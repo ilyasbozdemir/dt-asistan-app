@@ -224,9 +224,13 @@ export function Sidebar(): React.JSX.Element {
         </button>
 
         {!isCollapsed && (
-          <div className="text-[10px] text-center text-sidebar-text/50 font-medium px-2 py-1 truncate bg-sidebar-hover-bg/30 rounded border border-sidebar-border/40">
+          <Link
+            to="/dosya"
+            className="text-[10px] text-center text-sidebar-text/50 font-medium px-2 py-1 truncate bg-sidebar-hover-bg/30 rounded border border-sidebar-border/40 hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text transition-all block cursor-pointer active:scale-95"
+            title="Veri Dosyası Detaylarını Göster"
+          >
             Dosya: {fileName}
-          </div>
+          </Link>
         )}
       </div>
     </div>

@@ -4,14 +4,13 @@ import { TANIM_Personel } from './tables/TANIM_Personel'
 import { TANIM_Birim } from './tables/TANIM_Birim'
 import { TANIM_Asama } from './tables/TANIM_Asama'
 import { DATA_TeminDosyasi } from './tables/DATA_TeminDosyasi'
+import { CURRENT_SCHEMA_VERSION } from '../db/migrate'
 
 export const TablePrefixLogic = {
   DATA: 'OPERASYONEL SÜREÇLER VE DOSYALAR (Temin Dosyaları, Teklifler, Siparişler)',
   TANIM: 'SİSTEM AYARLARI VE KONFİGÜRASYON (Mevzuat, Limitler, Firmalar, Personel)',
   LOG: 'SİSTEM LOGLARI VE KULLANICI HAREKETLERİ'
 }
-
-export const CURRENT_SCHEMA_VERSION = 3
 
 export const schema = {
   database: 'DOGRUDAN_TEMIN_DB',
@@ -35,32 +34,6 @@ export const schema = {
     // --- Operasyonel Veriler ---
     DATA_TeminDosyasi // Her bir temin kaydı
   ]
-}
-
-export function runMigrations(db: Database.Database, fromVersion: number): void {
-  console.log(`Running migrations from schema version ${fromVersion} to ${CURRENT_SCHEMA_VERSION}...`)
-
-  if (fromVersion < 2) {
-    console.log('Migrating schema to version 2 (adding code columns to DATA_TeminDosyasi)...')
-    try {
-      db.exec('ALTER TABLE DATA_TeminDosyasi ADD COLUMN fonksiyonel_kod TEXT;')
-    } catch (e) {
-      // Column already exists, ignore
-    }
-    try {
-      db.exec('ALTER TABLE DATA_TeminDosyasi ADD COLUMN ekonomik_kod TEXT;')
-    } catch (e) {
-      // Column already exists, ignore
-    }
-  }
-
-  if (fromVersion < 3) {
-    console.log('Migrating schema to version 3...')
-    // Baseline version 3 changes if any
-  }
-
-  // Update schema version inside settings
-  db.exec(`INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', '${CURRENT_SCHEMA_VERSION}');`)
 }
 
 export function initializeDatabase(db: Database.Database, institutionName: string): void {

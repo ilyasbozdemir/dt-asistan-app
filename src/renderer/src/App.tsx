@@ -118,6 +118,14 @@ const profilRoute = createRoute({
   component: ProfilScreen
 })
 
+import DosyaScreen from './screens/dosya/index.screen'
+
+const dosyaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya',
+  component: DosyaScreen
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dosyalarRoute,
@@ -133,7 +141,8 @@ const routeTree = rootRoute.addChildren([
   ambarRoute,
   malzemelerRoute,
   kurumRoute,
-  profilRoute
+  profilRoute,
+  dosyaRoute
 ])
 
 const router = createRouter({ routeTree })

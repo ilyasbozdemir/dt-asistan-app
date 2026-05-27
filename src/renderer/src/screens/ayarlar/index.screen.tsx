@@ -13,15 +13,7 @@ import {
   X,
   Plus,
   ListPlus,
-  Palette,
-  Database,
-  FolderOpen,
-  FileJson,
-  AlertCircle,
-  CheckCircle2,
-  RefreshCw,
-  Cpu,
-  FileArchive
+  Palette
 } from 'lucide-react'
 import {
   FONKSIYONEL_KODLAR,
@@ -29,9 +21,9 @@ import {
   EKONOMIK_KODLAR
 } from '../../constants/butce-kodlari'
 import TemaScreen from './TemaScreen'
-import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useLocation } from '@tanstack/react-router'
 
-type TabType = 'mali' | 'smtp' | 'tema' | 'dosya'
+type TabType = 'mali' | 'smtp' | 'tema'
 
 interface CodeItem {
   code: string
@@ -186,55 +178,26 @@ function CodeListEditor({
 export default function AyarlarScreen(): React.ReactNode {
   const { settings, isLoadingSettings, saveSettings, importSmtp, exportSmtp } = useAyarlarHooks()
   const { loadSettings: reloadSettingsStore } = useSettingsStore()
-  const { activeMeta, activeFilePath } = useWorkspaceStore()
 
-  const [activeTab, setActiveTab] = useState<TabType>('mali')
-  const [saving, setSaving] = useState(false)
-
-  // Auto-Updater States
-  const [updaterStatus, setUpdaterStatus] = useState<string>('idle') // idle, checking, available, not-available, downloaded, error
-  const [updateVersion, setUpdateVersion] = useState<string>('')
-  const [updaterError, setUpdaterError] = useState<string>('')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const params = new URLSearchParams(location.search)
+    const tabParam = params.get('tab') as TabType
+    if (tabParam === 'mali' || tabParam === 'smtp' || tabParam === 'tema') {
+      return tabParam
+    }
+    return 'mali'
+  })
 
   useEffect(() => {
-    if (!window.electron) return
-
-    const removeListener = window.electron.ipcRenderer.on(
-      'updater:status',
-      (_, data: { status: string; version?: string; error?: string }) => {
-        setUpdaterStatus(data.status)
-        if (data.version) setUpdateVersion(data.version)
-        if (data.error) setUpdaterError(data.error)
-      }
-    )
-
-    return () => {
-      if (removeListener) removeListener()
+    const params = new URLSearchParams(location.search)
+    const tabParam = params.get('tab') as TabType
+    if (tabParam === 'mali' || tabParam === 'smtp' || tabParam === 'tema') {
+      setActiveTab(tabParam)
     }
-  }, [])
+  }, [location.search])
 
-  const handleCheckUpdates = async () => {
-    setUpdaterStatus('checking')
-    setUpdaterError('')
-    try {
-      const res = await window.electron.ipcRenderer.invoke('updater:check')
-      if (!res.success) {
-        setUpdaterStatus('error')
-        setUpdaterError(res.error || 'Güncelleme kontrolü başarısız.')
-      }
-    } catch (err: any) {
-      setUpdaterStatus('error')
-      setUpdaterError(err.message || 'Hata oluştu.')
-    }
-  }
-
-  const handleQuitAndInstall = async () => {
-    try {
-      await window.electron.ipcRenderer.invoke('updater:quit-and-install')
-    } catch (err: any) {
-      alert('Güncelleme yüklenirken hata oluştu: ' + err.message)
-    }
-  }
+  const [saving, setSaving] = useState(false)
 
   // Tab 3: Mali & Kurumsal Kodlar
   // Kurumsal Kod → 4 düzey hiyerarşik (KOD1.KOD2.KOD3.KOD4)
@@ -487,18 +450,6 @@ export default function AyarlarScreen(): React.ReactNode {
             <Palette className="w-4 h-4 shrink-0" />
             <span>Renk & Tema</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab('dosya')}
-            className={`flex items-center gap-3 w-full text-left py-2.5 px-4 text-xs font-bold rounded-xl transition-all ${
-              activeTab === 'dosya'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
-            }`}
-          >
-            <Database className="w-4 h-4 shrink-0" />
-            <span>Veri Dosyası & Güncelleme</span>
-          </button>
         </div>
 
         {/* SAĞ PANEL (İÇERİK ALANI) */}
@@ -509,204 +460,6 @@ export default function AyarlarScreen(): React.ReactNode {
             </div>
           ) : activeTab === 'tema' ? (
             <TemaScreen isEmbedded={true} />
-          ) : activeTab === 'dosya' ? (
-            <div className="space-y-6 flex flex-col justify-between w-full h-full">
-              <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
-                    <Database className="w-5 h-5 text-blue-600" />
-                    Veri Dosyası (.dtm) ve Uygulama Güncellemesi
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Mevcut kurum veri dosyasının detaylarını inceleyin ve uygulama güncellemelerini yönetin.
-                  </p>
-                </div>
-
-                {/* Dosya Görselleştirmesi ve Tablo */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                  
-                  {/* Sol Kolon: Görsel Paket Yapısı */}
-                  <div className="md:col-span-5 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150/70 dark:border-slate-850/80 rounded-2xl p-4 shadow-inner">
-                    <h3 className="text-xs font-bold text-slate-700 dark:text-slate-350 mb-3 flex items-center gap-1.5">
-                      <FileArchive className="w-4 h-4 text-amber-500" />
-                      Paket İçeriği (.dtm ZIP)
-                    </h3>
-                    
-                    <div className="space-y-2 font-mono text-[11px] text-slate-600 dark:text-slate-400 select-none">
-                      {/* ZIP root */}
-                      <div className="flex items-center gap-2 font-bold text-slate-850 dark:text-slate-200">
-                        <span>📦</span>
-                        <span className="truncate max-w-[200px]" title={useWorkspaceStore.getState().fileName}>
-                          {useWorkspaceStore.getState().fileName}
-                        </span>
-                      </div>
-                      
-                      {/* meta.json */}
-                      <div className="flex items-start gap-2 pl-4 border-l border-slate-200 dark:border-slate-800 py-1">
-                        <span className="text-slate-400">├──</span>
-                        <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-950/20 px-1.5 py-0.5 rounded border border-blue-100/30 dark:border-blue-900/25">
-                          <FileJson className="w-3 h-3" />
-                          <span>meta.json</span>
-                        </div>
-                      </div>
-                      
-                      {/* database.sqlite */}
-                      <div className="flex items-start gap-2 pl-4 border-l border-slate-200 dark:border-slate-800 py-1">
-                        <span className="text-slate-400">├──</span>
-                        <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded border border-emerald-100/30 dark:border-emerald-900/25">
-                          <Database className="w-3 h-3" />
-                          <span>database.sqlite</span>
-                        </div>
-                      </div>
-
-                      {/* attachments/ */}
-                      <div className="flex items-start gap-2 pl-4 border-l border-slate-200 dark:border-slate-800 py-1">
-                        <span className="text-slate-400">└──</span>
-                        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-450 font-semibold bg-amber-50/50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-100/30 dark:border-amber-900/25">
-                          <FolderOpen className="w-3 h-3" />
-                          <span>attachments/</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-blue-50/40 dark:bg-blue-955/10 border border-blue-100/40 dark:border-blue-900/30 rounded-xl text-[10px] text-slate-550 dark:text-slate-400 leading-relaxed">
-                      💡 <strong>.dtm dosyası</strong>, yerel veritabanı ile kurum bilgilerini barındıran taşınabilir, sıkıştırılmış bir arşiv dosyasıdır.
-                    </div>
-                  </div>
-
-                  {/* Sağ Kolon: Metadata Tablosu */}
-                  <div className="md:col-span-7 space-y-4">
-                    <h3 className="text-xs font-bold text-slate-700 dark:text-slate-350">
-                      Dosya Sürüm ve Kimlik Bilgileri
-                    </h3>
-                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 font-bold text-slate-550">
-                        <div className="col-span-1">Parametre</div>
-                        <div className="col-span-2">Değer / Bilgi</div>
-                      </div>
-
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                        <div className="font-semibold text-slate-500">Kurum</div>
-                        <div className="col-span-2 font-bold text-slate-800 dark:text-slate-200">
-                          {activeMeta?.institution || 'Belirtilmemiş'}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                        <div className="font-semibold text-slate-500">Dosya Formatı</div>
-                        <div className="col-span-2 font-mono bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 text-amber-700 dark:text-amber-455 px-1.5 py-0.5 rounded w-fit text-[10px]">
-                          v{activeMeta?.dtm_version || '1.0'}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                        <div className="font-semibold text-slate-500">Uygulama Sürümü</div>
-                        <div className="col-span-2 font-mono bg-blue-50 dark:bg-blue-950/20 border border-blue-200/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded w-fit text-[10px]">
-                          v{activeMeta?.app_version || '1.0.0-alpha.1'}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                        <div className="font-semibold text-slate-500">Şema Sürümü</div>
-                        <div className="col-span-2 font-mono bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 text-emerald-700 dark:text-emerald-450 px-1.5 py-0.5 rounded w-fit text-[10px]">
-                          v{activeMeta?.schema_version || '3'}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                        <div className="font-semibold text-slate-500">Oluşturulma</div>
-                        <div className="col-span-2 text-slate-700 dark:text-slate-300">
-                          {activeMeta?.created_at || 'Bilinmiyor'}
-                        </div>
-                      </div>
-
-                      {activeMeta?.updated_at && (
-                        <div className="grid grid-cols-3 border-b border-slate-100 dark:border-slate-850 p-2.5">
-                          <div className="font-semibold text-slate-500">Son Güncelleme</div>
-                          <div className="col-span-2 text-slate-700 dark:text-slate-300">
-                            {new Date(activeMeta.updated_at).toLocaleString('tr-TR')}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-3 p-2.5 items-center">
-                        <div className="font-semibold text-slate-500">Dosya Konumu</div>
-                        <div className="col-span-2 text-[10px] font-mono text-slate-500 dark:text-slate-400 break-all select-all hover:text-blue-500 transition-colors" title={activeFilePath || ''}>
-                          {activeFilePath}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="h-px bg-slate-100 dark:bg-slate-800" />
-
-                {/* Güncelleme Bölümü */}
-                <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-blue-600" />
-                    Uygulama Güncelleme Yönetimi (Auto-Updater)
-                  </h3>
-
-                  <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-150 dark:border-slate-800/80 rounded-2xl gap-4 shadow-sm">
-                    <div className="space-y-1">
-                      <div className="text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
-                        Mevcut Sürüm:
-                        <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                          v1.0.0-alpha.1
-                        </span>
-                      </div>
-                      
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal max-w-lg font-medium">
-                        Kurumsal bilgisayarlardaki internet kotaları düşünülerek, güncellemeler GitHub üzerinden <strong>.blockmap</strong> teknolojisiyle sadece değişen paketleri (delta) indirerek kota tasarrufu sağlar.
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {updaterStatus === 'downloaded' ? (
-                        <Button
-                          onClick={handleQuitAndInstall}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 text-xs rounded-xl shadow-md shadow-emerald-500/10 flex items-center gap-2 cursor-pointer transition-all"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Kapat ve Yükle (Hazır)
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={handleCheckUpdates}
-                          disabled={updaterStatus === 'checking'}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 text-xs rounded-xl shadow-md shadow-blue-500/10 flex items-center gap-2 disabled:bg-blue-800 cursor-pointer transition-all"
-                        >
-                          <RefreshCw className={`w-3.5 h-3.5 ${updaterStatus === 'checking' ? 'animate-spin' : ''}`} />
-                          {updaterStatus === 'checking' ? 'Denetleniyor...' : 'Güncellemeleri Denetle'}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Güncelleme Durum Bildirimleri */}
-                  {updaterStatus !== 'idle' && (
-                    <div className={`p-4 rounded-xl border flex items-start gap-2.5 text-xs animate-in slide-in-from-top-2 duration-200 ${
-                      updaterStatus === 'checking' ? 'bg-slate-50/50 border-slate-200 text-slate-700 dark:bg-slate-900/30 dark:border-slate-800/80 dark:text-slate-350' :
-                      updaterStatus === 'available' ? 'bg-blue-50/50 border-blue-200 text-blue-800 dark:bg-blue-950/20 dark:border-blue-900/30 dark:text-blue-450' :
-                      updaterStatus === 'downloaded' ? 'bg-emerald-50/50 border-emerald-250 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-450 font-semibold' :
-                      updaterStatus === 'not-available' ? 'bg-slate-50/50 border-slate-200 text-slate-700 dark:bg-slate-900/30 dark:border-slate-800/80 dark:text-slate-350' :
-                      'bg-rose-50/50 border-rose-200 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-450'
-                    }`}>
-                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
-                      <div>
-                        {updaterStatus === 'checking' && <span>Uzak sunucudan yeni yayınlar ve `.blockmap` verileri sorgulanıyor...</span>}
-                        {updaterStatus === 'available' && <span>Yeni bir sürüm bulundu ({updateVersion || 'Bilinmiyor'}). Arka planda indirme işlemi başlatıldı.</span>}
-                        {updaterStatus === 'not-available' && <span>Harika! En güncel sürümü kullanıyorsunuz, herhangi bir güncelleme bulunmuyor.</span>}
-                        {updaterStatus === 'downloaded' && <span>Güncelleme başarıyla indirildi. Kurulumu tamamlamak için lütfen &quot;Kapat ve Yükle&quot; butonuna basın.</span>}
-                        {updaterStatus === 'error' && <span>Güncelleme kontrolü sırasında bir hata oluştu: <strong>{updaterError}</strong></span>}
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-              </div>
-            </div>
           ) : (
             <>
               <div className="space-y-6">

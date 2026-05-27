@@ -3,7 +3,8 @@ import Database from 'better-sqlite3'
 import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
-import { initializeDatabase, runMigrations, CURRENT_SCHEMA_VERSION } from '../database/index'
+import { initializeDatabase } from '../database/index'
+import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
 
 export interface WorkspaceMeta {
   dtm_version: string      // format versiyonu (örn: "1.0")
@@ -67,23 +68,74 @@ export class DtmWorkspace {
       )
     }
 
-    // 3. Connect to the SQLite database
-    const dbPath = path.join(this.tempDir, 'database.sqlite')
-    this.db = new Database(dbPath)
-
-    // 4. Run migrations if database is older
     const fromVersion = parseInt(meta.schema_version, 10) || 1
+
+    // Run migrations if database is older
     if (fromVersion < CURRENT_SCHEMA_VERSION) {
-      runMigrations(this.db, fromVersion)
-      
-      // Update metadata to reflect new schema version and current app version
-      meta.schema_version = CURRENT_SCHEMA_VERSION.toString()
-      meta.app_version = app.getVersion()
-      meta.updated_at = new Date().toISOString()
-      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
-      
-      // Save changes back to zip archive immediately
-      this.saveWorkspace()
+      // 1. Create backup before applying migrations
+      const backupPath = filePath + '.bak'
+      try {
+        fs.copyFileSync(filePath, backupPath)
+      } catch (err: any) {
+        throw new Error(`Dosya yedeklenirken hata oluştu: ${err.message}`)
+      }
+
+      try {
+        // 2. Connect to the SQLite database in temp directory
+        const dbPath = path.join(this.tempDir, 'database.sqlite')
+        this.db = new Database(dbPath)
+
+        // 3. Run sequential migration steps in transaction
+        runMigrations(this.db, fromVersion)
+        
+        // 4. Update metadata to reflect new schema version and current app version
+        meta.schema_version = CURRENT_SCHEMA_VERSION.toString()
+        meta.app_version = app.getVersion()
+        meta.updated_at = new Date().toISOString()
+        fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
+        
+        // 5. Save changes back to zip archive immediately
+        this.saveWorkspace()
+
+        // 6. Delete backup file upon successful migration
+        if (fs.existsSync(backupPath)) {
+          fs.unlinkSync(backupPath)
+        }
+      } catch (migrationError: any) {
+        console.error('Veritabanı güncellemesi başarısız oldu, değişiklikler geri alınıyor:', migrationError)
+        
+        // Close DB connection if it was initialized
+        if (this.db) {
+          try {
+            this.db.close()
+          } catch (e) {
+            // ignore close error
+          }
+          this.db = null
+        }
+
+        // Restore original file state from backup
+        try {
+          if (fs.existsSync(backupPath)) {
+            fs.copyFileSync(backupPath, filePath)
+            fs.unlinkSync(backupPath)
+          }
+        } catch (rollbackErr: any) {
+          console.error('Yedek dosya geri yüklenirken hata oluştu:', rollbackErr)
+        }
+
+        // Clear temp directory
+        this.ensureTempDir()
+
+        // Throw Turkish error
+        throw new Error(
+          `Dosya güncellenirken kritik bir hata oluştu ve işlem iptal edildi. Veri kaybı olmaması için dosya eski haline döndürüldü.\nHata Detayı: ${migrationError.message}`
+        )
+      }
+    } else {
+      // No migration needed, just connect to database
+      const dbPath = path.join(this.tempDir, 'database.sqlite')
+      this.db = new Database(dbPath)
     }
 
     this.meta = meta
