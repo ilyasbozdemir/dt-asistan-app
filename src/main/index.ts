@@ -38,20 +38,25 @@ function createWindow(): void {
     mainWindow.show()
   })
 
-  ipcMain.on('window-minimize', () => {
-    mainWindow.minimize()
+  ipcMain.on('window-minimize', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) win.minimize()
   })
 
-  ipcMain.on('window-maximize', () => {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize()
-    } else {
-      mainWindow.maximize()
+  ipcMain.on('window-maximize', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) {
+      if (win.isMaximized()) {
+        win.unmaximize()
+      } else {
+        win.maximize()
+      }
     }
   })
 
-  ipcMain.on('window-close', () => {
-    mainWindow.close()
+  ipcMain.on('window-close', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) win.close()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -151,6 +156,59 @@ if (!gotTheLock) {
           search: data.search.replace(/^\?/, ''),
           hash: data.path
         })
+      }
+    })
+
+    // --- Tab ↔ Window IPC Handlers ---
+    // Opens a tab's content in a separate detached window
+    ipcMain.on('tab:open-in-window', (_, data: { path: string; title: string }) => {
+      const newWindow = new BrowserWindow({
+        width: 1000,
+        height: 750,
+        minWidth: 800,
+        minHeight: 600,
+        autoHideMenuBar: true,
+        frame: false,
+        titleBarStyle: 'hidden',
+        titleBarOverlay: false,
+        title: data.title || 'DT Asistan',
+        icon: icon,
+        webPreferences: {
+          preload: join(__dirname, '../preload/index.js'),
+          sandbox: false
+        }
+      })
+
+      const separator = data.path.includes('?') ? '&' : '?'
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        newWindow.loadURL(
+          process.env['ELECTRON_RENDERER_URL'] + '#' + data.path + separator + 'mode=window'
+        )
+      } else {
+        const indexHtml = join(__dirname, '../renderer/index.html')
+        newWindow.loadFile(indexHtml, {
+          hash: data.path + separator + 'mode=window'
+        })
+      }
+    })
+
+    // Returns a detached window's content back to the main window as a tab
+    ipcMain.on('tab:return-to-parent', (event, data: { path: string }) => {
+      // Find the main window (the first window that is NOT the sender)
+      const senderWindow = BrowserWindow.fromWebContents(event.sender)
+      const allWindows = BrowserWindow.getAllWindows()
+      const mainWindow = allWindows.find((w) => w !== senderWindow) || allWindows[0]
+
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        // Tell the main window to re-add this path as a tab
+        mainWindow.webContents.send('tab:returned-from-window', { path: data.path })
+        if (mainWindow.isMinimized()) mainWindow.restore()
+        mainWindow.focus()
+      }
+
+      // Close the child window
+      if (senderWindow && !senderWindow.isDestroyed()) {
+        senderWindow.close()
       }
     })
     ipcMain.handle('workspace:create', async (_, filePath: string, institutionName: string) => {

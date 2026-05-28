@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   X,
+  ExternalLink,
   Home,
   FileText,
   ClipboardList,
@@ -67,6 +68,17 @@ export function TabsBar(): React.JSX.Element {
     }
   }
 
+  const handleOpenInWindow = (e: React.MouseEvent, path: string, label: string) => {
+    e.stopPropagation()
+    // Close the tab from the main window
+    const nextPath = closeTab(path)
+    if (nextPath) {
+      navigate({ to: nextPath })
+    }
+    // Open in a separate Electron window
+    window.electron?.ipcRenderer.send('tab:open-in-window', { path, title: label })
+  }
+
   // Mouse wheel horizontal scrolling support
   const handleWheel = (e: React.WheelEvent) => {
     if (scrollContainerRef.current) {
@@ -90,7 +102,7 @@ export function TabsBar(): React.JSX.Element {
             onClick={() => handleTabClick(tab.path)}
             data-active={isActive}
             className={cn(
-              'group flex items-center gap-2 h-9 px-4 text-xs font-semibold rounded-t-xl transition-all duration-200 border-x border-t border-transparent relative shrink-0 cursor-pointer min-w-[120px] max-w-[200px]',
+              'group flex items-center gap-2 h-9 px-4 text-xs font-semibold rounded-t-xl transition-all duration-200 border-x border-t border-transparent relative shrink-0 cursor-pointer min-w-[120px] max-w-[220px]',
               isActive
                 ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200/80 dark:border-slate-800 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/20'
@@ -103,13 +115,34 @@ export function TabsBar(): React.JSX.Element {
 
             <Icon className={cn('w-3.5 h-3.5 shrink-0', isActive ? 'text-blue-500' : 'text-slate-400 group-hover:text-slate-500')} />
             
-            <span className="truncate pr-4">{tab.label}</span>
+            <span className="truncate pr-10">{tab.label}</span>
 
-            {/* Close button - visible always on active, or on hover for inactive */}
-            {/* (Always keep at least one tab or allow closing all. In our store, closing the last one automatically redirects to /) */}
+            {/* Open in Window button */}
             <span
               role="button"
               tabIndex={0}
+              title="Pencerede Aç"
+              onClick={(e) => handleOpenInWindow(e, tab.path, tab.label)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleOpenInWindow(e as any, tab.path, tab.label)
+                }
+              }}
+              className={cn(
+                'absolute right-7 p-0.5 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all flex items-center justify-center cursor-pointer',
+                isActive
+                  ? 'opacity-60 hover:opacity-100'
+                  : 'opacity-0 group-hover:opacity-40 hover:opacity-100'
+              )}
+            >
+              <ExternalLink className="w-3 h-3" />
+            </span>
+
+            {/* Close button */}
+            <span
+              role="button"
+              tabIndex={0}
+              title="Sekmeyi Kapat"
               onClick={(e) => handleCloseClick(e, tab.path)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -131,3 +164,4 @@ export function TabsBar(): React.JSX.Element {
     </div>
   )
 }
+

@@ -1,18 +1,20 @@
 import { useEffect } from 'react'
-import { Outlet, useRouterState } from '@tanstack/react-router'
+import { Outlet, useRouterState, useNavigate } from '@tanstack/react-router'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { TabsBar } from './TabsBar'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useSettingsStore } from '../../store/settingsStore'
-import { useTabStore } from '../../store/tabStore'
+import { useTabStore, getTabLabel } from '../../store/tabStore'
 import LauncherScreen from '../../screens/launcher/index.screen'
 import LockScreen from './LockScreen'
 import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
 
 export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const path = routerState.location.pathname
@@ -70,8 +72,24 @@ export function PageWrapper(): React.ReactNode {
     }
   }, [queryClient])
 
+  // Listen for tabs returned from detached windows
+  useEffect(() => {
+    if (!window.electron) return
+    const removeListener = window.electron.ipcRenderer.on(
+      'tab:returned-from-window',
+      (_, data: { path: string }) => {
+        addTab(data.path)
+        navigate({ to: data.path })
+      }
+    )
+    return () => {
+      if (removeListener) removeListener()
+    }
+  }, [addTab, navigate])
+
   const searchParams = new URLSearchParams(window.location.search)
-  const isWindowMode = searchParams.get('mode') === 'window'
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const isWindowMode = searchParams.get('mode') === 'window' || hashParams.get('mode') === 'window'
 
   useEffect(() => {
     // Initial fetch of DB name if any (in case backend already has an open DB on soft reload)
@@ -161,9 +179,71 @@ export function PageWrapper(): React.ReactNode {
   }, [openWorkspace, queryClient])
 
   if (isWindowMode) {
+    // Extract the real path from the hash (strip mode=window param)
+    const rawPath = routerState.location.pathname || '/'
+    const windowTitle = getTabLabel(rawPath)
+
+    const handleReturnToParent = () => {
+      window.electron?.ipcRenderer.send('tab:return-to-parent', { path: rawPath })
+    }
+
+    const handleMinimize = () => window.electron?.ipcRenderer.send('window-minimize')
+    const handleMaximize = () => window.electron?.ipcRenderer.send('window-maximize')
+    const handleClose = () => window.electron?.ipcRenderer.send('window-close')
+
     return (
-      <div className="h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
-        <main className="h-full overflow-auto p-6">
+      <div className="h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col">
+        {/* Window Title Bar */}
+        <div
+          className="h-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex items-center px-3 shrink-0 gap-2"
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        >
+          {/* Return to Parent button */}
+          <button
+            onClick={handleReturnToParent}
+            title="Ana Pencereye Dön (Sekme Olarak)"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-all cursor-pointer"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <ArrowLeftToLine className="w-3.5 h-3.5" />
+            <span>Sekmeye Dön</span>
+          </button>
+
+          {/* Title */}
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate flex-1 ml-2">
+            {windowTitle}
+          </span>
+
+          {/* Window controls */}
+          <div
+            className="flex items-center"
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          >
+            <button
+              onClick={handleMinimize}
+              className="h-8 w-10 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-slate-700 transition-none"
+              title="Simge Durumuna Küçült"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleMaximize}
+              className="h-8 w-10 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-slate-700 transition-none"
+              title="Ekranı Kapla"
+            >
+              <Square className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleClose}
+              className="h-8 w-10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#e81123] transition-none"
+              title="Kapat"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
       </div>
@@ -192,3 +272,4 @@ export function PageWrapper(): React.ReactNode {
     </div>
   )
 }
+
