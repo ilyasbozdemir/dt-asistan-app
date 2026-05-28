@@ -16,7 +16,8 @@ import {
   Wrench,
   Activity,
   Calendar,
-  Building
+  Building,
+  ExternalLink
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -30,6 +31,10 @@ export default function DosyalarScreen(): React.ReactNode {
   const { updateTabLabel } = useTabStore()
   const routerState = useRouterState()
   
+  const searchParams = new URLSearchParams(window.location.search)
+  const isWindowMode = searchParams.get('mode') === 'window'
+  const urlId = searchParams.get('id')
+
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -44,17 +49,28 @@ export default function DosyalarScreen(): React.ReactNode {
   const [formFonksiyonelKod, setFormFonksiyonelKod] = useState('')
   const [formEkonomikKod, setFormEkonomikKod] = useState('')
 
-  const selectedDosya = dosyalar.find((d) => d.id === activeDosyaId)
+  const fileId = urlId ? parseInt(urlId, 10) : activeDosyaId
+  const selectedDosya = dosyalar.find((d) => d.id === fileId)
 
   // Dynamically update the tab label with the active file's topic
   useEffect(() => {
+    if (isWindowMode) return
     const currentHref = routerState.location.href
     if (selectedDosya) {
       updateTabLabel(currentHref, `DT: ${selectedDosya.konu}`)
     } else {
       updateTabLabel(currentHref, 'Doğrudan Temin')
     }
-  }, [selectedDosya, routerState.location.href, updateTabLabel])
+  }, [selectedDosya, routerState.location.href, updateTabLabel, isWindowMode])
+
+  const handleOpenInNewWindow = () => {
+    if (!selectedDosya) return
+    window.electron?.ipcRenderer.send('window:open-secondary', {
+      path: '/dosyalar',
+      search: `?id=${selectedDosya.id}&mode=window`,
+      title: `DT: ${selectedDosya.konu}`
+    })
+  }
 
   // Listen to global create trigger (e.g. from header selector)
   useEffect(() => {
@@ -194,7 +210,8 @@ export default function DosyalarScreen(): React.ReactNode {
   return (
     <div className="flex h-full gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* SOL: LİSTE (Master) */}
-      <div className="w-1/3 min-w-[320px] max-w-[400px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col overflow-hidden">
+      {!isWindowMode && (
+        <div className="w-1/3 min-w-[320px] max-w-[400px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -299,6 +316,7 @@ export default function DosyalarScreen(): React.ReactNode {
           )}
         </div>
       </div>
+      )}
 
       {/* SAĞ: DETAY VEYA DÜZENLEME FORMU (Detail) */}
       <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col overflow-hidden relative min-h-[500px]">
@@ -533,6 +551,15 @@ export default function DosyalarScreen(): React.ReactNode {
                 </div>
                 
                 <div className="flex gap-2 shrink-0">
+                  {!isWindowMode && (
+                    <button
+                      onClick={handleOpenInNewWindow}
+                      className="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                      title="Bu dosyayı yeni bağımsız pencerede aç"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Yeni Pencerede Aç
+                    </button>
+                  )}
                   <button
                     onClick={handleStartEdit}
                     className="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"

@@ -117,7 +117,42 @@ if (!gotTheLock) {
     ipcMain.on('ping', () => console.log('pong'))
 
     // --- Workspace & SQLite Handlers ---
-    // --- Workspace & SQLite Handlers ---
+    const broadcastDbChange = () => {
+      BrowserWindow.getAllWindows().forEach((win) => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('db:invalidated')
+        }
+      })
+    }
+
+    ipcMain.on('window:open-secondary', (_, data: { path: string; search: string; title?: string }) => {
+      const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
+      const newWindow = new BrowserWindow({
+        width: 1000,
+        height: 750,
+        minWidth: 800,
+        minHeight: 600,
+        parent: parent || undefined,
+        modal: false,
+        autoHideMenuBar: true,
+        title: data.title || 'DT Asistan — Detay',
+        icon: icon,
+        webPreferences: {
+          preload: join(__dirname, '../preload/index.js'),
+          sandbox: false
+        }
+      })
+
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        newWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + data.path + data.search)
+      } else {
+        const indexHtml = join(__dirname, '../renderer/index.html')
+        newWindow.loadFile(indexHtml, {
+          search: data.search.replace(/^\?/, ''),
+          hash: data.path
+        })
+      }
+    })
     ipcMain.handle('workspace:create', async (_, filePath: string, institutionName: string) => {
       try {
         const meta = workspaceManager.create(filePath, institutionName)
@@ -255,6 +290,7 @@ if (!gotTheLock) {
           INSERT OR REPLACE INTO settings (key, value) VALUES ('adminPassword', '${pass.replace(/'/g, "''")}');
         `)
         workspaceManager.save()
+        broadcastDbChange()
         return { success: true }
       } catch (error: any) {
         console.error('Setup auth error:', error)
@@ -300,6 +336,7 @@ if (!gotTheLock) {
         })
         transaction(settingsMap)
         workspaceManager.save()
+        broadcastDbChange()
         return { success: true }
       } catch (error: unknown) {
         console.error('Save settings error:', error)
@@ -473,6 +510,7 @@ if (!gotTheLock) {
         })()
 
         workspaceManager.save()
+        broadcastDbChange()
         return { success: true }
       } catch (error: any) {
         console.error('Import SMTP error:', error)
@@ -671,6 +709,7 @@ if (!gotTheLock) {
         })()
         
         workspaceManager.save()
+        broadcastDbChange()
         
         return {
           success: true,
@@ -704,6 +743,7 @@ if (!gotTheLock) {
         const db = workspaceManager.getDb()
         const stmt = db.prepare(sql)
         const info = stmt.run(...params)
+        broadcastDbChange()
         return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
       } catch (error: any) {
         return { success: false, error: error.message }

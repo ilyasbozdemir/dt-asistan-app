@@ -59,6 +59,20 @@ export function PageWrapper(): React.ReactNode {
     }
   }, [activeFilePath, isAuthenticated, clearTabs])
 
+  // Listen for db change invalidations from main process
+  useEffect(() => {
+    if (!window.electron) return
+    const removeListener = window.electron.ipcRenderer.on('db:invalidated', () => {
+      queryClient.invalidateQueries()
+    })
+    return () => {
+      if (removeListener) removeListener()
+    }
+  }, [queryClient])
+
+  const searchParams = new URLSearchParams(window.location.search)
+  const isWindowMode = searchParams.get('mode') === 'window'
+
   useEffect(() => {
     // Initial fetch of DB name if any (in case backend already has an open DB on soft reload)
     window.electron?.ipcRenderer.invoke('db:get-settings').then(async (res) => {
@@ -145,6 +159,16 @@ export function PageWrapper(): React.ReactNode {
       if (removeListener) removeListener()
     }
   }, [openWorkspace, queryClient])
+
+  if (isWindowMode) {
+    return (
+      <div className="h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
+        <main className="h-full overflow-auto p-6">
+          <Outlet />
+        </main>
+      </div>
+    )
+  }
 
   if (!activeFilePath) {
     return <LauncherScreen />
