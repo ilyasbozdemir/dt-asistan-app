@@ -1081,7 +1081,7 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
                     </div>
 
                     <div className="text-[8px] opacity-50 px-2 py-1">
-                      v1.0.0-alpha.1
+                      v1.0.0-alpha.2
                     </div>
                   </div>
 

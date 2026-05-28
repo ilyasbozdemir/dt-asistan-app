@@ -56,15 +56,21 @@ export default function LockScreen(): React.JSX.Element {
     loadSettings() // Load institutional settings pre-login to show name and logo
 
     setTimeout(() => {
-      const isRemembered = localStorage.getItem('rememberMe') === 'true'
-      setRememberMe(isRemembered)
-      if (isRemembered) {
-        setInstitutionCode(localStorage.getItem('rememberedCode') || '')
-        setUsername(localStorage.getItem('rememberedUser') || 'admin')
-        setPassword(localStorage.getItem('rememberedPass') || '')
+      if (fileName) {
+        const isRemembered = localStorage.getItem(`rememberMe_${fileName}`) === 'true'
+        setRememberMe(isRemembered)
+        if (isRemembered) {
+          setInstitutionCode(localStorage.getItem(`rememberedCode_${fileName}`) || '')
+          setUsername(localStorage.getItem(`rememberedUser_${fileName}`) || 'admin')
+          setPassword(localStorage.getItem(`rememberedPass_${fileName}`) || '')
+        } else {
+          setInstitutionCode('')
+          setUsername('admin')
+          setPassword('')
+        }
       }
     }, 0)
-  }, [loadSettings])
+  }, [loadSettings, fileName])
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
@@ -81,11 +87,11 @@ export default function LockScreen(): React.JSX.Element {
           password
         )
         if (res.success) {
-          if (rememberMe) {
-            localStorage.setItem('rememberMe', 'true')
-            localStorage.setItem('rememberedCode', institutionCode)
-            localStorage.setItem('rememberedUser', username)
-            localStorage.setItem('rememberedPass', password)
+          if (rememberMe && fileName) {
+            localStorage.setItem(`rememberMe_${fileName}`, 'true')
+            localStorage.setItem(`rememberedCode_${fileName}`, institutionCode)
+            localStorage.setItem(`rememberedUser_${fileName}`, username)
+            localStorage.setItem(`rememberedPass_${fileName}`, password)
           }
           setIsAuthenticated(true)
           await loadSettings()
@@ -101,16 +107,16 @@ export default function LockScreen(): React.JSX.Element {
           password
         )
         if (res.success) {
-          if (rememberMe) {
-            localStorage.setItem('rememberMe', 'true')
-            localStorage.setItem('rememberedCode', institutionCode)
-            localStorage.setItem('rememberedUser', username)
-            localStorage.setItem('rememberedPass', password)
-          } else {
-            localStorage.setItem('rememberMe', 'false')
-            localStorage.removeItem('rememberedCode')
-            localStorage.removeItem('rememberedUser')
-            localStorage.removeItem('rememberedPass')
+          if (rememberMe && fileName) {
+            localStorage.setItem(`rememberMe_${fileName}`, 'true')
+            localStorage.setItem(`rememberedCode_${fileName}`, institutionCode)
+            localStorage.setItem(`rememberedUser_${fileName}`, username)
+            localStorage.setItem(`rememberedPass_${fileName}`, password)
+          } else if (fileName) {
+            localStorage.setItem(`rememberMe_${fileName}`, 'false')
+            localStorage.removeItem(`rememberedCode_${fileName}`)
+            localStorage.removeItem(`rememberedUser_${fileName}`)
+            localStorage.removeItem(`rememberedPass_${fileName}`)
           }
           setIsAuthenticated(true)
           await loadSettings()

@@ -8,10 +8,10 @@ import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
 
 export interface WorkspaceMeta {
   dtm_version: string      // format versiyonu (örn: "1.0")
-  app_version: string      // oluşturan/güncelleyen uygulama versiyonu (örn: "1.0.0-alpha.1")
+  app_version: string      // oluşturan/güncelleyen uygulama versiyonu (örn: "1.0.0-alpha.2")
   created_at: string       // oluşturulma tarihi (YYYY-MM-DD)
   institution: string      // kurum adı
-  schema_version: string   // veritabanı şema versiyonu (örn: "3")
+  schema_version: number   // veritabanı şema versiyonu (örn: 3)
   updated_at?: string      // son düzenlenme zamanı (ISO string)
 }
 
@@ -21,10 +21,11 @@ function normalizeMeta(raw: any): WorkspaceMeta {
     app_version: raw.app_version || raw.version || '1.0.0',
     created_at: raw.created_at || (raw.createdAt ? raw.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
     institution: raw.institution || raw.institutionName || 'Bilinmeyen Kurum',
-    schema_version: (raw.schema_version || raw.schemaVersion || '1').toString(),
+    schema_version: parseInt(raw.schema_version || raw.schemaVersion || '1', 10) || 1,
     updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString()
   }
 }
+
 
 export class DtmWorkspace {
   private tempDir: string
@@ -68,16 +69,31 @@ export class DtmWorkspace {
       )
     }
 
-    const fromVersion = parseInt(meta.schema_version, 10) || 1
+    const fromVersion = meta.schema_version || 1
 
     if (fromVersion > CURRENT_SCHEMA_VERSION) {
-      throw new Error(
-        `Bu dosya daha yeni bir uygulama sürümü gerektirir. (Dosya Şema Sürümü: v${meta.schema_version}, Desteklenen Şema Sürümü: v${CURRENT_SCHEMA_VERSION})`
+      console.warn(
+        `Uyarı: Dosya şema sürümü (v${meta.schema_version}) uygulamadan yüksek. Şema sürümü v${CURRENT_SCHEMA_VERSION} olarak sıfırlanıyor.`
       )
-    }
+      meta.schema_version = CURRENT_SCHEMA_VERSION
+      meta.app_version = app.getVersion()
+      meta.updated_at = new Date().toISOString()
+      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
+      
+      const dbPath = path.join(this.tempDir, 'database.sqlite')
+      this.db = new Database(dbPath)
+      
+      try {
+        this.db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', ?);").run(
+          CURRENT_SCHEMA_VERSION.toString()
+        )
+      } catch (e) {
+        console.error('Failed to reset dbSchemaVersion in settings table:', e)
+      }
+      
+      this.saveWorkspace()
+    } else if (fromVersion < CURRENT_SCHEMA_VERSION) {
 
-    // Run migrations if database is older
-    if (fromVersion < CURRENT_SCHEMA_VERSION) {
       // 1. Create backup before applying migrations
       const backupPath = filePath + '.bak'
       try {
@@ -95,13 +111,14 @@ export class DtmWorkspace {
         runMigrations(this.db, fromVersion)
         
         // 4. Update metadata to reflect new schema version and current app version
-        meta.schema_version = CURRENT_SCHEMA_VERSION.toString()
+        meta.schema_version = CURRENT_SCHEMA_VERSION
         meta.app_version = app.getVersion()
         meta.updated_at = new Date().toISOString()
         fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
         
         // 5. Save changes back to zip archive immediately
         this.saveWorkspace()
+
 
         // 6. Delete backup file upon successful migration
         if (fs.existsSync(backupPath)) {
@@ -168,7 +185,7 @@ export class DtmWorkspace {
       app_version: app.getVersion(),
       created_at: new Date().toISOString().split('T')[0],
       institution: institutionName,
-      schema_version: CURRENT_SCHEMA_VERSION.toString(),
+      schema_version: CURRENT_SCHEMA_VERSION,
       updated_at: new Date().toISOString()
     }
     const metaPath = path.join(this.tempDir, 'meta.json')
@@ -194,14 +211,41 @@ export class DtmWorkspace {
 
     this.db.pragma('wal_checkpoint(TRUNCATE)')
 
-    // Update updated_at and app_version in meta
+    // Update updated_at, app_version and sync institution name in meta
     const metaPath = path.join(this.tempDir, 'meta.json')
     if (fs.existsSync(metaPath)) {
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8')) as WorkspaceMeta
       meta.updated_at = new Date().toISOString()
       meta.app_version = app.getVersion()
+
+      // Fetch institution name from settings table to keep meta.json in sync
+      try {
+        const row = this.db.prepare("SELECT value FROM settings WHERE key = 'institutionName'").get() as
+          | { value: string }
+          | undefined
+        if (row && row.value) {
+          meta.institution = row.value
+        }
+      } catch (e) {
+        console.error('Failed to sync institution name from DB to meta.json:', e)
+      }
+
+      // Fetch dbSchemaVersion from settings table to keep meta.json in sync
+      try {
+        const row = this.db.prepare("SELECT value FROM settings WHERE key = 'dbSchemaVersion'").get() as
+          | { value: string }
+          | undefined
+        if (row && row.value) {
+          meta.schema_version = parseInt(row.value, 10) || CURRENT_SCHEMA_VERSION
+        }
+      } catch (e) {
+        console.error('Failed to sync dbSchemaVersion from DB to meta.json:', e)
+      }
+
       fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
+      this.meta = meta
     }
+
 
     const zip = new AdmZip()
     zip.addLocalFolder(this.tempDir)

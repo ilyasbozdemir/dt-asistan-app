@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Database,
   FileJson,
@@ -15,8 +16,11 @@ import {
   Building,
   Cpu,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  Download
 } from 'lucide-react'
+
 
 interface TableStat {
   tableName: string
@@ -32,10 +36,94 @@ export default function DosyaScreen(): React.JSX.Element {
   const [selectedFile, setSelectedFile] = useState<PackageFile>('meta.json')
   const [copied, setCopied] = useState(false)
   
+  const queryClient = useQueryClient()
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // DTE Data Transfer States
+  const [dteContentType, setDteContentType] = useState<'firms' | 'items' | 'all'>('firms')
+  const [dteStatus, setDteStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null)
+  const [dteLoading, setDteLoading] = useState(false)
+
+  const handleExportDte = async (): Promise<void> => {
+    setDteLoading(true)
+    setDteStatus(null)
+    try {
+      const res = await window.electron.ipcRenderer.invoke('db:export-dte', dteContentType)
+      if (res.success) {
+        setDteStatus({
+          type: 'success',
+          message: `Veriler başarıyla dışa aktarıldı. (${res.recordCount} kayıt)`
+        })
+      } else {
+        if (res.error !== 'İptal edildi') {
+          setDteStatus({
+            type: 'error',
+            message: `Dışa aktarma hatası: ${res.error}`
+          })
+        }
+      }
+    } catch (err: any) {
+      setDteStatus({
+        type: 'error',
+        message: err.message || 'Dışa aktarım sırasında beklenmedik hata.'
+      })
+    } finally {
+      setDteLoading(false)
+    }
+  }
+
+  const handleImportDte = async (): Promise<void> => {
+    setDteLoading(true)
+    setDteStatus(null)
+    try {
+      const res = await window.electron.ipcRenderer.invoke('db:import-dte')
+      if (res.success) {
+        let msg = ''
+        if (res.importedFirmsCount > 0) msg += `${res.importedFirmsCount} adet firma `
+        if (res.importedItemsCount > 0) msg += `${msg ? 've ' : ''}${res.importedItemsCount} adet malzeme/hizmet kalemi `
+        
+        if (!msg) {
+          msg = 'Aktarılacak yeni kayıt bulunamadı veya atlandı.'
+        } else {
+          msg += 'başarıyla içe aktarıldı.'
+        }
+
+        if (res.warnings && res.warnings.length > 0) {
+          msg += ` (Uyarı: ${res.warnings.join(', ')})`
+        }
+
+        setDteStatus({
+          type: 'success',
+          message: msg
+        })
+
+        // Invalidate react-query cache
+        queryClient.invalidateQueries()
+        // Refresh local stats
+        setRefreshTrigger((prev) => prev + 1)
+      } else {
+        if (res.error !== 'İptal edildi') {
+          setDteStatus({
+            type: 'error',
+            message: `İçe aktarma hatası: ${res.error}`
+          })
+        }
+      }
+    } catch (err: any) {
+      setDteStatus({
+        type: 'error',
+        message: err.message || 'İçe aktarım sırasında beklenmedik hata.'
+      })
+    } finally {
+      setDteLoading(false)
+    }
+  }
+
   // Database stats state
   const [dbStats, setDbStats] = useState<TableStat[]>([])
   const [loadingStats, setLoadingStats] = useState(false)
   const [statsError, setStatsError] = useState<string | null>(null)
+
 
   // Auto-Updater States
   const [updaterStatus, setUpdaterStatus] = useState<string>('idle') // idle, checking, available, not-available, downloaded, error
@@ -95,6 +183,8 @@ export default function DosyaScreen(): React.JSX.Element {
           { name: 'TANIM_Birim', label: 'Kurum Birimleri', desc: 'Bütçe harcaması yapan belediye müdürlükleri/birimleri' },
           { name: 'TANIM_Personel', label: 'Personel Havuzu', desc: 'Evraklarda imza yetkilisi olan kurum çalışanları' },
           { name: 'TANIM_Mevzuat', label: 'Mevzuat ve Limitler', desc: 'Yıllara göre doğrudan temin bütçe ve KDV limitleri' },
+          { name: 'TANIM_Firma', label: 'Kayıtlı Firmalar', desc: 'Sistemde kayıtlı tedarikçiler ve firmalar havuzu' },
+          { name: 'TANIM_Kalem', label: 'Malzeme/Hizmet Kütüphanesi', desc: 'Yaklaşık maliyet kalem kütüphanesi' },
           { name: 'settings', label: 'Sistem Ayarları', desc: 'Uygulamanın yerel yapılandırma anahtar-değer çiftleri' }
         ]
 
@@ -130,7 +220,8 @@ export default function DosyaScreen(): React.JSX.Element {
     }
 
     fetchStats()
-  }, [activeFilePath])
+  }, [activeFilePath, refreshTrigger])
+
 
   const handleCopyPath = (): void => {
     if (!activeFilePath) return
@@ -147,7 +238,8 @@ export default function DosyaScreen(): React.JSX.Element {
           app_version: activeMeta.app_version,
           created_at: activeMeta.created_at,
           institution: activeMeta.institution,
-          schema_version: parseInt(activeMeta.schema_version, 10),
+          schema_version: activeMeta.schema_version,
+
           updated_at: activeMeta.updated_at
         },
         null,
@@ -266,8 +358,75 @@ export default function DosyaScreen(): React.JSX.Element {
               </p>
             </div>
           </div>
+
+          {/* Veri Alışverişi (.dte) Kartı */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-indigo-500" />
+              Veri İçe/Dışa Aktar (.dte)
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-normal font-medium">
+              Firma listesi ve malzeme/hizmet kütüphanesi kayıtlarını başka çalışma dosyalarıyla paylaşmak için <strong>.dte</strong> formatını kullanın.
+            </p>
+
+            <div className="space-y-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 p-3.5 rounded-2xl">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                  Dışa Aktarılacak Veri Türü
+                </label>
+                <select
+                  value={dteContentType}
+                  onChange={(e) => setDteContentType(e.target.value as any)}
+                  title="Dışa Aktarılacak Veri Türü Seçin"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-1.5 px-3 text-slate-855 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="firms">Yalnızca Firmalar / Tedarikçiler</option>
+                  <option value="items">Yalnızca Malzeme &amp; Hizmet Kalemleri</option>
+                  <option value="all">Tüm Tanımlı Veriler (Firma &amp; Kalemler)</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleExportDte}
+                  disabled={dteLoading}
+                  className="flex-1 bg-white hover:bg-slate-50 disabled:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-850 dark:border-slate-800 dark:text-slate-200 font-bold py-2 px-3 text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  Dışa Aktar
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleImportDte}
+                  disabled={dteLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-bold py-2 px-3 text-[11px] rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5 text-white/90" />
+                  İçe Aktar (.dte)
+                </button>
+              </div>
+            </div>
+
+            {dteStatus && (
+              <div
+                className={`p-3 rounded-xl border text-[11px] leading-relaxed animate-in slide-in-from-top-2 duration-200 ${
+                  dteStatus.type === 'success'
+                    ? 'bg-emerald-50/50 border-emerald-200 text-emerald-850 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-450'
+                    : 'bg-rose-50/50 border-rose-200 text-rose-855 dark:bg-rose-955/20 dark:border-rose-900/30 dark:text-rose-450'
+                }`}
+              >
+                <div className="flex items-start gap-2">
+                  <Info className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${dteStatus.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`} />
+                  <span>{dteStatus.message}</span>
+                </div>
+              </div>
+            )}
+          </div>
           
           {/* Hızlı Bilgi Bilgisi */}
+
           <div className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
             <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Dosya Değişiklik Davranışı
@@ -409,7 +568,8 @@ export default function DosyaScreen(): React.JSX.Element {
                     <Database className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold block text-slate-800 dark:text-slate-200 mb-0.5">SQLite Veritabanı Sağlığı</span>
-                      Veritabanı yapısı en güncel şema sürümü olan <strong>v{activeMeta?.schema_version || '3'}</strong> sürümündedir. Veri bütünlüğü ve ACID işlemleri kararlı durumdadır.
+                      Veritabanı yapısı en güncel şema sürümü olan <strong>v{activeMeta?.schema_version || '1'}</strong> sürümündedir. Veri bütünlüğü ve ACID işlemleri kararlı durumdadır.
+
                     </div>
                   </div>
                 </div>
@@ -479,7 +639,7 @@ export default function DosyaScreen(): React.JSX.Element {
             <div className="text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
               Mevcut Sürüm:
               <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold">
-                v1.0.0-alpha.1
+                v1.0.0-alpha.2
               </span>
             </div>
             

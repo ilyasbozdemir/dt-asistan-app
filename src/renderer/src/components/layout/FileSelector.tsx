@@ -46,11 +46,11 @@ export function FileSelector(): React.JSX.Element {
         const fileBaseName = res.filePath.split(/[/\\]/).pop() || 'Yeni Kurum'
         const projectName = fileBaseName.replace(/\.dtm$/i, '')
 
-        const success = await createWorkspace(res.filePath, projectName)
-        if (success) {
+        const result = await createWorkspace(res.filePath, projectName)
+        if (result.success) {
           queryClient.clear()
         } else {
-          alert('Çalışma dosyası (.dtm) oluşturulamadı!')
+          alert(`Çalışma dosyası (.dtm) oluşturulamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
         }
       }
     } catch (e) {
@@ -63,17 +63,18 @@ export function FileSelector(): React.JSX.Element {
     try {
       const res = await window.electron?.ipcRenderer.invoke('dialog:showOpenDialog')
       if (!res.canceled && res.filePath) {
-        const success = await openWorkspace(res.filePath)
-        if (success) {
+        const result = await openWorkspace(res.filePath)
+        if (result.success) {
           queryClient.clear()
         } else {
-          alert('Çalışma dosyası (.dtm) açılamadı!')
+          alert(`Çalışma dosyası (.dtm) açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
         }
       }
     } catch (e) {
       console.error(e)
     }
   }
+
 
   return (
     <div className="relative" ref={containerRef}>

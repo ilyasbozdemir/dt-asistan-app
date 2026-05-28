@@ -23,11 +23,14 @@ export const SUPPORTED_FORMATS: FileFormat[] = [
     label: 'Doğrudan Temin Veri Dosyası',
     dialogName: 'DT Asistan Dosyası',
     isDefault: true
+  },
+  {
+    ext: 'dte',
+    label: 'Doğrudan Temin Veri Aktarım Dosyası',
+    dialogName: 'DT Veri Aktarım Dosyası'
   }
-  // İleride eklenecek formatlar:
-  // { ext: 'dta', label: 'DT Arşiv Dosyası', dialogName: 'DT Arşiv' },
-  // { ext: 'dts', label: 'DT Şablon Dosyası', dialogName: 'DT Şablon' },
 ]
+
 
 /** Tüm desteklenen uzantıları ['dtm', 'dta', ...] olarak döner */
 export const allExtensions = SUPPORTED_FORMATS.map((f) => f.ext)

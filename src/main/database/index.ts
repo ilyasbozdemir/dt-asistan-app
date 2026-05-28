@@ -1,9 +1,11 @@
 import Database from 'better-sqlite3'
+import { app } from 'electron'
 import { TANIM_Mevzuat } from './tables/TANIM_Mevzuat'
 import { TANIM_Personel } from './tables/TANIM_Personel'
 import { TANIM_Birim } from './tables/TANIM_Birim'
 import { TANIM_Asama } from './tables/TANIM_Asama'
 import { DATA_TeminDosyasi } from './tables/DATA_TeminDosyasi'
+import { TANIM_Firma } from './tables/TANIM_Firma'
 import { CURRENT_SCHEMA_VERSION } from '../db/migrate'
 
 export const TablePrefixLogic = {
@@ -20,7 +22,7 @@ export const schema = {
     web: 'https://ilyasbozdemir.dev',
     github: 'https://github.com/ilyasbozdemir'
   },
-  version: '1.0.0-alpha.1',
+  version: '1.0.0-alpha.2',
   /**
    * Tablo tanımları — sıra önemlidir (FK bağımlılıkları).
    * Tüm tanım (TANIM_*) tabloları DATA_* tablolarından önce oluşturulmalı.
@@ -31,12 +33,15 @@ export const schema = {
     TANIM_Birim, // Kurum birimleri (Müdürlükler)
     TANIM_Personel, // Personel havuzu
     TANIM_Asama, // İşlem aşamaları (Status)
+    TANIM_Firma, // Kayıtlı firmalar havuzu
     // --- Operasyonel Veriler ---
     DATA_TeminDosyasi // Her bir temin kaydı
   ]
 }
 
+
 export function initializeDatabase(db: Database.Database, institutionName: string): void {
+  const currentAppVersion = app.getVersion()
   // Temel ayarlar tablosu
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
@@ -44,12 +49,13 @@ export function initializeDatabase(db: Database.Database, institutionName: strin
       value TEXT
     );
     INSERT OR REPLACE INTO settings (key, value) VALUES ('institutionName', '${institutionName.replace(/'/g, "''")}');
-    INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '${schema.version}');
+    INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '${currentAppVersion}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', '${CURRENT_SCHEMA_VERSION}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('appTitle', '${schema.app_title}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('adminName', 'İlyas BOZDEMİR');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('adminTitle', 'Sistem Yöneticisi');
   `)
+
 
   // Tüm tabloları sırayla oluştur
   schema.tables.forEach((table: any) => {

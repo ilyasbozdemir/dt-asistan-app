@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useWorkspaceStore } from '../../store/workspaceStore'
 
 const fetchAllSettings = async (): Promise<Record<string, string>> => {
   const res = await window.electron.ipcRenderer.invoke(
@@ -51,7 +52,10 @@ export function useAyarlarHooks(): AyarlarHooksReturn {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['allSettings'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allSettings'] })
+      useWorkspaceStore.getState().loadActiveMeta()
+    }
   })
 
   const importSmtpMutation = useMutation({

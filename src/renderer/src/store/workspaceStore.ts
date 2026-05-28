@@ -1,13 +1,15 @@
 import { create } from 'zustand'
 
 export interface WorkspaceMeta {
+
   dtm_version: string
   app_version: string
   created_at: string
   institution: string
-  schema_version: string
+  schema_version: number
   updated_at?: string
 }
+
 
 interface WorkspaceState {
   activeFilePath: string | null
@@ -20,14 +22,15 @@ interface WorkspaceState {
   setActiveFile: (path: string | null) => void
   setIsAuthenticated: (auth: boolean) => void
   setActiveDosyaId: (id: number | null) => void
-  openWorkspace: (filePath: string) => Promise<boolean>
+  openWorkspace: (filePath: string) => Promise<{ success: boolean; error?: string }>
   createWorkspace: (
     filePath: string,
     institutionName: string,
     institutionCode?: string,
     adminUsername?: string,
     adminPassword?: string
-  ) => Promise<boolean>
+  ) => Promise<{ success: boolean; error?: string }>
+
   closeWorkspace: () => Promise<void>
   loadActiveMeta: () => Promise<void>
 }
@@ -95,12 +98,12 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
               : null
             : null
         })
-        return true
+        return { success: true }
       }
-      return false
-    } catch (e) {
+      return { success: false, error: result.error }
+    } catch (e: any) {
       console.error(e)
-      return false
+      return { success: false, error: e.message }
     }
   },
   createWorkspace: async (
@@ -130,14 +133,15 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
           activeMeta: result.meta || null,
           activeDosyaId: null
         })
-        return true
+        return { success: true }
       }
-      return false
-    } catch (e) {
+      return { success: false, error: result.error }
+    } catch (e: any) {
       console.error(e)
-      return false
+      return { success: false, error: e.message }
     }
   },
+
   closeWorkspace: async () => {
     await window.electron.ipcRenderer.invoke('workspace:close')
     sessionStorage.removeItem('workspace_path')

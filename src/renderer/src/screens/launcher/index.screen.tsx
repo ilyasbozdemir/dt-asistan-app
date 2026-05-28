@@ -57,23 +57,23 @@ export default function LauncherScreen(): React.ReactNode {
 
     setCreating(true)
     try {
-      const success = await createWorkspace(
+      const result = await createWorkspace(
         pendingFilePath,
         institutionName,
         institutionCode,
         username,
         password
       )
-      if (success) {
+      if (result.success) {
         queryClient.clear()
         setShowCreateModal(false)
         setPendingFilePath(null)
       } else {
-        alert('Kurum dosyası oluşturulamadı!')
+        alert(`Kurum dosyası oluşturulamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      alert('Hata oluştu!')
+      alert(`Hata oluştu!\nHata: ${err.message || 'Bilinmeyen hata'}`)
     } finally {
       setCreating(false)
     }
@@ -83,17 +83,18 @@ export default function LauncherScreen(): React.ReactNode {
     try {
       const res = await window.electron?.ipcRenderer.invoke('dialog:showOpenDialog')
       if (!res.canceled && res.filePath) {
-        const success = await openWorkspace(res.filePath)
-        if (success) {
+        const result = await openWorkspace(res.filePath)
+        if (result.success) {
           queryClient.clear()
         } else {
-          alert('Kurum dosyası açılamadı!')
+          alert(`Kurum dosyası açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
         }
       }
     } catch (e) {
       console.error(e)
     }
   }
+
 
   const handleMinimize = (): void => window.electron?.ipcRenderer.send('window-minimize')
   const handleMaximize = (): void => window.electron?.ipcRenderer.send('window-maximize')

@@ -4,7 +4,9 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 import { workspaceManager } from './db/workspace'
+import { CURRENT_SCHEMA_VERSION } from './db/migrate'
 import nodemailer from 'nodemailer'
+
 import fs from 'fs'
 import {
   isSupportedFile,
@@ -478,8 +480,214 @@ if (!gotTheLock) {
       }
     })
 
+    ipcMain.handle('db:export-dte', async (_, contentType: 'firms' | 'items' | 'all') => {
+      try {
+        const db = workspaceManager.getDb()
+        const activeMeta = workspaceManager.getMeta()
+        
+        let firms: any[] = []
+        let items: any[] = []
+        
+        // Check table existences dynamically before querying
+        const checkTableExists = (tableName: string): boolean => {
+          const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName)
+          return !!row
+        }
+        
+        const hasFirms = checkTableExists('TANIM_Firma')
+        const hasItems = checkTableExists('TANIM_Kalem')
+        
+        if ((contentType === 'firms' || contentType === 'all') && hasFirms) {
+          firms = db.prepare('SELECT * FROM TANIM_Firma').all()
+        }
+        
+        if ((contentType === 'items' || contentType === 'all') && hasItems) {
+          items = db.prepare('SELECT * FROM TANIM_Kalem').all()
+        }
+        
+        // Fetch active institution name from settings
+        let institutionName = activeMeta?.institution || 'Bilinmeyen Kurum'
+        try {
+          const row = db.prepare("SELECT value FROM settings WHERE key = 'institutionName'").get() as { value: string } | undefined
+          if (row && row.value) {
+            institutionName = row.value
+          }
+        } catch (e) {
+          // ignore
+        }
+        
+        // Get active schema version
+        let activeSchemaVersion = CURRENT_SCHEMA_VERSION
+        try {
+          const row = db.prepare("SELECT value FROM settings WHERE key = 'dbSchemaVersion'").get() as { value: string } | undefined
+          if (row && row.value) {
+            activeSchemaVersion = parseInt(row.value, 10) || CURRENT_SCHEMA_VERSION
+          }
+        } catch (e) {
+          // ignore
+        }
+        
+        const recordCount = firms.length + items.length
+        
+        const payload = {
+          dte_version: '1.0',
+          exported_from_app: app.getVersion(),
+          exported_from_schema: activeSchemaVersion,
+          exported_at: new Date().toISOString().split('T')[0],
+          institution: institutionName,
+          content_type: contentType,
+          record_count: recordCount,
+          data: {
+            firms,
+            items
+          }
+        }
+        
+        const { filePath, canceled } = await dialog.showSaveDialog({
+          title: 'Doğrudan Temin Verilerini Dışa Aktar (.dte)',
+          defaultPath: `dt_veri_aktarimi_${contentType}_${new Date().toISOString().split('T')[0]}.dte`,
+          filters: [{ name: 'DTE Files', extensions: ['dte', 'json'] }]
+        })
+        
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+        
+        fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8')
+        return { success: true, filePath, recordCount }
+      } catch (error: any) {
+        console.error('Export DTE error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('db:import-dte', async (_, customFilePath?: string) => {
+      try {
+        let filePath = customFilePath
+        if (!filePath) {
+          const { filePaths, canceled } = await dialog.showOpenDialog({
+            title: 'Doğrudan Temin Verilerini İçe Aktar (.dte)',
+            filters: [{ name: 'DTE Files', extensions: ['dte', 'json'] }],
+            properties: ['openFile']
+          })
+          
+          if (canceled || !filePaths || filePaths.length === 0) {
+            return { success: false, error: 'İptal edildi' }
+          }
+          filePath = filePaths[0]
+        }
+        
+        const content = fs.readFileSync(filePath, 'utf-8')
+
+        const payload = JSON.parse(content)
+        
+        // Metadata validations
+        if (!payload.dte_version) {
+          return { success: false, error: 'Geçersiz DTE dosyası: dte_version bulunamadı.' }
+        }
+        
+        const exportedSchema = parseInt(payload.exported_from_schema, 10) || 1
+        if (exportedSchema > CURRENT_SCHEMA_VERSION) {
+          return {
+            success: false,
+            error: `Bu dosya daha yeni bir uygulama sürümü gerektirir. (Gereken Şema Sürümü: v${exportedSchema}, Mevcut Şema Sürümü: v${CURRENT_SCHEMA_VERSION})`
+          }
+        }
+        
+        const contentType = payload.content_type || 'all'
+        const firmsToImport = payload.data?.firms || []
+        const itemsToImport = payload.data?.items || []
+        
+        const db = workspaceManager.getDb()
+        
+        // Helpers to check tables & columns dynamically
+        const checkTableExists = (tableName: string): boolean => {
+          const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName)
+          return !!row
+        }
+        
+        const getTableColumns = (tableName: string): string[] => {
+          const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>
+          return rows.map((r) => r.name)
+        }
+        
+        let importedFirmsCount = 0
+        let importedItemsCount = 0
+        const warnings: string[] = []
+        
+        db.transaction(() => {
+          // Import Firms
+          if ((contentType === 'firms' || contentType === 'all') && firmsToImport.length > 0) {
+            if (checkTableExists('TANIM_Firma')) {
+              const existingCols = getTableColumns('TANIM_Firma')
+              
+              for (const firm of firmsToImport) {
+                // Keep only keys that exist in the target database table schema
+                const filteredFirm: Record<string, any> = {}
+                for (const col of existingCols) {
+                  if (firm[col] !== undefined) {
+                    filteredFirm[col] = firm[col]
+                  }
+                }
+                
+                if (Object.keys(filteredFirm).length > 0) {
+                  const colsStr = Object.keys(filteredFirm).map((c) => `"${c}"`).join(', ')
+                  const placeholders = Object.keys(filteredFirm).map(() => '?').join(', ')
+                  const values = Object.values(filteredFirm)
+                  
+                  db.prepare(`INSERT OR REPLACE INTO TANIM_Firma (${colsStr}) VALUES (${placeholders})`).run(...values)
+                  importedFirmsCount++
+                }
+              }
+            } else {
+              warnings.push('Firma tablosu (TANIM_Firma) hedef veritabanında bulunamadı. Firma aktarımı atlandı.')
+            }
+          }
+          
+          // Import Items
+          if ((contentType === 'items' || contentType === 'all') && itemsToImport.length > 0) {
+            if (checkTableExists('TANIM_Kalem')) {
+              const existingCols = getTableColumns('TANIM_Kalem')
+              
+              for (const item of itemsToImport) {
+                const filteredItem: Record<string, any> = {}
+                for (const col of existingCols) {
+                  if (item[col] !== undefined) {
+                    filteredItem[col] = item[col]
+                  }
+                }
+                
+                if (Object.keys(filteredItem).length > 0) {
+                  const colsStr = Object.keys(filteredItem).map((c) => `"${c}"`).join(', ')
+                  const placeholders = Object.keys(filteredItem).map(() => '?').join(', ')
+                  const values = Object.values(filteredItem)
+                  
+                  db.prepare(`INSERT OR REPLACE INTO TANIM_Kalem (${colsStr}) VALUES (${placeholders})`).run(...values)
+                  importedItemsCount++
+                }
+              }
+            } else {
+              warnings.push('Malzeme/Hizmet Kalemleri tablosu (TANIM_Kalem) hedef veritabanında bulunamadı. Kalem aktarımı atlandı.')
+            }
+          }
+        })()
+        
+        workspaceManager.save()
+        
+        return {
+          success: true,
+          importedFirmsCount,
+          importedItemsCount,
+          contentType,
+          warnings
+        }
+      } catch (error: any) {
+        console.error('Import DTE error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
     // Genel okuma işlemi (SELECT)
     ipcMain.handle('db:query', async (_, sql: string, params: any[] = []) => {
+
       try {
         const db = workspaceManager.getDb()
         const stmt = db.prepare(sql)

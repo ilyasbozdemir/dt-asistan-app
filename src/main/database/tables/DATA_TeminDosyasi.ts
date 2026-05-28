@@ -20,6 +20,7 @@ export const DATA_TeminDosyasi = {
     { name: 'fonksiyonel_kod', type: 'TEXT' },
     { name: 'ekonomik_kod', type: 'TEXT' },
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
+
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
   initialData: []

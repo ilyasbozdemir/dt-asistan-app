@@ -1,8 +1,18 @@
 appId: dev.ilyasbozdemir.dtasistan
 productName: DT Asistan
+fileAssociations:
+  - ext: dtm
+    name: Doğrudan Temin Çalışma Dosyası
+    description: DT Asistan Çalışma Dosyası
+    role: Editor
+  - ext: dte
+    name: Doğrudan Temin Veri Aktarım Dosyası
+    description: DT Asistan Veri Aktarım Dosyası
+    role: Editor
 directories:
   buildResources: build
 files:
+
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'

@@ -47,16 +47,63 @@ export function PageWrapper(): React.ReactNode {
     window.electron?.ipcRenderer.invoke('db:get-settings').then(async (res) => {
       const dbIsOpen = res && res.institutionName && !res.institutionName.includes('Hata')
       if (!dbIsOpen && activeFilePath) {
-        const success = await openWorkspace(activeFilePath)
-        if (success) queryClient.clear()
+        const result = await openWorkspace(activeFilePath)
+        if (result.success) queryClient.clear()
       }
     })
 
-    // Check if app was launched by double clicking a .dtm file
+    const handleDteFileOpen = async (filePath: string) => {
+      const currentActivePath = useWorkspaceStore.getState().activeFilePath
+      if (!currentActivePath) {
+        alert(
+          `Dışarıdan veri aktarım dosyası (.dte) algılandı, ancak aktif bir kurum dosyası açık değil.\nLütfen önce bir çalışma dosyası (.dtm) açın veya oluşturun.`
+        )
+        return
+      }
+
+      const fileBaseName = filePath.split('\\').pop()?.split('/').pop() || 'veri'
+      const confirmImport = confirm(
+        `"${fileBaseName}" veri dosyasındaki kayıtları aktif kurumunuza aktarmak istiyor musunuz?`
+      )
+      
+      if (!confirmImport) return
+
+      try {
+        const res = await window.electron.ipcRenderer.invoke('db:import-dte', filePath)
+        if (res.success) {
+          let msg = ''
+          if (res.importedFirmsCount > 0) msg += `${res.importedFirmsCount} adet firma `
+          if (res.importedItemsCount > 0) msg += `${msg ? 've ' : ''}${res.importedItemsCount} adet malzeme/hizmet kalemi `
+          
+          if (!msg) {
+            msg = 'Aktarılacak yeni kayıt bulunamadı veya atlandı.'
+          } else {
+            msg += 'başarıyla içe aktarıldı.'
+          }
+
+          if (res.warnings && res.warnings.length > 0) {
+            msg += `\n(Uyarılar: ${res.warnings.join(', ')})`
+          }
+
+          alert(msg)
+          queryClient.clear()
+        } else {
+          alert(`İçe aktarma başarısız oldu!\nHata: ${res.error || 'Bilinmeyen hata'}`)
+        }
+      } catch (err: any) {
+        alert(`İçe aktarma sırasında hata oluştu!\nHata: ${err.message}`)
+      }
+    }
+
+    // Check if app was launched by double clicking a file
     window.electron?.ipcRenderer.invoke('get-initial-file').then(async (filePath) => {
       if (filePath) {
-        const success = await openWorkspace(filePath)
-        if (success) queryClient.clear()
+        if (filePath.toLowerCase().endsWith('.dte')) {
+          handleDteFileOpen(filePath)
+        } else {
+          const result = await openWorkspace(filePath)
+          if (result.success) queryClient.clear()
+        }
       }
     })
 
@@ -65,11 +112,17 @@ export function PageWrapper(): React.ReactNode {
       'open-external-file',
       async (_, filePath) => {
         if (filePath) {
-          const success = await openWorkspace(filePath)
-          if (success) queryClient.clear()
+          if (filePath.toLowerCase().endsWith('.dte')) {
+            handleDteFileOpen(filePath)
+          } else {
+            const result = await openWorkspace(filePath)
+            if (result.success) queryClient.clear()
+          }
         }
       }
     )
+
+
 
     return () => {
       if (removeListener) removeListener()

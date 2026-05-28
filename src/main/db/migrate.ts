@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { migrations, Migration } from './migrations/index'
 
-export const CURRENT_SCHEMA_VERSION = 4
+export const CURRENT_SCHEMA_VERSION = 1
 
 /**
  * Runs pending database migrations sequentially.
@@ -9,9 +9,13 @@ export const CURRENT_SCHEMA_VERSION = 4
  */
 export function runMigrations(db: Database.Database, fromVersion: number): void {
   if (fromVersion > CURRENT_SCHEMA_VERSION) {
-    throw new Error(
-      `Bu dosya daha yeni bir uygulama sürümü gerektirir. (Dosya Şema Sürümü: v${fromVersion}, Desteklenen Şema Sürümü: v${CURRENT_SCHEMA_VERSION})`
+    console.warn(
+      `Uyarı: Veritabanı şema sürümü (v${fromVersion}) uygulama sürümünden (v${CURRENT_SCHEMA_VERSION}) daha yüksek. Şema sürümü v${CURRENT_SCHEMA_VERSION} olarak sıfırlanıyor.`
     )
+    db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', ?);").run(
+      CURRENT_SCHEMA_VERSION.toString()
+    )
+    return
   }
 
   const pendingMigrations: Migration[] = []
