@@ -1,20 +1,21 @@
 import React, { useState } from 'react'
-import { useBirimlerHooks, BirimInput } from './birimler.hooks'
+import { useBirimlerHooks, BirimInput, usePersonelList } from './birimler.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { LayoutGrid, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 
 const emptyBirim: BirimInput = {
   birim_adi: '', antet_ek_satir: '', ihtiyac_yeri_eki: '',
-  sunum_makami: '', kurumsal_kod: '', dtvt_kodu: '', ayrintili_bilgi_personel: ''
+  sunum_makami: '', kurumsal_kod: '', dtvt_kodu: '', ayrintili_bilgi_personel: '', ilgili_personel_id: null
 }
 
 export default function BirimlerScreen(): React.ReactNode {
   const { birimler, isLoadingBirimler, addBirim, deleteBirim } = useBirimlerHooks()
+  const { personeller, isLoading: isLoadingPersonel } = usePersonelList()
   const [form, setForm] = useState<BirimInput>({ ...emptyBirim })
   const [showExtraFields, setShowExtraFields] = useState(false)
 
-  const handleChange = (key: keyof BirimInput, value: string): void => {
+  const handleChange = (key: keyof BirimInput, value: string | number | null): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -29,6 +30,7 @@ export default function BirimlerScreen(): React.ReactNode {
       if (err.message?.includes('UNIQUE')) {
         alert('Bu birim zaten ekli!')
       } else {
+        console.error(err)
         alert('Birim eklenirken hata oluştu!')
       }
     }
@@ -50,7 +52,7 @@ export default function BirimlerScreen(): React.ReactNode {
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <Input
-        value={form[field] as string}
+        value={form[field] as string || ''}
         onChange={(e) => handleChange(field, e.target.value)}
         placeholder={placeholder || label}
         required={required}
@@ -102,7 +104,25 @@ export default function BirimlerScreen(): React.ReactNode {
                   <Field label="Kurumsal Kod" field="kurumsal_kod" />
                   <Field label="DTVT Kodu" field="dtvt_kodu" />
                 </div>
-                <Field label="Ayrıntılı Bilgi İçin Personel" field="ayrintili_bilgi_personel" placeholder="İlgili personel adı" />
+                
+                {/* PERSONEL SELECT */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                    İlgili Personel (Ayrıntılı Bilgi)
+                  </label>
+                  <select
+                    value={form.ilgili_personel_id || ''}
+                    onChange={(e) => handleChange('ilgili_personel_id', e.target.value ? Number(e.target.value) : null)}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 rounded-xl px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    disabled={isLoadingPersonel}
+                  >
+                    <option value="">-- Personel Seçiniz --</option>
+                    {personeller.map(p => (
+                      <option key={p.id} value={p.id}>{p.ad_soyad}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Legacy text field removed from UI but still in form/DB for backwards compat */}
               </div>
             )}
 
@@ -124,39 +144,46 @@ export default function BirimlerScreen(): React.ReactNode {
             ) : birimler.length === 0 ? (
               <div className="text-sm text-slate-450 dark:text-slate-500 py-4 italic">Kayıtlı birim bulunmamaktadır.</div>
             ) : (
-              birimler.map((birim) => (
-                <div
-                  key={birim.id}
-                  className="flex justify-between items-start p-3.5 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors group"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
-                        {birim.birim_adi}
-                      </span>
-                      {birim.kurumsal_kod && (
-                        <span className="font-mono text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">
-                          {birim.kurumsal_kod}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-[10px] text-slate-500 dark:text-slate-400">
-                      {birim.sunum_makami && <span>📋 {birim.sunum_makami}</span>}
-                      {birim.dtvt_kodu && <span>🏷️ DTVT: {birim.dtvt_kodu}</span>}
-                      {birim.ayrintili_bilgi_personel && <span>👤 {birim.ayrintili_bilgi_personel}</span>}
-                    </div>
-                  </div>
-                  <Button
-                    title="Sil"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteBirim(birim.id)}
-                    className="h-8 w-8 p-0 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15 transition-all shrink-0"
+              birimler.map((birim) => {
+                const personel = personeller.find(p => p.id === birim.ilgili_personel_id)
+                const legacyPersonelText = birim.ayrintili_bilgi_personel
+                
+                return (
+                  <div
+                    key={birim.id}
+                    className="flex justify-between items-start p-3.5 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors group"
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                          {birim.birim_adi}
+                        </span>
+                        {birim.kurumsal_kod && (
+                          <span className="font-mono text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">
+                            {birim.kurumsal_kod}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-500 dark:text-slate-400">
+                        {birim.sunum_makami && <span>📋 {birim.sunum_makami}</span>}
+                        {birim.dtvt_kodu && <span>🏷️ DTVT: {birim.dtvt_kodu}</span>}
+                        {(personel || legacyPersonelText) && (
+                          <span>👤 {personel ? personel.ad_soyad : legacyPersonelText}</span>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      title="Sil"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteBirim(birim.id)}
+                      className="h-8 w-8 p-0 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15 transition-all shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )
+              })
             )}
           </div>
         </div>

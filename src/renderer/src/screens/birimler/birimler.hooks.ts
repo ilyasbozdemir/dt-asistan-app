@@ -9,6 +9,7 @@ export interface Birim {
   kurumsal_kod: string
   dtvt_kodu: string
   ayrintili_bilgi_personel: string
+  ilgili_personel_id: number | null
   aktif_mi: number
   created_at: string
 }
@@ -24,6 +25,23 @@ const fetchBirimler = async (): Promise<Birim[]> => {
   return res.data
 }
 
+const fetchPersonelList = async (): Promise<{ id: number; ad_soyad: string }[]> => {
+  const res = await window.electron.ipcRenderer.invoke(
+    'db:query',
+    'SELECT id, ad_soyad FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC'
+  )
+  if (!res.success) throw new Error(res.error)
+  return res.data
+}
+
+export function usePersonelList() {
+  const { data: personeller = [], isLoading } = useQuery({
+    queryKey: ['personeller_list'],
+    queryFn: fetchPersonelList
+  })
+  return { personeller, isLoading }
+}
+
 export function useBirimlerHooks() {
   const queryClient = useQueryClient()
 
@@ -36,10 +54,10 @@ export function useBirimlerHooks() {
     mutationFn: async (birim: BirimInput) => {
       const cols = [
         'birim_adi', 'antet_ek_satir', 'ihtiyac_yeri_eki',
-        'sunum_makami', 'kurumsal_kod', 'dtvt_kodu', 'ayrintili_bilgi_personel'
+        'sunum_makami', 'kurumsal_kod', 'dtvt_kodu', 'ayrintili_bilgi_personel', 'ilgili_personel_id'
       ]
       const placeholders = cols.map(() => '?').join(', ')
-      const values = cols.map((col) => (birim as any)[col] || '')
+      const values = cols.map((col) => (birim as any)[col] ?? null)
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         `INSERT INTO TANIM_Birim (${cols.join(', ')}, aktif_mi) VALUES (${placeholders}, 1)`,

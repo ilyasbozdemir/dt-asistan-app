@@ -8,11 +8,16 @@ import {
   Calendar,
   Landmark,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Users,
+  Building,
+  Briefcase,
+  Megaphone
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useSettingsStore } from '../../store/settingsStore'
 import { Button } from '../../components/ui/Button'
+import { useDashboardStats } from './dashboard.hooks'
 
 // Types for Mock Data
 interface ActiveProcurement {
@@ -28,7 +33,8 @@ interface ActiveProcurement {
 }
 
 export default function DashboardScreen(): React.JSX.Element {
-  const { institutionName, limitType } = useSettingsStore()
+  const { institutionName, limitType, institutionType } = useSettingsStore()
+  const { stats, isLoading } = useDashboardStats()
   
   // Dynamic Greeting based on time
   const [greeting, setGreeting] = useState('İyi Günler')
@@ -49,6 +55,18 @@ export default function DashboardScreen(): React.JSX.Element {
     })
     setCurrentDate(formatter.format(new Date()))
   }, [])
+
+  // Kurum Türü Mapping
+  const getInstitutionTypeLabel = (type: string) => {
+    switch (type) {
+      case 'belediye': return 'Belediye / Mahalli İdare'
+      case 'genel_butce': return 'Bakanlık / Genel Bütçe'
+      case 'ozel_butce': return 'Üniversite / Özel Bütçe'
+      case 'duzenleyici': return 'Düzenleyici / Denetleyici Kurum'
+      default: return 'Diğer Kurum'
+    }
+  }
+  const kurumTuruLabel = getInstitutionTypeLabel(institutionType || 'belediye')
 
   // Mock Data for Active Procurements
   const [activeFiles] = useState<ActiveProcurement[]>([
@@ -159,10 +177,15 @@ export default function DashboardScreen(): React.JSX.Element {
       {/* 1. HERO HEADER */}
       <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600/10 via-indigo-600/5 to-transparent border border-blue-500/10 dark:border-blue-500/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-950/40 px-2.5 py-1 rounded-full border border-blue-500/15">
-            {institutionName || 'T.C. Güneyyurt Belediyesi'}
-          </span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-850 dark:text-slate-100 tracking-tight mt-2.5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-950/40 px-2.5 py-1 rounded-full border border-blue-500/15">
+              {institutionName || 'T.C. Güneyyurt Belediyesi'}
+            </span>
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-100/40 dark:bg-indigo-950/40 px-2.5 py-1 rounded-full border border-indigo-500/15">
+              {kurumTuruLabel}
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-850 dark:text-slate-100 tracking-tight">
             {greeting}, Kontrol Paneline Hoş Geldiniz.
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
@@ -270,6 +293,154 @@ export default function DashboardScreen(): React.JSX.Element {
             <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Ortalama Temin Süresi</div>
             <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
               8.4 <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Gün</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* NEW STATS & DUYURULAR GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* STATS CARDS */}
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          
+          {/* İhale Dosya Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-450 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Dosya Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.ihaleDosyaSayisi}
+              </div>
+            </div>
+          </div>
+
+          {/* İhalelere Seçilen Firma Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-emerald-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
+                <Building className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Seçilen Firma Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.ihalelereSecilenFirmaSayisi}
+              </div>
+            </div>
+          </div>
+
+          {/* İhalelere Katılan Firma Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-indigo-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-450 flex items-center justify-center shrink-0">
+                <Briefcase className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Katılan Firma Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.ihalelereKatilanFirmaSayisi}
+              </div>
+            </div>
+          </div>
+
+          {/* İhale Edilen Malzeme Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-amber-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-450 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Edilen Malzeme Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.ihaleEdilenMalzemeSayisi}
+              </div>
+            </div>
+          </div>
+
+          {/* Kurumda Kayıtlı İstekli Firma Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-purple-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-450 flex items-center justify-center shrink-0">
+                <Building className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı İstekli Firma Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.kayitliFirmaSayisi}
+              </div>
+            </div>
+          </div>
+
+          {/* Kurumda Kayıtlı Personel Sayısı */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-pink-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-450 flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı Personel Sayısı</div>
+              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                {isLoading ? '-' : stats.kayitliPersonelSayisi}
+              </div>
+            </div>
+          </div>
+          
+        </div>
+
+        {/* DUYURULAR / BİLDİRİMLER PANOSU */}
+        <div className="lg:col-span-4 flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <Megaphone className="w-5 h-5 text-amber-500" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Duyurular ve Güncellemeler</h3>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+              
+              {/* Duyuru 1 */}
+              <div className="flex gap-3">
+                <div className="mt-1 w-2 h-2 bg-blue-500 rounded-full shrink-0 shadow-sm shadow-blue-500/50"></div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Yeni Versiyon Yayınlandı! (v1.0.0-alpha.3)</h4>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Sistem teması baştan tasarlandı ve yeni birim özellikleri eklendi. Geri bildirimleriniz için teşekkür ederiz.
+                  </p>
+                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">28 Mayıs 2026</span>
+                </div>
+              </div>
+
+              {/* Duyuru 2 */}
+              <div className="flex gap-3">
+                <div className="mt-1 w-2 h-2 bg-emerald-500 rounded-full shrink-0 shadow-sm shadow-emerald-500/50"></div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">KİK 2026 Limitleri Güncellendi</h4>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    22/d Doğrudan Temin limitleri 2026 yılı için güncellenmiştir. Limit kontrolünü Mevzuat ekranından takip edebilirsiniz.
+                  </p>
+                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">15 Ocak 2026</span>
+                </div>
+              </div>
+
+              {/* Duyuru 3 */}
+              <div className="flex gap-3">
+                <div className="mt-1 w-2 h-2 bg-indigo-500 rounded-full shrink-0 shadow-sm shadow-indigo-500/50"></div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">EBYS Entegrasyonu Hazırlıkları</h4>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Kurum EBYS sistemine tam entegrasyon için altyapı çalışmaları başlatıldı. İlerleyen güncellemelerde duyurulacaktır.
+                  </p>
+                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">10 Mayıs 2026</span>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

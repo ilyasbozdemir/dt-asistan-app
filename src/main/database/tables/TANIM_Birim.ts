@@ -10,6 +10,7 @@ export const TANIM_Birim = {
     { name: 'kurumsal_kod', type: 'TEXT' },
     { name: 'dtvt_kodu', type: 'TEXT' },
     { name: 'ayrintili_bilgi_personel', type: 'TEXT' },
+    { name: 'ilgili_personel_id', type: 'INTEGER' },
     { name: 'aktif_mi', type: 'INTEGER', notNull: true, default: 1 },
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],

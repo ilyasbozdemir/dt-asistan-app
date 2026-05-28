@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Info, GitBranch, ExternalLink, Bug, Star } from 'lucide-react'
+import { Info, ExternalLink, Bug, Star } from 'lucide-react'
 
 export function Footer(): React.JSX.Element {
   const [showAbout, setShowAbout] = useState(false)
