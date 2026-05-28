@@ -190,9 +190,9 @@ export function Sidebar(): React.JSX.Element {
           )}
           title="Kullanıcı Profili ve Güvenlik Ayarlarına Git"
         >
-          <div className="w-8 h-8 rounded-full bg-sidebar-active-text/20 flex items-center justify-center shrink-0 overflow-hidden border border-sidebar-border bg-white/10">
+          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden border border-sidebar-border/60">
             {institutionLogo ? (
-              <img src={institutionLogo} alt="Profil" className="w-full h-full object-cover" />
+              <img src={institutionLogo} alt="Profil" className="w-full h-full object-contain p-0.5" />
             ) : (
               <span className="text-sidebar-hover-text text-xs font-bold">
                 {getInitials(adminUsername || 'SY')}

@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { migrations, Migration } from './migrations/index'
 
-export const CURRENT_SCHEMA_VERSION = 1
+export const CURRENT_SCHEMA_VERSION = 5
 
 /**
  * Runs pending database migrations sequentially.

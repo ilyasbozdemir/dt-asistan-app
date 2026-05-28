@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { useSettingsStore } from '../../store/settingsStore'
-import { Building2, Save, Upload, MapPin } from 'lucide-react'
+import { Building2, Save, Upload, MapPin, ImageIcon, Info, X } from 'lucide-react'
 import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
 
 type TabType = 'idari' | 'iletisim'
@@ -260,17 +260,17 @@ export default function KurumScreen(): React.JSX.Element {
                         </select>
                         {institutionType === 'belediye' && (
                           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 leading-normal font-medium">
-                            💡 Mahalli İdare şablonu aktif. Kurumsal kodunuzun "30" (Mahalli İdareler) ile başlaması ve bütçe kodlarında "5" Finansman Kodu kullanılması tavsiye edilir.
+                            💡  Kurumsal kodunuzun "30" (Mahalli İdareler) ile başlaması ve bütçe kodlarında "5" Finansman Kodu kullanılması tavsiye edilir.
                           </p>
                         )}
                         {institutionType === 'genel_butce' && (
                           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 leading-normal font-medium">
-                            💡 Genel Bütçe şablonu aktif. Kurumsal kodunuzun ilgili Bakanlık koduyla başlaması (örn. Sağlık: 18) ve "1" Finansman Kodu kullanılması tavsiye edilir.
+                            💡 Kurumsal kodunuzun ilgili Bakanlık koduyla başlaması (örn. Sağlık: 18) ve "1" Finansman Kodu kullanılması tavsiye edilir.
                           </p>
                         )}
                         {institutionType === 'ozel_butce' && (
                           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 leading-normal font-medium">
-                            💡 Özel Bütçe şablonu aktif. Yükseköğretim ve üniversite kurumsal kodları genellikle "38" ile başlar ve "2" Finansman Kodu kullanılır.
+                            💡 Yükseköğretim ve üniversite kurumsal kodları genellikle "38" ile başlar ve "2" Finansman Kodu kullanılır.
                           </p>
                         )}
                       </div>
@@ -315,171 +315,228 @@ export default function KurumScreen(): React.JSX.Element {
                       </div>
 
                       {/* LOGOLAR GRUBU */}
-                      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="border border-slate-100 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col justify-between">
+                      {/* Öneri bilgi banner'ı */}
+                      <div className="md:col-span-2 flex items-start gap-2 p-3 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl text-[10px] text-blue-700 dark:text-blue-400 leading-relaxed">
+                        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Önerilen boyutlar:</strong> Uygulama Logosu için <strong>256×256 px</strong> veya <strong>512×512 px</strong> (kare, şeffaf arka planlı PNG tercih edilir).
+                          Belge logoları (Sol/Sağ) için <strong>300×150 px</strong> önerilir. Maksimum dosya boyutu: <strong>2 MB</strong>.
+                        </span>
+                      </div>
+
+                      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {/* === UYGULAMA LOGOSU === */}
+                        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4 shadow-sm">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-0.5">
                               Uygulama Logosu
                             </label>
-                            <p className="text-[10px] text-slate-450 dark:text-slate-500 mb-3 leading-normal">
-                              Giriş/Kilit ekranı ve arayüzde gösterilen genel logo.
+                            <p className="text-[10px] text-slate-450 dark:text-slate-500 leading-normal">
+                              Giriş/Kilit ekranı ve sol menüde gösterilen genel logo.
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="w-16 h-16 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                              {institutionLogo ? (
+                          {/* Büyük önizleme alanı */}
+                          <label
+                            className="group relative flex flex-col items-center justify-center w-full h-36 bg-white dark:bg-slate-950 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 dark:hover:border-blue-700 transition-all duration-200 shadow-inner"
+                          >
+                            {institutionLogo ? (
+                              <>
                                 <img
                                   src={institutionLogo}
                                   alt="Uygulama Logosu"
-                                  className="w-full h-full object-contain p-1"
+                                  className="w-full h-full object-contain p-3"
                                 />
-                              ) : (
-                                <Building2 className="w-7 h-7 text-slate-305 dark:text-slate-750" />
-                              )}
-                            </div>
-                            <div className="flex flex-col gap-1.5 w-full">
-                              <label className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-sm">
-                                  <Upload className="w-3.5 h-3.5" />
-                                Seç
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (!file) return
-                                    const reader = new FileReader()
-                                    reader.onload = () => {
-                                      if (typeof reader.result === 'string')
-                                        setInstitutionLogo(reader.result)
-                                    }
-                                    reader.readAsDataURL(file)
-                                  }}
-                                />
-                              </label>
-                              {institutionLogo && (
-                                <button
-                                  type="button"
-                                  onClick={() => setInstitutionLogo('')}
-                                  className="py-1 px-3 border border-red-200 dark:border-red-950/30 hover:bg-red-50 dark:hover:bg-red-955/10 text-red-650 dark:text-red-455 rounded-lg text-[10px] font-bold transition-all"
-                                >
-                                  Kaldır
-                                </button>
-                              )}
-                            </div>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                  <Upload className="w-5 h-5 text-white" />
+                                  <span className="text-white text-[10px] font-semibold">Değiştir</span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-600">
+                                <ImageIcon className="w-8 h-8" />
+                                <span className="text-[10px] font-medium text-center leading-tight px-2">
+                                  Logo seçmek için<br />tıklayın
+                                </span>
+                                <span className="text-[9px] text-slate-350 dark:text-slate-700">PNG, JPG, SVG · Maks. 2MB</span>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('Dosya boyutu 2 MB\'ı aşmamalıdır!')
+                                  return
+                                }
+                                const reader = new FileReader()
+                                reader.onload = () => {
+                                  if (typeof reader.result === 'string')
+                                    setInstitutionLogo(reader.result)
+                                }
+                                reader.readAsDataURL(file)
+                              }}
+                            />
+                          </label>
+
+                          {/* Önerilen boyut etiketi */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] text-slate-400 dark:text-slate-600 font-mono">Önerilen: 256×256 px</span>
+                            {institutionLogo && (
+                              <button
+                                type="button"
+                                onClick={() => setInstitutionLogo('')}
+                                className="flex items-center gap-1 py-1 px-2 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold transition-all"
+                              >
+                                <X className="w-3 h-3" />
+                                Kaldır
+                              </button>
+                            )}
                           </div>
                         </div>
 
-                        {/* SOL LOGO */}
-                        <div className="border border-slate-100 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col justify-between">
+                        {/* === SOL LOGO === */}
+                        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4 shadow-sm">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-0.5">
                               Sol Logo (Kurum)
                             </label>
-                            <p className="text-[10px] text-slate-450 dark:text-slate-500 mb-3 leading-normal">
+                            <p className="text-[10px] text-slate-450 dark:text-slate-500 leading-normal">
                               Resmi belgelerin sol üstünde yer alacak kurum logosu.
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="w-16 h-16 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                              {logoLeft ? (
+                          <label
+                            className="group relative flex flex-col items-center justify-center w-full h-36 bg-white dark:bg-slate-950 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 dark:hover:border-blue-700 transition-all duration-200 shadow-inner"
+                          >
+                            {logoLeft ? (
+                              <>
                                 <img
                                   src={logoLeft}
                                   alt="Sol Logo"
-                                  className="w-full h-full object-contain p-1"
+                                  className="w-full h-full object-contain p-3"
                                 />
-                              ) : (
-                                <Building2 className="w-7 h-7 text-slate-305 dark:text-slate-750" />
-                              )}
-                            </div>
-                            <div className="flex flex-col gap-1.5 w-full">
-                              <label className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-sm">
-                                  <Upload className="w-3.5 h-3.5" />
-                                Seç
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (!file) return
-                                    const reader = new FileReader()
-                                    reader.onload = () => {
-                                      if (typeof reader.result === 'string')
-                                        setLogoLeft(reader.result)
-                                    }
-                                    reader.readAsDataURL(file)
-                                  }}
-                                />
-                              </label>
-                              {logoLeft && (
-                                <button
-                                  type="button"
-                                  onClick={() => setLogoLeft('')}
-                                  className="py-1 px-3 border border-red-200 dark:border-red-950/30 hover:bg-red-50 dark:hover:bg-red-955/10 text-red-650 dark:text-red-455 rounded-lg text-[10px] font-bold transition-all"
-                                >
-                                  Kaldır
-                                </button>
-                              )}
-                            </div>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                  <Upload className="w-5 h-5 text-white" />
+                                  <span className="text-white text-[10px] font-semibold">Değiştir</span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-600">
+                                <ImageIcon className="w-8 h-8" />
+                                <span className="text-[10px] font-medium text-center leading-tight px-2">
+                                  Logo seçmek için<br />tıklayın
+                                </span>
+                                <span className="text-[9px] text-slate-350 dark:text-slate-700">PNG, JPG, SVG · Maks. 2MB</span>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('Dosya boyutu 2 MB\'ı aşmamalıdır!')
+                                  return
+                                }
+                                const reader = new FileReader()
+                                reader.onload = () => {
+                                  if (typeof reader.result === 'string')
+                                    setLogoLeft(reader.result)
+                                }
+                                reader.readAsDataURL(file)
+                              }}
+                            />
+                          </label>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] text-slate-400 dark:text-slate-600 font-mono">Önerilen: 300×150 px</span>
+                            {logoLeft && (
+                              <button
+                                type="button"
+                                onClick={() => setLogoLeft('')}
+                                className="flex items-center gap-1 py-1 px-2 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold transition-all"
+                              >
+                                <X className="w-3 h-3" />
+                                Kaldır
+                              </button>
+                            )}
                           </div>
                         </div>
 
-                        {/* SAĞ LOGO */}
-                        <div className="border border-slate-100 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col justify-between">
+                        {/* === SAĞ LOGO === */}
+                        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4 shadow-sm">
                           <div>
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-0.5">
                               Sağ Logo (Bakanlık)
                             </label>
-                            <p className="text-[10px] text-slate-450 dark:text-slate-500 mb-3 leading-normal">
+                            <p className="text-[10px] text-slate-450 dark:text-slate-500 leading-normal">
                               Resmi belgelerin sağ üstünde yer alacak logo.
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="w-16 h-16 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                              {logoRight ? (
+                          <label
+                            className="group relative flex flex-col items-center justify-center w-full h-36 bg-white dark:bg-slate-950 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 dark:hover:border-blue-700 transition-all duration-200 shadow-inner"
+                          >
+                            {logoRight ? (
+                              <>
                                 <img
                                   src={logoRight}
                                   alt="Sağ Logo"
-                                  className="w-full h-full object-contain p-1"
+                                  className="w-full h-full object-contain p-3"
                                 />
-                              ) : (
-                                <Building2 className="w-7 h-7 text-slate-305 dark:text-slate-750" />
-                              )}
-                            </div>
-                            <div className="flex flex-col gap-1.5 w-full">
-                              <label className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-sm">
-                                  <Upload className="w-3.5 h-3.5" />
-                                Seç
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (!file) return
-                                    const reader = new FileReader()
-                                    reader.onload = () => {
-                                      if (typeof reader.result === 'string')
-                                        setLogoRight(reader.result)
-                                    }
-                                    reader.readAsDataURL(file)
-                                  }}
-                                />
-                              </label>
-                              {logoRight && (
-                                <button
-                                  type="button"
-                                  onClick={() => setLogoRight('')}
-                                  className="py-1 px-3 border border-red-200 dark:border-red-950/30 hover:bg-red-50 dark:hover:bg-red-955/10 text-red-650 dark:text-red-455 rounded-lg text-[10px] font-bold transition-all"
-                                >
-                                  Kaldır
-                                </button>
-                              )}
-                            </div>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                  <Upload className="w-5 h-5 text-white" />
+                                  <span className="text-white text-[10px] font-semibold">Değiştir</span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-600">
+                                <ImageIcon className="w-8 h-8" />
+                                <span className="text-[10px] font-medium text-center leading-tight px-2">
+                                  Logo seçmek için<br />tıklayın
+                                </span>
+                                <span className="text-[9px] text-slate-350 dark:text-slate-700">PNG, JPG, SVG · Maks. 2MB</span>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                if (file.size > 2 * 1024 * 1024) {
+                                  alert('Dosya boyutu 2 MB\'ı aşmamalıdır!')
+                                  return
+                                }
+                                const reader = new FileReader()
+                                reader.onload = () => {
+                                  if (typeof reader.result === 'string')
+                                    setLogoRight(reader.result)
+                                }
+                                reader.readAsDataURL(file)
+                              }}
+                            />
+                          </label>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] text-slate-400 dark:text-slate-600 font-mono">Önerilen: 300×150 px</span>
+                            {logoRight && (
+                              <button
+                                type="button"
+                                onClick={() => setLogoRight('')}
+                                className="flex items-center gap-1 py-1 px-2 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold transition-all"
+                              >
+                                <X className="w-3 h-3" />
+                                Kaldır
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>

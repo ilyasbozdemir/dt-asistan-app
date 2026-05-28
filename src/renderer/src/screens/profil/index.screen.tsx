@@ -101,9 +101,9 @@ export default function ProfilScreen(): React.JSX.Element {
         {/* Sol Kolon - Avatar Kartı */}
         <div className="md:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center justify-between min-h-[320px]">
           <div className="flex flex-col items-center w-full">
-            <div className="w-24 h-24 rounded-full bg-blue-600 dark:bg-blue-700 flex items-center justify-center text-white text-3xl font-bold shadow-md shadow-blue-500/10 mb-4 overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="w-24 h-24 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center text-slate-700 dark:text-slate-200 text-3xl font-bold shadow-md mb-4 overflow-hidden border-2 border-slate-200 dark:border-slate-700">
               {institutionLogo ? (
-                <img src={institutionLogo} alt="Logo" className="w-full h-full object-cover" />
+                <img src={institutionLogo} alt="Logo" className="w-full h-full object-contain p-1" />
               ) : (
                 getInitials(adminName)
               )}

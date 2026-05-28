@@ -3,7 +3,28 @@ export const TANIM_Firma = {
   description: 'Kayıtlı firmalar ve tedarikçiler havuzu',
   columns: [
     { name: 'id', type: 'INTEGER', primaryKey: true, autoIncrement: true },
-    { name: 'unvan', type: 'TEXT', notNull: true }
+    { name: 'firma_kodu', type: 'TEXT' },
+    { name: 'unvan', type: 'TEXT', notNull: true },
+    { name: 'ilgili_adi', type: 'TEXT' },
+    { name: 'uyrugu', type: 'TEXT' },
+    { name: 'istigal_konusu', type: 'TEXT' },
+    { name: 'adres', type: 'TEXT' },
+    { name: 'ilce', type: 'TEXT' },
+    { name: 'posta_kodu', type: 'TEXT' },
+    { name: 'il', type: 'TEXT' },
+    { name: 'telefon', type: 'TEXT' },
+    { name: 'faks', type: 'TEXT' },
+    { name: 'email', type: 'TEXT' },
+    { name: 'web_adresi', type: 'TEXT' },
+    { name: 'banka_adi', type: 'TEXT' },
+    { name: 'sube_kodu_adi', type: 'TEXT' },
+    { name: 'hesap_no', type: 'TEXT' },
+    { name: 'tc_kimlik_no', type: 'TEXT' },
+    { name: 'dogum_tarihi', type: 'TEXT' },
+    { name: 'vergi_dairesi', type: 'TEXT' },
+    { name: 'vergi_no', type: 'TEXT' },
+    { name: 'aktif_mi', type: 'INTEGER', notNull: true, default: 1 },
+    { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
   initialData: []
 }

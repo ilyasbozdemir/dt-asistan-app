@@ -6,6 +6,7 @@ import { TANIM_Birim } from './tables/TANIM_Birim'
 import { TANIM_Asama } from './tables/TANIM_Asama'
 import { DATA_TeminDosyasi } from './tables/DATA_TeminDosyasi'
 import { TANIM_Firma } from './tables/TANIM_Firma'
+import { TANIM_Ambar } from './tables/TANIM_Ambar'
 import { CURRENT_SCHEMA_VERSION } from '../db/migrate'
 
 export const TablePrefixLogic = {
@@ -34,6 +35,7 @@ export const schema = {
     TANIM_Personel, // Personel havuzu
     TANIM_Asama, // İşlem aşamaları (Status)
     TANIM_Firma, // Kayıtlı firmalar havuzu
+    TANIM_Ambar, // Ambar depoları
     // --- Operasyonel Veriler ---
     DATA_TeminDosyasi // Her bir temin kaydı
   ]
