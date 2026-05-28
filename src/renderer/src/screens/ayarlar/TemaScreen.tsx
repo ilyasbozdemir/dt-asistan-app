@@ -332,12 +332,10 @@ export default function TemaScreen({ isEmbedded = false }: { isEmbedded?: boolea
       
       setThemeLightVars(nextLight)
       setThemeDarkVars(nextDark)
+      applyThemeVars(nextLight)
+      applyThemeVars(nextDark)
       
-      showStatus('Tema başarıyla kaydedildi! Arayüzün yenilenmesi için uygulama yeniden başlatılıyor...')
-      
-      setTimeout(() => {
-        window.location.reload()
-      }, 1200)
+      showStatus('Tema başarıyla kaydedildi ve uygulandı!')
     } catch (error) {
       console.error(error)
       showStatus('Ayarlar kaydedilirken bir hata oluştu.', 'error')
@@ -389,10 +387,7 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
       // Apply CSS variables globally
       applyThemeVars(localLight)
       applyThemeVars(localDark)
-      showStatus('Tema başarıyla kaydedildi! Arayüzün yenilenmesi için uygulama yeniden başlatılıyor...')
-      setTimeout(() => {
-        window.location.reload()
-      }, 1200)
+      showStatus('Tema başarıyla kaydedildi ve uygulandı!')
     } catch (error) {
       console.error(error)
       showStatus('Ayarlar kaydedilirken bir hata oluştu.', 'error')
@@ -428,10 +423,9 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
       })
       setThemeLightVars(light)
       setThemeDarkVars(dark)
-      showStatus(`${name} teması başarıyla uygulandı! Arayüzün yenilenmesi için sayfa yenileniyor...`)
-      setTimeout(() => {
-        window.location.reload()
-      }, 1200)
+      applyThemeVars(light)
+      applyThemeVars(dark)
+      showStatus(`${name} teması başarıyla uygulandı!`)
     } catch (error) {
       console.error(error)
       showStatus('Tema kaydedilirken bir hata oluştu.', 'error')
