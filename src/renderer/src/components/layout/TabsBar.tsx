@@ -19,6 +19,7 @@ import {
   LucideIcon
 } from 'lucide-react'
 import { useTabStore } from '../../store/tabStore'
+import { useWorkspaceStore } from '../../store/workspaceStore'
 import { cn } from '../../utils/cn'
 
 // Map of route paths to Lucide Icon components
@@ -43,6 +44,7 @@ const tabIcons: Record<string, LucideIcon> = {
 
 export function TabsBar(): React.JSX.Element {
   const { tabs, activeTabPath, closeTab, setActiveTab } = useTabStore()
+  const { activeFilePath } = useWorkspaceStore()
   const navigate = useNavigate()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -75,8 +77,12 @@ export function TabsBar(): React.JSX.Element {
     if (nextPath) {
       navigate({ to: nextPath })
     }
-    // Open in a separate Electron window
-    window.electron?.ipcRenderer.send('tab:open-in-window', { path, title: label })
+    // Open in a separate Electron window, passing workspace path so child window can access DB
+    window.electron?.ipcRenderer.send('tab:open-in-window', {
+      path,
+      title: label,
+      workspacePath: activeFilePath || undefined
+    })
   }
 
   // Mouse wheel horizontal scrolling support

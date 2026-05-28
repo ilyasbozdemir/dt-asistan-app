@@ -161,7 +161,7 @@ if (!gotTheLock) {
 
     // --- Tab ↔ Window IPC Handlers ---
     // Opens a tab's content in a separate detached window
-    ipcMain.on('tab:open-in-window', (_, data: { path: string; title: string }) => {
+    ipcMain.on('tab:open-in-window', (_, data: { path: string; title: string; workspacePath?: string }) => {
       const newWindow = new BrowserWindow({
         width: 1000,
         height: 750,
@@ -180,14 +180,15 @@ if (!gotTheLock) {
       })
 
       const separator = data.path.includes('?') ? '&' : '?'
+      const wpParam = data.workspacePath ? '&wp=' + encodeURIComponent(data.workspacePath) : ''
       if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         newWindow.loadURL(
-          process.env['ELECTRON_RENDERER_URL'] + '#' + data.path + separator + 'mode=window'
+          process.env['ELECTRON_RENDERER_URL'] + '#' + data.path + separator + 'mode=window' + wpParam
         )
       } else {
         const indexHtml = join(__dirname, '../renderer/index.html')
         newWindow.loadFile(indexHtml, {
-          hash: data.path + separator + 'mode=window'
+          hash: data.path + separator + 'mode=window' + wpParam
         })
       }
     })

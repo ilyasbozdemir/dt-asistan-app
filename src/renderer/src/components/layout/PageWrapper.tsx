@@ -91,6 +91,28 @@ export function PageWrapper(): React.ReactNode {
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
   const isWindowMode = searchParams.get('mode') === 'window' || hashParams.get('mode') === 'window'
 
+  // When opened as a detached window, restore workspace context from URL params
+  useEffect(() => {
+    if (!isWindowMode) return
+    const wpFromSearch = searchParams.get('wp')
+    const wpFromHash = hashParams.get('wp')
+    const workspacePath = wpFromSearch || wpFromHash
+    if (workspacePath) {
+      const decodedPath = decodeURIComponent(workspacePath)
+      // Set sessionStorage so the workspace store picks it up
+      sessionStorage.setItem('workspace_path', decodedPath)
+      sessionStorage.setItem('workspace_auth', 'true')
+      // Open the workspace in the main process (it may already be open, which is fine)
+      openWorkspace(decodedPath).then((result) => {
+        if (result.success) {
+          // Mark as authenticated since parent was already authenticated
+          useWorkspaceStore.getState().setIsAuthenticated(true)
+        }
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Run once on mount
+
   useEffect(() => {
     // Initial fetch of DB name if any (in case backend already has an open DB on soft reload)
     window.electron?.ipcRenderer.invoke('db:get-settings').then(async (res) => {
