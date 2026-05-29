@@ -46,20 +46,22 @@ export default function BirimlerScreen(): React.ReactNode {
     }
   }
 
-  const Field = ({ label, field, required, placeholder }: { label: string; field: keyof BirimInput; required?: boolean; placeholder?: string }) => (
-    <div>
-      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <Input
-        value={form[field] as string || ''}
-        onChange={(e) => handleChange(field, e.target.value)}
-        placeholder={placeholder || label}
-        required={required}
-        className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
-      />
-    </div>
-  )
+const Field = ({ label, field, form, handleChange, required, placeholder }: { label: string; field: keyof BirimInput; form: BirimInput; handleChange: (field: keyof BirimInput, value: string) => void; required?: boolean; placeholder?: string }) => (
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <Input
+      value={form[field] as string || ''}
+      onChange={(e) => handleChange(field, e.target.value)}
+      placeholder={placeholder || label}
+      required={required}
+      className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
+    />
+  </div>
+)
+
+export default function BirimlerScreen(): React.ReactNode {
 
   return (
     <div className="p-8 max-w-4xl mx-auto flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
@@ -84,7 +86,7 @@ export default function BirimlerScreen(): React.ReactNode {
           </h3>
 
           <form onSubmit={handleAddBirim} className="space-y-3">
-            <Field label="Birim / Müdürlük Adı" field="birim_adi" required placeholder="Örn: Fen İşleri Müdürlüğü" />
+            <Field label="Birim / Müdürlük Adı" field="birim_adi" form={form} handleChange={handleChange} required placeholder="Örn: Fen İşleri Müdürlüğü" />
 
             <button
               type="button"
@@ -97,12 +99,12 @@ export default function BirimlerScreen(): React.ReactNode {
 
             {showExtraFields && (
               <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
-                <Field label="Antet Ek Satır" field="antet_ek_satir" placeholder="Antet yazısında ek satır" />
-                <Field label="İhtiyaç Yeri Eki" field="ihtiyac_yeri_eki" placeholder="İhtiyaç yeri ek bilgisi" />
-                <Field label="Sunum Makamı" field="sunum_makami" placeholder="Sunulacak makam" />
+                <Field label="Antet Ek Satır" field="antet_ek_satir" form={form} handleChange={handleChange} placeholder="Antet yazısında ek satır" />
+                <Field label="İhtiyaç Yeri Eki" field="ihtiyac_yeri_eki" form={form} handleChange={handleChange} placeholder="İhtiyaç yeri ek bilgisi" />
+                <Field label="Sunum Makamı" field="sunum_makami" form={form} handleChange={handleChange} placeholder="Sunulacak makam" />
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Kurumsal Kod" field="kurumsal_kod" />
-                  <Field label="DTVT Kodu" field="dtvt_kodu" />
+                  <Field label="Kurumsal Kod" field="kurumsal_kod" form={form} handleChange={handleChange} />
+                  <Field label="DTVT Kodu" field="dtvt_kodu" form={form} handleChange={handleChange} />
                 </div>
                 
                 {/* PERSONEL SELECT */}
