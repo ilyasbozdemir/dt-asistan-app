@@ -9,6 +9,21 @@ const emptyBirim: BirimInput = {
   sunum_makami: '', kurumsal_kod: '', dtvt_kodu: '', ayrintili_bilgi_personel: '', ilgili_personel_id: null
 }
 
+const Field = ({ label, field, form, handleChange, required, placeholder }: { label: string; field: keyof BirimInput; form: BirimInput; handleChange: (field: keyof BirimInput, value: string) => void; required?: boolean; placeholder?: string }) => (
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <Input
+      value={form[field] as string || ''}
+      onChange={(e) => handleChange(field, e.target.value)}
+      placeholder={placeholder || label}
+      required={required}
+      className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
+    />
+  </div>
+)
+
 export default function BirimlerScreen(): React.ReactNode {
   const { birimler, isLoadingBirimler, addBirim, deleteBirim } = useBirimlerHooks()
   const { personeller, isLoading: isLoadingPersonel } = usePersonelList()
@@ -45,23 +60,6 @@ export default function BirimlerScreen(): React.ReactNode {
       }
     }
   }
-
-const Field = ({ label, field, form, handleChange, required, placeholder }: { label: string; field: keyof BirimInput; form: BirimInput; handleChange: (field: keyof BirimInput, value: string) => void; required?: boolean; placeholder?: string }) => (
-  <div>
-    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <Input
-      value={form[field] as string || ''}
-      onChange={(e) => handleChange(field, e.target.value)}
-      placeholder={placeholder || label}
-      required={required}
-      className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
-    />
-  </div>
-)
-
-export default function BirimlerScreen(): React.ReactNode {
 
   return (
     <div className="p-8 max-w-4xl mx-auto flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
