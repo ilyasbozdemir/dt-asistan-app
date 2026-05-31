@@ -3,7 +3,7 @@ import { useFirmalarHooks, FirmaInput } from './firmalar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
-import { Building2, Plus, Trash2, Search, ChevronDown, ChevronUp, MapPin } from 'lucide-react'
+import { Building2, Plus, Trash2, Search, ChevronDown, ChevronUp } from 'lucide-react'
 
 const emptyFirma: FirmaInput = {
   firma_kodu: '', unvan: '', ilgili_adi: '', uyrugu: 'T.C.',
