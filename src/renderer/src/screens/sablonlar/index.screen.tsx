@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Editor, { loader } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 import * as XLSX from 'xlsx'
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import {
   Code,
   FileText,
@@ -164,7 +164,7 @@ export default function SablonlarScreen(): React.JSX.Element {
       </div>
 
       <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <PanelGroup direction="horizontal">
+        <PanelGroup orientation="horizontal">
           
           {/* SOL PANEL: HTML KODU */}
           <Panel defaultSize={35} minSize={20}>
