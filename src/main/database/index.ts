@@ -28,12 +28,7 @@ export const schema = {
     web: 'https://ilyasbozdemir.dev',
     github: 'https://github.com/ilyasbozdemir'
   },
-  version: '1.0.0-alpha.3',
-  changelog: [
-    { version: '1.0.0-alpha.1', notes: 'İlk sürüm (Temel veritabanı yapısı ve tablolar)' },
-    { version: '1.0.0-alpha.2', notes: 'TANIM_Ambar tablosu oluşturuldu, TANIM_Firma ve TANIM_Birim genişletildi' },
-    { version: '1.0.0-alpha.3', notes: 'Birim-Personel ilişkisi (ilgili_personel_id), Dashboard gerçek verileri ve Kurum Türü eklendi' }
-  ],
+  version: '1.0.0-alpha.4',
   /**
    * Tablo tanımları — sıra önemlidir (FK bağımlılıkları).
    * Tüm tanım (TANIM_*) tabloları DATA_* tablolarından önce oluşturulmalı.

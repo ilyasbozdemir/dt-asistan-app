@@ -5,24 +5,19 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import { initializeDatabase } from '../database/index'
-import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
+import { runMigrations, CURRENT_SCHEMA_VERSION, getPendingMigrations } from './migrate'
 
 export interface WorkspaceMeta {
-  dtm_version: string      // format versiyonu (örn: "1.0")
-  app_version: string      // oluşturan/güncelleyen uygulama versiyonu (örn: "1.0.0-alpha.2")
-  created_at: string       // oluşturulma tarihi (YYYY-MM-DD)
-  institution: string      // kurum adı
-  schema_version: number   // veritabanı şema versiyonu (örn: 3)
-  updated_at?: string      // son düzenlenme zamanı (ISO string)
-  integrity_hash?: string  // meta.json'un SHA-256 imzası
-  warnings?: string[]      // Frontend'e iletilecek uyarı mesajları
-}
-
-const VERSION_COMPATIBILITY: Record<string, { minSchema: number; maxSchema: number }> = {
-  "1.0.0-alpha.1": { minSchema: 1, maxSchema: 1 },
-  "1.0.0-alpha.2": { minSchema: 1, maxSchema: 2 },
-  "1.0.0-alpha.3": { minSchema: 1, maxSchema: 6 },
-  "1.0.0-alpha.4": { minSchema: 1, maxSchema: 6 },
+  dtm_version: string
+  app_version: string
+  created_at: string
+  institution: string
+  schema_version: number
+  platform: string
+  file_version: number
+  updated_at?: string
+  integrity_hash?: string
+  warnings?: string[]
 }
 
 function calculateIntegrityHash(meta: Partial<WorkspaceMeta>): string {
@@ -31,7 +26,8 @@ function calculateIntegrityHash(meta: Partial<WorkspaceMeta>): string {
     app_version: meta.app_version,
     schema_version: meta.schema_version,
     created_at: meta.created_at,
-    institution: meta.institution
+    institution: meta.institution,
+    platform: meta.platform
   }
   return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex')
 }
@@ -43,6 +39,8 @@ function normalizeMeta(raw: any): WorkspaceMeta {
     created_at: raw.created_at || (raw.createdAt ? raw.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
     institution: raw.institution || raw.institutionName || 'Bilinmeyen Kurum',
     schema_version: parseInt(raw.schema_version || raw.schemaVersion || '1', 10) || 1,
+    platform: raw.platform || process.platform,
+    file_version: raw.file_version || parseInt(raw.fileVersion || '1', 10) || 1,
     updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString(),
     integrity_hash: raw.integrity_hash,
     warnings: []
@@ -59,7 +57,7 @@ export class DtmWorkspace {
     this.tempDir = path.join(app.getPath('userData'), 'dtm_temp', Date.now().toString())
   }
 
-  public openWorkspace(filePath: string): WorkspaceMeta {
+  public openWorkspace(filePath: string, allowMigration: boolean = false): WorkspaceMeta {
     this.currentFilePath = filePath
     this.ensureTempDir()
 
@@ -90,17 +88,21 @@ export class DtmWorkspace {
       throw new Error(`Bu dosya daha yeni bir dtm formatı gerektirir.`)
     }
 
-    // Version Matrix Enforcement
-    const currentAppVersion = app.getVersion()
-    const appMatrix = VERSION_COMPATIBILITY[currentAppVersion] || { minSchema: 1, maxSchema: CURRENT_SCHEMA_VERSION }
-    
-    if (meta.schema_version > CURRENT_SCHEMA_VERSION || meta.schema_version > appMatrix.maxSchema) {
+    if (meta.schema_version > CURRENT_SCHEMA_VERSION) {
       throw new Error(`Bu dosya (v${meta.schema_version}) daha yeni bir uygulama sürümü gerektirir. Lütfen uygulamayı güncelleyin.`)
     }
 
     const fromVersion = meta.schema_version || 1
 
     if (fromVersion < CURRENT_SCHEMA_VERSION) {
+      if (!allowMigration) {
+        const pendingUpdates = getPendingMigrations(fromVersion)
+        if (pendingUpdates.length > 0) {
+           const payload = JSON.stringify({ requiresMigration: true, pendingUpdates })
+           throw new Error(`MIGRATION_REQUIRED|${payload}`)
+        }
+      }
+
       const backupPath = filePath + '.bak'
       try {
         fs.copyFileSync(filePath, backupPath)
@@ -116,6 +118,8 @@ export class DtmWorkspace {
         
         meta.schema_version = CURRENT_SCHEMA_VERSION
         meta.app_version = app.getVersion()
+        meta.platform = process.platform
+        meta.file_version = (meta.file_version || 0) + 1
         meta.updated_at = new Date().toISOString()
         meta.integrity_hash = calculateIntegrityHash(meta)
         fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2))
@@ -159,7 +163,7 @@ export class DtmWorkspace {
           meta.warnings?.push(`UYARI: meta.json içindeki sürüm (${meta.schema_version}) ile veritabanı sürümü (${dbSchemaVer}) uyuşmuyor. Dosya elle değiştirilmiş olabilir.`)
         }
       } catch(e) {
-         // Silently ignore if settings table is missing in very old corrupted files
+         // Silently ignore
       }
     }
 
@@ -182,6 +186,8 @@ export class DtmWorkspace {
       created_at: new Date().toISOString().split('T')[0],
       institution: institutionName,
       schema_version: CURRENT_SCHEMA_VERSION,
+      platform: process.platform,
+      file_version: 1,
       updated_at: new Date().toISOString(),
       warnings: []
     }
@@ -210,6 +216,7 @@ export class DtmWorkspace {
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8')) as WorkspaceMeta
       meta.updated_at = new Date().toISOString()
       meta.app_version = app.getVersion()
+      meta.platform = process.platform
 
       try {
         const row = this.db.prepare("SELECT value FROM settings WHERE key = 'institutionName'").get() as { value: string } | undefined
@@ -277,10 +284,10 @@ export const workspaceManager = {
     activeWorkspace = new DtmWorkspace()
     return activeWorkspace.createWorkspace(filePath, institutionName)
   },
-  open: (filePath: string) => {
+  open: (filePath: string, allowMigration: boolean = false) => {
     if (activeWorkspace) activeWorkspace.closeWorkspace()
     activeWorkspace = new DtmWorkspace()
-    return activeWorkspace.openWorkspace(filePath)
+    return activeWorkspace.openWorkspace(filePath, allowMigration)
   },
   save: () => {
     if (activeWorkspace) activeWorkspace.saveWorkspace()

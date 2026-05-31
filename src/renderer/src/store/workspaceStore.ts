@@ -23,7 +23,7 @@ interface WorkspaceState {
   setActiveFile: (path: string | null) => void
   setIsAuthenticated: (auth: boolean) => void
   setActiveDosyaId: (id: number | null) => void
-  openWorkspace: (filePath: string) => Promise<{ success: boolean; error?: string }>
+  openWorkspace: (filePath: string, allowMigration?: boolean) => Promise<{ success: boolean; error?: string; requiresMigration?: boolean; pendingUpdates?: any[] }>
   createWorkspace: (
     filePath: string,
     institutionName: string,
@@ -73,9 +73,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
     set({ activeDosyaId: id })
   },
-  openWorkspace: async (filePath: string) => {
+  openWorkspace: async (filePath: string, allowMigration: boolean = false) => {
     try {
-      const result = await window.electron.ipcRenderer.invoke('workspace:open', filePath)
+      const result = await window.electron.ipcRenderer.invoke('workspace:open', filePath, allowMigration)
+      
+      if (result.requiresMigration) {
+         return { success: false, requiresMigration: true, pendingUpdates: result.pendingUpdates }
+      }
+
       if (result.success) {
         const isSameFile = sessionStorage.getItem('workspace_path') === filePath
         const wasAuth = sessionStorage.getItem('workspace_auth') === 'true'

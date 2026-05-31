@@ -7,8 +7,7 @@ import fs from 'fs'
 import yaml from 'js-yaml'
 import icon from '../../resources/icon.png?asset'
 import { workspaceManager } from './db/workspace'
-import { CURRENT_SCHEMA_VERSION } from './db/migrate'
-import { schema } from './database/index'
+import { manifest, CURRENT_SCHEMA_VERSION } from './db/migrate'
 import nodemailer from 'nodemailer'
 import {
   isSupportedFile,
@@ -231,14 +230,28 @@ if (!gotTheLock) {
     })
 
     ipcMain.handle('get-changelog', async () => {
-      return schema.changelog
+      const allChanges: {version: string, notes: string}[] = []
+      for (const v of manifest.versions) {
+        if (v.changes && v.changes.length > 0) {
+          const notes = v.changes.map(c => `- Schema ${c.schema}: ${c.description}`).join('\n')
+          allChanges.push({ version: v.app, notes })
+        } else {
+          allChanges.push({ version: v.app, notes: 'Yapısal bir veritabanı değişikliği yok.' })
+        }
+      }
+      return allChanges.reverse()
     })
 
-    ipcMain.handle('workspace:open', async (_, filePath: string) => {
+    ipcMain.handle('workspace:open', async (_, filePath: string, allowMigration: boolean = false) => {
       try {
-        const meta = workspaceManager.open(filePath)
+        const meta = workspaceManager.open(filePath, allowMigration)
         return { success: true, meta }
       } catch (error: any) {
+        if (error.message && error.message.startsWith('MIGRATION_REQUIRED|')) {
+           const payloadStr = error.message.split('|')[1]
+           const payload = JSON.parse(payloadStr)
+           return { success: false, ...payload } // { requiresMigration: true, pendingUpdates: [] }
+        }
         console.error('Open workspace error:', error)
         return { success: false, error: error.message }
       }
