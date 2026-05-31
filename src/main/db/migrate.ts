@@ -1,8 +1,6 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
-import yaml from 'js-yaml'
-import manifestRaw from './schema-manifest.yaml?raw'
-// database/index.ts importu, oradaki table definition'larını kullanarak DDL oluşturmak için
+import { manifests } from './schema-manifest/index'
 import { schema as dbSchemaDef } from '../database/index'
 
 export interface SchemaChange {
@@ -21,23 +19,15 @@ export interface AppVersionManifest {
   changes: SchemaChange[]
 }
 
-export interface SchemaManifest {
-  versions: AppVersionManifest[]
-}
-
-export const manifest: SchemaManifest = yaml.load(manifestRaw) as SchemaManifest
-
 export function getCurrentAppManifest(): AppVersionManifest {
-  // Use app version from electron, default to last available if not matched
   const appVersion = app.getVersion()
-  const found = manifest.versions.find(v => v.app === appVersion)
+  const found = manifests.find(v => v.app === appVersion)
   if (found) return found
-  return manifest.versions[manifest.versions.length - 1]
+  return manifests[manifests.length - 1]
 }
 
-// Artık CURRENT_SCHEMA_VERSION bir fonksiyon ya da property getter gibi davranabilir.
-// Mevcut app'e izin verilen max DB şeması:
-export const CURRENT_SCHEMA_VERSION = getCurrentAppManifest().schema_max
+export const CURRENT_SCHEMA_MAX = getCurrentAppManifest().schema_max
+export const CURRENT_SCHEMA_VERSION = CURRENT_SCHEMA_MAX // legacy support for imports
 
 export interface PendingMigrationInfo {
   schema: number
@@ -50,7 +40,7 @@ export function getPendingMigrations(fromVersion: number): PendingMigrationInfo[
   if (fromVersion >= appManifest.schema_max) return pending
 
   const allChanges: SchemaChange[] = []
-  for (const v of manifest.versions) {
+  for (const v of manifests) {
     if (v.changes) {
       for (const change of v.changes) {
         if (!allChanges.find(c => c.schema === change.schema)) {
@@ -77,7 +67,7 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
   if (fromVersion >= MAX_SCHEMA) return
 
   const allChanges: SchemaChange[] = []
-  for (const v of manifest.versions) {
+  for (const v of manifests) {
     if (v.changes) {
       for (const change of v.changes) {
         if (!allChanges.find(c => c.schema === change.schema)) {
@@ -120,7 +110,6 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
             const constraintsSql = (tableDef as any).constraints ? ', ' + (tableDef as any).constraints.join(', ') : ''
             db.exec(`CREATE TABLE IF NOT EXISTS ${tableName} (${columnsSql}${constraintsSql});`)
             
-            // Eğer varsa varsayılan verilerini de bas
             if (tableDef.initialData && tableDef.initialData.length > 0) {
               tableDef.initialData.forEach((row: any) => {
                 const keys = Object.keys(row)
@@ -149,7 +138,6 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
               db.exec(`ALTER TABLE ${colAdd.table} ADD COLUMN ${sqlDef};`)
             } catch (err: any) {
               if (err.message && err.message.includes('duplicate column name')) {
-                // Ignore duplicate column errors to make it idempotent
                 console.log(`Column ${colAdd.table}.${colAdd.column} already exists, skipping.`)
               } else {
                 throw err
@@ -170,7 +158,7 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
   try {
     executeMigrationsTransaction()
   } catch (error: any) {
-    throw error // Yüksek seviyeye fırlatıyoruz, workspace.ts dosyayı rollback yapacak.
+    throw error 
   }
   console.log('Tüm veritabanı göç adımları başarıyla tamamlandı.')
 }

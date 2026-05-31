@@ -7,7 +7,8 @@ import fs from 'fs'
 import yaml from 'js-yaml'
 import icon from '../../resources/icon.png?asset'
 import { workspaceManager } from './db/workspace'
-import { manifest, CURRENT_SCHEMA_VERSION } from './db/migrate'
+import { CURRENT_SCHEMA_VERSION } from './db/migrate'
+import { manifests } from './db/schema-manifest/index'
 import nodemailer from 'nodemailer'
 import {
   isSupportedFile,
@@ -231,7 +232,7 @@ if (!gotTheLock) {
 
     ipcMain.handle('get-changelog', async () => {
       const allChanges: {version: string, notes: string}[] = []
-      for (const v of manifest.versions) {
+      for (const v of manifests) {
         if (v.changes && v.changes.length > 0) {
           const notes = v.changes.map(c => `- Schema ${c.schema}: ${c.description}`).join('\n')
           allChanges.push({ version: v.app, notes })
