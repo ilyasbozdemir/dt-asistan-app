@@ -17,7 +17,8 @@ import {
   Database,
   PackageSearch,
   FolderTree,
-  Megaphone
+  Megaphone,
+  Tag
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -44,6 +45,7 @@ const menuGroups = [
       { name: 'Ambar Tanımları', path: '/ambar', icon: Database },
       { name: 'Malzeme Listesi', path: '/malzemeler', icon: PackageSearch },
       { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
+      { name: 'OKAS Kodları', path: '/okaskod', icon: Tag },
       { name: 'Firmalar / Tedarikçiler', path: '/firmalar', icon: Building2 },
       { name: 'Personel Yönetimi', path: '/personel', icon: Users },
       { name: 'Kurum Bilgileri', path: '/kurum', icon: Building2 }

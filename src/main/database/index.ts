@@ -14,6 +14,7 @@ import { TANIM_AlimTuru_Sablon } from './tables/TANIM_AlimTuru_Sablon'
 import { SABLON_Placeholder } from './tables/SABLON_Placeholder'
 import { TANIM_Kalem } from './tables/TANIM_Kalem'
 import { TANIM_TasinirKod } from './tables/TANIM_TasinirKod'
+import { TANIM_OkasKod } from './tables/TANIM_OkasKod'
 import { CURRENT_SCHEMA_VERSION } from './migrate'
 
 export const TablePrefixLogic = {
@@ -44,6 +45,7 @@ export const schema = {
     TANIM_Firma, // Kayıtlı firmalar havuzu
     TANIM_Ambar, // Ambar depoları
     TANIM_TasinirKod, // Taşınır Kod Ağacı
+    TANIM_OkasKod,    // OKAS Kod Listesi
     TANIM_Kalem, // Malzeme ve Hizmet Kalemleri
     TANIM_AlimTuru, // Alım Türleri
     TANIM_Sablon, // Şablonlar

@@ -6,14 +6,17 @@ import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { useMalzemelerHooks } from './malzemeler.hooks'
 import { useTasinirKodHooks } from '../tasinirkod/tasinirkod.hooks'
+import { useOkasKodHooks } from '../okaskod/okaskod.hooks'
 import { cn } from '../../utils/cn'
 
 export default function MalzemelerScreen(): React.JSX.Element {
   const { kalemList, isLoading: isKalemLoading, addKalem, deleteKalem } = useMalzemelerHooks()
   const { tasinirKodList } = useTasinirKodHooks()
+  const { okasKodList } = useOkasKodHooks()
 
   const [barkodId, setBarkodId] = useState('')
   const [tasinirKodu, setTasinirKodu] = useState('')
+  const [okasKodu, setOkasKodu] = useState('')
   const [kalemAdi, setKalemAdi] = useState('')
   const [tipi, setTipi] = useState('Mal Alımı')
   const [birim, setBirim] = useState('Adet')
@@ -31,6 +34,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
   const handleOpenModal = () => {
     setBarkodId(generateBarcode())
     setTasinirKodu('')
+    setOkasKodu('')
     setKalemAdi('')
     setTipi('Mal Alımı')
     setBirim('Adet')
@@ -46,6 +50,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
       await addKalem({
         barkod_id: barkodId.trim(),
         tasinir_kodu: tasinirKodu.trim() || null,
+        okas_kodu: okasKodu.trim() || null,
         kalem_adi: kalemAdi.trim(),
         tipi: tipi,
         birim: birim,
@@ -71,6 +76,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
     const matchesSearch =
       m.kalem_adi.toLowerCase().includes(search.toLowerCase()) ||
       (m.tasinir_kodu || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.okas_kodu || '').toLowerCase().includes(search.toLowerCase()) ||
       m.barkod_id.toLowerCase().includes(search.toLowerCase())
     
     const matchesTab = activeTab === 'Tümü' || m.tipi === activeTab
@@ -113,7 +119,15 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 variant="outline"
                 className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm"
               >
-                <FolderTree className="w-4 h-4 text-emerald-600" /> Kod Yönetimi
+                <FolderTree className="w-4 h-4 text-emerald-600" /> Taşınır Kod Yönetimi
+              </Button>
+            </Link>
+            <Link to="/okaskod">
+              <Button
+                variant="outline"
+                className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm"
+              >
+                <Tag className="w-4 h-4 text-indigo-600" /> OKAS Kod Yönetimi
               </Button>
             </Link>
             <Button
@@ -234,8 +248,13 @@ export default function MalzemelerScreen(): React.JSX.Element {
                       ID: {item.barkod_id}
                     </span>
                     {item.tasinir_kodu && (
-                      <span className="w-fit font-mono font-bold text-[10px] text-blue-606 dark:text-blue-450 bg-blue-50 dark:bg-blue-900/30 border border-blue-100/20 dark:border-blue-900/10 px-1.5 py-0.5 rounded">
-                        T.Kodu: {item.tasinir_kodu}
+                      <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
+                        T: {item.tasinir_kodu}
+                      </span>
+                    )}
+                    {item.okas_kodu && (
+                      <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
+                        OKAS: {item.okas_kodu}
                       </span>
                     )}
                   </div>
@@ -285,7 +304,6 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 onChange={(e) => {
                   const val = e.target.value
                   setTasinirKodu(val)
-                  // Seçilen koda göre malzeme adını otomatik doldur (eğer malzeme adı boşsa veya sadece otomatik dolmuşsa)
                   const found = tasinirKodList.find(k => k.tam_kod === val)
                   if (found && !kalemAdi) {
                     setKalemAdi(found.aciklama)
@@ -302,6 +320,25 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 ))}
               </datalist>
             </div>
+          </div>
+
+          {/* OKAS Kodu */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">OKAS Kodu</label>
+            <Input
+              list="okas-kodlar"
+              value={okasKodu}
+              onChange={(e) => setOkasKodu(e.target.value)}
+              placeholder="Örn: 30192700 (Listeden Seçin)"
+              className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 font-mono"
+            />
+            <datalist id="okas-kodlar">
+              {okasKodList.map(k => (
+                <option key={k.id} value={k.kod}>
+                  {k.aciklama}
+                </option>
+              ))}
+            </datalist>
           </div>
 
           <div>

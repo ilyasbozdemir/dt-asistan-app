@@ -4,6 +4,7 @@ export interface Kalem {
   id: number
   barkod_id: string
   tasinir_kodu: string | null
+  okas_kodu: string | null
   kalem_adi: string
   tipi: string
   birim: string
@@ -31,10 +32,11 @@ export function useMalzemelerHooks() {
 
   const addKalemMutation = useMutation({
     mutationFn: async (kalem: Partial<Kalem>) => {
-      const sql = `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, kalem_adi, tipi, birim, kategori, aktif_mi, notlar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      const sql = `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kategori, aktif_mi, notlar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
       const params = [
         kalem.barkod_id,
         kalem.tasinir_kodu || null,
+        kalem.okas_kodu || null,
         kalem.kalem_adi,
         kalem.tipi || 'Mal Alımı',
         kalem.birim || 'Adet',
@@ -53,10 +55,11 @@ export function useMalzemelerHooks() {
 
   const updateKalemMutation = useMutation({
     mutationFn: async (kalem: Partial<Kalem> & { id: number }) => {
-      const sql = `UPDATE TANIM_Kalem SET barkod_id = ?, tasinir_kodu = ?, kalem_adi = ?, tipi = ?, birim = ?, kategori = ?, aktif_mi = ?, notlar = ? WHERE id = ?`
+      const sql = `UPDATE TANIM_Kalem SET barkod_id = ?, tasinir_kodu = ?, okas_kodu = ?, kalem_adi = ?, tipi = ?, birim = ?, kategori = ?, aktif_mi = ?, notlar = ? WHERE id = ?`
       const params = [
         kalem.barkod_id,
         kalem.tasinir_kodu || null,
+        kalem.okas_kodu || null,
         kalem.kalem_adi,
         kalem.tipi || 'Mal Alımı',
         kalem.birim || 'Adet',

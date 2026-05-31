@@ -17,6 +17,7 @@ import ProfilScreen from './screens/profil/index.screen'
 import DosyaScreen from './screens/dosya/index.screen'
 import SablonlarScreen from './screens/sablonlar/index.screen'
 import RaporlarScreen from './screens/raporlar/index.screen'
+import OkasKodScreen from './screens/okaskod/index.screen'
 
 const rootRoute = createRootRoute({
   component: PageWrapper
@@ -73,6 +74,12 @@ const raporlarRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/raporlar',
   component: RaporlarScreen
+})
+
+const okasKodRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/okaskod',
+  component: OkasKodScreen
 })
 
 const mevzuatRoute = createRoute({
@@ -150,6 +157,7 @@ const routeTree = rootRoute.addChildren([
   takipRoute,
   belgelerRoute,
   raporlarRoute,
+  okasKodRoute,
   mevzuatRoute,
   changelogRoute,
   ayarlarRoute,

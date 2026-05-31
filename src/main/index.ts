@@ -975,6 +975,57 @@ if (!gotTheLock) {
       }
     })
 
+    ipcMain.handle('db:import-okas-excel', async () => {
+      try {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+          title: 'OKAS Kodları Excel Dosyasını Seçin',
+          filters: [{ name: 'Excel Dosyaları', extensions: ['xls', 'xlsx'] }],
+          properties: ['openFile']
+        })
+
+        if (canceled || !filePaths || filePaths.length === 0) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const workbook = xlsx.readFile(filePaths[0])
+        const sheetName = workbook.SheetNames[0]
+        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 }) as any[][]
+
+        const db = workspaceManager.getDb()
+
+        const insertStmt = db.prepare(`
+          INSERT INTO TANIM_OkasKod (kod, bolum, grup, sinif, aciklama)
+          VALUES (?, ?, ?, ?, ?)
+          ON CONFLICT(kod) DO UPDATE SET aciklama = excluded.aciklama
+        `)
+
+        let count = 0
+        const tx = db.transaction((rows: any[][]) => {
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i]
+            if (row && row.length >= 2 && row[0] && row[1]) {
+              const rawKod = String(row[0]).replace(/\D/g, '').slice(0, 8)
+              if (rawKod.length < 2) continue
+              const aciklama = String(row[1]).trim()
+              const bolum = rawKod.slice(0, 2)
+              const grup = rawKod.length >= 3 ? rawKod.slice(0, 3) : null
+              const sinif = rawKod.length >= 4 ? rawKod.slice(0, 4) : null
+              insertStmt.run(rawKod, bolum, grup, sinif, aciklama)
+              count++
+            }
+          }
+        })
+
+        tx(data)
+        workspaceManager.save()
+        broadcastDbChange()
+
+        return { success: true, count }
+      } catch (error: any) {
+        console.error('OKAS Excel Import Error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
     // Genel okuma işlemi (SELECT)
     ipcMain.handle('db:query', async (_, sql: string, params: any[] = []) => {
 
