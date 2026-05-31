@@ -231,13 +231,13 @@ if (!gotTheLock) {
     })
 
     ipcMain.handle('get-changelog', async () => {
-      const allChanges: {version: string, notes: string}[] = []
+      const allChanges: {version: string, notes: string, schema_max: number}[] = []
       for (const v of manifests) {
         if (v.changes && v.changes.length > 0) {
           const notes = v.changes.map(c => `- Schema ${c.schema}: ${c.description}`).join('\n')
-          allChanges.push({ version: v.app, notes })
+          allChanges.push({ version: v.app, notes, schema_max: v.schema_max })
         } else {
-          allChanges.push({ version: v.app, notes: 'Yapısal bir veritabanı değişikliği yok.' })
+          allChanges.push({ version: v.app, notes: 'Yapısal bir veritabanı değişikliği yok.', schema_max: v.schema_max })
         }
       }
       return allChanges.reverse()

@@ -36,7 +36,7 @@ export default function LauncherScreen(): React.ReactNode {
 
   // Changelog states
   const [showChangelogModal, setShowChangelogModal] = useState(false)
-  const [changelog, setChangelog] = useState<{version: string, notes: string}[]>([])
+  const [changelog, setChangelog] = useState<{version: string, notes: string, schema_max: number}[]>([])
 
   useEffect(() => {
     window.electron?.ipcRenderer.invoke('get-changelog').then(res => setChangelog(res)).catch(e => console.error(e))

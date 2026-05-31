@@ -38,7 +38,7 @@ export default function DosyaScreen(): React.JSX.Element {
   
   const queryClient = useQueryClient()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [changelog, setChangelog] = useState<{version: string, notes: string}[]>([])
+  const [changelog, setChangelog] = useState<{version: string, notes: string, schema_max: number}[]>([])
 
   useEffect(() => {
     if (!window.electron) return
@@ -653,8 +653,8 @@ export default function DosyaScreen(): React.JSX.Element {
         
         <div className="space-y-6 relative pl-2">
           {changelog.map((log, index) => {
-            // Aktif sürüm mantığı (aktif dosyanın hangi sürüme denk geldiğini tam bilemesek de app_version üzerinden tutabiliriz veya en yenisi diyebiliriz)
-            const isActive = log.version === (activeMeta?.app_version || '1.0.0-alpha.5')
+            // Aktif dosyanın sürüm tespiti (schema_version tabanlı kesin tespit)
+            const isActive = log.schema_max === activeMeta?.schema_version
             
             return (
               <div key={log.version} className="relative pl-6">
