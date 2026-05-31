@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import Editor, { loader } from '@monaco-editor/react'
-import * as monaco from 'monaco-editor'
+import Editor from '@monaco-editor/react'
 import * as XLSX from 'xlsx'
 import Mustache from 'mustache'
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
@@ -15,8 +14,6 @@ import {
   Database
 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-
-loader.config({ monaco })
 
 export default function SablonlarScreen(): React.JSX.Element {
   const [htmlCode, setHtmlCode] = useState(

@@ -1140,8 +1140,16 @@ if (!gotTheLock) {
           
           if (testModeRow?.value === 'true') {
             autoUpdater.forceDevUpdateConfig = true
-
-            if (devVersionRow?.value) {
+            // Basic version validation to prevent semver crash
+            const isValidVersion = (v: string) => {
+              try {
+                const semver = require('semver')
+                return semver.valid(v.replace(/^v/, '')) !== null
+              } catch {
+                return false
+              }
+            }
+            if (devVersionRow?.value && isValidVersion(devVersionRow.value)) {
               Object.defineProperty(autoUpdater, 'currentVersion', { value: devVersionRow.value })
             } else {
               // Read dev-app-update.yml to get owner and repo
@@ -1156,7 +1164,9 @@ if (!gotTheLock) {
                     releases.forEach((r, i) => console.log(`[${i}] ${r.tag_name}`))
                     if (releases.length > 0) {
                       const targetVersion = releases[releases.length - 1].tag_name.replace('v', '')
-                      Object.defineProperty(autoUpdater, 'currentVersion', { value: targetVersion })
+                      if (isValidVersion(targetVersion)) {
+                        Object.defineProperty(autoUpdater, 'currentVersion', { value: targetVersion })
+                      }
                     }
                   }
                 }
