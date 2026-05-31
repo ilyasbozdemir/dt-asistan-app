@@ -12,6 +12,7 @@ import {
   Scale,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   LogOut,
   LayoutGrid,
   Database,
@@ -25,7 +26,25 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useQueryClient } from '@tanstack/react-query'
 
-const menuGroups = [
+interface SubItem {
+  name: string
+  path: string
+  icon: React.ElementType
+}
+
+interface MenuItem {
+  name: string
+  path: string
+  icon: React.ElementType
+  children?: SubItem[]
+}
+
+interface MenuGroup {
+  title: string
+  items: MenuItem[]
+}
+
+const menuGroups: MenuGroup[] = [
   {
     title: 'Ana Menü',
     items: [{ name: 'Gösterge Paneli', path: '/', icon: Home }]
@@ -43,9 +62,15 @@ const menuGroups = [
     items: [
       { name: 'Birim Yönetimi', path: '/birimler', icon: LayoutGrid },
       { name: 'Ambar Tanımları', path: '/ambar', icon: Database },
-      { name: 'Malzeme Listesi', path: '/malzemeler', icon: PackageSearch },
-      { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
-      { name: 'OKAS Kodları', path: '/okaskod', icon: Tag },
+      {
+        name: 'Malzeme Listesi',
+        path: '/malzemeler',
+        icon: PackageSearch,
+        children: [
+          { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
+          { name: 'OKAS Kodları', path: '/okaskod', icon: Tag }
+        ]
+      },
       { name: 'Firmalar / Tedarikçiler', path: '/firmalar', icon: Building2 },
       { name: 'Personel Yönetimi', path: '/personel', icon: Users },
       { name: 'Kurum Bilgileri', path: '/kurum', icon: Building2 }
@@ -65,6 +90,7 @@ const menuGroups = [
 
 export function Sidebar(): React.JSX.Element {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler']))
   const { institutionName, institutionLogo, adminUsername, institutionCode, loadSettings } =
     useSettingsStore()
   const { closeWorkspace, fileName } = useWorkspaceStore()
@@ -90,6 +116,15 @@ export function Sidebar(): React.JSX.Element {
       .slice(0, 2)
   }
 
+  const toggleExpanded = (path: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(path)) next.delete(path)
+      else next.add(path)
+      return next
+    })
+  }
+
   return (
     <div
       className={cn(
@@ -97,14 +132,12 @@ export function Sidebar(): React.JSX.Element {
         isCollapsed ? 'w-20' : 'w-64'
       )}
       onClick={(e) => {
-        // Boş bir alana tıklandıysa (link veya buton değilse) sidebar'ı aç/kapat
         const target = e.target as HTMLElement
         if (!target.closest('a') && !target.closest('button')) {
           setIsCollapsed(!isCollapsed)
         }
       }}
     >
-      {/* Toggle Button Wrapper (No-Drag) */}
       <button
         type="button"
         className={cn(
@@ -161,7 +194,6 @@ export function Sidebar(): React.JSX.Element {
         )}
       </div>
 
-      {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
         {menuGroups.map((group, idx) => (
           <div key={idx} className="space-y-1.5">
@@ -171,27 +203,100 @@ export function Sidebar(): React.JSX.Element {
               </h3>
             )}
             <ul className="space-y-1">
-              {group.items.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    to={item.path}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer',
-                      'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
-                      'active:scale-[0.98]'
+              {group.items.map((item) => {
+                const isExpanded = expandedItems.has(item.path)
+                const hasChildren = item.children && item.children.length > 0
+
+                return (
+                  <li key={item.name}>
+                    <div className="flex items-center gap-1">
+                      <Link
+                        to={item.path}
+                        className={cn(
+                          'flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer',
+                          'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
+                          'active:scale-[0.98]'
+                        )}
+                        activeProps={{
+                          className:
+                            'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm shadow-blue-500/5 font-bold'
+                        }}
+                      >
+                        <item.icon size={18} className="shrink-0" />
+                        {!isCollapsed && (
+                          <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>
+                        )}
+                      </Link>
+
+                      {hasChildren && !isCollapsed && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleExpanded(item.path)
+                          }}
+                          className="p-1 rounded-md hover:bg-sidebar-hover-bg text-sidebar-text/50 hover:text-sidebar-hover-text transition-all"
+                          title={isExpanded ? 'Kapat' : 'Genişlet'}
+                        >
+                          <ChevronDown
+                            size={13}
+                            className={cn(
+                              'transition-transform duration-200',
+                              isExpanded ? 'rotate-0' : '-rotate-90'
+                            )}
+                          />
+                        </button>
+                      )}
+                    </div>
+
+                    {hasChildren && !isCollapsed && isExpanded && (
+                      <ul className="mt-0.5 ml-4 pl-3 border-l border-sidebar-border/40 space-y-0.5">
+                        {item.children!.map((child) => (
+                          <li key={child.name}>
+                            <Link
+                              to={child.path}
+                              className={cn(
+                                'flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border border-transparent cursor-pointer',
+                                'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
+                                'active:scale-[0.98] text-sidebar-text/80'
+                              )}
+                              activeProps={{
+                                className:
+                                  'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm font-bold'
+                              }}
+                            >
+                              <child.icon size={14} className="shrink-0 opacity-70" />
+                              <span className="whitespace-nowrap">{child.name}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                    activeProps={{
-                      className:
-                        'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm shadow-blue-500/5 font-bold'
-                    }}
-                  >
-                    <item.icon size={18} className="shrink-0" />
-                    {!isCollapsed && (
-                      <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
+
+                    {hasChildren && isCollapsed && (
+                      <ul className="mt-0.5 space-y-0.5">
+                        {item.children!.map((child) => (
+                          <li key={child.name}>
+                            <Link
+                              to={child.path}
+                              title={child.name}
+                              className={cn(
+                                'flex items-center justify-center px-3 py-1.5 rounded-lg transition-all duration-200 border border-transparent cursor-pointer',
+                                'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text'
+                              )}
+                              activeProps={{
+                                className:
+                                  'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm'
+                              }}
+                            >
+                              <child.icon size={15} className="shrink-0 opacity-70" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                  </Link>
-                </li>
-              ))}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ))}

@@ -1026,6 +1026,68 @@ if (!gotTheLock) {
       }
     })
 
+    // ─── Taşınır Kodu Şablon İndir ────────────────────────────────────────────
+    ipcMain.handle('db:export-tasinir-template', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'Taşınır Kodları Excel Şablonunu Kaydet',
+          defaultPath: 'tasinir_kodu_sablon.xlsx',
+          filters: [{ name: 'Excel Dosyası', extensions: ['xlsx'] }]
+        })
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const headers = ['Hesap Kodu', 'I. Düzey', 'II. Düzey', 'III. Düzey', 'IV. Düzey', 'V. Düzey', 'Açıklama']
+        const exampleRows = [
+          ['150', '01', '', '', '', '', 'Tüketim Malzemeleri'],
+          ['150', '01', '01', '', '', '', 'Kırtasiye Malzemeleri'],
+          ['150', '01', '01', '01', '', '', 'Kalemler ve Yazı Araçları'],
+          ['150', '01', '01', '01', '01', '', 'Roller Kalemler'],
+          ['150', '01', '01', '01', '01', '01', 'Roller Kalem (Siyah)']
+        ]
+        const ws = xlsx.utils.aoa_to_sheet([headers, ...exampleRows])
+        ws['!cols'] = headers.map(() => ({ wch: 20 }))
+        const wb = xlsx.utils.book_new()
+        xlsx.utils.book_append_sheet(wb, ws, 'Taşınır Kodları')
+        xlsx.writeFile(wb, filePath)
+
+        return { success: true, filePath }
+      } catch (error: any) {
+        return { success: false, error: error.message }
+      }
+    })
+
+    // ─── OKAS Kodu Şablon İndir ───────────────────────────────────────────────
+    ipcMain.handle('db:export-okas-template', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'OKAS Kodları Excel Şablonunu Kaydet',
+          defaultPath: 'okas_kodu_sablon.xlsx',
+          filters: [{ name: 'Excel Dosyası', extensions: ['xlsx'] }]
+        })
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const headers = ['OKAS Kodu (8 hane)', 'Açıklama']
+        const exampleRows = [
+          ['30192700', 'Yazıcılar'],
+          ['30197630', 'Zımba makineleri'],
+          ['30197000', 'Küçük büro malzemeleri'],
+          ['48820000', 'İşletim sistemleri'],
+          ['79820000', 'Baskı hizmetleri']
+        ]
+        const ws = xlsx.utils.aoa_to_sheet([headers, ...exampleRows])
+        ws['!cols'] = [{ wch: 22 }, { wch: 40 }]
+        const wb = xlsx.utils.book_new()
+        xlsx.utils.book_append_sheet(wb, ws, 'OKAS Kodları')
+        xlsx.writeFile(wb, filePath)
+
+        return { success: true, filePath }
+      } catch (error: any) {
+        return { success: false, error: error.message }
+      }
+    })
+
     // Genel okuma işlemi (SELECT)
     ipcMain.handle('db:query', async (_, sql: string, params: any[] = []) => {
 

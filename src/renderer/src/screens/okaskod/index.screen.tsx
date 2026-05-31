@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Tag, Plus, Trash2, Search, Hash, AlertCircle, ExternalLink, FileUp } from 'lucide-react'
+import { Tag, Plus, Trash2, Search, Hash, AlertCircle, ExternalLink, FileUp, Download } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
@@ -70,6 +70,21 @@ export default function OkasKodScreen(): React.JSX.Element {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [isExportingTemplate, setIsExportingTemplate] = useState(false)
+
+  const handleExportTemplate = async () => {
+    try {
+      setIsExportingTemplate(true)
+      const res = await window.electron.ipcRenderer.invoke('db:export-okas-template')
+      if (!res.success && res.error !== 'İptal edildi') {
+        alert('Şablon dışa aktarımında hata: ' + res.error)
+      }
+    } catch (error: any) {
+      alert('Hata: ' + error.message)
+    } finally {
+      setIsExportingTemplate(false)
+    }
+  }
 
   const handleImportExcel = async () => {
     try {
@@ -147,15 +162,23 @@ export default function OkasKodScreen(): React.JSX.Element {
             </div>
             <div className="flex gap-2">
               <Button
+                onClick={handleExportTemplate}
+                disabled={isExportingTemplate}
+                variant="outline"
+                className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center px-4 py-2 text-sm"
+              >
+                <Download className="w-4 h-4" /> Şablon İndir
+              </Button>
+              <Button
                 onClick={handleImportExcel}
                 disabled={isImporting}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm"
+                className="gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md flex items-center px-4 py-2 text-sm"
               >
                 <FileUp className="w-4 h-4" /> {isImporting ? 'Aktarılıyor...' : "Excel'den İçe Aktar"}
               </Button>
               <Button
                 onClick={handleOpenModal}
-                className="gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md flex items-center px-4 py-2 text-sm"
+                className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm"
               >
                 <Plus className="w-4 h-4" /> Yeni Kod Ekle
               </Button>

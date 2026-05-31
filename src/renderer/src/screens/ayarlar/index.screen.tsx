@@ -52,6 +52,7 @@ export default function AyarlarScreen(): React.ReactNode {
   // Tab 6: Geliştirici Ayarları
   const [devUpdateTestMode, setDevUpdateTestMode] = useState(false)
   const [devUpdateVersion, setDevUpdateVersion] = useState('')
+  const [githubReleases, setGithubReleases] = useState<string[]>([])
 
   useEffect(() => {
     if (settings) {
@@ -67,6 +68,20 @@ export default function AyarlarScreen(): React.ReactNode {
       }, 0)
     }
   }, [settings])
+
+  useEffect(() => {
+    if (activeTab === 'developer') {
+      fetch('https://api.github.com/repos/ilyasbozdemir/dt-desktop-app/releases')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const versions = data.map((r: any) => r.tag_name.replace(/^v/, ''))
+            setGithubReleases(versions)
+          }
+        })
+        .catch(console.error)
+    }
+  }, [activeTab])
 
   const handleSaveTab = async (tab: TabType): Promise<void> => {
     if (tab !== 'smtp' && tab !== 'developer') return
@@ -140,7 +155,7 @@ export default function AyarlarScreen(): React.ReactNode {
             onClick={() => setActiveTab('smtp')}
             className={`flex items-center gap-3 w-full text-left py-2.5 px-4 text-xs font-bold rounded-xl transition-all ${
               activeTab === 'smtp'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-primary text-primary-foreground shadow-md'
                 : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -154,7 +169,7 @@ export default function AyarlarScreen(): React.ReactNode {
             onClick={() => setActiveTab('tema')}
             className={`flex items-center gap-3 w-full text-left py-2.5 px-4 text-xs font-bold rounded-xl transition-all ${
               activeTab === 'tema'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-primary text-primary-foreground shadow-md'
                 : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -168,7 +183,7 @@ export default function AyarlarScreen(): React.ReactNode {
             onClick={() => setActiveTab('developer')}
             className={`flex items-center gap-3 w-full text-left py-2.5 px-4 text-xs font-bold rounded-xl transition-all ${
               activeTab === 'developer'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                ? 'bg-primary text-primary-foreground shadow-md'
                 : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
@@ -270,7 +285,7 @@ export default function AyarlarScreen(): React.ReactNode {
                           id="smtpSecure"
                           checked={smtpSecure}
                           onChange={(e) => setSmtpSecure(e.target.checked)}
-                          className="rounded border-slate-300 dark:border-slate-700 bg-slate-55 dark:bg-slate-950 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-slate-300 dark:border-slate-700 bg-slate-55 dark:bg-slate-950 text-primary focus:ring-primary accent-primary"
                         />
                         <label
                           htmlFor="smtpSecure"
@@ -304,7 +319,7 @@ export default function AyarlarScreen(): React.ReactNode {
                           id="devUpdateTestMode"
                           checked={devUpdateTestMode}
                           onChange={(e) => setDevUpdateTestMode(e.target.checked)}
-                          className="rounded border-slate-300 dark:border-slate-700 bg-slate-55 dark:bg-slate-950 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-slate-300 dark:border-slate-700 bg-slate-55 dark:bg-slate-950 text-primary focus:ring-primary accent-primary"
                         />
                         <label
                           htmlFor="devUpdateTestMode"
@@ -317,14 +332,20 @@ export default function AyarlarScreen(): React.ReactNode {
                       {devUpdateTestMode && (
                         <div className="md:col-span-1">
                           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                            Şu Anki Versiyonu Şöyle Göster (currentVersion mock)
+                            Şu Anki Versiyonu Şöyle Göster (GitHub Releases)
                           </label>
-                          <Input
-                            placeholder="Örn: 0.0.1 veya 1.0.0-alpha.3"
+                          <select
                             value={devUpdateVersion}
                             onChange={(e) => setDevUpdateVersion(e.target.value)}
-                            className="bg-slate-55 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
-                          />
+                            className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-55 dark:bg-slate-950 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <option value="">-- Versiyon Seçiniz --</option>
+                            {githubReleases.map((v) => (
+                              <option key={v} value={v}>
+                                {v}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       )}
                     </div>
@@ -337,7 +358,7 @@ export default function AyarlarScreen(): React.ReactNode {
                 <Button
                   onClick={() => handleSaveTab(activeTab)}
                   disabled={saving}
-                  className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2 px-5 text-sm font-semibold transition-all shadow-md shadow-blue-500/10"
+                  className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl py-2 px-5 text-sm font-semibold transition-all shadow-md shadow-primary/20"
                 >
                   <Save className="w-4 h-4" /> Sekme Ayarlarını Kaydet
                 </Button>

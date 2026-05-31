@@ -423,8 +423,8 @@ export default function RaporlarScreen() {
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900">
       {/* Header */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-        <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-          <BarChart2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+        <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+          <BarChart2 className="w-5 h-5 text-primary" />
         </div>
         <div>
           <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">Raporlar</h1>
@@ -445,18 +445,18 @@ export default function RaporlarScreen() {
                 onClick={() => { setSeciliTip(tip.id); setRaporAktif(false) }}
                 className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                   seciliTip === tip.id
-                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50'
+                    ? 'bg-primary/10 text-primary border border-primary/20'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <span className={`mt-0.5 ${seciliTip === tip.id ? 'text-purple-600 dark:text-purple-400' : 'text-slate-400'}`}>
+                <span className={`mt-0.5 ${seciliTip === tip.id ? 'text-primary' : 'text-slate-400'}`}>
                   {tip.icon}
                 </span>
                 <div>
                   <div className="text-sm font-medium leading-tight">{tip.label}</div>
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">{tip.desc}</div>
                 </div>
-                {seciliTip === tip.id && <ChevronRight className="w-4 h-4 ml-auto mt-0.5 text-purple-500" />}
+                {seciliTip === tip.id && <ChevronRight className="w-4 h-4 ml-auto mt-0.5 text-primary" />}
               </button>
             ))}
           </div>
@@ -474,7 +474,7 @@ export default function RaporlarScreen() {
               <select
                 value={seciliYil}
                 onChange={(e) => { setSeciliYil(e.target.value); setRaporAktif(false) }}
-                className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {YILLAR.map((y) => <option key={y}>{y}</option>)}
               </select>
@@ -486,7 +486,7 @@ export default function RaporlarScreen() {
                 <select
                   value={seciliAy}
                   onChange={(e) => { setSeciliAy(e.target.value); setRaporAktif(false) }}
-                  className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   {AYLAR.map((a) => <option key={a}>{a}</option>)}
                 </select>
@@ -495,7 +495,7 @@ export default function RaporlarScreen() {
 
             <button
               onClick={handleRaporla}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition-colors shadow-sm"
             >
               <BarChart2 className="w-4 h-4" /> Raporla
             </button>
