@@ -646,36 +646,46 @@ export default function DosyaScreen(): React.JSX.Element {
 
       {/* Sürüm Geçmişi (Changelog) */}
       <div className="border-t border-slate-200 dark:border-slate-800 pt-6 my-2">
-        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5 uppercase tracking-wider mb-4">
+        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-350 flex items-center gap-1.5 uppercase tracking-wider mb-6">
           <Layers className="w-4 h-4 text-purple-500" />
           Veritabanı Sürüm Geçmişi
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {changelog.map((log) => {
-            const isActive = log.version === (activeMeta?.app_version || '1.0.0-alpha.3')
+        
+        <div className="space-y-6 relative pl-2">
+          {changelog.map((log, index) => {
+            // Aktif sürüm mantığı (aktif dosyanın hangi sürüme denk geldiğini tam bilemesek de app_version üzerinden tutabiliriz veya en yenisi diyebiliriz)
+            const isActive = log.version === (activeMeta?.app_version || '1.0.0-alpha.5')
+            
             return (
-              <div key={log.version} className={`p-4 rounded-2xl border flex items-start gap-3 transition-all ${isActive ? 'bg-purple-50/50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800/60 shadow-sm' : 'bg-slate-50/30 border-slate-200 dark:bg-slate-900/30 dark:border-slate-800/60'}`}>
-                <div className="shrink-0 mt-0.5">
-                   {isActive ? <Check className="w-4 h-4 text-purple-600 dark:text-purple-400" /> : <div className="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700" />}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={`font-mono text-xs font-bold ${isActive ? 'text-purple-700 dark:text-purple-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                      {log.version}
+              <div key={log.version} className="relative pl-6">
+                <div className={`absolute left-0 top-1.5 w-2 h-2 rounded-full ring-4 ${isActive ? 'bg-purple-500 ring-purple-50 dark:ring-purple-900/20' : 'bg-slate-300 ring-slate-50 dark:bg-slate-600 dark:ring-slate-800/50'}`}></div>
+                {index !== changelog.length - 1 && (
+                  <div className="absolute left-[3px] top-4 bottom-[-24px] w-0.5 bg-slate-100 dark:bg-slate-800"></div>
+                )}
+                
+                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+                  Versiyon {log.version}
+                  {isActive && (
+                    <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                      Aktif Dosya Sürümü
                     </span>
-                    {isActive && (
-                      <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
-                        Aktif
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-450 mt-1.5 leading-relaxed">
-                    {log.notes}
-                  </p>
+                  )}
+                  {index === 0 && !isActive && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 font-bold">
+                      EN YENİ
+                    </span>
+                  )}
+                </h4>
+                
+                <div className={`text-xs leading-relaxed whitespace-pre-wrap p-4 rounded-2xl border ${isActive ? 'bg-purple-50/50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800/60 text-purple-900 dark:text-purple-100 shadow-sm' : 'bg-slate-50/30 border-slate-200 dark:bg-slate-900/30 dark:border-slate-800/60 text-slate-600 dark:text-slate-400'}`}>
+                  {log.notes}
                 </div>
               </div>
             )
           })}
+          {changelog.length === 0 && (
+            <div className="text-sm text-slate-500 italic">Sürüm geçmişi bulunamadı.</div>
+          )}
         </div>
       </div>
 
