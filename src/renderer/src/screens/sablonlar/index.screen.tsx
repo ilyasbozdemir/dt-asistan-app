@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Editor, { loader } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 import * as XLSX from 'xlsx'
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import {
   Code,
   FileText,
@@ -10,7 +10,8 @@ import {
   Download,
   Save,
   LayoutTemplate,
-  GripVertical
+  GripVertical,
+  Database
 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { cn } from '../../utils/cn'
