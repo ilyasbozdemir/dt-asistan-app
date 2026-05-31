@@ -144,7 +144,7 @@ export function Sidebar(): React.JSX.Element {
           "absolute -right-3.5 top-1/2 -translate-y-1/2 z-50",
           "flex items-center justify-center",
           "w-7 h-7 rounded-full cursor-pointer group",
-          "bg-cyan-600 hover:bg-cyan-500 text-white",
+          "bg-primary hover:bg-primary/90 text-white",
           "border-2 border-white dark:border-slate-900",
           "shadow-lg hover:shadow-xl hover:scale-110 active:scale-95",
           "transition-all duration-300 ease-out"
