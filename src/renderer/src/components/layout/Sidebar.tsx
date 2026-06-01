@@ -34,7 +34,7 @@ interface SubItem {
 
 interface MenuItem {
   name: string
-  path: string
+  path?: string
   icon: React.ElementType
   children?: SubItem[]
 }
@@ -64,11 +64,11 @@ const menuGroups: MenuGroup[] = [
       { name: 'Ambar Tanımları', path: '/ambar', icon: Database },
       {
         name: 'Malzeme Listesi',
-        path: '/malzemeler',
         icon: PackageSearch,
         children: [
           { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
-          { name: 'OKAS Kodları', path: '/okaskod', icon: Tag }
+          { name: 'OKAS Kodları', path: '/okaskod', icon: Tag },
+          { name: 'Malzeme Listesi', path: '/malzemeler', icon: PackageSearch }
         ]
       },
       { name: 'Firmalar / Tedarikçiler', path: '/firmalar', icon: Building2 },
@@ -90,7 +90,7 @@ const menuGroups: MenuGroup[] = [
 
 export function Sidebar(): React.JSX.Element {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler']))
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler', 'Malzeme Listesi']))
   const { institutionName, institutionLogo, adminUsername, institutionCode, loadSettings } =
     useSettingsStore()
   const { closeWorkspace, fileName } = useWorkspaceStore()
@@ -204,37 +204,60 @@ export function Sidebar(): React.JSX.Element {
             )}
             <ul className="space-y-1">
               {group.items.map((item) => {
-                const isExpanded = expandedItems.has(item.path)
+                const itemKey = item.path || item.name
+                const isExpanded = expandedItems.has(itemKey)
                 const hasChildren = item.children && item.children.length > 0
 
                 return (
                   <li key={item.name}>
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to={item.path}
-                        className={cn(
-                          'flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer',
-                          'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
-                          'active:scale-[0.98]'
-                        )}
-                        activeProps={{
-                          className:
-                            'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm shadow-blue-500/5 font-bold'
-                        }}
-                      >
-                        <item.icon size={18} className="shrink-0" />
-                        {!isCollapsed && (
-                          <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>
-                        )}
-                      </Link>
+                    <div
+                      className="flex items-center gap-1"
+                      onClick={() => {
+                        if (hasChildren && !item.path) {
+                          toggleExpanded(itemKey)
+                        }
+                      }}
+                    >
+                      {item.path ? (
+                        <Link
+                          to={item.path}
+                          className={cn(
+                            'flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer',
+                            'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
+                            'active:scale-[0.98]'
+                          )}
+                          activeProps={{
+                            className:
+                              'bg-sidebar-active-bg text-sidebar-active-text border-sidebar-active-border shadow-sm shadow-blue-500/5 font-bold'
+                          }}
+                        >
+                          <item.icon size={18} className="shrink-0" />
+                          {!isCollapsed && (
+                            <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>
+                          )}
+                        </Link>
+                      ) : (
+                        <div
+                          className={cn(
+                            'flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer text-sidebar-text/80',
+                            'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',
+                            'active:scale-[0.98]'
+                          )}
+                        >
+                          <item.icon size={18} className="shrink-0" />
+                          {!isCollapsed && (
+                            <span className="text-sm font-medium whitespace-nowrap flex-1">{item.name}</span>
+                          )}
+                        </div>
+                      )}
 
                       {hasChildren && !isCollapsed && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            toggleExpanded(item.path)
+                            toggleExpanded(itemKey)
                           }}
-                          className="p-1 rounded-md hover:bg-sidebar-hover-bg text-sidebar-text/50 hover:text-sidebar-hover-text transition-all"
+                          className="p-1 rounded-md hover:bg-sidebar-hover-bg text-sidebar-text/50 hover:text-sidebar-hover-text transition-all cursor-pointer"
                           title={isExpanded ? 'Kapat' : 'Genişlet'}
                         >
                           <ChevronDown
