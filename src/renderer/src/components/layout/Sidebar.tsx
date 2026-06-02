@@ -61,7 +61,9 @@ const menuGroups: MenuGroup[] = [
   {
     title: 'Kayıtlar & Tanımlar',
     items: [
+      { name: 'İstekli Firma Yönetimi', path: '/firmalar', icon: Building2 },
       { name: 'Birim Yönetimi', path: '/birimler', icon: LayoutGrid },
+      { name: 'Personel Yönetimi', path: '/personel', icon: Users },
       { name: 'Ambar Tanımları', path: '/ambar', icon: Database },
       {
         name: 'Malzeme & Kodlar',
@@ -73,8 +75,8 @@ const menuGroups: MenuGroup[] = [
           { name: 'Ölçü Birimleri', path: '/olcubirimleri', icon: Ruler }
         ]
       },
-      { name: 'Firmalar / Tedarikçiler', path: '/firmalar', icon: Building2 },
-      { name: 'Personel Yönetimi', path: '/personel', icon: Users },
+
+
       { name: 'Kurum Bilgileri', path: '/kurum', icon: Building2 }
     ]
   },
