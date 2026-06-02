@@ -74,7 +74,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
         <div className="w-full">
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
             <PackageSearch className="w-8 h-8 text-blue-605" />
-            Malzeme & Hizmet Tanımları
+            Kayıtlı Mal / Hizmet / Yapım İşleri Listesi
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-4xl">
             Yaklaşık maliyet hesaplarında ve teklif mektuplarında kullanılacak malzeme, hizmet ve yapım kalemlerini yönetin.

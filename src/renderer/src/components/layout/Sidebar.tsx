@@ -69,7 +69,7 @@ const menuGroups: MenuGroup[] = [
         name: 'Malzeme & Kodlar',
         icon: PackageSearch,
         children: [
-          { name: 'Malzeme Listesi', path: '/malzemeler', icon: PackageSearch },
+          { name: 'Mal/Hizmet/Yapım İşleri Listesi', path: '/malzemeler', icon: PackageSearch },
           { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
           { name: 'OKAS Kodları', path: '/okaskod', icon: Tag },
           { name: 'Ölçü Birimleri', path: '/olcubirimleri', icon: Ruler }
