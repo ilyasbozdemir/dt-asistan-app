@@ -200,19 +200,21 @@ export default function PersonelScreen(): React.ReactNode {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Birim / Müdürlük</label>
-              <select
-                value={formData.birim || ''}
-                onChange={(e) => setFormData({ ...formData, birim: e.target.value })}
-                className="w-full flex h-9 rounded-md border bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">-- Birim Seçin --</option>
-                {birimler.map((b) => (
-                  <option key={b.id} value={b.birim_adi}>{b.birim_adi}</option>
-                ))}
-              </select>
-            </div>
+              <div className="relative">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Birim / Müdürlük</label>
+                <Input
+                  list="birimler-list"
+                  placeholder="-- Birim Seçin veya Arayın --"
+                  value={formData.birim || ''}
+                  onChange={(e) => setFormData({ ...formData, birim: e.target.value })}
+                  className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
+                />
+                <datalist id="birimler-list">
+                  {birimler.map((b) => (
+                    <option key={b.id} value={b.birim_adi} />
+                  ))}
+                </datalist>
+              </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>

@@ -152,7 +152,7 @@ export default function OkasKodScreen(): React.JSX.Element {
             </div>
             <div>
               <h1 className="text-base font-bold text-slate-800 dark:text-slate-100">OKAS Kodu Yönetimi</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Ortak Kamu Alımları Sözlüğü kodları</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Ortak Kamu Alımları Sözlüğü Kodları</p>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
