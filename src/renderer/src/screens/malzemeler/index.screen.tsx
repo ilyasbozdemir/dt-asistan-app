@@ -1,66 +1,15 @@
 import React, { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { PackageSearch, Plus, Trash2, Edit2, FileText, Tag, Search, ListFilter, FolderTree } from 'lucide-react'
+import { PackageSearch, Plus, Trash2, Edit2, FileText, Tag, Search, ListFilter, FolderTree, Download, Upload } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { Modal } from '../../components/ui/Modal'
 import { useMalzemelerHooks } from './malzemeler.hooks'
-import { useTasinirKodHooks } from '../tasinirkod/tasinirkod.hooks'
-import { useOkasKodHooks } from '../okaskod/okaskod.hooks'
 import { cn } from '../../utils/cn'
 
 export default function MalzemelerScreen(): React.JSX.Element {
-  const { kalemList, isLoading: isKalemLoading, addKalem, deleteKalem } = useMalzemelerHooks()
-  const { tasinirKodList } = useTasinirKodHooks()
-  const { okasKodList } = useOkasKodHooks()
+  const { kalemList, isLoading: isKalemLoading, deleteKalem } = useMalzemelerHooks()
 
-  const [barkodId, setBarkodId] = useState('')
-  const [tasinirKodu, setTasinirKodu] = useState('')
-  const [okasKodu, setOkasKodu] = useState('')
-  const [kalemAdi, setKalemAdi] = useState('')
-  const [tipi, setTipi] = useState('Mal Alımı')
-  const [birim, setBirim] = useState('Adet')
-  const [kategori, setKategori] = useState('')
-  
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('Tümü') // Tümü, Mal Alımı, Hizmet Alımı, Yapım İşi
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const generateBarcode = () => {
-    // Basic 13-digit generator for ease of use
-    return Math.floor(1000000000000 + Math.random() * 9000000000000).toString()
-  }
-
-  const handleOpenModal = () => {
-    setBarkodId(generateBarcode())
-    setTasinirKodu('')
-    setOkasKodu('')
-    setKalemAdi('')
-    setTipi('Mal Alımı')
-    setBirim('Adet')
-    setKategori('')
-    setIsModalOpen(true)
-  }
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!kalemAdi.trim() || !barkodId.trim()) return
-
-    try {
-      await addKalem({
-        barkod_id: barkodId.trim(),
-        tasinir_kodu: tasinirKodu.trim() || null,
-        okas_kodu: okasKodu.trim() || null,
-        kalem_adi: kalemAdi.trim(),
-        tipi: tipi,
-        birim: birim,
-        kategori: kategori.trim() || null
-      })
-      setIsModalOpen(false)
-    } catch (error: any) {
-      alert('Kayıt eklenirken hata oluştu: ' + error.message)
-    }
-  }
+  const [activeTab, setActiveTab] = useState('Tümü') // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
 
   const handleDelete = async (id: number) => {
     if (confirm('Bu malzeme/hizmet kaydını silmek istediğinize emin misiniz?')) {
@@ -72,6 +21,31 @@ export default function MalzemelerScreen(): React.JSX.Element {
     }
   }
 
+  const handleImport = async () => {
+    try {
+      const res = await window.electron.ipcRenderer.invoke('db:import-kalem-excel')
+      if (res.success) {
+        alert(`İçe aktarma başarılı. ${res.count} kalem güncellendi/eklendi.`)
+        window.location.reload()
+      } else if (res.error !== 'İptal edildi') {
+        alert('İçe aktarma hatası: ' + res.error)
+      }
+    } catch (e: any) {
+      alert('Hata: ' + e.message)
+    }
+  }
+
+  const handleExportTemplate = async () => {
+    try {
+      const res = await window.electron.ipcRenderer.invoke('db:export-kalem-template')
+      if (res.error && res.error !== 'İptal edildi') {
+        alert('Şablon kaydetme hatası: ' + res.error)
+      }
+    } catch (e: any) {
+      alert('Hata: ' + e.message)
+    }
+  }
+
   const filteredList = kalemList.filter((m) => {
     const matchesSearch =
       m.kalem_adi.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,7 +53,9 @@ export default function MalzemelerScreen(): React.JSX.Element {
       (m.okas_kodu || '').toLowerCase().includes(search.toLowerCase()) ||
       m.barkod_id.toLowerCase().includes(search.toLowerCase())
     
-    const matchesTab = activeTab === 'Tümü' || m.tipi === activeTab
+    const matchesTab = activeTab === 'Tümü' || 
+                       m.tipi === activeTab || 
+                       (activeTab === 'Hizmet' && m.tipi?.startsWith('Hizmet'))
 
     return matchesSearch && matchesTab
   })
@@ -90,8 +66,8 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
   return (
     <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex-1 min-w-0">
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex-1 min-w-0 max-w-3xl">
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
             <PackageSearch className="w-8 h-8 text-blue-605" />
             Malzeme & Hizmet Tanımları
@@ -108,34 +84,51 @@ export default function MalzemelerScreen(): React.JSX.Element {
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 shrink-0">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full xl:w-auto xl:justify-end">
           <div className="text-right border-r border-slate-200 dark:border-slate-800 pr-6 hidden sm:block">
             <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{kalemList.length}</div>
             <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Kayıtlı Kalem</div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/tasinirkod">
-              <Button
-                variant="outline"
-                className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm"
-              >
-                <FolderTree className="w-4 h-4 text-emerald-600" /> Taşınır Kod Yönetimi
-              </Button>
-            </Link>
-            <Link to="/okaskod">
-              <Button
-                variant="outline"
-                className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm"
-              >
-                <Tag className="w-4 h-4 text-indigo-600" /> OKAS Kod Yönetimi
-              </Button>
-            </Link>
+          <div className="flex flex-wrap gap-2 flex-1 sm:flex-initial">
             <Button
-              onClick={handleOpenModal}
-              className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm"
+              variant="outline"
+              onClick={handleExportTemplate}
+              className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm flex-1 sm:flex-initial justify-center"
+              title="Örnek şablonu indir"
             >
-              <Plus className="w-4 h-4" /> Yeni Kalem Ekle
+              <Download className="w-4 h-4 text-blue-600 shrink-0" /> <span className="whitespace-nowrap">Şablon İndir</span>
             </Button>
+            <Button
+              variant="outline"
+              onClick={handleImport}
+              className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm flex-1 sm:flex-initial justify-center"
+              title="Excel'den toplu kalem yükle"
+            >
+              <Upload className="w-4 h-4 text-orange-600 shrink-0" /> <span className="whitespace-nowrap">Excel İçe Aktar</span>
+            </Button>
+            <Link to="/tasinirkod" className="flex-1 sm:flex-initial">
+              <Button
+                variant="outline"
+                className="w-full gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
+              >
+                <FolderTree className="w-4 h-4 text-emerald-600 shrink-0" /> <span className="whitespace-nowrap">Taşınır Kod Yönetimi</span>
+              </Button>
+            </Link>
+            <Link to="/okaskod" className="flex-1 sm:flex-initial">
+              <Button
+                variant="outline"
+                className="w-full gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
+              >
+                <Tag className="w-4 h-4 text-indigo-600 shrink-0" /> <span className="whitespace-nowrap">OKAS Kod Yönetimi</span>
+              </Button>
+            </Link>
+            <Link to="/malzemeler/yeni" className="flex-1 sm:flex-initial">
+              <Button
+                className="w-full gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm justify-center text-white"
+              >
+                <Plus className="w-4 h-4 shrink-0" /> <span className="whitespace-nowrap">Mal/Hizmet/Yapım İşi Ekle</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -149,7 +142,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
           <div>
             <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Mal Alımı (Malzeme)</div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter(m => m.tipi === 'Mal Alımı').length} Kalem
+              {kalemList.filter(m => m.tipi === 'Mal').length} Kalem
             </div>
           </div>
         </div>
@@ -161,7 +154,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
           <div>
             <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Hizmet Alımı</div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter(m => m.tipi === 'Hizmet Alımı').length} Kalem
+              {kalemList.filter(m => m.tipi?.startsWith('Hizmet')).length} Kalem
             </div>
           </div>
         </div>
@@ -173,7 +166,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
           <div>
             <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Yapım İşi</div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter(m => m.tipi === 'Yapım İşi').length} Kalem
+              {kalemList.filter(m => m.tipi === 'Yapım').length} Kalem
             </div>
           </div>
         </div>
@@ -183,7 +176,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
         {/* TABS & SEARCH */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg overflow-x-auto max-w-full">
-            {['Tümü', 'Mal Alımı', 'Hizmet Alımı', 'Yapım İşi'].map(tab => (
+            {['Tümü', 'Mal', 'Hizmet', 'Yapım'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -194,7 +187,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 )}
               >
-                {tab}
+                {tab === 'Mal' ? 'Mal Alımı' : tab === 'Hizmet' ? 'Hizmet Alımı' : tab === 'Yapım' ? 'Yapım İşi' : tab}
               </button>
             ))}
           </div>
@@ -277,130 +270,6 @@ export default function MalzemelerScreen(): React.JSX.Element {
           </div>
         </div>
       </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Yeni Kayıt Ekle"
-        description="Yaklaşık maliyet hesaplarında ve tekliflerde kullanılacak kalemi tanımlayın."
-      >
-        <form onSubmit={handleAdd} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">Barkod / Benzersiz ID <span className="text-red-500">*</span></label>
-              <Input
-                required
-                value={barkodId}
-                onChange={(e) => setBarkodId(e.target.value)}
-                placeholder="Örn: 8698996516233"
-                className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">Taşınır Kodu</label>
-              <Input
-                list="tasinir-kodlar"
-                value={tasinirKodu}
-                onChange={(e) => {
-                  const val = e.target.value
-                  setTasinirKodu(val)
-                  const found = tasinirKodList.find(k => k.tam_kod === val)
-                  if (found && !kalemAdi) {
-                    setKalemAdi(found.aciklama)
-                  }
-                }}
-                placeholder="Örn: 150.01.01.01 (Listeden Seçin)"
-                className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 font-mono"
-              />
-              <datalist id="tasinir-kodlar">
-                {tasinirKodList.map(k => (
-                  <option key={k.id} value={k.tam_kod}>
-                    {k.aciklama}
-                  </option>
-                ))}
-              </datalist>
-            </div>
-          </div>
-
-          {/* OKAS Kodu */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">OKAS Kodu</label>
-            <Input
-              list="okas-kodlar"
-              value={okasKodu}
-              onChange={(e) => setOkasKodu(e.target.value)}
-              placeholder="Örn: 30192700 (Listeden Seçin)"
-              className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 font-mono"
-            />
-            <datalist id="okas-kodlar">
-              {okasKodList.map(k => (
-                <option key={k.id} value={k.kod}>
-                  {k.aciklama}
-                </option>
-              ))}
-            </datalist>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">Malzeme / Hizmet / Yapım Adı <span className="text-red-500">*</span></label>
-            <Input
-              required
-              value={kalemAdi}
-              onChange={(e) => setKalemAdi(e.target.value)}
-              placeholder="Örn: A4 Fotokopi Kağıdı (80 gr/m2) Beyaz"
-              className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">Tipi</label>
-              <select
-                value={tipi}
-                onChange={(e) => setTipi(e.target.value)}
-                className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-lg py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="Mal Alımı">Mal Alımı</option>
-                <option value="Hizmet Alımı">Hizmet Alımı</option>
-                <option value="Yapım İşi">Yapım İşi</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-455 mb-1.5">Ölçü Birimi</label>
-              <select
-                value={birim}
-                onChange={(e) => setBirim(e.target.value)}
-                className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-lg py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="Adet">Adet</option>
-                <option value="Kutu">Kutu</option>
-                <option value="Torba (50kg)">Torba (50kg)</option>
-                <option value="m3">m3</option>
-                <option value="m2">m2</option>
-                <option value="kg">kg</option>
-                <option value="Litre">Litre</option>
-                <option value="Metre">Metre</option>
-                <option value="Saat">Saat</option>
-                <option value="Gün">Gün</option>
-                <option value="Ay">Ay</option>
-                <option value="Adet/Yıl">Adet/Yıl</option>
-                <option value="Paket">Paket</option>
-                <option value="Takım">Takım</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-              İptal
-            </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shadow-md">
-              Kaydet
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   )
 }

@@ -9,6 +9,11 @@ export interface Kalem {
   tipi: string
   birim: string
   kategori: string | null
+  ozelligi: string | null
+  kdv_orani: number
+  mensei: string | null
+  is_personel: number
+  personel_asgari_fark_oran: number
   aktif_mi: number
   notlar: string | null
 }
@@ -32,15 +37,20 @@ export function useMalzemelerHooks() {
 
   const addKalemMutation = useMutation({
     mutationFn: async (kalem: Partial<Kalem>) => {
-      const sql = `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kategori, aktif_mi, notlar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      const sql = `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kategori, ozelligi, kdv_orani, mensei, is_personel, personel_asgari_fark_oran, aktif_mi, notlar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       const params = [
         kalem.barkod_id,
         kalem.tasinir_kodu || null,
         kalem.okas_kodu || null,
         kalem.kalem_adi,
-        kalem.tipi || 'Mal Alımı',
+        kalem.tipi || 'Mal',
         kalem.birim || 'Adet',
         kalem.kategori || null,
+        kalem.ozelligi || null,
+        kalem.kdv_orani !== undefined ? kalem.kdv_orani : 20,
+        kalem.mensei || null,
+        kalem.is_personel ? 1 : 0,
+        kalem.personel_asgari_fark_oran || 0,
         kalem.aktif_mi !== undefined ? kalem.aktif_mi : 1,
         kalem.notlar || null
       ]
@@ -55,15 +65,20 @@ export function useMalzemelerHooks() {
 
   const updateKalemMutation = useMutation({
     mutationFn: async (kalem: Partial<Kalem> & { id: number }) => {
-      const sql = `UPDATE TANIM_Kalem SET barkod_id = ?, tasinir_kodu = ?, okas_kodu = ?, kalem_adi = ?, tipi = ?, birim = ?, kategori = ?, aktif_mi = ?, notlar = ? WHERE id = ?`
+      const sql = `UPDATE TANIM_Kalem SET barkod_id = ?, tasinir_kodu = ?, okas_kodu = ?, kalem_adi = ?, tipi = ?, birim = ?, kategori = ?, ozelligi = ?, kdv_orani = ?, mensei = ?, is_personel = ?, personel_asgari_fark_oran = ?, aktif_mi = ?, notlar = ? WHERE id = ?`
       const params = [
         kalem.barkod_id,
         kalem.tasinir_kodu || null,
         kalem.okas_kodu || null,
         kalem.kalem_adi,
-        kalem.tipi || 'Mal Alımı',
+        kalem.tipi || 'Mal',
         kalem.birim || 'Adet',
         kalem.kategori || null,
+        kalem.ozelligi || null,
+        kalem.kdv_orani !== undefined ? kalem.kdv_orani : 20,
+        kalem.mensei || null,
+        kalem.is_personel ? 1 : 0,
+        kalem.personel_asgari_fark_oran || 0,
         kalem.aktif_mi !== undefined ? kalem.aktif_mi : 1,
         kalem.notlar || null,
         kalem.id

@@ -1,0 +1,27 @@
+export const TANIM_OlcuBirimi = {
+  name: 'TANIM_OlcuBirimi',
+  description: 'Malzeme ve Hizmetler için geçerli ölçü birimleri havuzu',
+  columns: [
+    { name: 'id', type: 'INTEGER', primaryKey: true, autoIncrement: true },
+    { name: 'ad', type: 'TEXT', notNull: true, unique: true },
+    { name: 'aktif_mi', type: 'INTEGER', notNull: true, default: 1 },
+    { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
+  ],
+  initialData: [
+    { ad: 'Adet' }, { ad: 'Ampul' }, { ad: 'Ay' }, { ad: 'Bağ' }, { ad: 'Bakım' },
+    { ad: 'Balya' }, { ad: 'Bidon' }, { ad: 'Boy' }, { ad: 'Cilt' }, { ad: 'Cl' },
+    { ad: 'Cm' }, { ad: 'Çanta' }, { ad: 'Çift' }, { ad: 'Çuval' }, { ad: 'Damacana' },
+    { ad: 'Desi' }, { ad: 'Desimetrekare' }, { ad: 'Desimetreküp' }, { ad: 'Deste' },
+    { ad: 'Düzine' }, { ad: 'Galon' }, { ad: 'Gram' }, { ad: 'Gün' }, { ad: 'Hafta' },
+    { ad: 'Hektar' }, { ad: 'Inch' }, { ad: 'Kasa' }, { ad: 'Kase' }, { ad: 'Kat' },
+    { ad: 'Kavanoz' }, { ad: 'Kepçe' }, { ad: 'Kg' }, { ad: 'Kilometre' }, { ad: 'Kilovar' },
+    { ad: 'Kilowatt' }, { ad: 'Kişi' }, { ad: 'Koli' }, { ad: 'Kova' }, { ad: 'Kutu' },
+    { ad: 'Litre' }, { ad: 'm2' }, { ad: 'm3' }, { ad: 'Makara' }, { ad: 'Metre' },
+    { ad: 'Metretül' }, { ad: 'Mg' }, { ad: 'Mikap' }, { ad: 'Ml' }, { ad: 'Mm' },
+    { ad: 'Ons' }, { ad: 'Öğün' }, { ad: 'Ölçüm' }, { ad: 'Paket' }, { ad: 'Periyot' },
+    { ad: 'Plaka' }, { ad: 'Porsiyon' }, { ad: 'Poşet' }, { ad: 'Puan' }, { ad: 'Rulo' },
+    { ad: 'Saat' }, { ad: 'Sayfa' }, { ad: 'Sefer' }, { ad: 'Set' }, { ad: 'Şişe' },
+    { ad: 'Tabak' }, { ad: 'Tabaka' }, { ad: 'Takım' }, { ad: 'Teneke' }, { ad: 'Test' },
+    { ad: 'Ton' }, { ad: 'Top' }, { ad: 'Torba' }, { ad: 'Tüp' }, { ad: 'Varil' }, { ad: 'Yıl' }
+  ]
+}

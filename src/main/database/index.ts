@@ -16,6 +16,7 @@ import { TANIM_Kalem } from './tables/TANIM_Kalem'
 import { TANIM_TasinirKod } from './tables/TANIM_TasinirKod'
 import { TANIM_OkasKod } from './tables/TANIM_OkasKod'
 import { TANIM_KodSozlugu } from './tables/TANIM_KodSozlugu'
+import { TANIM_OlcuBirimi } from './tables/TANIM_OlcuBirimi'
 import { CURRENT_SCHEMA_VERSION } from './migrate'
 
 export const TablePrefixLogic = {
@@ -48,6 +49,7 @@ export const schema = {
     TANIM_TasinirKod, // Taşınır Kod Ağacı
     TANIM_OkasKod,    // OKAS Kod Listesi
     TANIM_Kalem, // Malzeme ve Hizmet Kalemleri
+    TANIM_OlcuBirimi, // Ölçü Birimleri
     TANIM_AlimTuru, // Alım Türleri
     TANIM_Sablon, // Şablonlar
     TANIM_Placeholder, // Dinamik alanlar

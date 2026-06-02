@@ -19,7 +19,8 @@ import {
   PackageSearch,
   FolderTree,
   Megaphone,
-  Tag
+  Tag,
+  Ruler
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -68,7 +69,8 @@ const menuGroups: MenuGroup[] = [
         children: [
           { name: 'Malzeme Listesi', path: '/malzemeler', icon: PackageSearch },
           { name: 'Taşınır Kodları', path: '/tasinirkod', icon: FolderTree },
-          { name: 'OKAS Kodları', path: '/okaskod', icon: Tag }
+          { name: 'OKAS Kodları', path: '/okaskod', icon: Tag },
+          { name: 'Ölçü Birimleri', path: '/olcubirimleri', icon: Ruler }
         ]
       },
       { name: 'Firmalar / Tedarikçiler', path: '/firmalar', icon: Building2 },

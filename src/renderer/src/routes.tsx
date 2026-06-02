@@ -148,6 +148,18 @@ const dosyaRoute = createRoute({
   component: DosyaScreen
 })
 
+const olcubirimleriRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/olcubirimleri',
+  component: () => import('./screens/olcubirimleri/index.screen').then(m => <m.default />)
+})
+
+const yeniMalzemeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/malzemeler/yeni',
+  component: () => import('./screens/malzemeler/yeni.screen').then(m => <m.default />)
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dosyalarRoute,
@@ -165,7 +177,9 @@ const routeTree = rootRoute.addChildren([
   birimlerRoute,
   ambarRoute,
   malzemelerRoute,
+  yeniMalzemeRoute,
   tasinirkodRoute,
+  olcubirimleriRoute,
   kurumRoute,
   profilRoute,
   dosyaRoute

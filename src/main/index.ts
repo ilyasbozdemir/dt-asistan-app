@@ -1026,6 +1026,137 @@ if (!gotTheLock) {
       }
     })
 
+    // -----------------------------------------------------------------------------------------------------
+    // MALZEME (KALEM) EXCEL IMPORT & TEMPLATE
+    // -----------------------------------------------------------------------------------------------------
+    ipcMain.handle('db:export-kalem-template', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'Malzeme (Kalem) Excel Şablonunu Kaydet',
+          defaultPath: 'malzeme_sablon.xlsx',
+          filters: [{ name: 'Excel Dosyası', extensions: ['xlsx'] }]
+        })
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const headers = [
+          'Barkod/ID', 'Taşınır Kodu', 'OKAS Kodu', 'Malzeme/Hizmet Adı', 
+          'Türü', 'Birim', 'Kategori', 'Özelliği', 'KDV Oranı (%)', 
+          'Menşei', 'Personel Hizmeti Mi?', 'Asgari Ücret Fark Oranı (%)'
+        ]
+        const exampleRows = [
+          ['MLZ-0001', '150.01.01', '30192700', 'A4 Fotokopi Kağıdı', 'Mal', 'Paket', 'Kırtasiye', '80 gr/m2 beyaz renk', 20, 'Yerli', 'Hayır', 0],
+          ['MLZ-0002', '', '', 'Özel Yazılım Geliştirme', 'Hizmet, Diğer', 'Saat', 'Bilişim', '', 20, 'Yerli', 'Hayır', 0],
+          ['MLZ-0003', '', '', 'Güvenlik Personeli', 'Hizmet, Personel', 'Kişi', 'Güvenlik', 'Silahlı güvenlik görevlisi', 20, 'Yerli', 'Evet', 15]
+        ]
+        
+        const ws = xlsx.utils.aoa_to_sheet([headers, ...exampleRows])
+        ws['!cols'] = [
+          { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }, 
+          { wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 30 }, 
+          { wch: 15 }, { wch: 10 }, { wch: 20 }, { wch: 25 }
+        ]
+        const wb = xlsx.utils.book_new()
+        xlsx.utils.book_append_sheet(wb, ws, 'Malzemeler')
+
+        // Add beni_oku sheet
+        const db = workspaceManager.getDb()
+        const birimler = db.prepare('SELECT ad FROM TANIM_OlcuBirimi WHERE aktif_mi = 1 ORDER BY ad ASC').all() as {ad: string}[]
+        const beniOkuRows = [
+          ['DİKKAT EDİLECEK HUSUSLAR'],
+          ['1. Barkod/ID boş bırakılırsa sistem otomatik rastgele ID atar.'],
+          ['2. Türü alanı şu değerlerden biri olmalıdır: Mal, Hizmet, Personel, Hizmet, Diğer, Yapım'],
+          ['3. Menşei alanı şu değerlerden biri olmalıdır: Yerli, Yabancı'],
+          ['4. Personel Hizmeti Mi? alanı: Evet veya Hayır olmalıdır.'],
+          [''],
+          ['SİSTEMDEKİ GEÇERLİ BİRİMLER (Ölçü Birimi sütununda bunlardan birini kullanın)']
+        ]
+        birimler.forEach(b => beniOkuRows.push([b.ad]))
+        
+        const wsBeniOku = xlsx.utils.aoa_to_sheet(beniOkuRows)
+        wsBeniOku['!cols'] = [{ wch: 80 }]
+        xlsx.utils.book_append_sheet(wb, wsBeniOku, 'beni_oku')
+
+        xlsx.writeFile(wb, filePath)
+
+        return { success: true }
+      } catch (error: any) {
+        console.error('Kalem Excel Template Error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('db:import-kalem-excel', async () => {
+      try {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+          title: 'Malzeme (Kalem) Excel Dosyasını Seçin',
+          filters: [{ name: 'Excel Dosyaları', extensions: ['xls', 'xlsx'] }],
+          properties: ['openFile']
+        })
+
+        if (canceled || !filePaths || filePaths.length === 0) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const workbook = xlsx.readFile(filePaths[0])
+        const sheetName = workbook.SheetNames[0]
+        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 }) as any[][]
+
+        const db = workspaceManager.getDb()
+        const crypto = require('crypto')
+
+        const insertStmt = db.prepare(`
+          INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kategori, ozelligi, kdv_orani, mensei, is_personel, personel_asgari_fark_oran)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(barkod_id) DO UPDATE SET 
+            tasinir_kodu = excluded.tasinir_kodu,
+            okas_kodu = excluded.okas_kodu,
+            kalem_adi = excluded.kalem_adi,
+            tipi = excluded.tipi,
+            birim = excluded.birim,
+            kategori = excluded.kategori,
+            ozelligi = excluded.ozelligi,
+            kdv_orani = excluded.kdv_orani,
+            mensei = excluded.mensei,
+            is_personel = excluded.is_personel,
+            personel_asgari_fark_oran = excluded.personel_asgari_fark_oran
+        `)
+
+        let count = 0
+        const tx = db.transaction((rows: any[][]) => {
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i]
+            if (row && row.length >= 4 && row[3]) {
+              const barkodId = row[0] ? String(row[0]).trim() : crypto.randomUUID()
+              const tasinirKodu = row[1] ? String(row[1]).trim() : null
+              const okasKodu = row[2] ? String(row[2]).trim() : null
+              const kalemAdi = String(row[3]).trim()
+              const tipi = row[4] ? String(row[4]).trim() : 'Mal'
+              const birim = row[5] ? String(row[5]).trim() : 'Adet'
+              const kategori = row[6] ? String(row[6]).trim() : null
+              const ozelligi = row[7] ? String(row[7]).trim() : null
+              const kdv = row[8] !== undefined ? Number(row[8]) : 20
+              const mensei = row[9] ? String(row[9]).trim() : null
+              const isPersonelStr = row[10] ? String(row[10]).trim().toLowerCase() : 'hayır'
+              const isPersonel = isPersonelStr === 'evet' || isPersonelStr === '1' || isPersonelStr === 'true' ? 1 : 0
+              const asgariOran = row[11] !== undefined ? Number(row[11]) : 0
+
+              insertStmt.run(barkodId, tasinirKodu, okasKodu, kalemAdi, tipi, birim, kategori, ozelligi, kdv, mensei, isPersonel, asgariOran)
+              count++
+            }
+          }
+        })
+
+        tx(data)
+        workspaceManager.save()
+        broadcastDbChange()
+
+        return { success: true, count }
+      } catch (error: any) {
+        console.error('Kalem Excel Import Error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
     // ─── Taşınır Kodu Şablon İndir ────────────────────────────────────────────
     ipcMain.handle('db:export-tasinir-template', async () => {
       try {
