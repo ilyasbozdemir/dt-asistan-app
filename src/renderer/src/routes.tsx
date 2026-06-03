@@ -20,6 +20,7 @@ import RaporlarScreen from './screens/raporlar/index.screen'
 import OkasKodScreen from './screens/okaskod/index.screen'
 import OlcuBirimleriScreen from './screens/olcubirimleri/index.screen'
 import YeniMalzemeScreen from './screens/malzemeler/yeni.screen'
+import YeniDosyaScreen from './screens/dosyalar/yeni.screen'
 
 const rootRoute = createRootRoute({
   component: PageWrapper
@@ -35,6 +36,12 @@ const dosyalarRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dosyalar',
   component: DosyalarScreen
+})
+
+const yeniDosyaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosyalar/yeni',
+  component: YeniDosyaScreen
 })
 
 const firmalarRoute = createRoute({
@@ -131,6 +138,26 @@ const kurumRoute = createRoute({
   component: KurumScreen
 })
 
+import {
+  FiyatArastirmaKomisyonu,
+  MuayeneKabulKomisyonu,
+  FiyatArastirmaMuayeneKomisyonu,
+  KomisyonAtamaOnayEki,
+  MalzemeListesi,
+  IhtiyacListesiTalepFormu,
+  LuzumMuzekkeresiBelgesi,
+  LuzumOnayEki,
+  LuzumTeslimTesellum,
+  IstekliFirmalar,
+  YaklasikMaliyetCetveli,
+  PiyasaArastirmaTutanağı,
+  DogrudanTeminOnayBelgesi,
+  IhaleOnayBelgesi,
+  ButceSorgusu,
+  HarcamaTalimati,
+  HarcamaPusulasi
+} from './screens/dosya/SubScreens.screen'
+
 const profilRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profil',
@@ -141,6 +168,103 @@ const dosyaRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dosya',
   component: DosyaScreen
+})
+
+// 1. Komisyon
+const fiyatArastirmaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/komisyon/fiyat-arastirma',
+  component: FiyatArastirmaKomisyonu
+})
+const muayeneKabulRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/komisyon/muayene-kabul',
+  component: MuayeneKabulKomisyonu
+})
+const fiyatMuayeneRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/komisyon/fiyat-muayene',
+  component: FiyatArastirmaMuayeneKomisyonu
+})
+const komisyonOnayEkiRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/komisyon/onay-eki',
+  component: KomisyonAtamaOnayEki
+})
+
+// 2. Malzemeler
+const malzemeListesiRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/malzemeler/liste',
+  component: MalzemeListesi
+})
+const talepFormuRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/malzemeler/talep-formu',
+  component: IhtiyacListesiTalepFormu
+})
+
+// 3. Luzum
+const luzumBelgeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/luzum/belge',
+  component: LuzumMuzekkeresiBelgesi
+})
+const luzumOnayEkiRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/luzum/onay-eki',
+  component: LuzumOnayEki
+})
+const luzumTeslimTesellumRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/luzum/teslim-tesellum',
+  component: LuzumTeslimTesellum
+})
+
+// 4. Firmalar & Maliyet
+const istekliFirmalarRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/firmalar-maliyet/istekliler',
+  component: IstekliFirmalar
+})
+const yaklasikMaliyetRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/firmalar-maliyet/yaklasik',
+  component: YaklasikMaliyetCetveli
+})
+const piyasaArastirmaTutanakRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/firmalar-maliyet/tutanak',
+  component: PiyasaArastirmaTutanağı
+})
+
+// 5. Onay
+const dtOnayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/onay/dt-onay',
+  component: DogrudanTeminOnayBelgesi
+})
+const ihaleOnayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/onay/ihale-onay',
+  component: IhaleOnayBelgesi
+})
+const butceSorguRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/onay/butce-sorgu',
+  component: ButceSorgusu
+})
+
+// 6. Harcama
+const harcamaTalimatRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/harcama/talimat',
+  component: HarcamaTalimati
+})
+const harcamaPusulaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dosya/harcama/pusula',
+  component: HarcamaPusulasi
 })
 
 const olcubirimleriRoute = createRoute({
@@ -158,6 +282,7 @@ const yeniMalzemeRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dosyalarRoute,
+  yeniDosyaRoute,
   firmalarRoute,
   personelRoute,
   sablonlarRoute,
@@ -176,7 +301,24 @@ const routeTree = rootRoute.addChildren([
   olcubirimleriRoute,
   kurumRoute,
   profilRoute,
-  dosyaRoute
+  dosyaRoute,
+  fiyatArastirmaRoute,
+  muayeneKabulRoute,
+  fiyatMuayeneRoute,
+  komisyonOnayEkiRoute,
+  malzemeListesiRoute,
+  talepFormuRoute,
+  luzumBelgeRoute,
+  luzumOnayEkiRoute,
+  luzumTeslimTesellumRoute,
+  istekliFirmalarRoute,
+  yaklasikMaliyetRoute,
+  piyasaArastirmaTutanakRoute,
+  dtOnayRoute,
+  ihaleOnayRoute,
+  butceSorguRoute,
+  harcamaTalimatRoute,
+  harcamaPusulaRoute
 ])
 
 export const router = createRouter({ routeTree })

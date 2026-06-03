@@ -20,7 +20,10 @@ import {
   FolderTree,
   Megaphone,
   Tag,
-  Ruler
+  Ruler,
+  Compass,
+  FileCheck,
+  CreditCard
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -96,7 +99,7 @@ export function Sidebar(): React.JSX.Element {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler', 'Malzeme & Kodlar']))
   const { institutionName, institutionLogo, adminUsername, institutionCode, loadSettings } =
     useSettingsStore()
-  const { closeWorkspace, fileName } = useWorkspaceStore()
+  const { closeWorkspace, fileName, activeDosyaId } = useWorkspaceStore()
   const queryClient = useQueryClient()
 
   const handleCloseWorkspace = async (): Promise<void> => {
@@ -127,6 +130,69 @@ export function Sidebar(): React.JSX.Element {
       return next
     })
   }
+
+  const activeGroup = activeDosyaId ? {
+    title: 'Aktif Dosya İşlemleri',
+    items: [
+      {
+        name: 'Komisyon Atama',
+        icon: Users,
+        children: [
+          { name: 'Fiyat Araştırma Komisyonu', path: '/dosya/komisyon/fiyat-arastirma', icon: Users },
+          { name: 'Muayene Kabul ve Tespit', path: '/dosya/komisyon/muayene-kabul', icon: Users },
+          { name: 'Fiyat Araştırma & Muayene', path: '/dosya/komisyon/fiyat-muayene', icon: Users },
+          { name: 'Komisyon Atama Onay Eki', path: '/dosya/komisyon/onay-eki', icon: Users }
+        ]
+      },
+      {
+        name: 'Malzeme / İhtiyaçlar',
+        icon: PackageSearch,
+        children: [
+          { name: 'Malzeme Listesi', path: '/dosya/malzemeler/liste', icon: PackageSearch },
+          { name: 'İhtiyaç Listesi & Talep', path: '/dosya/malzemeler/talep-formu', icon: PackageSearch }
+        ]
+      },
+      {
+        name: 'Lüzum Müzekkeresi',
+        icon: FileText,
+        children: [
+          { name: 'Lüzum Müzekkeresi Belgesi', path: '/dosya/luzum/belge', icon: FileText },
+          { name: 'Onay Eki', path: '/dosya/luzum/onay-eki', icon: FileText },
+          { name: 'Teslim Tesellüm', path: '/dosya/luzum/teslim-tesellum', icon: FileText }
+        ]
+      },
+      {
+        name: 'Firmalar & Maliyet',
+        icon: Compass,
+        children: [
+          { name: 'İstekli Firmalar', path: '/dosya/firmalar-maliyet/istekliler', icon: Compass },
+          { name: 'Yaklaşık Maliyet', path: '/dosya/firmalar-maliyet/yaklasik', icon: Compass },
+          { name: 'Piyasa Araştırma Tutanağı', path: '/dosya/firmalar-maliyet/tutanak', icon: Compass }
+        ]
+      },
+      {
+        name: 'Onay Belgesi',
+        icon: FileCheck,
+        children: [
+          { name: 'Doğrudan Temin Onay Belgesi', path: '/dosya/onay/dt-onay', icon: FileCheck },
+          { name: 'İhale Onay Belgesi', path: '/dosya/onay/ihale-onay', icon: FileCheck },
+          { name: 'Bütçe Sorgusu', path: '/dosya/onay/butce-sorgu', icon: FileCheck }
+        ]
+      },
+      {
+        name: 'Harcama',
+        icon: CreditCard,
+        children: [
+          { name: 'Harcama Talimatı', path: '/dosya/harcama/talimat', icon: CreditCard },
+          { name: 'Harcama Pusulası', path: '/dosya/harcama/pusula', icon: CreditCard }
+        ]
+      }
+    ]
+  } : null
+
+  const finalMenuGroups = activeGroup 
+    ? [...menuGroups.slice(0, 2), activeGroup, ...menuGroups.slice(2)]
+    : menuGroups
 
   return (
     <div
@@ -198,7 +264,7 @@ export function Sidebar(): React.JSX.Element {
       </div>
 
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
-        {menuGroups.map((group, idx) => (
+        {finalMenuGroups.map((group, idx) => (
           <div key={idx} className="space-y-1.5">
             {!isCollapsed && (
               <h3 className="px-3 text-[10px] font-bold text-sidebar-text/50 uppercase tracking-widest">
