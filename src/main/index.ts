@@ -1239,6 +1239,7 @@ if (!gotTheLock) {
         const stmt = db.prepare(sql)
         const info = stmt.run(...params)
         broadcastDbChange()
+        workspaceManager.save()
         return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
       } catch (error: any) {
         return { success: false, error: error.message }

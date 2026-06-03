@@ -62,6 +62,7 @@ export const DATA_TeminDosyasi = {
     { name: 'durum_asama_id', type: 'INTEGER' }, // TANIM_Asama referansı
     { name: 'mevzuat_id', type: 'INTEGER' }, // TANIM_Mevzuat kaydına referans
     { name: 'notlar', type: 'TEXT' },
+    { name: 'tekrar_no', type: 'INTEGER', default: 1 },
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],

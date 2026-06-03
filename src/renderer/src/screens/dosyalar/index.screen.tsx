@@ -178,7 +178,7 @@ export default function DosyalarScreen(): React.ReactNode {
                     </div>
 
                     <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
-                      {dosya.konu}
+                      {dosya.konu} {dosya.tekrar_no && dosya.tekrar_no > 1 ? `(${dosya.tekrar_no})` : ''}
                     </h3>
 
                     {/* Zengin Bilgi Kartı Orta Bölüm */}
@@ -255,7 +255,7 @@ export default function DosyalarScreen(): React.ReactNode {
                           {dosya.temin_no || '-'}
                         </td>
                         <td className="p-3.5 font-bold text-slate-800 dark:text-slate-200 max-w-xs truncate" title={dosya.konu}>
-                          {dosya.konu}
+                          {dosya.konu} {dosya.tekrar_no && dosya.tekrar_no > 1 ? `(${dosya.tekrar_no})` : ''}
                         </td>
                         <td className="p-3.5">
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 capitalize">
@@ -302,7 +302,7 @@ export default function DosyalarScreen(): React.ReactNode {
                         AKTİF İHALE DOSYASI
                       </span>
                       <h2 className="text-base font-bold text-slate-850 dark:text-white leading-tight line-clamp-2" title={selectedDosya.konu}>
-                        {selectedDosya.konu}
+                        {selectedDosya.konu} {selectedDosya.tekrar_no && selectedDosya.tekrar_no > 1 ? `(${selectedDosya.tekrar_no})` : ''}
                       </h2>
                     </div>
                   </div>

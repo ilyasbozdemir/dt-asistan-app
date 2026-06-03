@@ -43,8 +43,10 @@ interface DBKodSozlugu {
 export default function YeniDosyaScreen(): React.JSX.Element {
   const navigate = useNavigate()
   const routerState = useRouterState()
-  const { addDosya, updateDosya } = useDosyalarHooks()
+  const { dosyalar, addDosya, updateDosya } = useDosyalarHooks()
   const { updateTabLabel } = useTabStore()
+
+  const [showKonuSuggestions, setShowKonuSuggestions] = useState(false)
 
   // Get query params
   const searchParams = new URLSearchParams(window.location.search)
@@ -201,12 +203,26 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       return
     }
 
+    const normalizeTr = (s: string) => s.trim().toLocaleLowerCase('tr-TR')
+    const targetKonu = normalizeTr(formData.konu || '')
+    const matches = dosyalar.filter(d => normalizeTr(d.konu) === targetKonu && (!isEdit || d.id !== editId))
+    let nextTekrarNo = 1
+    if (matches.length > 0) {
+      const maxNo = Math.max(...matches.map(d => d.tekrar_no || 1))
+      nextTekrarNo = maxNo + 1
+    }
+
+    const payload = {
+      ...formData,
+      tekrar_no: nextTekrarNo
+    }
+
     try {
       if (isEdit) {
-        await updateDosya({ ...formData, id: editId! })
+        await updateDosya({ ...payload, id: editId! })
         alert('İhale dosyası başarıyla güncellendi.')
       } else {
-        await addDosya(formData)
+        await addDosya(payload)
         alert('Yeni ihale dosyası başarıyla eklendi.')
       }
       navigate({ to: '/dosyalar' })
@@ -233,6 +249,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         return 'Doğrudan temin mevzuat maddesi.'
     }
   }
+
+  // Turkish lowercase normalization helper
+  const normalizeTr = (str: string) => (str || '').trim().toLocaleLowerCase('tr-TR')
+
+  // Collect unique previous subjects
+  const uniqueKonular = Array.from(new Set(dosyalar.map(d => d.konu).filter(Boolean)))
+  const matchedSuggestions = formData.konu
+    ? uniqueKonular.filter(k => 
+        normalizeTr(k).includes(normalizeTr(formData.konu || '')) &&
+        normalizeTr(k) !== normalizeTr(formData.konu || '')
+      ).slice(0, 5)
+    : []
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -392,7 +420,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-2 relative">
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
                         İhale / Dosya Konusu (İşin Adı) *
                       </label>
@@ -400,10 +428,41 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         required
                         value={formData.konu || ''}
-                        onChange={e => setFormData({ ...formData, konu: e.target.value })}
+                        onChange={e => {
+                          setFormData({ ...formData, konu: e.target.value })
+                          setShowKonuSuggestions(true)
+                        }}
+                        onFocus={() => setShowKonuSuggestions(true)}
+                        onBlur={() => {
+                          setTimeout(() => setShowKonuSuggestions(false), 200)
+                        }}
                         placeholder="Alımın konusunu resmi dilde açıklayıcı şekilde girin (Örn: Fen İşleri Kırtasiye Malzemesi Alımı)"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
                       />
+                      {showKonuSuggestions && matchedSuggestions.length > 0 && (
+                        <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950/50 text-[10px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                            Önceki İhale Konuları
+                          </div>
+                          <ul className="max-h-48 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/50">
+                            {matchedSuggestions.map((suggestion, index) => (
+                              <li key={index}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, konu: suggestion }))
+                                    setShowKonuSuggestions(false)
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/10 text-xs text-slate-700 dark:text-slate-300 font-semibold transition-colors flex items-center gap-2 cursor-pointer border-none bg-transparent"
+                                >
+                                  <FileText className="text-slate-400 w-3.5 h-3.5" />
+                                  <span>{suggestion}</span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     <div className="md:col-span-2">

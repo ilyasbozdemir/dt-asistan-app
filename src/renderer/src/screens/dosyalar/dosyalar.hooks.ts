@@ -54,6 +54,7 @@ export interface TeminDosyasi {
   durum_asama_id: number | null
   mevzuat_id: number | null
   notlar: string | null
+  tekrar_no?: number | null
   created_at: string
   birim_adi?: string | null
 }

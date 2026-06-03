@@ -160,7 +160,7 @@ export function useActiveDosyaSummary(activeDosyaId: number | null, institutionN
     try {
       const q = `
         SELECT 
-          d.temin_no, d.konu, d.tur, d.yaklasik_maliyet, d.butce_kodu, d.ihale_sekli, d.kdv, d.teklif_sozlesme_turu,
+          d.temin_no, d.konu, d.tur, d.yaklasik_maliyet, d.butce_kodu, d.ihale_sekli, d.kdv, d.teklif_sozlesme_turu, d.tekrar_no,
           b.birim_adi,
           f.unvan as firma_unvani
         FROM DATA_TeminDosyasi d
@@ -176,11 +176,15 @@ export function useActiveDosyaSummary(activeDosyaId: number | null, institutionN
         const katilanFirmaSayisi = 0 
         const malzemeSayisi = 0
 
+        const formattedKonu = row.tekrar_no && row.tekrar_no > 1
+          ? `${row.konu || 'Konu Belirtilmedi'} (${row.tekrar_no})`
+          : (row.konu || 'Konu Belirtilmedi')
+
         setSummary({
           kurumAdi: institutionName,
           kurumTuru: institutionTypeLabel,
           dosyaNo: row.temin_no || 'No Belirtilmedi',
-          konu: row.konu || 'Konu Belirtilmedi',
+          konu: formattedKonu,
           tur: row.tur || 'mal',
           birimAdi: row.birim_adi || 'Birim Seçilmedi',
           secilenFirma: row.firma_unvani || 'Henüz Seçilmedi',
