@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { useDosyalarHooks, TeminDosyasi } from './dosyalar.hooks'
+import { useDosyalarHooks } from './dosyalar.hooks'
 import { useTabStore } from '../../store/tabStore'
-import { useRouterState, Link, useNavigate } from '@tanstack/react-router'
+import { useRouterState, useNavigate } from '@tanstack/react-router'
 import {
   Search,
   Plus,
   FileText,
   ChevronRight,
-  Filter,
   Trash2,
   Edit,
-  Building,
   Calendar,
   Grid,
   List,
-  DollarSign,
-  ExternalLink,
-  Info
+  ExternalLink
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -132,7 +128,7 @@ export default function DosyalarScreen(): React.ReactNode {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <Plus size={16} />
-            Yeni İhale Ekle
+            Yeni Temin Dosyası Ekle
           </button>
         </div>
       </div>
@@ -146,7 +142,7 @@ export default function DosyalarScreen(): React.ReactNode {
           ) : filteredDosyalar.length === 0 ? (
             <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center flex flex-col items-center justify-center">
               <FileText className="w-12 h-12 text-slate-300 dark:text-slate-700 mb-3" />
-              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">İhale Dosyası Bulunamadı</h3>
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Temin Dosyası Bulunamadı</h3>
               <p className="text-xs text-slate-500 max-w-xs mt-1">
                 Arama kriterlerinize uyan veya kayıtlı herhangi bir doğrudan temin dosyası bulunmamaktadır.
               </p>
@@ -154,7 +150,7 @@ export default function DosyalarScreen(): React.ReactNode {
                 onClick={() => navigate({ to: '/dosyalar/yeni' })}
                 className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm"
               >
-                Yeni Dosya Oluştur
+                Yeni Temin Dosyası Ekle
               </button>
             </div>
           ) : viewMode === 'card' ? (
@@ -184,6 +180,34 @@ export default function DosyalarScreen(): React.ReactNode {
                     <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
                       {dosya.konu}
                     </h3>
+
+                    {/* Zengin Bilgi Kartı Orta Bölüm */}
+                    <div className="mt-2.5 space-y-2">
+                      {dosya.birim_adi && (
+                        <div className="text-[10px] font-semibold text-blue-650 dark:text-blue-400 truncate bg-blue-50/50 dark:bg-blue-955/25 px-2 py-1 rounded-lg border border-blue-100/35 dark:border-blue-900/20 w-fit">
+                          🏢 {dosya.birim_adi}
+                        </div>
+                      )}
+
+                      {dosya.isin_aciklamasi && (
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed bg-slate-50/30 dark:bg-slate-900/30 p-1.5 rounded-lg border border-slate-100/50 dark:border-slate-850/40">
+                          {dosya.isin_aciklamasi}
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {dosya.ihale_sekli && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-650 dark:text-purple-400 text-[9px] font-bold border border-purple-100/20">
+                            Madde: {dosya.ihale_sekli}
+                          </span>
+                        )}
+                        {dosya.butce_kodu && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[9px] font-mono font-medium border border-slate-200/20" title={dosya.butce_kodu}>
+                            ABS: {dosya.butce_kodu.split('-').pop()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">

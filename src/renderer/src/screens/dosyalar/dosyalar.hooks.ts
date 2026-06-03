@@ -55,12 +55,13 @@ export interface TeminDosyasi {
   mevzuat_id: number | null
   notlar: string | null
   created_at: string
+  birim_adi?: string | null
 }
 
 const fetchDosyalar = async (): Promise<TeminDosyasi[]> => {
   const res = await window.electron.ipcRenderer.invoke(
     'db:query',
-    'SELECT * FROM DATA_TeminDosyasi ORDER BY created_at DESC'
+    'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id ORDER BY d.created_at DESC'
   )
   if (!res.success) throw new Error(res.error)
   return res.data

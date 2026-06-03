@@ -62,13 +62,13 @@ const sablonlarRoute = createRoute({
   component: SablonlarScreen
 })
 
-// Placeholder routes
+import { TakipScreen } from './screens/system/TakipScreen'
+
+// Dynamic routes
 const takipRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/takip',
-  component: () => (
-    <div className="p-4 text-slate-500">Takip & Durum ekranı yapım aşamasında...</div>
-  )
+  component: TakipScreen
 })
 
 

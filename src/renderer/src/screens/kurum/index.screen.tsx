@@ -6,6 +6,7 @@ import { Building2, Save, Upload, MapPin, ImageIcon, Info, X, ExternalLink } fro
 import { Link } from '@tanstack/react-router'
 import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
+import { useSettingsStore } from '../../store/settingsStore'
 
 type TabType = 'idari' | 'iletisim'
 

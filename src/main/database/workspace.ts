@@ -4,7 +4,7 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { initializeDatabase } from './index'
+import { initializeDatabase, schema } from './index'
 import { runMigrations, CURRENT_SCHEMA_VERSION, getPendingMigrations } from './migrate'
 import tasinirKodlariSeed from './seed/tasinir_kodlari.json'
 
@@ -45,6 +45,32 @@ function normalizeMeta(raw: any): WorkspaceMeta {
     updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString(),
     integrity_hash: raw.integrity_hash,
     warnings: []
+  }
+}
+
+function ensureSchemaIntegrity(db: Database.Database): void {
+  for (const table of schema.tables as any[]) {
+    try {
+      const tableInfo = db.prepare(`PRAGMA table_info(${table.name})`).all() as any[]
+      if (tableInfo.length === 0) {
+        continue
+      }
+      const existingColumns = new Set(tableInfo.map((c) => c.name))
+      for (const col of table.columns as any[]) {
+        if (!existingColumns.has(col.name)) {
+          let sqlDef = '"' + col.name + '" ' + col.type
+          if (col.unique) sqlDef += ' UNIQUE'
+          if (col.notNull) sqlDef += ' NOT NULL'
+          if (col.default !== undefined) {
+            sqlDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+          }
+          console.log(`[Schema Self-Healing] Adding missing column ${table.name}.${col.name}`)
+          db.exec(`ALTER TABLE ${table.name} ADD COLUMN ${sqlDef};`)
+        }
+      }
+    } catch (err: any) {
+      console.error(`Error self-healing table ${table.name}:`, err.message)
+    }
   }
 }
 
@@ -116,6 +142,7 @@ export class DtmWorkspace {
         this.db = new Database(dbPath)
 
         runMigrations(this.db, fromVersion)
+        ensureSchemaIntegrity(this.db)
         
         meta.schema_version = CURRENT_SCHEMA_VERSION
         meta.app_version = app.getVersion()
@@ -153,6 +180,10 @@ export class DtmWorkspace {
     } else {
       const dbPath = path.join(this.tempDir, 'database.sqlite')
       this.db = new Database(dbPath)
+    }
+
+    if (this.db) {
+      ensureSchemaIntegrity(this.db)
     }
 
     // Cross Validation

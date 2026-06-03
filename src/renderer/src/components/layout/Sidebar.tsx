@@ -6,7 +6,6 @@ import {
   FileText,
   Users,
   Building2,
-  BookOpen,
   ClipboardList,
   BarChart3,
   Scale,
@@ -28,7 +27,8 @@ import {
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
+import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
 
 interface SubItem {
   name: string
@@ -131,63 +131,148 @@ export function Sidebar(): React.JSX.Element {
     })
   }
 
+  // Get active file and its type
+  const { dosyalar } = useDosyalarHooks()
+  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
+  
+  // Fetch Alım Türü configs from DB
+  interface DbAlimTuru {
+    id: string
+    ad: string
+    ikon: string
+    belgeler: (string | { ad: string; sablonId?: string })[]
+    sablonId: string
+  }
+
+  const { data: dbAlimTurleri = [] } = useQuery<DbAlimTuru[]>({
+    queryKey: ['alim_turleri_list'],
+    queryFn: async () => {
+      const res = await window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM TANIM_AlimTuru WHERE aktif_mi = 1')
+      if (!res.success) return []
+      return res.data.map((d: { id: number; tur_adi: string; ikon: string; belgeler: string; sablon_id: string }) => {
+        let parsedBelgeler = []
+        try {
+          parsedBelgeler = typeof d.belgeler === 'string' ? JSON.parse(d.belgeler) : (d.belgeler || [])
+        } catch(e) {
+          console.error(e)
+        }
+        return {
+          id: d.id.toString(),
+          ad: d.tur_adi,
+          ikon: d.ikon,
+          belgeler: parsedBelgeler,
+          sablonId: d.sablon_id || ''
+        }
+      })
+    }
+  })
+
+  const activeAlimTuru = activeDosya
+    ? dbAlimTurleri.find((t) => {
+        const fileTur = activeDosya.tur?.toLowerCase()
+        const dbTur = t.ad?.toLowerCase() || ''
+        if (fileTur === 'mal' && dbTur.includes('mal')) return true
+        if (fileTur === 'hizmet' && dbTur.includes('hizmet')) return true
+        if (fileTur === 'yapim_isi' && (dbTur.includes('yapım') || dbTur.includes('yapim'))) return true
+        if (fileTur === 'danismanlik' && (dbTur.includes('danışmanlık') || dbTur.includes('danismanlik'))) return true
+        return dbTur === fileTur
+      })
+    : null
+
+  // Map sidebar item paths to required document keywords
+  const documentPathMapping: Record<string, string[]> = {
+    '/dosya/komisyon/fiyat-arastirma': ['Piyasa Fiyat Araştırması Tutanağı'],
+    '/dosya/komisyon/muayene-kabul': ['Muayene ve Kabul Komisyonu Tutanağı', 'Hizmet İşleri Kabul Tutanağı', 'Yapım İşleri Kabul Tutanağı'],
+    '/dosya/komisyon/fiyat-muayene': ['Piyasa Fiyat Araştırması Tutanağı', 'Muayene ve Kabul Komisyonu Tutanağı'],
+    '/dosya/komisyon/onay-eki': ['Onay Belgesi'],
+    '/dosya/malzemeler/talep-formu': ['Onay Belgesi'],
+    '/dosya/luzum/belge': ['Onay Belgesi'],
+    '/dosya/luzum/onay-eki': ['Onay Belgesi'],
+    '/dosya/luzum/teslim-tesellum': ['Muayene ve Kabul Komisyonu Tutanağı', 'Hizmet İşleri Kabul Tutanağı', 'Yapım İşleri Kabul Tutanağı'],
+    '/dosya/firmalar-maliyet/istekliler': ['Piyasa Fiyat Araştırması Tutanağı'],
+    '/dosya/firmalar-maliyet/yaklasik': ['Yaklaşık Maliyet Hesap Cetveli', 'Piyasa Fiyat Araştırması Tutanağı'],
+    '/dosya/firmalar-maliyet/tutanak': ['Piyasa Fiyat Araştırması Tutanağı'],
+    '/dosya/onay/dt-onay': ['Onay Belgesi'],
+    '/dosya/onay/ihale-onay': ['Onay Belgesi'],
+    '/dosya/onay/butce-sorgu': ['Onay Belgesi'],
+    '/dosya/harcama/talimat': ['Onay Belgesi', 'Fatura / e-Arşiv Fatura'],
+    '/dosya/harcama/pusula': ['Fatura / e-Arşiv Fatura']
+  }
+
+  // Fetch stages dynamically from db
+  const { data: dbAsamalar = [] } = useQuery<any[]>({
+    queryKey: ['sidebar_asamalar'],
+    queryFn: async () => {
+      const res = await window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM TANIM_Asama WHERE aktif_mi = 1 ORDER BY asama_sira ASC')
+      if (!res.success) return []
+      return res.data
+    }
+  })
+
+  const subPagesMapping = [
+    { name: 'Malzeme Listesi', path: '/dosya/malzemeler/liste', icon: PackageSearch, stage: 1 },
+    { name: 'İhtiyaç Listesi & Talep', path: '/dosya/malzemeler/talep-formu', icon: PackageSearch, stage: 1 },
+    { name: 'Lüzum Müzekkeresi Belgesi', path: '/dosya/luzum/belge', icon: FileText, stage: 1 },
+    { name: 'Onay Eki', path: '/dosya/luzum/onay-eki', icon: FileText, stage: 1 },
+    { name: 'Bütçe Sorgusu', path: '/dosya/onay/butce-sorgu', icon: FileCheck, stage: 1 },
+
+    { name: 'Fiyat Araştırma Komisyonu', path: '/dosya/komisyon/fiyat-arastirma', icon: Users, stage: 2 },
+    { name: 'Fiyat Araştırma & Muayene', path: '/dosya/komisyon/fiyat-muayene', icon: Users, stage: 2 },
+    { name: 'İstekli Firmalar', path: '/dosya/firmalar-maliyet/istekliler', icon: Compass, stage: 2 },
+    { name: 'Yaklaşık Maliyet', path: '/dosya/firmalar-maliyet/yaklasik', icon: Compass, stage: 2 },
+    { name: 'Piyasa Araştırma Tutanağı', path: '/dosya/firmalar-maliyet/tutanak', icon: Compass, stage: 2 },
+
+    { name: 'Komisyon Atama Onay Eki', path: '/dosya/komisyon/onay-eki', icon: Users, stage: 3 },
+    { name: 'Doğrudan Temin Onay Belgesi', path: '/dosya/onay/dt-onay', icon: FileCheck, stage: 3 },
+    { name: 'İhale Onay Belgesi', path: '/dosya/onay/ihale-onay', icon: FileCheck, stage: 3 },
+
+    { name: 'Muayene Kabul ve Tespit', path: '/dosya/komisyon/muayene-kabul', icon: Users, stage: 4 },
+    { name: 'Teslim Tesellüm', path: '/dosya/luzum/teslim-tesellum', icon: FileText, stage: 4 },
+    { name: 'Harcama Talimatı', path: '/dosya/harcama/talimat', icon: CreditCard, stage: 4 },
+    { name: 'Harcama Pusulası', path: '/dosya/harcama/pusula', icon: CreditCard, stage: 4 }
+  ]
+
+  const stagesToUse = dbAsamalar.length > 0 ? dbAsamalar : [
+    { asama_sira: 1, asama_adi: 'İhtiyaç Tespiti & Başlangıç' },
+    { asama_sira: 2, asama_adi: 'Piyasa Fiyat Araştırması' },
+    { asama_sira: 3, asama_adi: 'Sipariş & Sözleşme' },
+    { asama_sira: 4, asama_adi: 'Kabul & Ödeme İşlemleri' }
+  ]
+
+  const dynamicActiveItems: MenuItem[] = stagesToUse.map((asama) => {
+    // Filter subpages that correspond to this stage index
+    const stagePages = subPagesMapping.filter((p) => p.stage === asama.asama_sira)
+    
+    // Filter based on activeAlimTuru's documents requirement (dynamic document list)
+    const filteredChildren = stagePages.filter((child) => {
+      if (!activeAlimTuru) return true
+      const reqDocs = documentPathMapping[child.path]
+      if (!reqDocs) return true
+      return reqDocs.some((docName) => 
+        activeAlimTuru.belgeler.some((b) => {
+          const documentName = typeof b === 'string' ? b : (b?.ad || '')
+          return documentName.toLowerCase().includes(docName.toLowerCase()) || docName.toLowerCase().includes(documentName.toLowerCase())
+        })
+      )
+    })
+
+    // Assign appropriate Lucide icon based on stage sequence
+    let IconComponent = FolderTree
+    if (asama.asama_sira === 1) IconComponent = FolderTree
+    else if (asama.asama_sira === 2) IconComponent = PackageSearch
+    else if (asama.asama_sira === 3) IconComponent = FileCheck
+    else if (asama.asama_sira === 4) IconComponent = CreditCard
+
+    return {
+      name: `${asama.asama_sira}. ${asama.asama_adi}`,
+      icon: IconComponent,
+      children: filteredChildren
+    }
+  }).filter((group) => group.children && group.children.length > 0)
+
   const activeGroup = activeDosyaId ? {
     title: 'Aktif Dosya İşlemleri',
-    items: [
-      {
-        name: 'Komisyon Atama',
-        icon: Users,
-        children: [
-          { name: 'Fiyat Araştırma Komisyonu', path: '/dosya/komisyon/fiyat-arastirma', icon: Users },
-          { name: 'Muayene Kabul ve Tespit', path: '/dosya/komisyon/muayene-kabul', icon: Users },
-          { name: 'Fiyat Araştırma & Muayene', path: '/dosya/komisyon/fiyat-muayene', icon: Users },
-          { name: 'Komisyon Atama Onay Eki', path: '/dosya/komisyon/onay-eki', icon: Users }
-        ]
-      },
-      {
-        name: 'Malzeme / İhtiyaçlar',
-        icon: PackageSearch,
-        children: [
-          { name: 'Malzeme Listesi', path: '/dosya/malzemeler/liste', icon: PackageSearch },
-          { name: 'İhtiyaç Listesi & Talep', path: '/dosya/malzemeler/talep-formu', icon: PackageSearch }
-        ]
-      },
-      {
-        name: 'Lüzum Müzekkeresi',
-        icon: FileText,
-        children: [
-          { name: 'Lüzum Müzekkeresi Belgesi', path: '/dosya/luzum/belge', icon: FileText },
-          { name: 'Onay Eki', path: '/dosya/luzum/onay-eki', icon: FileText },
-          { name: 'Teslim Tesellüm', path: '/dosya/luzum/teslim-tesellum', icon: FileText }
-        ]
-      },
-      {
-        name: 'Firmalar & Maliyet',
-        icon: Compass,
-        children: [
-          { name: 'İstekli Firmalar', path: '/dosya/firmalar-maliyet/istekliler', icon: Compass },
-          { name: 'Yaklaşık Maliyet', path: '/dosya/firmalar-maliyet/yaklasik', icon: Compass },
-          { name: 'Piyasa Araştırma Tutanağı', path: '/dosya/firmalar-maliyet/tutanak', icon: Compass }
-        ]
-      },
-      {
-        name: 'Onay Belgesi',
-        icon: FileCheck,
-        children: [
-          { name: 'Doğrudan Temin Onay Belgesi', path: '/dosya/onay/dt-onay', icon: FileCheck },
-          { name: 'İhale Onay Belgesi', path: '/dosya/onay/ihale-onay', icon: FileCheck },
-          { name: 'Bütçe Sorgusu', path: '/dosya/onay/butce-sorgu', icon: FileCheck }
-        ]
-      },
-      {
-        name: 'Harcama',
-        icon: CreditCard,
-        children: [
-          { name: 'Harcama Talimatı', path: '/dosya/harcama/talimat', icon: CreditCard },
-          { name: 'Harcama Pusulası', path: '/dosya/harcama/pusula', icon: CreditCard }
-        ]
-      }
-    ]
+    items: dynamicActiveItems
   } : null
 
   const finalMenuGroups = activeGroup 
@@ -200,12 +285,6 @@ export function Sidebar(): React.JSX.Element {
         'h-screen bg-sidebar-bg text-sidebar-text flex flex-col shadow-xl shrink-0 transition-all duration-300 relative z-50 border-r border-sidebar-border',
         isCollapsed ? 'w-20' : 'w-64'
       )}
-      onClick={(e) => {
-        const target = e.target as HTMLElement
-        if (!target.closest('a') && !target.closest('button')) {
-          setIsCollapsed(!isCollapsed)
-        }
-      }}
     >
       <button
         type="button"

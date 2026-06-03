@@ -5,6 +5,7 @@ import {
   TrendingUp,
   Clock,
   ChevronRight,
+  ChevronDown,
   Plus,
   Calendar,
   Landmark,
@@ -22,27 +23,18 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Button } from '../../components/ui/Button'
 import { useDashboardStats, useActiveDosyaSummary } from './dashboard.hooks'
-// Types for Mock Data
-interface ActiveProcurement {
-  id: string
-  dosyaNo: string
-  baslik: string
-  birim: string
-  tur: 'Mal' | 'Hizmet' | 'Yapım'
-  butceKodu: string
-  yaklasikMaliyet: number
-  olusturmaTarihi: string
-  asama: 1 | 2 | 3 | 4 | 5 // 1: Hazırlık, 2: P.F.A. (Piyasa Fiyat Araştırması), 3: Teklif Toplama, 4: Karar/Onay, 5: Fatura/Ödeme
-}
+import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 
 export default function DashboardScreen(): React.JSX.Element {
   const { institutionName, limitType, institutionType } = useSettingsStore()
   const { activeDosyaId } = useWorkspaceStore()
   const { stats, isLoading } = useDashboardStats()
+  const { dosyalar } = useDosyalarHooks()
   
   // Dynamic Greeting based on time
   const [greeting, setGreeting] = useState('İyi Günler')
   const [currentDate, setCurrentDate] = useState('')
+  const [isActivePopoverOpen, setIsActivePopoverOpen] = useState(false)
 
   useEffect(() => {
     const hours = new Date().getHours()
@@ -75,86 +67,51 @@ export default function DashboardScreen(): React.JSX.Element {
 
   const { summary: activeSummary, isLoading: isActiveSummaryLoading } = useActiveDosyaSummary(activeDosyaId, institutionName, kurumTuruLabel)
 
-  // Mock Data for Active Procurements
-  const [activeFiles] = useState<ActiveProcurement[]>([
-    {
-      id: 'dosya-1',
-      dosyaNo: 'DT-2026/012',
-      baslik: 'Park Bahçeler Müdürlüğü Bank ve Çöp Kovası Alımı',
-      birim: 'Park ve Bahçeler Müdürlüğü',
-      tur: 'Mal',
-      butceKodu: '06.1.1.01',
-      yaklasikMaliyet: 485000,
-      olusturmaTarihi: '2026-05-18',
-      asama: 3
-    },
-    {
-      id: 'dosya-2',
-      dosyaNo: 'DT-2026/015',
-      baslik: 'Belediye Hizmet Binası Klima Bakım ve Onarım Hizmeti',
-      birim: 'Destek Hizmetleri Müdürlüğü',
-      tur: 'Hizmet',
-      butceKodu: '03.2.1.02',
-      yaklasikMaliyet: 185000,
-      olusturmaTarihi: '2026-05-22',
-      asama: 2
-    },
-    {
-      id: 'dosya-3',
-      dosyaNo: 'DT-2026/016',
-      baslik: 'Fen İşleri Şantiyesi İstinat Duvarı Yapım İşi',
-      birim: 'Fen İşleri Müdürlüğü',
-      tur: 'Yapım',
-      butceKodu: '06.5.7.08',
-      yaklasikMaliyet: 890000,
-      olusturmaTarihi: '2026-05-25',
-      asama: 1
-    },
-    {
-      id: 'dosya-4',
-      dosyaNo: 'DT-2026/009',
-      baslik: 'Kültür İşleri Broşür ve Afiş Basım Hizmet Alımı',
-      birim: 'Kültür ve Sosyal İşler Müdürlüğü',
-      tur: 'Hizmet',
-      butceKodu: '03.5.1.01',
-      yaklasikMaliyet: 120000,
-      olusturmaTarihi: '2026-05-10',
-      asama: 4
-    },
-    {
-      id: 'dosya-5',
-      dosyaNo: 'DT-2026/006',
-      baslik: 'Bilgi İşlem Merkezi Server Yedek Parça Alımı',
-      birim: 'Bilgi İşlem Müdürlüğü',
-      tur: 'Mal',
-      butceKodu: '06.1.2.02',
-      yaklasikMaliyet: 320000,
-      olusturmaTarihi: '2026-05-02',
-      asama: 5
-    }
-  ])
+  // Use real database files for listing (last 5 files)
+  const activeFiles = dosyalar.slice(0, 5)
 
-  // Limit States (Turkish Municipalities 10% Budget Limit Rule)
-  // Total direct procurement cannot exceed 10% of the institution's total budget.
-  const totalBudgetLimit = 15000000 // 15 Milyon TL
-  const totalBudgetSpent = 9642000  // 9.6 Milyon TL
-  const spentPercent = (totalBudgetSpent / totalBudgetLimit) * 100
+  // Active dossier consumption ratio against single KİK limit
+  const activeDossierLimit = limitType === 'buyuksehir' ? 1021827 : 340391
+  const activeDossierSpent = activeSummary?.yaklasikMaliyet || 0
+  const activeSpentPercent = Math.min(100, (activeDossierSpent / activeDossierLimit) * 100)
 
-  // Category breakdown for charts
+  // Category breakdown for charts (from database stats)
   const categoryData = {
-    Mal: 4338900,
-    Hizmet: 3374700,
-    Yapım: 1928400
+    Mal: stats.malYaklasikMaliyet || 0,
+    Hizmet: stats.hizmetYaklasikMaliyet || 0,
+    Yapım: stats.yapimYaklasikMaliyet || 0
   }
 
-  // Monthly trends (fake data)
-  const monthlyData = [
-    { ay: 'Ocak', tutar: 1100000 },
-    { ay: 'Şubat', tutar: 1800000 },
-    { ay: 'Mart', tutar: 2200000 },
-    { ay: 'Nisan', tutar: 2500000 },
-    { ay: 'Mayıs', tutar: 2042000 }
+  const totalCat = categoryData.Mal + categoryData.Hizmet + categoryData.Yapım || 1
+  const malPct = Math.round((categoryData.Mal / totalCat) * 100)
+  const hizmetPct = Math.round((categoryData.Hizmet / totalCat) * 100)
+  const yapimPct = Math.max(0, 100 - malPct - hizmetPct)
+
+  // Monthly trends from database
+  const monthlyData = stats.aylikHarcamalar && stats.aylikHarcamalar.length > 0 ? stats.aylikHarcamalar : [
+    { ay: 'Ocak', tutar: 0 },
+    { ay: 'Şubat', tutar: 0 },
+    { ay: 'Mart', tutar: 0 },
+    { ay: 'Nisan', tutar: 0 },
+    { ay: 'Mayıs', tutar: 0 }
   ]
+
+  // Dynamic SVG Chart Coordinates calculation
+  const maxVal = Math.max(...monthlyData.map(d => d.tutar), 10000)
+  const chartPoints = monthlyData.map((d, index) => {
+    const x = 50 + (index * 600) / (monthlyData.length - 1)
+    const y = 170 - (d.tutar / maxVal) * 120
+    return { x, y, tutar: d.tutar }
+  })
+
+  const pathD = chartPoints.reduce((acc, p, index) => {
+    if (index === 0) return `M ${p.x} ${p.y}`
+    return `${acc} L ${p.x} ${p.y}`
+  }, '')
+
+  const areaD = chartPoints.length > 0
+    ? `${pathD} L ${chartPoints[chartPoints.length - 1].x} 190 L ${chartPoints[0].x} 190 Z`
+    : ''
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('tr-TR', {
@@ -229,7 +186,67 @@ export default function DashboardScreen(): React.JSX.Element {
           </p>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 relative">
+          {activeSummary && (
+            <div className="relative">
+              <Button 
+                onClick={() => setIsActivePopoverOpen(!isActivePopoverOpen)}
+                variant="outline"
+                className="text-xs font-bold py-2 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-450 flex items-center gap-1.5"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Aktif Dosya
+                <ChevronDown className={`w-3.5 h-3.5 transform transition-transform ${isActivePopoverOpen ? 'rotate-180' : ''}`} />
+              </Button>
+              {isActivePopoverOpen && (
+                <div className="absolute right-0 mt-2 w-80 md:w-96 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100 dark:border-slate-850">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">Çalışılan Aktif Dosya</h4>
+                      <p className="text-[9px] text-slate-400">Şu anda üzerinde işlem yapılan doğrudan temin dosyası</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2.5">
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase block">No & Konu</span>
+                        <span className="font-mono text-blue-650 dark:text-blue-450 font-bold block">{activeSummary.dosyaNo}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-350 truncate block mt-0.5" title={activeSummary.konu}>{activeSummary.konu}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase block">Maliyet & KDV</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-100 block">{formatCurrency(activeSummary.yaklasikMaliyet)}</span>
+                        <span className="text-slate-450 block mt-0.5">KDV: %{activeSummary.kdv}</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase block">Birim & Tür</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-305 block truncate">{activeSummary.birimAdi}</span>
+                        <span className="text-slate-450 capitalize block mt-0.5">{activeSummary.tur} Alımı</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase block">Yüklenici Firma</span>
+                        <span className="font-semibold text-emerald-650 dark:text-emerald-450 block truncate" title={activeSummary.secilenFirma}>{activeSummary.secilenFirma}</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100/50 dark:border-indigo-900/30">
+                        <span className="font-bold text-indigo-600">Firmalar:</span>
+                        <span className="font-bold text-indigo-700 dark:text-indigo-400">{activeSummary.katilanFirmaSayisi} Firma</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/30 dark:bg-amber-950/10 border border-amber-100/50 dark:border-amber-900/30">
+                        <span className="font-bold text-amber-600">Kalemler:</span>
+                        <span className="font-bold text-amber-700 dark:text-amber-400">{activeSummary.malzemeSayisi} Kalem</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <Link to="/dosyalar">
             <Button className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-4 shadow-md shadow-blue-500/10 flex items-center gap-2">
               <Plus className="w-4 h-4" />
@@ -246,158 +263,89 @@ export default function DashboardScreen(): React.JSX.Element {
 
       {/* 2. KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Active Files */}
+        {/* Card 1: Total Dossiers (Genel) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-blue-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-450 flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5" />
             </div>
-            <span className="flex items-center text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-500/10">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" />
-              +3 bu hafta
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-2.5 py-0.5 rounded-full border border-blue-500/10">
+              Genel Metrik
             </span>
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Aktif Temin Dosyaları</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Toplam Temin Dosyası (Genel)</div>
             <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
-              {activeFiles.length} <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Dosya</span>
+              {isLoading ? '-' : stats.ihaleDosyaSayisi} <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Dosya</span>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Combined Estimated Volume */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-blue-500/30 transition-all duration-300">
+        {/* Card 2: Total Estimated Volume (Genel) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-emerald-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
-            <span className="flex items-center text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-500/10">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" />
-              +12% aylık
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-0.5 rounded-full border border-emerald-500/10">
+              Genel Toplam
             </span>
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Toplam Yaklaşık Maliyet</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Toplam Yaklaşık Maliyet (Genel)</div>
             <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {formatCurrency(2340000)}
+              {isLoading ? '-' : formatCurrency(stats.toplamYaklasikMaliyet)}
             </div>
           </div>
         </div>
 
-        {/* Card 3: Budget Consumption Gauge */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-blue-500/30 transition-all duration-300">
+        {/* Card 3: Active Dossier Cost (Aktif) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-indigo-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-450 flex items-center justify-center shrink-0">
               <Landmark className="w-5 h-5" />
             </div>
-            <span className="flex items-center text-[10px] font-bold text-amber-600 dark:text-amber-450 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full border border-amber-500/10">
-              Dosya Limiti: {limitType === 'buyuksehir' ? '1.021.827 ₺' : '340.391 ₺'}
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2.5 py-0.5 rounded-full border border-indigo-500/10">
+              Aktif Dosya
             </span>
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Doğrudan Temin Tüketim Oranı</div>
-            <div className="flex items-center justify-between mt-1.5">
-              <span className="text-2xl font-extrabold text-slate-850 dark:text-slate-100">
-                %{spentPercent.toFixed(1)}
-              </span>
-              <span className="text-[10px] font-medium text-slate-400">
-                {formatCurrency(totalBudgetSpent)} / 15M TL
-              </span>
-            </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mt-1.5">
-              <div 
-                className="bg-indigo-600 h-full rounded-full transition-all duration-500" 
-                style={{ width: `${spentPercent}%` }}
-              />
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Aktif Dosya Maliyeti</div>
+            <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 truncate">
+              {isActiveSummaryLoading ? 'Yükleniyor...' : activeSummary ? formatCurrency(activeSummary.yaklasikMaliyet) : 'Dosya Seçilmedi'}
             </div>
           </div>
         </div>
 
-        {/* Card 4: Average Duration */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-blue-500/30 transition-all duration-300">
+        {/* Card 4: Active Dossier KİK Limit Consumption (Aktif) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-amber-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-450 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5" />
             </div>
-            <span className="flex items-center text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-500/10">
-              <ArrowDownRight className="w-3 h-3 mr-0.5 text-emerald-600" />
-              -1.4 gün
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-0.5 rounded-full border border-amber-500/10">
+              Yasal Limit Etkisi
             </span>
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Ortalama Temin Süresi</div>
-            <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
-              8.4 <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Gün</span>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Aktif Dosya Limit Tüketim Oranı</div>
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-2xl font-extrabold text-slate-850 dark:text-slate-100">
+                {activeSummary ? `%${activeSpentPercent.toFixed(1)}` : '-%'}
+              </span>
+              <span className="text-[9px] font-semibold text-slate-400">
+                Limit: {formatCurrency(activeDossierLimit)}
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mt-1.5">
+              <div 
+                className="bg-indigo-650 h-full rounded-full transition-all duration-500" 
+                style={{ width: `${activeSummary ? activeSpentPercent : 0}%` }}
+              />
             </div>
           </div>
         </div>
       </div>
-
-      {/* ACTIVE FILE SUMMARY WIDGET */}
-      {activeDosyaId && (
-        <div className="bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-900/50 rounded-3xl p-6 shadow-sm mb-6 relative overflow-hidden">
-          {/* Background Decoration */}
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              <FileText className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Çalışılan Aktif İhale Dosyası</h3>
-              <p className="text-[10px] text-slate-500">Şu anda üzerinde işlem yaptığınız dosyanın özet bilgileri</p>
-            </div>
-          </div>
-
-          {isActiveSummaryLoading ? (
-            <div className="h-24 flex items-center justify-center text-xs font-semibold text-slate-500 animate-pulse">Yükleniyor...</div>
-          ) : activeSummary ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 items-stretch">
-              
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-800/50">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Kurum Adı</span>
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 line-clamp-2">{activeSummary.kurumAdi}</span>
-              </div>
-              
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-800/50">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Kurum Türü</span>
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{activeSummary.kurumTuru}</span>
-              </div>
-
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-800/50">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">Dosya Adı & No</span>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-mono text-blue-600 dark:text-blue-450">{activeSummary.dosyaNo}</span>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 line-clamp-1" title={activeSummary.konu}>{activeSummary.konu}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-800/50">
-                <span className="text-[9px] font-bold text-slate-400 uppercase">İhale & Alım Türü</span>
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 capitalize">{activeSummary.tur} Alımı</span>
-              </div>
-
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/30">
-                <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500 uppercase">Seçilen Firma</span>
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 line-clamp-2">{activeSummary.secilenFirma}</span>
-              </div>
-
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-100/50 dark:border-indigo-900/30">
-                <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-500 uppercase">Katılan Firmalar</span>
-                <span className="text-lg font-extrabold text-indigo-700 dark:text-indigo-400">{activeSummary.katilanFirmaSayisi} <span className="text-[10px] font-semibold text-indigo-500 dark:text-indigo-600">Firma</span></span>
-              </div>
-
-              <div className="flex flex-col gap-1 p-3 rounded-xl bg-amber-50/30 dark:bg-amber-950/10 border border-amber-100/50 dark:border-amber-900/30">
-                <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase">Malzeme Sayısı</span>
-                <span className="text-lg font-extrabold text-amber-700 dark:text-amber-400">{activeSummary.malzemeSayisi} <span className="text-[10px] font-semibold text-amber-500 dark:text-amber-600">Kalem</span></span>
-              </div>
-
-            </div>
-          ) : (
-             <div className="h-16 flex items-center justify-center text-xs font-semibold text-slate-500">Aktif dosya bilgisi bulunamadı.</div>
-          )}
-        </div>
-      )}
 
       {/* NEW STATS & DUYURULAR GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -580,7 +528,7 @@ export default function DashboardScreen(): React.JSX.Element {
               <p className="text-[11px] text-slate-450 mt-0.5">Yıl genelinde doğrudan temin kalemlerine yapılan harcamalar</p>
             </div>
             <span className="text-xs font-mono font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-xl text-slate-700 dark:text-slate-350">
-              2026 (Toplam: {formatCurrency(totalBudgetSpent)})
+              2026 (Toplam: {formatCurrency(stats.toplamYaklasikMaliyet)})
             </span>
           </div>
 
@@ -599,32 +547,33 @@ export default function DashboardScreen(): React.JSX.Element {
                   <stop offset="100%" stopColor="currentColor" stopOpacity="0.00" />
                 </linearGradient>
               </defs>
-              <path
-                d="M 50 170 Q 170 140 200 130 T 350 110 T 500 90 T 655 110 L 655 190 L 50 190 Z"
-                fill="url(#spendGrad)"
-              />
+              {areaD && (
+                <path
+                  d={areaD}
+                  fill="url(#spendGrad)"
+                />
+              )}
 
               {/* Smooth Spline Path */}
-              <path
-                d="M 50 170 Q 170 140 200 130 T 350 110 T 500 90 T 655 110"
-                stroke="currentColor"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
+              {pathD && (
+                <path
+                  d={pathD}
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
 
               {/* Chart Points */}
-              <circle cx="50" cy="170" r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-              <circle cx="200" cy="130" r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-              <circle cx="350" cy="110" r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-              <circle cx="500" cy="90" r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-              <circle cx="655" cy="110" r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-
-              {/* Tooltip Indicators */}
-              <text x="50" y="150" fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">1.1M</text>
-              <text x="200" y="110" fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">1.8M</text>
-              <text x="350" y="90" fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">2.2M</text>
-              <text x="500" y="70" fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">2.5M</text>
-              <text x="655" y="90" fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">2.0M</text>
+              {chartPoints.map((p, index) => (
+                <g key={index}>
+                  <circle cx={p.x} cy={p.y} r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
+                  <text x={p.x} y={p.y - 12} fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">
+                    {p.tutar > 0 ? `${(p.tutar / 1000).toFixed(0)}K` : '0'}
+                  </text>
+                </g>
+              ))}
             </svg>
 
             {/* X Axis Labels */}
@@ -648,7 +597,7 @@ export default function DashboardScreen(): React.JSX.Element {
             <svg width="150" height="150" viewBox="0 0 42 42" className="transform -rotate-90">
               <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="currentColor" strokeOpacity="0.05" strokeWidth="4" />
               
-              {/* Mal Alımı (%45) */}
+              {/* Mal Alımı */}
               <circle 
                 cx="21" 
                 cy="21" 
@@ -656,10 +605,10 @@ export default function DashboardScreen(): React.JSX.Element {
                 fill="transparent" 
                 stroke="#3b82f6" 
                 strokeWidth="4" 
-                strokeDasharray="45 55" 
+                strokeDasharray={`${malPct} ${100 - malPct}`} 
                 strokeDashoffset="0" 
               />
-              {/* Hizmet Alımı (%35) */}
+              {/* Hizmet Alımı */}
               <circle 
                 cx="21" 
                 cy="21" 
@@ -667,10 +616,10 @@ export default function DashboardScreen(): React.JSX.Element {
                 fill="transparent" 
                 stroke="#10b981" 
                 strokeWidth="4" 
-                strokeDasharray="35 65" 
-                strokeDashoffset="-45" 
+                strokeDasharray={`${hizmetPct} ${100 - hizmetPct}`} 
+                strokeDashoffset={`-${malPct}`} 
               />
-              {/* Yapım İşleri (%20) */}
+              {/* Yapım İşleri */}
               <circle 
                 cx="21" 
                 cy="21" 
@@ -678,13 +627,13 @@ export default function DashboardScreen(): React.JSX.Element {
                 fill="transparent" 
                 stroke="#f59e0b" 
                 strokeWidth="4" 
-                strokeDasharray="20 80" 
-                strokeDashoffset="-80" 
+                strokeDasharray={`${yapimPct} ${100 - yapimPct}`} 
+                strokeDashoffset={`-${malPct + hizmetPct}`} 
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">
-                %100
+              <span className="text-xl font-extrabold text-slate-800 dark:text-slate-100">
+                %{totalCat > 1 ? 100 : 0}
               </span>
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dağılım</span>
             </div>
@@ -698,7 +647,7 @@ export default function DashboardScreen(): React.JSX.Element {
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Mal Alımı</span>
               </div>
               <span className="text-xs font-mono font-bold text-slate-850 dark:text-slate-105">
-                {formatCurrency(categoryData.Mal)} (%45)
+                {formatCurrency(categoryData.Mal)} (%{malPct})
               </span>
             </div>
 
@@ -708,7 +657,7 @@ export default function DashboardScreen(): React.JSX.Element {
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Hizmet Alımı</span>
               </div>
               <span className="text-xs font-mono font-bold text-slate-850 dark:text-slate-105">
-                {formatCurrency(categoryData.Hizmet)} (%35)
+                {formatCurrency(categoryData.Hizmet)} (%{hizmetPct})
               </span>
             </div>
 
@@ -718,7 +667,7 @@ export default function DashboardScreen(): React.JSX.Element {
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-350">Yapım İşi</span>
               </div>
               <span className="text-xs font-mono font-bold text-slate-850 dark:text-slate-105">
-                {formatCurrency(categoryData.Yapım)} (%20)
+                {formatCurrency(categoryData.Yapım)} (%{yapimPct})
               </span>
             </div>
           </div>
@@ -753,16 +702,16 @@ export default function DashboardScreen(): React.JSX.Element {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {activeFiles.map((file) => {
-                const asamaInfo = getAsamaDetails(file.asama)
+                const asamaInfo = getAsamaDetails(file.durum_asama_id || 1)
                 return (
                   <tr key={file.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
                     <td className="py-3.5 px-4 max-w-xs">
                       <div className="flex flex-col gap-1">
                         <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-blue-450 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded w-max border border-blue-500/10">
-                          {file.dosyaNo}
+                          {file.temin_no}
                         </span>
                         <span className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                          {file.baslik}
+                          {file.konu}
                         </span>
                       </div>
                     </td>
@@ -770,7 +719,7 @@ export default function DashboardScreen(): React.JSX.Element {
                     <td className="py-3.5 px-4">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">
-                          {file.birim}
+                          {file.birim_adi || 'Birim Belirtilmedi'}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                           Süreç Türü: {file.tur} Alımı
@@ -780,7 +729,7 @@ export default function DashboardScreen(): React.JSX.Element {
 
                     <td className="py-3.5 px-4 text-right">
                       <span className="font-mono font-bold text-xs text-slate-800 dark:text-slate-100">
-                        {formatCurrency(file.yaklasikMaliyet)}
+                        {formatCurrency(file.yaklasik_maliyet)}
                       </span>
                     </td>
 
@@ -795,9 +744,9 @@ export default function DashboardScreen(): React.JSX.Element {
                             <div 
                               key={step} 
                               className={`h-1.5 rounded-full transition-all duration-300 ${
-                                step < file.asama 
+                                step < (file.durum_asama_id || 1) 
                                   ? 'bg-emerald-500 w-4' 
-                                  : step === file.asama 
+                                  : step === (file.durum_asama_id || 1) 
                                     ? 'bg-blue-500 w-6 animate-pulse' 
                                     : 'bg-slate-200 dark:bg-slate-850 w-2.5'
                               }`} 

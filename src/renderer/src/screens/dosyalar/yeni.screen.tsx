@@ -56,7 +56,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   useEffect(() => {
     document.title = isEdit ? 'İhale Dosyası Düzenle - DT' : 'Yeni İhale Dosyası Ekle - DT'
     const currentHref = routerState.location.href
-    updateTabLabel(currentHref, isEdit ? 'Dosya Düzenle' : 'Yeni Dosya Ekle')
+    updateTabLabel(currentHref, isEdit ? 'DT Dosyasını Düzenle' : 'Yeni DT Dosyası Ekle')
   }, [isEdit, routerState.location.href, updateTabLabel])
 
   // DB Collections state
@@ -256,6 +256,57 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           </div>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  temin_no: '2026/DT-084',
+                  dosya_acilis_tarihi: '2026-06-03',
+                  butce_yili: 2026,
+                  butce_tipi: 'Genel Bütçe',
+                  konu: 'Park Bahçeler Müdürlüğü Elektrik Kablosu ve Aydınlatma Armatürü Alımı',
+                  isin_aciklamasi: 'X Belediyesi Park Bahçeler Müdürlüğü tarafından yeşil alanlar ve çocuk oyun parklarının aydınlatılmasında kullanılmak üzere elektrik kablosu ve aydınlatma armatürü alımı işi.',
+                  birim_id: birimler[0]?.id || null,
+                  antet_ek_satir: 'Fen İşleri Dairesi Başkanlığı',
+                  sunulacak_makam: 'BAŞKANLIK MAKAMINA',
+                  ihtiyac_yeri: 'X Belediyesi Merkez Şantiyesi',
+                  kurumsal_kod: '30.11.01.22',
+                  fonksiyonel_kod: '01.3.9.00',
+                  muhasebe_birimi: '30.06.01',
+                  harcama_birimi: '30.11.01',
+                  finansman_kodu: '5',
+                  ekonomik_kod: '03.2.1.01',
+                  butce_kodu: '46.30.11.23-01.3.9.00-5-03.2.1.01',
+                  talep_tarihi: '2026-06-03',
+                  talep_sayisi: 'E-2026-456',
+                  ihale_tipi: 'Doğrudan Temin',
+                  tur: 'mal',
+                  ihale_sekli: '22/d*',
+                  teklif_sozlesme_turu: 'Birim Fiyat',
+                  alt_yuklenici_olacak_mi: 0,
+                  kismi_teklif_verilecek_mi: 0,
+                  fiyat_farki_dayanagi: '',
+                  yatirim_proje_no: '',
+                  avans_verilecek_mi: 0,
+                  yaklasik_maliyet_hesaplamasi: 'Piyasa Fiyat Araştırması',
+                  kdv: '20',
+                  hesaplama_esasi: '',
+                  komisyon_takdiri: 'GÜNEY YURT BELEDİYE BAŞKANLIĞI ONAYI',
+                  tibbi_cihaz_alimi_mi: 0,
+                  irtibat_yetkilisi_id: personeller[0]?.id || null,
+                  onay_personel_id: personeller.find(p => p.harcama_yetkilisi_mi === 1)?.id || personeller[1]?.id || null,
+                  hazirlayan_personel_id: personeller[0]?.id || null,
+                  son_teklif_verme_tarihi: '2026-06-10T14:00',
+                  teslim_tarihi: '2026-06-30',
+                  yaklasik_maliyet: 145005
+                })
+              }}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-605 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            >
+              Test Verisi Doldur
+            </button>
+          )}
           <Link
             to="/dosyalar"
             className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
@@ -494,19 +545,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Dosya Notları / Genel Açıklamalar
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={formData.notlar || ''}
-                        onChange={e => setFormData({ ...formData, notlar: e.target.value })}
-                        placeholder="Yalnızca yöneticilerin göreceği özel notlar..."
-                        className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white resize-none"
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -676,6 +714,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       <select
                         value={formData.tur || 'mal'}
                         onChange={e => setFormData({ ...formData, tur: e.target.value })}
+                        title="Alım / İhale Türü"
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
                         <option value="mal">Mal Alımı</option>
@@ -1096,7 +1135,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </button>
               )}
 
-              {activeTab !== 'sorumlular' ? (
+              {activeTab !== 'sorumlular' && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1108,14 +1147,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 >
                   Sonraki Adım
                   <ChevronRight size={14} />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer"
-                >
-                  <Save size={16} />
-                  {isEdit ? 'Değişiklikleri Kaydet' : 'İhale Dosyasını Kaydet'}
                 </button>
               )}
             </div>
