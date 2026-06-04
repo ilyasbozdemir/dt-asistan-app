@@ -6,7 +6,6 @@ import {
   Home,
   FileText,
   ClipboardList,
-  BookOpen,
   LayoutGrid,
   Database,
   PackageSearch,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
@@ -9,8 +9,6 @@ import {
   Plus,
   Calendar,
   Landmark,
-  ArrowUpRight,
-  ArrowDownRight,
   Users,
   Building,
   Briefcase,
@@ -32,25 +30,22 @@ export default function DashboardScreen(): React.JSX.Element {
   const { dosyalar } = useDosyalarHooks()
   
   // Dynamic Greeting based on time
-  const [greeting, setGreeting] = useState('İyi Günler')
-  const [currentDate, setCurrentDate] = useState('')
-  const [isActivePopoverOpen, setIsActivePopoverOpen] = useState(false)
-
-  useEffect(() => {
+  const greeting = (() => {
     const hours = new Date().getHours()
-    if (hours >= 6 && hours < 12) setGreeting('Günaydın')
-    else if (hours >= 12 && hours < 18) setGreeting('İyi Günler')
-    else if (hours >= 18 && hours < 23) setGreeting('İyi Akşamlar')
-    else setGreeting('İyi Geceler')
+    if (hours >= 6 && hours < 12) return 'Günaydın'
+    if (hours >= 12 && hours < 18) return 'İyi Günler'
+    if (hours >= 18 && hours < 23) return 'İyi Akşamlar'
+    return 'İyi Geceler'
+  })()
 
-    const formatter = new Intl.DateTimeFormat('tr-TR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-    setCurrentDate(formatter.format(new Date()))
-  }, [])
+  const currentDate = new Intl.DateTimeFormat('tr-TR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(new Date())
+
+  const [isActivePopoverOpen, setIsActivePopoverOpen] = useState(false)
 
   // Kurum Türü Mapping
   const getInstitutionTypeLabel = (type: string) => {
