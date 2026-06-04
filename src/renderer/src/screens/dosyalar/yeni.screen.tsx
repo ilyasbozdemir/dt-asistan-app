@@ -502,7 +502,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Kurum İçi Temin Numarası
+                        Doğrudan Temin Numarası
                       </label>
                       <input
                         type="text"

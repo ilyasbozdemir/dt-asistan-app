@@ -58,9 +58,9 @@ function ensureSchemaIntegrity(db: Database.Database): void {
       const existingColumns = new Set(tableInfo.map((c) => c.name))
       for (const col of table.columns as any[]) {
         if (!existingColumns.has(col.name)) {
+          // SQLite ALTER TABLE ADD COLUMN does NOT support UNIQUE or NOT NULL constraints.
+          // These are only valid at CREATE TABLE time. We skip them here to avoid errors.
           let sqlDef = '"' + col.name + '" ' + col.type
-          if (col.unique) sqlDef += ' UNIQUE'
-          if (col.notNull) sqlDef += ' NOT NULL'
           if (col.default !== undefined) {
             sqlDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
           }
