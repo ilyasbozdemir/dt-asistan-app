@@ -8,7 +8,7 @@ declare global {
       }
     }
     api: {
-      aiGenerate: (options: { prompt: string; systemInstruction?: string }) => Promise<{ success: boolean; data?: string; error?: string }>
+      aiGenerate: (options: { prompt: string; systemInstruction?: string; enableDatabaseAccess?: boolean }) => Promise<{ success: boolean; data?: string; error?: string }>
       aiTest: (provider: string, apiKey: string) => Promise<{ success: boolean; data?: string; error?: string }>
     }
   }

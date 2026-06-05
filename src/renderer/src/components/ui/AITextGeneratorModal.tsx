@@ -80,11 +80,14 @@ export function AITextGeneratorModal({
         finalPrompt += `\n\nÖNEMLİ: Yanıtını SADECE geçerli bir JSON formatında dön. Başka hiçbir açıklama, markdown veya text ekleme. Sadece süslü parantezlerle başlayan ham JSON dön.\nBeklenen Format (örnek):\n${expectedJsonFormat || '{ "sonuc": "..." }'}`
       }
 
-      const res = await window.api.aiGenerate({ prompt: finalPrompt })
+      const res = await window.api.aiGenerate({ 
+        prompt: finalPrompt,
+        enableDatabaseAccess: isAdvisorMode 
+      })
+
       if (res.success && res.data) {
         let cleanData = res.data.trim()
         if (mode === 'json') {
-          // Clean possible markdown json wraps
           cleanData = cleanData
             .replace(/^```json\s*/, '')
             .replace(/^```\s*/, '')

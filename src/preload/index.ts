@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  aiGenerate: (options: { prompt: string; systemInstruction?: string }) => ipcRenderer.invoke('ai:generate', options),
+  aiGenerate: (options: { prompt: string; systemInstruction?: string; enableDatabaseAccess?: boolean }) => ipcRenderer.invoke('ai:generate', options),
   aiTest: (provider: string, apiKey: string) => ipcRenderer.invoke('ai:test', provider, apiKey)
 }
 
