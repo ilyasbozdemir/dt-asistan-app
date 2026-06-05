@@ -265,12 +265,12 @@ export function AITextGeneratorModal({
 
           {/* AI Result Area */}
           {(result || loading) && (
-            <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-4 animate-in fade-in duration-300">
+            <div className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-4 animate-in fade-in duration-300">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {isAdvisorMode ? 'Yapay Zeka Yanıtı' : `Üretilen ${mode === 'json' ? 'JSON Verisi' : 'Metin'} (Düzenleyebilirsiniz)`}
+                  {isAdvisorMode ? 'Sohbet & Tavsiye Sonucu' : `Üretilen ${mode === 'json' ? 'JSON Verisi' : 'Metin'} (Düzenleyebilirsiniz)`}
                 </label>
-                {result && (
+                {result && !isAdvisorMode && (
                   <button
                     type="button"
                     onClick={handleGenerate}
@@ -281,18 +281,72 @@ export function AITextGeneratorModal({
                 )}
               </div>
 
-              {loading ? (
-                <div className="w-full h-40 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
-                  <div className="w-8 h-8 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-                  <span className="text-xs text-slate-450 italic">AI metin yazıyor...</span>
+              {isAdvisorMode ? (
+                <div className="space-y-3 flex flex-col mt-2">
+                  {/* User Balloon */}
+                  <div className="flex gap-2.5 flex-row-reverse animate-in fade-in zoom-in-95">
+                    <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-none">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 dark:text-slate-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-tr-sm">
+                      {prompt.split('\n').map((line, li) => <p key={li}>{line || <br />}</p>)}
+                    </div>
+                  </div>
+
+                  {/* AI Balloon */}
+                  <div className="flex gap-2.5 flex-row animate-in fade-in zoom-in-95 delay-100">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center flex-none">
+                      <Sparkles className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div className="max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-sm shadow-sm">
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
+                          <span className="text-slate-500 italic">Asistan değerlendiriyor...</span>
+                        </div>
+                      ) : (
+                        <div 
+                          className="space-y-1.5 [&>p]:mb-2 last:[&>p]:mb-0 [&_strong]:font-extrabold [&_strong]:text-slate-900 dark:[&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1"
+                          dangerouslySetInnerHTML={{
+                            __html: result
+                              // Header
+                              .replace(/### (.*?)\n/g, '<h3 class="text-sm font-bold mt-3 mb-1 text-purple-600 dark:text-purple-400">$1</h3>')
+                              .replace(/## (.*?)\n/g, '<h2 class="text-base font-extrabold mt-4 mb-2 text-slate-900 dark:text-white">$1</h2>')
+                              // Bold
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              // Italic
+                              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                              // Lists
+                              .replace(/^- (.*)/gm, '<li>$1</li>')
+                              // New lines (only if not wrapped in tags to avoid <br> between list items, simple logic: just newline)
+                              // First wrap consecutive list items in <ul>
+                              .replace(/(<li>.*<\/li>\n?)+/g, match => `<ul class="my-2">${match}</ul>`)
+                              // Then convert remaining \n to <br/>
+                              .replace(/\n/g, '<br/>')
+                              .replace(/<br\/><\/ul>/g, '</ul>')
+                              .replace(/<br\/><li/g, '<li')
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <textarea
-                  rows={mode === 'json' ? 10 : 6}
-                  value={result}
-                  onChange={(e) => setResult(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal font-semibold resize-y font-mono"
-                />
+                <>
+                  {loading ? (
+                    <div className="w-full h-40 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+                      <span className="text-xs text-slate-450 italic">AI metin yazıyor...</span>
+                    </div>
+                  ) : (
+                    <textarea
+                      rows={mode === 'json' ? 10 : 6}
+                      value={result}
+                      onChange={(e) => setResult(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal font-semibold resize-y font-mono"
+                    />
+                  )}
+                </>
               )}
 
               {result && !loading && !isAdvisorMode && (
