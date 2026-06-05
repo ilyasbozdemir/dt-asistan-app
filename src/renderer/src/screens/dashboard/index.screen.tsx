@@ -14,19 +14,36 @@ import {
   Briefcase,
   Megaphone,
   Database,
-  Info
+  Info,
+  ShieldAlert,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Button } from '../../components/ui/Button'
-import { useDashboardStats, useActiveDosyaSummary } from './dashboard.hooks'
+import { useDashboardStats, useActiveDosyaSummary, useAnnouncements } from './dashboard.hooks'
 import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 
 export default function DashboardScreen(): React.JSX.Element {
-  const { institutionName, limitType, institutionType } = useSettingsStore()
+  const {
+    institutionName,
+    limitType,
+    institutionType,
+    kurumsalKod,
+    fonksiyonelKod,
+    muhasebeBirimKodu,
+    muhasebeBirimAdi,
+    harcamaBirimKodu,
+    harcamaBirimAdi,
+    adminName,
+    adminTitle,
+    institutionCode
+  } = useSettingsStore()
   const { activeDosyaId } = useWorkspaceStore()
   const { stats, isLoading } = useDashboardStats()
+  const { announcements, isLoading: isAnnouncementsLoading } = useAnnouncements()
   const { dosyalar } = useDosyalarHooks()
   
   // Dynamic Greeting based on time
@@ -341,8 +358,7 @@ export default function DashboardScreen(): React.JSX.Element {
           </div>
         </div>
       </div>
-
-      {/* NEW STATS & DUYURULAR GRID */}
+                 {/* NEW STATS & RIGHT PANEL GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* STATS CARDS */}
         <div className="lg:col-span-8">
@@ -357,157 +373,315 @@ export default function DashboardScreen(): React.JSX.Element {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {/* İhale Dosya Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-450 flex items-center justify-center shrink-0">
-                <FileText className="w-5 h-5" />
+            {/* İhale Dosya Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-450 flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Dosya Sayısı</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.ihaleDosyaSayisi}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-[8px] bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded text-blue-650 dark:text-blue-400 font-bold">Mal: {stats.malDosyaSayisi}</span>
+                  <span className="text-[8px] bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded text-emerald-600 dark:text-emerald-450 font-bold">Hizmet: {stats.hizmetDosyaSayisi}</span>
+                  <span className="text-[8px] bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded text-amber-600 dark:text-amber-450 font-bold">Yapım: {stats.yapimDosyaSayisi}</span>
+                  {stats.danismanlikDosyaSayisi > 0 && (
+                    <span className="text-[8px] bg-purple-50 dark:bg-purple-950 px-1.5 py-0.5 rounded text-purple-600 dark:text-purple-400 font-bold">Danış: {stats.danismanlikDosyaSayisi}</span>
+                  )}
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Dosya Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.ihaleDosyaSayisi}
-              </div>
-            </div>
-          </div>
 
-          {/* İhalelere Seçilen Firma Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-emerald-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
-                <Building className="w-5 h-5" />
+            {/* İhale Süreç Dağılımı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-cyan-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Aktif & Tamamlanan</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.ihaleDosyaSayisi}
+                </div>
+                <div className="text-[9px] text-slate-500 dark:text-slate-450 mt-2 flex flex-col gap-0.5 font-semibold">
+                  <div className="flex justify-between">
+                    <span>Aktif Süreç:</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">{stats.aktifDosyaSayisi}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tamamlanan:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.tamamlananDosyaSayisi}</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Seçilen Firma Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.ihalelereSecilenFirmaSayisi}
-              </div>
-            </div>
-          </div>
 
-          {/* İhalelere Katılan Firma Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-indigo-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-450 flex items-center justify-center shrink-0">
-                <Briefcase className="w-5 h-5" />
+            {/* İhalelere Katılan Firma Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-indigo-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-450 flex items-center justify-center shrink-0">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Katılan Firma Sayısı</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.ihalelereKatilanFirmaSayisi}
+                </div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-2">
+                  Dosyalarda teklif veren veya davet edilen tekil firmalar.
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Katılan Firma Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.ihalelereKatilanFirmaSayisi}
-              </div>
-            </div>
-          </div>
 
-          {/* İhale Edilen Malzeme Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-amber-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-450 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-5 h-5" />
+            {/* İhalelere Seçilen Firma Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-emerald-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-450 flex items-center justify-center shrink-0">
+                  <Building className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhalelere Seçilen Firma Sayısı</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.ihalelereSecilenFirmaSayisi}
+                </div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-2">
+                  Satın alma yapılması kararlaştırılan kazanan firma sayısı.
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Edilen Malzeme Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.ihaleEdilenMalzemeSayisi}
-              </div>
-            </div>
-          </div>
 
-          {/* Kurumda Kayıtlı İstekli Firma Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-purple-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-450 flex items-center justify-center shrink-0">
-                <Building className="w-5 h-5" />
+            {/* En Çok İhale Alan İstekli */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-violet-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                  <Building className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 px-2 py-0.5 rounded-full border border-violet-500/10">Lider Tedarikçi</span>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">En Çok Tercih Edilen</div>
+                <div className="text-xs font-black text-slate-850 dark:text-slate-100 mt-1 truncate" title={stats.enCokSecilenFirma?.unvan || 'Veri Yok'}>
+                  {stats.enCokSecilenFirma?.unvan || 'Kayıt Bulunamadı'}
+                </div>
+                {stats.enCokSecilenFirma && (
+                  <div className="text-[10px] text-violet-600 dark:text-violet-400 font-bold mt-1">
+                    {stats.enCokSecilenFirma.count} Dosya İhalesi
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı İstekli Firma Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.kayitliFirmaSayisi}
-              </div>
-            </div>
-          </div>
 
-          {/* Kurumda Kayıtlı Personel Sayısı */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-pink-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-450 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5" />
+            {/* En Çok Harcama Yapan Birim */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-pink-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-900/20 text-pink-650 dark:text-pink-400 flex items-center justify-center shrink-0">
+                  <Landmark className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-bold text-pink-600 dark:text-pink-450 bg-pink-50 dark:bg-pink-950/30 px-2 py-0.5 rounded-full border border-pink-500/10">Lider Birim</span>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">En Çok Harcama Yapan</div>
+                <div className="text-xs font-black text-slate-850 dark:text-slate-100 mt-1 truncate" title={stats.enCokHarcamaYapanBirim?.birim_adi || 'Veri Yok'}>
+                  {stats.enCokHarcamaYapanBirim?.birim_adi || 'Kayıt Bulunamadı'}
+                </div>
+                {stats.enCokHarcamaYapanBirim && (
+                  <div className="text-[10px] text-pink-650 dark:text-pink-400 font-bold mt-1">
+                    {formatCurrency(stats.enCokHarcamaYapanBirim.total)}
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı Personel Sayısı</div>
-              <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                {isLoading ? '-' : stats.kayitliPersonelSayisi}
+
+            {/* İhale Edilen Malzeme Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-amber-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-450 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">İhale Edilen Kalem Sayısı</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.ihaleEdilenMalzemeSayisi}
+                </div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-2">
+                  Tüm dosyalarda talep edilen toplam kalem miktarı.
+                </div>
               </div>
             </div>
-          </div>
-          
+
+            {/* Kurumda Kayıtlı İstekli Firma Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-purple-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-450 flex items-center justify-center shrink-0">
+                  <Building className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı Tedarikçi Havuzu</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.kayitliFirmaSayisi}
+                </div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-2">
+                  Sistem havuzuna kayıtlı olan toplam tedarikçi firma.
+                </div>
+              </div>
+            </div>
+
+            {/* Kurumda Kayıtlı Personel Sayısı */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-pink-500/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-900/20 text-pink-650 dark:text-pink-450 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Kayıtlı Personel Sayısı</div>
+                <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
+                  {isLoading ? '-' : stats.kayitliPersonelSayisi}
+                </div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-2">
+                  Süreçlerde görev alabilecek toplam personel sayısı.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* DUYURULAR / BİLDİRİMLER PANOSU */}
-        <div className="lg:col-span-4 flex flex-col gap-4 h-full max-h-[480px]">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex-1 flex flex-col min-h-0">
-            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        {/* RIGHT SIDE PANEL: IDENTITY CARD & ANNOUNCEMENTS */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          {/* Institution Identity Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <Building className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Kurum Kimlik Kartı</h3>
+            </div>
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Kurum Adı</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-100">{institutionName || 'Belirtilmemiş'}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Kurum Türü</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{kurumTuruLabel}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Limit Grubu</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    {limitType === 'buyuksehir' ? 'Büyükşehir Limitleri' : 'Diğer İdare Limitleri'}
+                  </span>
+                </div>
+              </div>
+              {institutionCode && (
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Kurum Kodu</span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{institutionCode}</span>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                {kurumsalKod && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Kurumsal Kod</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{kurumsalKod}</span>
+                  </div>
+                )}
+                {fonksiyonelKod && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Fonksiyonel Kod</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{fonksiyonelKod}</span>
+                  </div>
+                )}
+              </div>
+              {(harcamaBirimAdi || harcamaBirimKodu) && (
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Harcama Birimi</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 block truncate" title={harcamaBirimAdi}>
+                    {harcamaBirimKodu ? `[${harcamaBirimKodu}] ` : ''}{harcamaBirimAdi || 'Belirtilmemiş'}
+                  </span>
+                </div>
+              )}
+              {(muhasebeBirimAdi || muhasebeBirimKodu) && (
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Muhasebe Birimi</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 block truncate" title={muhasebeBirimAdi}>
+                    {muhasebeBirimKodu ? `[${muhasebeBirimKodu}] ` : ''}{muhasebeBirimAdi || 'Belirtilmemiş'}
+                  </span>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-850">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Birim Sayısı</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{stats.kayitliBirimSayisi} Birim</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Ambar Sayısı</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{stats.kayitliAmbarSayisi} Depo</span>
+                </div>
+              </div>
+              <div className="pt-2.5 border-t border-slate-100 dark:border-slate-850">
+                <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase">Harcama Yetkilisi</span>
+                <span className="font-extrabold text-blue-600 dark:text-blue-450">{adminName}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block">{adminTitle}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* DUYURULAR / BİLDİRİMLER PANOSU */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col max-h-[360px] overflow-hidden">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
               <Megaphone className="w-5 h-5 text-amber-500" />
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Duyurular ve Güncellemeler</h3>
             </div>
             
-            <div className="flex-1 overflow-y-auto pr-2 space-y-5 min-h-0 custom-scrollbar">
-              
-              {/* Duyuru 1 */}
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 bg-blue-500 rounded-full shrink-0 shadow-sm shadow-blue-500/50"></div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Yeni Altyapı ve Ekranlar (v1.0.0-alpha.5)</h4>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    Kurum bilgileri, personel ve birim yönetimi ekranları modernleştirildi. Mali ve Muhasebe kod listeleri entegre edildi.
-                  </p>
-                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">02 Haziran 2026</span>
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4 min-h-0 custom-scrollbar">
+              {isAnnouncementsLoading ? (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400 italic">
+                  Duyurular yükleniyor...
                 </div>
-              </div>
-
-              {/* Duyuru 2 */}
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 bg-emerald-500 rounded-full shrink-0 shadow-sm shadow-emerald-500/50"></div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Kayıt Ekranları Geliştirildi</h4>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    Malzeme/Hizmet ekleme, OKAS ve Taşınır kod seçimleri ile Ölçü Birimleri sayfasındaki listeleme deneyimi iyileştirildi.
-                  </p>
-                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">01 Haziran 2026</span>
+              ) : announcements.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400 italic">
+                  Aktif duyuru bulunmuyor.
                 </div>
-              </div>
+              ) : (
+                announcements.map((ann) => {
+                  let DotIcon = Info
+                  let colorClass = 'bg-blue-500 text-white'
+                  
+                  if (ann.type === 'success') {
+                    DotIcon = CheckCircle2
+                    colorClass = 'bg-emerald-500 text-white'
+                  } else if (ann.type === 'warning') {
+                    DotIcon = AlertTriangle
+                    colorClass = 'bg-amber-500 text-white'
+                  } else if (ann.type === 'error') {
+                    DotIcon = ShieldAlert
+                    colorClass = 'bg-red-500 text-white'
+                  }
 
-              {/* Duyuru 3 */}
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 bg-purple-500 rounded-full shrink-0 shadow-sm shadow-purple-500/50"></div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Doğrudan Temin Altyapısı</h4>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    Doğrudan temin İhale Dosyası modülü için ön hazırlıklar tamamlandı. Gerekli veritabanı tabloları eklendi.
-                  </p>
-                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">30 Mayıs 2026</span>
-                </div>
-              </div>
-
-              {/* Duyuru 4 */}
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 bg-indigo-500 rounded-full shrink-0 shadow-sm shadow-indigo-500/50"></div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">KİK 2026 Limitleri Güncellendi</h4>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    22/d Doğrudan Temin limitleri güncellenmiştir. Kontrolünü Mevzuat ekranından takip edebilirsiniz.
-                  </p>
-                  <span className="text-[9px] text-slate-400 font-medium mt-1 block">15 Ocak 2026</span>
-                </div>
-              </div>
-
+                  return (
+                    <div key={ann.id} className="flex gap-3 items-start">
+                      <div className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${colorClass}`}>
+                        <DotIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">{ann.title}</h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                          {ann.content}
+                        </p>
+                        <span className="text-[9px] text-slate-400 font-medium mt-1 block">{ann.date}</span>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
             </div>
           </div>
         </div>
