@@ -187,6 +187,21 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   // AI Form Fill Modal
   const [showAIModal, setShowAIModal] = useState(false)
+  const [aiModalConfig, setAiModalConfig] = useState<{
+    title: string
+    fieldName: string
+    initialPrompt: string
+    systemInstruction: string
+    mode?: 'text' | 'json'
+    expectedJsonFormat?: string
+  }>({
+    title: '',
+    fieldName: '',
+    initialPrompt: '',
+    systemInstruction: '',
+    mode: 'text',
+    expectedJsonFormat: ''
+  })
 
   // Reusable AI Text Generator Modal
   const [textGenConfig, setTextGenConfig] = useState<{
@@ -268,12 +283,26 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   }
 
   const handleAiKomisyonGenerate = () => {
-    openTextGenerator(
-      'komisyon_takdiri',
-      'Komisyon Takdiri Metni Üret',
-      'Komisyon Takdiri',
-      `Kamu ihale doğrudan temin süreci için komisyon karar takdiri veya görevlendirme yazısı metni oluştur. İhale/İş Adı: "${formData.konu || ''}". Resmi ve hukuki bir dil kullan.`
-    )
+    setAiModalConfig({
+      title: 'Komisyon Karar Takdiri',
+      fieldName: 'komisyon_takdiri',
+      initialPrompt: `"${formData.konu || 'Mal Alımı'}" ihalesine ilişkin komisyon kararı ve yetki devri metnini resmi bir üslupla oluştur.`,
+      systemInstruction: 'Sen resmi bir ihale komisyon sekreterisin. Karar takdiri için kısa ve net bir ifade üret.',
+      mode: 'text'
+    })
+    setShowAIModal(true)
+  }
+
+  const handleAiFullFormGenerate = () => {
+    setAiModalConfig({
+      title: 'Dosyayı Yapay Zeka İle Oluştur',
+      fieldName: 'tum_dosya',
+      initialPrompt: '',
+      systemInstruction: 'Sen bir ihale ve doğrudan temin uzmanısın. Kullanıcının verdiği metne göre bir ihale dosyasının temel özelliklerini ve gerekli alanlarını çıkart. Kullanıcı sana karmaşık bir dille ihale isteğini anlatabilir, sen bunu ayrıştırıp aşağıdaki JSON formatına birebir uyan, eksiksiz bir yanıt vereceksin.',
+      mode: 'json',
+      expectedJsonFormat: `{\n  "konu": "Kısa ve öz ihale adı",\n  "isin_aciklamasi": "İşin çok detaylı ve profesyonel kapsam açıklaması (Maddeler halinde olabilir)",\n  "tur": "mal veya hizmet veya yapim_isi veya danismanlik (bunlardan biri olmak zorunda)",\n  "yaklasik_maliyet": 150000 (sayısal),\n  "kdv": "20" veya "0",\n  "komisyon_takdiri": "Komisyon kararı takdiri metni",\n  "ihale_sekli": "22/d*" veya "22/d**"\n}`
+    })
+    setShowAIModal(true)
   }
 
   // Handle Birim Selection and autofill antet fields
@@ -389,11 +418,11 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           {/* AI Asistan Butonu */}
           <button
             type="button"
-            onClick={() => setShowAIModal(true)}
+            onClick={handleAiFullFormGenerate}
             className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-500/20 flex items-center gap-2 cursor-pointer"
           >
             <Sparkles size={14} />
-            AI Asistan
+            Yapay Zeka Asistanı
           </button>
           {import.meta.env.DEV && (
             <button

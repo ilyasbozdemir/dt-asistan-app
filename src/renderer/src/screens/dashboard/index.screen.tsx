@@ -17,14 +17,19 @@ import {
   Info,
   ShieldAlert,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  PlayCircle,
+  ListPlus,
+  Sparkles
 } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Link } from '@tanstack/react-router'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Button } from '../../components/ui/Button'
 import { useDashboardStats, useActiveDosyaSummary, useAnnouncements } from './dashboard.hooks'
 import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
+import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
 
 export default function DashboardScreen(): React.JSX.Element {
   const {
@@ -45,6 +50,9 @@ export default function DashboardScreen(): React.JSX.Element {
   const { stats, isLoading } = useDashboardStats()
   const { announcements, isLoading: isAnnouncementsLoading } = useAnnouncements()
   const { dosyalar } = useDosyalarHooks()
+  
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null)
   
   // Dynamic Greeting based on time
   const greeting = (() => {
@@ -107,23 +115,6 @@ export default function DashboardScreen(): React.JSX.Element {
     { ay: 'Nisan', tutar: 0 },
     { ay: 'Mayıs', tutar: 0 }
   ]
-
-  // Dynamic SVG Chart Coordinates calculation
-  const maxVal = Math.max(...monthlyData.map(d => d.tutar), 10000)
-  const chartPoints = monthlyData.map((d, index) => {
-    const x = 50 + (index * 600) / (monthlyData.length - 1)
-    const y = 170 - (d.tutar / maxVal) * 120
-    return { x, y, tutar: d.tutar }
-  })
-
-  const pathD = chartPoints.reduce((acc, p, index) => {
-    if (index === 0) return `M ${p.x} ${p.y}`
-    return `${acc} L ${p.x} ${p.y}`
-  }, '')
-
-  const areaD = chartPoints.length > 0
-    ? `${pathD} L ${chartPoints[chartPoints.length - 1].x} 190 L ${chartPoints[0].x} 190 Z`
-    : ''
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('tr-TR', {
@@ -701,56 +692,47 @@ export default function DashboardScreen(): React.JSX.Element {
             </span>
           </div>
 
-          {/* Line Chart Component via Pure SVG */}
-          <div className="h-64 relative w-full flex flex-col justify-end">
-            <svg viewBox="0 0 700 200" className="w-full h-full text-blue-600" fill="none">
-              {/* Grid Lines */}
-              <line x1="0" y1="50" x2="700" y2="50" stroke="currentColor" strokeOpacity="0.05" strokeWidth="1" />
-              <line x1="0" y1="100" x2="700" y2="100" stroke="currentColor" strokeOpacity="0.05" strokeWidth="1" />
-              <line x1="0" y1="150" x2="700" y2="150" stroke="currentColor" strokeOpacity="0.05" strokeWidth="1" />
-
-              {/* Area Gradient */}
-              <defs>
-                <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.00" />
-                </linearGradient>
-              </defs>
-              {areaD && (
-                <path
-                  d={areaD}
-                  fill="url(#spendGrad)"
+          {/* Line Chart Component via Recharts */}
+          <div className="h-64 relative w-full flex flex-col justify-end mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorTutar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                <XAxis 
+                  dataKey="ay" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} 
+                  dy={10}
                 />
-              )}
-
-              {/* Smooth Spline Path */}
-              {pathD && (
-                <path
-                  d={pathD}
-                  stroke="currentColor"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                  tickFormatter={(val) => val > 0 ? `${(val/1000).toFixed(0)}K` : '0'} 
+                  dx={-10}
                 />
-              )}
-
-              {/* Chart Points */}
-              {chartPoints.map((p, index) => (
-                <g key={index}>
-                  <circle cx={p.x} cy={p.y} r="5" className="fill-white dark:fill-slate-900" stroke="currentColor" strokeWidth="2.5" />
-                  <text x={p.x} y={p.y - 12} fontSize="9" fontWeight="bold" className="fill-slate-500" textAnchor="middle">
-                    {p.tutar > 0 ? `${(p.tutar / 1000).toFixed(0)}K` : '0'}
-                  </text>
-                </g>
-              ))}
-            </svg>
-
-            {/* X Axis Labels */}
-            <div className="flex justify-between items-center px-4 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider">
-              {monthlyData.map((item) => (
-                <span key={item.ay}>{item.ay}</span>
-              ))}
-            </div>
+                <Tooltip 
+                  formatter={(value: number) => [formatCurrency(value), 'Harcama']}
+                  labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="tutar" 
+                  stroke="#3b82f6" 
+                  strokeWidth={3} 
+                  fillOpacity={1} 
+                  fill="url(#colorTutar)" 
+                  activeDot={{ r: 6, strokeWidth: 2, fill: '#fff', stroke: '#3b82f6' }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -761,46 +743,41 @@ export default function DashboardScreen(): React.JSX.Element {
             <p className="text-[11px] text-slate-450 mt-0.5">Yaklaşık maliyetlerin mal, hizmet ve yapım türlerine oranı</p>
           </div>
 
-          {/* Donut Chart */}
+          {/* Donut Chart via Recharts */}
           <div className="relative flex items-center justify-center my-4 h-40">
-            <svg width="150" height="150" viewBox="0 0 42 42" className="transform -rotate-90">
-              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="currentColor" strokeOpacity="0.05" strokeWidth="4" />
-              
-              {/* Mal Alımı */}
-              <circle 
-                cx="21" 
-                cy="21" 
-                r="15.915" 
-                fill="transparent" 
-                stroke="#3b82f6" 
-                strokeWidth="4" 
-                strokeDasharray={`${malPct} ${100 - malPct}`} 
-                strokeDashoffset="0" 
-              />
-              {/* Hizmet Alımı */}
-              <circle 
-                cx="21" 
-                cy="21" 
-                r="15.915" 
-                fill="transparent" 
-                stroke="#10b981" 
-                strokeWidth="4" 
-                strokeDasharray={`${hizmetPct} ${100 - hizmetPct}`} 
-                strokeDashoffset={`-${malPct}`} 
-              />
-              {/* Yapım İşleri */}
-              <circle 
-                cx="21" 
-                cy="21" 
-                r="15.915" 
-                fill="transparent" 
-                stroke="#f59e0b" 
-                strokeWidth="4" 
-                strokeDasharray={`${yapimPct} ${100 - yapimPct}`} 
-                strokeDashoffset={`-${malPct + hizmetPct}`} 
-              />
-            </svg>
-            <div className="absolute flex flex-col items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Mal Alımı', value: categoryData.Mal, color: '#3b82f6' },
+                    { name: 'Hizmet Alımı', value: categoryData.Hizmet, color: '#10b981' },
+                    { name: 'Yapım İşi', value: categoryData.Yapım, color: '#f59e0b' }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={75}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {
+                    [
+                      { name: 'Mal Alımı', value: categoryData.Mal, color: '#3b82f6' },
+                      { name: 'Hizmet Alımı', value: categoryData.Hizmet, color: '#10b981' },
+                      { name: 'Yapım İşi', value: categoryData.Yapım, color: '#f59e0b' }
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))
+                  }
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)}
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute flex flex-col items-center justify-center pointer-events-none">
               <span className="text-xl font-extrabold text-slate-800 dark:text-slate-100">
                 %{totalCat > 1 ? 100 : 0}
               </span>
@@ -926,12 +903,24 @@ export default function DashboardScreen(): React.JSX.Element {
                     </td>
 
                     <td className="py-3.5 px-4 text-center">
-                      <Link to="/dosyalar">
-                        <Button variant="ghost" size="sm" className="h-8 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1">
-                          Detay
-                          <ChevronRight className="w-3.5 h-3.5" />
+                      <div className="flex justify-center items-center gap-2">
+                        <Link to="/dosyalar">
+                          <Button variant="ghost" size="sm" className="h-8 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1">
+                            Detay
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </Button>
+                        </Link>
+                        <Button
+                          onClick={() => {
+                            setSelectedFileForAI(file)
+                            setShowAIModal(true)
+                          }}
+                          className="h-8 px-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-500/20 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Sparkles size={12} className="animate-pulse" />
+                          AI
                         </Button>
-                      </Link>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -940,6 +929,20 @@ export default function DashboardScreen(): React.JSX.Element {
           </table>
         </div>
       </div>
+      
+      {/* AI Assistant Modal */}
+      {showAIModal && selectedFileForAI && (
+        <AITextGeneratorModal
+          title={`Akıllı Asistan - Dosya: ${selectedFileForAI.temin_no}`}
+          initialPrompt={`${selectedFileForAI.konu} konulu aktif bir ihale dosyası üzerinde çalışıyorum. Yaklaşık maliyet: ${formatCurrency(selectedFileForAI.yaklasik_maliyet || 0)}. Lütfen bu dosya için bana tavsiye ve süreç özeti ver.`}
+          onClose={() => setShowAIModal(false)}
+          onApply={(text) => {
+            console.log('AI Response:', text)
+            setShowAIModal(false)
+          }}
+          systemInstruction="Sen yetkin bir Doğrudan Temin (Kamu İhale) uzmanısın. Kullanıcının sana sunduğu aktif ihale dosyasının verilerine göre sıradaki adımlar, dikkat edilmesi gerekenler veya kısa mevzuat tavsiyeleri içeren kısa ve okunabilir bir metin döndür."
+        />
+      )}
     </div>
   )
 }

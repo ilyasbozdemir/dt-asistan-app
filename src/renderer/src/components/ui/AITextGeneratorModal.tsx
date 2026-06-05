@@ -10,7 +10,10 @@ interface AITextGeneratorModalProps {
   initialSubject?: string
   initialPrompt?: string
   systemInstruction?: string
-  onApply: (generatedText: string) => void
+  mode?: 'text' | 'json'
+  expectedJsonFormat?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onApply: (generatedData: any) => void
 }
 
 export function AITextGeneratorModal({
@@ -21,6 +24,8 @@ export function AITextGeneratorModal({
   initialSubject = '',
   initialPrompt = '',
   systemInstruction = '',
+  mode = 'text',
+  expectedJsonFormat = '',
   onApply
 }: AITextGeneratorModalProps): React.JSX.Element | null {
   const [prompt, setPrompt] = useState('')
@@ -34,14 +39,17 @@ export function AITextGeneratorModal({
       if (initialPrompt) {
         setPrompt(initialPrompt)
       } else if (initialSubject) {
-        setPrompt(`"${initialSubject}" konusu için detaylı, resmi ve profesyonel bir kamu ihalesi ${fieldName.toLowerCase()} metni oluştur.`)
+        setPrompt(
+          `"${initialSubject}" konusu için detaylı, resmi ve profesyonel bir kamu ihalesi ${fieldName.toLowerCase()} metni oluştur.`
+        )
       } else {
         setPrompt('')
       }
       setResult('')
       setError('')
     }
-  }, [isOpen, initialSubject, initialPrompt, fieldName])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const handleGenerate = async (): Promise<void> => {
     if (!prompt.trim()) {
@@ -52,32 +60,64 @@ export function AITextGeneratorModal({
     setLoading(true)
     setError('')
     try {
-      const finalPrompt = systemInstruction 
+      let finalPrompt = systemInstruction 
         ? `${systemInstruction}\n\nKullanıcı İsteği:\n${prompt}`
         : prompt
 
+      if (mode === 'json') {
+        finalPrompt += `\n\nÖNEMLİ: Yanıtını SADECE geçerli bir JSON formatında dön. Başka hiçbir açıklama, markdown veya text ekleme. Sadece süslü parantezlerle başlayan ham JSON dön.\nBeklenen Format (örnek):\n${expectedJsonFormat || '{ "sonuc": "..." }'}`
+      }
+
       const res = await window.api.aiGenerate({ prompt: finalPrompt })
       if (res.success && res.data) {
-        setResult(res.data.trim())
+        let cleanData = res.data.trim()
+        if (mode === 'json') {
+          // Clean possible markdown json wraps
+          cleanData = cleanData
+            .replace(/^```json\s*/, '')
+            .replace(/^```\s*/, '')
+            .replace(/```$/, '')
+            .trim()
+          // Validate JSON
+          try {
+            JSON.parse(cleanData)
+          } catch (e) {
+            console.warn('AI yanıtı geçerli bir JSON değil, ama yinede yansıtılıyor.', e)
+          }
+        }
+        setResult(cleanData)
       } else {
-        setError(res.error || 'Yapay zeka yanıt üretemedi. Ayarlar > Yapay Zeka sayfasından API anahtarınızı kontrol edin.')
+        setError(
+          res.error ||
+            'Yapay zeka yanıt üretemedi. Ayarlar > Yapay Zeka sayfasından API anahtarınızı kontrol edin.'
+        )
       }
-    } catch (err: any) {
-      setError(err.message || 'Beklenmeyen bir hata oluştu.')
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Beklenmeyen bir hata oluştu.')
     } finally {
       setLoading(false)
     }
   }
 
   const handleApply = (): void => {
-    onApply(result)
+    if (mode === 'json') {
+      try {
+        const parsedData = JSON.parse(result)
+        onApply(parsedData)
+      } catch (err) {
+        setError('Oluşturulan metin geçerli bir JSON formatında değil. Lütfen düzenleyip tekrar deneyin.')
+        return
+      }
+    } else {
+      onApply(result)
+    }
     onClose()
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+    <div className="fixed inset-0 z-200 flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
@@ -90,17 +130,20 @@ export function AITextGeneratorModal({
         'animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300'
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-linear-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
+            <div className="w-8 h-8 bg-linear-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
               <Sparkles className="w-4 h-4 text-white animate-pulse" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100">{title}</h2>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Yapay zeka ile metin oluşturun ve düzenleyin</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Yapay zeka ile metin oluşturun ve düzenleyin
+              </p>
             </div>
           </div>
           <button
+            title="Kapat"
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-white/60 dark:hover:bg-slate-800 transition-colors"
           >
@@ -126,24 +169,38 @@ export function AITextGeneratorModal({
 
           {/* Quick templates */}
           <div className="flex flex-wrap gap-1.5">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">Örnekler:</span>
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">
+              Örnekler:
+            </span>
             <button
               type="button"
-              onClick={() => setPrompt(`"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`)}
+              onClick={() =>
+                setPrompt(
+                  `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
+                )
+              }
               className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
             >
               Resmi Açıklama
             </button>
             <button
               type="button"
-              onClick={() => setPrompt(`"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`)}
+              onClick={() =>
+                setPrompt(
+                  `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
+                )
+              }
               className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
             >
               Kapsam Maddeleri
             </button>
             <button
               type="button"
-              onClick={() => setPrompt(`"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`)}
+              onClick={() =>
+                setPrompt(
+                  `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
+                )
+              }
               className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
             >
               Şartname Özeti
@@ -155,7 +212,7 @@ export function AITextGeneratorModal({
             type="button"
             onClick={handleGenerate}
             disabled={loading || !prompt.trim()}
-            className="w-full py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-500/20 disabled:opacity-55"
+            className="w-full py-2.5 bg-linear-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-500/20 disabled:opacity-55"
           >
             {loading ? (
               <>
@@ -182,7 +239,7 @@ export function AITextGeneratorModal({
             <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-4 animate-in fade-in duration-300">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Üretilen Metin (Düzenleyebilirsiniz)
+                  Üretilen {mode === 'json' ? 'JSON Verisi' : 'Metin'} (Düzenleyebilirsiniz)
                 </label>
                 {result && (
                   <button
@@ -202,10 +259,10 @@ export function AITextGeneratorModal({
                 </div>
               ) : (
                 <textarea
-                  rows={6}
+                  rows={mode === 'json' ? 10 : 6}
                   value={result}
                   onChange={(e) => setResult(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal font-semibold resize-y"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal font-semibold resize-y font-mono"
                 />
               )}
 
@@ -213,7 +270,7 @@ export function AITextGeneratorModal({
                 <button
                   type="button"
                   onClick={handleApply}
-                  className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+                  className="w-full py-2.5 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
                 >
                   <Check size={14} />
                   Forma Uygula ve Kapat

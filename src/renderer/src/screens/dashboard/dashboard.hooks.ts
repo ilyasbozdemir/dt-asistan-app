@@ -239,6 +239,7 @@ export interface ActiveDosyaSummary {
   ihaleSekli: string
   kdv: string
   teklifSozlesmeTuru: string
+  durumAsamaId: number | null
 }
 
 export function useActiveDosyaSummary(activeDosyaId: number | null, institutionName: string, institutionTypeLabel: string) {
@@ -255,7 +256,7 @@ export function useActiveDosyaSummary(activeDosyaId: number | null, institutionN
     try {
       const q = `
         SELECT 
-          d.temin_no, d.konu, d.tur, d.yaklasik_maliyet, d.butce_kodu, d.ihale_sekli, d.kdv, d.teklif_sozlesme_turu, d.tekrar_no,
+          d.temin_no, d.konu, d.tur, d.yaklasik_maliyet, d.butce_kodu, d.ihale_sekli, d.kdv, d.teklif_sozlesme_turu, d.tekrar_no, d.durum_asama_id,
           b.birim_adi,
           f.unvan as firma_unvani
         FROM DATA_TeminDosyasi d
@@ -302,7 +303,8 @@ export function useActiveDosyaSummary(activeDosyaId: number | null, institutionN
           butceKodu: row.butce_kodu || '-',
           ihaleSekli: row.ihale_sekli || '-',
           kdv: row.kdv || '20',
-          teklifSozlesmeTuru: row.teklif_sozlesme_turu || '-'
+          teklifSozlesmeTuru: row.teklif_sozlesme_turu || '-',
+          durumAsamaId: row.durum_asama_id || null
         })
       } else {
         setSummary(null)
