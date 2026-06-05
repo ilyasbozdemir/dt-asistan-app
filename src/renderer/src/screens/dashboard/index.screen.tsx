@@ -933,14 +933,16 @@ export default function DashboardScreen(): React.JSX.Element {
       {/* AI Assistant Modal */}
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
-          title={`Akıllı Asistan - Dosya: ${selectedFileForAI.temin_no}`}
-          initialPrompt={`${selectedFileForAI.konu} konulu aktif bir ihale dosyası üzerinde çalışıyorum. Yaklaşık maliyet: ${formatCurrency(selectedFileForAI.yaklasik_maliyet || 0)}. Lütfen bu dosya için bana tavsiye ve süreç özeti ver.`}
+          isOpen={true}
+          fieldName="Süreç Tavsiyesi"
+          title={`Akıllı Asistan - Dosya: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}`}
+          initialPrompt={`Aşağıdaki detaylara sahip dosya üzerinde çalışıyorum:\n- Konu: ${selectedFileForAI.konu}\n- Yaklaşık Maliyet: ${formatCurrency(selectedFileForAI.yaklasik_maliyet || 0)}\n\nLütfen bu dosya için bana sonraki adımlar, dikkat edilecekler ve süreç tavsiyesi ver.`}
           onClose={() => setShowAIModal(false)}
           onApply={(text) => {
             console.log('AI Response:', text)
             setShowAIModal(false)
           }}
-          systemInstruction="Sen yetkin bir Doğrudan Temin (Kamu İhale) uzmanısın. Kullanıcının sana sunduğu aktif ihale dosyasının verilerine göre sıradaki adımlar, dikkat edilmesi gerekenler veya kısa mevzuat tavsiyeleri içeren kısa ve okunabilir bir metin döndür."
+          systemInstruction="Sen yetkin bir Doğrudan Temin ve Kamu İhale (4734 Sayılı Kanun) uzmanısın. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen metin içinde belirli bir Kurum Adı, Belediye, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele). Fakat ihale malzemelerini tarif eden teknik özellikleri (boyut, renk, adet, cins vb.) aynen kullan."
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Sparkles, X, Loader2, Check, RefreshCw } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { AIPrivacyModal } from './AIPrivacyModal'
 
 interface AITextGeneratorModalProps {
   isOpen: boolean
@@ -32,10 +33,19 @@ export function AITextGeneratorModal({
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
   const [error, setError] = useState('')
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   // Set default prompt when modal opens
   useEffect(() => {
     if (isOpen) {
+      setTimeout(() => {
+        if (localStorage.getItem('ai_consent_accepted') !== 'true') {
+          setShowPrivacy(true)
+        } else {
+          setShowPrivacy(false)
+        }
+      }, 0)
+
       if (initialPrompt) {
         setPrompt(initialPrompt)
       } else if (initialSubject) {
@@ -115,6 +125,21 @@ export function AITextGeneratorModal({
   }
 
   if (!isOpen) return null
+
+  if (showPrivacy) {
+    return (
+      <AIPrivacyModal
+        onAccept={() => {
+          localStorage.setItem('ai_consent_accepted', 'true')
+          setShowPrivacy(false)
+        }}
+        onDecline={() => {
+          setShowPrivacy(false)
+          onClose()
+        }}
+      />
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center">

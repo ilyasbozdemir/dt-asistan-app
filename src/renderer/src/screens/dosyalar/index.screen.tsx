@@ -193,6 +193,20 @@ export default function DosyalarScreen(): React.ReactNode {
             </button>
           </div>
 
+          {/* GENEL YAPAY ZEKA BUTONU */}
+          <button
+            onClick={() => {
+              setSelectedFileForAI({ konu: 'Genel Mevzuat Danışmanlığı', yaklasik_maliyet: 0, temin_no: 'Belirtilmemiş' })
+              setShowAIModal(true)
+            }}
+            className="px-4 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-violet-500/20 flex items-center gap-1.5 cursor-pointer shrink-0"
+            title="Mevzuat ve Genel Süreçler Hakkında AI'a Danışın"
+          >
+            <Sparkles size={16} />
+            <span className="hidden md:inline">Yapay Zeka Asistanı</span>
+            <span className="md:hidden">AI</span>
+          </button>
+
           {/* YENİ EKLE */}
           <button
             onClick={() => navigate({ to: '/dosyalar/yeni' })}
@@ -468,9 +482,19 @@ export default function DosyalarScreen(): React.ReactNode {
                   <FileText size={28} className="text-slate-400" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350">Dosya Seçilmedi</h3>
-                <p className="text-[11px] text-slate-500 max-w-xs mt-1.5">
-                  İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz ihale dosyasını soldaki listeden seçin.
+                <p className="text-[11px] text-slate-500 max-w-xs mt-1.5 mb-6">
+                  İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz ihale dosyasını soldaki listeden seçin. Veya genel süreçler hakkında Yapay Zeka'ya danışın.
                 </p>
+                <button
+                  onClick={() => {
+                    setSelectedFileForAI({ konu: 'Genel Mevzuat Danışmanlığı', yaklasik_maliyet: 0, temin_no: 'Belirtilmemiş' })
+                    setShowAIModal(true)
+                  }}
+                  className="px-6 py-3 bg-linear-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-violet-500/20 flex items-center gap-2 cursor-pointer"
+                >
+                  <Sparkles size={16} />
+                  Yapay Zeka'ya Danış
+                </button>
               </div>
             ) : (
               <>
@@ -646,9 +670,15 @@ export default function DosyalarScreen(): React.ReactNode {
 
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
+          isOpen={true}
+          fieldName="Mevzuat Analizi"
           title="Yapay Zeka Asistanı"
-          initialPrompt={`Sistemde kayıtlı olan aşağıdaki doğrudan temin (ihale) dosyasını incele ve bana bir sonraki yasal/idari aşamalar hakkında mevzuata uygun bir tavsiye ya da dosya özeti sun:\n\nDosya No: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}\nKonu: ${selectedFileForAI.konu}\nMaliyet: ${selectedFileForAI.yaklasik_maliyet} TL\nMadde: ${selectedFileForAI.ihale_sekli || 'Belirtilmemiş'}`}
-          systemInstruction="Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kısa, net ve mevzuata uygun dönüşler yap. Asla Markdown veya süslü formatları bozma. Doğrudan temin süreçlerindeki adımları rehberlik ederek anlat."
+          initialPrompt={
+            selectedFileForAI.konu === 'Genel Mevzuat Danışmanlığı' 
+              ? `Doğrudan temin, kamu ihale kanunu veya belediye satın alma süreçleri (4734 sayılı kanun vb.) hakkında sana genel bir mevzuat veya idari işleyiş sorusu soracağım. Lütfen profesyonel bir asistan gibi yanıtla.\n\nSorum: `
+              : `Sistemde kayıtlı olan aşağıdaki doğrudan temin (ihale) dosyasını incele ve bana bir sonraki yasal/idari aşamalar hakkında mevzuata uygun bir tavsiye ya da dosya özeti sun:\n\nDosya No: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}\nKonu: ${selectedFileForAI.konu}\nMaliyet: ${selectedFileForAI.yaklasik_maliyet} TL\nMadde: ${selectedFileForAI.ihale_sekli || 'Belirtilmemiş'}`
+          }
+          systemInstruction="Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen sorularda veya dosya içeriğinde belirli bir Kurum Adı, Belediye Adı, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele). Ancak ihale malzemelerini tarif eden teknik özellikleri (boyut, renk, adet vb.) aynen kullan."
           onClose={() => {
             setShowAIModal(false)
             setSelectedFileForAI(null)

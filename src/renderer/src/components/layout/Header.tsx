@@ -2,10 +2,14 @@ import React from 'react'
 import { Bell, Moon, Sun, Minus, Square, X, DownloadCloud } from 'lucide-react'
 import { useTheme } from '../providers/ThemeProvider'
 import { TeminSelector } from './TeminSelector'
+import { useAnnouncements } from '../../screens/dashboard/dashboard.hooks'
 
 export function Header(): React.JSX.Element {
   const { theme, setTheme } = useTheme()
   const [updateStatus, setUpdateStatus] = React.useState<{status: string, version?: string} | null>(null)
+  const [showNotifications, setShowNotifications] = React.useState(false)
+  
+  const { announcements } = useAnnouncements()
 
   React.useEffect(() => {
     const removeListener = window.electron?.ipcRenderer.on('updater:status', (_event, data) => {
@@ -59,14 +63,41 @@ export function Header(): React.JSX.Element {
           </button>
         )}
 
-        <button
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-all rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-800/50 relative mr-2"
-          title="Bildirimler"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm"></span>
-        </button>
+        <div className="relative">
+          <button
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-all rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-800/50 relative mr-2 cursor-pointer"
+            title="Bildirimler"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm animate-pulse"></span>
+          </button>
+
+          {showNotifications && (
+            <div className="absolute top-full right-2 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2">
+              <div className="p-3 border-b border-slate-100 dark:border-slate-800 font-bold text-sm text-slate-700 dark:text-slate-200 flex justify-between items-center">
+                Bildirimler ve İşlem Logları
+                <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-slate-600">
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="max-h-80 overflow-y-auto custom-scrollbar flex flex-col">
+                {announcements && announcements.length > 0 ? (
+                  announcements.slice(0, 10).map((item, i) => (
+                    <div key={i} className="p-3 border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1">{item.title}</p>
+                      <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">{item.content}</p>
+                      <p className="text-[9px] text-slate-400 mt-1.5 font-mono">{new Date(item.date).toLocaleString('tr-TR')}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-slate-400 text-xs">Henüz bildirim bulunmuyor.</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Native-style Window Controls */}
