@@ -118,6 +118,12 @@ export async function generateContent(options: AIGenerateOptions): Promise<AIRes
   try {
     let finalOptions = { ...options }
 
+    const aiIdentity = "Sen bir Kamu İhale ve Muhasebe Uzmanısın (Doğrudan Temin - DT). Kullanıcı sana soru sorduğunda veya form incelemesi yaptığında, muhasebe diline (ekonomik kod, bütçe türü, fonksiyonel kod, KDV hesabı vb.) ve Kamu İhale Kanununa (özellikle 22/d) hakim olduğunu göstererek profesyonelce yanıt ver. Analizlerinde tutarsızlıkları bul ve net öneriler sun."
+    
+    finalOptions.systemInstruction = finalOptions.systemInstruction 
+      ? `${aiIdentity}\n\nEk Talimat: ${finalOptions.systemInstruction}`
+      : aiIdentity
+
     if (options.enableDatabaseAccess) {
       const schema = workspaceManager.getDatabaseSchema()
       if (schema) {

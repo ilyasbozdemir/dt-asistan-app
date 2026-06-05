@@ -283,6 +283,16 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     )
   }
 
+  const handleAiFormValidation = () => {
+    const dataStr = JSON.stringify(formData, null, 2)
+    openTextGenerator(
+      'notlar',
+      'AI Form Tutarsızlık Kontrolü',
+      'Form Analiz Sonucu (İsterseniz Notlara Ekleyebilirsiniz)',
+      `Sen bir Kamu İhale ve Muhasebe Uzmanısın. Kullanıcı bir Doğrudan Temin ihale dosyası oluşturuyor ancak kaydetmeden önce sana kontrol ettirmek istedi.\n\nAşağıdaki form verilerini ihale mevzuatı (özellikle 22/d vb.), muhasebe kuralları (fonksiyonel kod, ekonomik kod uyumu) ve mantıksal tutarlılık açısından incele:\n\n${dataStr}\n\nEğer KDV, bütçe, ihale şekli, teslim tarihi gibi alanlarda bir hata, eksiklik veya mevzuata aykırılık görüyorsan kullanıcıyı uyar. Her şey normalse tebrik et.`
+    )
+  }
+
   const handleAiKomisyonGenerate = () => {
     setAiModalConfig({
       title: 'Komisyon Karar Takdiri',
@@ -418,6 +428,16 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           </div>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+          {/* AI Form Kontrol Butonu */}
+          <button
+            type="button"
+            onClick={handleAiFormValidation}
+            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-teal-500/20 flex items-center gap-2 cursor-pointer"
+            title="Formunuzdaki mantıksal, mali ve mevzuat hatalarını AI ile analiz edin"
+          >
+            🤖 AI Form Kontrolü
+          </button>
+          
           {/* AI Asistan Butonu */}
           <button
             type="button"
