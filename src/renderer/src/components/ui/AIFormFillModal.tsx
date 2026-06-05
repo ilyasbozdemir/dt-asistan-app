@@ -187,6 +187,14 @@ function PreviewPanel({
           <Sparkles size={12} /> Forma Uygula
         </button>
       </div>
+
+      <div className="mt-2 mb-1 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] font-semibold flex items-start gap-1.5 leading-relaxed">
+        <span className="text-xs mt-0.5">⚠️</span>
+        <span>
+          Yapay zekanın tahmin ettiği ekonomik kodlar, tarihler ve bütçe hesaplamaları hata içerebilir. Lütfen doğruluğunu <b>teyit edip</b> uygulayınız.
+        </span>
+      </div>
+
       <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
         {context.doldurulacakAlanlar.filter(a => values[a.alan] !== undefined).map(a => (
           <div key={a.alan} className="flex gap-2 text-xs">

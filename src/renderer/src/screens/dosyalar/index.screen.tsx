@@ -671,6 +671,7 @@ export default function DosyalarScreen(): React.ReactNode {
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
           isOpen={true}
+          isAdvisorMode={true}
           fieldName="Mevzuat Analizi"
           title="Yapay Zeka Asistanı"
           initialPrompt={

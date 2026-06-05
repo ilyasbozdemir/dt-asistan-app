@@ -934,6 +934,7 @@ export default function DashboardScreen(): React.JSX.Element {
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
           isOpen={true}
+          isAdvisorMode={true}
           fieldName="Süreç Tavsiyesi"
           title={`Akıllı Asistan - Dosya: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}`}
           initialPrompt={`Aşağıdaki detaylara sahip dosya üzerinde çalışıyorum:\n- Konu: ${selectedFileForAI.konu}\n- Yaklaşık Maliyet: ${formatCurrency(selectedFileForAI.yaklasik_maliyet || 0)}\n\nLütfen bu dosya için bana sonraki adımlar, dikkat edilecekler ve süreç tavsiyesi ver.`}

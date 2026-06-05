@@ -11,6 +11,7 @@ interface AITextGeneratorModalProps {
   initialSubject?: string
   initialPrompt?: string
   systemInstruction?: string
+  isAdvisorMode?: boolean
   mode?: 'text' | 'json'
   expectedJsonFormat?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +26,7 @@ export function AITextGeneratorModal({
   initialSubject = '',
   initialPrompt = '',
   systemInstruction = '',
+  isAdvisorMode = false,
   mode = 'text',
   expectedJsonFormat = '',
   onApply
@@ -163,7 +165,7 @@ export function AITextGeneratorModal({
             <div>
               <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100">{title}</h2>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Yapay zeka ile metin oluşturun ve düzenleyin
+                {isAdvisorMode ? 'Yapay zekaya danışın ve süreç hakkında bilgi alın' : 'Yapay zeka ile metin oluşturun ve düzenleyin'}
               </p>
             </div>
           </div>
@@ -181,56 +183,58 @@ export function AITextGeneratorModal({
           {/* Instructions Input */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-650 dark:text-slate-400">
-              Yapay Zekaya Talimatınız
+              {isAdvisorMode ? 'Yapay Zeka\'ya Mesajınız veya Sorunuz' : 'Yapay Zekaya Talimatınız'}
             </label>
             <textarea
               rows={3}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Yapay zekanın nasıl bir metin üretmesini istediğinizi yazın (örn: Belediye binası temizlik işi ihalesi için idari şartnameye uygun iş tanımı oluştur. Süre 6 ay olsun, malzemeleri yüklenici karşılasın.)"
+              placeholder={isAdvisorMode ? "Yapay zekaya sormak istediğiniz soruyu veya tavsiye konusunu yazın..." : "Yapay zekanın nasıl bir metin üretmesini istediğinizi yazın (örn: Belediye binası temizlik işi ihalesi için idari şartnameye uygun iş tanımı oluştur.)"}
               className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-slate-800 dark:text-slate-250 font-semibold"
             />
           </div>
 
           {/* Quick templates */}
-          <div className="flex flex-wrap gap-1.5">
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">
-              Örnekler:
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setPrompt(
-                  `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
-                )
-              }
-              className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-            >
-              Resmi Açıklama
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setPrompt(
-                  `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
-                )
-              }
-              className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-            >
-              Kapsam Maddeleri
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setPrompt(
-                  `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
-                )
-              }
-              className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-            >
-              Şartname Özeti
-            </button>
-          </div>
+          {!isAdvisorMode && (
+            <div className="flex flex-wrap gap-1.5">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">
+                Örnekler:
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setPrompt(
+                    `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
+                  )
+                }
+                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+              >
+                Resmi Açıklama
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPrompt(
+                    `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
+                  )
+                }
+                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+              >
+                Kapsam Maddeleri
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPrompt(
+                    `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
+                  )
+                }
+                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+              >
+                Şartname Özeti
+              </button>
+            </div>
+          )}
 
           {/* Action button */}
           <button
@@ -242,12 +246,12 @@ export function AITextGeneratorModal({
             {loading ? (
               <>
                 <Loader2 size={14} className="animate-spin" />
-                Metin Oluşturuluyor...
+                {isAdvisorMode ? 'Analiz Ediliyor...' : 'Metin Oluşturuluyor...'}
               </>
             ) : (
               <>
                 <Sparkles size={14} />
-                Metni Üret
+                {isAdvisorMode ? 'Yapay Zekaya Danış' : 'Metni Üret'}
               </>
             )}
           </button>
@@ -264,7 +268,7 @@ export function AITextGeneratorModal({
             <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-4 animate-in fade-in duration-300">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Üretilen {mode === 'json' ? 'JSON Verisi' : 'Metin'} (Düzenleyebilirsiniz)
+                  {isAdvisorMode ? 'Yapay Zeka Yanıtı' : `Üretilen ${mode === 'json' ? 'JSON Verisi' : 'Metin'} (Düzenleyebilirsiniz)`}
                 </label>
                 {result && (
                   <button
@@ -291,14 +295,28 @@ export function AITextGeneratorModal({
                 />
               )}
 
+              {result && !loading && !isAdvisorMode && (
+                <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 rounded-xl text-[10px] font-semibold flex items-start gap-1.5 mt-3 mb-2 animate-in fade-in">
+                  <span className="text-xs">⚠️</span>
+                  <span className="leading-relaxed">
+                    Yapay zeka tarafından üretilen içerikler, <b>ekonomik kodlar</b>, bütçe tertipleri ve diğer teknik veriler hata veya tutarsızlık içerebilir. Lütfen doğruluğunu <b>teyit etmeden</b> kaydetmeyiniz.
+                  </span>
+                </div>
+              )}
+
               {result && !loading && (
                 <button
                   type="button"
-                  onClick={handleApply}
-                  className="w-full py-2.5 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+                  onClick={isAdvisorMode ? onClose : handleApply}
+                  className={cn(
+                    "w-full py-2.5 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md",
+                    isAdvisorMode 
+                      ? "bg-slate-800 hover:bg-slate-900 shadow-slate-900/20" 
+                      : "bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/20"
+                  )}
                 >
                   <Check size={14} />
-                  Forma Uygula ve Kapat
+                  {isAdvisorMode ? 'Teşekkürler, Kapat' : 'Forma Uygula ve Kapat'}
                 </button>
               )}
             </div>

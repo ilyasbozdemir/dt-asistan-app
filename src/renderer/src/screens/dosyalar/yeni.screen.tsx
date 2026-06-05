@@ -564,9 +564,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2 relative">
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İhale / Dosya Konusu (İşin Adı) *
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-450">
+                          İhale / Dosya Konusu (İşin Adı) *
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => openTextGenerator('konu', 'Konuyu AI ile Üret', 'İhale Konusu', 'Verilen metin veya alım işlemine göre en uygun, resmi ve kısa ihale / doğrudan temin konusunu (İşin Adı) üret. Başka hiçbir açıklama yazma, sadece ihale adını ver.')}
+                          className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded border-none"
+                        >
+                          <Sparkles size={11} /> AI ile Üret
+                        </button>
+                      </div>
                       <input
                         type="text"
                         required
@@ -841,9 +850,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     </div>
 
                     <div className="md:col-span-3">
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Bütçe Kodu / Harcama Tertibi
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-600 dark:text-slate-455">
+                          Bütçe Kodu / Harcama Tertibi (Ekonomik Kod)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => openTextGenerator('butce_kodu', 'Bütçe/Ekonomik Kod Tahmini', 'Bütçe Kodu', 'Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et. Sadece kodu yaz. (Örn: 03.2.1.01 veya 46.30.11.23-01.3.9.00-5-03.2.1.01)')}
+                          className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded border-none"
+                        >
+                          <Sparkles size={11} /> AI ile Tahmin Et
+                        </button>
+                      </div>
                       <input
                         type="text"
                         value={formData.butce_kodu || ''}
