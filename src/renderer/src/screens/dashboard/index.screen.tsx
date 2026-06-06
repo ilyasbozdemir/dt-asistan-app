@@ -388,16 +388,6 @@ export default function DashboardScreen(): React.JSX.Element {
         {/* STATS CARDS */}
         {!activeDosyaId && (
           <div className="lg:col-span-8">
-          <div className="mb-4">
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 flex items-center gap-2">
-              <Database className="w-4 h-4 text-blue-500" />
-              Kurum Genel Bilgileri
-            </h2>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30 flex items-start gap-1.5">
-              <Info className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-              Bu istatistikler aktif olan tekil bir temin dosyasına (sürece) göre değil, kurumun tüm veritabanı geneline (tüm dosyalar, tüm firmalar, tüm personeller vb.) göre hesaplanmıştır.
-            </p>
-          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {/* İhale Dosya Sayısı */}
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
