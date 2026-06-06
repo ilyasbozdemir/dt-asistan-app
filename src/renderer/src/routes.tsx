@@ -304,7 +304,6 @@ const routeTree = rootRoute.addChildren([
   komisyonGorevleriRoute,
   takipRoute,
   raporlarRoute,
-  komisyonlarRoute,
   okasKodRoute,
   mevzuatRoute,
   changelogRoute,
