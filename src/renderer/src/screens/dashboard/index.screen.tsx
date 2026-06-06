@@ -29,6 +29,8 @@ import { Button } from '../../components/ui/Button'
 import { useDashboardStats, useActiveDosyaSummary, useAnnouncements } from './dashboard.hooks'
 import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
+import { TakipScreen } from '../system/TakipScreen'
+import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 
 export default function DashboardScreen(): React.JSX.Element {
   const {
@@ -49,6 +51,8 @@ export default function DashboardScreen(): React.JSX.Element {
   const { stats, isLoading } = useDashboardStats()
   const { announcements, isLoading: isAnnouncementsLoading } = useAnnouncements()
   const { dosyalar } = useDosyalarHooks()
+  const { settings } = useAyarlarHooks()
+  const isMailConfigured = !!settings.smtp_host
   
   const [showAIModal, setShowAIModal] = useState(false)
   const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null)
@@ -166,9 +170,31 @@ export default function DashboardScreen(): React.JSX.Element {
     }
   }
 
+  if (activeDosyaId) {
+    return <TakipScreen />
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* 1. HERO HEADER */}
+      {!isMailConfigured && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3 text-amber-700 dark:text-amber-500">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold">Mail (SMTP) Ayarları Yapılandırılmamış</h4>
+              <p className="text-xs mt-0.5 opacity-90">Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz için posta sunucunuzu ayarlamanız gerekmektedir. Şifrenizi unutursanız sisteme erişiminizi kaybedebilirsiniz!</p>
+            </div>
+          </div>
+          <Link to="/ayarlar?tab=smtp">
+            <Button className="shrink-0 text-xs py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm">
+              <Mail className="w-4 h-4 mr-1.5" />
+              Ayarları Yapılandır
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600/10 via-indigo-600/5 to-transparent border border-blue-500/10 dark:border-blue-500/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">

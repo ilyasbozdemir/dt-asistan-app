@@ -297,7 +297,7 @@ export function Sidebar(): React.JSX.Element {
           title: 'Dosya Navigasyonu',
           items: [
             ...(!isDosyaWindowMode ? [{ name: '⬅ Tüm Teminlere Dön', path: '/dosyalar', icon: ChevronLeft, onClick: () => setActiveDosyaId(null) }] : []),
-            ...(!isDosyaWindowMode ? [{ name: 'Yeni Pencerede Aç', icon: Square, onClick: handleOpenInNewWindow }] : [])
+            { name: 'Süreç Takip & Durum', path: '/takip', icon: ClipboardList }
           ]
         },
         activeGroup
