@@ -10,12 +10,9 @@ import { workspaceManager } from './database/workspace'
 import { CURRENT_SCHEMA_VERSION } from './database/migrate'
 import { manifests } from './database/schema-manifest/index'
 import nodemailer from 'nodemailer'
-import {
-  isSupportedFile,
-  allFormatsFilter,
-  perFormatFilters,
-  defaultFormat
-} from './config/fileFormats'
+import { isSupportedFile, defaultFormat, perFormatFilters, allFormatsFilter } from './config/fileFormats'
+import { startServer, stopServer, getSocketServer } from './server'
+import { connectToServer, disconnectFromServer, emitEvent } from './client'
 import { generateContent, testConnection, AIGenerateOptions } from './ai/index'
 
 function createWindow(): void {
@@ -129,8 +126,6 @@ if (!gotTheLock) {
     })
 
     // --- EBYS Network (Socket) Handlers ---
-    const { startServer, stopServer, getSocketServer } = require('./server')
-    const { connectToServer, disconnectFromServer, emitEvent } = require('./client')
 
     ipcMain.handle('network:start-server', (_, port: number) => {
       return startServer(port)

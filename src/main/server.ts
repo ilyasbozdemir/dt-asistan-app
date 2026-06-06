@@ -1,6 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io'
 import http from 'http'
-import { ipcMain, BrowserWindow } from 'electron'
+import { BrowserWindow } from 'electron'
 
 let io: SocketIOServer | null = null
 let httpServer: http.Server | null = null
@@ -11,7 +11,7 @@ export function startServer(port: number = 3000): { success: boolean; error?: st
       return { success: true } // Zaten çalışıyor
     }
 
-    httpServer = http.createServer((req, res) => {
+    httpServer = http.createServer((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/plain' })
       res.end('DT Asistan EBYS Server Running')
     })
