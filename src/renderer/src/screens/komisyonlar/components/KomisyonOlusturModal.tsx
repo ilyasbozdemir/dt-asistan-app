@@ -1,23 +1,17 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  X,
-  Users,
-  Search,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react'
+import { AlertCircle, Trash2, Plus } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
+import { Modal } from '../../../components/ui/Modal'
 
 interface KomisyonOlusturModalProps {
   isOpen: boolean
   onClose: () => void
+  komisyonId?: number | null
 }
 
-export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalProps): React.JSX.Element | null {
+export function KomisyonOlusturModal({ isOpen, onClose, komisyonId }: KomisyonOlusturModalProps): React.JSX.Element | null {
   const queryClient = useQueryClient()
   const [ad, setAd] = useState('')
   
@@ -50,6 +44,38 @@ export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalPr
     enabled: isOpen
   })
 
+  // Fetch for edit
+  useQuery({
+    queryKey: ['komisyon_detay', komisyonId],
+    queryFn: async () => {
+      if (!komisyonId) return null
+      
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT * FROM TANIM_Komisyon WHERE id = ?',
+        [komisyonId]
+      )
+      if (!res.success || !res.data[0]) throw new Error(res.error || 'Komisyon bulunamadı')
+      setAd(res.data[0].ad)
+
+      const membersRes = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT * FROM TANIM_KomisyonUye WHERE komisyon_id = ?',
+        [komisyonId]
+      )
+      if (membersRes.success && membersRes.data) {
+        setUyeler(membersRes.data.map((m: any) => ({
+          id: Date.now() + Math.random(),
+          personelId: m.personel_id,
+          gorevId: m.gorev_id,
+          asilMi: m.asil_mi
+        })))
+      }
+      return res.data[0]
+    },
+    enabled: !!komisyonId && isOpen
+  })
+
   const handleAddUye = () => {
     setUyeler([...uyeler, { id: Date.now(), personelId: '', gorevId: '', asilMi: 1 }])
   }
@@ -69,27 +95,53 @@ export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalPr
         throw new Error('Lütfen tüm üyelerin personel ve görev seçimlerini yapınız.')
       }
 
-      const res = await window.electron.ipcRenderer.invoke('db:transaction', [
-        {
-          sql: 'INSERT INTO TANIM_Komisyon (ad) VALUES (?)',
-          params: [ad]
+      if (komisyonId) {
+        const updateRes = await window.electron.ipcRenderer.invoke('db:transaction', [
+          {
+            sql: 'UPDATE TANIM_Komisyon SET ad = ? WHERE id = ?',
+            params: [ad, komisyonId]
+          },
+          {
+            sql: 'DELETE FROM TANIM_KomisyonUye WHERE komisyon_id = ?',
+            params: [komisyonId]
+          }
+        ])
+        if (!updateRes.success) throw new Error(updateRes.error)
+        
+        const uyeQueries = uyeler.map(u => ({
+          sql: 'INSERT INTO TANIM_KomisyonUye (komisyon_id, personel_id, gorev_id, asil_mi) VALUES (?, ?, ?, ?)',
+          params: [komisyonId, u.personelId, u.gorevId, u.asilMi]
+        }))
+
+        if (uyeQueries.length > 0) {
+          const uyeRes = await window.electron.ipcRenderer.invoke('db:transaction', uyeQueries)
+          if (!uyeRes.success) throw new Error(uyeRes.error)
         }
-      ])
-      
-      if (!res.success) throw new Error(res.error)
-      const komisyonId = res.lastInsertRowid
+        return komisyonId
 
-      const uyeQueries = uyeler.map(u => ({
-        sql: 'INSERT INTO TANIM_KomisyonUye (komisyon_id, personel_id, gorev_id, asil_mi) VALUES (?, ?, ?, ?)',
-        params: [komisyonId, u.personelId, u.gorevId, u.asilMi]
-      }))
+      } else {
+        const res = await window.electron.ipcRenderer.invoke('db:transaction', [
+          {
+            sql: 'INSERT INTO TANIM_Komisyon (ad) VALUES (?)',
+            params: [ad]
+          }
+        ])
+        
+        if (!res.success) throw new Error(res.error)
+        const newKomisyonId = res.lastInsertRowid
 
-      if (uyeQueries.length > 0) {
-        const uyeRes = await window.electron.ipcRenderer.invoke('db:transaction', uyeQueries)
-        if (!uyeRes.success) throw new Error(uyeRes.error)
+        const uyeQueries = uyeler.map(u => ({
+          sql: 'INSERT INTO TANIM_KomisyonUye (komisyon_id, personel_id, gorev_id, asil_mi) VALUES (?, ?, ?, ?)',
+          params: [newKomisyonId, u.personelId, u.gorevId, u.asilMi]
+        }))
+
+        if (uyeQueries.length > 0) {
+          const uyeRes = await window.electron.ipcRenderer.invoke('db:transaction', uyeQueries)
+          if (!uyeRes.success) throw new Error(uyeRes.error)
+        }
+
+        return newKomisyonId
       }
-
-      return komisyonId
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
@@ -99,54 +151,34 @@ export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalPr
     }
   })
 
-  if (!isOpen) return null
-
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden relative">
-      <div className="flex flex-col h-full overflow-hidden">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Users className="w-6 h-6 text-blue-500" />
-              Yeni Komisyon Oluştur
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Komisyon türünü belirleyin ve personelleri görevlendirin.
-            </p>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={komisyonId ? 'Komisyonu Düzenle' : 'Yeni Komisyon Oluştur'}
+      description="Komisyon türünü belirleyin ve personelleri görevlendirin."
+      className="max-w-4xl"
+    >
+      <div className="space-y-6">
+        {saveMutation.isError && (
+          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            {saveMutation.error?.message}
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        )}
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Komisyon Adı</label>
+          <Input
+            type="text"
+            placeholder="Örn: Bilişim Sistemleri Fiyat Araştırma Komisyonu"
+            value={ad}
+            onChange={e => setAd(e.target.value)}
+            className="w-full"
+          />
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
-          {saveMutation.isError && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              {saveMutation.error?.message}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Komisyon Adı</label>
-              <Input
-                type="text"
-                placeholder="Örn: Bilişim Sistemleri Fiyat Araştırma Komisyonu"
-                value={ad}
-                onChange={e => setAd(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Komisyon Üyeleri</h3>
@@ -213,27 +245,22 @@ export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalPr
                 ))
               )}
             </div>
-          </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3 shrink-0">
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={saveMutation.isPending}>
             İptal
           </Button>
           <Button 
-            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white" 
+            className="bg-blue-600 hover:bg-blue-700 text-white" 
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
           >
-            {saveMutation.isPending ? 'Kaydediliyor...' : (
-              <>
-                <CheckCircle2 className="w-4 h-4" /> Komisyonu Kaydet
-              </>
-            )}
+            {saveMutation.isPending ? 'Kaydediliyor...' : (komisyonId ? 'Güncelle' : 'Kaydet')}
           </Button>
+        </div>
       </div>
-    </div>
-    </div>
+    </Modal>
   )
 }

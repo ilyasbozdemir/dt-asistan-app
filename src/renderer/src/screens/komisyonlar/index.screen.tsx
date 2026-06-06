@@ -15,7 +15,8 @@ import { KomisyonOlusturModal } from './components/KomisyonOlusturModal'
 
 export default function KomisyonlarScreen(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeView, setActiveView] = useState<'list' | 'create'>('list')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingKomisyonId, setEditingKomisyonId] = useState<number | null>(null)
 
   // Oluşturulmuş Komisyonları Çek
   const { data: komisyonlar = [], isLoading: isKomisyonLoading } = useQuery({
@@ -72,15 +73,17 @@ export default function KomisyonlarScreen(): React.JSX.Element {
 
           <Button 
             className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
-            onClick={() => setActiveView('create')}
+            onClick={() => {
+              setEditingKomisyonId(null)
+              setIsModalOpen(true)
+            }}
           >
             <Plus className="w-4 h-4" /> Komisyon Oluştur
           </Button>
         </div>
       </div>
 
-      {activeView === 'list' && (
-        <div className="grid grid-cols-1 gap-8 items-start flex-1 min-h-0">
+      <div className="grid grid-cols-1 gap-8 items-start flex-1 min-h-0">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
             
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -157,7 +160,16 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                       )}
                       
                       <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
-                        <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg">Düzenle</Button>
+                        <Button 
+                          variant="outline" 
+                          className="text-xs py-1.5 h-auto rounded-lg"
+                          onClick={() => {
+                            setEditingKomisyonId(komisyon.id)
+                            setIsModalOpen(true)
+                          }}
+                        >
+                          Düzenle
+                        </Button>
                         <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50">Sil</Button>
                       </div>
                     </div>
@@ -167,15 +179,14 @@ export default function KomisyonlarScreen(): React.JSX.Element {
             </div>
           </div>
         </div>
-      )}
-
-      {activeView === 'create' && (
         <KomisyonOlusturModal 
-          isOpen={true} 
-          onClose={() => setActiveView('list')} 
+          isOpen={isModalOpen} 
+          komisyonId={editingKomisyonId}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingKomisyonId(null)
+          }} 
         />
-      )}
-      
     </div>
   )
 }

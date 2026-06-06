@@ -23,8 +23,7 @@ import {
   Compass,
   FileCheck,
   CreditCard,
-  Square
-} from 'lucide-react'
+        } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -108,7 +107,7 @@ export function Sidebar(): React.JSX.Element {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler', 'Malzeme & Kodlar']))
   const { institutionName, institutionLogo, adminUsername, institutionCode, loadSettings } =
     useSettingsStore()
-  const { closeWorkspace, fileName, activeDosyaId, setActiveDosyaId, activeFilePath } = useWorkspaceStore()
+  const { closeWorkspace, fileName, activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
   const queryClient = useQueryClient()
 
   const handleCloseWorkspace = async (): Promise<void> => {
@@ -120,15 +119,7 @@ export function Sidebar(): React.JSX.Element {
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
   const isDosyaWindowMode = searchParams.get('mode') === 'dosya_window' || hashParams.get('mode') === 'dosya_window'
 
-  const handleOpenInNewWindow = () => {
-    if (!activeDosyaId || !activeFilePath) return
-    window.electron?.ipcRenderer.send('window:open-dosya', {
-      dosyaId: activeDosyaId,
-      path: '/dosya',
-      workspacePath: activeFilePath,
-      title: activeDosya?.konu || activeDosya?.isin_aciklamasi || `Dosya #${activeDosyaId}`
-    })
-  }
+
 
   React.useEffect(() => {
     loadSettings()
