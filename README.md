@@ -31,21 +31,37 @@ yedekleyebilir, taşıyabilir ve paylaşabilirsiniz.
 
 ## Özellikler
 
-- **Mevzuata tam uygunluk** — 4734 Sayılı Kamu İhale Kanunu Madde 22 ve Kamu İhale Kurumu standartları eksiksiz karşılanmaktadır.
-- **Tek girdi, sonsuz kullanım** — Temin sürecinde kullanılan belgeleri kurumunuza özgü bir kez düzenleyin, her zaman kullanın. Sık kullanılan benzer alımlarınız için Tip Onay Belgesi oluşturun.
-- **Sınırsız Esneklik** — En düşük fiyatlı firmadan mı, tüm kalemleri aynı firmadan mı, yoksa her kalem için istediğiniz firmadan mı alım gerçekleştireceksiniz? Kaç firmadan teklif alacaksanız sayısını siz belirleyin. Seçim tamamen size ait!
-- **Yaklaşık Maliyet Kolaylığı** — Yaklaşık maliyeti ister programla detaylı hesaplayın, isterseniz doğrudan elinizdeki veriyi girin.
-- **EKAP’a Girişe Hazır** — Doğrudan Temin Kayıt Formu için zaman harcamaya gerek kalmadı, sistem her şeyi EKAP formatına uygun hazırlar.
-- **Dinamik şablon yönetimi** — Belgelerinizi uygulama içinden düzenleyebilir, anlık önizleyebilir ve `.xlsx` ya da `.docx` formatında dışa aktarabilirsiniz.
-- **DYS uyumlu çıktı** — Tüm belgeler `.UDF` formatında da dışa aktarılabilir; Doküman Yönetim Sistemi entegrasyonu ek adım gerektirmez.
-- **Adım adım rehberli iş akışı** — Her süreç aşaması yönlendirmeli ekranlarla ilerler; eksik ya da hatalı bilgi girilmesi sistem tarafından engellenir.
-- **Tamamen çevrimdışı** — İnternet bağlantısı gerekmez, verileriniz yalnızca sizin bilgisayarınızda durur.
+- **Mevzuata tam uygunluk** — 4734 Sayılı Kamu İhale Kanunu Madde 22 ve Kamu
+  İhale Kurumu standartları eksiksiz karşılanmaktadır.
+- **Tek girdi, sonsuz kullanım** — Temin sürecinde kullanılan belgeleri
+  kurumunuza özgü bir kez düzenleyin, her zaman kullanın. Sık kullanılan benzer
+  alımlarınız için Tip Onay Belgesi oluşturun.
+- **Sınırsız Esneklik** — En düşük fiyatlı firmadan mı, tüm kalemleri aynı
+  firmadan mı, yoksa her kalem için istediğiniz firmadan mı alım
+  gerçekleştireceksiniz? Kaç firmadan teklif alacaksanız sayısını siz
+  belirleyin. Seçim tamamen size ait!
+- **Yaklaşık Maliyet Kolaylığı** — Yaklaşık maliyeti ister programla detaylı
+  hesaplayın, isterseniz doğrudan elinizdeki veriyi girin.
+- **EKAP’a Girişe Hazır** — Doğrudan Temin Kayıt Formu için zaman harcamaya
+  gerek kalmadı, sistem her şeyi EKAP formatına uygun hazırlar.
+- **Dinamik şablon yönetimi** — Belgelerinizi uygulama içinden düzenleyebilir,
+  anlık önizleyebilir ve `.xlsx` ya da `.docx` formatında dışa aktarabilirsiniz.
+- **DYS uyumlu çıktı** — Tüm belgeler `.UDF` formatında da dışa aktarılabilir;
+  Doküman Yönetim Sistemi entegrasyonu ek adım gerektirmez.
+- **Adım adım rehberli iş akışı** — Her süreç aşaması yönlendirmeli ekranlarla
+  ilerler; eksik ya da hatalı bilgi girilmesi sistem tarafından engellenir.
+- **Tamamen çevrimdışı** — İnternet bağlantısı gerekmez, verileriniz yalnızca
+  sizin bilgisayarınızda durur.
 
 ---
 
 ## Kimler Kullanabilir?
-Kamu İhale Kanunu kapsamında **Doğrudan Temin** ile alım yapan tüm kurum ve kuruluşlar için tasarlanmıştır:
-- **Belediyeler** (Büyük, orta ve küçük ölçekli ihale düzenleyen tüm müdürlükler)
+
+Kamu İhale Kanunu kapsamında **Doğrudan Temin** ile alım yapan tüm kurum ve
+kuruluşlar için tasarlanmıştır:
+
+- **Belediyeler** (Büyük, orta ve küçük ölçekli ihale düzenleyen tüm
+  müdürlükler)
 - **İl Özel İdareleri**
 - **Hastaneler** ve **Üniversiteler**
 - **İl Milli Eğitim Müdürlükleri**
@@ -57,7 +73,10 @@ Kamu İhale Kanunu kapsamında **Doğrudan Temin** ile alım yapan tüm kurum ve
 ---
 
 ## Basıma Hazır Alabileceğiniz Belgeler
-Sistemden saniyeler içinde otomatik olarak üretip çıktısını alabileceğiniz belgeler:
+
+Sistemden saniyeler içinde otomatik olarak üretip çıktısını alabileceğiniz
+belgeler:
+
 - Doğrudan Temin Onay Belgesi
 - Yaklaşık Maliyet Hesap Cetveli ve Görevlendirme Yazısı
 - İhtiyaç Listesi ve Talep Yazısı (Lüzum Müzekkeresi)
@@ -72,14 +91,17 @@ Sistemden saniyeler içinde otomatik olarak üretip çıktısını alabileceğin
 
 ---
 
-## Gelişmiş Raporlama (Çok Yakında!)
-Bütçe harcama raporlarınız tek tuşla elinizin altında olacak:
+## Gelişmiş Raporlama
+
+Bütçe harcama raporlarınız tek tuşla elinizin altında:
+
 - Hangi bütçe kaleminden?
 - Hangi tarih aralığında?
 - Hangi temin şeklinden veya iş türlerinde?
 - Ne kadar alım gerçekleştirdiniz?
 
-Tüm bu soruların yanıtlarını güçlü ve dinamik raporlama ekranlarıyla anında alabileceksiniz.
+Tüm bu soruların yanıtlarını güçlü ve dinamik raporlama ekranlarıyla anında
+alabilirsiniz.
 
 ---
 
