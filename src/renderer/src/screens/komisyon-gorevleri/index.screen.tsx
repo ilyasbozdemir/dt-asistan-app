@@ -1,0 +1,107 @@
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  ClipboardCheck,
+  Search,
+  Plus,
+  Filter,
+  CheckCircle2,
+  Trash2,
+  Edit
+} from 'lucide-react'
+import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
+
+export default function KomisyonGorevleriScreen(): React.JSX.Element {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const { data: gorevler = [], isLoading } = useQuery({
+    queryKey: ['komisyon_gorevleri'],
+    queryFn: async () => {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT * FROM TANIM_KomisyonGorevi WHERE aktif_mi = 1 ORDER BY id ASC'
+      )
+      if (!res.success) throw new Error(res.error)
+      return res.data
+    }
+  })
+
+  const filteredGorevler = gorevler.filter(g => 
+    g.ad.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (g.aciklama && g.aciklama.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  return (
+    <div className="flex flex-col h-full space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <ClipboardCheck className="w-6 h-6 text-indigo-500" />
+            Komisyon Görev Tanımları
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Komisyonlarda personellere atanabilecek "Başkan, Üye, Uzman Üye" gibi unvan ve görevleri yönetin.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all">
+            <Plus className="w-4 h-4" /> Yeni Görev Ekle
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Görev adı veya açıklama ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-4 py-2 w-full bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl text-sm"
+            />
+          </div>
+          <Button variant="outline" className="gap-2 rounded-xl text-slate-600 dark:text-slate-300">
+            <Filter className="w-4 h-4" /> Filtrele
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {isLoading ? (
+              <div className="col-span-full py-12 text-center text-slate-500">Yükleniyor...</div>
+            ) : filteredGorevler.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-slate-500">Görev bulunamadı.</div>
+            ) : (
+              filteredGorevler.map((gorev: any) => (
+              <div key={gorev.id} className="group p-4 bg-slate-50/50 hover:bg-slate-50 dark:bg-slate-950/50 dark:hover:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl transition-all">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                      {gorev.ad.charAt(0)}
+                    </div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{gorev.ad}</h3>
+                  </div>
+                  <div className="flex opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                    <button className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed ml-10">
+                  {gorev.aciklama}
+                </p>
+              </div>
+            )))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

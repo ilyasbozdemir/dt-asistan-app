@@ -8,8 +8,9 @@ import v1alpha6 from './1.0.0-alpha.6.yaml?raw'
 import v1alpha7 from './1.0.0-alpha.7.yaml?raw'
 import v1alpha8 from './1.0.0-alpha.8.yaml?raw'
 import v1alpha9 from './1.0.0-alpha.9.yaml?raw'
+import v1alpha10 from './1.0.0-alpha.10.yaml?raw'
 
 // Sıralama schema_version'a göre ascending (küçükten büyüğe) olmalıdır. Sıra şart!
-export const manifestsRaw = [v1alpha1, v1alpha2, v1alpha3, v1alpha4, v1alpha5, v1alpha6, v1alpha7, v1alpha8, v1alpha9]
+export const manifestsRaw = [v1alpha1, v1alpha2, v1alpha3, v1alpha4, v1alpha5, v1alpha6, v1alpha7, v1alpha8, v1alpha9, v1alpha10]
 
 export const manifests = manifestsRaw.map(raw => yaml.load(raw) as any)

@@ -21,6 +21,7 @@ import OkasKodScreen from './screens/okaskod/index.screen'
 import OlcuBirimleriScreen from './screens/olcubirimleri/index.screen'
 import YeniMalzemeScreen from './screens/malzemeler/yeni.screen'
 import YeniDosyaScreen from './screens/dosyalar/yeni.screen'
+import KomisyonlarScreen from './screens/komisyonlar/index.screen'
 
 const rootRoute = createRootRoute({
   component: PageWrapper
@@ -60,6 +61,12 @@ const sablonlarRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/sablonlar',
   component: SablonlarScreen
+})
+
+const komisyonlarRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/komisyonlar',
+  component: KomisyonlarScreen
 })
 
 import { TakipScreen } from './screens/system/TakipScreen'
@@ -288,6 +295,7 @@ const routeTree = rootRoute.addChildren([
   sablonlarRoute,
   takipRoute,
   raporlarRoute,
+  komisyonlarRoute,
   okasKodRoute,
   mevzuatRoute,
   changelogRoute,

@@ -17,6 +17,7 @@ import { TANIM_TasinirKod } from './tables/TANIM_TasinirKod'
 import { TANIM_OkasKod } from './tables/TANIM_OkasKod'
 import { TANIM_KodSozlugu } from './tables/TANIM_KodSozlugu'
 import { TANIM_OlcuBirimi } from './tables/TANIM_OlcuBirimi'
+import { TANIM_KomisyonGorevi } from './tables/TANIM_KomisyonGorevi'
 import { DATA_TeminKalem } from './tables/DATA_TeminKalem'
 import { DATA_TeminFirma } from './tables/DATA_TeminFirma'
 import { DATA_TeminKalemTeklif } from './tables/DATA_TeminKalemTeklif'
@@ -62,6 +63,7 @@ export const schema = {
     TANIM_AlimTuru_Sablon, // Alım türü ve şablon eşleşmeleri
     SABLON_Placeholder, // Şablon içi alan eşleşmeleri
     TANIM_KodSozlugu, // Kurumsal ve Mali Kod Sözlüğü
+    TANIM_KomisyonGorevi, // Komisyon Görev Tanımları
     // --- Operasyonel Veriler ---
     DATA_TeminDosyasi, // Her bir temin kaydı
     DATA_TeminKalem,

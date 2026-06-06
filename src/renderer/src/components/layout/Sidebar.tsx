@@ -68,6 +68,7 @@ const menuGroups: MenuGroup[] = [
       { name: 'İstekli Firma Yönetimi', path: '/firmalar', icon: Building2 },
       { name: 'Birim Yönetimi', path: '/birimler', icon: LayoutGrid },
       { name: 'Personel Yönetimi', path: '/personel', icon: Users },
+      { name: 'Komisyon Yönetimi', path: '/komisyonlar', icon: Users },
       { name: 'Ambar Tanımları', path: '/ambar', icon: Database },
       {
         name: 'Malzeme & Kodlar',
