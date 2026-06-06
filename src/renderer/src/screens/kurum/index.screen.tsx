@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { Building2, Save, Upload, MapPin, ImageIcon, Info, X, ExternalLink } from 'lucide-react'
+import { Building2, Save, Upload, MapPin, ImageIcon, Info, X, ExternalLink, Plus } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
@@ -254,8 +254,9 @@ export default function KurumScreen(): React.JSX.Element {
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                          Kurum Anteti (Satır Satır)
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
+                          Kurum Anteti
+                          <span className="text-[9px] font-normal text-slate-400">(Örn: T.C. / X Kurumu / Y Müdürlüğü)</span>
                         </label>
                         <div className="space-y-2">
                           {institutionLetterhead.map((line, idx) => (
@@ -288,9 +289,10 @@ export default function KurumScreen(): React.JSX.Element {
                           <button
                             type="button"
                             onClick={() => setInstitutionLetterhead([...institutionLetterhead, ''])}
-                            className="mt-2 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800/40"
+                            className="mt-2 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800/40 flex items-center gap-1.5 transition-colors"
                           >
-                            + Yeni Satır Ekle
+                            <Plus className="w-3.5 h-3.5" />
+                            Yeni Satır Ekle
                           </button>
                         </div>
                       </div>
