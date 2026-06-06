@@ -18,8 +18,7 @@ import { GorevTanimlariModal } from './components/GorevTanimlariModal'
 
 export default function KomisyonlarScreen(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isRolesModalOpen, setIsRolesModalOpen] = useState(false)
+  const [activeView, setActiveView] = useState<'list' | 'create' | 'roles'>('list')
 
   // Oluşturulmuş Komisyonları Çek
   const { data: komisyonlar = [], isLoading: isKomisyonLoading } = useQuery({
@@ -61,88 +60,94 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           <Button 
             variant="outline" 
             className="gap-2 rounded-xl text-slate-600 dark:text-slate-300"
-            onClick={() => setIsRolesModalOpen(true)}
+            onClick={() => setActiveView('roles')}
           >
             <Settings className="w-4 h-4" /> Görev Tanımlarını Yönet
           </Button>
           <Button 
             className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setActiveView('create')}
           >
             <Plus className="w-4 h-4" /> Komisyon Oluştur
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 items-start flex-1 min-h-0">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <Input
-                type="text"
-                placeholder="Komisyon adı veya üye ara..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl text-sm"
-              />
-            </div>
-            <Button variant="outline" className="gap-2 rounded-xl text-slate-600 dark:text-slate-300">
-              <Filter className="w-4 h-4" /> Filtrele
-            </Button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800/50 rounded-xl flex flex-col p-6">
-            {isKomisyonLoading ? (
-               <div className="flex-1 flex items-center justify-center text-slate-500">Yükleniyor...</div>
-            ) : filteredKomisyonlar.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center max-w-md">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
-                    Kayıtlı Komisyon Bulunamadı
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Henüz bir komisyon tanımı bulunmuyor. Yeni bir komisyon eklemek için yukarıdaki "Komisyon Oluştur" butonunu kullanabilirsiniz.
-                  </p>
-                </div>
+      {activeView === 'list' && (
+        <div className="grid grid-cols-1 gap-8 items-start flex-1 min-h-0">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Komisyon adı veya üye ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 pr-4 py-2 w-full bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl text-sm"
+                />
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredKomisyonlar.map((komisyon: any) => (
-                  <div key={komisyon.id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
-                          {getIconForTur(komisyon.ad)}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-800 dark:text-slate-200">{komisyon.ad}</h3>
+              <Button variant="outline" className="gap-2 rounded-xl text-slate-600 dark:text-slate-300">
+                <Filter className="w-4 h-4" /> Filtrele
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800/50 rounded-xl flex flex-col p-6">
+              {isKomisyonLoading ? (
+                 <div className="flex-1 flex items-center justify-center text-slate-500">Yükleniyor...</div>
+              ) : filteredKomisyonlar.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center max-w-md">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
+                      Kayıtlı Komisyon Bulunamadı
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Henüz bir komisyon tanımı bulunmuyor. Yeni bir komisyon eklemek için yukarıdaki "Komisyon Oluştur" butonunu kullanabilirsiniz.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredKomisyonlar.map((komisyon: any) => (
+                    <div key={komisyon.id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
+                            {getIconForTur(komisyon.ad)}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200">{komisyon.ad}</h3>
+                          </div>
                         </div>
                       </div>
+                      {/* İleride burada komisyon üyeleri de listelenebilir (Sub-query veya join ile çekilip) */}
+                      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+                        <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg">Düzenle</Button>
+                        <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50">Sil</Button>
+                      </div>
                     </div>
-                    {/* İleride burada komisyon üyeleri de listelenebilir (Sub-query veya join ile çekilip) */}
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
-                      <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg">Düzenle</Button>
-                      <Button variant="outline" className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50">Sil</Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <KomisyonOlusturModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-      />
+      {activeView === 'create' && (
+        <KomisyonOlusturModal 
+          isOpen={true} 
+          onClose={() => setActiveView('list')} 
+        />
+      )}
       
-      <GorevTanimlariModal
-        isOpen={isRolesModalOpen}
-        onClose={() => setIsRolesModalOpen(false)}
-      />
+      {activeView === 'roles' && (
+        <GorevTanimlariModal
+          isOpen={true}
+          onClose={() => setActiveView('list')}
+        />
+      )}
     </div>
   )
 }

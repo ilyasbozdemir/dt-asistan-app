@@ -13,11 +13,8 @@ export const TANIM_KomisyonGorevi = {
     'UNIQUE(ad)'
   ],
   initialData: [
-    { ad: 'Başkan', aciklama: 'Komisyona başkanlık eden asil üye.', aktif_mi: 1 },
+    { ad: 'Komisyon Başkanı', aciklama: 'Komisyona başkanlık eden asil üye.', aktif_mi: 1 },
     { ad: 'Üye', aciklama: 'Komisyonda görevli asil üye.', aktif_mi: 1 },
-    { ad: 'Düz Üye', aciklama: 'Komisyonda görevli standart üye.', aktif_mi: 1 },
-    { ad: 'Uzman Üye', aciklama: 'Mali veya teknik konularda uzmanlığı olan üye.', aktif_mi: 1 },
-    { ad: 'Yedek Üye', aciklama: 'Asil üyelerin katılamadığı durumlarda görev alan üye.', aktif_mi: 1 },
     { ad: 'Harcama Yetkilisi', aciklama: 'Harcama yetkilisi görevini yürüten personel.', aktif_mi: 1 },
     { ad: 'Satın Alma Harcama Yetkilisi', aciklama: 'Satın alma süreçlerinden sorumlu harcama yetkilisi.', aktif_mi: 1 },
     { ad: 'Gerçekleştirme Görevlisi', aciklama: 'İşin gerçekleştirilmesinden sorumlu görevli.', aktif_mi: 1 },

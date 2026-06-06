@@ -1303,6 +1303,34 @@ if (!gotTheLock) {
       }
     })
 
+    // Transaction işlemi (Çoklu INSERT, UPDATE, DELETE)
+    ipcMain.handle('db:transaction', async (_, queries: { sql: string; params: any[] }[]) => {
+      try {
+        const db = workspaceManager.getDb()
+        
+        let lastInsertRowid: number | bigint = 0
+        let totalChanges = 0
+
+        const transaction = db.transaction((stmts: { sql: string; params: any[] }[]) => {
+          for (const q of stmts) {
+            const stmt = db.prepare(q.sql)
+            const info = stmt.run(...q.params)
+            lastInsertRowid = info.lastInsertRowid
+            totalChanges += info.changes
+          }
+        })
+
+        transaction(queries)
+
+        broadcastDbChange()
+        workspaceManager.save()
+        
+        return { success: true, lastInsertRowid, changes: totalChanges }
+      } catch (error: any) {
+        return { success: false, error: error.message }
+      }
+    })
+
     createWindow()
 
     // Helper to send status to all open windows
