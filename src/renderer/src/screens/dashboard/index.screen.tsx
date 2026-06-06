@@ -18,12 +18,11 @@ import {
   ShieldAlert,
   CheckCircle2,
   AlertTriangle,
-  PlayCircle,
-  ListPlus,
   Sparkles
 } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Link } from '@tanstack/react-router'
+import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Button } from '../../components/ui/Button'
@@ -265,7 +264,9 @@ export default function DashboardScreen(): React.JSX.Element {
       </div>
 
       {/* 2. KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={cn("grid grid-cols-1 gap-4", activeDosyaId ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-4")}>
+        {!activeDosyaId && (
+          <>
         {/* Card 1: Total Dossiers (Genel) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-blue-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
@@ -301,7 +302,11 @@ export default function DashboardScreen(): React.JSX.Element {
             </div>
           </div>
         </div>
+          </>
+        )}
 
+        {activeDosyaId && (
+          <>
         {/* Card 3: Active Dossier Cost (Aktif) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 group hover:border-indigo-500/30 transition-all duration-300">
           <div className="flex items-center justify-between">
@@ -348,11 +353,14 @@ export default function DashboardScreen(): React.JSX.Element {
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
                  {/* NEW STATS & RIGHT PANEL GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* STATS CARDS */}
-        <div className="lg:col-span-8">
+        {!activeDosyaId && (
+          <div className="lg:col-span-8">
           <div className="mb-4">
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 flex items-center gap-2">
               <Database className="w-4 h-4 text-blue-500" />
@@ -545,6 +553,7 @@ export default function DashboardScreen(): React.JSX.Element {
             </div>
           </div>
         </div>
+        )}
 
         {/* RIGHT SIDE PANEL: IDENTITY CARD & ANNOUNCEMENTS */}
         <div className="lg:col-span-4 flex flex-col gap-6">
@@ -718,7 +727,7 @@ export default function DashboardScreen(): React.JSX.Element {
                   dx={-10}
                 />
                 <Tooltip 
-                  formatter={(value: number) => [formatCurrency(value), 'Harcama']}
+                  formatter={(value: any) => [formatCurrency(value as number), 'Harcama']}
                   labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 />
@@ -772,7 +781,7 @@ export default function DashboardScreen(): React.JSX.Element {
                   }
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value: any) => formatCurrency(value as number)}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
               </PieChart>

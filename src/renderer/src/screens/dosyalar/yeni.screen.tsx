@@ -60,9 +60,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   // Title & Tab title
   useEffect(() => {
-    document.title = isEdit ? 'İhale Dosyası Düzenle - DT' : 'Yeni İhale Dosyası Ekle - DT'
+    document.title = isEdit ? 'Ä°hale DosyasÄ± DÃ¼zenle - DT' : 'Yeni Ä°hale DosyasÄ± Ekle - DT'
     const currentHref = routerState.location.href
-    updateTabLabel(currentHref, isEdit ? 'DT Dosyasını Düzenle' : 'Yeni DT Dosyası Ekle')
+    updateTabLabel(currentHref, isEdit ? 'DT DosyasÄ±nÄ± DÃ¼zenle' : 'Yeni DT DosyasÄ± Ekle')
   }, [isEdit, routerState.location.href, updateTabLabel])
 
   // DB Collections state
@@ -76,7 +76,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     temin_no: '',
     dosya_acilis_tarihi: new Date().toISOString().split('T')[0],
     butce_yili: new Date().getFullYear(),
-    butce_tipi: 'Genel Bütçe',
+    butce_tipi: 'Genel BÃ¼tÃ§e',
     konu: '',
     isin_aciklamasi: '',
     birim_id: null,
@@ -91,7 +91,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     ekonomik_kod: '',
     talep_tarihi: '',
     talep_sayisi: '',
-    ihale_tipi: 'Doğrudan Temin',
+    ihale_tipi: 'DoÄŸrudan Temin',
     tur: 'mal',
     ihale_sekli: '22/d*',
     teklif_sozlesme_turu: 'Birim Fiyat',
@@ -150,7 +150,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           }
         }
       } catch (err) {
-        console.error('Veritabanı yüklenirken hata oluştu:', err)
+        console.error('VeritabanÄ± yÃ¼klenirken hata oluÅŸtu:', err)
       } finally {
         setLoadingDb(false)
       }
@@ -158,8 +158,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     loadData()
   }, [isEdit, editId])
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<'genel' | 'mali' | 'ihale' | 'sorumlular'>('genel')
+  // Active Tab (Stepper)
+  const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac' | 'teknik'>('genel')
 
   // Search states for custom select/autocomplete dropdowns
   const [showBirimSearch, setShowBirimSearch] = useState(false)
@@ -177,7 +177,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     (p.unvan || '').toLowerCase().includes(personelSearchQuery.toLowerCase())
   )
 
-  // Copy Konu (İşin Adı) to Açıklama
+  // Copy Konu (Ä°ÅŸin AdÄ±) to AÃ§Ä±klama
   const handleCopyKonuToAciklama = () => {
     setFormData(prev => ({
       ...prev,
@@ -188,7 +188,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   // AI Form Fill Modal
   const [showAIModal, setShowAIModal] = useState(false)
-  const [aiModalConfig, setAiModalConfig] = useState<{
+  const [, setAiModalConfig] = useState<{
     title: string
     fieldName: string
     initialPrompt: string
@@ -231,7 +231,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const getAIFormContext = () => {
     const selectedBirim = birimler.find(b => b.id === formData.birim_id)
     return {
-      formTitle: 'Yeni Doğrudan Temin İhale Dosyası',
+      formTitle: 'Yeni DoÄŸrudan Temin Ä°hale DosyasÄ±',
       kurumBilgisi: {
         birimAdi: selectedBirim?.birim_adi,
         sunulacakMakam: formData.sunulacak_makam || selectedBirim?.sunum_makami,
@@ -247,15 +247,15 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         butce_yili: formData.butce_yili
       },
       doldurulacakAlanlar: [
-        { alan: 'konu', etiket: 'İhale / Dosya Konusu', tip: 'text' as const, zorunlu: true, ornekDeger: 'Fen İşleri Kırtasiye Malzemesi Alımı' },
-        { alan: 'isin_aciklamasi', etiket: 'İşin Açıklaması / Kapsamı', tip: 'textarea' as const },
-        { alan: 'temin_no', etiket: 'Doğrudan Temin Numarası', tip: 'text' as const, ornekDeger: '2026/DT-001' },
-        { alan: 'sunulacak_makam', etiket: 'Evrakın Sunulacağı Makam', tip: 'text' as const, ornekDeger: 'BAŞKANLIK MAKAMINA' },
-        { alan: 'ihtiyac_yeri', etiket: 'İhtiyaç Yeri', tip: 'text' as const },
-        { alan: 'antet_ek_satir', etiket: 'İdari Antet Ek Satır', tip: 'text' as const },
-        { alan: 'yaklasik_maliyet', etiket: 'Yaklaşık Maliyet (₺)', tip: 'number' as const },
-        { alan: 'komisyon_takdiri', etiket: 'Komisyon Takdir Yazısı', tip: 'text' as const },
-        { alan: 'hesaplama_esasi', etiket: 'Hesaplama Esası', tip: 'text' as const }
+        { alan: 'konu', etiket: 'Ä°hale / Dosya Konusu', tip: 'text' as const, zorunlu: true, ornekDeger: 'Fen Ä°ÅŸleri KÄ±rtasiye Malzemesi AlÄ±mÄ±' },
+        { alan: 'isin_aciklamasi', etiket: 'Ä°ÅŸin AÃ§Ä±klamasÄ± / KapsamÄ±', tip: 'textarea' as const },
+        { alan: 'temin_no', etiket: 'DoÄŸrudan Temin NumarasÄ±', tip: 'text' as const, ornekDeger: '2026/DT-001' },
+        { alan: 'sunulacak_makam', etiket: 'EvrakÄ±n SunulacaÄŸÄ± Makam', tip: 'text' as const, ornekDeger: 'BAÅKANLIK MAKAMINA' },
+        { alan: 'ihtiyac_yeri', etiket: 'Ä°htiyaÃ§ Yeri', tip: 'text' as const },
+        { alan: 'antet_ek_satir', etiket: 'Ä°dari Antet Ek SatÄ±r', tip: 'text' as const },
+        { alan: 'yaklasik_maliyet', etiket: 'YaklaÅŸÄ±k Maliyet (â‚º)', tip: 'number' as const },
+        { alan: 'komisyon_takdiri', etiket: 'Komisyon Takdir YazÄ±sÄ±', tip: 'text' as const },
+        { alan: 'hesaplama_esasi', etiket: 'Hesaplama EsasÄ±', tip: 'text' as const }
       ]
     }
   }
@@ -277,9 +277,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const handleAiDescGenerate = () => {
     openTextGenerator(
       'isin_aciklamasi',
-      'İşin Açıklamasını Üret',
-      'İşin Açıklaması',
-      `Şu ihale konusu için resmi ve profesyonel bir "İşin Kapsamı ve Tanımı" metni oluştur. İhale/İş Adı: "${formData.konu || ''}". Metin kurumsal bir dilde olmalı, gereksiz yorum içermemeli ve doğrudan idari şartname açıklaması formatında olmalı. Eğer metinde ihale makamı vb. geçecekse yer tutucu olarak köşeli parantez ([KURUM ADI] vb.) kullan, gerçek isim verme.`
+      'Ä°ÅŸin AÃ§Ä±klamasÄ±nÄ± Ãœret',
+      'Ä°ÅŸin AÃ§Ä±klamasÄ±',
+      `Åu ihale konusu iÃ§in resmi ve profesyonel bir "Ä°ÅŸin KapsamÄ± ve TanÄ±mÄ±" metni oluÅŸtur. Ä°hale/Ä°ÅŸ AdÄ±: "${formData.konu || ''}". Metin kurumsal bir dilde olmalÄ±, gereksiz yorum iÃ§ermemeli ve doÄŸrudan idari ÅŸartname aÃ§Ä±klamasÄ± formatÄ±nda olmalÄ±. EÄŸer metinde ihale makamÄ± vb. geÃ§ecekse yer tutucu olarak kÃ¶ÅŸeli parantez ([KURUM ADI] vb.) kullan, gerÃ§ek isim verme.`
     )
   }
 
@@ -287,9 +287,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     const dataStr = JSON.stringify(formData, null, 2)
     openTextGenerator(
       'notlar',
-      'AI Form Tutarsızlık Kontrolü',
-      'Form Analiz Sonucu (İsterseniz Notlara Ekleyebilirsiniz)',
-      `Sen bir Kamu İhale ve Muhasebe Uzmanısın. Kullanıcı bir Doğrudan Temin ihale dosyası oluşturuyor ancak kaydetmeden önce sana kontrol ettirmek istedi.\n\nAşağıdaki form verilerini ihale mevzuatı (özellikle 22/d vb.), muhasebe kuralları (fonksiyonel kod, ekonomik kod uyumu) ve mantıksal tutarlılık açısından incele:\n\n${dataStr}\n\nEğer KDV, bütçe, ihale şekli, teslim tarihi gibi alanlarda bir hata, eksiklik veya mevzuata aykırılık görüyorsan kullanıcıyı uyar. Her şey normalse tebrik et.`
+      'AI Form TutarsÄ±zlÄ±k KontrolÃ¼',
+      'Form Analiz Sonucu (Ä°sterseniz Notlara Ekleyebilirsiniz)',
+      `Sen bir Kamu Ä°hale ve Muhasebe UzmanÄ±sÄ±n. KullanÄ±cÄ± bir DoÄŸrudan Temin ihale dosyasÄ± oluÅŸturuyor ancak kaydetmeden Ã¶nce sana kontrol ettirmek istedi.\n\nAÅŸaÄŸÄ±daki form verilerini ihale mevzuatÄ± (Ã¶zellikle 22/d vb.), muhasebe kurallarÄ± (fonksiyonel kod, ekonomik kod uyumu) ve mantÄ±ksal tutarlÄ±lÄ±k aÃ§Ä±sÄ±ndan incele:\n\n${dataStr}\n\nEÄŸer KDV, bÃ¼tÃ§e, ihale ÅŸekli, teslim tarihi gibi alanlarda bir hata, eksiklik veya mevzuata aykÄ±rÄ±lÄ±k gÃ¶rÃ¼yorsan kullanÄ±cÄ±yÄ± uyar. Her ÅŸey normalse tebrik et.`
     )
   }
 
@@ -297,8 +297,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     setAiModalConfig({
       title: 'Komisyon Karar Takdiri',
       fieldName: 'komisyon_takdiri',
-      initialPrompt: `"${formData.konu || 'Mal Alımı'}" ihalesine ilişkin komisyon kararı ve yetki devri metnini resmi bir üslupla oluştur.`,
-      systemInstruction: 'Sen resmi bir ihale komisyon sekreterisin. Karar takdiri için kısa ve net bir ifade üret.',
+      initialPrompt: `"${formData.konu || 'Mal AlÄ±mÄ±'}" ihalesine iliÅŸkin komisyon kararÄ± ve yetki devri metnini resmi bir Ã¼slupla oluÅŸtur.`,
+      systemInstruction: 'Sen resmi bir ihale komisyon sekreterisin. Karar takdiri iÃ§in kÄ±sa ve net bir ifade Ã¼ret.',
       mode: 'text'
     })
     setShowAIModal(true)
@@ -306,12 +306,12 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   const handleAiFullFormGenerate = () => {
     setAiModalConfig({
-      title: 'Dosyayı Yapay Zeka İle Oluştur',
+      title: 'DosyayÄ± Yapay Zeka Ä°le OluÅŸtur',
       fieldName: 'tum_dosya',
       initialPrompt: '',
-      systemInstruction: 'Sen bir ihale ve doğrudan temin uzmanısın. Kullanıcının verdiği metne göre bir ihale dosyasının temel özelliklerini ve gerekli alanlarını çıkart. Kullanıcı sana karmaşık bir dille ihale isteğini anlatabilir, sen bunu ayrıştırıp aşağıdaki JSON formatına birebir uyan, eksiksiz bir yanıt vereceksin.',
+      systemInstruction: 'Sen bir ihale ve doÄŸrudan temin uzmanÄ±sÄ±n. KullanÄ±cÄ±nÄ±n verdiÄŸi metne gÃ¶re bir ihale dosyasÄ±nÄ±n temel Ã¶zelliklerini ve gerekli alanlarÄ±nÄ± Ã§Ä±kart. KullanÄ±cÄ± sana karmaÅŸÄ±k bir dille ihale isteÄŸini anlatabilir, sen bunu ayrÄ±ÅŸtÄ±rÄ±p aÅŸaÄŸÄ±daki JSON formatÄ±na birebir uyan, eksiksiz bir yanÄ±t vereceksin.',
       mode: 'json',
-      expectedJsonFormat: `{\n  "konu": "Kısa ve öz ihale adı",\n  "isin_aciklamasi": "İşin çok detaylı ve profesyonel kapsam açıklaması (Maddeler halinde olabilir)",\n  "tur": "mal veya hizmet veya yapim_isi veya danismanlik (bunlardan biri olmak zorunda)",\n  "yaklasik_maliyet": 150000 (sayısal),\n  "kdv": "20" veya "0",\n  "komisyon_takdiri": "Komisyon kararı takdiri metni",\n  "ihale_sekli": "22/d*" veya "22/d**"\n}`
+      expectedJsonFormat: `{\n  "konu": "KÄ±sa ve Ã¶z ihale adÄ±",\n  "isin_aciklamasi": "Ä°ÅŸin Ã§ok detaylÄ± ve profesyonel kapsam aÃ§Ä±klamasÄ± (Maddeler halinde olabilir)",\n  "tur": "mal veya hizmet veya yapim_isi veya danismanlik (bunlardan biri olmak zorunda)",\n  "yaklasik_maliyet": 150000 (sayÄ±sal),\n  "kdv": "20" veya "0",\n  "komisyon_takdiri": "Komisyon kararÄ± takdiri metni",\n  "ihale_sekli": "22/d*" veya "22/d**"\n}`
     })
     setShowAIModal(true)
   }
@@ -334,7 +334,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.konu?.trim()) {
-      alert('Lütfen dosya konusunu (İşin Adı) giriniz.')
+      alert('LÃ¼tfen dosya konusunu (Ä°ÅŸin AdÄ±) giriniz.')
       return
     }
 
@@ -355,17 +355,17 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     try {
       if (isEdit) {
         await updateDosya({ ...payload, id: editId! })
-        await logActivity('Dosya Güncellendi', `${payload.konu || 'İsimsiz'} isimli dosya güncellendi.`, 'info')
-        alert('İhale dosyası başarıyla güncellendi.')
+        await logActivity('Dosya GÃ¼ncellendi', `${payload.konu || 'Ä°simsiz'} isimli dosya gÃ¼ncellendi.`, 'info')
+        alert('Ä°hale dosyasÄ± baÅŸarÄ±yla gÃ¼ncellendi.')
       } else {
         await addDosya(payload)
-        await logActivity('Yeni Dosya Eklendi', `${payload.konu || 'İsimsiz'} konusuyla yeni bir temin dosyası oluşturuldu.`, 'success')
-        alert('Yeni ihale dosyası başarıyla eklendi.')
+        await logActivity('Yeni Dosya Eklendi', `${payload.konu || 'Ä°simsiz'} konusuyla yeni bir temin dosyasÄ± oluÅŸturuldu.`, 'success')
+        alert('Yeni ihale dosyasÄ± baÅŸarÄ±yla eklendi.')
       }
       navigate({ to: '/dosyalar' })
     } catch (error) {
       console.error(error)
-      alert('Kaydetme sırasında bir hata oluştu: ' + (error as Error).message)
+      alert('Kaydetme sÄ±rasÄ±nda bir hata oluÅŸtu: ' + (error as Error).message)
     }
   }
 
@@ -373,17 +373,17 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const getIhaleSekliExplanation = (sekil: string | null | undefined) => {
     switch (sekil) {
       case '22/d*':
-        return 'Büyükşehir belediyesi sınırları içindeki doğrudan temin limiti.'
+        return 'BÃ¼yÃ¼kÅŸehir belediyesi sÄ±nÄ±rlarÄ± iÃ§indeki doÄŸrudan temin limiti.'
       case '22/d**':
-        return 'Diğer belediyeler ve idareler için doğrudan temin limiti.'
+        return 'DiÄŸer belediyeler ve idareler iÃ§in doÄŸrudan temin limiti.'
       case '22/a':
-        return 'İhtiyacın sadece gerçek veya tüzel tek kişi tarafından karşılanabilmesi.'
+        return 'Ä°htiyacÄ±n sadece gerÃ§ek veya tÃ¼zel tek kiÅŸi tarafÄ±ndan karÅŸÄ±lanabilmesi.'
       case '22/b':
-        return 'Özel bir hakka sahip gerçek veya tüzel tek kişinin olması.'
+        return 'Ã–zel bir hakka sahip gerÃ§ek veya tÃ¼zel tek kiÅŸinin olmasÄ±.'
       case '22/c':
-        return 'Mevcut mal, ekipman, teknoloji veya hizmetlerle uyumun sağlanması için yapılacak alımlar.'
+        return 'Mevcut mal, ekipman, teknoloji veya hizmetlerle uyumun saÄŸlanmasÄ± iÃ§in yapÄ±lacak alÄ±mlar.'
       default:
-        return 'Doğrudan temin mevzuat maddesi.'
+        return 'DoÄŸrudan temin mevzuat maddesi.'
     }
   }
 
@@ -420,10 +420,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-slate-850 dark:text-white flex items-center gap-2">
               <FileText className="text-blue-600" size={24} />
-              {isEdit ? 'İhale Dosyası Detaylarını Düzenle' : 'Yeni Doğrudan Temin İhale Dosyası'}
+              {isEdit ? 'Ä°hale DosyasÄ± DetaylarÄ±nÄ± DÃ¼zenle' : 'Yeni DoÄŸrudan Temin Ä°hale DosyasÄ±'}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Tüm idari, mali, hukuki ve komisyon alanlarını bu panel üzerinden yönetin.
+              TÃ¼m idari, mali, hukuki ve komisyon alanlarÄ±nÄ± bu panel Ã¼zerinden yÃ¶netin.
             </p>
           </div>
         </div>
@@ -432,20 +432,20 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           <button
             type="button"
             onClick={handleAiFormValidation}
-            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-teal-500/20 flex items-center gap-2 cursor-pointer"
-            title="Formunuzdaki mantıksal, mali ve mevzuat hatalarını AI ile analiz edin"
+            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-teal-500/20 flex items-center gap-2 cursor-pointer"
+            title="Formunuzdaki mantÄ±ksal, mali ve mevzuat hatalarÄ±nÄ± AI ile analiz edin"
           >
-            🤖 AI Form Kontrolü
+            ğŸ¤– AI Form KontrolÃ¼
           </button>
           
           {/* AI Asistan Butonu */}
           <button
             type="button"
             onClick={handleAiFullFormGenerate}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-500/20 flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer"
           >
             <Sparkles size={14} />
-            Yapay Zeka Asistanı
+            Yapay Zeka AsistanÄ±
           </button>
           {import.meta.env.DEV && (
             <button
@@ -455,13 +455,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   temin_no: '2026/DT-084',
                   dosya_acilis_tarihi: '2026-06-03',
                   butce_yili: 2026,
-                  butce_tipi: 'Genel Bütçe',
-                  konu: 'Park Bahçeler Müdürlüğü Elektrik Kablosu ve Aydınlatma Armatürü Alımı',
-                  isin_aciklamasi: 'X Belediyesi Park Bahçeler Müdürlüğü tarafından yeşil alanlar ve çocuk oyun parklarının aydınlatılmasında kullanılmak üzere elektrik kablosu ve aydınlatma armatürü alımı işi.',
+                  butce_tipi: 'Genel BÃ¼tÃ§e',
+                  konu: 'Park BahÃ§eler MÃ¼dÃ¼rlÃ¼ÄŸÃ¼ Elektrik Kablosu ve AydÄ±nlatma ArmatÃ¼rÃ¼ AlÄ±mÄ±',
+                  isin_aciklamasi: 'X Belediyesi Park BahÃ§eler MÃ¼dÃ¼rlÃ¼ÄŸÃ¼ tarafÄ±ndan yeÅŸil alanlar ve Ã§ocuk oyun parklarÄ±nÄ±n aydÄ±nlatÄ±lmasÄ±nda kullanÄ±lmak Ã¼zere elektrik kablosu ve aydÄ±nlatma armatÃ¼rÃ¼ alÄ±mÄ± iÅŸi.',
                   birim_id: birimler[0]?.id || null,
-                  antet_ek_satir: 'Fen İşleri Dairesi Başkanlığı',
-                  sunulacak_makam: 'BAŞKANLIK MAKAMINA',
-                  ihtiyac_yeri: 'X Belediyesi Merkez Şantiyesi',
+                  antet_ek_satir: 'Fen Ä°ÅŸleri Dairesi BaÅŸkanlÄ±ÄŸÄ±',
+                  sunulacak_makam: 'BAÅKANLIK MAKAMINA',
+                  ihtiyac_yeri: 'X Belediyesi Merkez Åantiyesi',
                   kurumsal_kod: '30.11.01.22',
                   fonksiyonel_kod: '01.3.9.00',
                   muhasebe_birimi: '30.06.01',
@@ -471,7 +471,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   butce_kodu: '46.30.11.23-01.3.9.00-5-03.2.1.01',
                   talep_tarihi: '2026-06-03',
                   talep_sayisi: 'E-2026-456',
-                  ihale_tipi: 'Doğrudan Temin',
+                  ihale_tipi: 'DoÄŸrudan Temin',
                   tur: 'mal',
                   ihale_sekli: '22/d*',
                   teklif_sozlesme_turu: 'Birim Fiyat',
@@ -480,10 +480,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   fiyat_farki_dayanagi: '',
                   yatirim_proje_no: '',
                   avans_verilecek_mi: 0,
-                  yaklasik_maliyet_hesaplamasi: 'Piyasa Fiyat Araştırması',
+                  yaklasik_maliyet_hesaplamasi: 'Piyasa Fiyat AraÅŸtÄ±rmasÄ±',
                   kdv: '20',
                   hesaplama_esasi: '',
-                  komisyon_takdiri: 'GÜNEY YURT BELEDİYE BAŞKANLIĞI ONAYI',
+                  komisyon_takdiri: 'GÃœNEY YURT BELEDÄ°YE BAÅKANLIÄI ONAYI',
                   tibbi_cihaz_alimi_mi: 0,
                   irtibat_yetkilisi_id: personeller[0]?.id || null,
                   onay_personel_id: personeller.find(p => p.harcama_yetkilisi_mi === 1)?.id || personeller[1]?.id || null,
@@ -502,68 +502,77 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             to="/dosyalar"
             className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
           >
-            İptal
+            Ä°ptal
           </Link>
           <button
             onClick={handleSave}
             className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer"
           >
             <Save size={16} />
-            {isEdit ? 'Dosyayı Güncelle' : 'Dosyayı Kaydet'}
+            {isEdit ? 'DosyayÄ± GÃ¼ncelle' : 'DosyayÄ± Kaydet'}
           </button>
         </div>
       </div>
 
-      {/* TABS SELECTOR */}
-      <div className="flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-2 overflow-x-auto scrollbar-none flex gap-2">
-        <button
-          onClick={() => setActiveTab('genel')}
-          className={cn(
-            'px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap cursor-pointer flex items-center gap-2',
-            activeTab === 'genel'
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-extrabold'
-              : 'border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-          )}
-        >
-          <FileText size={14} />
-          Genel Bilgiler & Antet
-        </button>
-        <button
-          onClick={() => setActiveTab('mali')}
-          className={cn(
-            'px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap cursor-pointer flex items-center gap-2',
-            activeTab === 'mali'
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-extrabold'
-              : 'border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-          )}
-        >
-          <DollarSign size={14} />
-          Bütçe & Muhasebe Kodları
-        </button>
-        <button
-          onClick={() => setActiveTab('ihale')}
-          className={cn(
-            'px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap cursor-pointer flex items-center gap-2',
-            activeTab === 'ihale'
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-extrabold'
-              : 'border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-          )}
-        >
-          <Building2 size={14} />
-          İhale, Teklif & Hesaplama
-        </button>
-        <button
-          onClick={() => setActiveTab('sorumlular')}
-          className={cn(
-            'px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap cursor-pointer flex items-center gap-2',
-            activeTab === 'sorumlular'
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-extrabold'
-              : 'border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-          )}
-        >
-          <User size={14} />
-          Sorumlular, Tarih & Komisyon
-        </button>
+      {/* STEPPER UI */}
+      <div className="flex-none bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-12 py-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative flex justify-between">
+            {/* Connecting Line */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800 -translate-y-1/2 rounded-full z-0"></div>
+            
+            {/* Step 1 */}
+            <div className="relative z-10 flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setActiveTab('genel')}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
+                  activeTab === 'genel' || activeTab === 'ihtiyac' || activeTab === 'teknik'
+                    ? 'bg-blue-600 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                )}
+              >
+                1
+              </button>
+              <span className={cn('mt-2 text-[11px] font-bold uppercase tracking-wider', activeTab === 'genel' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400')}>Genel Bilgiler</span>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative z-10 flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setActiveTab('ihtiyac')}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
+                  activeTab === 'ihtiyac' || activeTab === 'teknik'
+                    ? 'bg-blue-500 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                )}
+              >
+                2
+              </button>
+              <span className={cn('mt-2 text-[11px] font-bold uppercase tracking-wider', activeTab === 'ihtiyac' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400')}>Ä°htiyaÃ§ Listesi</span>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative z-10 flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setActiveTab('teknik')}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
+                  activeTab === 'teknik'
+                    ? 'bg-blue-600 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                )}
+              >
+                3
+              </button>
+              <span className={cn('mt-2 text-[11px] font-bold uppercase tracking-wider', activeTab === 'teknik' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400')}>Teknik Åart. & Ekler</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* FORM BODY */}
@@ -571,29 +580,29 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         <form onSubmit={handleSave} className="max-w-5xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
           
           {loadingDb ? (
-            <div className="p-8 text-center text-sm text-slate-500 italic">Bilgiler yükleniyor...</div>
+            <div className="p-8 text-center text-sm text-slate-500 italic">Bilgiler yÃ¼kleniyor...</div>
           ) : (
             <>
-              {/* TAB 1: GENEL BİLGİLER */}
+              {/* TAB 1: GENEL BÄ°LGÄ°LER */}
               {activeTab === 'genel' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                     <FileText className="text-blue-500 w-5 h-5" />
-                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Genel Bilgiler & İdari Antet Yapısı</h2>
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Genel Bilgiler & Ä°dari Antet YapÄ±sÄ±</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2 relative">
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-450">
-                          İhale / Dosya Konusu (İşin Adı) *
+                          Ä°hale / Dosya Konusu (Ä°ÅŸin AdÄ±) *
                         </label>
                         <button
                           type="button"
-                          onClick={() => openTextGenerator('konu', 'Konuyu AI ile Üret', 'İhale Konusu', 'Verilen metin veya alım işlemine göre en uygun, resmi ve kısa ihale / doğrudan temin konusunu (İşin Adı) üret. Başka hiçbir açıklama yazma, sadece ihale adını ver.')}
-                          className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded border-none"
+                          onClick={() => openTextGenerator('konu', 'Konuyu AI ile Ãœret', 'Ä°hale Konusu', 'Verilen metin veya alÄ±m iÅŸlemine gÃ¶re en uygun, resmi ve kÄ±sa ihale / doÄŸrudan temin konusunu (Ä°ÅŸin AdÄ±) Ã¼ret. BaÅŸka hiÃ§bir aÃ§Ä±klama yazma, sadece ihale adÄ±nÄ± ver.')}
+                          className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border-none"
                         >
-                          <Sparkles size={11} /> AI ile Üret
+                          <Sparkles size={11} /> AI ile Ãœret
                         </button>
                       </div>
                       <input
@@ -608,18 +617,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         onBlur={() => {
                           setTimeout(() => setShowKonuSuggestions(false), 200)
                         }}
-                        placeholder="Alımın konusunu resmi dilde açıklayıcı şekilde girin (Örn: Fen İşleri Kırtasiye Malzemesi Alımı)"
+                        placeholder="AlÄ±mÄ±n konusunu resmi dilde aÃ§Ä±klayÄ±cÄ± ÅŸekilde girin (Ã–rn: Fen Ä°ÅŸleri KÄ±rtasiye Malzemesi AlÄ±mÄ±)"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
                       />
                       {exactMatchCount > 0 && (
                         <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1.5 flex items-center gap-1 animate-in fade-in duration-200">
-                          ⚠️ Bu isimde daha önce {exactMatchCount} adet dosya açılmış. Kaydedildiğinde otomatik olarak &quot;({exactMatchCount + 1})&quot; son eki eklenecektir.
+                          âš ï¸ Bu isimde daha Ã¶nce {exactMatchCount} adet dosya aÃ§Ä±lmÄ±ÅŸ. KaydedildiÄŸinde otomatik olarak &quot;({exactMatchCount + 1})&quot; son eki eklenecektir.
                         </p>
                       )}
                       {showKonuSuggestions && matchedSuggestions.length > 0 && (
                         <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                           <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950/50 text-[10px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                            Önceki İhale Konuları
+                            Ã–nceki Ä°hale KonularÄ±
                           </div>
                           <ul className="max-h-48 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/50">
                             {matchedSuggestions.map((suggestion, index) => (
@@ -645,17 +654,17 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     <div className="md:col-span-2">
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455">
-                          İşin Açıklaması / Kapsamı
+                          Ä°ÅŸin AÃ§Ä±klamasÄ± / KapsamÄ±
                         </label>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={handleAiDescGenerate}
-                            title="İşin adına göre yapay zeka ile profesyonel açıklama metni oluştur"
-                            className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded"
+                            title="Ä°ÅŸin adÄ±na gÃ¶re yapay zeka ile profesyonel aÃ§Ä±klama metni oluÅŸtur"
+                            className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded"
                           >
                             <Sparkles size={11} />
-                            AI ile Üret
+                            AI ile Ãœret
                           </button>
                           <button
                             type="button"
@@ -663,7 +672,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                             className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/10 px-2 py-1 rounded"
                           >
                             <Copy size={11} />
-                            İşin Adını Kopyala
+                            Ä°ÅŸin AdÄ±nÄ± Kopyala
                           </button>
                         </div>
                       </div>
@@ -671,20 +680,20 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         rows={3}
                         value={formData.isin_aciklamasi || ''}
                         onChange={e => setFormData({ ...formData, isin_aciklamasi: e.target.value })}
-                        placeholder="İşin detaylı açıklaması veya şartnamedeki kapsam açıklaması..."
+                        placeholder="Ä°ÅŸin detaylÄ± aÃ§Ä±klamasÄ± veya ÅŸartnamedeki kapsam aÃ§Ä±klamasÄ±..."
                         className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal resize-none"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Doğrudan Temin Numarası
+                        DoÄŸrudan Temin NumarasÄ±
                       </label>
                       <input
                         type="text"
                         value={formData.temin_no || ''}
                         onChange={e => setFormData({ ...formData, temin_no: e.target.value })}
-                        placeholder="Örn: 2026/DT-001 (Opsiyonel)"
+                        placeholder="Ã–rn: 2026/DT-001 (Opsiyonel)"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -697,24 +706,24 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                          <button
                            type="button"
                            onClick={handleAiKomisyonGenerate}
-                           className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded"
+                           className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded"
                          >
                            <Sparkles size={11} />
-                           AI ile Üret
+                           AI ile Ãœret
                          </button>
                        </div>
                        <input
                          type="text"
                          value={formData.komisyon_takdiri || ''}
                          onChange={e => setFormData({ ...formData, komisyon_takdiri: e.target.value })}
-                         placeholder="Resmi kurul kararı veya yetki belgesi referansı..."
+                         placeholder="Resmi kurul kararÄ± veya yetki belgesi referansÄ±..."
                          className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                        />
                      </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Dosya Açılış Tarihi
+                        Dosya AÃ§Ä±lÄ±ÅŸ Tarihi
                       </label>
                       <input
                         type="date"
@@ -726,7 +735,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div className="relative">
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İhalesi Yapılacak Birim / Müdürlük
+                        Ä°halesi YapÄ±lacak Birim / MÃ¼dÃ¼rlÃ¼k
                       </label>
                       <div className="relative">
                         <button
@@ -737,7 +746,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                           <span>
                             {formData.birim_id
                               ? birimler.find(b => b.id === formData.birim_id)?.birim_adi
-                              : 'Birim Seçiniz...'}
+                              : 'Birim SeÃ§iniz...'}
                           </span>
                           <Search size={14} className="text-slate-400" />
                         </button>
@@ -754,7 +763,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                             />
                             <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
                               {filteredBirimler.length === 0 ? (
-                                <div className="p-3 text-center text-xs text-slate-450">Birim bulunamadı.</div>
+                                <div className="p-3 text-center text-xs text-slate-450">Birim bulunamadÄ±.</div>
                               ) : (
                                 filteredBirimler.map(b => (
                                   <button
@@ -774,44 +783,44 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                           </div>
                         )}
                       </div>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Birim seçildiğinde antet, sunum makamı ve bütçe kodları otomatik doldurulur.</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Birim seÃ§ildiÄŸinde antet, sunum makamÄ± ve bÃ¼tÃ§e kodlarÄ± otomatik doldurulur.</p>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İdari Antet Ek Satır
+                        Ä°dari Antet Ek SatÄ±r
                       </label>
                       <input
                         type="text"
                         value={formData.antet_ek_satir || ''}
                         onChange={e => setFormData({ ...formData, antet_ek_satir: e.target.value })}
-                        placeholder="Örn: Fen İşleri Dairesi Başkanlığı"
+                        placeholder="Ã–rn: Fen Ä°ÅŸleri Dairesi BaÅŸkanlÄ±ÄŸÄ±"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Evrakın Sunulacağı Makam
+                        EvrakÄ±n SunulacaÄŸÄ± Makam
                       </label>
                       <input
                         type="text"
                         value={formData.sunulacak_makam || ''}
                         onChange={e => setFormData({ ...formData, sunulacak_makam: e.target.value })}
-                        placeholder="Örn: BAŞKANLIK MAKAMINA veya MÜDÜRLÜK MAKAMINA"
+                        placeholder="Ã–rn: BAÅKANLIK MAKAMINA veya MÃœDÃœRLÃœK MAKAMINA"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İhtiyaç Yeri (Lüzum Birimi)
+                        Ä°htiyaÃ§ Yeri (LÃ¼zum Birimi)
                       </label>
                       <input
                         type="text"
                         value={formData.ihtiyac_yeri || ''}
                         onChange={e => setFormData({ ...formData, ihtiyac_yeri: e.target.value })}
-                        placeholder="Örn: Fen İşleri Şantiyesi"
+                        placeholder="Ã–rn: Fen Ä°ÅŸleri Åantiyesi"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -819,18 +828,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </div>
               )}
 
-              {/* TAB 2: MALİ & BÜTÇE KODLARI */}
-              {activeTab === 'mali' && (
+              {/* TAB 2: MALÄ° & BÃœTÃ‡E KODLARI (ArtÄ±k Genel Bilgilerin devamÄ±) */}
+              {activeTab === 'genel' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                    <DollarSign className="text-emerald-500 w-5 h-5" />
-                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Mali Analiz & Bütçe Harcama Kodları</h2>
+                    <DollarSign className="text-blue-500 w-5 h-5" />
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Mali Analiz & BÃ¼tÃ§e Harcama KodlarÄ±</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Bütçe Yılı
+                        BÃ¼tÃ§e YÄ±lÄ±
                       </label>
                       <input
                         type="number"
@@ -842,17 +851,17 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Bütçe Tipi
+                        BÃ¼tÃ§e Tipi
                       </label>
                       <select
-                        value={formData.butce_tipi || 'Genel Bütçe'}
+                        value={formData.butce_tipi || 'Genel BÃ¼tÃ§e'}
                         onChange={e => setFormData({ ...formData, butce_tipi: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="Genel Bütçe">Genel Bütçe</option>
-                        <option value="Döner Sermaye">Döner Sermaye</option>
-                        <option value="Özel Bütçe">Özel Bütçe</option>
-                        <option value="Diğer">Diğer</option>
+                        <option value="Genel BÃ¼tÃ§e">Genel BÃ¼tÃ§e</option>
+                        <option value="DÃ¶ner Sermaye">DÃ¶ner Sermaye</option>
+                        <option value="Ã–zel BÃ¼tÃ§e">Ã–zel BÃ¼tÃ§e</option>
+                        <option value="DiÄŸer">DiÄŸer</option>
                       </select>
                     </div>
 
@@ -864,7 +873,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         value={formData.finansman_kodu || ''}
                         onChange={e => setFormData({ ...formData, finansman_kodu: e.target.value })}
-                        placeholder="Örn: 2, 5 veya 8"
+                        placeholder="Ã–rn: 2, 5 veya 8"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -872,12 +881,12 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     <div className="md:col-span-3">
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455">
-                          Bütçe Kodu / Harcama Tertibi (Ekonomik Kod)
+                          BÃ¼tÃ§e Kodu / Harcama Tertibi (Ekonomik Kod)
                         </label>
                         <button
                           type="button"
-                          onClick={() => openTextGenerator('butce_kodu', 'Bütçe/Ekonomik Kod Tahmini', 'Bütçe Kodu', 'Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et. Sadece kodu yaz. (Örn: 03.2.1.01 veya 46.30.11.23-01.3.9.00-5-03.2.1.01)')}
-                          className="text-[10px] text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded border-none"
+                          onClick={() => openTextGenerator('butce_kodu', 'BÃ¼tÃ§e/Ekonomik Kod Tahmini', 'BÃ¼tÃ§e Kodu', 'AlÄ±mÄ±n konusuna ve tÃ¼rÃ¼ne gÃ¶re (Ã–rn: Mal AlÄ±mÄ±, Hizmet AlÄ±mÄ±) uygun bir kamu maliyesi ekonomik bÃ¼tÃ§e kodu veya harcama tertibi tahmin et. Sadece kodu yaz. (Ã–rn: 03.2.1.01 veya 46.30.11.23-01.3.9.00-5-03.2.1.01)')}
+                          className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border-none"
                         >
                           <Sparkles size={11} /> AI ile Tahmin Et
                         </button>
@@ -886,7 +895,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         value={formData.butce_kodu || ''}
                         onChange={e => setFormData({ ...formData, butce_kodu: e.target.value })}
-                        placeholder="Örn: 46.30.11.23-01.3.9.00-5-03.2.1.01"
+                        placeholder="Ã–rn: 46.30.11.23-01.3.9.00-5-03.2.1.01"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200 font-mono font-bold"
                       />
                     </div>
@@ -898,31 +907,31 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                          Kurumsal Kod (Düzey 1-2-3-4)
+                          Kurumsal Kod (DÃ¼zey 1-2-3-4)
                         </label>
                         <select
                           value={formData.kurumsal_kod || ''}
                           onChange={e => setFormData({ ...formData, kurumsal_kod: e.target.value })}
                           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
                         >
-                          <option value="">Seçiniz...</option>
+                          <option value="">SeÃ§iniz...</option>
                           {kodSozlugu.filter(k => k.tur === 'kurumsal').map(k => (
                             <option key={k.id} value={k.kod}>{k.kod} - {k.aciklama}</option>
                           ))}
                         </select>
-                        <p className="text-[10px] text-slate-400 mt-1">Eksik kodları <Link to="/mevzuat" className="text-blue-600 underline font-semibold">Mevzuat & Kodlar</Link> ekranından ekleyebilirsiniz.</p>
+                        <p className="text-[10px] text-slate-400 mt-1">Eksik kodlarÄ± <Link to="/mevzuat" className="text-blue-600 underline font-semibold">Mevzuat & Kodlar</Link> ekranÄ±ndan ekleyebilirsiniz.</p>
                       </div>
 
                       <div>
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                          Fonksiyonel Kod (Düzey 1-2-3-4)
+                          Fonksiyonel Kod (DÃ¼zey 1-2-3-4)
                         </label>
                         <select
                           value={formData.fonksiyonel_kod || ''}
                           onChange={e => setFormData({ ...formData, fonksiyonel_kod: e.target.value })}
                           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
                         >
-                          <option value="">Seçiniz...</option>
+                          <option value="">SeÃ§iniz...</option>
                           {kodSozlugu.filter(k => k.tur === 'fonksiyonel').map(k => (
                             <option key={k.id} value={k.kod}>{k.kod} - {k.aciklama}</option>
                           ))}
@@ -931,14 +940,14 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                       <div>
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                          Muhasebe Birimi (Birim Kodu & Adı)
+                          Muhasebe Birimi (Birim Kodu & AdÄ±)
                         </label>
                         <select
                           value={formData.muhasebe_birimi || ''}
                           onChange={e => setFormData({ ...formData, muhasebe_birimi: e.target.value })}
                           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
                         >
-                          <option value="">Seçiniz...</option>
+                          <option value="">SeÃ§iniz...</option>
                           {kodSozlugu.filter(k => k.tur === 'muhasebe_birimi').map(k => (
                             <option key={k.id} value={k.kod}>{k.kod} - {k.aciklama}</option>
                           ))}
@@ -947,14 +956,14 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                       <div>
                         <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                          Harcama Birimi (Birim Kodu & Adı)
+                          Harcama Birimi (Birim Kodu & AdÄ±)
                         </label>
                         <select
                           value={formData.harcama_birimi || ''}
                           onChange={e => setFormData({ ...formData, harcama_birimi: e.target.value })}
                           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
                         >
-                          <option value="">Seçiniz...</option>
+                          <option value="">SeÃ§iniz...</option>
                           {kodSozlugu.filter(k => k.tur === 'harcama_birimi').map(k => (
                             <option key={k.id} value={k.kod}>{k.kod} - {k.aciklama}</option>
                           ))}
@@ -965,62 +974,62 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </div>
               )}
 
-              {/* TAB 3: İHALE, TEKLİF & HESAPLAMA */}
-              {activeTab === 'ihale' && (
+              {/* TAB 3: Ä°HALE, TEKLÄ°F & HESAPLAMA (ArtÄ±k Genel Bilgilerin devamÄ±) */}
+              {activeTab === 'genel' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                     <Building2 className="text-indigo-500 w-5 h-5" />
-                    <h2 className="text-base font-bold text-slate-800 dark:text-white">İhale Koşulları, Teklif ve Finansal Detaylar</h2>
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Ä°hale KoÅŸullarÄ±, Teklif ve Finansal Detaylar</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İhale Tipi
+                        Ä°hale Tipi
                       </label>
                       <input
                         type="text"
                         disabled
-                        value={formData.ihale_tipi || 'Doğrudan Temin'}
+                        value={formData.ihale_tipi || 'DoÄŸrudan Temin'}
                         className="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-500"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Alım / İhale Türü
+                        AlÄ±m / Ä°hale TÃ¼rÃ¼
                       </label>
                       <select
                         value={formData.tur || 'mal'}
                         onChange={e => setFormData({ ...formData, tur: e.target.value })}
-                        title="Alım / İhale Türü"
+                        title="AlÄ±m / Ä°hale TÃ¼rÃ¼"
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="mal">Mal Alımı</option>
-                        <option value="hizmet">Hizmet Alımı</option>
-                        <option value="yapim_isi">Yapım İşi</option>
-                        <option value="danismanlik">Danışmanlık Alımı</option>
+                        <option value="mal">Mal AlÄ±mÄ±</option>
+                        <option value="hizmet">Hizmet AlÄ±mÄ±</option>
+                        <option value="yapim_isi">YapÄ±m Ä°ÅŸi</option>
+                        <option value="danismanlik">DanÄ±ÅŸmanlÄ±k AlÄ±mÄ±</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5 flex items-center gap-1">
-                        Doğrudan Temin Maddesi (İhale Şekli)
+                        DoÄŸrudan Temin Maddesi (Ä°hale Åekli)
                         <span title={getIhaleSekliExplanation(formData.ihale_sekli)}>
                           <HelpCircle size={13} className="text-slate-450 cursor-help" />
                         </span>
                       </label>
                       <select
-                        title="Doğrudan Temin Maddesi Seçin"
+                        title="DoÄŸrudan Temin Maddesi SeÃ§in"
                         value={formData.ihale_sekli || '22/d*'}
                         onChange={e => setFormData({ ...formData, ihale_sekli: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="22/d*">22/d* (Büyükşehir)</option>
-                        <option value="22/d**">22/d** (Diğer İdareler)</option>
+                        <option value="22/d*">22/d* (BÃ¼yÃ¼kÅŸehir)</option>
+                        <option value="22/d**">22/d** (DiÄŸer Ä°dareler)</option>
                         <option value="22/a">22/a (Tek Yetkili)</option>
-                        <option value="22/b">22/b (Özel Hak)</option>
-                        <option value="22/c">22/c (Uyum Alımı)</option>
+                        <option value="22/b">22/b (Ã–zel Hak)</option>
+                        <option value="22/c">22/c (Uyum AlÄ±mÄ±)</option>
                       </select>
                       <p className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 leading-normal">
                         {getIhaleSekliExplanation(formData.ihale_sekli)}
@@ -1029,85 +1038,85 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Teklif / Sözleşme Türü
+                        Teklif / SÃ¶zleÅŸme TÃ¼rÃ¼
                       </label>
                       <select
                         value={formData.teklif_sozlesme_turu || 'Birim Fiyat'}
                         onChange={e => setFormData({ ...formData, teklif_sozlesme_turu: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="Birim Fiyat">Birim Fiyatlı Teklif</option>
-                        <option value="Götürü Bedel">Götürü Bedel Teklif</option>
-                        <option value="Sözleşmesiz">Sözleşme Yapılmayacak</option>
+                        <option value="Birim Fiyat">Birim FiyatlÄ± Teklif</option>
+                        <option value="GÃ¶tÃ¼rÃ¼ Bedel">GÃ¶tÃ¼rÃ¼ Bedel Teklif</option>
+                        <option value="SÃ¶zleÅŸmesiz">SÃ¶zleÅŸme YapÄ±lmayacak</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        KDV Oranı (%)
+                        KDV OranÄ± (%)
                       </label>
                       <select
                         value={formData.kdv || '20'}
                         onChange={e => setFormData({ ...formData, kdv: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="0">KDV Hariç (%0)</option>
+                        <option value="0">KDV HariÃ§ (%0)</option>
                         <option value="1">KDV (%1)</option>
                         <option value="10">KDV (%10)</option>
                         <option value="20">KDV (%20)</option>
-                        <option value="Tevkifat">Tevkifatlı KDV</option>
+                        <option value="Tevkifat">TevkifatlÄ± KDV</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Tahmini Yaklaşık Maliyet (KDV Hariç ₺)
+                        Tahmini YaklaÅŸÄ±k Maliyet (KDV HariÃ§ â‚º)
                       </label>
                       <input
                         type="number"
                         step="0.01"
                         value={formData.yaklasik_maliyet || 0}
                         onChange={e => setFormData({ ...formData, yaklasik_maliyet: parseFloat(e.target.value) || 0 })}
-                        placeholder="₺ 0.00"
+                        placeholder="â‚º 0.00"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Fiyat Farkı Dayanağı (Varsa)
+                        Fiyat FarkÄ± DayanaÄŸÄ± (Varsa)
                       </label>
                       <input
                         type="text"
                         value={formData.fiyat_farki_dayanagi || ''}
                         onChange={e => setFormData({ ...formData, fiyat_farki_dayanagi: e.target.value })}
-                        placeholder="Örn: 2026/123 Fiyat Farkı Kararnamesi"
+                        placeholder="Ã–rn: 2026/123 Fiyat FarkÄ± Kararnamesi"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Yatırım Proje Numarası
+                        YatÄ±rÄ±m Proje NumarasÄ±
                       </label>
                       <input
                         type="text"
                         value={formData.yatirim_proje_no || ''}
                         onChange={e => setFormData({ ...formData, yatirim_proje_no: e.target.value })}
-                        placeholder="Örn: 2026-03-Y-12"
+                        placeholder="Ã–rn: 2026-03-Y-12"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Yaklaşık Maliyet Hesaplama Esası
+                        YaklaÅŸÄ±k Maliyet Hesaplama EsasÄ±
                       </label>
                       <input
                         type="text"
                         value={formData.yaklasik_maliyet_hesaplamasi || ''}
                         onChange={e => setFormData({ ...formData, yaklasik_maliyet_hesaplamasi: e.target.value })}
-                        placeholder="Örn: Piyasa Fiyat Araştırması"
+                        placeholder="Ã–rn: Piyasa Fiyat AraÅŸtÄ±rmasÄ±"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -1123,7 +1132,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
                       />
                       <label htmlFor="alt_yuklenici" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        Alt Yüklenici Olabilir
+                        Alt YÃ¼klenici Olabilir
                       </label>
                     </div>
 
@@ -1136,7 +1145,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
                       />
                       <label htmlFor="kismi_teklif" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        Kısmi Teklife Açık
+                        KÄ±smi Teklife AÃ§Ä±k
                       </label>
                     </div>
 
@@ -1149,7 +1158,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
                       />
                       <label htmlFor="avans" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        Avans Ödemesi Var
+                        Avans Ã–demesi Var
                       </label>
                     </div>
 
@@ -1162,26 +1171,26 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
                       />
                       <label htmlFor="tibbi_cihaz" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        Tıbbi Cihaz Alımı
+                        TÄ±bbi Cihaz AlÄ±mÄ±
                       </label>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* TAB 4: SORUMLULAR, TARİH & KOMİSYON */}
-              {activeTab === 'sorumlular' && (
+              {/* TAB 4: SORUMLULAR, TARÄ°H & KOMÄ°SYON (ArtÄ±k Genel Bilgilerin devamÄ±) */}
+              {activeTab === 'genel' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                    <User className="text-purple-500 w-5 h-5" />
-                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Yetkililer, Süreç Tarihleri ve İdari Kayıtlar</h2>
+                    <User className="text-blue-500 w-5 h-5" />
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Yetkililer, SÃ¼reÃ§ Tarihleri ve Ä°dari KayÄ±tlar</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {/* İRTİBAT YETKİLİSİ AUTOCOMPLETE */}
+                    {/* Ä°RTÄ°BAT YETKÄ°LÄ°SÄ° AUTOCOMPLETE */}
                     <div className="relative">
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        İrtibat Yetkilisi (Personel)
+                        Ä°rtibat Yetkilisi (Personel)
                       </label>
                       <button
                         type="button"
@@ -1191,7 +1200,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         <span>
                           {formData.irtibat_yetkilisi_id
                             ? personeller.find(p => p.id === formData.irtibat_yetkilisi_id)?.ad_soyad
-                            : 'İrtibat Personeli Seçin...'}
+                            : 'Ä°rtibat Personeli SeÃ§in...'}
                         </span>
                         <Search size={14} className="text-slate-400" />
                       </button>
@@ -1208,7 +1217,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                           />
                           <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-0.5">
                             {filteredPersoneller.length === 0 ? (
-                              <div className="p-3 text-center text-xs text-slate-450">Personel bulunamadı.</div>
+                              <div className="p-3 text-center text-xs text-slate-450">Personel bulunamadÄ±.</div>
                             ) : (
                               filteredPersoneller.map(p => (
                                 <button
@@ -1221,7 +1230,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                                   }}
                                   className="w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
                                 >
-                                  {p.ad_soyad} - <span className="text-[10px] text-slate-400">{p.unvan || 'Unvansız'}</span>
+                                  {p.ad_soyad} - <span className="text-[10px] text-slate-400">{p.unvan || 'UnvansÄ±z'}</span>
                                 </button>
                               ))
                             )}
@@ -1233,7 +1242,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     {/* HAZIRLAYAN PERSONEL */}
                     <div className="relative">
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Dosyayı Hazırlayan Personel
+                        DosyayÄ± HazÄ±rlayan Personel
                       </label>
                       <button
                         type="button"
@@ -1243,7 +1252,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         <span>
                           {formData.hazirlayan_personel_id
                             ? personeller.find(p => p.id === formData.hazirlayan_personel_id)?.ad_soyad
-                            : 'Hazırlayan Seçin...'}
+                            : 'HazÄ±rlayan SeÃ§in...'}
                         </span>
                         <Search size={14} className="text-slate-400" />
                       </button>
@@ -1278,7 +1287,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       )}
                     </div>
 
-                    {/* HARCAMA YETKİLİSİ (ONAY VEREN) */}
+                    {/* HARCAMA YETKÄ°LÄ°SÄ° (ONAY VEREN) */}
                     <div className="relative">
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
                         Harcama Yetkilisi (Onaylayan)
@@ -1291,7 +1300,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         <span>
                           {formData.onay_personel_id
                             ? personeller.find(p => p.id === formData.onay_personel_id)?.ad_soyad
-                            : 'Harcama Yetkilisi Seçin...'}
+                            : 'Harcama Yetkilisi SeÃ§in...'}
                         </span>
                         <Search size={14} className="text-slate-400" />
                       </button>
@@ -1318,7 +1327,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                                 }}
                                 className="w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
                               >
-                                {p.ad_soyad} {p.harcama_yetkilisi_mi === 1 && '⭐'}
+                                {p.ad_soyad} {p.harcama_yetkilisi_mi === 1 && 'â­'}
                               </button>
                             ))}
                           </div>
@@ -1340,13 +1349,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-                        Talep Sayısı (Evrak No)
+                        Talep SayÄ±sÄ± (Evrak No)
                       </label>
                       <input
                         type="text"
                         value={formData.talep_sayisi || ''}
                         onChange={e => setFormData({ ...formData, talep_sayisi: e.target.value })}
-                        placeholder="Örn: E-12345"
+                        placeholder="Ã–rn: E-12345"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -1365,7 +1374,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-                        Tahmini İşi Bitiş / Teslim Tarihi
+                        Tahmini Ä°ÅŸi BitiÅŸ / Teslim Tarihi
                       </label>
                       <input
                         type="date"
@@ -1383,10 +1392,74 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         value={formData.komisyon_takdiri || ''}
                         onChange={e => setFormData({ ...formData, komisyon_takdiri: e.target.value })}
-                        placeholder="Resmi kurul kararı veya yetki belgesi referansı..."
+                        placeholder="Resmi kurul kararÄ± veya yetki belgesi referansÄ±..."
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
+                  </div>
+                </div>
+              )}
+              {/* YENÄ° ADIM: Ä°HTÄ°YAÃ‡ LÄ°STESÄ° */}
+              {activeTab === 'ihtiyac' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+                    <FileText className="text-blue-500 w-5 h-5" />
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Ä°htiyaÃ§ Listesi & AlÄ±m Kalemleri</h2>
+                  </div>
+                  
+                  <div className="bg-blue-50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                    <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+                      <div>
+                        <h3 className="text-sm font-bold text-blue-800 dark:text-blue-400">EKAP Uyumlu Kalem TanÄ±mlama</h3>
+                        <p className="text-xs text-blue-600 dark:text-blue-500 mt-1">Ä°hale kalemlerinizi (OKAS kodlarÄ±yla) ekleyerek Birim Fiyat Teklif Cetveli oluÅŸturabilirsiniz.</p>
+                      </div>
+                      <div className="flex gap-2 w-full md:w-auto">
+                        <button type="button" className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors w-full md:w-auto">
+                          Manuel Kalem Ekle
+                        </button>
+                        <button type="button" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-colors w-full md:w-auto whitespace-nowrap">
+                          + OKAS'tan Aktar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Empty State */}
+                  <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-950">
+                    <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm mb-4">
+                      <Search className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">HenÃ¼z Kalem Eklenmedi</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm text-center">DoÄŸrudan temin kapsamÄ±nda alÄ±nacak mal, hizmet veya yapÄ±m iÅŸi kalemlerini buradan ekleyin.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* YENÄ° ADIM: TEKNÄ°K Ã–ZELLÄ°KLER & EKLER */}
+              {activeTab === 'teknik' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+                    <HelpCircle className="text-blue-500 w-5 h-5" />
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Teknik Åartname & Ek Belgeler</h2>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                    <h3 className="text-sm font-bold text-blue-800 dark:text-blue-400">EKAP DokÃ¼man KurallarÄ±</h3>
+                    <ul className="text-xs text-blue-700 dark:text-blue-500 mt-2 space-y-1 list-disc list-inside">
+                      <li>YÃ¼kleyeceÄŸiniz dosyalar zip veya rar formatÄ±nda olmalÄ±dÄ±r.</li>
+                      <li>VirÃ¼s taramasÄ±ndan geÃ§irilmiÅŸ olmalÄ±dÄ±r.</li>
+                      <li>DokÃ¼manlar teknik ÅŸartname, proforma fatura Ã¶rneÄŸi veya idari belgeleri iÃ§erebilir.</li>
+                    </ul>
+                  </div>
+
+                  {/* File Upload UI */}
+                  <div className="py-10 px-6 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex flex-col items-center justify-center cursor-pointer">
+                    <Building2 className="w-8 h-8 text-slate-400 mb-3" />
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">DosyalarÄ± sÃ¼rÃ¼kleyip bÄ±rakÄ±n veya seÃ§in</span>
+                    <span className="text-[10px] text-slate-500 mt-1">.zip, .rar, .pdf (Max: 50MB)</span>
+                    <button type="button" className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                      GÃ¶zat
+                    </button>
                   </div>
                 </div>
               )}
@@ -1396,7 +1469,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           {/* TAB CONTINUATION ACTION BUTTONS */}
           <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-5 mt-6">
             <div className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold uppercase tracking-wider">
-              {isEdit ? `Dosya ID: #${editId}` : 'Yeni Kayıt Yapılıyor'}
+              {isEdit ? `Dosya ID: #${editId}` : 'Yeni KayÄ±t YapÄ±lÄ±yor'}
             </div>
             
             <div className="flex gap-3">
@@ -1404,9 +1477,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 <button
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'mali') setActiveTab('genel')
-                    if (activeTab === 'ihale') setActiveTab('mali')
-                    if (activeTab === 'sorumlular') setActiveTab('ihale')
+                    if (activeTab === 'ihtiyac') setActiveTab('genel')
+                    if (activeTab === 'teknik') setActiveTab('ihtiyac')
                   }}
                   className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                 >
@@ -1414,18 +1486,25 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </button>
               )}
 
-              {activeTab !== 'sorumlular' && (
+              {activeTab !== 'teknik' ? (
                 <button
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'genel') setActiveTab('mali')
-                    else if (activeTab === 'mali') setActiveTab('ihale')
-                    else if (activeTab === 'ihale') setActiveTab('sorumlular')
+                    if (activeTab === 'genel') setActiveTab('ihtiyac')
+                    else if (activeTab === 'ihtiyac') setActiveTab('teknik')
                   }}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                  className="px-4 py-2 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                 >
-                  Sonraki Adım
+                  Sonraki AdÄ±m
                   <ChevronRight size={14} />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSave}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer"
+                >
+                  <Save size={16} />
+                  {isEdit ? 'TÃ¼m DosyayÄ± GÃ¼ncelle' : 'DosyayÄ± Kaydet ve Bitir'}
                 </button>
               )}
             </div>

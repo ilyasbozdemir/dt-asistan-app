@@ -1,4 +1,3 @@
-import React from 'react'
 import { ShieldAlert, Check, X } from 'lucide-react'
 
 interface AIPrivacyModalProps {

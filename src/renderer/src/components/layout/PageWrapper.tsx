@@ -92,13 +92,22 @@ export function PageWrapper(): React.ReactNode {
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
   const isWindowMode = searchParams.get('mode') === 'window' || hashParams.get('mode') === 'window'
+  const isDosyaWindowMode = searchParams.get('mode') === 'dosya_window' || hashParams.get('mode') === 'dosya_window'
+  const isAnyWindowMode = isWindowMode || isDosyaWindowMode
 
   // When opened as a detached window, restore workspace context from URL params
   useEffect(() => {
-    if (!isWindowMode) return
+    if (!isAnyWindowMode) return
     const wpFromSearch = searchParams.get('wp')
     const wpFromHash = hashParams.get('wp')
     const workspacePath = wpFromSearch || wpFromHash
+    
+    // Check dosyaId for dosya_window mode
+    const dosyaId = searchParams.get('dosyaId') || hashParams.get('dosyaId')
+    if (dosyaId) {
+      sessionStorage.setItem('workspace_dosya_id', dosyaId)
+    }
+
     if (workspacePath) {
       const decodedPath = decodeURIComponent(workspacePath)
       // Set sessionStorage so the workspace store picks it up
@@ -202,7 +211,7 @@ export function PageWrapper(): React.ReactNode {
     }
   }, [openWorkspace, queryClient])
 
-  if (isWindowMode) {
+  if (isAnyWindowMode) {
     // Extract the real path from the hash (strip mode=window param)
     const rawPath = routerState.location.pathname || '/'
     const windowTitle = getTabLabel(rawPath)
@@ -222,16 +231,18 @@ export function PageWrapper(): React.ReactNode {
           className="h-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex items-center px-3 shrink-0 gap-2"
           style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
-          {/* Return to Parent button */}
-          <button
-            onClick={handleReturnToParent}
-            title="Ana Pencereye Dön (Sekme Olarak)"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-all cursor-pointer"
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          >
-            <ArrowLeftToLine className="w-3.5 h-3.5" />
-            <span>Sekmeye Dön</span>
-          </button>
+          {/* Return to Parent button - only for tab windows */}
+          {!isDosyaWindowMode && (
+            <button
+              onClick={handleReturnToParent}
+              title="Ana Pencereye Dön (Sekme Olarak)"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-all cursor-pointer"
+              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            >
+              <ArrowLeftToLine className="w-3.5 h-3.5" />
+              <span>Sekmeye Dön</span>
+            </button>
+          )}
 
           {/* Title */}
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate flex-1 ml-2">
@@ -267,9 +278,12 @@ export function PageWrapper(): React.ReactNode {
           </div>
         </div>
 
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </main>
+        <div className="flex flex-1 overflow-hidden">
+          {isDosyaWindowMode && <Sidebar />}
+          <main className="flex-1 overflow-auto p-6">
+            <Outlet />
+          </main>
+        </div>
       </div>
     )
   }

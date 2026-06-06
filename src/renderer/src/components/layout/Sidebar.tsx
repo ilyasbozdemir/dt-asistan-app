@@ -22,7 +22,8 @@ import {
   Ruler,
   Compass,
   FileCheck,
-  CreditCard
+  CreditCard,
+  Square
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -41,6 +42,7 @@ interface MenuItem {
   path?: string
   icon: React.ElementType
   children?: SubItem[]
+  onClick?: () => void
 }
 
 interface MenuGroup {
@@ -99,12 +101,26 @@ export function Sidebar(): React.JSX.Element {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['/malzemeler', 'Malzeme & Kodlar']))
   const { institutionName, institutionLogo, adminUsername, institutionCode, loadSettings } =
     useSettingsStore()
-  const { closeWorkspace, fileName, activeDosyaId } = useWorkspaceStore()
+  const { closeWorkspace, fileName, activeDosyaId, setActiveDosyaId, activeFilePath } = useWorkspaceStore()
   const queryClient = useQueryClient()
 
   const handleCloseWorkspace = async (): Promise<void> => {
     await closeWorkspace()
     queryClient.clear()
+  }
+
+  const searchParams = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const isDosyaWindowMode = searchParams.get('mode') === 'dosya_window' || hashParams.get('mode') === 'dosya_window'
+
+  const handleOpenInNewWindow = () => {
+    if (!activeDosyaId || !activeFilePath) return
+    window.electron?.ipcRenderer.send('window:open-dosya', {
+      dosyaId: activeDosyaId,
+      path: '/dosya',
+      workspacePath: activeFilePath,
+      title: activeDosya?.konu || activeDosya?.isin_aciklamasi || `Dosya #${activeDosyaId}`
+    })
   }
 
   React.useEffect(() => {
@@ -276,7 +292,16 @@ export function Sidebar(): React.JSX.Element {
   } : null
 
   const finalMenuGroups = activeGroup 
-    ? [...menuGroups.slice(0, 2), activeGroup, ...menuGroups.slice(2)]
+    ? [
+        {
+          title: 'Dosya Navigasyonu',
+          items: [
+            ...(!isDosyaWindowMode ? [{ name: '⬅ Tüm Teminlere Dön', path: '/dosyalar', icon: ChevronLeft, onClick: () => setActiveDosyaId(null) }] : []),
+            ...(!isDosyaWindowMode ? [{ name: 'Yeni Pencerede Aç', icon: Square, onClick: handleOpenInNewWindow }] : [])
+          ]
+        },
+        activeGroup
+      ]
     : menuGroups
 
   return (
@@ -369,6 +394,11 @@ export function Sidebar(): React.JSX.Element {
                       {item.path ? (
                         <Link
                           to={item.path}
+                          onClick={() => {
+                            if (item.onClick) {
+                              item.onClick()
+                            }
+                          }}
                           className={cn(
                             'flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-transparent cursor-pointer',
                             'hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text',

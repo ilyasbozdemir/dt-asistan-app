@@ -166,6 +166,53 @@ if (!gotTheLock) {
       }
     })
 
+    // --- Dosya ↔ Window IPC Handlers ---
+    const dosyaWindows = new Map<number, BrowserWindow>()
+
+    ipcMain.on('window:open-dosya', (_, data: { dosyaId: number; path: string; workspacePath: string; title?: string }) => {
+      const existingWin = dosyaWindows.get(data.dosyaId)
+      if (existingWin && !existingWin.isDestroyed()) {
+        if (existingWin.isMinimized()) existingWin.restore()
+        existingWin.focus()
+        return
+      }
+
+      const newWindow = new BrowserWindow({
+        width: 1100,
+        height: 800,
+        minWidth: 800,
+        minHeight: 600,
+        autoHideMenuBar: true,
+        frame: false,
+        titleBarStyle: 'hidden',
+        titleBarOverlay: false,
+        title: data.title || `Dosya #${data.dosyaId}`,
+        icon: icon,
+        webPreferences: {
+          preload: join(__dirname, '../preload/index.js'),
+          sandbox: false
+        }
+      })
+
+      dosyaWindows.set(data.dosyaId, newWindow)
+      newWindow.on('closed', () => {
+        dosyaWindows.delete(data.dosyaId)
+      })
+
+      const wpParam = data.workspacePath ? '&wp=' + encodeURIComponent(data.workspacePath) : ''
+      const searchParams = `?mode=dosya_window&dosyaId=${data.dosyaId}${wpParam}`
+
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        newWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + data.path + searchParams)
+      } else {
+        const indexHtml = join(__dirname, '../renderer/index.html')
+        newWindow.loadFile(indexHtml, {
+          hash: data.path,
+          search: searchParams.replace(/^\?/, '')
+        })
+      }
+    })
+
     // --- Tab ↔ Window IPC Handlers ---
     // Opens a tab's content in a separate detached window
     ipcMain.on('tab:open-in-window', (_, data: { path: string; title: string; workspacePath?: string }) => {
