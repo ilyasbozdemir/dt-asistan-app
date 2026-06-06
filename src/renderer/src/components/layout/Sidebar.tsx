@@ -58,8 +58,7 @@ const menuGroups: MenuGroup[] = [
   {
     title: 'Süreç Yönetimi',
     items: [
-      { name: 'Doğrudan Temin', path: '/dosyalar', icon: FileText },
-      { name: 'Takip & Durum', path: '/takip', icon: ClipboardList },
+      { name: 'Doğrudan Temin Dosyaları', path: '/dosyalar', icon: FileText },
     ]
   },
   {
