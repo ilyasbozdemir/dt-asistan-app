@@ -697,7 +697,7 @@ export default function DosyaScreen(): React.JSX.Element {
             <div className="text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
               Mevcut Sürüm:
               <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold">
-                v1.0.0-alpha.2
+                {activeMeta?.app_version ? `v${activeMeta.app_version}` : 'Bilinmiyor'}
               </span>
             </div>
             

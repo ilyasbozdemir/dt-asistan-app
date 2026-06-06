@@ -1402,7 +1402,13 @@ if (!gotTheLock) {
 
     ipcMain.handle('updater:check', async () => {
       try {
+        if (!app.isPackaged && !autoUpdater.forceDevUpdateConfig) {
+          return { success: false, error: 'Geliştirme modunda (Dev) otomatik güncelleme denetlenemez.' }
+        }
         const result = await autoUpdater.checkForUpdatesAndNotify()
+        if (result === null) {
+          return { success: false, error: 'Güncelleme kontrolü bu ortamda atlandı veya desteklenmiyor.' }
+        }
         return { success: true, result }
       } catch (error: any) {
         console.error('Manual update check error:', error)
