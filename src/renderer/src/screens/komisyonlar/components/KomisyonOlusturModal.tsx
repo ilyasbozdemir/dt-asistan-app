@@ -15,13 +15,11 @@ import { Input } from '../../../components/ui/Input'
 interface KomisyonOlusturModalProps {
   isOpen: boolean
   onClose: () => void
-  komisyonTurleri: any[]
 }
 
-export function KomisyonOlusturModal({ isOpen, onClose, komisyonTurleri }: KomisyonOlusturModalProps): React.JSX.Element | null {
+export function KomisyonOlusturModal({ isOpen, onClose }: KomisyonOlusturModalProps): React.JSX.Element | null {
   const queryClient = useQueryClient()
   const [ad, setAd] = useState('')
-  const [turId, setTurId] = useState<number | ''>('')
   
   // Üyeler state: { personelId: number, gorevId: number, asilMi: boolean }
   const [uyeler, setUyeler] = useState<any[]>([])
@@ -66,15 +64,15 @@ export function KomisyonOlusturModal({ isOpen, onClose, komisyonTurleri }: Komis
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!ad || !turId) throw new Error('Lütfen komisyon adı ve türünü giriniz.')
+      if (!ad) throw new Error('Lütfen komisyon adı giriniz.')
       if (uyeler.some(u => !u.personelId || !u.gorevId)) {
         throw new Error('Lütfen tüm üyelerin personel ve görev seçimlerini yapınız.')
       }
 
       const res = await window.electron.ipcRenderer.invoke('db:transaction', [
         {
-          sql: 'INSERT INTO TANIM_Komisyon (tur_id, ad) VALUES (?, ?)',
-          params: [turId, ad]
+          sql: 'INSERT INTO TANIM_Komisyon (ad) VALUES (?)',
+          params: [ad]
         }
       ])
       
@@ -97,7 +95,6 @@ export function KomisyonOlusturModal({ isOpen, onClose, komisyonTurleri }: Komis
       queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
       onClose()
       setAd('')
-      setTurId('')
       setUyeler([])
     }
   })
@@ -136,27 +133,12 @@ export function KomisyonOlusturModal({ isOpen, onClose, komisyonTurleri }: Komis
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Komisyon Türü</label>
-              <select 
-                title="Komisyon Türü Seçiniz"
-                value={turId}
-                onChange={e => setTurId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
-              >
-                <option value="">-- Komisyon Türü Seçiniz --</option>
-                {komisyonTurleri.map(t => (
-                  <option key={t.id} value={t.id}>{t.ad}</option>
-                ))}
-              </select>
-            </div>
-            
+          <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Komisyon Adı</label>
               <Input
                 type="text"
-                placeholder="Örn: 2026 Yılı Mal Alımı Komisyonu"
+                placeholder="Örn: Bilişim Sistemleri Fiyat Araştırma Komisyonu"
                 value={ad}
                 onChange={e => setAd(e.target.value)}
                 className="w-full"

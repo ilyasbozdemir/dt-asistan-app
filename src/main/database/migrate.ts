@@ -9,6 +9,7 @@ export interface SchemaChange {
   description: string
   tables_added?: string[]
   columns_added?: { table: string; column: string }[]
+  raw_sql?: string[]
 }
 
 export interface AppVersionManifest {
@@ -143,6 +144,12 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
                 throw err
               }
             }
+          }
+        }
+
+        if (change.raw_sql && change.raw_sql.length > 0) {
+          for (const sql of change.raw_sql) {
+            db.exec(sql)
           }
         }
         

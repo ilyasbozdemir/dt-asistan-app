@@ -18,7 +18,6 @@ import { TANIM_OkasKod } from './tables/TANIM_OkasKod'
 import { TANIM_KodSozlugu } from './tables/TANIM_KodSozlugu'
 import { TANIM_OlcuBirimi } from './tables/TANIM_OlcuBirimi'
 import { TANIM_KomisyonGorevi } from './tables/TANIM_KomisyonGorevi'
-import { TANIM_KomisyonTuru } from './tables/TANIM_KomisyonTuru'
 import { TANIM_Komisyon } from './tables/TANIM_Komisyon'
 import { TANIM_KomisyonUye } from './tables/TANIM_KomisyonUye'
 import { DATA_TeminKalem } from './tables/DATA_TeminKalem'
@@ -67,7 +66,6 @@ export const schema = {
     SABLON_Placeholder, // Şablon içi alan eşleşmeleri
     TANIM_KodSozlugu, // Kurumsal ve Mali Kod Sözlüğü
     TANIM_KomisyonGorevi, // Komisyon Görev Tanımları
-    TANIM_KomisyonTuru, // Komisyon Türleri
     TANIM_Komisyon, // Tanımlı Komisyonlar
     TANIM_KomisyonUye, // Tanımlı Komisyonların Üyeleri
     // --- Operasyonel Veriler ---

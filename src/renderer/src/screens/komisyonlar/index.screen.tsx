@@ -17,45 +17,21 @@ import { KomisyonOlusturModal } from './components/KomisyonOlusturModal'
 import { GorevTanimlariModal } from './components/GorevTanimlariModal'
 
 export default function KomisyonlarScreen(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<number | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isRolesModalOpen, setIsRolesModalOpen] = useState(false)
 
-  // Komisyon Türlerini DB'den Çek (Fiyat Araştırma, Muayene Kabul vb.)
-  const { data: komisyonTurleri = [], isLoading: isTurLoading } = useQuery({
-    queryKey: ['komisyon_turleri'],
-    queryFn: async () => {
-      const res = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT * FROM TANIM_KomisyonTuru WHERE aktif_mi = 1 ORDER BY id ASC'
-      )
-      if (!res.success) throw new Error(res.error)
-      return res.data
-    }
-  })
-
-  // Set initial active tab
-  React.useEffect(() => {
-    if (komisyonTurleri.length > 0 && activeTab === null) {
-      setActiveTab(komisyonTurleri[0].id)
-    }
-  }, [komisyonTurleri, activeTab])
-
-  // Aktif Taba Ait Oluşturulmuş Komisyonları Çek
+  // Oluşturulmuş Komisyonları Çek
   const { data: komisyonlar = [], isLoading: isKomisyonLoading } = useQuery({
-    queryKey: ['komisyonlar', activeTab],
+    queryKey: ['komisyonlar'],
     queryFn: async () => {
-      if (!activeTab) return []
       const res = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT * FROM TANIM_Komisyon WHERE tur_id = ? AND aktif_mi = 1 ORDER BY id DESC',
-        [activeTab]
+        'SELECT * FROM TANIM_Komisyon WHERE aktif_mi = 1 ORDER BY id DESC'
       )
       if (!res.success) throw new Error(res.error)
       return res.data
-    },
-    enabled: !!activeTab
+    }
   })
 
   const getIconForTur = (ad: string) => {
@@ -64,17 +40,9 @@ export default function KomisyonlarScreen(): React.JSX.Element {
     return <ShieldCheck className="w-4 h-4 shrink-0" />
   }
 
-  const menuItems: InnerMenuItem[] = komisyonTurleri.map((tur: any) => ({
-    id: tur.id,
-    label: tur.ad,
-    icon: getIconForTur(tur.ad)
-  }))
-
   const filteredKomisyonlar = komisyonlar.filter((k: any) => 
     k.ad.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  const activeTur = komisyonTurleri.find((t: any) => t.id === activeTab)
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -106,20 +74,8 @@ export default function KomisyonlarScreen(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1 min-h-0">
-        <div className="lg:col-span-3 shrink-0">
-          {isTurLoading ? (
-            <div className="text-sm text-slate-500 p-4">Türler Yükleniyor...</div>
-          ) : (
-            <InnerMenu
-              items={menuItems}
-              activeId={activeTab as any}
-              onChange={(id) => setActiveTab(id as number)}
-            />
-          )}
-        </div>
-
-        <div className="lg:col-span-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
+      <div className="grid grid-cols-1 gap-8 items-start flex-1 min-h-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col overflow-hidden relative">
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="relative flex-1 max-w-md">
@@ -143,14 +99,11 @@ export default function KomisyonlarScreen(): React.JSX.Element {
             ) : filteredKomisyonlar.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center max-w-md">
-                  <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                    {activeTur && getIconForTur(activeTur.ad)}
-                  </div>
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
-                    {activeTur?.ad}
+                    Kayıtlı Komisyon Bulunamadı
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Henüz bu kategoriye ait bir komisyon tanımı bulunmuyor. Yeni bir komisyon eklemek için yukarıdaki "Komisyon Oluştur" butonunu kullanabilirsiniz.
+                    Henüz bir komisyon tanımı bulunmuyor. Yeni bir komisyon eklemek için yukarıdaki "Komisyon Oluştur" butonunu kullanabilirsiniz.
                   </p>
                 </div>
               </div>
@@ -187,7 +140,6 @@ export default function KomisyonlarScreen(): React.JSX.Element {
       <KomisyonOlusturModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
-        komisyonTurleri={komisyonTurleri}
       />
       
       <GorevTanimlariModal
