@@ -42,6 +42,32 @@ export default function FirmalarScreen(): React.JSX.Element {
   const handleAdd = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     if (!form.unvan.trim()) return
+
+    // Duplicate kontrolleri
+    if (form.vergi_no?.trim()) {
+      const isDuplicate = firmalar.some(f => f.vergi_no === form.vergi_no.trim())
+      if (isDuplicate) {
+        alert('Bu vergi numarasına sahip bir firma zaten sistemde kayıtlı!')
+        return
+      }
+    }
+
+    if (form.tc_kimlik_no?.trim()) {
+      const isDuplicateTC = firmalar.some(f => f.tc_kimlik_no === form.tc_kimlik_no.trim())
+      if (isDuplicateTC) {
+        alert('Bu TC Kimlik numarasına sahip bir kişi/firma zaten sistemde kayıtlı!')
+        return
+      }
+    }
+
+    // Aynı ünvanda firma var mı diye yumuşak uyarı verebiliriz ama engellemeyelim (Bazen şubeler vs olabiliyor)
+    const isNameDuplicate = firmalar.some(f => f.unvan.trim().toLowerCase() === form.unvan.trim().toLowerCase())
+    if (isNameDuplicate) {
+      if (!confirm('Aynı ünvanla kayıtlı başka bir firma daha var. Yine de eklemek istiyor musunuz?')) {
+        return
+      }
+    }
+
     try {
       await addFirma(form)
       setForm({ ...emptyFirma })
