@@ -14,8 +14,10 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { KomisyonOlusturModal } from './components/KomisyonOlusturModal'
 import { PersonelAtaModal } from './components/PersonelAtaModal'
+import { useTabStore } from '../../store/tabStore'
 
 export default function KomisyonlarScreen(): React.JSX.Element {
+  const { addTab } = useTabStore()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -146,136 +148,74 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                           </div>
                         </div>
                       </div>
-                      {komisyon.uyeler && komisyon.uyeler.length > 0 ? (
-                        <div className="mt-3 space-y-2">
-                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Komisyon Üyeleri</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {komisyon.uyeler.map((uye: any, idx: number) => (
-                              <div key={idx} className="flex flex-col p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50">
-                                <div className="flex items-center gap-1">
-                                  <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">
-                                    {uye.personel_id ? uye.ad_soyad : <span className="text-slate-400 italic">Boş Kontenjan</span>}
-                                  </span>
-                                  {uye.asil_mi === 1 ? (
-                                    <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-medium">Asil</span>
-                                  ) : (
-                                    <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-1.5 py-0.5 rounded-full font-medium">Yedek</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1 mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                  {uye.personel_id && (
-                                    <>
-                                      <span>{uye.unvan}</span>
-                                      <span className="text-slate-300 dark:text-slate-600">•</span>
-                                    </>
-                                  )}
-                                  <span className="font-medium text-slate-600 dark:text-slate-300">{uye.gorev_adi}</span>
-                                </div>
-                                {!uye.personel_id ? (
-                                  <div className="mt-2">
-                                    <Button 
-                                      variant="outline" 
-                                      className="w-full text-xs py-1 h-auto rounded-md text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                                      onClick={() => {
-                                        setAtaRoleId(uye.role_id)
-                                        setAtaKomisyonId(uye.komisyon_id)
-                                        setIsAtaModalOpen(true)
-                                      }}
-                                    >
-                                      Personel Ata
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <div className="mt-2 flex gap-2">
-                                    <Button 
-                                      variant="outline" 
-                                      className="flex-1 text-xs py-1 h-auto rounded-md text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                                      onClick={() => {
-                                        setAtaRoleId(uye.role_id)
-                                        setAtaKomisyonId(uye.komisyon_id)
-                                        setIsAtaModalOpen(true)
-                                      }}
-                                    >
-                                      Değiştir
-                                    </Button>
-                                    <Button 
-                                      variant="outline" 
-                                      className="flex-1 text-xs py-1 h-auto rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                      onClick={async () => {
-                                        if(confirm('Personeli bu görevden (komisyondan) almak istediğinize emin misiniz?')) {
-                                          const res = await window.electron.ipcRenderer.invoke('db:run', 'UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?', [uye.role_id])
-                                          if (res.success) {
-                                            queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      Kaldır
-                                    </Button>
-                                  </div>
-                                )}
+                      
+                      {/* Alt Kısım - Aksiyonlar */}
+                      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            className="text-xs py-1.5 px-3 h-auto rounded-lg text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => {
+                              addTab('/komisyonlar/detay?id=' + komisyon.id)
+                            }}
+                          >
+                            <Users className="w-3.5 h-3.5 mr-1.5" />
+                            Üyeler ve Detaylar ({komisyon.uyeler?.length || 0})
+                          </Button>
+
+                          {komisyon.sablonlar && komisyon.sablonlar.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-300 dark:text-slate-700">|</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {komisyon.sablonlar.map((sablon: any) => (
+                                  <Button
+                                    key={sablon.sablon_id}
+                                    variant="outline"
+                                    className="text-xs py-1.5 px-3 h-auto rounded-lg text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    onClick={() => {
+                                      alert(`Şablon üretiliyor: ${sablon.ad}\n(Bu özellik yapım aşamasındadır)`)
+                                    }}
+                                  >
+                                    <Printer className="w-3.5 h-3.5 mr-1.5" />
+                                    {sablon.ad}
+                                  </Button>
+                                ))}
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="mt-3 py-3 text-center bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 text-xs text-slate-500">
-                          Henüz üye atanmamış.
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          className="text-xs py-1.5 h-auto rounded-lg"
-                          onClick={() => {
-                            setEditingKomisyonId(komisyon.id)
-                            setIsModalOpen(true)
-                          }}
-                        >
-                          Düzenle
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={async () => {
-                            if (window.confirm('Bu komisyonu silmek istediğinize emin misiniz?')) {
-                              const res = await window.electron.ipcRenderer.invoke(
-                                'db:run',
-                                'UPDATE TANIM_Komisyon SET aktif_mi = 0 WHERE id = ?',
-                                [komisyon.id]
-                              )
-                              if (res.success) {
-                                queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
+
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            className="text-xs py-1.5 h-auto rounded-lg"
+                            onClick={() => {
+                              setEditingKomisyonId(komisyon.id)
+                              setIsModalOpen(true)
+                            }}
+                          >
+                            Düzenle
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={async () => {
+                              if (window.confirm('Bu komisyonu silmek istediğinize emin misiniz?')) {
+                                const res = await window.electron.ipcRenderer.invoke(
+                                  'db:run',
+                                  'UPDATE TANIM_Komisyon SET aktif_mi = 0 WHERE id = ?',
+                                  [komisyon.id]
+                                )
+                                if (res.success) {
+                                  queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
+                                }
                               }
-                            }
-                          }}
-                        >
-                          Sil
-                        </Button>
-                      </div>
-                      
-                      {komisyon.sablonlar && komisyon.sablonlar.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Çıktılar / Belgeler</p>
-                          <div className="flex flex-wrap gap-2">
-                            {komisyon.sablonlar.map((sablon: any) => (
-                              <Button
-                                key={sablon.sablon_id}
-                                variant="outline"
-                                className="text-xs py-1 px-3 h-auto rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                                onClick={() => {
-                                  // Gelecekte belge oluşturma modülüne yönlendirme
-                                  alert(`Şablon üretiliyor: ${sablon.ad}\n(Bu özellik yapım aşamasındadır)`)
-                                }}
-                              >
-                                <Printer className="w-3 h-3 mr-1.5" />
-                                {sablon.ad}
-                              </Button>
-                            ))}
-                          </div>
+                            }}
+                          >
+                            Sil
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>

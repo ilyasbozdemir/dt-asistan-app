@@ -37,6 +37,8 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/tasinirkod')) return 'Taşınır Kodları'
   if (path.startsWith('/okaskod')) return 'OKAS Kodları'
   if (path.startsWith('/sablonlar')) return 'Şablon Yönetimi'
+  if (path.startsWith('/komisyonlar/detay')) return 'Komisyon Detayı'
+  if (path.startsWith('/komisyonlar')) return 'Komisyon Yönetimi'
   if (path.startsWith('/changelog')) return 'Sürüm Notları'
   return 'Yeni Sekme'
 }
