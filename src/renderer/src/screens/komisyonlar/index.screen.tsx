@@ -149,7 +149,6 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                         </div>
                       </div>
                       
-                      {/* Alt Kısım - Aksiyonlar */}
                       <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Button 
@@ -208,6 +207,8 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                                 )
                                 if (res.success) {
                                   queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
+                                } else {
+                                  alert('Silme işlemi başarısız oldu: ' + res.error)
                                 }
                               }
                             }}
