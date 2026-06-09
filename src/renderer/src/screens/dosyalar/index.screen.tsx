@@ -23,7 +23,9 @@ import {
   CheckCircle2,
   Clock,
   FileCheck,
-  Sparkles
+  Sparkles,
+  Lock,
+  Unlock
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -163,6 +165,12 @@ export default function DosyalarScreen(): React.ReactNode {
     const ekapNo = window.prompt('EKAP İhale Kayıt Numarasını (İKN) giriniz:')
     if (ekapNo !== null) {
       await updateDosya({ id, is_ekap_sent: 1, ekap_no: ekapNo.trim() })
+    }
+  }
+
+  const handleKilidiAc = async (id: number): Promise<void> => {
+    if (confirm('Kilidi açarsanız dosyanın EKAP bağlantısı/kilit durumu iptal edilecektir. Düzenlemeye devam edebilmek için emin misiniz?')) {
+      await updateDosya({ id, is_ekap_sent: 0, ekap_no: null })
     }
   }
 
@@ -840,10 +848,19 @@ export default function DosyalarScreen(): React.ReactNode {
                           onClick={() => handleEkapGonder(selectedDosya.id)}
                           className="px-4 py-2.5 border border-sky-200 dark:border-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-955/10 text-sky-600 dark:text-sky-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-sky-50 dark:bg-sky-900/20"
                         >
-                          <ExternalLink size={14} />
-                          EKAP'a Gönder
+                          <Lock size={14} />
+                          Kilitle (EKAP)
                         </button>
                       </>
+                    )}
+                    {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent === 1 && (
+                      <button
+                        onClick={() => handleKilidiAc(selectedDosya.id)}
+                        className="col-span-2 px-4 py-2.5 border border-amber-200 dark:border-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-955/10 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Unlock size={14} />
+                        Kilidi Aç
+                      </button>
                     )}
                     {selectedDosya.is_deleted === 1 && (
                       <button
