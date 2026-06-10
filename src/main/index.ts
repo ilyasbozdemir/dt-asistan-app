@@ -402,6 +402,60 @@ if (!gotTheLock) {
       }
     })
 
+    ipcMain.handle('export-html', async (_, htmlContent: string) => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'A4 HTML Olarak Kaydet',
+          defaultPath: 'Cikti.html',
+          filters: [{ name: 'HTML Dosyası', extensions: ['html'] }]
+        })
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+        
+        const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>A4 Belge</title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    body { 
+      width: 210mm; 
+      margin: 0 auto; 
+      font-family: 'Times New Roman', Times, serif; 
+      font-size: 12pt;
+      line-height: 1.5;
+      background: white;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 1em; table-layout: fixed; }
+    td, th { border: 1px solid #000; padding: 6px; }
+    th { font-weight: bold; background-color: #f1f5f9; text-align: left; }
+    p { margin-bottom: 1em; margin-top: 0; }
+    ul { list-style-type: disc; padding-left: 20px; margin-bottom: 1em; }
+    ol { list-style-type: decimal; padding-left: 20px; margin-bottom: 1em; }
+    h1 { font-size: 16pt; font-weight: bold; margin-bottom: 0.5em; }
+    h2 { font-size: 14pt; font-weight: bold; margin-bottom: 0.5em; }
+    h3 { font-size: 12pt; font-weight: bold; margin-bottom: 0.5em; }
+    @media print {
+      body { margin: 0; width: 100%; }
+      @page { margin: 20mm; }
+    }
+  </style>
+</head>
+<body>
+  ${htmlContent}
+</body>
+</html>`
+
+        fs.writeFileSync(filePath, fullHtml, 'utf8')
+        
+        return { success: true, filePath }
+      } catch (err: any) {
+        return { success: false, error: err.message }
+      }
+    })
+
     ipcMain.handle('export-xlsx', async (_, bufferData: Uint8Array | ArrayBuffer) => {
       try {
         const { canceled, filePath } = await dialog.showSaveDialog({

@@ -10,10 +10,13 @@ import {
   Save,
   GripVertical,
   Database,
-  ArrowLeft
+  ArrowLeft,
+  LayoutTemplate,
+  Eye
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Sablon, useSaveSablon, usePlaceholders } from '../sablonlar.hooks'
+import { A4Editor } from '../../../../components/editor/A4Editor'
 
 const ResizeHandle = () => (
   <PanelResizeHandle className="w-2 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-700/50 transition-colors cursor-col-resize group">
@@ -25,9 +28,10 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const [ad, setAd] = useState(sablon?.ad || '')
   const [dosyaAdi, setDosyaAdi] = useState(sablon?.dosya_adi || '')
   const [aciklama, setAciklama] = useState(sablon?.aciklama || '')
-  const [htmlCode, setHtmlCode] = useState(sablon?.icerik || `<div style="font-family: Arial, sans-serif; padding: 20px;">\n  <h1 style="color: #2563eb;">Merhaba, {{firma_adi}}!</h1>\n</div>`)
+  const [htmlCode, setHtmlCode] = useState(sablon?.icerik || `<p>Merhaba, {{firma_adi}}!</p>`)
   const [testJson, setTestJson] = useState(`{\n  "firma_adi": "Test Firması A.Ş."\n}`)
   const [parsedData, setParsedData] = useState<Record<string, any>>({})
+  const [activeTab, setActiveTab] = useState<'design' | 'preview'>('design')
   const iframeRef = useRef<HTMLIFrameElement>(null)
   
   const { data: placeholders } = usePlaceholders()
@@ -74,12 +78,12 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     }
   }
 
-  const handleExportDocx = async () => {
+  const handleExportHtml = async () => {
     try {
       const finalHtml = Mustache.render(htmlCode, parsedData)
-      const res = await window.electron.ipcRenderer.invoke('export-docx', finalHtml)
+      const res = await window.electron.ipcRenderer.invoke('export-html', finalHtml)
       if (res.success) {
-        alert('Şablon başarıyla DOCX olarak dışa aktarıldı.')
+        alert('Şablon başarıyla A4 HTML olarak dışa aktarıldı.')
       } else if (res.error !== 'İptal edildi') {
         alert('Dışa aktarma hatası: ' + res.error)
       }
@@ -161,9 +165,9 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
             <Upload className="w-3.5 h-3.5 text-blue-500" />
             DOCX Aç
           </Button>
-          <Button onClick={handleExportDocx} className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
+          <Button onClick={handleExportHtml} className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
             <Download className="w-3.5 h-3.5" />
-            DOCX İndir
+            HTML İndir (A4)
           </Button>
           <Button onClick={handleSave} disabled={saveSablon.isPending} className="bg-purple-600 hover:bg-purple-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white ml-2">
             <Save className="w-3.5 h-3.5" />
@@ -197,75 +201,84 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <PanelGroup orientation="horizontal">
-          
-          {/* SOL PANEL: HTML KODU */}
-          <Panel defaultSize={35} minSize={20}>
-            <div className="flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
-              <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center gap-2">
-                <Code className="w-4 h-4 text-slate-500" />
-                <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">Şablon Kodu (HTML)</h2>
-              </div>
-              <div className="flex-1">
-                <Editor
-                  height="100%"
-                  language="html"
-                  value={htmlCode}
-                  onChange={(val) => setHtmlCode(val || '')}
-                  theme="vs-dark"
-                  options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
-                />
-              </div>
-            </div>
-          </Panel>
+      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-2">
+        <button
+          onClick={() => setActiveTab('design')}
+          className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
+            activeTab === 'design'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+          }`}
+        >
+          <LayoutTemplate className="w-4 h-4" />
+          Word Görünümü (Tasarım)
+        </button>
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
+            activeTab === 'preview'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+          }`}
+        >
+          <Eye className="w-4 h-4" />
+          Mustache.js Önizleme
+        </button>
+      </div>
 
-          <ResizeHandle />
-
-          {/* ORTA PANEL: TEST VERİSİ */}
-          <Panel defaultSize={30} minSize={20}>
-            <div className="flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
-              <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Database className="w-4 h-4 text-slate-500" />
-                  <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">Test Verisi (JSON)</h2>
+      {activeTab === 'design' ? (
+        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <A4Editor content={htmlCode} onChange={setHtmlCode} />
+        </div>
+      ) : (
+        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <PanelGroup orientation="horizontal">
+            {/* SOL PANEL: TEST VERİSİ */}
+            <Panel defaultSize={30} minSize={20}>
+              <div className="flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Database className="w-4 h-4 text-slate-500" />
+                    <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">Test Verisi (JSON)</h2>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <Editor
+                    height="100%"
+                    language="json"
+                    value={testJson}
+                    onChange={(val) => setTestJson(val || '')}
+                    theme="vs-dark"
+                    options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
+                  />
                 </div>
               </div>
-              <div className="flex-1">
-                <Editor
-                  height="100%"
-                  language="json"
-                  value={testJson}
-                  onChange={(val) => setTestJson(val || '')}
-                  theme="vs-dark"
-                  options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
-                />
-              </div>
-            </div>
-          </Panel>
+            </Panel>
 
-          <ResizeHandle />
+            <ResizeHandle />
 
-          {/* SAĞ PANEL: CANLI ÖNİZLEME */}
-          <Panel defaultSize={35} minSize={20}>
-            <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/50">
-              <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">Canlı Önizleme</h2>
+            {/* SAĞ PANEL: CANLI ÖNİZLEME */}
+            <Panel defaultSize={70} minSize={30}>
+              <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/50">
+                <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">İndirilecek A4 Çıktısı Önizleme</h2>
+                </div>
+                <div className="flex-1 overflow-auto bg-slate-200 dark:bg-slate-800 p-8 flex justify-center custom-scrollbar">
+                  <div className="w-[210mm] min-h-[297mm] bg-white shadow-lg border border-slate-300 relative">
+                    <iframe
+                      ref={iframeRef}
+                      title="preview"
+                      className="w-full h-full border-0"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 overflow-auto bg-white dark:bg-slate-950 p-4">
-                <iframe
-                  ref={iframeRef}
-                  title="preview"
-                  className="w-full h-full border-0 rounded"
-                  sandbox="allow-same-origin"
-                />
-              </div>
-            </div>
-          </Panel>
-
-        </PanelGroup>
-      </div>
+            </Panel>
+          </PanelGroup>
+        </div>
+      )}
     </div>
   )
 }

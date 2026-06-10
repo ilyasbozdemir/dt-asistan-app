@@ -148,6 +148,27 @@ export function MalzemeListesi(): React.JSX.Element {
   const [aciklama, setAciklama] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+
+  const handleAiAçiklama = async () => {
+    const name = kalemAdi.trim() || searchQuery.trim()
+    if (!name) return
+    setAiLoading(true)
+    try {
+      const res = await window.electron.ipcRenderer.invoke('ai:generate', {
+        prompt: `Bir kamu ihalesinde "${name}" malzemesi veya hizmeti alınacaktır. Bu alım için teknik şartnameye yazılabilecek, genel teknik standartları belirten, ürünün/hizmetin özelliklerini açıklayan kısa ve öz profesyonel bir metin yazar mısın? Sadece metni ver, başına sonuna bir şey ekleme.`
+      })
+      if (res.success && res.data) {
+        setAciklama(res.data)
+      } else {
+        alert('AI hatası: ' + (res.error || 'Bilinmeyen hata'))
+      }
+    } catch (err: any) {
+      alert('AI Hatası: ' + err.message)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   // Edit states
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -424,9 +445,19 @@ export function MalzemeListesi(): React.JSX.Element {
 
             {/* Açıklama */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-                Açıklama (Opsiyonel)
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                  Açıklama (Opsiyonel)
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAiAçiklama}
+                  disabled={(!kalemAdi && !searchQuery) || aiLoading}
+                  className="text-[9px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {aiLoading ? 'Düşünüyor...' : '✨ AI Önerisi'}
+                </button>
+              </div>
               <textarea
                 value={aciklama}
                 onChange={(e) => setAciklama(e.target.value)}

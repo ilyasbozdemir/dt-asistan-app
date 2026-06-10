@@ -1,0 +1,171 @@
+import React, { useEffect } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TextAlign from '@tiptap/extension-text-align'
+import {
+  Bold, Italic, List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
+  Table as TableIcon, Heading1, Heading2, Heading3
+} from 'lucide-react'
+
+interface A4EditorProps {
+  content: string
+  onChange: (html: string) => void
+  readOnly?: boolean
+}
+
+export function A4Editor({ content, onChange, readOnly = false }: A4EditorProps): React.JSX.Element {
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content,
+    editable: !readOnly,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+    },
+  })
+
+  // Update content if changed externally (e.g., initial load)
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content)
+    }
+  }, [content, editor])
+
+  if (!editor) {
+    return <div>Yükleniyor...</div>
+  }
+
+  return (
+    <div className="flex flex-col h-full w-full bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative z-10">
+      {/* TOOLBAR */}
+      {!readOnly && (
+        <div className="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-2 flex flex-wrap gap-1 relative z-20">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('bold') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Kalın"
+          >
+            <Bold className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('italic') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="İtalik"
+          >
+            <Italic className="w-4 h-4" />
+          </button>
+          
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1 self-center" />
+          
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Başlık 1"
+          >
+            <Heading1 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Başlık 2"
+          >
+            <Heading2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 3 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Başlık 3"
+          >
+            <Heading3 className="w-4 h-4" />
+          </button>
+
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1 self-center" />
+
+          <button
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('bulletList') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Sırasız Liste"
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('orderedList') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Sıralı Liste"
+          >
+            <ListOrdered className="w-4 h-4" />
+          </button>
+
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1 self-center" />
+
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'left' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Sola Hizala"
+          >
+            <AlignLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'center' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Ortala"
+          >
+            <AlignCenter className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'right' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+            title="Sağa Hizala"
+          >
+            <AlignRight className="w-4 h-4" />
+          </button>
+
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1 self-center" />
+
+          <button
+            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300`}
+            title="Tablo Ekle"
+          >
+            <TableIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* EDITOR CANVAS */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-200 dark:bg-slate-800 custom-scrollbar flex justify-center w-full relative z-10">
+        <div className="w-[210mm] min-h-[297mm] max-w-full bg-white text-black p-[20mm] shadow-lg border border-slate-300 dark:border-slate-700 print:shadow-none print:border-none editor-content">
+          <style dangerouslySetInnerHTML={{__html:`
+            .editor-content .ProseMirror { min-height: 100%; outline: none; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; }
+            .editor-content .ProseMirror p { margin-bottom: 1em; }
+            .editor-content .ProseMirror h1 { font-size: 16pt; font-weight: bold; margin-bottom: 0.5em; }
+            .editor-content .ProseMirror h2 { font-size: 14pt; font-weight: bold; margin-bottom: 0.5em; }
+            .editor-content .ProseMirror h3 { font-size: 12pt; font-weight: bold; margin-bottom: 0.5em; }
+            .editor-content .ProseMirror ul { list-style-type: disc; padding-left: 20px; margin-bottom: 1em; }
+            .editor-content .ProseMirror ol { list-style-type: decimal; padding-left: 20px; margin-bottom: 1em; }
+            .editor-content .ProseMirror table { border-collapse: collapse; width: 100%; margin-bottom: 1em; table-layout: fixed; }
+            .editor-content .ProseMirror td, .editor-content .ProseMirror th { border: 1px solid #cbd5e1; padding: 8px; min-width: 1em; }
+            .editor-content .ProseMirror th { font-weight: bold; background-color: #f1f5f9; text-align: left; }
+            .editor-content .ProseMirror .selectedCell:after { z-index: 2; position: absolute; content: ""; left: 0; right: 0; top: 0; bottom: 0; background: rgba(200, 200, 255, 0.4); pointer-events: none; }
+            .editor-content .ProseMirror .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: -2px; width: 4px; background-color: #adf; pointer-events: none; }
+          `}} />
+          <EditorContent editor={editor} className="h-full w-full outline-none" />
+        </div>
+      </div>
+    </div>
+  )
+}
