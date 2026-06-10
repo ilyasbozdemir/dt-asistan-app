@@ -1502,6 +1502,29 @@ if (!gotTheLock) {
 
     autoUpdater.on('update-available', (info) => {
       console.log(`Yeni sürüm bulundu! Sürüm: ${info.version}`)
+      
+      try {
+        const versionsPath = join(__dirname, '../../versions.json')
+        if (fs.existsSync(versionsPath)) {
+          const versionsList: string[] = JSON.parse(fs.readFileSync(versionsPath, 'utf8'))
+          const currentV = (autoUpdater.currentVersion as any)?.version || app.getVersion()
+          const incomingVersion = info.version.replace(/^v/, '')
+          const cleanCurrentV = currentV.replace(/^v/, '')
+          
+          const currentIndex = versionsList.indexOf(cleanCurrentV)
+          const incomingIndex = versionsList.indexOf(incomingVersion)
+          
+          // Eğer ikisi de listedeyse ve gelen sürüm mevcut sürümden eski/aynı ise
+          if (currentIndex !== -1 && incomingIndex !== -1 && incomingIndex <= currentIndex) {
+            console.log(`Bulunan sürüm (${incomingVersion}) mevcut sürümden (${cleanCurrentV}) daha eski veya aynı. Güncelleme reddedildi!`)
+            sendUpdaterStatus('not-available', { version: cleanCurrentV, info: null })
+            return
+          }
+        }
+      } catch (err) {
+        console.error('versions.json kontrol hatası:', err)
+      }
+
       sendUpdaterStatus('available', { version: info.version, info })
     })
 

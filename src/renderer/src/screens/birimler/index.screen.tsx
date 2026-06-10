@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useBirimlerHooks, BirimInput, usePersonelList } from './birimler.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { LayoutGrid, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { LayoutGrid, Plus, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { Modal } from '../../components/ui/Modal'
 
@@ -27,32 +27,54 @@ const Field = ({ label, field, form, handleChange, required, placeholder }: { la
 )
 
 export default function BirimlerScreen(): React.ReactNode {
-  const { birimler, isLoadingBirimler, addBirim, deleteBirim } = useBirimlerHooks()
+  const { birimler, isLoadingBirimler, addBirim, updateBirim, deleteBirim } = useBirimlerHooks()
   const { personeller, isLoading: isLoadingPersonel } = usePersonelList()
   const [form, setForm] = useState<BirimInput>({ ...emptyBirim })
   const [showExtraFields, setShowExtraFields] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingBirimId, setEditingBirimId] = useState<number | null>(null)
 
   const handleChange = (key: keyof BirimInput, value: string | number | null): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleAddBirim = async (e: React.FormEvent): Promise<void> => {
+  const handleSaveBirim = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     if (!form.birim_adi.trim()) return
     try {
-      await addBirim(form)
+      if (editingBirimId) {
+        await updateBirim({ id: editingBirimId, data: form })
+      } else {
+        await addBirim(form)
+      }
       setForm({ ...emptyBirim })
       setShowExtraFields(false)
       setIsModalOpen(false)
+      setEditingBirimId(null)
     } catch (err: any) {
       if (err.message?.includes('UNIQUE')) {
         alert('Bu birim zaten ekli!')
       } else {
         console.error(err)
-        alert('Birim eklenirken hata oluştu!')
+        alert('Birim kaydedilirken hata oluştu!')
       }
     }
+  }
+
+  const handleEditClick = (birim: any) => {
+    setForm({
+      birim_adi: birim.birim_adi || '',
+      antet_ek_satir: birim.antet_ek_satir || '',
+      ihtiyac_yeri_eki: birim.ihtiyac_yeri_eki || '',
+      sunum_makami: birim.sunum_makami || '',
+      kurumsal_kod: birim.kurumsal_kod || '',
+      dtvt_kodu: birim.dtvt_kodu || '',
+      ayrintili_bilgi_personel: birim.ayrintili_bilgi_personel || '',
+      ilgili_personel_id: birim.ilgili_personel_id || null
+    })
+    setEditingBirimId(birim.id)
+    setShowExtraFields(true)
+    setIsModalOpen(true)
   }
 
   const handleDeleteBirim = async (id: number): Promise<void> => {
@@ -78,7 +100,12 @@ export default function BirimlerScreen(): React.ReactNode {
           </p>
         </div>
         <Button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setForm({ ...emptyBirim })
+            setEditingBirimId(null)
+            setShowExtraFields(false)
+            setIsModalOpen(true)
+          }}
           className="bg-blue-600 hover:bg-blue-700 shadow-md flex items-center gap-2 px-4 py-2 text-sm shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -102,15 +129,26 @@ export default function BirimlerScreen(): React.ReactNode {
                   key={birim.id}
                   className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
                 >
-                  <Button
-                    title="Sil"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteBirim(birim.id)}
-                    className="absolute top-2 right-2 h-8 w-8 p-0 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <Button
+                      title="Düzenle"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditClick(birim)}
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      title="Sil"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteBirim(birim.id)}
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                   
                   <div className="flex items-center gap-2 mb-2 pr-8">
                     <span className="font-bold text-sm text-slate-800 dark:text-slate-200 leading-tight">
@@ -157,11 +195,14 @@ export default function BirimlerScreen(): React.ReactNode {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Yeni Birim Tanımla"
-        description="Kurumunuza ait idari birim veya müdürlük ekleyin."
+        onClose={() => {
+          setIsModalOpen(false)
+          setEditingBirimId(null)
+        }}
+        title={editingBirimId ? "Birimi Düzenle" : "Yeni Birim Tanımla"}
+        description={editingBirimId ? "İdari birim bilgilerini güncelleyin." : "Kurumunuza ait idari birim veya müdürlük ekleyin."}
       >
-        <form onSubmit={handleAddBirim} className="space-y-4">
+        <form onSubmit={handleSaveBirim} className="space-y-4">
           <Field label="Birim / Müdürlük Adı" field="birim_adi" form={form} handleChange={handleChange} required placeholder="Örn: Fen İşleri Müdürlüğü" />
 
           <button
@@ -203,11 +244,14 @@ export default function BirimlerScreen(): React.ReactNode {
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => {
+              setIsModalOpen(false)
+              setEditingBirimId(null)
+            }}>
               İptal
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shadow-md">
-              Birimi Kaydet
+              {editingBirimId ? "Güncelle" : "Birimi Kaydet"}
             </Button>
           </div>
         </form>
