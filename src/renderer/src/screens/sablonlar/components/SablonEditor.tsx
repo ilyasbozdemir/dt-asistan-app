@@ -3,7 +3,6 @@ import Editor from '@monaco-editor/react'
 import Mustache from 'mustache'
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import {
-  Code,
   FileText,
   Upload,
   Download,
@@ -15,7 +14,7 @@ import {
   Eye
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
-import { useSaveSablon, usePlaceholders } from '../sablonlar.hooks'
+import { Sablon, useSaveSablon, usePlaceholders } from '../sablonlar.hooks'
 import { A4Editor } from '../../../components/editor/A4Editor'
 
 const ResizeHandle = () => (

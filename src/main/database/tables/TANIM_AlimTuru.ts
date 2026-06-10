@@ -11,6 +11,9 @@ export const TANIM_AlimTuru = {
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
+  constraints: [
+    'UNIQUE(tur_adi)'
+  ],
   initialData: [
     {
       tur_adi: 'Mal Alımı',

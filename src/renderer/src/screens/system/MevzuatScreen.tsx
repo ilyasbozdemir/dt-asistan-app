@@ -358,17 +358,17 @@ export function MevzuatScreen(): React.JSX.Element {
         taxNumber
       }
 
-      await window.electron.ipcRenderer.invoke('db:query', 'DELETE FROM TANIM_KodSozlugu')
+      await window.electron.ipcRenderer.invoke('db:run', 'DELETE FROM TANIM_KodSozlugu')
       
       const insertQueries = [
-        ...kurumsalCodes.map(c => `INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES ('kurumsal', '${c.code}', '${c.description}')`),
-        ...fonksiyonelCodes.map(c => `INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES ('fonksiyonel', '${c.code}', '${c.description}')`),
-        ...muhasebeBirimleri.map(c => `INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES ('muhasebe_birimi', '${c.code}', '${c.description}')`),
-        ...harcamaBirimleri.map(c => `INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES ('harcama_birimi', '${c.code}', '${c.description}')`)
+        ...kurumsalCodes.map(c => ({ sql: 'INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES (?, ?, ?)', params: ['kurumsal', c.code, c.description] })),
+        ...fonksiyonelCodes.map(c => ({ sql: 'INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES (?, ?, ?)', params: ['fonksiyonel', c.code, c.description] })),
+        ...muhasebeBirimleri.map(c => ({ sql: 'INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES (?, ?, ?)', params: ['muhasebe_birimi', c.code, c.description] })),
+        ...harcamaBirimleri.map(c => ({ sql: 'INSERT INTO TANIM_KodSozlugu (tur, kod, aciklama) VALUES (?, ?, ?)', params: ['harcama_birimi', c.code, c.description] }))
       ]
       
-      for (const query of insertQueries) {
-        await window.electron.ipcRenderer.invoke('db:query', query)
+      if (insertQueries.length > 0) {
+        await window.electron.ipcRenderer.invoke('db:transaction', insertQueries)
       }
 
       await saveSettings(dataToSave)

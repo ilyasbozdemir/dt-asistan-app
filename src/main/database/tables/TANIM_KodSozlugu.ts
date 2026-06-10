@@ -10,6 +10,9 @@ export const TANIM_KodSozlugu = {
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
+  constraints: [
+    'UNIQUE(tur, kod)'
+  ],
   initialData: [
     // Varsayılan Kurumsal Kodlar
     { tur: 'kurumsal', kod: '30.11.01.22', aciklama: 'Mali Hizmetler Müdürlüğü', aktif_mi: 1 },

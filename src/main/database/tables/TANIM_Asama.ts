@@ -11,6 +11,9 @@ export const TANIM_Asama = {
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
+  constraints: [
+    'UNIQUE(asama_adi)'
+  ],
   initialData: [
     {
       asama_sira: 1,
