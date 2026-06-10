@@ -297,6 +297,35 @@ export function MevzuatScreen(): React.JSX.Element {
   const { loadSettings: reloadSettingsStore } = useSettingsStore()
   const [savingMali, setSavingMali] = useState(false)
 
+  // Mock State for Settings (This would normally come from a global store/db)
+  const [limits, _setLimits] = useState({
+    buyuksehir: '1.021.827,00',
+    diger: '340.391,00',
+    yil: new Date().getFullYear().toString()
+  })
+  const setLimits = (val: React.SetStateAction<typeof limits>) => {
+    _setLimits(val)
+    setIsConfirmed(false)
+  }
+
+  type VergiOrani = {
+    id: string
+    ad: string
+    oran: string
+    tur: 'yuzde' | 'binde'
+  }
+  const [rates, _setRates] = useState<VergiOrani[]>([
+    { id: '1', ad: 'Damga Vergisi', oran: '9,48', tur: 'binde' },
+    { id: '2', ad: 'Karar Pulu', oran: '5,69', tur: 'binde' },
+    { id: '3', ad: 'KDV (Genel)', oran: '20', tur: 'yuzde' },
+    { id: '4', ad: 'KDV (İndirimli)', oran: '10', tur: 'yuzde' },
+    { id: '5', ad: 'KDV (Özel)', oran: '1', tur: 'yuzde' }
+  ])
+  const setRates = (val: React.SetStateAction<typeof rates>) => {
+    _setRates(val)
+    setIsConfirmed(false)
+  }
+
   useEffect(() => {
     if (settings) {
       const normalizeCodes = (raw: unknown): CodeItem[] => {
@@ -328,7 +357,6 @@ export function MevzuatScreen(): React.JSX.Element {
       window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM TANIM_KodSozlugu WHERE aktif_mi = 1')
         .then(res => {
           if (res.success && res.data) {
-            setKurumsalCodes(res.data.filter((d: any) => d.tur === 'kurumsal').map((d: any) => ({ code: d.kod, description: d.aciklama })))
             setFonksiyonelCodes(res.data.filter((d: any) => d.tur === 'fonksiyonel').map((d: any) => ({ code: d.kod, description: d.aciklama })))
             setMuhasebeBirimleri(res.data.filter((d: any) => d.tur === 'muhasebe_birimi').map((d: any) => ({ code: d.kod, description: d.aciklama })))
             setHarcamaBirimleri(res.data.filter((d: any) => d.tur === 'harcama_birimi').map((d: any) => ({ code: d.kod, description: d.aciklama })))
@@ -336,34 +364,49 @@ export function MevzuatScreen(): React.JSX.Element {
         })
         .catch(console.error)
 
-      setInstitutionType(settings.institutionType || 'belediye')
-      setFinansmanKodu(settings.finansmanKodu || '5')
-      setLimitType(settings.limitType || 'diger')
+      queueMicrotask(() => {
+        setInstitutionType(settings.institutionType || 'belediye')
+        setFinansmanKodu(settings.finansmanKodu || '5')
+        setLimitType(settings.limitType || 'diger')
 
-      try {
-        if (settings.ekonomikKodlarList === undefined) {
-          setEconomicCodes(
-            EKONOMIK_KODLAR.map((item) => ({ code: item.kod, description: item.aciklama }))
-          )
-        } else {
-          const parsed = JSON.parse(settings.ekonomikKodlarList)
-          setEconomicCodes(normalizeCodes(parsed))
+        try {
+          if (settings.ekonomikKodlarList === undefined) {
+            setEconomicCodes(
+              EKONOMIK_KODLAR.map((item) => ({ code: item.kod, description: item.aciklama }))
+            )
+          } else {
+            const parsed = JSON.parse(settings.ekonomikKodlarList)
+            setEconomicCodes(normalizeCodes(parsed))
+          }
+        } catch {
+          setEconomicCodes([])
         }
-      } catch {
-        setEconomicCodes([])
-      }
 
-      setTaxOffice(settings.taxOffice || '')
-      setTaxNumber(settings.taxNumber || '')
+        setTaxOffice(settings.taxOffice || '')
+        setTaxNumber(settings.taxNumber || '')
 
-      if (settings.limits) {
-        try { _setLimits(JSON.parse(settings.limits)) } catch (e) { console.error('Error parsing limits', e) }
-      }
-      if (settings.rates) {
-        try { _setRates(JSON.parse(settings.rates)) } catch (e) { console.error('Error parsing rates', e) }
-      }
+        if (settings.limits) {
+          try { _setLimits(JSON.parse(settings.limits)) } catch (e) { console.error('Error parsing limits', e) }
+        }
+        if (settings.rates) {
+          try { _setRates(JSON.parse(settings.rates)) } catch (e) { console.error('Error parsing rates', e) }
+        }
+      })
     }
   }, [settings])
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      if (birimler && birimler.length > 0) {
+        setKurumsalCodes(birimler.map(b => ({
+          code: b.kurumsal_kod || '',
+          description: b.birim_adi
+        })))
+      } else {
+        setKurumsalCodes([])
+      }
+    })
+  }, [birimler])
 
   const handleInstitutionTypeChange = (type: string): void => {
     setInstitutionType(type)
@@ -437,34 +480,6 @@ export function MevzuatScreen(): React.JSX.Element {
     setTimeout(() => setCopiedText(''), 1500)
   }
 
-  // Mock State for Settings (This would normally come from a global store/db)
-  const [limits, _setLimits] = useState({
-    buyuksehir: '1.021.827,00',
-    diger: '340.391,00',
-    yil: new Date().getFullYear().toString()
-  })
-  const setLimits = (val: React.SetStateAction<typeof limits>) => {
-    _setLimits(val)
-    setIsConfirmed(false)
-  }
-
-  type VergiOrani = {
-    id: string
-    ad: string
-    oran: string
-    tur: 'yuzde' | 'binde'
-  }
-  const [rates, _setRates] = useState<VergiOrani[]>([
-    { id: '1', ad: 'Damga Vergisi', oran: '9,48', tur: 'binde' },
-    { id: '2', ad: 'Karar Pulu', oran: '5,69', tur: 'binde' },
-    { id: '3', ad: 'KDV (Genel)', oran: '20', tur: 'yuzde' },
-    { id: '4', ad: 'KDV (İndirimli)', oran: '10', tur: 'yuzde' },
-    { id: '5', ad: 'KDV (Özel)', oran: '1', tur: 'yuzde' }
-  ])
-  const setRates = (val: React.SetStateAction<typeof rates>) => {
-    _setRates(val)
-    setIsConfirmed(false)
-  }
 
   const { data: asamalar = [], isLoading: isLoadingAsamalar } = useQuery({
     queryKey: ['asamalar'],
@@ -824,15 +839,60 @@ export function MevzuatScreen(): React.JSX.Element {
 
                   {/* Kurumsal Kodlar */}
                   <div className="mt-4">
-                    <CodeListEditor
-                      title="Kurumsal Kodlar (Kurum Birimleri)"
-                      description="Kurumunuza ait ana birim ve müdürlük kodları (Örn: XX.XX.XX.XX - Mali Hizmetler)"
-                      codes={kurumsalCodes}
-                      onChange={setKurumsalCodes}
-                      placeholderCode="Örn: 30.11.01.22"
-                      placeholderDesc="Mevcut Birimlerden Seçiniz..."
-                      descOptions={birimler.map(b => ({ value: b.birim_adi, label: b.birim_adi }))}
-                    />
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-blue-500" />
+                            Kurumsal Kodlar (Kurum Birimleri)
+                          </h3>
+                          <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1">
+                            Kurumunuza ait ana birim ve müdürlük kodları (Birim Yönetimi verileri).
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {birimler.length === 0 ? (
+                          <div className="text-center py-6 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-950 rounded-lg border border-dashed border-slate-200 dark:border-slate-800">
+                            Tanımlı birim bulunamadı. Lütfen önce "Birim Yönetimi" sayfasından birimlerinizi ekleyin.
+                          </div>
+                        ) : (
+                          birimler.map((birim, index) => {
+                            const codeItem = kurumsalCodes.find(c => c.description === birim.birim_adi)
+                            const currentCode = codeItem ? codeItem.code : (birim.kurumsal_kod || '')
+                            
+                            return (
+                              <div key={birim.id || index} className="flex items-center gap-3 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
+                                <div className="flex-1">
+                                  <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    {birim.birim_adi}
+                                  </div>
+                                </div>
+                                <div className="w-48 shrink-0">
+                                  <Input
+                                    value={currentCode}
+                                    onChange={(e) => {
+                                      const newCode = e.target.value
+                                      setKurumsalCodes(prev => {
+                                        const exists = prev.find(p => p.description === birim.birim_adi)
+                                        if (exists) {
+                                          return prev.map(p => p.description === birim.birim_adi ? { ...p, code: newCode } : p)
+                                        } else {
+                                          return [...prev, { code: newCode, description: birim.birim_adi }]
+                                        }
+                                      })
+                                    }}
+                                    placeholder="Kurumsal Kod (Örn: 30.11.01.22)"
+                                    className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 w-full"
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Fonksiyonel Kodlar */}

@@ -1433,61 +1433,7 @@ if (!gotTheLock) {
 
     // --- Auto Updater Logic ---
     // Uygulama açıldıktan saniyeler sonra güncellemeleri kontrol et
-    if (isDev) {
-      const checkInterval = setInterval(async () => {
-        try {
-          // If getDb() throws an error, the catch block will suppress it and we'll try again in 5s
-          const db = workspaceManager.getDb()
-          
-          // Database is ready, stop checking
-          clearInterval(checkInterval)
-
-          const testModeRow = db.prepare("SELECT value FROM settings WHERE key = 'devUpdateTestMode'").get() as { value: string } | undefined
-          const devVersionRow = db.prepare("SELECT value FROM settings WHERE key = 'devUpdateVersion'").get() as { value: string } | undefined
-          
-          if (testModeRow?.value === 'true') {
-            autoUpdater.forceDevUpdateConfig = true
-            // Basic version validation to prevent semver crash
-            const isValidVersion = (v: string) => {
-              try {
-                const semver = require('semver')
-                return semver.valid(v.replace(/^v/, '')) !== null
-              } catch {
-                return false
-              }
-            }
-            if (devVersionRow?.value && isValidVersion(devVersionRow.value)) {
-              Object.defineProperty(autoUpdater, 'currentVersion', { value: devVersionRow.value })
-            } else {
-              // Read dev-app-update.yml to get owner and repo
-              const ymlPath = join(__dirname, '../../dev-app-update.yml')
-              if (fs.existsSync(ymlPath)) {
-                const config = yaml.load(fs.readFileSync(ymlPath, 'utf8')) as any
-                if (config && config.owner && config.repo) {
-                  const res = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/releases`)
-                  const releases = await res.json()
-                  if (Array.isArray(releases)) {
-                    releases.forEach((r, i) => console.log(`[${i}] ${r.tag_name}`))
-                    if (releases.length > 0) {
-                      const targetVersion = releases[releases.length - 1].tag_name.replace('v', '')
-                      if (isValidVersion(targetVersion)) {
-                        Object.defineProperty(autoUpdater, 'currentVersion', { value: targetVersion })
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            
-            autoUpdater.checkForUpdates().catch(e => {
-              console.error('Update check error:', e.message)
-            })
-          }
-        } catch (e) {
-          // Keep waiting for DB to be initialized by the user
-        }
-      }, 5000)
-    } else {
+    if (app.isPackaged) {
       setTimeout(() => {
         autoUpdater.checkForUpdates().catch(e => {
           console.error('Update check error:', e.message)

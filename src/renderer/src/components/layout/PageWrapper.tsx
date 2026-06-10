@@ -184,7 +184,11 @@ export function PageWrapper(): React.ReactNode {
           handleDteFileOpen(filePath)
         } else {
           const result = await openWorkspace(filePath)
-          if (result.success) queryClient.clear()
+          if (result.success) {
+            queryClient.clear()
+            clearTabs()
+            navigate({ to: '/' })
+          }
         }
       }
     })
@@ -198,7 +202,11 @@ export function PageWrapper(): React.ReactNode {
             handleDteFileOpen(filePath)
           } else {
             const result = await openWorkspace(filePath)
-            if (result.success) queryClient.clear()
+            if (result.success) {
+              queryClient.clear()
+              clearTabs()
+              navigate({ to: '/' })
+            }
           }
         }
       }

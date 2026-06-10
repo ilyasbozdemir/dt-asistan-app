@@ -8,7 +8,7 @@ import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
 import { DTVTKoduLabels } from '../../constants/dtvt-kodlari'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { useSettingsStore } from '../../store/settingsStore'
-import { kurumKoduAlgila } from '../../utils/kurum-kodu'
+
 
 type TabType = 'idari' | 'iletisim'
 
@@ -271,23 +271,9 @@ export default function KurumScreen(): React.JSX.Element {
                         <Input
                           value={kurumsalKod}
                           onChange={(e) => setKurumsalKod(e.target.value)}
-                          placeholder="Örn: xx.xx.xx.xx"
+                          placeholder="Örn: 46.70.97"
                           className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
                         />
-                        {kurumsalKod && (
-                          <div className="mt-1.5">
-                            {kurumKoduAlgila(kurumsalKod).format === 'yeni' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
-                                <Info className="w-2.5 h-2.5" /> YENİ FORMAT
-                              </span>
-                            )}
-                            {kurumKoduAlgila(kurumsalKod).format !== 'yeni' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
-                                <Info className="w-2.5 h-2.5" /> STANDART DIŞI FORMAT
-                              </span>
-                            )}
-                          </div>
-                        )}
                       </div>
 
                       {/* Kurumsal Kod (Eski Sistem) */}
@@ -299,23 +285,9 @@ export default function KurumScreen(): React.JSX.Element {
                         <Input
                           value={eskiKurumsalKod}
                           onChange={(e) => setEskiKurumsalKod(e.target.value)}
-                          placeholder="Örn: xx-xx"
+                          placeholder="Örn: 70151"
                           className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
                         />
-                        {eskiKurumsalKod && (
-                          <div className="mt-1.5">
-                            {kurumKoduAlgila(eskiKurumsalKod).format === 'eski' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
-                                <Info className="w-2.5 h-2.5" /> ESKİ FORMAT (Say2000i)
-                              </span>
-                            )}
-                            {kurumKoduAlgila(eskiKurumsalKod).format !== 'eski' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
-                                <Info className="w-2.5 h-2.5" /> STANDART DIŞI FORMAT
-                              </span>
-                            )}
-                          </div>
-                        )}
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
