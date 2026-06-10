@@ -5,6 +5,7 @@ import { Input } from '../../components/ui/Input'
 import { Building2, Save, Upload, MapPin, ImageIcon, Info, X, ExternalLink, Plus } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
+import { DTVTKoduLabels } from '../../constants/dtvt-kodlari'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { useSettingsStore } from '../../store/settingsStore'
 
@@ -57,6 +58,7 @@ export default function KurumScreen(): React.JSX.Element {
   const [muhasebeBirimAdi, setMuhasebeBirimAdi] = useState('')
   const [harcamaBirimKodu, setHarcamaBirimKodu] = useState('')
   const [harcamaBirimAdi, setHarcamaBirimAdi] = useState('')
+  const [dtvtKodu, setDtvtKodu] = useState('')
 
   const [sozlukData, setSozlukData] = useState<{ tur: string; kod: string; aciklama: string }[]>([])
 
@@ -124,6 +126,7 @@ export default function KurumScreen(): React.JSX.Element {
         setMuhasebeBirimAdi(settings.muhasebeBirimAdi || '')
         setHarcamaBirimKodu(settings.harcamaBirimKodu || '')
         setHarcamaBirimAdi(settings.harcamaBirimAdi || '')
+        setDtvtKodu(settings.dtvtKodu || '')
       }, 0)
     }
   }, [settings])
@@ -151,6 +154,7 @@ export default function KurumScreen(): React.JSX.Element {
         dataToSave.muhasebeBirimAdi = muhasebeBirimAdi
         dataToSave.harcamaBirimKodu = harcamaBirimKodu
         dataToSave.harcamaBirimAdi = harcamaBirimAdi
+        dataToSave.dtvtKodu = dtvtKodu
       } else if (tab === 'iletisim') {
         dataToSave.address = address
         dataToSave.district = district
@@ -490,6 +494,25 @@ export default function KurumScreen(): React.JSX.Element {
                               {sozlukData.filter(d => d.tur === 'harcama_birimi').map(item => (
                                 <option key={item.kod} value={item.kod}>
                                   {item.kod} — {item.aciklama}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* DTVT Kodu */}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                              DTVT Kodu
+                            </label>
+                            <select
+                              value={dtvtKodu}
+                              onChange={e => setDtvtKodu(e.target.value)}
+                              className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            >
+                              <option value="">Seçiniz...</option>
+                              {Object.entries(DTVTKoduLabels).map(([val, label]) => (
+                                <option key={val} value={val}>
+                                  {val} — {label}
                                 </option>
                               ))}
                             </select>

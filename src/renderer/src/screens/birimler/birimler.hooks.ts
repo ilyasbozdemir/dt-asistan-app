@@ -7,7 +7,6 @@ export interface Birim {
   ihtiyac_yeri_eki: string
   sunum_makami: string
   kurumsal_kod: string
-  dtvt_kodu: string
   ayrintili_bilgi_personel: string
   ilgili_personel_id: number | null
   aktif_mi: number
@@ -55,7 +54,7 @@ export function useBirimlerHooks() {
     mutationFn: async (birim: BirimInput) => {
       const cols = [
         'birim_adi', 'antet_ek_satir', 'ihtiyac_yeri_eki',
-        'sunum_makami', 'kurumsal_kod', 'dtvt_kodu', 'ayrintili_bilgi_personel', 'ilgili_personel_id'
+        'sunum_makami', 'kurumsal_kod', 'ayrintili_bilgi_personel', 'ilgili_personel_id'
       ]
       const placeholders = cols.map(() => '?').join(', ')
       const values = cols.map((col) => (birim as any)[col] ?? null)

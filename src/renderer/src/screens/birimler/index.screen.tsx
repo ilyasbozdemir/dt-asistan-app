@@ -8,7 +8,7 @@ import { Modal } from '../../components/ui/Modal'
 
 const emptyBirim: BirimInput = {
   birim_adi: '', antet_ek_satir: '', ihtiyac_yeri_eki: '',
-  sunum_makami: '', kurumsal_kod: '', dtvt_kodu: '', ayrintili_bilgi_personel: '', ilgili_personel_id: null
+  sunum_makami: '', kurumsal_kod: '', ayrintili_bilgi_personel: '', ilgili_personel_id: null
 }
 
 const Field = ({ label, field, form, handleChange, required, placeholder }: { label: string; field: keyof BirimInput; form: BirimInput; handleChange: (field: keyof BirimInput, value: string) => void; required?: boolean; placeholder?: string }) => (
@@ -68,7 +68,6 @@ export default function BirimlerScreen(): React.ReactNode {
       ihtiyac_yeri_eki: birim.ihtiyac_yeri_eki || '',
       sunum_makami: birim.sunum_makami || '',
       kurumsal_kod: birim.kurumsal_kod || '',
-      dtvt_kodu: birim.dtvt_kodu || '',
       ayrintili_bilgi_personel: birim.ayrintili_bilgi_personel || '',
       ilgili_personel_id: birim.ilgili_personel_id || null
     })
@@ -173,12 +172,6 @@ export default function BirimlerScreen(): React.ReactNode {
                         <span className="line-clamp-2">{birim.sunum_makami}</span>
                       </div>
                     )}
-                    {birim.dtvt_kodu && (
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-                        <span className="opacity-70">🏷️</span>
-                        <span>DTVT: {birim.dtvt_kodu}</span>
-                      </div>
-                    )}
                     {(personel || legacyPersonelText) && (
                       <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                         <span className="opacity-70">👤</span>
@@ -221,7 +214,6 @@ export default function BirimlerScreen(): React.ReactNode {
               <Field label="Sunum Makamı" field="sunum_makami" form={form} handleChange={handleChange} placeholder="Sunulacak makam" />
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Kurumsal Kod" field="kurumsal_kod" form={form} handleChange={handleChange} />
-                <Field label="DTVT Kodu" field="dtvt_kodu" form={form} handleChange={handleChange} />
               </div>
               
               <div>
