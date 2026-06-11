@@ -218,46 +218,80 @@ export function AITextGeneratorModal({
           </div>
 
           {/* Quick templates */}
-          {!isAdvisorMode && (
-            <div className="flex flex-wrap gap-1.5">
-              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">
-                Örnekler:
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setPrompt(
-                    `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
-                  )
-                }
-                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-              >
-                Resmi Açıklama
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setPrompt(
-                    `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
-                  )
-                }
-                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-              >
-                Kapsam Maddeleri
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setPrompt(
-                    `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
-                  )
-                }
-                className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
-              >
-                Şartname Özeti
-              </button>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-550 flex items-center mr-1">
+              Örnekler:
+            </span>
+            
+            {isAdvisorMode ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setPrompt('Bu dosyanın bir sonraki yasal/idari aşamalarını ve kritik süreçlerini listele.')}
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Sonraki Aşamalar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrompt('Bu ihale dosyası için mevzuata (4734 Sayılı Kanun) uygunluk analizi yap ve varsa riskli kısımları uyar.')}
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Mevzuat Analizi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrompt('Bu tür bir alım için en doğru piyasa fiyat araştırması yöntemi ne olmalıdır? Nereden teklif istenmeli?')}
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Piyasa Araştırması
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrompt('Bu dosya için örnek bir komisyon onay yazısı veya gerekçe taslağı oluşturur musun?')}
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Onay Taslağı
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrompt(
+                      `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
+                    )
+                  }
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Resmi Açıklama
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrompt(
+                      `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
+                    )
+                  }
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Kapsam Maddeleri
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrompt(
+                      `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
+                    )
+                  }
+                  className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
+                >
+                  Şartname Özeti
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Action button */}
           <button

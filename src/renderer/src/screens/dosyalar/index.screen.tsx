@@ -967,12 +967,12 @@ export default function DosyalarScreen(): React.ReactNode {
           isAdvisorMode={true}
           fieldName="Mevzuat Analizi"
           title="Yapay Zeka Asistanı"
-          initialPrompt={
+          initialPrompt=""
+          systemInstruction={
             selectedFileForAI.konu === 'Genel Mevzuat Danışmanlığı'
-              ? `Doğrudan temin, kamu ihale kanunu veya belediye satın alma süreçleri (4734 sayılı kanun vb.) hakkında sana genel bir mevzuat veya idari işleyiş sorusu soracağım. Lütfen profesyonel bir asistan gibi yanıtla.\n\nSorum: `
-              : `Sistemde kayıtlı olan aşağıdaki doğrudan temin (ihale) dosyasını incele ve bana bir sonraki yasal/idari aşamalar hakkında mevzuata uygun bir tavsiye ya da dosya özeti sun:\n\nDosya No: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}\nKonu: ${selectedFileForAI.konu}\nMaliyet: ${selectedFileForAI.yaklasik_maliyet} TL\nMadde: ${selectedFileForAI.ihale_sekli || 'Belirtilmemiş'}`
+              ? "Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kullanıcıya genel mevzuat veya idari işleyiş hakkında rehberlik edeceksin.\n\nÖNEMLİ GİZLİLİK KURALI: Gerçek kurum veya kişi isimlerini maskele."
+              : `Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kullanıcı sana sistemdeki bir dosyası hakkında danışacak.\n\nŞu anki Aktif Dosya Bilgileri:\n- Dosya No: ${selectedFileForAI.temin_no || 'Belirtilmemiş'}\n- Konu: ${selectedFileForAI.konu}\n- Maliyet: ${selectedFileForAI.yaklasik_maliyet || 0} TL\n- İhale Şekli (Madde): ${selectedFileForAI.ihale_sekli || 'Belirtilmemiş'}\n\nÖNEMLİ GİZLİLİK KURALI: Gerçek kurum, şahıs isimleri veya adresleri [Kurum Adı], [İlgili Kişi] şeklinde maskele.`
           }
-          systemInstruction="Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen sorularda veya dosya içeriğinde belirli bir Kurum Adı, Belediye Adı, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele). Ancak ihale malzemelerini tarif eden teknik özellikleri (boyut, renk, adet vb.) aynen kullan."
           onClose={() => {
             setShowAIModal(false)
             setSelectedFileForAI(null)
