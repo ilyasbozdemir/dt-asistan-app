@@ -12,7 +12,8 @@ import {
   Sparkles,
   ChevronRight,
   ChevronDown,
-  Bot
+  Bot,
+  Loader2
 } from 'lucide-react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useDosyalarHooks, TeminDosyasi } from './dosyalar.hooks'
@@ -55,6 +56,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const { updateTabLabel } = useTabStore()
   const { institutionName } = useSettingsStore()
 
+  const [isDescLoading, setIsDescLoading] = useState(false)
   const [showKonuSuggestions, setShowKonuSuggestions] = useState(false)
 
   // Get query params
@@ -406,13 +408,27 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       return updated;
     });
   }
-  const handleAiDescGenerate = () => {
-    openTextGenerator(
-      'isin_aciklamasi',
-      'İşin Açıklamasını Üret',
-      'İşin Açıklaması',
-      `Şu ihale konusu için resmi ve profesyonel bir "İşin Kapsamı ve Tanımı" metni oluştur. İhale/İş Adı: "${formData.konu || ''}". Metin kurumsal bir dilde olmalı, gereksiz yorum içermemeli ve doğrudan idari şartname açıklaması formatında olmalı. Eğer metinde ihale makamı vb. geçecekse yer tutucu olarak köşeli parantez ([KURUM ADI] vb.) kullan, gerçek isim verme.`
-    )
+  const handleAiDescGenerate = async () => {
+    if (!formData.konu?.trim()) {
+      alert('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+      return
+    }
+    
+    setIsDescLoading(true)
+    try {
+      const prompt = `Şu kamu alım işi/ihalesi için sadece 1-2 cümlelik, çok kısa ve öz bir "İşin Kapsamı ve Tanımı" metni oluştur. İhale/İş Adı: "${formData.konu}". Metin kurumsal bir dilde olmalı, ancak ASLA başlık (örn: 1. İşin konusu vb.), madde imi veya uzun paragraflar KULLANMA. İdare adını anonim olarak "İdaremiz" veya "Kurumumuz" şeklinde belirt, gerçek isim verme. Sadece doğrudan açıklamayı düz metin olarak ver.`
+      
+      const res = await window.api.aiGenerate({ prompt, enableDatabaseAccess: false })
+      if (res.success && res.data) {
+        setFormData(prev => ({ ...prev, isin_aciklamasi: res.data.trim() }))
+      } else {
+        alert('Yapay zeka yanıt üretemedi: ' + (res.error || 'Bilinmeyen hata'))
+      }
+    } catch (err: any) {
+      alert('Bir hata oluştu: ' + err.message)
+    } finally {
+      setIsDescLoading(false)
+    }
   }
 
   const handleAiFormValidation = () => {
@@ -855,11 +871,12 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                           <button
                             type="button"
                             onClick={handleAiDescGenerate}
+                            disabled={isDescLoading}
                             title="İşin adına göre yapay zeka ile profesyonel açıklama metni oluştur"
-                            className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded"
+                            className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded disabled:opacity-50"
                           >
-                            <Sparkles size={11} />
-                            AI ile Üret
+                            {isDescLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                            {isDescLoading ? 'Üretiliyor...' : 'AI ile Üret'}
                           </button>
                           <button
                             type="button"
