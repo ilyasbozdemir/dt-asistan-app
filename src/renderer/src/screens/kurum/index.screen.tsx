@@ -290,7 +290,7 @@ export default function KurumScreen(): React.JSX.Element {
                                   newArr[idx] = e.target.value;
                                   setInstitutionLetterhead(newArr);
                                 }}
-                                placeholder={`Antet ${idx + 1}. Satır (Örn: ${idx === 0 ? 'T.C.' : idx === 1 ? 'GÜNEY YURT BELEDİYE BAŞKANLIĞI' : 'Destek Hizmetleri'})`}
+                                placeholder={`Antet ${idx + 1}. Satır (Örn: ${idx === 0 ? 'T.C.' : idx === 1 ? 'X BELEDİYE BAŞKANLIĞI' : 'Destek Hizmetleri'})`}
                                 className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs flex-1"
                               />
                               {institutionLetterhead.length > 1 && (

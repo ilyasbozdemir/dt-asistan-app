@@ -655,8 +655,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   isin_aciklamasi: 'X Belediyesi Park Bahçeler Müdürlüğü tarafından yeşil alanlar ve çocuk oyun parklarının aydınlatılmasında kullanılmak üzere elektrik kablosu ve aydınlatma armatürü alımı işi.',
                   birim_id: birimler[0]?.id || null,
                   antet_ek_satir: 'Fen İşleri Dairesi Başkanlığı',
-                  sunulacak_makam: 'BAÅKANLIK MAKAMINA',
-                  ihtiyac_yeri: 'X Belediyesi Merkez Åantiyesi',
+                  sunulacak_makam: 'BAŞKANLIK MAKAMINA',
+                  ihtiyac_yeri: 'X Belediyesi Merkez Şantiyesi',
                   e_butce: '46.00.00.01',
                   fonksiyonel_kod: '01.3.9.00',
                   muhasebe_birimi: '30.06.01',
@@ -678,7 +678,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   yaklasik_maliyet_hesaplamasi: 'Piyasa Fiyat Araştırması',
                   kdv: '20',
                   hesaplama_esasi: '',
-                  komisyon_takdiri: 'GÜNEY YURT BELEDİYE BAÅKANLIÄI ONAYI',
+                  komisyon_takdiri: '',
                   tibbi_cihaz_alimi_mi: 0,
                   irtibat_yetkilisi_id: personeller[0]?.id || null,
                   onay_personel_id: personeller.find(p => p.harcama_yetkilisi_mi === 1)?.id || personeller[1]?.id || null,
@@ -764,7 +764,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
               >
                 3
               </button>
-              <span className={cn('mt-2 text-[11px] font-bold uppercase tracking-wider', activeTab === 'teknik' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400')}>Teknik Åart. & Ekler</span>
+              <span className={cn('mt-2 text-[11px] font-bold uppercase tracking-wider', activeTab === 'teknik' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400')}>Teknik Şart. & Ekler</span>
             </div>
           </div>
         </div>
@@ -817,7 +817,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       />
                       {exactMatchCount > 0 && (
                         <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1.5 flex items-center gap-1 animate-in fade-in duration-200">
-                          âš ï¸ Bu isimde daha önce {exactMatchCount} adet dosya açılmış. Kaydedildiğinde otomatik olarak &quot;({exactMatchCount + 1})&quot; son eki eklenecektir.
+                          ⚠️ Bu isimde daha önce {exactMatchCount} adet dosya açılmış. Kaydedildiğinde otomatik olarak "({exactMatchCount + 1})" son eki eklenecektir.
                         </p>
                       )}
                       {showKonuSuggestions && matchedSuggestions.length > 0 && (
@@ -1002,7 +1002,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         value={formData.sunulacak_makam || ''}
                         onChange={e => setFormData({ ...formData, sunulacak_makam: e.target.value })}
-                        placeholder="Örn: BAÅKANLIK MAKAMINA veya MÜDÜRLÜK MAKAMINA"
+                        placeholder="Örn: BAŞKANLIK MAKAMINA veya MÜDÜRLÜK MAKAMINA"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -1015,7 +1015,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         type="text"
                         value={formData.ihtiyac_yeri || ''}
                         onChange={e => setFormData({ ...formData, ihtiyac_yeri: e.target.value })}
-                        placeholder="Örn: Fen İşleri Åantiyesi"
+                        placeholder="Örn: Fen İşleri Şantiyesi"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       />
                     </div>
@@ -1209,7 +1209,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5 flex items-center gap-1">
-                        Doğrudan Temin Maddesi (İhale Åekli)
+                        Doğrudan Temin Maddesi (İhale Şekli)
                         <span title={getIhaleSekliExplanation(formData.ihale_sekli)}>
                           <HelpCircle size={13} className="text-slate-450 cursor-help" />
                         </span>
@@ -1522,7 +1522,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                                 }}
                                 className="w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
                               >
-                                {p.ad_soyad} {p.harcama_yetkilisi_mi === 1 && 'â­'}
+                                {p.ad_soyad} {p.harcama_yetkilisi_mi === 1 && '★'}
                               </button>
                             ))}
                           </div>
@@ -1689,7 +1689,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 <div className="space-y-6 animate-in fade-in duration-300">
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                     <HelpCircle className="text-blue-500 w-5 h-5" />
-                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Teknik Åartname & Ek Belgeler</h2>
+                    <h2 className="text-base font-bold text-slate-800 dark:text-white">Teknik Şartname & Ek Belgeler</h2>
                   </div>
 
                   <div className="bg-blue-50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/30">
