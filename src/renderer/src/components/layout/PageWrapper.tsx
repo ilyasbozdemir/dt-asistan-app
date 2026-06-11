@@ -212,10 +212,19 @@ export function PageWrapper(): React.ReactNode {
       }
     )
 
-
+    // Listen for navigate events from main process (Tray, Jump Lists)
+    const removeNavListener = window.electron?.ipcRenderer.on(
+      'app:navigate',
+      (_, route) => {
+        if (route) {
+          navigate({ to: route })
+        }
+      }
+    )
 
     return () => {
       if (removeListener) removeListener()
+      if (removeNavListener) removeNavListener()
     }
   }, [openWorkspace, queryClient])
 

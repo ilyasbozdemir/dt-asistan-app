@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, Tray, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -15,6 +15,13 @@ import { generateContent, testConnection, AIGenerateOptions } from './ai/index'
 
 process.on('uncaughtException', (error) => {
   console.error('UNCAUGHT EXCEPTION:', error)
+})
+
+let tray: Tray | null = null
+let isQuitting = false
+
+app.on('before-quit', () => {
+  isQuitting = true
 })
 
 function createWindow(): void {
@@ -38,6 +45,16 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    if (process.argv.includes('--new-dosya')) {
+      mainWindow.webContents.send('app:navigate', '/dosyalar/yeni')
+    }
+  })
+
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
   })
 
   ipcMain.on('window-minimize', (event) => {
@@ -92,6 +109,8 @@ if (!gotTheLock) {
       const filePath = commandLine.find((arg) => isSupportedFile(arg))
       if (filePath) {
         mainWindow.webContents.send('open-external-file', filePath)
+      } else if (commandLine.includes('--new-dosya')) {
+        mainWindow.webContents.send('app:navigate', '/dosyalar/yeni')
       }
     }
   })
@@ -100,6 +119,63 @@ if (!gotTheLock) {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.whenReady().then(() => {
+    if (process.platform === 'win32') {
+      app.setUserTasks([
+        {
+          program: process.execPath,
+          arguments: '--new-dosya',
+          iconPath: process.execPath,
+          iconIndex: 0,
+          title: 'Yeni Doğrudan Temin Dosyası',
+          description: 'Hızlıca yeni bir doğrudan temin dosyası oluşturun'
+        }
+      ])
+    }
+
+    tray = new Tray(icon)
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Gösterge Paneli',
+        click: () => {
+          const windows = BrowserWindow.getAllWindows()
+          if (windows.length > 0) {
+            windows[0].show()
+            windows[0].webContents.send('app:navigate', '/')
+          }
+        }
+      },
+      {
+        label: 'Yeni Doğrudan Temin Dosyası',
+        click: () => {
+          const windows = BrowserWindow.getAllWindows()
+          if (windows.length > 0) {
+            windows[0].show()
+            windows[0].webContents.send('app:navigate', '/dosyalar/yeni')
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Çıkış',
+        click: () => {
+          isQuitting = true
+          app.quit()
+        }
+      }
+    ])
+    tray.setToolTip('DT Asistan')
+    tray.setContextMenu(contextMenu)
+    tray.on('click', () => {
+      const windows = BrowserWindow.getAllWindows()
+      if (windows.length > 0) {
+        if (windows[0].isVisible()) {
+          windows[0].hide()
+        } else {
+          windows[0].show()
+        }
+      }
+    })
+
     // İlk açılışta desteklenen bir dosyanın çift tıklanarak açılıp açılmadığını kontrol et
     const initialFilePath = process.argv.find((arg) => isSupportedFile(arg)) ?? null
     // Use handle (not handleOnce) so renderer HMR reloads don't cause "No handler" errors.
