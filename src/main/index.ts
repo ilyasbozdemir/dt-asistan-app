@@ -1525,6 +1525,19 @@ if (!gotTheLock) {
         return { success: true, version: result.updateInfo.version }
       } catch (error: any) {
         console.error('Manual update check error:', error)
+        
+        // GİZLİ REPO (PRIVATE) HAZIRLIĞI:
+        // Eğer repo private ise ve token verilmemişse genelde 404 Not Found veya 401/403 döner.
+        // İleride kullanıcı ayarlarından token alıp autoUpdater.requestHeaders'a ekleyip tekrar deneyebiliriz:
+        /*
+        if (error.statusCode === 404 || error.statusCode === 401 || error.statusCode === 403) {
+           console.log('Gizli repo erişimi reddedildi, token ile tekrar deneniyor...')
+           // autoUpdater.requestHeaders = { ...autoUpdater.requestHeaders, Authorization: `Bearer ${userToken}` }
+           // const retryResult = await autoUpdater.checkForUpdates()
+           // return { success: true, version: retryResult.updateInfo.version }
+        }
+        */
+
         return { success: false, error: error.message }
       }
     })
