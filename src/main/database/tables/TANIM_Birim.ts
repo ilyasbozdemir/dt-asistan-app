@@ -11,6 +11,7 @@ export const TANIM_Birim = {
     { name: 'e_butce', type: 'TEXT' },
     { name: 'say2000i', type: 'TEXT' },
     { name: 'dtvt_kodu', type: 'TEXT' },
+    { name: 'detsis_kodu', type: 'TEXT' },
     { name: 'ayrintili_bilgi_personel', type: 'TEXT' },
     { name: 'ilgili_personel_id', type: 'INTEGER' },
     { name: 'aktif_mi', type: 'INTEGER', notNull: true, default: 1 },

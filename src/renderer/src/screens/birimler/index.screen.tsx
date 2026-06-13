@@ -3,13 +3,19 @@ import { useBirimlerHooks, BirimInput, usePersonelList } from './birimler.hooks'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { LayoutGrid, Plus, Trash2, Edit2, ChevronDown, ChevronUp, Hash, Users, MapPin, Type, AlignLeft, User, Building, Calendar } from 'lucide-react'
+import { LayoutGrid, Plus, Trash2, Edit2, ChevronDown, ChevronUp, Hash, Users, MapPin, Type, AlignLeft, User, Building, Calendar, Info } from 'lucide-react'
 
 import { Modal } from '../../components/ui/Modal'
 
 const emptyBirim: BirimInput = {
   birim_adi: '', antet_ek_satir: '', ihtiyac_yeri_eki: '',
-  sunum_makami: '', e_butce: '', say2000i: '', ayrintili_bilgi_personel: '', ilgili_personel_id: null
+  sunum_makami: '',
+  e_butce: '',
+  say2000i: '',
+  dtvt_kodu: '',
+  detsis_kodu: '',
+  ayrintili_bilgi_personel: '',
+  ilgili_personel_id: null
 }
 
 const Field = ({ label, field, form, handleChange, required, placeholder }: { label: string; field: keyof BirimInput; form: BirimInput; handleChange: (field: keyof BirimInput, value: string) => void; required?: boolean; placeholder?: string }) => (
@@ -35,6 +41,9 @@ export default function BirimlerScreen(): React.ReactNode {
   const [showExtraFields, setShowExtraFields] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBirimId, setEditingBirimId] = useState<number | null>(null)
+  
+  // Placeholder for kurumsalKodlar as per instruction logic
+  const kurumsalKodlar: { kod: string; aciklama: string }[] = []
 
   const handleChange = (key: keyof BirimInput, value: string | number | null): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -82,6 +91,8 @@ export default function BirimlerScreen(): React.ReactNode {
       sunum_makami: birim.sunum_makami || '',
       e_butce: birim.e_butce || '',
       say2000i: birim.say2000i || '',
+      dtvt_kodu: birim.dtvt_kodu || '',
+      detsis_kodu: birim.detsis_kodu || '',
       ayrintili_bilgi_personel: birim.ayrintili_bilgi_personel || '',
       ilgili_personel_id: birim.ilgili_personel_id || null
     })
@@ -206,7 +217,15 @@ export default function BirimlerScreen(): React.ReactNode {
                         </div>
                       </div>
                     )}
-                    
+                    {(birim.detsis_kodu || birim.dtvt_kodu) && (
+                      <div className="flex items-start gap-2 text-[11px] text-slate-600 dark:text-slate-400 col-span-full">
+                        <Building className="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" />
+                        <div>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300 mr-1">DETSİS Kodu:</span>
+                          <span className="font-mono">{birim.detsis_kodu || birim.dtvt_kodu}</span>
+                        </div>
+                      </div>
+                    )}
                     {birim.antet_ek_satir && (
                       <div className="flex items-start gap-2 text-[11px] text-slate-600 dark:text-slate-400">
                         <Type className="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" />
@@ -323,6 +342,31 @@ export default function BirimlerScreen(): React.ReactNode {
               <Field label="İhtiyaç Yeri Eki" field="ihtiyac_yeri_eki" form={form} handleChange={handleChange} placeholder="İhtiyaç yeri ek bilgisi" />
               <Field label="Sunum Makamı" field="sunum_makami" form={form} handleChange={handleChange} placeholder="Sunulacak makam" />
               
+              <div className="col-span-full">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                  DETSİS Kodu <span className="text-[10px] font-normal text-slate-400">(Eski adıyla DTVT)</span>
+                </label>
+                <select
+                  value={form.dtvt_kodu || ''}
+                  onChange={(e) => {
+                    handleChange('dtvt_kodu', e.target.value)
+                    handleChange('detsis_kodu', e.target.value)
+                  }}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-2 px-3 rounded-lg text-slate-800 dark:text-slate-200"
+                >
+                  <option value="">Seçiniz...</option>
+                  {kurumsalKodlar.map((k) => (
+                    <option key={k.kod} value={k.kod}>
+                      {k.kod} — {k.aciklama}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex items-start gap-1.5 leading-relaxed">
+                  <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  DTVT sistemi, DETSİS olarak güncellenmiştir. Birimlerin kullandığı mevcut kodlar aynı kalmıştır.
+                </p>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
                   İlgili Personel (Ayrıntılı Bilgi)

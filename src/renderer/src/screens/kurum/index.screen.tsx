@@ -62,6 +62,7 @@ export default function KurumScreen(): React.JSX.Element {
   const [harcamaBirimKodu, setHarcamaBirimKodu] = useState('')
   const [harcamaBirimAdi, setHarcamaBirimAdi] = useState('')
   const [dtvtKodu, setDtvtKodu] = useState('')
+  const [detsisKodu, setDetsisKodu] = useState('')
 
   const [sozlukData, setSozlukData] = useState<{ tur: string; kod: string; aciklama: string }[]>([])
 
@@ -130,6 +131,7 @@ export default function KurumScreen(): React.JSX.Element {
         setHarcamaBirimKodu(settings.harcamaBirimKodu || '')
         setHarcamaBirimAdi(settings.harcamaBirimAdi || '')
         setDtvtKodu(settings.dtvtKodu || '')
+        setDetsisKodu(settings.detsisKodu || '')
       }, 0)
     }
   }, [settings])
@@ -158,6 +160,7 @@ export default function KurumScreen(): React.JSX.Element {
         dataToSave.harcamaBirimKodu = harcamaBirimKodu
         dataToSave.harcamaBirimAdi = harcamaBirimAdi
         dataToSave.dtvtKodu = dtvtKodu
+        dataToSave.detsisKodu = detsisKodu
       } else if (tab === 'iletisim') {
         dataToSave.address = address
         dataToSave.district = district
@@ -532,14 +535,17 @@ export default function KurumScreen(): React.JSX.Element {
                             </select>
                           </div>
 
-                          {/* DTVT Kodu */}
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                              DTVT Kodu
+                          {/* DETSİS (Eski DTVT) Kodu */}
+                          <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                              DETSİS Kodu <span className="text-[10px] font-normal text-slate-400">(Eski adıyla DTVT)</span>
                             </label>
                             <select
                               value={dtvtKodu}
-                              onChange={e => setDtvtKodu(e.target.value)}
+                              onChange={e => {
+                                setDtvtKodu(e.target.value)
+                                setDetsisKodu(e.target.value)
+                              }}
                               className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             >
                               <option value="">Seçiniz...</option>
@@ -549,6 +555,10 @@ export default function KurumScreen(): React.JSX.Element {
                                 </option>
                               ))}
                             </select>
+                            <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex items-start gap-1.5 leading-relaxed">
+                              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                              DTVT (Devlet Teşkilatı Veri Tabanı) sistemi, DETSİS (Devlet Teşkilatı Merkezi Kayıt Sistemi) olarak güncellenmiştir. Kurumların kullandığı mevcut kodlar değişmemiştir.
+                            </p>
                           </div>
 
                         </div>
