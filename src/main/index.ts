@@ -1600,7 +1600,7 @@ if (!gotTheLock) {
 
     // --- Auto Updater Logic ---
     if (!app.isPackaged) {
-      autoUpdater.forceDevUpdateConfig = true
+      autoUpdater.forceDevUpdateConfig = false
     }
 
     // Uygulama açıldıktan saniyeler sonra güncellemeleri kontrol et
