@@ -38,7 +38,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   "kurumIci": false,
   "evrakSayisi": "E-12345",
   "sunulacakMakamAdi": "MAKAM ONAYINA",
-  "dosyaKonusu": "Hastane laboratuvar",
+  "dosyaKonusu": "KONUSU",
   "hazirlayanPersonelAdi": "Ahmet Yılmaz",
   "hazirlayanPersonelUnvan": "Satınalma Memuru",
   "onaylayanPersonelAdi": "Dr. Mehmet Demir",
@@ -48,8 +48,8 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     { "siraNo": 1, "kodu": "LAB-001", "malzemeAdi": "Eldiven", "ozelligi": "Nitril", "birimi": "Kutu", "kdvOrani": "%20", "miktar": 50 },
     { "siraNo": 2, "kodu": "LAB-002", "malzemeAdi": "Maske", "ozelligi": "N95", "birimi": "Adet", "kdvOrani": "%10", "miktar": 200 }
   ]
-}`
-
+}
+`
   const [testJson, setTestJson] = useState(defaultTestJson)
   const [activeTab, setActiveTab] = useState<'design' | 'preview' | 'pdf'>('design')
   const [pdfBase64, setPdfBase64] = useState<string>('')
@@ -109,7 +109,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
       if (!masterHtml) return '<div style="padding:20px;">Master şablon yükleniyor...</div>'
       return Mustache.render(masterHtml, parsedData, { content: htmlCode })
     } catch (e) {
-      return `<div style="color:red;padding:20px;">Şablon Hatası: ${e}</div>`
+      return '<div style="color:red;padding:20px;">Şablon Hatası: ' + String(e) + '</div>'
     }
   })()
 
@@ -187,9 +187,8 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
       return
     }
 
-    const isConfirmed = confirm(
-      sablon ? `Yeni bir versiyon (v${sablon.versiyon + 1}) oluşturulacak.\nOnaylıyor musunuz?` : 'Yeni şablon oluşturulacak.\nOnaylıyor musunuz?'
-    )
+    const message = 'Onaylıyor musunuz?'
+    const isConfirmed = window.confirm(message)
     if (!isConfirmed) return
 
     saveSablon.mutate({
@@ -221,7 +220,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              {sablon ? `${sablon.ad} (v${sablon.versiyon}) Düzenle` : 'Yeni Şablon Oluştur'}
+              {sablon ? (sablon.ad + " (v" + sablon.versiyon + ") Düzenle") : 'Yeni Şablon Oluştur'}
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               HTML Şablonunuzu yazın, test verisi girin ve anlık önizleme alın. Yer tutucular için {'{{degisken}}'} kullanın.
