@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İhtiyaç Listesi</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  body { 
+    font-family: "Times New Roman", serif; 
+    font-size: 12pt; 
+    width: 210mm; 
+    min-height: 297mm; 
+    margin: 0 auto; 
+    padding: 20mm;
+    box-sizing: border-box;
+  }
+  .header { text-align: center; line-height: 1.4; margin-bottom: 20px; text-transform: uppercase; }
+  .header-fields { margin: 10px 0; }
+  .title { text-align: center; font-weight: bold; margin: 20px 0; text-transform: uppercase; }
+  .konu { text-align: justify; text-indent: 35px; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th, td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 11pt; }
+  .signature { text-align: center; margin-top: 50px; }
+  .footer { margin-top: 60px; font-size: 9pt; display: flex; justify-content: space-between; border-top: 1px solid #000; padding-top: 10px; }
+  .footer .left-info { text-align: left; }
+  .footer .right-info { text-align: right; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <strong>{{antetSatir1}}</strong><br>
+    {{antetSatir2}}<br>
+    {{antetSatir3}}
+  </div>
+
+  <div class="header-fields">
+    Sayı: {{evrakSayisi}}
+    <span style="float:right;">Tarih: {{tarih}}</span><br>
+    Konu: İhtiyaç Listesi
+  </div>
+
+  <div style="clear:both;"></div>
+
+  <div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
+    {{sunulacakMakamAdi}}
+  </div>
+
+  <div class="konu">
+    {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
+    Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için
+    gereğini arz ederim.
+  </div>
+
+  <div style="text-align:right; margin-bottom: 20px;">
+    {{hazirlayanPersonelAdi}}<br>
+    {{hazirlayanPersonelUnvan}}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Sıra No</th>
+        <th>Kodu</th>
+        <th>Malzeme Adı</th>
+        <th>Özelliği</th>
+        <th>Birimi</th>
+        <th>Kdv Oranı</th>
+        <th>Miktar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#ihtiyacKalemleri}}
+      <tr>
+        <td>{{siraNo}}</td>
+        <td>{{kodu}}</td>
+        <td>{{malzemeAdi}}</td>
+        <td>{{ozelligi}}</td>
+        <td>{{birimi}}</td>
+        <td>{{kdvOrani}}</td>
+        <td>{{miktar}}</td>
+      </tr>
+      {{/ihtiyacKalemleri}}
+      {{^ihtiyacKalemleri}}
+      <tr>
+        <td colspan="7">Kalem bulunamadı</td>
+      </tr>
+      {{/ihtiyacKalemleri}}
+    </tbody>
+  </table>
+
+  <div class="signature">
+    <div style="display: inline-block; text-align: center;">
+      OLUR<br>
+      {{dosyaTarihi}}<br><br>
+      {{onaylayanPersonelAdi}}<br>
+      {{onaylayanPersonelUnvan}}
+    </div>
+  </div>
+
+  {{^kurumIci}}
+  <div class="footer">
+    <div class="left-info">
+      Adres: {{kurumAdres}}<br>
+      Elektronik Ağ: {{kurumWeb}}<br>
+      Elektronik Posta: {{kurumEmail}}
+    </div>
+    <div class="right-info">
+      Ayrıntılı Bilgi İçin: {{ilgiliPersonelAdi}}<br>
+      Tel: {{kurumTelefon}}<br>
+      Faks: {{kurumFaks}}
+    </div>
+  </div>
+  {{/kurumIci}}
+
+</body>
+</html>

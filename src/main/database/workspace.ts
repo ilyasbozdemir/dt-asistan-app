@@ -102,6 +102,36 @@ function ensureSchemaIntegrity(db: Database.Database): void {
   }
 }
 
+function seedTemplates(db: Database.Database): void {
+  try {
+    const templatesDirDev = path.join(app.getAppPath(), 'resources', 'templates')
+    const templatesDirProd = path.join(process.resourcesPath, 'templates')
+    const targetDir = fs.existsSync(templatesDirProd) ? templatesDirProd : templatesDirDev
+
+    if (fs.existsSync(targetDir)) {
+      const files = fs.readdirSync(targetDir)
+      for (const file of files) {
+        if (file.endsWith('.html')) {
+          const content = fs.readFileSync(path.join(targetDir, file), 'utf-8')
+          const exists = db.prepare('SELECT 1 FROM TANIM_Sablon WHERE dosya_adi = ?').get(file)
+          if (!exists) {
+            let ad = file.replace('.html', '').replace(/-/g, ' ').toUpperCase()
+            if (file === 'ihtiyac-listesi.html') ad = 'İHTİYAÇ LİSTESİ' // Özel çeviri
+            
+            db.prepare(`
+              INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi)
+              VALUES (?, ?, 'html', ?, ?, 1)
+            `).run(ad, file, content, 'Sistem varsayılan şablonu')
+            console.log(`[Seed] Seeded default template: ${file}`)
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error('Error seeding templates:', err)
+  }
+}
+
 export class DtmWorkspace {
   private tempDir: string
   private db: Database.Database | null = null
@@ -115,7 +145,30 @@ export class DtmWorkspace {
   public openWorkspace(filePath: string, allowMigration: boolean = false): WorkspaceMeta {
     const lockPath = filePath + '.lock'
     if (fs.existsSync(lockPath)) {
-      throw new Error('LOCKED|Bu dosya şu anda başka bir pencerede veya programda açık durumda. Çakışmayı önlemek için önce diğer taraftan kapatmalısınız.')
+      try {
+        const pidStr = fs.readFileSync(lockPath, 'utf-8')
+        const pid = parseInt(pidStr, 10)
+        if (!isNaN(pid) && pid !== process.pid) {
+          let isRunning = false
+          try {
+            process.kill(pid, 0)
+            isRunning = true
+          } catch (e) {
+            isRunning = false
+          }
+          if (!isRunning) {
+            // Ölü kilit dosyası tespit edildi, sil ve devam et
+            fs.unlinkSync(lockPath)
+          } else {
+            throw new Error('LOCKED|Bu dosya şu anda başka bir pencerede veya programda açık durumda. Çakışmayı önlemek için önce diğer taraftan kapatmalısınız.')
+          }
+        } else if (isNaN(pid)) {
+          throw new Error('LOCKED|Bu dosya şu anda başka bir pencerede veya programda açık durumda. Çakışmayı önlemek için önce diğer taraftan kapatmalısınız.')
+        }
+      } catch (err: any) {
+        if (err.message.startsWith('LOCKED|')) throw err
+        throw new Error('LOCKED|Bu dosya şu anda başka bir pencerede veya programda açık durumda. Çakışmayı önlemek için önce diğer taraftan kapatmalısınız.')
+      }
     }
     
     try {
@@ -223,6 +276,7 @@ export class DtmWorkspace {
 
     if (this.db) {
       ensureSchemaIntegrity(this.db)
+      seedTemplates(this.db)
     }
 
     // Cross Validation

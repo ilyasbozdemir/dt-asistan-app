@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import Editor from '@monaco-editor/react'
+
 import Mustache from 'mustache'
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
 import {
@@ -28,7 +28,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const [dosyaAdi, setDosyaAdi] = useState(sablon?.dosya_adi || '')
   const [aciklama, setAciklama] = useState(sablon?.aciklama || '')
   const [htmlCode, setHtmlCode] = useState(sablon?.icerik || `<p>Merhaba, {{firma_adi}}!</p>`)
-  const [testJson, setTestJson] = useState(`{\n  "firma_adi": "Test Firması A.Ş."\n}`)
+  const [testJson, setTestJson] = useState(`{\n  "firma_adi": "Test Firması A.Ş.",\n  "kurumIci": false\n}`)
   const [parsedData, setParsedData] = useState<Record<string, any>>({})
   const [activeTab, setActiveTab] = useState<'design' | 'preview'>('design')
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -97,10 +97,10 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
       return
     }
 
-    // Değişken Taraması (Regex ile {{degisken_adi}})
-    const matches = htmlCode.match(/\{\{([a-zA-Z0-9_]+)\}\}/g) || []
-    // Benzersiz değişken isimlerini çıkar (kıvrımlı parantezler olmadan)
-    const uniqueVars = Array.from(new Set(matches.map(m => m.replace(/[{}]/g, ''))))
+    // Değişken Taraması (Regex ile {{degisken_adi}} ve Mustache döngüleri {{#dizi}})
+    const matches = Array.from(htmlCode.matchAll(/\{\{\s*[#/^]?\s*([a-zA-Z0-9_]+)\s*\}\}/g))
+    // Benzersiz değişken isimlerini çıkar
+    const uniqueVars = Array.from(new Set(matches.map(m => m[1])))
 
     if (!placeholders) {
       alert('Sistem değişkenleri yüklenemedi.')
@@ -110,17 +110,14 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     const missingVars = uniqueVars.filter(v => !placeholders.find(p => p.anahtar === v))
     
     if (missingVars.length > 0) {
-      alert(`HATA! Şablonda tanımlanamayan değişkenler var:\n${missingVars.map(v => '{{' + v + '}}').join(', ')}\n\nLütfen bu değişkenleri düzeltin veya sisteme ekleyin. Kayıt iptal edildi.`)
-      return
+      const confirmMissing = confirm(`UYARI! Şablonda sistemde kayıtlı olmayan değişkenler var:\n${missingVars.map(v => '{{' + v + '}}').join(', ')}\n\nBu şekilde kaydedilirse bu değişkenler otomatik doldurulmayabilir. Yine de kaydetmek istiyor musunuz?`)
+      if (!confirmMissing) return
+    } else {
+      const isConfirmed = confirm(
+        `Bu şablon şu değişkenleri kullanıyor:\n${uniqueVars.map(v => '{{' + v + '}}').join(', ')}\n\n${sablon ? 'Yeni bir versiyon (v' + (sablon.versiyon + 1) + ') oluşturulacak.' : 'Yeni şablon oluşturulacak.'}\nOnaylıyor musunuz?`
+      )
+      if (!isConfirmed) return
     }
-
-    const extractedPlaceholders = placeholders.filter(p => uniqueVars.includes(p.anahtar))
-
-    const isConfirmed = confirm(
-      `Bu şablon şu değişkenleri kullanıyor:\n${uniqueVars.map(v => '{{' + v + '}}').join(', ')}\n\n${sablon ? 'Yeni bir versiyon (v' + (sablon.versiyon + 1) + ') oluşturulacak.' : 'Yeni şablon oluşturulacak.'}\nOnaylıyor musunuz?`
-    )
-
-    if (!isConfirmed) return
 
     saveSablon.mutate({
       ad,
@@ -235,20 +232,19 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
             {/* SOL PANEL: TEST VERİSİ */}
             <Panel defaultSize={30} minSize={20}>
               <div className="flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
                     <Database className="w-4 h-4 text-slate-500" />
                     <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">Test Verisi (JSON)</h2>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <Editor
-                    height="100%"
-                    language="json"
+                <div className="flex-1 min-h-0 relative bg-[#1e1e1e]">
+                  <textarea
+                    className="w-full h-full p-4 bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[13px] resize-none outline-none custom-scrollbar border-0"
                     value={testJson}
-                    onChange={(val) => setTestJson(val || '')}
-                    theme="vs-dark"
-                    options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
+                    onChange={(e) => setTestJson(e.target.value)}
+                    spellCheck={false}
+                    placeholder="JSON Test verisi..."
                   />
                 </div>
               </div>
@@ -259,16 +255,16 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
             {/* SAĞ PANEL: CANLI ÖNİZLEME */}
             <Panel defaultSize={70} minSize={30}>
               <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/50">
-                <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2">
+                <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2 shrink-0">
                   <FileText className="w-4 h-4 text-slate-500" />
                   <h2 className="text-xs font-bold text-slate-700 dark:text-slate-300">İndirilecek Çıktı Önizleme (Varsayılan: A4)</h2>
                 </div>
-                <div className="flex-1 overflow-auto bg-slate-200 dark:bg-slate-800 p-8 flex justify-center custom-scrollbar">
+                <div className="flex-1 min-h-0 overflow-auto bg-slate-200 dark:bg-slate-800 p-8 flex justify-center custom-scrollbar">
                   <div className="w-[210mm] min-h-[297mm] bg-white shadow-lg border border-slate-300 relative">
                     <iframe
                       ref={iframeRef}
                       title="preview"
-                      className="w-full h-full border-0"
+                      className="w-full h-full border-0 absolute inset-0"
                       sandbox="allow-same-origin"
                     />
                   </div>

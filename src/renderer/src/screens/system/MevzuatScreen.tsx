@@ -25,6 +25,7 @@ import { useQuery } from '@tanstack/react-query'
 import { cn } from '../../utils/cn'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useSablonlar } from '../sablonlar/sablonlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 
@@ -273,11 +274,13 @@ export function MevzuatScreen(): React.JSX.Element {
 
   // Dinamik Alım Türü Rehberi State
   const [alimTurleri, setAlimTurleri] = useState([
-    { id: '1', ad: 'Mal Alımı', ikon: 'Building2', belgeler: ['Onay Belgesi', 'Piyasa Fiyat Araştırması Tutanağı', 'Muayene Kabul ve Tespit Komisyonu Tutanağı', 'Fatura / e-Arşiv Fatura', 'Taşınır İşlem Fişi (TİF)'], sablonId: '' },
-    { id: '2', ad: 'Hizmet Alımı', ikon: 'Briefcase', belgeler: ['Onay Belgesi', 'Piyasa Fiyat Araştırması Tutanağı', 'Hizmet İşleri Kabul Tutanağı', 'Fatura / e-Arşiv Fatura'], sablonId: '' },
-    { id: '3', ad: 'Yapım İşi', ikon: 'HardHat', belgeler: ['Yaklaşık Maliyet Hesap Cetveli', 'Onay Belgesi', 'Piyasa Fiyat Araştırması Tutanağı', 'Yapım İşleri Kabul Tutanağı', 'Sözleşme (İdare Gerekli Görürse)'], sablonId: '' }
+    { id: '1', ad: 'Mal Alımı', ikon: 'Building2', belgeler: [{ ad: 'Onay Belgesi', sablonId: '' }, { ad: 'Piyasa Fiyat Araştırması Tutanağı', sablonId: '' }, { ad: 'Muayene Kabul ve Tespit Komisyonu Tutanağı', sablonId: '' }, { ad: 'Fatura / e-Arşiv Fatura', sablonId: '' }, { ad: 'Taşınır İşlem Fişi (TİF)', sablonId: '' }] },
+    { id: '2', ad: 'Hizmet Alımı', ikon: 'Briefcase', belgeler: [{ ad: 'Onay Belgesi', sablonId: '' }, { ad: 'Piyasa Fiyat Araştırması Tutanağı', sablonId: '' }, { ad: 'Hizmet İşleri Kabul Tutanağı', sablonId: '' }, { ad: 'Fatura / e-Arşiv Fatura', sablonId: '' }] },
+    { id: '3', ad: 'Yapım İşi', ikon: 'HardHat', belgeler: [{ ad: 'Yaklaşık Maliyet Hesap Cetveli', sablonId: '' }, { ad: 'Onay Belgesi', sablonId: '' }, { ad: 'Piyasa Fiyat Araştırması Tutanağı', sablonId: '' }, { ad: 'Yapım İşleri Kabul Tutanağı', sablonId: '' }, { ad: 'Sözleşme (İdare Gerekli Görürse)', sablonId: '' }] }
   ])
   const [yeniAlimTuru, setYeniAlimTuru] = useState('')
+
+  const { data: sablonlarData } = useSablonlar()
 
   const [institutionType, setInstitutionType] = useState('belediye')
   const [finansmanKodu, setFinansmanKodu] = useState('5')
@@ -1283,7 +1286,7 @@ export function MevzuatScreen(): React.JSX.Element {
                 <Button 
                   onClick={() => {
                     if(yeniAlimTuru.trim()) {
-                      setAlimTurleri([...alimTurleri, { id: Date.now().toString(), ad: yeniAlimTuru.trim(), ikon: 'FileText', belgeler: ['Onay Belgesi', 'Piyasa Fiyat Araştırması Tutanağı'], sablonId: '' }]);
+                      setAlimTurleri([...alimTurleri, { id: Date.now().toString(), ad: yeniAlimTuru.trim(), ikon: 'FileText', belgeler: [{ ad: 'Onay Belgesi', sablonId: '' }, { ad: 'Piyasa Fiyat Araştırması Tutanağı', sablonId: '' }] }]);
                       setYeniAlimTuru('');
                     }
                   }}
@@ -1310,25 +1313,33 @@ export function MevzuatScreen(): React.JSX.Element {
                     {tur.ikon === 'HardHat' && <HardHat className="w-6 h-6" />}
                     {tur.ikon === 'FileText' && <FileText className="w-6 h-6" />}
                   </div>
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-3">{tur.ad}</h3>
-                  <div className="mb-4">
-                    <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">Şablon ID (Bağlantı)</label>
-                    <Input 
-                      value={tur.sablonId} 
-                      onChange={(e) => {
-                        const newTurleri = [...alimTurleri];
-                        const index = newTurleri.findIndex(t => t.id === tur.id);
-                        if(index > -1) { newTurleri[index].sablonId = e.target.value; setAlimTurleri(newTurleri); }
-                      }}
-                      placeholder="Şablon ID..." 
-                      className="h-7 text-xs bg-white dark:bg-slate-950" 
-                    />
-                  </div>
-                  <ul className="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">{tur.ad}</h3>
+                  <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
                     {tur.belgeler.map((belge, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                        <span>{belge}</span>
+                      <li key={idx} className="flex flex-col gap-1.5 border-b border-slate-100 dark:border-slate-800/50 pb-2.5">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                          <span className="font-medium text-[13px]">{belge.ad}</span>
+                        </div>
+                        <div className="pl-6">
+                          <select 
+                            value={belge.sablonId} 
+                            onChange={(e) => {
+                              const newTurleri = [...alimTurleri];
+                              const turIndex = newTurleri.findIndex(t => t.id === tur.id);
+                              if(turIndex > -1) { 
+                                newTurleri[turIndex].belgeler[idx].sablonId = e.target.value; 
+                                setAlimTurleri(newTurleri); 
+                              }
+                            }}
+                            className="w-full h-7 text-[11px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded outline-none focus:border-blue-500 px-2" 
+                          >
+                            <option value="">Şablon Bağlantısı Yok</option>
+                            {sablonlarData?.map(s => (
+                              <option key={s.id} value={s.id}>{s.ad} ({s.dosya_adi})</option>
+                            ))}
+                          </select>
+                        </div>
                       </li>
                     ))}
                     <li className="flex items-start gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-800">

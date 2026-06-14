@@ -13,7 +13,8 @@ import {
   ChevronRight,
   ChevronDown,
   Bot,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useDosyalarHooks, TeminDosyasi } from './dosyalar.hooks'

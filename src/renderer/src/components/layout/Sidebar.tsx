@@ -94,7 +94,6 @@ const menuGroups: MenuGroup[] = [
     title: 'Sistem',
     items: [
       { name: 'Raporlar', path: '/raporlar', icon: BarChart3 },
-      { name: 'Şablon Yönetimi', path: '/sablonlar', icon: FileText },
       { name: 'Sürüm Notları', path: '/changelog', icon: Megaphone },
       {
         name: 'Ayarlar',
@@ -103,6 +102,7 @@ const menuGroups: MenuGroup[] = [
           { name: 'Genel Ayarlar', path: '/ayarlar', icon: Settings },
           { name: 'Mevzuat ve Parametreler', path: '/mevzuat', icon: Scale },
           { name: 'Toplu İçe Aktarma', path: '/import', icon: Database },
+          { name: 'Şablon Yönetimi', path: '/sablonlar', icon: FileText },
 
         ]
       }

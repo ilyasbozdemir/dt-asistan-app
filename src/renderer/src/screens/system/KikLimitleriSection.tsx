@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Info, Plus, Trash2, CalendarDays, AlertTriangle } from 'lucide-react'
+import { Info, Plus, CalendarDays, AlertTriangle, Edit2 } from 'lucide-react'
 import { useKikLimitDonemleri, LimitDonemKaydi } from './kik-limitleri.hooks'
 import { donemTarihAraligiUret } from '../../constants/madde-22d-donemler'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -46,6 +46,17 @@ export function KikLimitleriSection(): React.JSX.Element {
         return
       }
 
+      const isUpdate = donemler.some(d => d.donem_kodu === newDonemKodu)
+      if (isUpdate) {
+        if (!confirm(`UYARI: "${newDonemKodu}" dönemi zaten kayıtlı. Bu dönemi güncellerseniz, bu döneme ait mevcut doğrudan temin hesaplamaları (henüz tamamlanmamış dosyalar için) etkilenebilir.\n\nYine de değerlerin doğruluğunu onaylayıp GÜNCELLEMEK istiyor musunuz?`)) {
+          return
+        }
+      } else {
+        if (!confirm(`"${newDonemKodu}" dönemini sisteme ekliyorsunuz.\n\nDeğerlerin doğruluğunu onaylıyor musunuz?`)) {
+          return
+        }
+      }
+
       await addMutation.mutateAsync({
         donem_kodu: newDonemKodu,
         baslangic_tarihi: newBaslangic,
@@ -68,10 +79,12 @@ export function KikLimitleriSection(): React.JSX.Element {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Bu dönemi silmek istediğinize emin misiniz?')) {
-      await deleteMutation.mutateAsync(id)
-    }
+  const handleEdit = (donem: LimitDonemKaydi) => {
+    setNewDonemKodu(donem.donem_kodu)
+    setNewBaslangic(donem.baslangic_tarihi)
+    setNewBitis(donem.bitis_tarihi)
+    setNewBuyuksehir(donem.buyuksehir_limit.toString().replace('.', ','))
+    setNewDiger(donem.diger_limit.toString().replace('.', ','))
   }
 
   const formatCurrency = (val: number) => {
@@ -105,7 +118,7 @@ export function KikLimitleriSection(): React.JSX.Element {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <div className="md:col-span-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl">
           <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Yeni Dönem Ekle
+            <Plus className="w-4 h-4" /> Yeni Dönem Ekle / Güncelle
           </h3>
           <form onSubmit={handleAdd} className="space-y-4">
             {errorMsg && (
@@ -171,7 +184,7 @@ export function KikLimitleriSection(): React.JSX.Element {
               disabled={addMutation.isPending}
               className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-all disabled:opacity-50"
             >
-              {addMutation.isPending ? 'Ekleniyor...' : 'Ekle'}
+              {addMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
             </button>
           </form>
         </div>
@@ -208,11 +221,11 @@ export function KikLimitleriSection(): React.JSX.Element {
                       </td>
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => donem.id && handleDelete(donem.id)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                          title="Sil"
+                          onClick={() => handleEdit(donem)}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                          title="Düzenle"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>

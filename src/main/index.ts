@@ -24,6 +24,16 @@ app.on('before-quit', () => {
   isQuitting = true
 })
 
+// Uygulama tamamen kapanırken (Quit) aktif dosyayı/lock'u temizle
+app.on('will-quit', () => {
+  try { workspaceManager.close() } catch (e) {}
+})
+
+// Süreç herhangi bir sebeple çökerse veya kapanırsa son bir temizlik şansı
+process.on('exit', () => {
+  try { workspaceManager.close() } catch (e) {}
+})
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

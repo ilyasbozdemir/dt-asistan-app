@@ -17,6 +17,7 @@ export function cakisanDonemBul(yeniDonem: LimitDonemKaydi, mevcutDonemler: Limi
 
   for (const mevcut of mevcutDonemler) {
     if (yeniDonem.id && mevcut.id === yeniDonem.id) continue // Kendi güncelleniyorsa atla
+    if (mevcut.donem_kodu === yeniDonem.donem_kodu) continue // Aynı dönem kodu güncelleneceği için atla
     const mevcutBas = new Date(mevcut.baslangic_tarihi).getTime()
     const mevcutBit = new Date(mevcut.bitis_tarihi).getTime()
 
@@ -82,8 +83,14 @@ export function useKikLimitDonemleri() {
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         `INSERT INTO TANIM_KikLimitDonemleri (donem_kodu, baslangic_tarihi, bitis_tarihi, buyuksehir_limit, diger_limit, kaynak) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [donem.donem_kodu, donem.baslangic_tarihi, donem.bitis_tarihi, donem.buyuksehir_limit, donem.diger_limit, 'Kullanıcı Ekledi']
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(donem_kodu) DO UPDATE SET
+         baslangic_tarihi = excluded.baslangic_tarihi,
+         bitis_tarihi = excluded.bitis_tarihi,
+         buyuksehir_limit = excluded.buyuksehir_limit,
+         diger_limit = excluded.diger_limit,
+         kaynak = excluded.kaynak`,
+        [donem.donem_kodu, donem.baslangic_tarihi, donem.bitis_tarihi, donem.buyuksehir_limit, donem.diger_limit, 'Kullanıcı Güncelledi']
       )
       if (!res.success) throw new Error(res.error)
       return res
