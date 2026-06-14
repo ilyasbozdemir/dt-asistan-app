@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { FileText, RefreshCw } from 'lucide-react'
-import { Button } from '../../../../../components/ui/Button'
+import { Button } from '../../../../components/ui/Button'
 
 interface PdfTabProps {
   isPdfLoading: boolean
@@ -9,6 +9,32 @@ interface PdfTabProps {
 }
 
 export function PdfTab({ isPdfLoading, pdfBase64, handleUpdatePdfPreview }: PdfTabProps) {
+  const [pdfUrl, setPdfUrl] = useState<string>('')
+
+  useEffect(() => {
+    if (pdfBase64) {
+      try {
+        const byteCharacters = atob(pdfBase64)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        setPdfUrl(url)
+
+        return () => {
+          URL.revokeObjectURL(url)
+        }
+      } catch (e) {
+        console.error('PDF Blob error', e)
+      }
+    } else {
+      setPdfUrl('')
+    }
+  }, [pdfBase64])
+
   return (
     <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -33,10 +59,11 @@ export function PdfTab({ isPdfLoading, pdfBase64, handleUpdatePdfPreview }: PdfT
              </div>
            </div>
          ) : null}
-         {pdfBase64 ? (
-           <iframe
+         {pdfUrl ? (
+           <embed
              title="pdf-preview"
-             src={`data:application/pdf;base64,${pdfBase64}`}
+             type="application/pdf"
+             src={pdfUrl}
              className="w-full h-full border-0"
            />
          ) : (

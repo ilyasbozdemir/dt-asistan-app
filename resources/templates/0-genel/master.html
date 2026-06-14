@@ -100,127 +100,44 @@
       page-break-inside: avoid;
       font-size: 11pt;
     }
-
-    .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      font-size: 8pt;
-      display: flex;
-      justify-content: space-between;
-      border-top: 1.5px solid #000;
-      padding-top: 10px;
-      color: #333;
-      background-color: white;
-    }
-
-    .footer-spacer {
-      height: 60px;
-    }
-
-    .footer .left-info {
-      text-align: left;
-      line-height: 1.4;
-    }
-
-    .footer .right-info {
-      text-align: right;
-      line-height: 1.4;
-    }
-
-    /* Sayfa iskeleti (Page Layout) Ayarları */
-    table.page-layout {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-collapse: collapse;
-    }
-
-    table.page-layout>thead>tr>td,
-    table.page-layout>tbody>tr>td,
-    table.page-layout>tfoot>tr>td {
-      border: none;
-      padding: 0;
-    }
-    
-    table.page-layout>tbody>tr>td {
-      height: 100%;
-      vertical-align: top;
-    }
   </style>
 </head>
 
 <body>
 
-  <table class="page-layout">
-    <thead>
-      <tr>
-        <td>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="width: 20%; text-align: left;">
-              {{#solLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/solLogo}}
-            </div>
-            <div class="header" style="flex: 1; margin-bottom: 0;">
-              <strong>{{antetSatir1}}</strong><br>
-              <strong>{{antetSatir2}}</strong><br>
-              <strong>{{antetSatir3}}</strong><br>
-            </div>
-            <div style="width: 20%; text-align: right;">
-              {{#sagLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/sagLogo}}
-            </div>
-          </div>
+  {{^antetTekrarla}}
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="width: 20%; text-align: left;">
+      {{#solLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/solLogo}}
+    </div>
+    <div class="header" style="flex: 1; margin-bottom: 0;">
+      <strong>{{antetSatir1}}</strong><br>
+      <strong>{{antetSatir2}}</strong><br>
+      <strong>{{antetSatir3}}</strong><br>
+    </div>
+    <div style="width: 20%; text-align: right;">
+      {{#sagLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/sagLogo}}
+    </div>
+  </div>
 
-          <div class="header-fields" style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="width: 50%; word-wrap: break-word; text-align: left;">
-              Sayı: {{evrakSayisi}}<br>
-              Konu: {{dosyaKonusu}}
-            </div>
-            <div style="text-align: right;">
-              Tarih: {{tarih}}
-            </div>
-          </div>
-        </td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <!-- MAIN CONTENT PLACEHOLDER -->
-          {{#ekNo}}
-          <div style="text-align: right; font-weight: bold; font-size: 11pt; margin-bottom: 10px;">
-            {{ekNo}}
-          </div>
-          {{/ekNo}}
-          {{> content }}
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>
-          <!-- FOOTER REPEATS ON EVERY PAGE -->
-          {{^kurumIci}}
-          <div class="footer">
-            <div class="left-info">
-              Adres: {{kurumAdres}}<br>
-              Elektronik Ağ: {{kurumWeb}}<br>
-              E-posta: {{kurumEmail}}<br>
-              KEP: {{kurumKepAdres}}
-            </div>
+  <div class="header-fields" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="width: 50%; word-wrap: break-word; text-align: left;">
+      Sayı: {{evrakSayisi}}<br>
+      Konu: {{dosyaKonusu}}
+    </div>
+    <div style="text-align: right;">
+      Tarih: {{tarih}}
+    </div>
+  </div>
+  {{/antetTekrarla}}
 
-            <div class="right-info">
-              Ayrıntılı Bilgi İçin: {{ilgiliPersonelAdi}}<br>
-              Telefon: {{kurumTelefon}}<br>
-              Faks: {{kurumFaks}}<br>
-              İnternet Adresi: {{kurumWeb}}
-            </div>
-          </div>
-          {{/kurumIci}}
-        </td>
-      </tr>
-    </tfoot>
-  </table>
+  <!-- MAIN CONTENT PLACEHOLDER -->
+  {{#ekNo}}
+  <div style="text-align: right; font-weight: bold; font-size: 11pt; margin-bottom: 10px;">
+    {{ekNo}}
+  </div>
+  {{/ekNo}}
+  {{> content }}
 
 </body>
 

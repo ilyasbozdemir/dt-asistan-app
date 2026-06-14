@@ -49,7 +49,8 @@ function createWindow(): void {
     icon: icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      plugins: true
     }
   })
 
@@ -634,7 +635,7 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
-    ipcMain.handle('export-pdf', async (_, htmlContent: string, fileName?: string) => {
+    ipcMain.handle('export-pdf', async (_, htmlContent: string, printOptions?: any, fileName?: string) => {
       try {
         const { canceled, filePath } = await dialog.showSaveDialog({
           title: 'PDF Olarak Kaydet',
@@ -646,15 +647,17 @@ if (!gotTheLock && !isMultiInstance) {
         const win = new BrowserWindow({ show: false })
         await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
         
-        let pdfData = await win.webContents.printToPDF({
+        const defaultPrintOptions = {
           printBackground: true,
           displayHeaderFooter: false
-        })
+        }
+        
+        let pdfData = await win.webContents.printToPDF(printOptions || defaultPrintOptions)
         
         const pdfString = pdfData.toString('utf8')
         const pageCount = (pdfString.match(/\/Type\s*\/Page\b/g) || []).length
         
-        if (pageCount > 1) {
+        if (!printOptions && pageCount > 1) {
           pdfData = await win.webContents.printToPDF({
             printBackground: true,
             displayHeaderFooter: true,
@@ -672,20 +675,22 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
-    ipcMain.handle('preview-pdf', async (_, htmlContent: string) => {
+    ipcMain.handle('preview-pdf', async (_, htmlContent: string, printOptions?: any) => {
       try {
         const win = new BrowserWindow({ show: false })
         await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
         
-        let pdfData = await win.webContents.printToPDF({
+        const defaultPrintOptions = {
           printBackground: true,
           displayHeaderFooter: false
-        })
+        }
+        
+        let pdfData = await win.webContents.printToPDF(printOptions || defaultPrintOptions)
         
         const pdfString = pdfData.toString('utf8')
         const pageCount = (pdfString.match(/\/Type\s*\/Page\b/g) || []).length
         
-        if (pageCount > 1) {
+        if (!printOptions && pageCount > 1) {
           pdfData = await win.webContents.printToPDF({
             printBackground: true,
             displayHeaderFooter: true,
