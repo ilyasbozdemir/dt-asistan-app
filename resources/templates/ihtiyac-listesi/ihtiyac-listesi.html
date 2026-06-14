@@ -1,246 +1,55 @@
-<!DOCTYPE html>
-<html lang="tr">
+<div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
+  {{sunulacakMakamAdi}}
+</div>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>İhtiyaç Listesi</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 2.54cm;
-    }
+<div class="konu">
+  {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
+  Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için
+  gereğini arz ederim.
+</div>
 
-    body {
-      font-family: "Times New Roman", serif;
-      font-size: 12pt;
-      box-sizing: border-box;
-    }
+<div style="text-align:right; margin-bottom: 20px;">
+  {{hazirlayanPersonelAdi}}<br>
+  {{hazirlayanPersonelUnvan}}
+</div>
 
-    @media screen {
-      body {
-        padding: 2.54cm;
-      }
-    }
+<table class="content-table">
+  <thead>
+    <tr>
+      <th>Sıra No</th>
+      <th>Kodu</th>
+      <th>Malzeme Adı</th>
+      <th>Özelliği</th>
+      <th>Birimi</th>
+      <th>Kdv Oranı</th>
+      <th>Miktar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#ihtiyacKalemleri}}
+    <tr>
+      <td>{{siraNo}}</td>
+      <td>{{kodu}}</td>
+      <td>{{malzemeAdi}}</td>
+      <td>{{ozelligi}}</td>
+      <td>{{birimi}}</td>
+      <td>{{kdvOrani}}</td>
+      <td>{{miktar}}</td>
+    </tr>
+    {{/ihtiyacKalemleri}}
+    {{^ihtiyacKalemleri}}
+    <tr>
+      <td colspan="7">Kalem bulunamadı</td>
+    </tr>
+    {{/ihtiyacKalemleri}}
+  </tbody>
+</table>
 
-    @media print {
-      body {
-        padding: 0;
-        margin: 0;
-      }
-    }
-
-    .header {
-      text-align: center;
-      line-height: 1.4;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-    }
-
-    .header-fields {
-      margin: 10px 0;
-    }
-
-    .title {
-      text-align: center;
-      font-weight: bold;
-      margin: 20px 0;
-      text-transform: uppercase;
-    }
-
-    .konu {
-      text-align: justify;
-      text-indent: 35px;
-      margin: 20px 0;
-    }
-
-    table.content-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-
-    table.content-table th,
-    table.content-table td {
-      border: 1px solid #000;
-      padding: 6px;
-      text-align: center;
-      font-size: 11pt;
-    }
-
-    table.content-table tr {
-      page-break-inside: avoid;
-    }
-
-    .signature {
-      text-align: center;
-      margin-top: 50px;
-      page-break-inside: avoid;
-    }
-
-    .footer {
-      font-size: 9pt;
-      display: flex;
-      justify-content: space-between;
-      border-top: 1px solid #000;
-      padding-top: 10px;
-      margin-top: 20px;
-    }
-
-    .footer .left-info {
-      text-align: left;
-    }
-
-    .footer .right-info {
-      text-align: right;
-    }
-
-    /* Page layout structures */
-    table.page-layout {
-      width: 100%;
-      border: none;
-      border-collapse: collapse;
-    }
-
-    table.page-layout>thead>tr>td {
-      border: none;
-      padding: 0;
-    }
-
-    table.page-layout>tbody>tr>td {
-      border: none;
-      padding: 0;
-    }
-
-    table.page-layout>tfoot>tr>td {
-      border: none;
-      padding: 0;
-    }
-  </style>
-</head>
-
-<body>
-
-  <table class="page-layout">
-    <thead>
-      <tr>
-        <td>
-          <!-- HEADER REPEATS ON EVERY PAGE -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="width: 20%; text-align: left;">
-              {{#solLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/solLogo}}
-            </div>
-            <div class="header" style="flex: 1; margin-bottom: 0;">
-              <strong>{{antetSatir1}}</strong><br>
-              <strong>{{antetSatir2}}</strong><br>
-              <strong>{{antetSatir3}}</strong><br>
-            </div>
-            <div style="width: 20%; text-align: right;">
-              {{#sagLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/sagLogo}}
-            </div>
-          </div>
-
-          <div class="header-fields" style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="width: 50%; word-wrap: break-word; text-align: left;">
-              Sayı: {{evrakSayisi}}<br>
-              Konu: İhtiyaç Listesi
-            </div>
-            <div style="text-align: right;">
-              Tarih: {{tarih}}
-            </div>
-          </div>
-        </td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <!-- MAIN CONTENT -->
-          <div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
-            {{sunulacakMakamAdi}}
-          </div>
-
-          <div class="konu">
-            {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
-            Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için
-            gereğini arz ederim.
-          </div>
-
-          <div style="text-align:right; margin-bottom: 20px;">
-            {{hazirlayanPersonelAdi}}<br>
-            {{hazirlayanPersonelUnvan}}
-          </div>
-
-          <table class="content-table">
-            <thead>
-              <tr>
-                <th>Sıra No</th>
-                <th>Kodu</th>
-                <th>Malzeme Adı</th>
-                <th>Özelliği</th>
-                <th>Birimi</th>
-                <th>Kdv Oranı</th>
-                <th>Miktar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#ihtiyacKalemleri}}
-              <tr>
-                <td>{{siraNo}}</td>
-                <td>{{kodu}}</td>
-                <td>{{malzemeAdi}}</td>
-                <td>{{ozelligi}}</td>
-                <td>{{birimi}}</td>
-                <td>{{kdvOrani}}</td>
-                <td>{{miktar}}</td>
-              </tr>
-              {{/ihtiyacKalemleri}}
-              {{^ihtiyacKalemleri}}
-              <tr>
-                <td colspan="7">Kalem bulunamadı</td>
-              </tr>
-              {{/ihtiyacKalemleri}}
-            </tbody>
-          </table>
-
-          <div class="signature">
-            <div style="display: inline-block; text-align: center;">
-              OLUR<br>
-              {{dosyaTarihi}}<br><br>
-              {{onaylayanPersonelAdi}}<br>
-              {{onaylayanPersonelUnvan}}
-            </div>
-          </div>
-
-        </td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>
-          <!-- FOOTER REPEATS ON EVERY PAGE -->
-          {{^kurumIci}}
-          <div class="footer">
-            <div class="left-info">
-              Adres: {{kurumAdres}}<br>
-              Elektronik Ağ: {{kurumWeb}}<br>
-              E-posta: {{kurumEmail}}<br>
-              KEP: {{kurumKepAdres}}
-            </div>
-
-            <div class="right-info">
-              Ayrıntılı Bilgi İçin: {{ilgiliPersonelAdi}}<br>
-              Telefon: {{kurumTelefon}}<br>
-              Faks: {{kurumFaks}}<br>
-              İnternet Adresi: {{kurumWeb}}
-            </div>
-          </div>
-          {{/kurumIci}}
-        </td>
-      </tr>
-    </tfoot>
-  </table>
-
-</body>
-
-</html>
+<div class="signature">
+  <div style="display: inline-block; text-align: center;">
+    OLUR<br>
+    {{dosyaTarihi}}<br><br>
+    {{onaylayanPersonelAdi}}<br>
+    {{onaylayanPersonelUnvan}}
+  </div>
+</div>

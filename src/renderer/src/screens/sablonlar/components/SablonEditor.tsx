@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import Mustache from 'mustache'
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels'
@@ -60,8 +60,22 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
 
   const [testJson, setTestJson] = useState(defaultTestJson)
   const [activeTab, setActiveTab] = useState<'design' | 'preview'>('design')
+  const [masterHtml, setMasterHtml] = useState('')
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  
+
+  useEffect(() => {
+    window.electron.ipcRenderer
+      .invoke('template:read-system', 'master.html')
+      .then((res) => {
+        if (typeof res === 'string' && res.trim().length > 0) {
+          setMasterHtml(res)
+        } else {
+          console.error('Master şablon boş geldi:', res)
+        }
+      })
+      .catch((err) => console.error('Master template yüklenemedi:', err))
+  }, [])
+
   
   const saveSablon = useSaveSablon()
 
@@ -77,7 +91,8 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   // Calculate final HTML synchronously so iframe instantly updates via srcDoc
   const finalHtmlForPreview = (() => {
     try {
-      return Mustache.render(htmlCode, parsedData)
+      if (!masterHtml) return '<div style="padding:20px;">Master şablon yükleniyor...</div>'
+      return Mustache.render(masterHtml, parsedData, { content: htmlCode })
     } catch (e) {
       return `<div style="color:red;padding:20px;">Şablon Hatası: ${e}</div>`
     }
@@ -99,7 +114,8 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
 
   const handleExportHtml = async () => {
     try {
-      const finalHtml = Mustache.render(htmlCode, parsedData)
+      if (!masterHtml) return
+      const finalHtml = Mustache.render(masterHtml, parsedData, { content: htmlCode })
       const res = await window.electron.ipcRenderer.invoke('export-html', finalHtml, { paperSize: 'A4' })
       if (res.success) {
         alert('Şablon başarıyla HTML olarak dışa aktarıldı.')
@@ -113,7 +129,8 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
 
   const handleExportPdf = async () => {
     try {
-      const finalHtml = Mustache.render(htmlCode, parsedData)
+      if (!masterHtml) return
+      const finalHtml = Mustache.render(masterHtml, parsedData, { content: htmlCode })
       const res = await window.electron.ipcRenderer.invoke('export-pdf', finalHtml)
       if (res.success) {
         alert('Şablon başarıyla PDF olarak dışa aktarıldı.')

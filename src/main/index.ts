@@ -646,7 +646,7 @@ if (!gotTheLock && !isMultiInstance) {
           printBackground: true,
           displayHeaderFooter: true,
           headerTemplate: '<div></div>',
-          footerTemplate: '<div style="font-size: 10px; width: 100%; text-align: right; padding-right: 2.54cm;">Sayfa <span class="pageNumber"></span> / <span class="totalPages"></span></div>'
+          footerTemplate: '<div style="font-size: 10px; width: 100%; text-align: center; padding-bottom: 5px;"><span class="pageNumber"></span>/<span class="totalPages"></span></div>'
         })
         
         fs.writeFileSync(filePath, pdfData)
