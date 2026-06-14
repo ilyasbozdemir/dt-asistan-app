@@ -39,7 +39,7 @@ export function SablonListesi({ onEdit, onCreate }: { onEdit: (s: Sablon) => voi
                   <div className="flex-1">
                     <h3 className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-1">{sablon.ad}</h3>
                     <p className="text-xs text-slate-500 font-mono mt-1 flex items-center gap-1">
-                      {sablon.dosya_adi}.{sablon.dosya_turu}
+                      {sablon.dosya_adi}{sablon.dosya_adi.endsWith(`.${sablon.dosya_turu}`) ? '' : `.${sablon.dosya_turu}`}
                     </p>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-[10px] font-bold px-2 py-1 rounded">

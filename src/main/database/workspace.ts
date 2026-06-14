@@ -108,23 +108,37 @@ function seedTemplates(db: Database.Database): void {
     const templatesDirProd = path.join(process.resourcesPath, 'templates')
     const targetDir = fs.existsSync(templatesDirProd) ? templatesDirProd : templatesDirDev
 
-    if (fs.existsSync(targetDir)) {
-      const files = fs.readdirSync(targetDir)
-      for (const file of files) {
-        if (file.endsWith('.html')) {
-          const content = fs.readFileSync(path.join(targetDir, file), 'utf-8')
-          const exists = db.prepare('SELECT 1 FROM TANIM_Sablon WHERE dosya_adi = ?').get(file)
-          if (!exists) {
-            let ad = file.replace('.html', '').replace(/-/g, ' ').toUpperCase()
-            if (file === 'ihtiyac-listesi.html') ad = 'İHTİYAÇ LİSTESİ' 
-            
-            db.prepare(`
-              INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi)
-              VALUES (?, ?, 'html', ?, ?, 1)
-            `).run(ad, file, content, 'Sistem varsayılan şablonu')
-            console.log(`[Seed] Seeded default template: ${file}`)
-          }
+    if (!fs.existsSync(targetDir)) return;
+
+    const findHtmlFiles = (dir: string): string[] => {
+      let results: string[] = []
+      const list = fs.readdirSync(dir)
+      for (const file of list) {
+        const filePath = path.join(dir, file)
+        const stat = fs.statSync(filePath)
+        if (stat && stat.isDirectory()) {
+          results = results.concat(findHtmlFiles(filePath))
+        } else if (file.endsWith('.html')) {
+          results.push(filePath)
         }
+      }
+      return results
+    }
+
+    const htmlFiles = findHtmlFiles(targetDir)
+    for (const filePath of htmlFiles) {
+      const file = path.basename(filePath)
+      const content = fs.readFileSync(filePath, 'utf-8')
+      const exists = db.prepare('SELECT 1 FROM TANIM_Sablon WHERE dosya_adi = ?').get(file)
+      if (!exists) {
+        let ad = file.replace('.html', '').replace(/-/g, ' ').toUpperCase()
+        if (file === 'ihtiyac-listesi.html') ad = 'İHTİYAÇ LİSTESİ' 
+        
+        db.prepare(`
+          INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi)
+          VALUES (?, ?, 'html', ?, ?, 1)
+        `).run(ad, file, content, 'Sistem varsayılan şablonu')
+        console.log(`[Seed] Seeded default template: ${file}`)
       }
     }
   } catch (err: any) {
