@@ -24,6 +24,7 @@ import { AIFormFillModal, AIFilledValues } from '../../components/ui/AIFormFillM
 import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
 import { logActivity } from '../../utils/logger'
 import { EskiDosyaKopyalaModal } from './components/EskiDosyaKopyalaModal'
+import { useKikLimitDonemleri } from '../system/kik-limitleri.hooks'
 
 interface DBBirim {
   id: number
@@ -54,7 +55,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const routerState = useRouterState()
   const { dosyalar, addDosya, updateDosya } = useDosyalarHooks()
   const { updateTabLabel } = useTabStore()
-  const { institutionName } = useSettingsStore()
+  const { institutionName, limitType } = useSettingsStore()
+  const { donemTanimsizMi } = useKikLimitDonemleri()
 
   const [isDescLoading, setIsDescLoading] = useState(false)
   const [showKonuSuggestions, setShowKonuSuggestions] = useState(false)
@@ -100,7 +102,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     talep_sayisi: '',
     ihale_tipi: 'Doğrudan Temin',
     tur: 'mal',
-    ihale_sekli: '22/d*',
+    ihale_sekli: limitType === 'buyuksehir' ? '22/d*' : '22/d**',
     teklif_sozlesme_turu: 'Birim Fiyat',
     alt_yuklenici_olacak_mi: 0,
     kismi_teklif_verilecek_mi: 0,
@@ -225,6 +227,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       ekonomik_kod: eskiDosya.ekonomik_kod,
       ihale_tipi: eskiDosya.ihale_tipi,
       tur: eskiDosya.tur,
+      // ihale_sekli: eskiDosya.ihale_sekli, // Kopya yerine ayarlardan geleni koruyalım (isteğe bağlı)
       ihale_sekli: eskiDosya.ihale_sekli,
       teklif_sozlesme_turu: eskiDosya.teklif_sozlesme_turu,
       alt_yuklenici_olacak_mi: eskiDosya.alt_yuklenici_olacak_mi,
@@ -794,6 +797,22 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             <div className="p-8 text-center text-sm text-slate-500 italic">Bilgiler yükleniyor...</div>
           ) : (
             <>
+              {donemTanimsizMi(formData.dosya_acilis_tarihi) && (
+                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl mb-6 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-lg">
+                      <HelpCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-red-800 dark:text-red-300">Kritik Hata: 22/d Limit Dönemi Bulunamadı!</h3>
+                      <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                        Sistemde, seçtiğiniz "Dosya Açılış Tarihi" ({formData.dosya_acilis_tarihi}) ile eşleşen bir Doğrudan Temin Limit Dönemi bulunamadı. Lütfen <strong>Sistem Ayarları &gt; Mevzuat ve Parametreler</strong> bölümünden ilgili tarihe ait limiti ekleyiniz. Limit olmadan bu dosyaya tahmini bedel kontrolü yapılamaz.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* TAB 1: GENEL BİLGİLER */}
               {activeTab === 'genel' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
@@ -1233,19 +1252,30 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       </label>
                       <select
                         title="Doğrudan Temin Maddesi Seçin"
-                        value={formData.ihale_sekli || '22/d*'}
+                        value={formData.ihale_sekli || (limitType === 'buyuksehir' ? '22/d*' : '22/d**')}
                         onChange={e => setFormData({ ...formData, ihale_sekli: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                       >
-                        <option value="22/d*">22/d* (Büyükşehir)</option>
-                        <option value="22/d**">22/d** (Diğer İdareler)</option>
+                        {limitType === 'buyuksehir' ? (
+                          <option value="22/d*">22/d* (Büyükşehir)</option>
+                        ) : (
+                          <option value="22/d**">22/d** (Diğer İdareler)</option>
+                        )}
                         <option value="22/a">22/a (Tek Yetkili)</option>
                         <option value="22/b">22/b (Özel Hak)</option>
                         <option value="22/c">22/c (Uyum Alımı)</option>
                       </select>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 leading-normal">
-                        {getIhaleSekliExplanation(formData.ihale_sekli)}
-                      </p>
+                      {formData.ihale_sekli?.startsWith('22/d') && (
+                        <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium bg-blue-50 dark:bg-blue-900/20 p-1.5 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                          <Info className="w-3 h-3 inline-block mr-1 mb-0.5" />
+                          22/d limiti, kurum ayarlarındaki "Kamu İhale Mevzuatı Limit Tipi" ({limitType === 'buyuksehir' ? 'Büyükşehir' : 'Diğer İdareler'}) ayarına göre otomatik seçilmiştir.
+                        </p>
+                      )}
+                      {!formData.ihale_sekli?.startsWith('22/d') && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 leading-normal">
+                          {getIhaleSekliExplanation(formData.ihale_sekli)}
+                        </p>
+                      )}
                     </div>
 
                     <div>

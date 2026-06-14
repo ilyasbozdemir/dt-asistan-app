@@ -346,24 +346,24 @@ export default function BirimlerScreen(): React.ReactNode {
                 <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
                   DETSİS Kodu <span className="text-[10px] font-normal text-slate-400">(Eski adıyla DTVT)</span>
                 </label>
-                <select
+                <Input
                   value={form.dtvt_kodu || ''}
                   onChange={(e) => {
                     handleChange('dtvt_kodu', e.target.value)
                     handleChange('detsis_kodu', e.target.value)
                   }}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-2 px-3 rounded-lg text-slate-800 dark:text-slate-200"
-                >
-                  <option value="">Seçiniz...</option>
-                  {kurumsalKodlar.map((k) => (
-                    <option key={k.kod} value={k.kod}>
-                      {k.kod} — {k.aciklama}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Biriminizin DETSİS kodunu girin..."
+                  className="w-full bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs"
+                />
                 <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex items-start gap-1.5 leading-relaxed">
                   <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  DTVT sistemi, DETSİS olarak güncellenmiştir. Birimlerin kullandığı mevcut kodlar aynı kalmıştır.
+                  <span>
+                    DTVT sistemi, DETSİS olarak güncellenmiştir. Birim kodunuzu bilmiyorsanız{' '}
+                    <a href="https://detsis.gov.tr/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">
+                      https://detsis.gov.tr/
+                    </a>{' '}
+                    adresinden arama yaparak bulabilirsiniz.
+                  </span>
                 </p>
               </div>
 

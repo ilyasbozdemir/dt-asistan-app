@@ -95,10 +95,16 @@ const menuGroups: MenuGroup[] = [
     items: [
       { name: 'Raporlar', path: '/raporlar', icon: BarChart3 },
       { name: 'Şablon Yönetimi', path: '/sablonlar', icon: FileText },
-      { name: 'Mevzuat & Limitler', path: '/mevzuat', icon: Scale },
       { name: 'Toplu İçe Aktarma', path: '/import', icon: Database },
       { name: 'Sürüm Notları', path: '/changelog', icon: Megaphone },
-      { name: 'Ayarlar', path: '/ayarlar', icon: Settings }
+      {
+        name: 'Ayarlar',
+        icon: Settings,
+        children: [
+          { name: 'Genel Ayarlar', path: '/ayarlar', icon: Settings },
+          { name: 'Mevzuat ve Parametreler', path: '/mevzuat', icon: Scale }
+        ]
+      }
     ]
   }
 ]

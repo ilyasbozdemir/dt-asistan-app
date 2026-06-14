@@ -21,6 +21,7 @@ interface SettingsState {
   muhasebeBirimAdi: string
   harcamaBirimKodu: string
   harcamaBirimAdi: string
+  ekapDonemKurali: string
   setInstitutionName: (name: string) => void
   setInstitutionLogo: (logo: string | null) => void
   setAdminName: (name: string) => void
@@ -63,6 +64,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   muhasebeBirimAdi: '',
   harcamaBirimKodu: '',
   harcamaBirimAdi: '',
+  ekapDonemKurali: '',
   setInstitutionName: (name) => set({ institutionName: name }),
   setInstitutionLogo: (logo) => set({ institutionLogo: logo }),
   setAdminName: (name) => set({ adminName: name }),
@@ -104,7 +106,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         muhasebeBirimKodu: settings.muhasebeBirimKodu || '',
         muhasebeBirimAdi: settings.muhasebeBirimAdi || '',
         harcamaBirimKodu: settings.harcamaBirimKodu || '',
-        harcamaBirimAdi: settings.harcamaBirimAdi || ''
+        harcamaBirimAdi: settings.harcamaBirimAdi || '',
+        ekapDonemKurali: settings.ekapDonemKurali || ''
       })
     } catch (error) {
       console.error('Ayarlar yüklenemedi:', error)
@@ -128,7 +131,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         muhasebeBirimKodu: '',
         muhasebeBirimAdi: '',
         harcamaBirimKodu: '',
-        harcamaBirimAdi: ''
+        harcamaBirimAdi: '',
+        ekapDonemKurali: ''
       })
     }
   }

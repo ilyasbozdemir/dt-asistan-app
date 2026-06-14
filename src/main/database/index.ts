@@ -21,6 +21,7 @@ import { TANIM_KomisyonGorevi } from './tables/TANIM_KomisyonGorevi'
 import { TANIM_Komisyon } from './tables/TANIM_Komisyon'
 import { TANIM_KomisyonUye } from './tables/TANIM_KomisyonUye'
 import { TANIM_Komisyon_Sablon } from './tables/TANIM_Komisyon_Sablon'
+import { TANIM_KikLimitDonemleri } from './tables/TANIM_KikLimitDonemleri'
 import { DATA_TeminKalem } from './tables/DATA_TeminKalem'
 import { DATA_TeminFirma } from './tables/DATA_TeminFirma'
 import { DATA_TeminKalemTeklif } from './tables/DATA_TeminKalemTeklif'
@@ -70,6 +71,7 @@ export const schema = {
     TANIM_Komisyon, // Tanımlı Komisyonlar
     TANIM_KomisyonUye, // Tanımlı Komisyonların Üyeleri
     TANIM_Komisyon_Sablon, // Komisyonlara Atanmış Belgeler/Şablonlar
+    TANIM_KikLimitDonemleri, // KİK Limit Dönemleri
     // --- Operasyonel Veriler ---
     DATA_TeminDosyasi, // Her bir temin kaydı
     DATA_TeminKalem,

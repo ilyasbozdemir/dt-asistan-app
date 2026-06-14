@@ -204,9 +204,9 @@ import {
 } from '../../constants/madde-22-bentleri'
 import {
   MADDE_22D_KATEGORILER,
-  AKTIF_DONEM,
   ISLEM_TURLERI
 } from '../../constants/madde-22d-limitler'
+import { KikLimitleriSection } from './KikLimitleriSection'
 
 interface Asama {
   id: number
@@ -298,16 +298,6 @@ export function MevzuatScreen(): React.JSX.Element {
   const { loadSettings: reloadSettingsStore } = useSettingsStore()
   const [savingMali, setSavingMali] = useState(false)
 
-  // Mock State for Settings (This would normally come from a global store/db)
-  const [limits, _setLimits] = useState({
-    buyuksehir: '1.021.827,00',
-    diger: '340.391,00',
-    yil: new Date().getFullYear().toString()
-  })
-  const setLimits = (val: React.SetStateAction<typeof limits>) => {
-    _setLimits(val)
-    setIsConfirmed(false)
-  }
 
   type VergiOrani = {
     id: string
@@ -386,9 +376,6 @@ export function MevzuatScreen(): React.JSX.Element {
         setTaxOffice(settings.taxOffice || '')
         setTaxNumber(settings.taxNumber || '')
 
-        if (settings.limits) {
-          try { _setLimits(JSON.parse(settings.limits)) } catch (e) { console.error('Error parsing limits', e) }
-        }
         if (settings.rates) {
           try { _setRates(JSON.parse(settings.rates)) } catch (e) { console.error('Error parsing rates', e) }
         }
@@ -498,7 +485,6 @@ export function MevzuatScreen(): React.JSX.Element {
     setIsSaving(true)
     try {
       await saveSettings({
-        limits: JSON.stringify(limits),
         rates: JSON.stringify(rates)
       })
       await reloadSettingsStore()
@@ -512,14 +498,16 @@ export function MevzuatScreen(): React.JSX.Element {
   }
 
   const menuItems: InnerMenuItem[] = [
-    { id: 'limitler', label: '4734 Sayılı Kanun Limitleri', icon: <Scale className="w-4 h-4 shrink-0" /> },
-    { id: 'oranlar', label: 'Vergi & Kesinti Oranları', icon: <Calculator className="w-4 h-4 shrink-0" /> },
-    { id: 'fiyatfarki', label: 'Fiyat Farkı Kararnameleri', icon: <Coins className="w-4 h-4 shrink-0" /> },
-    { id: 'mali', label: 'Mali & Kurumsal Kodlar', icon: <FileCode className="w-4 h-4 shrink-0" /> },
-    { id: 'rehber', label: 'Alım Türü Rehberi', icon: <FileText className="w-4 h-4 shrink-0" /> },
-    { id: 'asamalar', label: 'İşlem Aşamaları (Status)', icon: <Info className="w-4 h-4 shrink-0" /> },
-    { id: 'bentler', label: 'Madde 22 Bentleri', icon: <BookOpen className="w-4 h-4 shrink-0" /> },
-    { id: 'butcekodlari', label: 'Bütçe Kodları (ABS)', icon: <FileText className="w-4 h-4 shrink-0" /> }
+    { id: 'limitler', label: 'KİK Kanun Limitleri', description: 'Madde 22/d dönem limitleri', icon: <Scale className="w-4 h-4 shrink-0" /> },
+    { id: 'oranlar', label: 'Vergi & Kesinti Oranları', description: 'KDV, Damga, Tevkifat vb.', icon: <Calculator className="w-4 h-4 shrink-0" /> },
+    { id: 'fiyatfarki', label: 'Fiyat Farkı Katsayıları', description: 'Kararname endeksleri', icon: <Coins className="w-4 h-4 shrink-0" /> },
+    { id: 'div1', label: '', icon: null, isDivider: true },
+    { id: 'mali', label: 'Kurumsal Mali Kodlar', description: 'Fonksiyonel, muhasebe birimi', icon: <FileCode className="w-4 h-4 shrink-0" /> },
+    { id: 'butcekodlari', label: 'ABS Bütçe Kodları', description: 'Ekonomik gelir/gider', icon: <FileText className="w-4 h-4 shrink-0" /> },
+    { id: 'div2', label: '', icon: null, isDivider: true },
+    { id: 'rehber', label: 'Alım Türü Rehberi', description: 'Mal, hizmet, yapım işleri', icon: <FileText className="w-4 h-4 shrink-0" /> },
+    { id: 'asamalar', label: 'İşlem Aşamaları (Durum)', description: 'Süreç navigasyonu', icon: <Info className="w-4 h-4 shrink-0" /> },
+    { id: 'bentler', label: 'Madde 22 Bentleri', description: 'Kanun madde içerikleri', icon: <BookOpen className="w-4 h-4 shrink-0" /> }
   ]
 
   return (
@@ -552,7 +540,7 @@ export function MevzuatScreen(): React.JSX.Element {
       {/* SAĞ PANEL */}
         <div className="lg:col-span-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm min-h-[450px] flex flex-col overflow-y-auto max-h-[calc(100vh-220px)] custom-scrollbar flex-1">
           {/* STICKY ACTION BAR */}
-          {(activeTab === 'limitler' || activeTab === 'oranlar') && (
+          {(activeTab === 'oranlar') && (
             <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -591,120 +579,8 @@ export function MevzuatScreen(): React.JSX.Element {
           )}
           <div className="p-6 flex-1">
           {activeTab === 'limitler' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="flex items-start gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl border border-blue-100 dark:border-blue-800/50">
-              <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-500" />
-              <div className="text-sm">
-                <p className="font-semibold mb-1">Doğrudan Temin (Madde 22/d) Hakkında</p>
-                <p>
-                  Bu maddedeki sınırlar içerisinde kalan ihtiyaçlar, ilan yapılmaksızın ve teminat
-                  alınmaksızın idarelerce uygun görülen kişilerden piyasa fiyat araştırması
-                  yapılarak temin edilebilir. Limitler Kamu İhale Kurumu tarafından her yıl
-                  güncellenir.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Geçerli Yıl (Bkz. {AKTIF_DONEM.gecerlilik_baslangic} -{' '}
-                    {AKTIF_DONEM.gecerlilik_bitis})
-                  </label>
-                  <input
-                    type="text"
-                    value={limits.yil}
-                    onChange={(e) => setLimits({ ...limits, yil: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-medium transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-300 line-clamp-1"
-                    title={MADDE_22D_KATEGORILER.BUYUKSEHIR_SINIRI_DAHIL.aciklama}
-                  >
-                    {MADDE_22D_KATEGORILER.BUYUKSEHIR_SINIRI_DAHIL.aciklama} (₺)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={limits.buyuksehir}
-                      onChange={(e) => setLimits({ ...limits, buyuksehir: e.target.value })}
-                      className="w-full pl-4 pr-10 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-medium transition-all"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                      ₺
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-300 line-clamp-1"
-                    title={MADDE_22D_KATEGORILER.DIGER_IDARELER.aciklama}
-                  >
-                    {MADDE_22D_KATEGORILER.DIGER_IDARELER.aciklama} (₺)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={limits.diger}
-                      onChange={(e) => setLimits({ ...limits, diger: e.target.value })}
-                      className="w-full pl-4 pr-10 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-medium transition-all"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                      ₺
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
-                Doğrudan Temin İşlem Türleri
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {ISLEM_TURLERI.map((islem) => (
-                  <span
-                    key={islem.kod}
-                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700"
-                  >
-                    {islem.aciklama}
-                  </span>
-                ))}
-              </div>
-
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
-                Uygulama İçi Uyarı Davranışı
-              </h3>
-              <div className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-slate-800 dark:text-slate-200">
-                      Limit Aşımında Uyar
-                    </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                      Yeni bir dosya oluşturulurken tahmini bedel veya yaklaşık maliyet belirtilen
-                      limitleri aştığında sistem otomatik olarak uyarı verir.
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
+            <KikLimitleriSection />
+          )}
 
         {activeTab === 'oranlar' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">

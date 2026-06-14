@@ -411,8 +411,8 @@ export default function KurumScreen(): React.JSX.Element {
                           title="Limit Tipini Seçin"
                           className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
-                          <option value="diger">Diğer İdareler (İlçe, Belde, İl ve Diğer Kurumlar — Limit: 340.391 ₺)</option>
-                          <option value="buyuksehir">Büyükşehir Belediyesi Sınırları Dahilindeki İdareler — Limit: 1.021.827 ₺</option>
+                          <option value="diger">Diğer İdareler (İlçe, Belde, İl ve Diğer Kurumlar)</option>
+                          <option value="buyuksehir">Büyükşehir Belediyesi Sınırları Dahilindeki İdareler</option>
                         </select>
                         <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-normal">
                           Bu seçim, doğrudan temin dosyası oluşturulurken tahmini bedel limit aşımı kontrolünü ve Gösterge Paneli bütçe uyarılarını belirler.
@@ -562,24 +562,21 @@ export default function KurumScreen(): React.JSX.Element {
                             <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
                               DETSİS Kodu <span className="text-[10px] font-normal text-slate-400">(Eski adıyla DTVT)</span>
                             </label>
-                            <select
+                            <Input
                               value={dtvtKodu}
                               onChange={e => {
                                 setDtvtKodu(e.target.value)
                                 setDetsisKodu(e.target.value)
                               }}
-                              className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            >
-                              <option value="">Seçiniz...</option>
-                              {Object.entries(DTVTKoduLabels).map(([val, label]) => (
-                                <option key={val} value={val}>
-                                  {val} — {label}
-                                </option>
-                              ))}
-                            </select>
+                              placeholder="Kurumunuzun DETSİS kodunu girin..."
+                              className="w-full bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
+                            />
                             <p className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex items-start gap-1.5 leading-relaxed">
                               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                              DTVT (Devlet Teşkilatı Veri Tabanı) sistemi, DETSİS (Devlet Teşkilatı Merkezi Kayıt Sistemi) olarak güncellenmiştir. Kurumların kullandığı mevcut kodlar değişmemiştir.
+                              <span>
+                                DTVT (Devlet Teşkilatı Veri Tabanı) sistemi, DETSİS (Devlet Teşkilatı Merkezi Kayıt Sistemi) olarak güncellenmiştir.
+                                Kurum kodunuzu bilmiyorsanız <a href="https://detsis.gov.tr/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">https://detsis.gov.tr/</a> adresinden arama yaparak bulabilirsiniz.
+                              </span>
                             </p>
                           </div>
 
