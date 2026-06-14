@@ -30,7 +30,7 @@ export function useSablonlar() {
     queryFn: async () => {
       const res = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT * FROM TANIM_Sablon WHERE aktif_mi = 1 ORDER BY id DESC'
+        'SELECT * FROM TANIM_Sablon WHERE id IN (SELECT MAX(id) FROM TANIM_Sablon WHERE aktif_mi = 1 GROUP BY COALESCE(parent_id, id)) ORDER BY id DESC'
       )
       if (res.error) throw new Error(res.error)
       return res.data as Sablon[]
@@ -91,45 +91,86 @@ export function useSaveSablon() {
       extractedPlaceholders: Placeholder[]
     }) => {
       const isUpdate = !!oldSablon
-      const parent_id = isUpdate ? (oldSablon.parent_id || oldSablon.id) : null
-      const versiyon = isUpdate ? oldSablon.versiyon + 1 : 1
 
-      const queries: { sql: string; params: any[] }[] = []
-
-      // Deactivate old version if it's an update
       if (isUpdate) {
-        queries.push({
-          sql: 'UPDATE TANIM_Sablon SET aktif_mi = 0 WHERE id = ?',
-          params: [oldSablon.id]
-        })
-      }
+        if (oldSablon.versiyon === 1) {
+          // Create customized version (v2)
+          const parent_id = oldSablon.parent_id || oldSablon.id
+          const insertRes = await window.electron.ipcRenderer.invoke(
+            'db:run',
+            `INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi, parent_id, versiyon)
+             VALUES (?, ?, ?, ?, ?, 1, ?, 2)`,
+            [ad, dosya_adi, dosya_turu, icerik, aciklama, parent_id]
+          )
+          if (insertRes.error) throw new Error(insertRes.error)
+          const newSablonId = insertRes.lastID
 
-      // We cannot easily get the newly inserted ID inside a transaction using pure db:transaction
-      // unless the backend returns it. Let's do it manually via single db:run calls or update the transaction logic.
-      // Wait, db:transaction doesn't return the last inserted ID.
-      // So we will execute them sequentially for now, or just use db:run then db:run.
+          for (const p of extractedPlaceholders) {
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'INSERT INTO SABLON_Placeholder (sablon_id, placeholder_id) VALUES (?, ?)',
+              [newSablonId, p.id]
+            )
+          }
+          return newSablonId
+        } else {
+          // Update existing customized version in place
+          const updateRes = await window.electron.ipcRenderer.invoke(
+            'db:run',
+            `UPDATE TANIM_Sablon SET ad = ?, dosya_adi = ?, icerik = ?, aciklama = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+            [ad, dosya_adi, icerik, aciklama, oldSablon.id]
+          )
+          if (updateRes.error) throw new Error(updateRes.error)
 
-      const insertRes = await window.electron.ipcRenderer.invoke(
-        'db:run',
-        `INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi, parent_id, versiyon)
-         VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
-        [ad, dosya_adi, dosya_turu, icerik, aciklama, parent_id, versiyon]
-      )
-
-      if (insertRes.error) throw new Error(insertRes.error)
-
-      const newSablonId = insertRes.lastID
-
-      // Insert mappings for extracted placeholders
-      for (const p of extractedPlaceholders) {
-        await window.electron.ipcRenderer.invoke(
+          // Replace placeholders
+          await window.electron.ipcRenderer.invoke('db:run', 'DELETE FROM SABLON_Placeholder WHERE sablon_id = ?', [oldSablon.id])
+          for (const p of extractedPlaceholders) {
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'INSERT INTO SABLON_Placeholder (sablon_id, placeholder_id) VALUES (?, ?)',
+              [oldSablon.id, p.id]
+            )
+          }
+          return oldSablon.id
+        }
+      } else {
+        // Insert new fresh template (v1)
+        const insertRes = await window.electron.ipcRenderer.invoke(
           'db:run',
-          'INSERT INTO SABLON_Placeholder (sablon_id, placeholder_id) VALUES (?, ?)',
-          [newSablonId, p.id]
+          `INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi, parent_id, versiyon)
+           VALUES (?, ?, ?, ?, ?, 1, NULL, 1)`,
+          [ad, dosya_adi, dosya_turu, icerik, aciklama]
         )
-      }
+        if (insertRes.error) throw new Error(insertRes.error)
+        const newSablonId = insertRes.lastID
 
-      return newSablonId
+        for (const p of extractedPlaceholders) {
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            'INSERT INTO SABLON_Placeholder (sablon_id, placeholder_id) VALUES (?, ?)',
+            [newSablonId, p.id]
+          )
+        }
+        return newSablonId
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sablonlar'] })
+    }
+  })
+}
+
+export function useDeleteSablon() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'DELETE FROM TANIM_Sablon WHERE id = ?',
+        [id]
+      )
+      if (res.error) throw new Error(res.error)
+      return id
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sablonlar'] })

@@ -153,7 +153,9 @@
     "kurumAdres": "Çankaya / Ankara",
     "kurumWeb": "www.ankara.saglik.gov.tr",
     "kurumEmail": "info@ankara.saglik.gov.tr",
-    "ilgiliPersonelAdi": "Ayşe Kaya",
     "kurumTelefon": "0312 000 00 00",
-    "kurumFaks": "0312 000 00 01"
+    "kurumFaks": "0312 000 00 01",
+    "kurumKepAdres": "ankara.saglik@hs01.kep.tr",
+    "kurumInternetAdresi": "https://www.ankara.saglik.gov.tr",
+    "ilgiliPersonelAdi": "Ayşe Kaya"
 }

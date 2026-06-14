@@ -11,10 +11,11 @@ import {
   Database,
   ArrowLeft,
   LayoutTemplate,
-  Eye
+  Eye,
+  History
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
-import { Sablon, useSaveSablon } from '../sablonlar.hooks'
+import { Sablon, useSaveSablon, useSablonHistory } from '../sablonlar.hooks'
 import { A4Editor } from '../../../components/editor/A4Editor'
 
 const ResizeHandle = () => (
@@ -29,11 +30,12 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const [aciklama, setAciklama] = useState(sablon?.aciklama || '')
   const [htmlCode, setHtmlCode] = useState(sablon?.icerik || `<p>Merhaba, {{ffirma_adi}}!</p>`)
   const [testJson, setTestJson] = useState(`{\n  "firma_adi": "Test Firması A.Ş.",\n  "kurumIci": false\n}`)
-  const [activeTab, setActiveTab] = useState<'design' | 'preview'>('design')
+  const [activeTab, setActiveTab] = useState<'design' | 'preview' | 'history'>('design')
   const iframeRef = useRef<HTMLIFrameElement>(null)
   
   
   const saveSablon = useSaveSablon()
+  const { data: history, isLoading: historyLoading } = useSablonHistory(sablon?.parent_id || sablon?.id || null)
 
   const parsedData = React.useMemo(() => {
     try {
@@ -193,13 +195,26 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
           <Eye className="w-4 h-4" />
           Mustache.js Önizleme
         </button>
+        {sablon && (
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm border-b-2 transition-colors ${
+              activeTab === 'history'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <History className="w-4 h-4" />
+            Versiyon Geçmişi
+          </button>
+        )}
       </div>
 
       {activeTab === 'design' ? (
         <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
           <A4Editor content={htmlCode} onChange={setHtmlCode} />
         </div>
-      ) : (
+      ) : activeTab === 'preview' ? (
         <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
           <PanelGroup orientation="horizontal">
             {/* SOL PANEL: TEST VERİSİ */}
@@ -246,6 +261,47 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
               </div>
             </Panel>
           </PanelGroup>
+        </div>
+      ) : (
+        <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-auto p-6 shadow-sm">
+          {historyLoading ? (
+             <div className="text-center text-slate-500 py-10">Yükleniyor...</div>
+          ) : history?.length === 0 ? (
+             <div className="text-center text-slate-500 py-10">Henüz geçmiş versiyon yok.</div>
+          ) : (
+             <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">Versiyon Geçmişi</h2>
+               {history?.map((s) => (
+                 <div key={s.id} className="p-5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:border-purple-200 transition-colors">
+                   <div className="flex justify-between items-center mb-3">
+                     <div className="flex items-center gap-3">
+                       <span className="font-bold text-lg text-slate-800 dark:text-slate-200">v{s.versiyon}</span>
+                       {s.aktif_mi === 1 && <span className="text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded uppercase">Aktif Versiyon</span>}
+                     </div>
+                     <span className="text-sm text-slate-500 font-mono">{new Date(s.created_at).toLocaleString('tr-TR')}</span>
+                   </div>
+                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{s.aciklama || 'Açıklama girilmemiş.'}</p>
+                   {s.aktif_mi === 0 && (
+                     <Button 
+                       onClick={() => {
+                         if (confirm('Bu eski versiyonu yüklemek istiyor musunuz? Mevcut değişiklikleriniz kaybolabilir.')) {
+                           setHtmlCode(s.icerik)
+                           setAd(s.ad)
+                           setDosyaAdi(s.dosya_adi)
+                           setAciklama(s.aciklama || '')
+                           setActiveTab('design')
+                         }
+                       }} 
+                       variant="outline" 
+                       className="text-xs"
+                     >
+                       Bu Versiyonu Editöre Yükle
+                     </Button>
+                   )}
+                 </div>
+               ))}
+             </div>
+          )}
         </div>
       )}
     </div>

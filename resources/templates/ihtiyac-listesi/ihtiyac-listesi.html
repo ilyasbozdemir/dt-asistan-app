@@ -1,283 +1,246 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>İhtiyaç Listesi</title>
-<style>
-  @page { size: A4; margin: 0; }
-  body { 
-    font-family: "Times New Roman", serif; 
-    font-size: 12pt; 
-    margin: 0; 
-    padding: 0;
-    box-sizing: border-box;
-    background: #e0e0e0;
-  }
-  .page {
-    width: 210mm;
-    height: 297mm;
-    margin: 10px auto;
-    background: white;
-    padding: 20mm;
-    box-sizing: border-box;
-    position: relative;
-    page-break-after: always;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  @media print {
-    body { background: white; }
-    .page { margin: 0; page-break-after: always; box-shadow: none; border: none; }
-  }
-  
-  .header { text-align: center; line-height: 1.4; text-transform: uppercase; }
-  .header-fields { margin: 10px 0; }
-  .konu { text-align: justify; text-indent: 35px; margin: 20px 0; }
-  table.content-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-  table.content-table th, table.content-table td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 11pt; }
-  
-  .signature { text-align: center; margin-top: 30px; }
-  .footer { position: absolute; bottom: 20mm; left: 20mm; right: 20mm; font-size: 9pt; border-top: 1px solid #000; padding-top: 5px; }
-  .footer-content { display: flex; justify-content: space-between; }
-  .footer .left-info { text-align: left; }
-  .footer .right-info { text-align: right; }
-  .page-number { text-align: center; font-weight: bold; margin-top: 10px; font-size: 10pt; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İhtiyaç Listesi</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2.00cm;
+    }
+
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 12pt;
+      box-sizing: border-box;
+    }
+
+    @media screen {
+      body {
+        padding: 2.00cm;
+      }
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    .header {
+      text-align: center;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .header-fields {
+      margin: 10px 0;
+    }
+
+    .title {
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0;
+      text-transform: uppercase;
+    }
+
+    .konu {
+      text-align: justify;
+      text-indent: 35px;
+      margin: 20px 0;
+    }
+
+    table.content-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table.content-table th,
+    table.content-table td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+      font-size: 11pt;
+    }
+
+    table.content-table tr {
+      page-break-inside: avoid;
+    }
+
+    .signature {
+      text-align: center;
+      margin-top: 50px;
+      page-break-inside: avoid;
+    }
+
+    .footer {
+      font-size: 9pt;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #000;
+      padding-top: 10px;
+      margin-top: 20px;
+    }
+
+    .footer .left-info {
+      text-align: left;
+    }
+
+    .footer .right-info {
+      text-align: right;
+    }
+
+    /* Page layout structures */
+    table.page-layout {
+      width: 100%;
+      border: none;
+      border-collapse: collapse;
+    }
+
+    table.page-layout>thead>tr>td {
+      border: none;
+      padding: 0;
+    }
+
+    table.page-layout>tbody>tr>td {
+      border: none;
+      padding: 0;
+    }
+
+    table.page-layout>tfoot>tr>td {
+      border: none;
+      padding: 0;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- GİZLİ ŞABLON İÇERİĞİ (JS BURADAN OKUYUP SAYFALARA BÖLECEK) -->
-<div id="source-content" style="display: none;">
-  <!-- HEADER TEMPLATE -->
-  <div id="tpl-header">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <div style="width: 20%; text-align: left;">
-        {{#solLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/solLogo}}
-      </div>
-      <div class="header" style="flex: 1; margin-bottom: 0;">
-        <strong>{{antetSatir1}}</strong><br>
-        <strong>{{antetSatir2}}</strong><br>
-        <strong>{{antetSatir3}}</strong><br>
-      </div>
-      <div style="width: 20%; text-align: right;">
-        {{#sagLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/sagLogo}}
-      </div>
-    </div>
-    <div class="header-fields" style="display: flex; justify-content: space-between; align-items: flex-start;">
-      <div style="width: 50%; word-wrap: break-word; text-align: left;">
-        Sayı: {{evrakSayisi}}<br>
-        Konu: İhtiyaç Listesi
-      </div>
-      <div style="text-align: right;">
-        Tarih: {{tarih}}
-      </div>
-    </div>
-  </div>
-
-  <!-- BEFORE TABLE -->
-  <div id="tpl-before-table">
-    <div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
-      {{sunulacakMakamAdi}}
-    </div>
-    <div class="konu">
-      {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
-      Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için gereğini arz ederim.
-    </div>
-    <div style="text-align:right; margin-bottom: 20px;">
-      {{hazirlayanPersonelAdi}}<br>
-      {{hazirlayanPersonelUnvan}}
-    </div>
-  </div>
-
-  <!-- TABLE HEAD -->
-  <table id="tpl-table-head">
+  <table class="page-layout">
     <thead>
       <tr>
-        <th>Sıra No</th>
-        <th>Kodu</th>
-        <th>Malzeme Adı</th>
-        <th>Özelliği</th>
-        <th>Birimi</th>
-        <th>Kdv Oranı</th>
-        <th>Miktar</th>
+        <td>
+          <!-- HEADER REPEATS ON EVERY PAGE -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="width: 20%; text-align: left;">
+              {{#solLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/solLogo}}
+            </div>
+            <div class="header" style="flex: 1; margin-bottom: 0;">
+              <strong>{{antetSatir1}}</strong><br>
+              <strong>{{antetSatir2}}</strong><br>
+              <strong>{{antetSatir3}}</strong><br>
+            </div>
+            <div style="width: 20%; text-align: right;">
+              {{#sagLogo}}<img src="{{.}}" style="max-width: 80px; max-height: 80px;">{{/sagLogo}}
+            </div>
+          </div>
+
+          <div class="header-fields" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="width: 50%; word-wrap: break-word; text-align: left;">
+              Sayı: {{evrakSayisi}}<br>
+              Konu: İhtiyaç Listesi
+            </div>
+            <div style="text-align: right;">
+              Tarih: {{tarih}}
+            </div>
+          </div>
+        </td>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      <tr>
+        <td>
+          <!-- MAIN CONTENT -->
+          <div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
+            {{sunulacakMakamAdi}}
+          </div>
+
+          <div class="konu">
+            {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
+            Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için
+            gereğini arz ederim.
+          </div>
+
+          <div style="text-align:right; margin-bottom: 20px;">
+            {{hazirlayanPersonelAdi}}<br>
+            {{hazirlayanPersonelUnvan}}
+          </div>
+
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th>Sıra No</th>
+                <th>Kodu</th>
+                <th>Malzeme Adı</th>
+                <th>Özelliği</th>
+                <th>Birimi</th>
+                <th>Kdv Oranı</th>
+                <th>Miktar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#ihtiyacKalemleri}}
+              <tr>
+                <td>{{siraNo}}</td>
+                <td>{{kodu}}</td>
+                <td>{{malzemeAdi}}</td>
+                <td>{{ozelligi}}</td>
+                <td>{{birimi}}</td>
+                <td>{{kdvOrani}}</td>
+                <td>{{miktar}}</td>
+              </tr>
+              {{/ihtiyacKalemleri}}
+              {{^ihtiyacKalemleri}}
+              <tr>
+                <td colspan="7">Kalem bulunamadı</td>
+              </tr>
+              {{/ihtiyacKalemleri}}
+            </tbody>
+          </table>
+
+          <div class="signature">
+            <div style="display: inline-block; text-align: center;">
+              OLUR<br>
+              {{dosyaTarihi}}<br><br>
+              {{onaylayanPersonelAdi}}<br>
+              {{onaylayanPersonelUnvan}}
+            </div>
+          </div>
+
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>
+          <!-- FOOTER REPEATS ON EVERY PAGE -->
+          {{^kurumIci}}
+          <div class="footer">
+            <div class="left-info">
+              Adres: {{kurumAdres}}<br>
+              Elektronik Ağ: {{kurumWeb}}<br>
+              E-posta: {{kurumEmail}}<br>
+              KEP: {{kurumKepAdres}}
+            </div>
+
+            <div class="right-info">
+              Ayrıntılı Bilgi İçin: {{ilgiliPersonelAdi}}<br>
+              Telefon: {{kurumTelefon}}<br>
+              Faks: {{kurumFaks}}<br>
+              İnternet Adresi: {{kurumWeb}}
+            </div>
+          </div>
+          {{/kurumIci}}
+        </td>
+      </tr>
+    </tfoot>
   </table>
 
-  <!-- TABLE ROWS -->
-  <div id="tpl-table-rows">
-    {{#ihtiyacKalemleri}}
-    <table><tbody>
-      <tr class="item-row">
-        <td>{{siraNo}}</td>
-        <td>{{kodu}}</td>
-        <td>{{malzemeAdi}}</td>
-        <td>{{ozelligi}}</td>
-        <td>{{birimi}}</td>
-        <td>{{kdvOrani}}</td>
-        <td>{{miktar}}</td>
-      </tr>
-    </tbody></table>
-    {{/ihtiyacKalemleri}}
-    {{^ihtiyacKalemleri}}
-    <table><tbody>
-      <tr class="item-row">
-        <td colspan="7">Kalem bulunamadı</td>
-      </tr>
-    </tbody></table>
-    {{/ihtiyacKalemleri}}
-  </div>
-
-  <!-- AFTER TABLE SIGNATURE -->
-  <div id="tpl-after-table">
-    <div class="signature">
-      <div style="display: inline-block; text-align: center;">
-        OLUR<br>
-        {{dosyaTarihi}}<br><br>
-        {{onaylayanPersonelAdi}}<br>
-        {{onaylayanPersonelUnvan}}
-      </div>
-    </div>
-  </div>
-
-  <!-- FOOTER TEMPLATE -->
-  <div id="tpl-footer">
-    <div class="footer">
-      {{^kurumIci}}
-      <div class="footer-content">
-        <div class="left-info">
-          Adres: {{kurumAdres}}<br>
-          Elektronik Ağ: {{kurumWeb}}<br>
-          Elektronik Posta: {{kurumEmail}}
-        </div>
-        <div class="right-info">
-          Ayrıntılı Bilgi İçin: {{ilgiliPersonelAdi}}<br>
-          Tel: {{kurumTelefon}}<br>
-          Faks: {{kurumFaks}}
-        </div>
-      </div>
-      {{/kurumIci}}
-      <div class="page-number">Sayfa <span class="current-page"></span> / <span class="total-pages"></span></div>
-    </div>
-  </div>
-</div>
-
-<div id="pages-container"></div>
-
-<script>
-  window.onload = function() {
-    paginateContent();
-  };
-
-  function paginateContent() {
-    const container = document.getElementById('pages-container');
-    container.innerHTML = '';
-
-    const sourceHeader = document.getElementById('tpl-header').innerHTML;
-    const sourceBeforeTable = document.getElementById('tpl-before-table').innerHTML;
-    const sourceTableHead = document.getElementById('tpl-table-head').innerHTML;
-    const sourceRows = Array.from(document.querySelectorAll('#tpl-table-rows .item-row'));
-    const sourceAfterTable = document.getElementById('tpl-after-table').innerHTML;
-    const sourceFooter = document.getElementById('tpl-footer').innerHTML;
-
-    let pageIndex = 1;
-    let currentPage = createPage(container, sourceHeader, sourceFooter);
-    let contentArea = currentPage.querySelector('.content-area');
-
-    // Add BEFORE TABLE elements
-    const beforeTableDiv = document.createElement('div');
-    beforeTableDiv.innerHTML = sourceBeforeTable;
-    contentArea.appendChild(beforeTableDiv);
-
-    // Create initial table
-    let currentTable = document.createElement('table');
-    currentTable.className = 'content-table';
-    currentTable.innerHTML = sourceTableHead;
-    let currentTbody = currentTable.querySelector('tbody');
-    contentArea.appendChild(currentTable);
-
-    // A4 height: 297mm. Padding 40mm. Usable: 257mm. Footer takes ~30mm. Available for content ~220mm
-    // 220mm = 220 * 3.779527 ≈ 830px. We use 800px to be safe.
-    const availableHeightPx = 800; 
-
-    for (let i = 0; i < sourceRows.length; i++) {
-      const row = sourceRows[i].cloneNode(true);
-      currentTbody.appendChild(row);
-
-      // Check if height exceeded
-      if (contentArea.scrollHeight > availableHeightPx) {
-        // Remove the row from current page
-        currentTbody.removeChild(row);
-
-        // Create new page
-        pageIndex++;
-        currentPage = createPage(container, sourceHeader, sourceFooter);
-        contentArea = currentPage.querySelector('.content-area');
-        
-        // Create new table for new page
-        currentTable = document.createElement('table');
-        currentTable.className = 'content-table';
-        currentTable.innerHTML = sourceTableHead;
-        currentTbody = currentTable.querySelector('tbody');
-        contentArea.appendChild(currentTable);
-        
-        // Add the row to the new page
-        currentTbody.appendChild(row);
-      }
-    }
-
-    // Now try to add the signature
-    const signatureDiv = document.createElement('div');
-    signatureDiv.innerHTML = sourceAfterTable;
-    contentArea.appendChild(signatureDiv);
-
-    if (contentArea.scrollHeight > availableHeightPx) {
-      // Signature didn't fit, move to next page
-      contentArea.removeChild(signatureDiv);
-      pageIndex++;
-      currentPage = createPage(container, sourceHeader, sourceFooter);
-      contentArea = currentPage.querySelector('.content-area');
-      contentArea.appendChild(signatureDiv);
-    }
-
-    // Update Page Numbers
-    const totalPages = pageIndex;
-    const pages = document.querySelectorAll('.page');
-    pages.forEach((page, idx) => {
-      const pageNumDisplay = page.querySelector('.page-number');
-      if (totalPages === 1) {
-        pageNumDisplay.style.display = 'none'; // Sadece 1 sayfa varsa gizle
-      } else {
-        page.querySelector('.current-page').innerText = (idx + 1);
-        page.querySelector('.total-pages').innerText = totalPages;
-      }
-    });
-  }
-
-  function createPage(container, headerHTML, footerHTML) {
-    const page = document.createElement('div');
-    page.className = 'page';
-    
-    const contentArea = document.createElement('div');
-    contentArea.className = 'content-area';
-    
-    // Insert Header
-    const headerDiv = document.createElement('div');
-    headerDiv.innerHTML = headerHTML;
-    contentArea.appendChild(headerDiv);
-    
-    page.appendChild(contentArea);
-    
-    // Insert Footer
-    const footerDiv = document.createElement('div');
-    footerDiv.innerHTML = footerHTML;
-    page.appendChild(footerDiv);
-    
-    container.appendChild(page);
-    return page;
-  }
-</script>
 </body>
+
 </html>
