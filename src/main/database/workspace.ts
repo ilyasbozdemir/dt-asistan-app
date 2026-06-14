@@ -53,22 +53,37 @@ function ensureSchemaIntegrity(db: Database.Database): void {
     try {
       const tableInfo = db.prepare(`PRAGMA table_info(${table.name})`).all() as any[]
       if (tableInfo.length === 0) {
-        continue
-      }
-      const existingColumns = new Set(tableInfo.map((c) => c.name))
-      for (const col of table.columns as any[]) {
-        if (!existingColumns.has(col.name)) {
-          // SQLite ALTER TABLE ADD COLUMN does NOT support UNIQUE or NOT NULL constraints.
-          // These are only valid at CREATE TABLE time. We skip them here to avoid errors.
-          let sqlDef = '"' + col.name + '" ' + col.type
-          if (col.default !== undefined) {
-            sqlDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+        console.log(`[Schema Self-Healing] Creating missing table ${table.name}`)
+        const columnsSql = table.columns
+          .map((col: any) => {
+            let colDef = '"' + col.name + '" ' + col.type
+            if (col.primaryKey) colDef += ' PRIMARY KEY'
+            if (col.autoIncrement) colDef += ' AUTOINCREMENT'
+            if (col.unique) colDef += ' UNIQUE'
+            if (col.notNull) colDef += ' NOT NULL'
+            if (col.default !== undefined) {
+              colDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+            }
+            return colDef
+          })
+          .join(', ')
+        const constraintsSql = table.constraints ? ', ' + table.constraints.join(', ') : ''
+        db.exec('CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columnsSql + constraintsSql + ');')
+      } else {
+        const existingColumns = new Set(tableInfo.map((c) => c.name))
+        for (const col of table.columns as any[]) {
+          if (!existingColumns.has(col.name)) {
+            // SQLite ALTER TABLE ADD COLUMN does NOT support UNIQUE or NOT NULL constraints.
+            // These are only valid at CREATE TABLE time. We skip them here to avoid errors.
+            let sqlDef = '"' + col.name + '" ' + col.type
+            if (col.default !== undefined) {
+              sqlDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+            }
+            console.log(`[Schema Self-Healing] Adding missing column ${table.name}.${col.name}`)
+            db.exec(`ALTER TABLE ${table.name} ADD COLUMN ${sqlDef};`)
           }
-          console.log(`[Schema Self-Healing] Adding missing column ${table.name}.${col.name}`)
-          db.exec(`ALTER TABLE ${table.name} ADD COLUMN ${sqlDef};`)
         }
       }
-      
       // Self-heal missing initial data
       if (table.initialData && table.initialData.length > 0) {
         table.initialData.forEach((row: any) => {
