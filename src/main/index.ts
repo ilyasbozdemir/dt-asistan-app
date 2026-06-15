@@ -613,7 +613,7 @@ if (!gotTheLock && !isMultiInstance) {
       return { canceled, filePath: filePaths && filePaths.length > 0 ? filePaths[0] : null }
     })
 
-    ipcMain.handle('export-pdf', async (_, htmlContent: string, printOptions?: any, fileName?: string) => {
+    ipcMain.handle('export-pdf', async (_, htmlContent: string, _printOptions?: any, fileName?: string) => {
       try {
         const { canceled, filePath } = await dialog.showSaveDialog({
           title: 'PDF Olarak Kaydet',
@@ -690,7 +690,7 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
-    ipcMain.handle('preview-pdf', async (_, htmlContent: string, printOptions?: any) => {
+    ipcMain.handle('preview-pdf', async (_, htmlContent: string, _printOptions?: any) => {
       try {
         const pdfBuffer = await renderPdfBuffer(htmlContent)
         return { success: true, data: pdfBuffer.toString('base64') }

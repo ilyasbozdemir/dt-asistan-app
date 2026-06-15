@@ -1,6 +1,5 @@
 import { BrowserWindow } from 'electron'
 import * as fs from 'fs'
-import * as path from 'path'
 
 /**
  * Renders HTML to a PDF Buffer using Paged.js for pagination.
