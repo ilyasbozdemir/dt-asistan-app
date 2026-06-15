@@ -58,6 +58,7 @@ function SablonHistoryModal({ sablon, isOpen, onClose, onEdit }: { sablon: Sablo
 export function SablonListesi({ onEdit, onCreate }: { onEdit: (s: Sablon) => void, onCreate: () => void }) {
   const { data: sablonlar, isLoading } = useSablonlar()
   const [historySablon, setHistorySablon] = useState<Sablon | null>(null)
+  const deleteSablon = useDeleteSablon()
 
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-300">
@@ -140,10 +141,22 @@ export function SablonListesi({ onEdit, onCreate }: { onEdit: (s: Sablon) => voi
                         </div>
                       )}
                       
-                      <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <Button onClick={(e) => { e.stopPropagation(); setHistorySablon(sablon); }} variant="ghost" className="w-full justify-center text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                      <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                        <Button onClick={(e) => { e.stopPropagation(); setHistorySablon(sablon); }} variant="ghost" className="flex-1 justify-center text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20">
                           <History className="w-3.5 h-3.5 mr-2" /> Versiyon Geçmişi
                         </Button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (confirm(`'${sablon.ad}' şablonunu silmek istediğinize emin misiniz?`)) {
+                              deleteSablon.mutate(sablon.id)
+                            }
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                          title="Şablonu Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
