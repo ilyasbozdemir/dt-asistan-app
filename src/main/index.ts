@@ -19,11 +19,6 @@ process.on('uncaughtException', (error) => {
 })
 
 let tray: Tray | null = null
-let isQuitting = false
-
-app.on('before-quit', () => {
-  isQuitting = true
-})
 
 // Uygulama tamamen kapanırken (Quit) aktif dosyayı/lock'u temizle
 app.on('will-quit', () => {
@@ -62,12 +57,13 @@ function createWindow(): void {
     }
   })
 
-  mainWindow.on('close', (event) => {
-    if (!isQuitting) {
-      event.preventDefault()
-      mainWindow.hide()
-    }
-  })
+  // Uygulama kapatıldığında direkt kapansın (arka planda çalışmasın)
+  // mainWindow.on('close', (event) => {
+  //   if (!isQuitting) {
+  //     event.preventDefault()
+  //     mainWindow.hide()
+  //   }
+  // })
 
   ipcMain.on('window-minimize', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
@@ -182,7 +178,6 @@ if (!gotTheLock && !isMultiInstance) {
       {
         label: 'Çıkış',
         click: () => {
-          isQuitting = true
           app.quit()
         }
       }
