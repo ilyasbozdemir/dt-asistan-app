@@ -1,5 +1,9 @@
 appId: dev.ilyasbozdemir.dtasistan
 productName: DT Asistan
+publish:
+  provider: github
+  owner: ilyasbozdemir
+  repo: dt-desktop-app
 fileAssociations:
   - ext: dtm
     name: Doğrudan Temin Çalışma Dosyası
