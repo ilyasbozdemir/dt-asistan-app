@@ -34,7 +34,7 @@ function setAttr(tag: string, attr: string, value: string): string {
   if (new RegExp(`${escaped}="`).test(tag)) {
     return tag.replace(new RegExp(`${escaped}="[^"]*"`), `${attr}="${value}"`)
   }
-  return tag.replace('>', ` ${attr}="${value}">`)
+  return tag.replace(/(\/?>)$/, ` ${attr}="${value}"$1`)
 }
 
 function mergeClasses(existing: string, incoming: string[]): string {
@@ -50,12 +50,8 @@ export function applyPagedBehaviors(htmlContent: string): string {
 
   const regex = /<[^>]+data-behavior="([^"]+)"[^>]*>/g
 
-  let match: RegExpExecArray | null
-  let result = htmlContent
-
-  while ((match = regex.exec(result)) !== null) {
-    const fullMatch = match[0]
-    const behaviors = match[1].trim().split(/\s+/)
+  return htmlContent.replace(regex, (fullMatch, behaviorStr) => {
+    const behaviors = behaviorStr.trim().split(/\s+/)
 
     const classes = behaviors
       .map((b) => BEHAVIOR_CLASS_MAP[b])
@@ -73,10 +69,8 @@ export function applyPagedBehaviors(htmlContent: string): string {
     const merged = mergeClasses(existingClass ?? '', classes)
     updated = setAttr(updated, 'class', merged)
 
-    result = result.replace(fullMatch, updated)
-  }
-
-  return result
+    return updated
+  })
 }
 
 export function getPagedClass(behavior: string): string {

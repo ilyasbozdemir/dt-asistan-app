@@ -8,12 +8,13 @@ import {
   Save,
   ArrowLeft,
   LayoutTemplate,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Sablon, useSaveSablon } from '../sablonlar.hooks'
 
-
+import { AiTemplateGeneratorModal } from './AiTemplateGeneratorModal'
 import { A4Editor } from '../../../components/editor/A4Editor'
 import { PreviewTab } from './tabs/PreviewTab'
 import { PdfTab } from './tabs/PdfTab'
@@ -49,6 +50,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const [activeTab, setActiveTab] = useState<'design' | 'preview' | 'pdf'>('design')
   const [pdfBase64, setPdfBase64] = useState<string>('')
   const [isPdfLoading, setIsPdfLoading] = useState(false)
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false)
 
   const saveSablon = useSaveSablon()
 
@@ -210,6 +212,10 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
         </div>
         
         <div className="flex items-center gap-2 shrink-0">
+          <Button onClick={() => setIsAiModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
+            <Sparkles className="w-3.5 h-3.5" />
+            AI Sihirbazı
+          </Button>
           <Button onClick={handleImportDocx} variant="outline" className="text-xs font-semibold py-2 flex items-center gap-2 border-slate-200 dark:border-slate-800">
             <Upload className="w-3.5 h-3.5 text-blue-500" />
             DOCX Aç
@@ -334,6 +340,15 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
           handleUpdatePdfPreview={handleUpdatePdfPreview}
         />
       ) : null}
+
+      <AiTemplateGeneratorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        currentHtml={htmlCode}
+        onApply={(newHtml) => {
+          setHtmlCode(newHtml)
+        }}
+      />
     </div>
   )
 }

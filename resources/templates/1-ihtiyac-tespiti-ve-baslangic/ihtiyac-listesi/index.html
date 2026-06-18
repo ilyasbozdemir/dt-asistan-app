@@ -6,7 +6,7 @@
     @page {
       size: A4;
       margin: 2cm 1.5cm 2.5cm 1.5cm;
-      @bottom-right {
+      @bottom-center {
         content: "Sayfa " counter(page) " / " counter(pages);
         font-size: 8pt;
         font-family: "Times New Roman", serif;
@@ -15,62 +15,48 @@
     body {
       font-family: "Times New Roman", Times, serif;
       font-size: 11pt;
-      box-sizing: border-box;
       color: #000;
       line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
     }
-    .header {
-      text-align: center;
-      line-height: 1.3;
-      margin-bottom: 20px;
-      text-transform: uppercase;
+    .page-container {
+      max-width: 21cm;
+      min-height: 29.7cm;
+      margin: 20px auto;
+      padding: 2cm 1.5cm 2.5cm 1.5cm;
+      background: white;
+      box-sizing: border-box;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .header strong {
-      font-size: 12pt;
-      letter-spacing: 0.5px;
-    }
-    .title {
-      text-align: center;
-      font-weight: bold;
-      text-decoration: underline;
-      margin: 20px 0;
-      font-size: 12pt;
-    }
-    .konu {
-      text-indent: 40px;
-      text-align: justify;
-      margin-bottom: 20px;
-    }
-    .content-table {
+    .content-body {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 10pt;
     }
-    .content-table th, .content-table td {
-      border: 1px solid #000;
-      padding: 6px;
-      text-align: left;
+    @media print {
+      body {
+        background-color: white;
+      }
+      .page-container {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        max-width: none;
+        min-height: 0;
+      }
     }
-    .content-table th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-      text-align: center;
-    }
-    .footer-info {
-      font-size: 8pt;
-    }
-
-    /* ── Paged.js Running Elements ── */
+    /* ── Header / Footer Positioning (Bypassing Paged.js margin boxes) ── */
     .paged-header {
-      position: running(pagedHeader);
-      display: block;
+      position: absolute;
+      top: -4.5cm; /* Push into the top margin of the first page */
+      left: 0;
       width: 100%;
     }
 
     .paged-footer {
-      position: running(pagedFooter);
-      display: block;
+      position: fixed;
+      bottom: -3.5cm; /* Push into the bottom margin of every page */
+      left: 0;
       width: 100%;
     }
 
@@ -80,98 +66,240 @@
 
     /* PAGE RULES — SINGLE SOURCE OF TRUTH */
     @page {
-      @bottom-left { content: element(pagedFooter); }
+      size: A4;
+      margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+      @bottom-center {
+        content: "Sayfa " counter(page) " / " counter(pages);
+        font-size: 8pt;
+      }
     }
 
     @page:first {
-      @top-center  { content: element(pagedHeader); }
-      @bottom-left { content: none; }
+      margin-top: 4.5cm;
+      @bottom-center { content: none; }
+    }
+
+    .header {
+      position: relative;
+      text-align: center;
+      line-height: 1.3;
+      margin-bottom: 10px; /* Reduced to avoid Paged.js margin overflow */
+      padding: 0 80px;
+    }
+    .header-line {
+      font-weight: bold;
+      font-size: 12pt;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+    .meta-table {
+      border-collapse: collapse;
+    }
+    .meta-table td {
+      padding: 2px 10px 2px 0;
+      vertical-align: top;
+    }
+    .meta-label {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .makam {
+      text-align: center;
+      font-weight: bold;
+      margin: 40px 0 20px 0;
+      text-transform: uppercase;
+    }
+    .title {
+      text-align: center;
+      font-weight: bold;
+      text-decoration: underline;
+      margin: 20px 0;
+      font-size: 12pt;
+    }
+    .konu-metni {
+      text-indent: 40px;
+      text-align: justify;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .hazirlayan {
+      text-align: right;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+    .content-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 30px;
+      font-size: 10pt;
+    }
+    .content-table th, .content-table td {
+      border: 1px solid #333;
+      padding: 6px;
+      text-align: left;
+    }
+    
+    /* ── Hassas Sayfa Bölünme Kuralları ── */
+    /* Tablo satırları ortadan bölünmesin (cantSplit) */
+    .content-table tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    /* Paragraflar ortadan bölünmesin (keepLines) */
+    .keep-lines {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    /* Başlık altındaki içerikten kopmasın (keepNext) */
+    .keep-next {
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    /* Zorla yeni sayfadan başlasın (pageBreakBefore) */
+    .page-break-before {
+      break-before: page;
+      page-break-before: always;
+    }
+    /* ──────────────────────────────────── */
+
+    .content-table th {
+      font-weight: bold;
+      text-align: center;
+      background-color: #f2f2f2;
+    }
+    .approval {
+      text-align: center;
+      margin-top: 40px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      break-before: avoid;
+      page-break-before: avoid;
+    }
+    /* Duplicate footer rule cleanup */
+    .footer-left {
+      text-align: left;
+    }
+    .footer-right {
+      text-align: right;
     }
   </style>
 </head>
 <body>
+  <div class="page-container">
 
-  <!-- ANTET (Sadece İlk Sayfa) -->
-  <div data-behavior="first-page-only" data-slot="top-center">
-    <div class="header">
-      {{#solLogo}}
-      <img src="{{solLogo}}" alt="Logo" style="width: 60px; height: auto; position: absolute; left: 0; top: 0;" />
-      {{/solLogo}}
-      <strong>T.C.</strong><br>
-      <strong>{{antetSatir1}}</strong><br>
-      {{antetSatir2}}<br>
-      {{antetSatir3}}
+    <!-- ANTET -->
+    <div class="paged-header" data-behavior="first-page-only" data-slot="top-center">
+      <div class="header">
+        {{#solLogo}}
+        <img src="{{solLogo}}" alt="Sol Logo" style="width: 70px; height: auto; position: absolute; left: 0; top: 0;" />
+        {{/solLogo}}
+        {{#sagLogo}}
+        <img src="{{sagLogo}}" alt="Sağ Logo" style="width: 70px; height: auto; position: absolute; right: 0; top: 0;" />
+        {{/sagLogo}}
+
+        {{#antetSatirlari}}
+        <div class="header-line">{{.}}</div>
+        {{/antetSatirlari}}
+      </div>
     </div>
-  </div>
 
-  <!-- KURUM İLETİŞİM (Tüm Sayfalar) -->
-  {{^kurumIci}}
-  <div data-behavior="every-page" data-slot="bottom-left">
-    <div class="footer-info">
-      İletişim: {{kurumAdres}} | Tel: {{kurumTelefon}} | Faks: {{kurumFaks}}<br>
-      E-posta: {{kurumEposta}} | KEP: {{kurumKep}}<br>
-      Bilgi İçin: {{ilgiliPersonelAdi}} - {{ilgiliPersonelUnvan}}
+    <!-- CONTENT BODY (Güvenli Alan) -->
+    <div class="content-body">
+      <div class="meta-row">
+      <div>
+        <table class="meta-table">
+          <tr>
+            <td class="meta-label">Sayı</td>
+            <td>: {{evrakSayisi}}</td>
+          </tr>
+          <tr>
+            <td class="meta-label">Konu</td>
+            <td>: {{dosyaKonusu}}</td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <strong>Tarih:</strong> {{tarih}}
+      </div>
     </div>
-  </div>
-  {{/kurumIci}}
 
-  <div class="makam" style="text-align: center; font-weight: bold; margin: 40px 0; text-transform: uppercase;">
-    {{sunulacakMakamAdi}}
-  </div>
+    <div class="makam">
+      {{sunulacakMakamAdi}}
+    </div>
+    <div class="konu-metni">
+      {{ihtiyacYeri}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.<br>
+      Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunu'nun ilgili maddesine göre temini için gereğini arz ederim.
+    </div>
 
-  <div class="title">İHTİYAÇ LİSTESİ</div>
+    <div class="hazirlayan">
+      {{hazirlayanPersonelAdi}}<br>
+      {{hazirlayanPersonelUnvan}}
+    </div>
 
-  <div class="konu">
-    {{dosyaKonusu}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.
-    Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun ilgili maddesine göre temini için
-    gereğini arz ederim.
-  </div>
+    <table class="content-table">
+      <thead>
+        <tr>
+          <th>Kodu</th>
+          <th>Malzeme Adı</th>
+          <th>Özelliği</th>
+          <th>Birimi</th>
+          <th>KDV Oranı</th>
+          <th>Miktar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#ihtiyacKalemleri}}
+        <tr>
+          <td>{{kodu}}</td>
+          <td>{{malzemeAdi}}</td>
+          <td>{{ozelligi}}</td>
+          <td>{{birimi}}</td>
+          <td>{{kdvOrani}}</td>
+          <td>{{miktar}}</td>
+        </tr>
+        {{/ihtiyacKalemleri}}
+        {{^ihtiyacKalemleri}}
+        <tr>
+          <td colspan="6" style="text-align: center;">Kalem bulunamadı</td>
+        </tr>
+        {{/ihtiyacKalemleri}}
+      </tbody>
+    </table>
 
-  <div style="text-align:right; margin-bottom: 20px;">
-    {{hazirlayanPersonelAdi}}<br>
-    {{hazirlayanPersonelUnvan}}
-  </div>
-
-  <table class="content-table">
-    <thead>
-      <tr>
-        <th>Kodu</th>
-        <th>Malzeme Adı</th>
-        <th>Özelliği</th>
-        <th>Birimi</th>
-        <th>Kdv Oranı</th>
-        <th>Miktar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#ihtiyacKalemleri}}
-      <tr>
-        <td>{{kodu}}</td>
-        <td>{{malzemeAdi}}</td>
-        <td>{{ozelligi}}</td>
-        <td>{{birimi}}</td>
-        <td>{{kdvOrani}}</td>
-        <td>{{miktar}}</td>
-      </tr>
-      {{/ihtiyacKalemleri}}
-      {{^ihtiyacKalemleri}}
-      <tr>
-        <td colspan="6" style="text-align: center;">Kalem bulunamadı</td>
-      </tr>
-      {{/ihtiyacKalemleri}}
-    </tbody>
-  </table>
-
-  <div class="signature" style="text-align: center; margin-top: 40px;" data-behavior="keep-together">
-    {{#onaylayanlar}}
-    <div style="display: inline-block; text-align: center; width: 30%; min-width: 200px; vertical-align: top; margin-bottom: 30px;">
-      OLUR<br>
-      {{dosyaTarihi}}<br><br><br>
+    {{#olurYazisi}}
+    <div class="approval" data-behavior="keep-together">
+      <strong>OLUR</strong><br>
+      {{dosyaTarihi}}<br><br><br><br>
       {{onaylayanPersonelAdi}}<br>
       {{onaylayanPersonelUnvan}}
     </div>
-    {{/onaylayanlar}}
-  </div>
+    {{/olurYazisi}}
+    </div> <!-- END CONTENT BODY -->
 
+    <!-- KURUM İLETİŞİM -->
+    {{^kurumIci}}
+    <div class="paged-footer" data-behavior="every-page">
+      <div style="border-top: 1px solid red; margin-bottom: 5px;"></div>
+      <div style="display: flex; justify-content: space-between; color: #333; line-height: 1.2; font-size: 8pt;">
+        <div class="footer-left">
+          Adres: {{kurumAdres}}<br>
+          Elektronik Ağ: {{kurumWeb}}<br>
+          E-Posta: {{kurumEposta}}<br>
+          KEP: {{kurumKep}}
+        </div>
+        <div class="footer-right" style="text-align: right;">
+          Bilgi İçin: {{ilgiliPersonelAdi}}<br>
+          {{ilgiliPersonelUnvan}}<br>
+          Telefon No: {{kurumTelefon}}
+        </div>
+      </div>
+    </div>
+    {{/kurumIci}}
+
+  </div>
 </body>
 </html>
