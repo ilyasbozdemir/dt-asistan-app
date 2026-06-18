@@ -127,6 +127,24 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     }
   }
 
+  const handleExportDocx = async () => {
+    try {
+      if (!window.electron) {
+        alert('Bu özellik yalnızca masaüstü uygulamasında (Electron) çalışır.')
+        return
+      }
+      const rawHtml = Mustache.render(htmlCode, parsedData)
+      const res = await window.electron.ipcRenderer.invoke('export-docx', rawHtml, ad || dosyaAdi)
+      if (res.success) {
+        alert('Şablon başarıyla Word (DOCX) olarak dışa aktarıldı.')
+      } else if (res.error !== 'İptal edildi') {
+        alert('Dışa aktarma hatası: ' + res.error)
+      }
+    } catch (err: any) {
+      alert('Hata: ' + err.message)
+    }
+  }
+
   const handleUpdatePdfPreview = async () => {
     if (!window.electron) {
       alert('PDF önizleme özelliği yalnızca masaüstü uygulamasında (Electron) çalışır. Tarayıcıda desteklenmemektedir.')
@@ -228,6 +246,10 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
           <Button onClick={handleExportPdf} className="bg-red-600 hover:bg-red-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
             <Download className="w-3.5 h-3.5" />
             PDF İndir
+          </Button>
+          <Button onClick={handleExportDocx} className="bg-sky-600 hover:bg-sky-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
+            <Download className="w-3.5 h-3.5" />
+            DOCX İndir
           </Button>
           <Button
               variant="outline"
