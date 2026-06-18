@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react'
 import Mustache from 'mustache'
 import {
   FileText,
-  Upload,
   Download,
   Save,
   ArrowLeft,
@@ -73,23 +72,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     }
   })()
 
-  const handleImportDocx = async () => {
-    try {
-      if (!window.electron) {
-        alert('Bu özellik yalnızca masaüstü uygulamasında (Electron) çalışır.')
-        return
-      }
-      const res = await window.electron.ipcRenderer.invoke('import-docx')
-      if (res.success && res.html) {
-        setHtmlCode(res.html)
-        alert('DOCX başarıyla HTML olarak içe aktarıldı.')
-      } else if (res.error && res.error !== 'İptal edildi') {
-        alert('İçe aktarma hatası: ' + res.error)
-      }
-    } catch (err: any) {
-      alert('Hata: ' + err.message)
-    }
-  }
+
 
   const handleExportHtml = async () => {
     try {
