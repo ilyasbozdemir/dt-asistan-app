@@ -278,5 +278,31 @@
     {{/kurumIci}}
 
   </div>
+
+  <script>
+    // Tablo satırlarını sayfalara eşitçe bölerek "OLUR" imza alanının tek başına son sayfada kalmasını engellemek için
+    window.addEventListener('DOMContentLoaded', () => {
+      const tbody = document.querySelector('.content-table tbody');
+      if (!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const totalRows = rows.length;
+      
+      // Bir sayfaya sığabilecek yaklaşık maksimum satır sayısı
+      const MAX_ROWS_PER_PAGE = 25; 
+      
+      const estimatedPages = Math.ceil(totalRows / MAX_ROWS_PER_PAGE);
+      
+      if (estimatedPages > 1) {
+         // Satırları sayfalara eşit paylaştırmak için sayfa başına düşen ideal satır sayısını bul
+         const rowsPerChunk = Math.ceil(totalRows / estimatedPages);
+         rows.forEach((row, index) => {
+           if (index > 0 && index % rowsPerChunk === 0) {
+             row.style.breakBefore = 'page';
+             row.style.pageBreakBefore = 'always';
+           }
+         });
+      }
+    });
+  </script>
 </body>
 </html>

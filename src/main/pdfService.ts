@@ -42,13 +42,17 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
         }
 
         const footerEl = document.querySelector('.paged-footer');
-        
         const footerHtml = footerEl ? footerEl.outerHTML : '<div></div>';
         
-        // Remove footer from body so it doesn't print in the main content at the end
+        const headerEl = document.querySelector('.paged-header');
+        const headerHtml = headerEl ? headerEl.outerHTML : '<div></div>';
+        const hasHeader = !!headerEl;
+
+        // Remove footer and header from body so they don't print in the main content
         if (footerEl) footerEl.remove();
+        if (headerEl) headerEl.remove();
         
-        return { footerHtml };
+        return { footerHtml, headerHtml, hasHeader };
       })()
     `)
 
@@ -56,11 +60,16 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
     const pdfBuffer = await win.webContents.printToPDF({
       printBackground: true,
       displayHeaderFooter: true,
-      headerTemplate: '<div></div>', // We leave the header in the body so it only prints on page 1
-      footerTemplate: `<div style="width: 100%; font-size: 10px; padding: 0 1.5cm; -webkit-print-color-adjust: exact;">${extracted.footerHtml}</div>`,
+      headerTemplate: `<div style="width: 100%; font-size: 10px; padding: 0 1.5cm; margin-top: 15px; -webkit-print-color-adjust: exact;">${extracted.headerHtml}</div>`,
+      footerTemplate: `<div style="width: 100%; font-size: 10px; padding: 0 1.5cm; -webkit-print-color-adjust: exact;">
+                         ${extracted.footerHtml}
+                         <div style="text-align: center; margin-top: 8px; font-size: 9px; font-weight: bold; color: #555;">
+                           <span class="pageNumber"></span> / <span class="totalPages"></span>
+                         </div>
+                       </div>`,
       margins: {
-        top: 0.98, // ~2.5cm
-        bottom: 1.0, // ~2.5cm (Footer alt boslugunu azalttik)
+        top: extracted.hasHeader ? 1.6 : 0.98, // Increase top margin if there is a header
+        bottom: 1.2, // ~3cm (Footer and pagination needs a bit more space)
         left: 0.59, // ~1.5cm
         right: 0.59 // ~1.5cm
       },
