@@ -60,7 +60,7 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
       footerTemplate: `<div style="width: 100%; font-size: 10px; padding: 0 1.5cm; -webkit-print-color-adjust: exact;">${extracted.footerHtml}</div>`,
       margins: {
         top: 0.98, // ~2.5cm
-        bottom: 1.5, // ~3.8cm (Footer için ekstra yer açtık)
+        bottom: 1.0, // ~2.5cm (Footer alt boslugunu azalttik)
         left: 0.59, // ~1.5cm
         right: 0.59 // ~1.5cm
       },

@@ -231,9 +231,14 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
                       return
                     }
                     const content = await window.electron.ipcRenderer.invoke('template:read-system', dosyaAdi);
+                    const jsonContent = await window.electron.ipcRenderer.invoke('template:read-system', dosyaAdi.endsWith('.html') ? dosyaAdi + '.json' : dosyaAdi + '/index.html.json');
+                    
                     if (content) {
                       setHtmlCode(content);
-                      alert('Varsayılan şablon yüklendi.');
+                      if (jsonContent) {
+                        setTestJson(jsonContent);
+                      }
+                      alert('Varsayılan şablon ve test verisi yüklendi.');
                     } else {
                       alert('Varsayılan şablon dosyası bulunamadı.');
                     }
