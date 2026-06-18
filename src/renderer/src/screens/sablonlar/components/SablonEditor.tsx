@@ -18,7 +18,6 @@ import { AiTemplateGeneratorModal } from './AiTemplateGeneratorModal'
 import { A4Editor } from '../../../components/editor/A4Editor'
 import { PreviewTab } from './tabs/PreviewTab'
 import { PdfTab } from './tabs/PdfTab'
-import { applyPagedBehaviors } from '../../../utils/paged-behaviors'
 
 export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () => void }): React.ReactElement {
   const [ad, setAd] = useState(sablon?.ad || '')
@@ -66,7 +65,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const finalHtmlForPreview = (() => {
     try {
       const rawHtml = Mustache.render(htmlCode, parsedData)
-      return applyPagedBehaviors(rawHtml)
+      return rawHtml
     } catch (e) {
       return '<div style="color:red;padding:20px;">Şablon Hatası: ' + String(e) + '</div>'
     }
@@ -97,8 +96,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
         return
       }
       const rawHtml = Mustache.render(htmlCode, parsedData)
-      const finalHtml = applyPagedBehaviors(rawHtml)
-      const res = await window.electron.ipcRenderer.invoke('export-html', finalHtml, { paperSize: 'A4' }, ad || dosyaAdi)
+      const res = await window.electron.ipcRenderer.invoke('export-html', rawHtml, { paperSize: 'A4' }, ad || dosyaAdi)
       if (res.success) {
         alert('Şablon başarıyla HTML olarak dışa aktarıldı.')
       } else if (res.error !== 'İptal edildi') {
@@ -116,8 +114,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
         return
       }
       const rawHtml = Mustache.render(htmlCode, parsedData)
-      const finalHtml = applyPagedBehaviors(rawHtml)
-      const res = await window.electron.ipcRenderer.invoke('export-pdf', finalHtml, null, ad || dosyaAdi)
+      const res = await window.electron.ipcRenderer.invoke('export-pdf', rawHtml, null, ad || dosyaAdi)
       if (res.success) {
         alert('Şablon başarıyla PDF olarak dışa aktarıldı.')
       } else if (res.error !== 'İptal edildi') {
@@ -136,8 +133,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
     setIsPdfLoading(true)
     try {
       const rawHtml = Mustache.render(htmlCode, parsedData)
-      const finalHtml = applyPagedBehaviors(rawHtml)
-      const res = await window.electron.ipcRenderer.invoke('preview-pdf', finalHtml)
+      const res = await window.electron.ipcRenderer.invoke('preview-pdf', rawHtml)
       if (res.success && res.data) {
         setPdfBase64(res.data)
       } else {
@@ -216,10 +212,7 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
             <Sparkles className="w-3.5 h-3.5" />
             AI Sihirbazı
           </Button>
-          <Button onClick={handleImportDocx} variant="outline" className="text-xs font-semibold py-2 flex items-center gap-2 border-slate-200 dark:border-slate-800">
-            <Upload className="w-3.5 h-3.5 text-blue-500" />
-            DOCX Aç
-          </Button>
+
           <Button onClick={handleExportHtml} className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-4 shadow-md flex items-center gap-2 text-white">
             <Download className="w-3.5 h-3.5" />
             HTML İndir
