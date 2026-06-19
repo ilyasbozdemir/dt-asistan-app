@@ -95,7 +95,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
         set({
           activeFilePath: filePath,
-          fileName: filePath.split('\\').pop()?.split('/').pop() || 'Bilinmeyen Dosya',
+          fileName: filePath.split(/[/\\]/).pop() || 'Bilinmeyen Dosya',
           isAuthenticated: keepAuth,
           activeMeta: result.meta || null,
           activeDosyaId: keepAuth
@@ -104,6 +104,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
               : null
             : null
         })
+        
+        // Add to recent files
+        const nameWithoutExt = filePath.split(/[/\\]/).pop()?.replace(/\.dt[ma]$/i, '') || 'Bilinmeyen Kurum'
+        window.electron.ipcRenderer.invoke('app:add-recent-file', filePath, nameWithoutExt).catch(console.error)
+
         return { success: true }
       }
       return { success: false, error: result.error }
@@ -134,11 +139,16 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         sessionStorage.removeItem('workspace_dosya_id')
         set({
           activeFilePath: filePath,
-          fileName: filePath.split('\\').pop()?.split('/').pop() || 'Bilinmeyen Dosya',
+          fileName: filePath.split(/[/\\]/).pop() || 'Bilinmeyen Dosya',
           isAuthenticated: true, // Auto-logged in on create
           activeMeta: result.meta || null,
           activeDosyaId: null
         })
+
+        // Add to recent files
+        const nameWithoutExt = filePath.split(/[/\\]/).pop()?.replace(/\.dt[ma]$/i, '') || 'Bilinmeyen Kurum'
+        window.electron.ipcRenderer.invoke('app:add-recent-file', filePath, nameWithoutExt).catch(console.error)
+
         return { success: true }
       }
       return { success: false, error: result.error }

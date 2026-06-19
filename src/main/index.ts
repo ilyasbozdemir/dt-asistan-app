@@ -9,6 +9,7 @@ import { CURRENT_SCHEMA_VERSION } from './database/migrate'
 import { manifests } from './database/schema-manifest/index'
 import nodemailer from 'nodemailer'
 import { isSupportedFile, defaultFormat, perFormatFilters, allFormatsFilter } from './config/fileFormats'
+import { recentFilesStore } from './store/recentFiles'
 import { startServer, stopServer, getSocketServer } from './server'
 import { connectToServer, disconnectFromServer, emitEvent } from './client'
 import { generateContent, testConnection, AIGenerateOptions } from './ai/index'
@@ -702,6 +703,16 @@ if (!gotTheLock && !isMultiInstance) {
         properties: ['openFile']
       })
       return { canceled, filePath: filePaths && filePaths.length > 0 ? filePaths[0] : null }
+    })
+
+    // --- RECENT FILES HANDLERS ---
+    ipcMain.handle('app:get-recent-files', () => {
+      return recentFilesStore.getRecentFiles()
+    })
+
+    ipcMain.handle('app:add-recent-file', (_, filePath: string, name: string) => {
+      recentFilesStore.addRecentFile(filePath, name)
+      return { success: true }
     })
 
     ipcMain.handle('export-pdf', async (_, htmlContent: string, _printOptions?: any, fileName?: string) => {

@@ -44,7 +44,7 @@ export function FileSelector(): React.JSX.Element {
       const res = await window.electron?.ipcRenderer.invoke('dialog:showSaveDialog')
       if (!res.canceled && res.filePath) {
         const fileBaseName = res.filePath.split(/[/\\]/).pop() || 'Yeni Kurum'
-        const projectName = fileBaseName.replace(/\.dtm$/i, '')
+        const projectName = fileBaseName.replace(/\.dt[ma]$/i, '')
 
         const result = await createWorkspace(res.filePath, projectName)
         if (result.success) {

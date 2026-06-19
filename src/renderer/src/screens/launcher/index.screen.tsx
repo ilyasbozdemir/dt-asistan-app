@@ -13,7 +13,9 @@ import {
   Moon,
   Eye,
   EyeOff,
-  Wifi
+  Wifi,
+  Clock,
+  ChevronRight
 } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useQueryClient } from '@tanstack/react-query'
@@ -40,13 +42,23 @@ export default function LauncherScreen(): React.ReactNode {
   const [creating, setCreating] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Recent files state
+  const [recentFiles, setRecentFiles] = useState<any[]>([])
+
+  React.useEffect(() => {
+    // Fetch recent files on mount
+    window.electron?.ipcRenderer.invoke('app:get-recent-files').then(files => {
+      if (files) setRecentFiles(files)
+    }).catch(console.error)
+  }, [])
+
   const handleCreateNewFile = async (): Promise<void> => {
     try {
       const res = await window.electron?.ipcRenderer.invoke('dialog:showSaveDialog')
       if (!res.canceled && res.filePath) {
         // Dosya yolundan dosya adını (uzantısız) çıkar
         const fileName = res.filePath.split(/[/\\]/).pop() || 'Yeni Kurum'
-        const projectName = fileName.replace(/\.dtm$/i, '')
+        const projectName = fileName.replace(/\.dt[ma]$/i, '')
 
         setPendingFilePath(res.filePath)
         setInstitutionName(projectName)
@@ -102,6 +114,24 @@ export default function LauncherScreen(): React.ReactNode {
         } else {
           alert(`Kurum dosyası açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
         }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleOpenRecent = async (filePath: string): Promise<void> => {
+    try {
+      const result = await openWorkspace(filePath, false)
+      if (result.requiresMigration) {
+        setMigrationData({ filePath, pendingUpdates: result.pendingUpdates || [] })
+        setShowMigrationModal(true)
+        return
+      }
+      if (result.success) {
+        queryClient.clear()
+      } else {
+        alert(`Kurum dosyası açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
       }
     } catch (e) {
       console.error(e)
@@ -190,23 +220,24 @@ export default function LauncherScreen(): React.ReactNode {
       </div>
 
       <div
-        className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+        className="max-w-4xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-row"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
-        <div className="p-8 text-center border-b border-slate-100 dark:border-slate-800">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 animate-pulse">
-            <FolderOpen className="w-8 h-8" />
+        <div className="flex-1 flex flex-col">
+          <div className="p-8 text-center border-b border-slate-100 dark:border-slate-800">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 animate-pulse">
+              <FolderOpen className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+              DT Asistan&apos;a Hoş Geldiniz
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">
+              Çalışmaya başlamak için yeni bir kurum/çalışma alanı dosyası (.dtm, .dta) oluşturun veya
+              mevcut bir kurumu açın.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-            DT Asistan&apos;a Hoş Geldiniz
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
-            Çalışmaya başlamak için yeni bir kurum/çalışma alanı dosyası (.dtm) oluşturun veya
-            mevcut bir kurumu açın.
-          </p>
-        </div>
 
-        <div className="p-6 space-y-4">
+          <div className="p-8 space-y-4 flex-1 flex flex-col justify-center">
           <button
             onClick={handleCreateNewFile}
             className="w-full flex items-center gap-4 p-4 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 transition-all group"
@@ -232,7 +263,45 @@ export default function LauncherScreen(): React.ReactNode {
               <p className="text-xs opacity-80 mt-0.5">Önceden oluşturulmuş .dtm dosyasını yükle</p>
             </div>
           </button>
+          </div>
         </div>
+
+        <div className="w-80 border-l border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-6 flex flex-col">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 mb-4">
+              <Clock className="w-4 h-4" />
+              <span>Son Açılanlar</span>
+            </div>
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              {recentFiles.map((file) => (
+                <button
+                  key={file.id}
+                  onClick={() => handleOpenRecent(file.path)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all group text-left"
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                      <FolderOpen className="w-4 h-4" />
+                    </div>
+                    <div className="truncate">
+                      <h4 className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                        {file.name}
+                      </h4>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 truncate" dir="rtl">
+                        {file.path}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-400 dark:group-hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                </button>
+              ))}
+              {recentFiles.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-32 text-center">
+                  <FolderOpen className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Henüz son açılan bir dosya yok.</p>
+                </div>
+              )}
+            </div>
+          </div>
       </div>
 
       {/* CREATE WORKSPACE AUTH MODAL */}
