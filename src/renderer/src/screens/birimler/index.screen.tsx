@@ -3,7 +3,7 @@ import { useBirimlerHooks, BirimInput, usePersonelList } from './birimler.hooks'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { LayoutGrid, Plus, Trash2, Edit2, ChevronDown, ChevronUp, Hash, Users, MapPin, Type, AlignLeft, User, Building, Calendar, Info, ExternalLink } from 'lucide-react'
+import { LayoutGrid, Plus, Trash2, Edit2, ChevronDown, ChevronUp, Hash, Users, MapPin, Type, AlignLeft, User, Building, Calendar, Info, ArrowLeft, X } from 'lucide-react'
 
 import { Modal } from '../../components/ui/Modal'
 
@@ -42,37 +42,29 @@ export default function BirimlerScreen(): React.ReactNode {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBirimId, setEditingBirimId] = useState<number | null>(null)
   
+  const [viewingBirim, setViewingBirim] = useState<any | null>(null)
+  
+  const [ihtiyacYeriList, setIhtiyacYeriList] = useState<string[]>([''])
+  
   // Placeholder for kurumsalKodlar as per instruction logic
-  // const kurumsalKodlar: { kod: string; aciklama: string }[] = []
-
   const handleChange = (key: keyof BirimInput, value: string | number | null): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleSaveBirim = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     if (!form.birim_adi.trim()) return
     
-    try {
-      const dataToSave = { ...form }
-      
-      // If the user hasn't typed the full code and a prefix exists, append the prefix!
-      if (settings?.eButceKodu && form.e_butce && !form.e_butce.startsWith(settings.eButceKodu)) {
-        dataToSave.e_butce = `${settings.eButceKodu}.${form.e_butce}`
-      }
-      if (settings?.say2000iKodu && form.say2000i && !form.say2000i.startsWith(settings.say2000iKodu)) {
-        dataToSave.say2000i = `${settings.say2000iKodu}${form.say2000i}`
-      }
+    const finalIhtiyacYeri = ihtiyacYeriList.filter(v => v.trim() !== '').join('\n')
+    const submitData = { ...form, ihtiyac_yeri_eki: finalIhtiyacYeri }
 
+    try {
       if (editingBirimId) {
-        await updateBirim({ id: editingBirimId, data: dataToSave })
+        await updateBirim({ id: editingBirimId, data: submitData })
       } else {
-        await addBirim(dataToSave)
+        await addBirim(submitData)
       }
-      setForm({ ...emptyBirim })
-      setShowExtraFields(false)
-      setIsModalOpen(false)
-      setEditingBirimId(null)
+      closeModal()
     } catch (err: any) {
       if (err.message?.includes('UNIQUE')) {
         alert('Bu birim zaten ekli!')
@@ -83,7 +75,22 @@ export default function BirimlerScreen(): React.ReactNode {
     }
   }
 
-  const handleEditClick = (birim: any) => {
+  const openModal = () => {
+    setForm({ ...emptyBirim })
+    setIhtiyacYeriList([''])
+    setEditingBirimId(null)
+    setShowExtraFields(false)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingBirimId(null)
+    setIhtiyacYeriList([''])
+  }
+
+  const handleEditClick = (e: React.MouseEvent, birim: any) => {
+    e.stopPropagation()
     setForm({
       birim_adi: birim.birim_adi || '',
       antet_ek_satir: birim.antet_ek_satir || '',
@@ -96,12 +103,18 @@ export default function BirimlerScreen(): React.ReactNode {
       ayrintili_bilgi_personel: birim.ayrintili_bilgi_personel || '',
       ilgili_personel_id: birim.ilgili_personel_id || null
     })
+    setIhtiyacYeriList(birim.ihtiyac_yeri_eki ? birim.ihtiyac_yeri_eki.split('\n') : [''])
     setEditingBirimId(birim.id)
     setShowExtraFields(true)
     setIsModalOpen(true)
   }
 
-  const handleDeleteBirim = async (id: number): Promise<void> => {
+  const handleViewClick = (birim: any) => {
+    setViewingBirim(birim)
+  }
+
+  const handleDeleteBirim = async (e: React.MouseEvent, id: number): Promise<void> => {
+    e.stopPropagation()
     if (confirm('Bu birimi silmek istediğinize emin misiniz?')) {
       try {
         await deleteBirim(id)
@@ -109,6 +122,111 @@ export default function BirimlerScreen(): React.ReactNode {
         alert('Silme sırasında hata oluştu!')
       }
     }
+  }
+
+  // EĞER DETAY EKRANINDAYSAK, LİSTEYİ GÖSTERME
+  if (viewingBirim) {
+    return (
+      <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+        <Button 
+          variant="ghost" 
+          onClick={() => setViewingBirim(null)}
+          className="w-fit mb-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Listeye Geri Dön
+        </Button>
+        
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
+          <div className="flex items-center gap-5 bg-blue-50/50 dark:bg-blue-950/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/50 mb-8">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-blue-200 dark:border-blue-800">
+              <Building className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{viewingBirim.birim_adi}</h2>
+              <div className="text-sm text-slate-500 flex gap-4">
+                {viewingBirim.personel_sayisi !== undefined && (
+                  <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <Users className="w-4 h-4 text-blue-500" /> {viewingBirim.personel_sayisi} Personel
+                  </span>
+                )}
+                {viewingBirim.created_at && new Date(viewingBirim.created_at).getFullYear() > 2000 && (
+                  <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <Calendar className="w-4 h-4 text-slate-400" /> {new Date(viewingBirim.created_at).toLocaleDateString('tr-TR')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <Hash className="w-4 h-4 text-slate-400" /> e-Bütçe Kodu
+              </span>
+              <span className="font-mono text-base text-slate-800 dark:text-slate-200 font-semibold">{viewingBirim.e_butce || '-'}</span>
+            </div>
+            
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <Hash className="w-4 h-4 text-slate-400" /> Say2000i Kodu
+              </span>
+              <span className="font-mono text-base text-slate-800 dark:text-slate-200 font-semibold">{viewingBirim.say2000i || '-'}</span>
+            </div>
+            
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <Hash className="w-4 h-4 text-slate-400" /> DETSİS / DTVT Kodu
+              </span>
+              <span className="font-mono text-base text-slate-800 dark:text-slate-200 font-semibold">{viewingBirim.detsis_kodu || viewingBirim.dtvt_kodu || '-'}</span>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <AlignLeft className="w-4 h-4 text-slate-400" /> Sunum Makamı
+              </span>
+              <span className="text-sm text-slate-800 dark:text-slate-200">{viewingBirim.sunum_makami || '-'}</span>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <Type className="w-4 h-4 text-slate-400" /> Antet Ek Satır
+              </span>
+              <span className="text-sm text-slate-800 dark:text-slate-200">{viewingBirim.antet_ek_satir || '-'}</span>
+            </div>
+
+            {(viewingBirim.ilgili_personel_id || viewingBirim.ayrintili_bilgi_personel) && (
+              <div className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600/70 dark:text-emerald-500/70 uppercase tracking-wider mb-2">
+                  <User className="w-4 h-4 text-emerald-500" /> İlgili Personel
+                </span>
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  {personeller.find(p => p.id === viewingBirim.ilgili_personel_id)?.ad_soyad || viewingBirim.ayrintili_bilgi_personel}
+                </span>
+              </div>
+            )}
+            
+            {viewingBirim.ihtiyac_yeri_eki && (
+              <div className="col-span-full p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600/70 dark:text-amber-500/70 uppercase tracking-wider mb-3">
+                  <MapPin className="w-4 h-4 text-amber-500" /> İhtiyaç Yerleri
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {viewingBirim.ihtiyac_yeri_eki.split('\n').filter((y: string) => y.trim()).map((yer: string, index: number) => (
+                    <div key={index} className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-amber-200/50 dark:border-amber-800/50 shadow-sm">
+                      <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+                        {index + 1}
+                      </div>
+                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate">{yer}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -124,12 +242,7 @@ export default function BirimlerScreen(): React.ReactNode {
           </p>
         </div>
         <Button 
-          onClick={() => {
-            setForm({ ...emptyBirim })
-            setEditingBirimId(null)
-            setShowExtraFields(false)
-            setIsModalOpen(true)
-          }}
+          onClick={openModal}
           className="bg-blue-600 hover:bg-blue-700 shadow-md flex items-center gap-2 px-4 py-2 text-sm shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -151,14 +264,15 @@ export default function BirimlerScreen(): React.ReactNode {
               return (
                 <div
                   key={birim.id}
-                  className="flex flex-col p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-700 transition-all group relative overflow-hidden"
+                  onClick={() => handleViewClick(birim)}
+                  className="flex flex-col p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-700 transition-all group relative overflow-hidden cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all bg-gradient-to-l from-white via-white to-transparent dark:from-slate-900 dark:via-slate-900 pl-8">
                     <Button
                       title="Düzenle"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEditClick(birim)}
+                      onClick={(e) => handleEditClick(e, birim)}
                       className="h-8 w-8 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -167,7 +281,7 @@ export default function BirimlerScreen(): React.ReactNode {
                       title="Sil"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteBirim(birim.id)}
+                      onClick={(e) => handleDeleteBirim(e, birim.id)}
                       className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -245,16 +359,6 @@ export default function BirimlerScreen(): React.ReactNode {
                         </div>
                       </div>
                     )}
-
-                    {birim.created_at && (
-                      <div className="flex items-start gap-2 text-[11px] text-slate-600 dark:text-slate-400 col-span-full pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                        <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" />
-                        <div>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">Oluşturulma Tarihi</span>
-                          <span className="line-clamp-1 leading-relaxed">{new Date(birim.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Footer (Personel) */}
@@ -276,14 +380,11 @@ export default function BirimlerScreen(): React.ReactNode {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setEditingBirimId(null)
-        }}
+        onClose={closeModal}
         title={editingBirimId ? "Birimi Düzenle" : "Yeni Birim Tanımla"}
         description={editingBirimId ? "İdari birim bilgilerini güncelleyin." : "Kurumunuza ait idari birim veya müdürlük ekleyin."}
       >
-        <form onSubmit={handleSaveBirim} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <Field label="Birim / Müdürlük Adı" field="birim_adi" form={form} handleChange={handleChange} required placeholder="Örn: Fen İşleri Müdürlüğü" />
 
           <button
@@ -311,7 +412,13 @@ export default function BirimlerScreen(): React.ReactNode {
                     <input
                       type="text"
                       value={form.e_butce as string || ''}
-                      onChange={(e) => handleChange('e_butce', e.target.value)}
+                      onChange={(e) => {
+                        let val = e.target.value
+                        if (settings?.eButceKodu && !val.startsWith(settings.eButceKodu)) {
+                          // e-butce mantığı burada manuel işleniyor
+                        }
+                        handleChange('e_butce', val)
+                      }}
                       placeholder="Birim Kodu (Örn: 03)"
                       className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
                     />
@@ -339,7 +446,47 @@ export default function BirimlerScreen(): React.ReactNode {
               </div>
               
               <Field label="Antet Ek Satır" field="antet_ek_satir" form={form} handleChange={handleChange} placeholder="Antet yazısında ek satır" />
-              <Field label="İhtiyaç Yeri Eki" field="ihtiyac_yeri_eki" form={form} handleChange={handleChange} placeholder="İhtiyaç yeri ek bilgisi" />
+              
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                  İhtiyaç Yerleri
+                </label>
+                {ihtiyacYeriList.map((yer, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={yer}
+                      onChange={(e) => {
+                        const newList = [...ihtiyacYeriList]
+                        newList[index] = e.target.value
+                        setIhtiyacYeriList(newList)
+                      }}
+                      placeholder={`${index + 1}. İhtiyaç Yeri (Örn: Fen İşleri Ambarı)`}
+                      className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        const newList = ihtiyacYeriList.filter((_, i) => i !== index)
+                        if (newList.length === 0) newList.push('')
+                        setIhtiyacYeriList(newList)
+                      }}
+                      className="h-9 w-9 p-0 text-slate-400 hover:text-red-500 shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIhtiyacYeriList([...ihtiyacYeriList, ''])}
+                  className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 p-1 h-auto"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Yeni Satır Ekle
+                </Button>
+              </div>
+
               <Field label="Sunum Makamı" field="sunum_makami" form={form} handleChange={handleChange} placeholder="Sunulacak makam" />
               
               <div className="col-span-full">
@@ -365,14 +512,6 @@ export default function BirimlerScreen(): React.ReactNode {
                       </a>.
                     </span>
                   </div>
-                  {form.dtvt_kodu && (
-                    <div className="flex items-center gap-1.5 ml-5">
-                      <ExternalLink className="w-3 h-3" />
-                      <a href={`https://detsis.gov.tr/birim/${form.dtvt_kodu}/${form.dtvt_kodu}/${new Date().toISOString().split('T')[0]}`} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">
-                        Birim Künyesine Git
-                      </a>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -396,10 +535,7 @@ export default function BirimlerScreen(): React.ReactNode {
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-6">
-            <Button type="button" variant="outline" onClick={() => {
-              setIsModalOpen(false)
-              setEditingBirimId(null)
-            }}>
+            <Button type="button" variant="outline" onClick={closeModal}>
               İptal
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shadow-md">

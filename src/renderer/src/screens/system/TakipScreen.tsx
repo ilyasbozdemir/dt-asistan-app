@@ -11,9 +11,7 @@ import {
   Building,
   Layers,
   ChevronRight,
-  Upload,
-  FileCheck,
-  Bell
+  FileCheck
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'

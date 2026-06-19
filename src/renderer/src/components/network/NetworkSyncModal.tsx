@@ -7,7 +7,11 @@ interface NetworkSyncModalProps {
 
 interface ServerInfo {
   success: boolean
-  meta: any
+  meta: {
+    institution: string
+    schema_version: number
+    updated_at: string
+  }
   fileSize: number
   error?: string
 }
@@ -98,9 +102,9 @@ export function NetworkSyncModal({ onClose }: NetworkSyncModalProps): React.JSX.
       } else {
         throw new Error(res.error)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error')
-      setMessage(err.message)
+      setMessage((err as Error).message)
     }
   }
 
@@ -118,9 +122,9 @@ export function NetworkSyncModal({ onClose }: NetworkSyncModalProps): React.JSX.
       } else {
         throw new Error(res.error)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error')
-      setMessage(err.message)
+      setMessage((err as Error).message)
     }
   }
 
@@ -230,6 +234,6 @@ export function NetworkSyncModal({ onClose }: NetworkSyncModalProps): React.JSX.
   )
 }
 
-function InfoIcon(props: any) {
+function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return <CheckCircle2 {...props} />
 }

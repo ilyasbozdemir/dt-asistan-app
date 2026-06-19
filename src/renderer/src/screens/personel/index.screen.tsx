@@ -4,7 +4,7 @@ import { useBirimlerHooks } from '../birimler/birimler.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
-import { Plus, Edit, Trash2, Users, CheckCircle, Shield } from 'lucide-react'
+import { Plus, Edit, Trash2, Users, CheckCircle, Shield, ArrowLeft } from 'lucide-react'
 
 export default function PersonelScreen(): React.ReactNode {
   const { personelList, isLoading: isPersonelLoading, addPersonel, updatePersonel, deletePersonel } =
@@ -12,6 +12,8 @@ export default function PersonelScreen(): React.ReactNode {
   const { birimler } = useBirimlerHooks()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPersonel, setEditingPersonel] = useState<Personel | null>(null)
+
+  const [viewingPersonel, setViewingPersonel] = useState<Personel | null>(null)
 
   const [formData, setFormData] = useState<Partial<Personel>>({
     ad_soyad: '',
@@ -25,7 +27,8 @@ export default function PersonelScreen(): React.ReactNode {
     aktif_mi: 1
   })
 
-  const openModal = (personel?: Personel): void => {
+  const openModal = (e?: React.MouseEvent, personel?: Personel): void => {
+    if (e) e.stopPropagation()
     if (personel) {
       setEditingPersonel(personel)
       setFormData(personel)
@@ -51,6 +54,10 @@ export default function PersonelScreen(): React.ReactNode {
     setEditingPersonel(null)
   }
 
+  const handleViewClick = (personel: Personel) => {
+    setViewingPersonel(personel)
+  }
+
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     try {
@@ -66,7 +73,8 @@ export default function PersonelScreen(): React.ReactNode {
     }
   }
 
-  const handleDelete = async (id: number): Promise<void> => {
+  const handleDelete = async (e: React.MouseEvent, id: number): Promise<void> => {
+    e.stopPropagation()
     if (confirm('Bu personeli silmek istediğinize emin misiniz?')) {
       try {
         await deletePersonel(id)
@@ -75,6 +83,89 @@ export default function PersonelScreen(): React.ReactNode {
         alert('Silme sırasında bir hata oluştu!')
       }
     }
+  }
+
+  if (viewingPersonel) {
+    return (
+      <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+        <Button 
+          variant="ghost" 
+          onClick={() => setViewingPersonel(null)}
+          className="w-fit mb-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Listeye Geri Dön
+        </Button>
+        
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
+          <div className="flex items-center gap-5 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 mb-8">
+            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-3xl uppercase shadow-sm shrink-0 border border-blue-200 dark:border-blue-800">
+              {viewingPersonel.ad_soyad.slice(0, 2)}
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{viewingPersonel.ad_soyad}</h2>
+              <div className="text-base font-medium text-slate-500 dark:text-slate-400">
+                {viewingPersonel.unvan || 'Unvan Belirtilmedi'}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Birim / Müdürlük</span>
+              <span className="text-base text-slate-700 dark:text-slate-300 font-semibold">{viewingPersonel.birim || '-'}</span>
+            </div>
+            <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Kurum Sicil No</span>
+              <span className="font-mono text-base text-slate-700 dark:text-slate-300 font-semibold">{viewingPersonel.sicil_no || '-'}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <span className="text-sm font-bold text-slate-500">Telefon</span>
+              <span className="text-base text-slate-800 dark:text-slate-200 font-medium">{viewingPersonel.telefon || '-'}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <span className="text-sm font-bold text-slate-500">E-Posta</span>
+              <span className="text-base text-slate-800 dark:text-slate-200 font-medium">{viewingPersonel.eposta || '-'}</span>
+            </div>
+          </div>
+
+          <div className="pt-8 mt-6 border-t border-slate-100 dark:border-slate-800">
+            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-500" /> Yetki Durumu
+            </h4>
+            <div className="flex flex-col md:flex-row gap-4">
+              {viewingPersonel.ihale_yetkilisi_mi === 1 && (
+                <div className="flex-1 flex items-start gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/50 rounded-2xl">
+                  <Shield className="w-6 h-6 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="block text-sm font-bold text-purple-700 dark:text-purple-300 mb-1">İhale Yetkilisi</span>
+                    <span className="block text-xs text-purple-600/70 dark:text-purple-400/70 leading-relaxed">İhale ve alım onay yetkisine sahip.</span>
+                  </div>
+                </div>
+              )}
+              {viewingPersonel.harcama_yetkilisi_mi === 1 && (
+                <div className="flex-1 flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl">
+                  <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="block text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-1">Harcama Yetkilisi</span>
+                    <span className="block text-xs text-emerald-600/70 dark:text-emerald-400/70 leading-relaxed">Bütçe kullanma yetkisine sahip.</span>
+                  </div>
+                </div>
+              )}
+              {viewingPersonel.ihale_yetkilisi_mi === 0 && viewingPersonel.harcama_yetkilisi_mi === 0 && (
+                <div className="w-full p-4 text-center text-sm text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-2xl italic border border-slate-100 dark:border-slate-800">
+                  Bu personelin özel bir sistem yetkisi bulunmuyor.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -113,14 +204,15 @@ export default function PersonelScreen(): React.ReactNode {
             personelList.map((p) => (
               <div
                 key={p.id}
-                className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
+                onClick={() => handleViewClick(p)}
+                className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
               >
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
                     title="Düzenle"
                     variant="ghost"
                     size="sm"
-                    onClick={() => openModal(p)}
+                    onClick={(e) => openModal(e, p)}
                     className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                   >
                     <Edit className="w-3.5 h-3.5" />
@@ -129,7 +221,7 @@ export default function PersonelScreen(): React.ReactNode {
                     title="Sil"
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(p.id)}
+                    onClick={(e) => handleDelete(e, p.id)}
                     className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
