@@ -46,6 +46,8 @@ export default function BirimlerScreen(): React.ReactNode {
   
   const [ihtiyacYeriList, setIhtiyacYeriList] = useState<string[]>([''])
   
+  const isMuhasebe = form.birim_adi.toLowerCase().includes('muhasebe') || form.birim_adi.toLowerCase().includes('mali') || form.birim_adi.toLowerCase().includes('harcama')
+  
   // Placeholder for kurumsalKodlar as per instruction logic
   const handleChange = (key: keyof BirimInput, value: string | number | null): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -387,6 +389,58 @@ export default function BirimlerScreen(): React.ReactNode {
         <form onSubmit={handleSubmit} className="space-y-4">
           <Field label="Birim / Müdürlük Adı" field="birim_adi" form={form} handleChange={handleChange} required placeholder="Örn: Fen İşleri Müdürlüğü" />
 
+          {isMuhasebe && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="col-span-full">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-2 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5" />
+                  Mali / Muhasebe birimi tespit edildi. Lütfen finansal kodları giriniz:
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                  e-Bütçe Kodu
+                </label>
+                <div className="flex">
+                  {settings?.eButceKodu && (
+                    <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
+                      {settings.eButceKodu}.
+                    </span>
+                  )}
+                  <input
+                    type="text"
+                    value={form.e_butce as string || ''}
+                    onChange={(e) => {
+                      let val = e.target.value
+                      handleChange('e_butce', val)
+                    }}
+                    placeholder="Birim Kodu (Örn: 03)"
+                    className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                  Say2000i Kodu
+                </label>
+                <div className="flex">
+                  {settings?.say2000iKodu && (
+                    <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
+                      {settings.say2000iKodu}
+                    </span>
+                  )}
+                  <input
+                    type="text"
+                    value={form.say2000i as string || ''}
+                    onChange={(e) => handleChange('say2000i', e.target.value)}
+                    placeholder="Birim Kodu (Örn: 01)"
+                    className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => setShowExtraFields(!showExtraFields)}
@@ -398,52 +452,51 @@ export default function BirimlerScreen(): React.ReactNode {
 
           {showExtraFields && (
             <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                    e-Bütçe Kodu
-                  </label>
-                  <div className="flex">
-                    {settings?.eButceKodu && (
-                      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
-                        {settings.eButceKodu}.
-                      </span>
-                    )}
-                    <input
-                      type="text"
-                      value={form.e_butce as string || ''}
-                      onChange={(e) => {
-                        let val = e.target.value
-                        if (settings?.eButceKodu && !val.startsWith(settings.eButceKodu)) {
-                          // e-butce mantığı burada manuel işleniyor
-                        }
-                        handleChange('e_butce', val)
-                      }}
-                      placeholder="Birim Kodu (Örn: 03)"
-                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
-                    />
+              {!isMuhasebe && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                      e-Bütçe Kodu
+                    </label>
+                    <div className="flex">
+                      {settings?.eButceKodu && (
+                        <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
+                          {settings.eButceKodu}.
+                        </span>
+                      )}
+                      <input
+                        type="text"
+                        value={form.e_butce as string || ''}
+                        onChange={(e) => {
+                          let val = e.target.value
+                          handleChange('e_butce', val)
+                        }}
+                        placeholder="Birim Kodu (Örn: 03)"
+                        className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                      Say2000i Kodu
+                    </label>
+                    <div className="flex">
+                      {settings?.say2000iKodu && (
+                        <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
+                          {settings.say2000iKodu}
+                        </span>
+                      )}
+                      <input
+                        type="text"
+                        value={form.say2000i as string || ''}
+                        onChange={(e) => handleChange('say2000i', e.target.value)}
+                        placeholder="Birim Kodu (Örn: 01)"
+                        className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                    Say2000i Kodu
-                  </label>
-                  <div className="flex">
-                    {settings?.say2000iKodu && (
-                      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs font-mono">
-                        {settings.say2000iKodu}
-                      </span>
-                    )}
-                    <input
-                      type="text"
-                      value={form.say2000i as string || ''}
-                      onChange={(e) => handleChange('say2000i', e.target.value)}
-                      placeholder="Birim Kodu (Örn: 01)"
-                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
-                    />
-                  </div>
-                </div>
-              </div>
+              )}
               
               <Field label="Antet Ek Satır" field="antet_ek_satir" form={form} handleChange={handleChange} placeholder="Antet yazısında ek satır" />
               
