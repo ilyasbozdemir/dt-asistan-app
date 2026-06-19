@@ -13,6 +13,8 @@ import { startServer, stopServer, getSocketServer } from './server'
 import { connectToServer, disconnectFromServer, emitEvent } from './client'
 import { generateContent, testConnection, AIGenerateOptions } from './ai/index'
 import { renderPdfBuffer } from './pdfService'
+import { startExpressServer, stopExpressServer } from './network/expressServer'
+import FormData from 'form-data' // Electron's Node may not have full FormData for file streams, so we can use node-fetch or similar, but let's try native fetch with blob first, or just write a small push function.
 
 process.on('uncaughtException', (error) => {
   console.error('UNCAUGHT EXCEPTION:', error)
@@ -250,6 +252,97 @@ if (!gotTheLock && !isMultiInstance) {
       const io = getSocketServer()
       if (io) {
          io.emit(eventName, data)
+      }
+    })
+
+    // --- EBYS Express Network Handlers ---
+
+    ipcMain.handle('network:start-express', (_, port: number) => {
+      return startExpressServer(port)
+    })
+
+    ipcMain.handle('network:stop-express', () => {
+      stopExpressServer()
+      return { success: true }
+    })
+
+    ipcMain.handle('network:pull-db', async (_, url: string) => {
+      try {
+        const response = await fetch(`${url}/api/network/pull`)
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Sunucu Hatası: ${response.status} - ${errorText}`)
+        }
+        
+        const arrayBuffer = await response.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+        
+        let currentFile = workspaceManager.getCurrentFilePath()
+        let backupPath: string | null = null
+        
+        if (!currentFile) {
+          const { canceled, filePath } = await dialog.showSaveDialog({
+            title: 'Ağdan Gelen Veritabanını Kaydet',
+            defaultPath: 'paylasim.dtm',
+            filters: [{ name: 'DTM Dosyaları', extensions: ['dtm'] }]
+          })
+          if (canceled || !filePath) throw new Error('İşlem iptal edildi.')
+          currentFile = filePath
+        } else {
+          workspaceManager.close()
+          backupPath = currentFile + '.networkbak'
+          fs.copyFileSync(currentFile, backupPath)
+        }
+        
+        try {
+          fs.writeFileSync(currentFile, buffer)
+          workspaceManager.open(currentFile, false)
+          if (backupPath && fs.existsSync(backupPath)) fs.unlinkSync(backupPath)
+          
+          BrowserWindow.getAllWindows().forEach((win) => {
+            if (!win.isDestroyed()) win.webContents.send('network:db-pulled')
+          })
+          
+          return { success: true }
+        } catch (e: any) {
+          if (backupPath && fs.existsSync(backupPath)) {
+            fs.copyFileSync(backupPath, currentFile)
+            fs.unlinkSync(backupPath)
+            try { workspaceManager.open(currentFile, false) } catch {}
+          }
+          throw e
+        }
+      } catch (err: any) {
+        return { success: false, error: err.message }
+      }
+    })
+
+    ipcMain.handle('network:push-db', async (_, url: string) => {
+      try {
+        const currentFile = workspaceManager.getCurrentFilePath()
+        if (!currentFile || !fs.existsSync(currentFile)) throw new Error('Gönderilecek açık bir dosya yok.')
+        
+        // Ensure latest data is written
+        workspaceManager.save()
+        
+        const fileData = fs.readFileSync(currentFile)
+        const blob = new Blob([fileData], { type: 'application/octet-stream' })
+        const formData = new FormData()
+        formData.append('file', blob as any, 'database.dtm')
+        
+        const response = await fetch(`${url}/api/network/push`, {
+          method: 'POST',
+          body: formData as any
+        })
+        
+        if (!response.ok) {
+           const errData = await response.json().catch(() => ({ error: 'Bilinmeyen Hata' }))
+           throw new Error(`Hata: ${errData.error || response.statusText}`)
+        }
+        
+        return { success: true }
+      } catch (err: any) {
+        return { success: false, error: err.message }
       }
     })
 

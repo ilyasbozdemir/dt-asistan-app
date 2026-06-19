@@ -474,6 +474,10 @@ export class DtmWorkspace {
     return this.meta
   }
 
+  public getCurrentFilePath(): string | null {
+    return this.currentFilePath
+  }
+
   private ensureTempDir() {
     if (fs.existsSync(this.tempDir)) {
       fs.rmSync(this.tempDir, { recursive: true, force: true })
@@ -511,6 +515,10 @@ export const workspaceManager = {
   getMeta: () => {
     if (!activeWorkspace) return null
     return activeWorkspace.getMeta()
+  },
+  getCurrentFilePath: () => {
+    if (!activeWorkspace) return null
+    return activeWorkspace.getCurrentFilePath()
   },
   getDatabaseSchema: () => {
     if (!activeWorkspace) return null

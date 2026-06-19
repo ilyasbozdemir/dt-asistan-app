@@ -1,0 +1,150 @@
+import express from 'express'
+import cors from 'cors'
+import multer from 'multer'
+import http from 'http'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
+import { app, BrowserWindow } from 'electron'
+import { workspaceManager } from '../database/workspace'
+
+let server: http.Server | null = null
+
+export function getLocalIP() {
+  const interfaces = os.networkInterfaces()
+  for (const devName in interfaces) {
+    const iface = interfaces[devName]
+    if (!iface) continue
+    for (let i = 0; i < iface.length; i++) {
+      const alias = iface[i]
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal)
+        return alias.address
+    }
+  }
+  return '0.0.0.0'
+}
+
+export function startExpressServer(port: number = 4000) {
+  if (server) {
+    return { success: true, port, ip: getLocalIP() }
+  }
+
+  const expressApp = express()
+  expressApp.use(cors())
+  expressApp.use(express.json())
+
+  // Configure multer to save to temp directory
+  const uploadDir = path.join(app.getPath('userData'), 'dtm_uploads')
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true })
+  }
+  const upload = multer({ dest: uploadDir })
+
+  expressApp.get('/api/network/info', (_req, res) => {
+    try {
+      const meta = workspaceManager.getMeta()
+      const currentFile = workspaceManager.getCurrentFilePath()
+      if (!meta || !currentFile) {
+         res.status(404).json({ error: 'Açık bir dosya yok.' })
+         return
+      }
+      res.json({
+        success: true,
+        meta,
+        fileSize: fs.existsSync(currentFile) ? fs.statSync(currentFile).size : 0
+      })
+    } catch (err: any) {
+      res.status(500).json({ error: err.message })
+    }
+  })
+
+  expressApp.get('/api/network/pull', (_req, res) => {
+    try {
+      const currentFile = workspaceManager.getCurrentFilePath()
+      if (!currentFile || !fs.existsSync(currentFile)) {
+         res.status(404).json({ error: 'Açık bir dosya yok.' })
+         return
+      }
+      
+      // Before downloading, make sure it's saved.
+      workspaceManager.save()
+      
+      res.download(currentFile, 'paylasim.dtm')
+    } catch (err: any) {
+      res.status(500).json({ error: err.message })
+    }
+  })
+
+  expressApp.post('/api/network/push', upload.single('file'), (req, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: 'Dosya yüklenemedi.' })
+        return
+      }
+      
+      const uploadedFile = req.file.path
+      const currentFile = workspaceManager.getCurrentFilePath()
+      
+      if (!currentFile) {
+        // Hedef makinede açık dosya yoksa push yapılamaz
+        fs.unlinkSync(uploadedFile)
+        res.status(400).json({ error: 'Karşı tarafta açık bir dosya yok.' })
+        return
+      }
+
+      // Close the DB before overwriting
+      workspaceManager.close()
+
+      // Backup the old file just in case
+      const backupPath = currentFile + '.networkbak'
+      fs.copyFileSync(currentFile, backupPath)
+
+      try {
+        // Overwrite
+        fs.copyFileSync(uploadedFile, currentFile)
+        fs.unlinkSync(uploadedFile)
+
+        // Reopen DB via manager
+        workspaceManager.open(currentFile, false)
+        
+        // Broadcast change to renderer to reload data
+        BrowserWindow.getAllWindows().forEach((win) => {
+          if (!win.isDestroyed()) {
+            win.webContents.send('network:db-pushed')
+          }
+        })
+        
+        // Delete backup on success
+        if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath)
+        
+        res.json({ success: true, message: 'Dosya başarıyla yüklendi ve güncellendi.' })
+      } catch (err: any) {
+        // Restore from backup
+        if (fs.existsSync(backupPath)) {
+           fs.copyFileSync(backupPath, currentFile)
+           fs.unlinkSync(backupPath)
+           
+           try {
+             workspaceManager.open(currentFile, false)
+           } catch(e) {}
+        }
+        res.status(500).json({ error: 'Yükleme sırasında hata: ' + err.message })
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message })
+    }
+  })
+
+  server = expressApp.listen(port, '0.0.0.0', () => {
+    console.log(`Express server started on port ${port} IP ${getLocalIP()}`)
+  })
+
+  return { success: true, port, ip: getLocalIP() }
+}
+
+export function stopExpressServer() {
+  if (server) {
+    server.close()
+    server = null
+  }
+}

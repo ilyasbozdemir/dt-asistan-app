@@ -12,11 +12,13 @@ import {
   Sun,
   Moon,
   Eye,
-  EyeOff
+  EyeOff,
+  Wifi
 } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTheme } from '../../components/providers/ThemeProvider'
+import { NetworkSyncModal } from '../../components/network/NetworkSyncModal'
 
 export default function LauncherScreen(): React.ReactNode {
   const { openWorkspace, createWorkspace } = useWorkspaceStore()
@@ -25,6 +27,7 @@ export default function LauncherScreen(): React.ReactNode {
 
   // Modal states for creating a new institution
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showNetworkModal, setShowNetworkModal] = useState(false)
   const [pendingFilePath, setPendingFilePath] = useState<string | null>(null)
 
   // Migration states
@@ -148,6 +151,13 @@ export default function LauncherScreen(): React.ReactNode {
           className="flex items-center space-x-1"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
+          <button
+            onClick={() => setShowNetworkModal(true)}
+            className="p-1.5 text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+            title="Ağ Paylaşımı"
+          >
+            <Wifi className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="p-1.5 text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-all rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800/50 mr-2"
@@ -386,6 +396,8 @@ export default function LauncherScreen(): React.ReactNode {
           </div>
         </div>
       )}
+
+      {showNetworkModal && <NetworkSyncModal onClose={() => setShowNetworkModal(false)} />}
     </div>
   )
 }

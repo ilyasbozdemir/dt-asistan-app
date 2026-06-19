@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Info, ExternalLink, Bug, Star } from 'lucide-react'
+import { Info, ExternalLink, Bug, Star, Wifi } from 'lucide-react'
 import packageJson from '../../../../../package.json'
+import { NetworkSyncModal } from '../network/NetworkSyncModal'
 
 export function Footer(): React.JSX.Element {
   const [showAbout, setShowAbout] = useState(false)
+  const [showNetwork, setShowNetwork] = useState(false)
   const [appVersion, setAppVersion] = useState(packageJson.version)
+  const [localIp, setLocalIp] = useState<string | null>(null)
   const aboutRef = useRef<HTMLDivElement>(null)
 
   const fetchVersion = () => {
@@ -20,6 +23,18 @@ export function Footer(): React.JSX.Element {
 
   useEffect(() => {
     fetchVersion()
+    
+    // Start local server to get IP
+    if ((window as any).electron?.ipcRenderer) {
+      ;(window as any).electron.ipcRenderer.invoke('network:start-express', 4000)
+        .then((res: any) => {
+          if (res && res.success) {
+            setLocalIp(`${res.ip}:${res.port}`)
+          }
+        })
+        .catch(console.error)
+    }
+
     window.addEventListener('app-version-changed', fetchVersion)
     return () => window.removeEventListener('app-version-changed', fetchVersion)
   }, [])
@@ -53,6 +68,15 @@ export function Footer(): React.JSX.Element {
 
       <div className="flex items-center space-x-2 relative" ref={aboutRef}>
         <span>v{appVersion}</span>
+
+        <button
+          onClick={() => setShowNetwork(true)}
+          className="flex items-center space-x-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-emerald-500 font-medium"
+          title="Ağ Senkronizasyonu"
+        >
+          <Wifi className="w-3.5 h-3.5" />
+          <span>Ağ Paylaşımı {localIp && `(${localIp})`}</span>
+        </button>
 
         <button
           onClick={() => setShowAbout(!showAbout)}
@@ -110,6 +134,8 @@ export function Footer(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      {showNetwork && <NetworkSyncModal onClose={() => setShowNetwork(false)} />}
     </footer>
   )
 }
