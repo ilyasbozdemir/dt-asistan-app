@@ -5,9 +5,10 @@ import { donemTarihAraligiUret } from '../../constants/madde-22d-donemler'
 import { useSettingsStore } from '../../store/settingsStore'
 
 export function KikLimitleriSection(): React.JSX.Element {
-  const { donemler, isLoading, addMutation, yaklasanDonemUyarisiGosterilsinMi } = useKikLimitDonemleri()
-  const { ekapDonemKurali } = useSettingsStore()
-  
+  const { donemler, isLoading, addMutation, yaklasanDonemUyarisiGosterilsinMi } =
+    useKikLimitDonemleri()
+  const { ekapDonemKurali, limitType } = useSettingsStore()
+
   const [newDonemKodu, setNewDonemKodu] = useState('')
   const [newBaslangic, setNewBaslangic] = useState('')
   const [newBitis, setNewBitis] = useState('')
@@ -33,11 +34,26 @@ export function KikLimitleriSection(): React.JSX.Element {
     e.preventDefault()
     setErrorMsg('')
     try {
-      const bLimit = parseFloat(newBuyuksehir.replace(/\./g, '').replace(',', '.'))
-      const dLimit = parseFloat(newDiger.replace(/\./g, '').replace(',', '.'))
+      let bLimit = parseFloat(newBuyuksehir.replace(/\./g, '').replace(',', '.'))
+      let dLimit = parseFloat(newDiger.replace(/\./g, '').replace(',', '.'))
 
-      if (isNaN(bLimit) || isNaN(dLimit) || bLimit <= 0 || dLimit <= 0) {
-        setErrorMsg('Lütfen geçerli ve 0\'dan büyük limit değerleri giriniz.')
+      if (isNaN(bLimit)) bLimit = 0
+      if (isNaN(dLimit)) dLimit = 0
+
+      if (limitType === 'buyuksehir' && bLimit <= 0) {
+        setErrorMsg(
+          'Kurum tipiniz Büyükşehir olduğu için lütfen Büyükşehir limiti için geçerli bir değer giriniz.'
+        )
+        return
+      }
+      if (limitType === 'diger' && dLimit <= 0) {
+        setErrorMsg(
+          'Kurum tipiniz Diğer İdare olduğu için lütfen Diğer İdareler limiti için geçerli bir değer giriniz.'
+        )
+        return
+      }
+      if (bLimit <= 0 && dLimit <= 0) {
+        setErrorMsg('Lütfen en az bir limit değerini giriniz.')
         return
       }
 
@@ -46,13 +62,21 @@ export function KikLimitleriSection(): React.JSX.Element {
         return
       }
 
-      const isUpdate = donemler.some(d => d.donem_kodu === newDonemKodu)
+      const isUpdate = donemler.some((d) => d.donem_kodu === newDonemKodu)
       if (isUpdate) {
-        if (!confirm(`UYARI: "${newDonemKodu}" dönemi zaten kayıtlı. Bu dönemi güncellerseniz, bu döneme ait mevcut doğrudan temin hesaplamaları (henüz tamamlanmamış dosyalar için) etkilenebilir.\n\nYine de değerlerin doğruluğunu onaylayıp GÜNCELLEMEK istiyor musunuz?`)) {
+        if (
+          !confirm(
+            `UYARI: "${newDonemKodu}" dönemi zaten kayıtlı. Bu dönemi güncellerseniz, bu döneme ait mevcut doğrudan temin hesaplamaları (henüz tamamlanmamış dosyalar için) etkilenebilir.\n\nYine de değerlerin doğruluğunu onaylayıp GÜNCELLEMEK istiyor musunuz?`
+          )
+        ) {
           return
         }
       } else {
-        if (!confirm(`"${newDonemKodu}" dönemini sisteme ekliyorsunuz.\n\nDeğerlerin doğruluğunu onaylıyor musunuz?`)) {
+        if (
+          !confirm(
+            `"${newDonemKodu}" dönemini sisteme ekliyorsunuz.\n\nDeğerlerin doğruluğunu onaylıyor musunuz?`
+          )
+        ) {
           return
         }
       }
@@ -98,7 +122,8 @@ export function KikLimitleriSection(): React.JSX.Element {
         <div className="text-sm">
           <p className="font-semibold mb-1">Doğrudan Temin (Madde 22/d) Limit Dönemleri</p>
           <p>
-            Limitler statik değildir. Geçmiş dönemlere ait limitleri ve gelecek dönemleri buraya kaydederek geriye dönük hesaplamaların doğru çalışmasını sağlayabilirsiniz.
+            Limitler statik değildir. Geçmiş dönemlere ait limitleri ve gelecek dönemleri buraya
+            kaydederek geriye dönük hesaplamaların doğru çalışmasını sağlayabilirsiniz.
           </p>
         </div>
       </div>
@@ -109,7 +134,9 @@ export function KikLimitleriSection(): React.JSX.Element {
           <div className="text-sm">
             <p className="font-semibold mb-1">Yeni Limitler Yayımlanmış Olabilir</p>
             <p>
-              1 Şubat itibarıyla yeni KİK eşik değerleri devreye girecektir. İlgili limitleri yeni bir dönem ekleyerek sisteme tanımlamanız önerilir. Aksi takdirde 1 Şubat itibarıyla tahmini bedel hesaplamalarında sorun yaşayabilirsiniz.
+              1 Şubat itibarıyla yeni KİK eşik değerleri devreye girecektir. İlgili limitleri yeni
+              bir dönem ekleyerek sisteme tanımlamanız önerilir. Aksi takdirde 1 Şubat itibarıyla
+              tahmini bedel hesaplamalarında sorun yaşayabilirsiniz.
             </p>
           </div>
         </div>
@@ -127,54 +154,78 @@ export function KikLimitleriSection(): React.JSX.Element {
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Dönem Yılı (Örn: 2027)</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Dönem Yılı (Örn: 2027)
+              </label>
               <input
                 type="text"
                 value={newDonemKodu}
-                onChange={e => setNewDonemKodu(e.target.value)}
+                onChange={(e) => setNewDonemKodu(e.target.value)}
                 maxLength={4}
                 placeholder="2027"
                 className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Başlangıç Tarihi</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Başlangıç Tarihi
+                </label>
                 <input
                   type="date"
                   value={newBaslangic}
-                  onChange={e => setNewBaslangic(e.target.value)}
+                  onChange={(e) => setNewBaslangic(e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Bitiş Tarihi</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Bitiş Tarihi
+                </label>
                 <input
                   type="date"
                   value={newBitis}
-                  onChange={e => setNewBitis(e.target.value)}
+                  onChange={(e) => setNewBitis(e.target.value)}
                   className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"
                 />
               </div>
             </div>
 
+            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50 text-xs text-indigo-700 dark:text-indigo-300">
+              <span className="font-bold flex items-center gap-1 mb-1">
+                <Info size={14} /> Bilgi
+              </span>
+              Sistem ayarlarında Kurum Tipi{' '}
+              <strong>
+                {limitType === 'buyuksehir' ? 'Büyükşehir Belediyesi' : 'Diğer İdare'}
+              </strong>{' '}
+              olarak seçili. Sadece bu alanın doldurulması zorunludur. Sistemin veri analizlerini
+              iyileştirmek için diğer limiti de girebilirsiniz.
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Büyükşehir Limiti (₺)</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Büyükşehir Limiti (₺){' '}
+                {limitType === 'buyuksehir' && <span className="text-red-500">*</span>}
+              </label>
               <input
                 type="text"
                 value={newBuyuksehir}
-                onChange={e => setNewBuyuksehir(e.target.value)}
+                onChange={(e) => setNewBuyuksehir(e.target.value)}
                 placeholder="0,00"
                 className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Diğer İdareler Limiti (₺)</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Diğer İdareler Limiti (₺){' '}
+                {limitType === 'diger' && <span className="text-red-500">*</span>}
+              </label>
               <input
                 type="text"
                 value={newDiger}
-                onChange={e => setNewDiger(e.target.value)}
+                onChange={(e) => setNewDiger(e.target.value)}
                 placeholder="0,00"
                 className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium"
               />
@@ -205,7 +256,7 @@ export function KikLimitleriSection(): React.JSX.Element {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                  {donemler.map(donem => (
+                  {donemler.map((donem) => (
                     <tr key={donem.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
                       <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">
                         {donem.donem_kodu}

@@ -177,31 +177,67 @@ export default function DashboardScreen(): React.JSX.Element {
     }
   }
 
+  const smartAlerts = useSmartAlerts(settings, activeDosyaId, activeSummary)
+
   if (activeDosyaId) {
     return <TakipScreen />
   }
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* 1. HERO HEADER */}
-      {!isMailConfigured && (
-        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3 text-amber-700 dark:text-amber-500">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-sm font-bold">Mail (SMTP) Ayarları Yapılandırılmamış</h4>
-              <p className="text-xs mt-0.5 opacity-90">Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz için posta sunucunuzu ayarlamanız gerekmektedir. Şifrenizi unutursanız sisteme erişiminizi kaybedebilirsiniz!</p>
+      {/* 1. HERO HEADER & SMART ALERTS */}
+      <div className="flex flex-col gap-3">
+        {!isMailConfigured && (
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3 text-amber-700 dark:text-amber-500">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-bold">Mail (SMTP) Ayarları Yapılandırılmamış</h4>
+                <p className="text-xs mt-0.5 opacity-90">Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz için posta sunucunuzu ayarlamanız gerekmektedir. Şifrenizi unutursanız sisteme erişiminizi kaybedebilirsiniz!</p>
+              </div>
             </div>
+            <Link to="/ayarlar" search={{ tab: 'smtp' }}>
+              <Button className="shrink-0 text-xs py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm">
+                <Mail className="w-4 h-4 mr-1.5" />
+                Ayarları Yapılandır
+              </Button>
+            </Link>
           </div>
-          <Link to="/ayarlar" search={{ tab: 'smtp' }}>
-            <Button className="shrink-0 text-xs py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm">
-              <Mail className="w-4 h-4 mr-1.5" />
-              Ayarları Yapılandır
-            </Button>
-          </Link>
-        </div>
-      )}
+        )}
 
+        {smartAlerts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {smartAlerts.map(alert => (
+              <div key={alert.id} className={`p-4 rounded-2xl border flex flex-col justify-between gap-3 shadow-sm ${
+                alert.type === 'error' ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400' :
+                alert.type === 'warning' ? 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900/50 text-orange-700 dark:text-orange-400' :
+                'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400'
+              }`}>
+                <div className="flex items-start gap-3">
+                  {alert.type === 'error' ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" /> : 
+                   alert.type === 'warning' ? <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" /> : 
+                   <Info className="w-5 h-5 shrink-0 mt-0.5" />}
+                  <div>
+                    <h4 className="text-sm font-bold">{alert.title}</h4>
+                    <p className="text-xs mt-0.5 opacity-90 leading-relaxed">{alert.message}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Link to={alert.actionLink} search={alert.actionSearch}>
+                    <Button variant="outline" className={`h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-lg border-current hover:bg-white/50 dark:hover:bg-black/20 ${
+                      alert.type === 'error' ? 'text-red-700 dark:text-red-400' :
+                      alert.type === 'warning' ? 'text-orange-700 dark:text-orange-400' :
+                      'text-blue-700 dark:text-blue-400'
+                    }`}>
+                      {alert.actionText} <ChevronRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600/10 via-indigo-600/5 to-transparent border border-blue-500/10 dark:border-blue-500/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

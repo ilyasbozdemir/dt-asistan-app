@@ -11,7 +11,10 @@ export interface LimitDonemKaydi {
 }
 
 // Yeni eklenen dönemin mevcut dönemlerle tarih olarak çakışıp çakışmadığını kontrol eder
-export function cakisanDonemBul(yeniDonem: LimitDonemKaydi, mevcutDonemler: LimitDonemKaydi[]): LimitDonemKaydi | null {
+export function cakisanDonemBul(
+  yeniDonem: LimitDonemKaydi,
+  mevcutDonemler: LimitDonemKaydi[]
+): LimitDonemKaydi | null {
   const yeniBas = new Date(yeniDonem.baslangic_tarihi).getTime()
   const yeniBit = new Date(yeniDonem.bitis_tarihi).getTime()
 
@@ -48,7 +51,13 @@ export function useKikLimitDonemleri() {
 
   // Yeni dönem ekle
   const addMutation = useMutation({
-    mutationFn: async (input: { donem_kodu: string; baslangic_tarihi: string; bitis_tarihi: string; buyuksehir_limit: number; diger_limit: number }): Promise<any> => {
+    mutationFn: async (input: {
+      donem_kodu: string
+      baslangic_tarihi: string
+      bitis_tarihi: string
+      buyuksehir_limit: number
+      diger_limit: number
+    }): Promise<unknown> => {
       const donem: LimitDonemKaydi = {
         donem_kodu: input.donem_kodu,
         baslangic_tarihi: input.baslangic_tarihi,
@@ -69,15 +78,17 @@ export function useKikLimitDonemleri() {
       if (cakisan) {
         throw new Error(
           `"${input.donem_kodu}" dönemi için girilen tarih aralığı (${donem.baslangic_tarihi} - ${donem.bitis_tarihi}), ` +
-          `"${cakisan.donem_kodu}" dönemi (${cakisan.baslangic_tarihi} - ${cakisan.bitis_tarihi}) ile çakışıyor.`
+            `"${cakisan.donem_kodu}" dönemi (${cakisan.baslangic_tarihi} - ${cakisan.bitis_tarihi}) ile çakışıyor.`
         )
       }
 
-      if (!donem.buyuksehir_limit || donem.buyuksehir_limit <= 0) {
-        throw new Error("Büyükşehir limiti 0'dan büyük olmalıdır.")
-      }
-      if (!donem.diger_limit || donem.diger_limit <= 0) {
-        throw new Error("Diğer İdareler limiti 0'dan büyük olmalıdır.")
+      if (
+        (!donem.buyuksehir_limit || donem.buyuksehir_limit <= 0) &&
+        (!donem.diger_limit || donem.diger_limit <= 0)
+      ) {
+        throw new Error(
+          "En az bir limit değeri (Büyükşehir veya Diğer İdareler) 0'dan büyük olmalıdır."
+        )
       }
 
       const res = await window.electron.ipcRenderer.invoke(
@@ -90,17 +101,26 @@ export function useKikLimitDonemleri() {
          buyuksehir_limit = excluded.buyuksehir_limit,
          diger_limit = excluded.diger_limit,
          kaynak = excluded.kaynak`,
-        [donem.donem_kodu, donem.baslangic_tarihi, donem.bitis_tarihi, donem.buyuksehir_limit, donem.diger_limit, 'Kullanıcı Güncelledi']
+        [
+          donem.donem_kodu,
+          donem.baslangic_tarihi,
+          donem.bitis_tarihi,
+          donem.buyuksehir_limit,
+          donem.diger_limit,
+          'Kullanıcı Güncelledi'
+        ]
       )
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: (): void => { queryClient.invalidateQueries({ queryKey: ['kikLimitDonemleri'] }) }
+    onSuccess: (): void => {
+      queryClient.invalidateQueries({ queryKey: ['kikLimitDonemleri'] })
+    }
   })
 
   // Sil
   const deleteMutation = useMutation({
-    mutationFn: async (id: number): Promise<any> => {
+    mutationFn: async (id: number): Promise<unknown> => {
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         'DELETE FROM TANIM_KikLimitDonemleri WHERE id = ?',
@@ -109,13 +129,15 @@ export function useKikLimitDonemleri() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: (): void => { queryClient.invalidateQueries({ queryKey: ['kikLimitDonemleri'] }) }
+    onSuccess: (): void => {
+      queryClient.invalidateQueries({ queryKey: ['kikLimitDonemleri'] })
+    }
   })
 
   // Tarihe göre aktif dönemi getir (örn: "2026-06-15" string yyyy-MM-dd veya Date objesi)
   const getAktifDonem = (tarih?: string | Date): LimitDonemKaydi | null => {
     if (donemler.length === 0) return null
-    
+
     let islemTarihi: Date
     if (!tarih) {
       islemTarihi = new Date()

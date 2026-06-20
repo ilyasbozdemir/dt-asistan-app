@@ -396,3 +396,102 @@ export function useAnnouncements() {
 
   return { announcements, isLoading, refetch: loadAnnouncements }
 }
+
+export interface SmartAlert {
+  id: string
+  title: string
+  message: string
+  type: 'error' | 'warning' | 'info'
+  actionLink: string
+  actionSearch?: Record<string, string>
+  actionText: string
+}
+
+export function useSmartAlerts(settings: any, activeDosyaId: number | null, activeSummary: ActiveDosyaSummary | null) {
+  const [alerts, setAlerts] = useState<SmartAlert[]>([])
+
+  useEffect(() => {
+    const newAlerts: SmartAlert[] = []
+
+    // 1. Kurum Kimliği ve Türü
+    if (!settings.institutionName || !settings.institutionType || !settings.limitType) {
+      newAlerts.push({
+        id: 'missing_kurum_identity',
+        title: 'Kurum Kimliği Eksik',
+        message: 'Kurum adı ve bütçe limit türü seçilmemiş. Limitlerin doğru çalışması için ayarları tamamlayın.',
+        type: 'error',
+        actionLink: '/ayarlar',
+        actionSearch: { tab: 'kurum' },
+        actionText: 'Kurum Ayarları'
+      })
+    }
+
+    // 2. Harcama Yetkilisi
+    if (!settings.adminName || !settings.adminTitle) {
+      newAlerts.push({
+        id: 'missing_admin_info',
+        title: 'Harcama Yetkilisi Eksik',
+        message: 'Harcama yetkilisi (gerçekleştirme görevlisi) kimlik bilgileri boş. Çıktı evraklarında imza alanları boş kalacaktır.',
+        type: 'warning',
+        actionLink: '/ayarlar',
+        actionSearch: { tab: 'kurum' },
+        actionText: 'Yetkili Ekle'
+      })
+    }
+
+    // 3. Kodlar (Say2000i, e-Bütçe vs.)
+    if (!settings.kurumsalKod && !settings.harcamaBirimKodu && !settings.muhasebeBirimKodu) {
+      newAlerts.push({
+        id: 'missing_kurum_codes',
+        title: 'Birim Kodları Eksik',
+        message: 'Muhasebat veya harcama birim kodları girilmemiş. Resmi yazışmalarda veya UYAP belgelerinde sorun yaşayabilirsiniz.',
+        type: 'info',
+        actionLink: '/ayarlar',
+        actionSearch: { tab: 'kurum' },
+        actionText: 'Kodları Gir'
+      })
+    }
+
+    // 4. Aktif Dosya - Malzeme
+    if (activeDosyaId && activeSummary) {
+      if (activeSummary.malzemeSayisi === 0) {
+        newAlerts.push({
+          id: 'missing_items',
+          title: 'Dosyada Malzeme Yok',
+          message: 'Üzerinde çalıştığınız bu dosyaya (İhtiyaç Listesi) henüz hiç kalem eklenmemiş.',
+          type: 'warning',
+          actionLink: '/dosya/malzemeler/liste',
+          actionText: 'Malzeme Ekle'
+        })
+      } else if (activeSummary.yaklasikMaliyet === 0) {
+        // Malzeme var ama yaklaşık maliyet 0
+        newAlerts.push({
+          id: 'missing_cost',
+          title: 'Maliyet Hesaplanmamış',
+          message: 'İhtiyaç listesi oluşturulmuş fakat Piyasa Fiyat Araştırması yapılarak Yaklaşık Maliyet henüz hesaplanmamış.',
+          type: 'error',
+          actionLink: '/dosya/firmalar-maliyet/yaklasik',
+          actionText: 'Maliyet Hesapla'
+        })
+      }
+
+      // 5. Aktif Dosya - Firmalar
+      if (activeSummary.katilanFirmaSayisi === 0) {
+        newAlerts.push({
+          id: 'missing_firms',
+          title: 'İstekli Firma Eklenmemiş',
+          message: 'Piyasa araştırmasına veya doğrudan temine davet edilecek firma seçilmemiş.',
+          type: 'warning',
+          actionLink: '/dosya/firmalar-maliyet/istekliler',
+          actionText: 'Firma Davet Et'
+        })
+      }
+
+      // 6. Aktif Dosya - Komisyon Atanmamış vs check could be added if we had commission data in summary
+    }
+
+    setAlerts(newAlerts)
+  }, [settings, activeDosyaId, activeSummary])
+
+  return alerts
+}

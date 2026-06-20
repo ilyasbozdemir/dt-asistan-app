@@ -65,6 +65,7 @@ export interface TeminDosyasi {
 }
 
 const fetchDosyalar = async (): Promise<TeminDosyasi[]> => {
+  if (!window.electron) return []
   const res = await window.electron.ipcRenderer.invoke(
     'db:query',
     'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id ORDER BY d.created_at DESC'
@@ -83,6 +84,10 @@ export function useDosyalarHooks() {
 
   const addDosyaMutation = useMutation({
     mutationFn: async (dosya: Partial<TeminDosyasi>) => {
+      if (!window.electron)
+        throw new Error(
+          'Bu özellik sadece masaüstü uygulamasında çalışır (Tarayıcı desteklenmiyor).'
+        )
       const columns = Object.keys(dosya).filter(
         (k) => k !== 'id' && dosya[k as keyof TeminDosyasi] !== undefined
       )
@@ -102,6 +107,7 @@ export function useDosyalarHooks() {
 
   const updateDosyaMutation = useMutation({
     mutationFn: async (dosya: Partial<TeminDosyasi> & { id: number }) => {
+      if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
       const columns = Object.keys(dosya).filter(
         (k) => k !== 'id' && dosya[k as keyof TeminDosyasi] !== undefined
       )
@@ -121,6 +127,7 @@ export function useDosyalarHooks() {
 
   const deleteDosyaMutation = useMutation({
     mutationFn: async (id: number) => {
+      if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         'UPDATE DATA_TeminDosyasi SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -134,6 +141,7 @@ export function useDosyalarHooks() {
 
   const hardDeleteDosyaMutation = useMutation({
     mutationFn: async (id: number) => {
+      if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         'DELETE FROM DATA_TeminDosyasi WHERE id = ?',
