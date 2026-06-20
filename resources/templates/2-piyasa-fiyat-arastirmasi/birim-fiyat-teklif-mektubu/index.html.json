@@ -1,0 +1,46 @@
+{
+  "dosyaTarihi": "15.06.2026",
+  "antetSatirlari": [
+    "T.C.",
+    "KAYABAŞI BELEDİYE BAŞKANLIĞI"
+  ],
+  "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/refs/heads/main/resources/icon.png",
+  "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
+  "hitap": "İLGİLİ FİRMALARA",
+  "isinAdi": "Belediye Hizmet Binası Tadilatı İçin İnşaat Malzemesi Alımı",
+  "teklifSahibi": "",
+  "uyrugu": "",
+  "tcKimlikNo": "",
+  "ortaklarinTcNo": "",
+  "vergiNo": "",
+  "tebligatAdresi": "",
+  "telefonFaks": "",
+  "eposta": "",
+  "aciklama": "",
+  "sonTeklifVermeTarihi": "25.06.2026",
+  "sonTeklifVermeSaati": "17:00",
+  "ihtiyacKalemleri": [
+    {
+      "siraNo": 1,
+      "malzemeAdi": "Portland Çimento (50 kg)",
+      "ozelligi": "CEM I 42,5 R tipi torba çimento",
+      "birimi": "Torba",
+      "miktar": 150
+    },
+    {
+      "siraNo": 2,
+      "malzemeAdi": "İnşaat Demiri (12 mm)",
+      "ozelligi": "Nervürlü çelik inşaat demiri",
+      "birimi": "Ton",
+      "miktar": 5
+    }
+  ],
+  "kurumIci": true,
+  "kurumAdres": "Kayabaşı Mahallesi İstiklal Caddesi No:45 Merkez/Ankara",
+  "kurumTelefon": "0312 999 88 77",
+  "kurumWeb": "www.kayabasi.bel.tr",
+  "kurumEposta": "destek@kayabasi.bel.tr",
+  "kurumKep": "kayabasibelediyesi@hs01.kep.tr",
+  "ilgiliPersonelAdi": "Mehmet Can",
+  "ilgiliPersonelUnvan": "İnşaat Mühendisi"
+}
