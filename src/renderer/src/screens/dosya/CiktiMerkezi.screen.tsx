@@ -4,6 +4,7 @@ import { Printer, Download, FileText, CheckSquare, Square, Layers, Loader2 } fro
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import Mustache from 'mustache'
 import { Sablon } from '../sablonlar/sablonlar.hooks'
+import { SAYI_YAZI_MAP } from '../../constants/sayiEslesmeleri'
 
 export function CiktiMerkeziScreen(): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
@@ -52,6 +53,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           kurumIci: false,
           evrakSayisi: dosyaRes.data?.[0]?.temin_no || 'Belirtilmedi',
           dosyaKonusu: dosyaRes.data?.[0]?.konu || 'Konu Belirtilmedi',
+          sayiYazıyla: SAYI_YAZI_MAP,
           ihtiyacKalemleri: kalemlerRes.data?.map((k: any, i: number) => ({
             siraNo: i + 1,
             kodu: k.tasinir_kodu || k.okas_kodu || '-',

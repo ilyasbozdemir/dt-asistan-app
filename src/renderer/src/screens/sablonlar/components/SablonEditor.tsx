@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 import Mustache from 'mustache'
+import { SAYI_YAZI_MAP } from '../../../constants/sayiEslesmeleri'
 import {
   FileText,
   Download,
@@ -56,9 +57,10 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
 
   const parsedData = React.useMemo(() => {
     try {
-      return JSON.parse(testJson)
+      const parsed = JSON.parse(testJson)
+      return { sayiYazıyla: SAYI_YAZI_MAP, ...parsed }
     } catch {
-      return {}
+      return { sayiYazıyla: SAYI_YAZI_MAP }
     }
   }, [testJson])
 
