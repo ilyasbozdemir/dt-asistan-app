@@ -11,7 +11,8 @@ import {
   Building,
   Layers,
   ChevronRight,
-  FileCheck
+  FileCheck,
+  HelpCircle
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -221,10 +222,20 @@ export function TakipScreen(): React.JSX.Element {
 
             {/* PROCESS PROGRESS BAR */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-250 mb-6 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-blue-600" />
-                İşlem Aşaması İlerleme Durumu
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800/60">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-250 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-blue-600" />
+                  İşlem Aşaması İlerleme Durumu
+                </h3>
+                <Link
+                  to="/yardim"
+                  search={{ doc: 'dogrudan_temin_islem_sureci' }}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-750 dark:text-blue-400 dark:hover:text-blue-305 flex items-center gap-1.5 bg-blue-50 dark:bg-blue-955/20 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-900/40 transition-all cursor-pointer shadow-xs"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 animate-pulse" />
+                  İşlem Süreci Akış Şeması
+                </Link>
+              </div>
 
               {/* Progress Line stepper */}
               <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-4 mt-4">
