@@ -7,6 +7,7 @@ import { Link } from '@tanstack/react-router'
 import { FINANSMAN_KODLARI } from '../../constants/butce-kodlari'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { useSettingsStore } from '../../store/settingsStore'
+import { getSubInstitutionOptions } from '../../utils/kurumHelper'
 
 
 type TabType = 'idari' | 'iletisim'
@@ -133,6 +134,17 @@ export default function KurumScreen(): React.JSX.Element {
       }, 0)
     }
   }, [settings])
+
+  // Kurum tipi veya finansman kodu değiştiğinde alt kurum türünü otomatik olarak güncelle
+  useEffect(() => {
+    const options = getSubInstitutionOptions(institutionType, finansmanKodu)
+    if (options.length > 0) {
+      const hasValidValue = options.some(opt => opt.value === subInstitutionType)
+      if (!hasValidValue) {
+        setSubInstitutionType(options[0].value)
+      }
+    }
+  }, [institutionType, finansmanKodu, subInstitutionType])
 
   const handleSaveTab = async (tab: TabType): Promise<void> => {
     setSaving(true)
@@ -360,27 +372,33 @@ export default function KurumScreen(): React.JSX.Element {
                           <option value="sosyal_guvenlik">SGK / Sosyal Güvenlik Kurumu (Finansman Kaynağı: 4)</option>
                           <option value="diger">Diğer İdareler / Kamu İktisadi Teşebbüsü (Finansman Kaynağı: Kuruma Göre Değişir)</option>
                         </select>
-                        {institutionType === 'belediye' && (
-                          <div className="mt-3 bg-slate-100/50 dark:bg-slate-900/30 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
-                            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5">
-                              Mahalli İdare Alt Kurum Türü *
-                            </label>
-                            <select
-                              value={subInstitutionType}
-                              onChange={(e) => setSubInstitutionType(e.target.value)}
-                              title="Alt Kurum Türünü Seçin"
-                              className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            >
-                              <option value="belediye">Belediye (Şablonlarda: "Belediyemiz")</option>
-                              <option value="il_ozel">İl Özel İdaresi (Şablonlarda: "İl Özel İdaremiz")</option>
-                              <option value="koy">Köy Muhtarlığı (Şablonlarda: "Muhtarlığımız")</option>
-                              <option value="diger">Diğer (Şablonlarda: "Kurumumuz")</option>
-                            </select>
-                            <p className="text-[10px] text-slate-500 mt-2 leading-relaxed font-medium">
-                              💡 Bu seçim, şablonlardaki <strong>{`{{kurumumuz}}`}</strong> etiketinin otomatik ve doğru şekilde doldurulmasını sağlar.
-                            </p>
-                          </div>
-                        )}
+                        {(() => {
+                          const options = getSubInstitutionOptions(institutionType, finansmanKodu)
+                          if (options.length <= 1) return null
+                          
+                          return (
+                            <div className="mt-3 bg-slate-100/50 dark:bg-slate-900/30 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                              <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+                                Alt Kurum Türü / Tabiri *
+                              </label>
+                              <select
+                                value={subInstitutionType}
+                                onChange={(e) => setSubInstitutionType(e.target.value)}
+                                title="Alt Kurum Türünü Seçin"
+                                className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              >
+                                {options.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed font-medium">
+                                💡 Bu seçim, şablonlardaki <strong>{`{{kurumumuz}}`}</strong> etiketinin otomatik ve doğru şekilde doldurulmasını sağlar.
+                              </p>
+                            </div>
+                          )
+                        })()}
                         {institutionType === 'belediye' && (
                           <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 leading-normal font-medium">
                             💡  Kurumsal kodunuzun "46" (Mahalli İdareler) ile başlaması ve bütçe kodlarında "5" Finansman Kaynağı kullanılması tavsiye edilir.
@@ -555,6 +573,7 @@ export default function KurumScreen(): React.JSX.Element {
                             <select
                               value={fonksiyonelKod}
                               onChange={e => setFonksiyonelKod(e.target.value)}
+                              title="Kurumsal Kod Seçin"
                               className="w-full bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             >
                               <option value="">Seçiniz...</option>

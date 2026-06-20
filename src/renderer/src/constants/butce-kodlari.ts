@@ -23,7 +23,7 @@ export const FINANSMAN_KODLARI = [
   { kod: '2', aciklama: 'Özel Bütçeli İdareler' },
   { kod: '3', aciklama: 'Düzenleyici ve Denetleyici Kurumlar' },
   { kod: '4', aciklama: 'Sosyal Güvenlik Kurumları' },
-  { kod: '5', aciklama: 'Mahalli İdareler' },
+  { kod: '5', aciklama: 'Mahalli İdareler (Belediye, İl Özel İdaresi, Köy)' },
   { kod: '6', aciklama: 'Özel Ödenekler' },
   { kod: '7', aciklama: 'Dış Proje Kredileri' },
   { kod: '8', aciklama: 'Bağış ve Yardımlar' }

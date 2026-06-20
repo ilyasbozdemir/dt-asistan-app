@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '../../store/workspaceStore'
 import Mustache from 'mustache'
 import { Sablon } from '../sablonlar/sablonlar.hooks'
 import { SAYI_YAZI_MAP } from '../../constants/sayiEslesmeleri'
+import { getInstitutionSuffixes } from '../../utils/kurumHelper'
 
 export function CiktiMerkeziScreen(): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
@@ -46,15 +47,9 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         )
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
-        const instType = settings?.institutionType || ''
         const subInstType = settings?.subInstitutionType || ''
         
-        let kurumumuzText = 'Kurumumuz'
-        if (instType === 'belediye') {
-          if (subInstType === 'belediye') kurumumuzText = 'Belediyemiz'
-          else if (subInstType === 'il_ozel') kurumumuzText = 'İl Özel İdaremiz'
-          else if (subInstType === 'koy') kurumumuzText = 'Muhtarlığımız'
-        }
+        const suffixes = getInstitutionSuffixes(subInstType)
 
         const today = new Intl.DateTimeFormat('tr-TR', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
 
@@ -65,7 +60,10 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           evrakSayisi: dosyaRes.data?.[0]?.temin_no || 'Belirtilmedi',
           dosyaKonusu: dosyaRes.data?.[0]?.konu || 'Konu Belirtilmedi',
           sayiYazıyla: SAYI_YAZI_MAP,
-          kurumumuz: kurumumuzText,
+          kurumumuz: suffixes.kurumumuz,
+          kurumunuz: suffixes.kurumunuz,
+          kurumu: suffixes.kurumu,
+          kurumlari: suffixes.kurumlari,
           ihtiyacKalemleri: kalemlerRes.data?.map((k: any, i: number) => ({
             siraNo: i + 1,
             kodu: k.tasinir_kodu || k.okas_kodu || '-',
