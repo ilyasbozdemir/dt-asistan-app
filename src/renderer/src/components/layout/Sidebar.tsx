@@ -65,7 +65,7 @@ const menuGroups: MenuGroup[] = [
     title: 'Kayıtlar & Tanımlar',
     items: [
       {
-        name: 'Kurum Bilgileri',
+        name: 'Kurum Yönetimi',
         icon: Building2,
         children: [
           { name: 'Kurum Bilgileri', path: '/kurum', icon: Building2 },

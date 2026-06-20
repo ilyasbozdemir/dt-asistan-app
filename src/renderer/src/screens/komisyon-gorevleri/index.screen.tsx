@@ -18,7 +18,13 @@ export default function KomisyonGorevleriScreen(): React.JSX.Element {
     queryFn: async () => {
       const res = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT * FROM TANIM_KomisyonGorevi WHERE aktif_mi = 1 ORDER BY id ASC'
+        `SELECT 
+          kg.*,
+          (SELECT COUNT(*) FROM TANIM_KomisyonUye ku WHERE ku.gorev_id = kg.id) as kullanim_sayisi,
+          (SELECT GROUP_CONCAT(DISTINCT k.ad) FROM TANIM_Komisyon k INNER JOIN TANIM_KomisyonUye ku ON ku.komisyon_id = k.id WHERE ku.gorev_id = kg.id) as kullanilan_komisyonlar
+         FROM TANIM_KomisyonGorevi kg 
+         WHERE kg.aktif_mi = 1 
+         ORDER BY kg.id ASC`
       )
       if (!res.success) throw new Error(res.error)
       return res.data
@@ -157,25 +163,55 @@ export default function KomisyonGorevleriScreen(): React.JSX.Element {
                           )}
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            className="text-xs py-1.5 h-auto rounded-lg"
-                            onClick={() => handleEdit(gorev)}
-                          >
-                            Düzenle
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => {
-                              if (confirm('Bu görevi silmek istediğinize emin misiniz?')) {
-                                deleteMutation.mutate(gorev.id)
-                              }
-                            }}
-                          >
-                            Sil
-                          </Button>
+                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+                          <div>
+                            {gorev.kullanim_sayisi > 0 ? (
+                              <div className="group/tooltip relative flex items-center">
+                                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-900/20 dark:text-blue-400 cursor-help">
+                                  Aktif kullanım: {gorev.kullanim_sayisi}
+                                </span>
+                                {gorev.kullanilan_komisyonlar && (
+                                  <div className="absolute bottom-full left-0 mb-2 hidden w-max max-w-[250px] flex-col gap-1 rounded-lg bg-slate-800 dark:bg-slate-700 p-2.5 text-xs text-white shadow-xl group-hover/tooltip:flex z-50">
+                                    <span className="font-semibold text-slate-300 border-b border-slate-600 pb-1.5 mb-1">Bulunduğu Komisyonlar</span>
+                                    {gorev.kullanilan_komisyonlar.split(',').map((k: string, i: number) => (
+                                      <span key={i} className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"></span>
+                                        <span className="truncate" title={k.trim()}>{k.trim()}</span>
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center rounded-md bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-800/50 dark:text-slate-400">
+                                Kullanılmıyor
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              className="text-xs py-1.5 h-auto rounded-lg"
+                              onClick={() => handleEdit(gorev)}
+                            >
+                              Düzenle
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="text-xs py-1.5 h-auto rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
+                              onClick={() => {
+                                if (gorev.kullanim_sayisi > 0) {
+                                  alert(`Bu görev aktif olarak ${gorev.kullanim_sayisi} komisyon üyesine atanmış durumda. Silmek için önce o komisyonlardan bu görevi kaldırmalısınız.`)
+                                  return
+                                }
+                                if (confirm('Bu görevi silmek istediğinize emin misiniz?')) {
+                                  deleteMutation.mutate(gorev.id)
+                                }
+                              }}
+                            >
+                              Sil
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))
