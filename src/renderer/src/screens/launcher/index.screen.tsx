@@ -165,7 +165,6 @@ export default function LauncherScreen(): React.ReactNode {
   return (
     <div
       className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950 p-6 relative transition-colors duration-300"
-      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
       {/* Draggable Header with Window Controls & Theme Switcher */}
       <div
