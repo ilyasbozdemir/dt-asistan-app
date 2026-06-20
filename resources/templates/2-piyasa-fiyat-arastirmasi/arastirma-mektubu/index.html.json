@@ -1,0 +1,64 @@
+{
+  "detsisNo": "",
+  "dosyaNumarasi": {
+    "yili": "2026",
+    "sayisi": "123"
+  },
+  "dosyaKonusu": "Fiyat Araştırması",
+  "dosyaTarihi": "09.06.2026",
+  "antetSatirlari": [
+    "T.C.",
+    "GÜNEYYURT BELEDİYE BAŞKANLIĞI",
+    "Fen İşleri Müdürlüğü"
+  ],
+  "solLogo": "",
+  "sagLogo": "",
+  "sayinIlgili": "Sayın İlgili,",
+  "aciklamaMetni": "Aşağıda cins ve miktarları belirtilen mal/hizmet kalemlerinin yaklaşık maliyet tespiti için piyasa araştırması yapılmaktadır, birim fiyatlarını KDV hariç bildirmenizi rica ederim/ederiz.",
+  "gorevlendirilenler": [
+    {
+      "adSoyad": "Mustafa ÇALIŞKAN",
+      "unvan": "Memur",
+      "komisyonGorevi": "Komisyon Başkanı"
+    },
+    {
+      "adSoyad": "Hasan EROĞLU",
+      "unvan": "Tekniker",
+      "komisyonGorevi": "Komisyon Üyesi"
+    },
+    {
+      "adSoyad": "Mustafa TUNCER",
+      "unvan": "Tekniker",
+      "komisyonGorevi": "Komisyon Üyesi"
+    },
+    {
+      "adSoyad": "Mehmet MUTLU",
+      "unvan": "Bld. Personeli",
+      "komisyonGorevi": "Komisyon Üyesi"
+    }
+  ],
+  "ihtiyacKalemleri": [
+    {
+      "siraNo": 1,
+      "malzemeAdi": "Siyah Profil 100x200x4,00 mm",
+      "ozelligi": "Profil 100x200x4,00 mm",
+      "birimi": "Adet",
+      "miktar": 34
+    },
+    {
+      "siraNo": 2,
+      "malzemeAdi": "Siyah Profil 100x200x5,00 mm",
+      "ozelligi": "Profil 100x200x5,00 mm",
+      "birimi": "Adet",
+      "miktar": 52
+    }
+  ],
+  "kurumIci": false,
+  "kurumAdres": "Güneyyurt Belediyesi, Ermenek/KARAMAN",
+  "kurumTelefon": "0338 716 11 11",
+  "kurumWeb": "www.guneyyurt.bel.tr",
+  "kurumEposta": "info@guneyyurt.bel.tr",
+  "kurumKep": "guneyyurtbelediyesi@hs01.kep.tr",
+  "ilgiliPersonelAdi": "Mustafa ÇALIŞKAN",
+  "ilgiliPersonelUnvan": "Memur"
+}
