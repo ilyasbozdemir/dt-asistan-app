@@ -465,8 +465,8 @@ export default function DashboardScreen(): React.JSX.Element {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* STATS CARDS */}
         {!activeDosyaId && (
-          <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="lg:col-span-9">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* İhale Dosya Sayısı */}
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
                 <div className="flex items-center justify-between mb-2">
@@ -651,7 +651,7 @@ export default function DashboardScreen(): React.JSX.Element {
         )}
 
         {/* RIGHT SIDE PANEL: IDENTITY CARD & ANNOUNCEMENTS */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Institution Identity Card */}
           <div className="bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-850 border border-blue-100/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm relative overflow-hidden group">
             <div className="absolute -right-6 -top-6 w-32 h-32 bg-blue-400/10 dark:bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-400/20 transition-all duration-700 pointer-events-none" />
