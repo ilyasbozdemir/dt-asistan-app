@@ -3,7 +3,7 @@
   "version": "1.0.0-alpha.57",
   "description": "Doğrudan Temin ve Satın Alma Süreçleri Yönetim Sistemi",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "ilyasbozdemir.dev",
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
