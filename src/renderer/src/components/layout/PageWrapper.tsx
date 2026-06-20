@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useRouterState, useNavigate } from '@tanstack/react-router'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
@@ -12,6 +12,7 @@ import LockScreen from './LockScreen'
 import { DisclaimerModal } from '../modals/DisclaimerModal'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
+import { routeComponents } from './routeComponents'
 
 export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
@@ -40,8 +41,56 @@ export function PageWrapper(): React.ReactNode {
 
   const { activeFilePath, openWorkspace, isAuthenticated, loadActiveMeta } = useWorkspaceStore()
   const { loadSettings } = useSettingsStore()
-  const { addTab, clearTabs } = useTabStore()
+  const { tabs, activeTabPath, addTab, clearTabs } = useTabStore()
   const queryClient = useQueryClient()
+
+  const [lastActive, setLastActive] = useState<Record<string, number>>({})
+  const [expiredPaths, setExpiredPaths] = useState<Record<string, boolean>>({})
+
+  // Update last active timestamp for current tab
+  useEffect(() => {
+    if (activeTabPath) {
+      const handle = setTimeout(() => {
+        setLastActive((prev) => ({
+          ...prev,
+          [activeTabPath]: Date.now()
+        }))
+        setExpiredPaths((prev) => {
+          if (prev[activeTabPath]) {
+            return {
+              ...prev,
+              [activeTabPath]: false
+            }
+          }
+          return prev
+        })
+      }, 0)
+      return () => clearTimeout(handle)
+    }
+    return undefined
+  }, [activeTabPath])
+
+  // Periodic cleanup for inactive tabs (every 15 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now()
+      setExpiredPaths((prev) => {
+        const next: Record<string, boolean> = { ...prev }
+        let changed = false
+        for (const tab of tabs) {
+          const isActive = tab.path === activeTabPath
+          const lastActiveTime = lastActive[tab.path] || now
+          const isExpired = !isActive && tab.path !== '/' && now - lastActiveTime > 5 * 60 * 1000
+          if (next[tab.path] !== isExpired) {
+            next[tab.path] = isExpired
+            changed = true
+          }
+        }
+        return changed ? next : prev
+      })
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [tabs, activeTabPath, lastActive])
 
   useEffect(() => {
     if (activeFilePath && isAuthenticated) {
@@ -321,8 +370,27 @@ export function PageWrapper(): React.ReactNode {
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
         <TabsBar />
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+        <main className="flex-1 relative overflow-hidden">
+          {tabs.map((tab) => {
+            const isActive = tab.path === activeTabPath
+            const isExpired = expiredPaths[tab.path]
+
+            if (isExpired) return null
+
+            const cleanPath = tab.path.split('?')[0].split('#')[0]
+            const Component = routeComponents[cleanPath]
+            if (!Component) return null
+
+            return (
+              <div
+                key={tab.path}
+                style={{ display: isActive ? 'block' : 'none' }}
+                className="h-full w-full absolute inset-0 p-6 overflow-auto"
+              >
+                <Component />
+              </div>
+            )
+          })}
         </main>
         <Footer />
       </div>
