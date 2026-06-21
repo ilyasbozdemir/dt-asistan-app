@@ -1,5 +1,12 @@
 {
+  "antetSatirlari": [
+    "T.C.",
+    "ACME BELEDİYE BAŞKANLIĞI"
+  ],
+  "kurumUst": "T.C.",
   "kurumAdi": "ACME BELEDİYE BAŞKANLIĞI",
+  "mudurluk": "Destek Hizmetleri Müdürlüğü",
+  "idareAdi": "ACME BELEDİYE BAŞKANLIĞI - Destek Hizmetleri Müdürlüğü",
   "tarih": "21/06/2026",
   "isAdi": "Bilgi İşlem Altyapı ve Kablolama Malzemeleri Alımı İşi",
   "dosyaTarihi": "21/06/2026",

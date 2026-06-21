@@ -166,6 +166,11 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
         const genelToplam = formatTR(grandTotal)
 
+        const rawHarcamaBirimi = settings?.harcamaBirimAdi || dosyaRes.data?.[0]?.harcama_birimi || ''
+        const parentInstitutionName = settings?.parentInstitution || ''
+        const institutionName = settings?.institutionName || 'Kurum Adı Belirtilmedi'
+        const idareAdi = rawHarcamaBirimi ? `${institutionName} - ${rawHarcamaBirimi}` : institutionName
+
         let context: any = {
           tarih: today,
           dosyaTarihi: dosyaRes.data?.[0]?.tarih || today,
@@ -180,6 +185,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           kurumlari: suffixes.kurumlari,
           kalemSayisi,
           kalemSayisiYazi,
+          solLogo: settings?.logoLeft || null,
+          sagLogo: settings?.logoRight || null,
+          kurumUst: parentInstitutionName,
+          kurumAdi: institutionName,
+          mudurluk: rawHarcamaBirimi,
+          idareAdi: idareAdi,
           baskanAdi: dosyaRes.data?.[0]?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
           baskanUnvan: dosyaRes.data?.[0]?.onaylayan_unvan || 'Harcama Yetkilisi',
           komisyon: commission.map((c: any) => ({
