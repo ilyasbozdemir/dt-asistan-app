@@ -34,10 +34,13 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         )
         if (sablonsRes.success) setSablons(sablonsRes.data)
 
-        // Aktif dosya verisini al (Temel dosya bilgisi ve kalemler)
+        // Aktif dosya verisini al (Temel dosya bilgisi, onaylayan personel ve kalemler)
         const dosyaRes = await window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT * FROM DATA_TeminDosyasi WHERE id = ?',
+          `SELECT d.*, p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan 
+           FROM DATA_TeminDosyasi d 
+           LEFT JOIN TANIM_Personel p ON d.onay_personel_id = p.id 
+           WHERE d.id = ?`,
           [activeDosyaId]
         )
         const kalemlerRes = await window.electron.ipcRenderer.invoke(
@@ -45,6 +48,40 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
           [activeDosyaId]
         )
+
+        // Firmaları çek (DATA_TeminFirma ve TANIM_Firma birleşimi)
+        const firmsRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT df.id as temin_firma_id, f.unvan, f.id as firma_id 
+           FROM DATA_TeminFirma df 
+           JOIN TANIM_Firma f ON df.firma_id = f.id 
+           WHERE df.temin_dosya_id = ?`,
+          [activeDosyaId]
+        )
+        const firms = firmsRes.success ? firmsRes.data : []
+
+        // Teklifleri çek
+        const bidsRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?',
+          [activeDosyaId]
+        )
+        const bids = bidsRes.success ? bidsRes.data : []
+        const bidsMap: Record<string, number> = {}
+        bids.forEach((b: any) => {
+          bidsMap[`${b.temin_kalem_id}_${b.temin_firma_id}`] = b.birim_fiyat || 0
+        })
+
+        // Komisyon üyelerini çek
+        const komsRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT tk.*, p.ad_soyad, p.unvan 
+           FROM DATA_TeminKomisyon tk 
+           JOIN TANIM_Personel p ON tk.personel_id = p.id 
+           WHERE tk.temin_dosya_id = ? AND tk.komisyon_turu = 'Fiyat Araştırma'`,
+          [activeDosyaId]
+        )
+        const commission = komsRes.success ? komsRes.data : []
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
         const subInstType = settings?.subInstitutionType || ''
@@ -62,12 +99,62 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         const kalemSayisi = kalemlerRes.data?.length || 0
         const kalemSayisiYazi = sayiyiYaziyaCevir(kalemSayisi)
 
+        // Para birimi formatlayıcı
+        const formatTR = (val: number) => {
+          return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)
+        }
+
+        // Firma toplamlarını hesapla
+        const firmaToplamlari = firms.map((f: any) => {
+          let sum = 0
+          kalemlerRes.data?.forEach((k: any) => {
+            const price = bidsMap[`${k.id}_${f.temin_firma_id}`] || 0
+            sum += price * (k.miktar || 0)
+          })
+          return {
+            toplam: formatTR(sum)
+          }
+        })
+
+        // En düşük fiyatlar ve genel toplam hesaplama
+        let grandTotal = 0
+        const needItems = kalemlerRes.data?.map((k: any, index: number) => {
+          const itemPrices = firms.map((f: any) => bidsMap[`${k.id}_${f.temin_firma_id}`] || 0)
+          const validPrices = itemPrices.filter((p: number) => p > 0)
+          const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : 0
+          const toplamBedel = minPrice * (k.miktar || 0)
+          grandTotal += toplamBedel
+
+          const firmaTeklifleri = firms.map((f: any) => {
+            const price = bidsMap[`${k.id}_${f.temin_firma_id}`] || 0
+            return {
+              fiyat: price > 0 ? formatTR(price) : '-'
+            }
+          })
+
+          return {
+            siraNo: index + 1,
+            kodu: k.tasinir_kodu || k.okas_kodu || '-',
+            malzemeAdi: k.kalem_adi,
+            ozelligi: k.aciklama || '',
+            birimi: k.birim,
+            kdvOrani: `%${k.kdv_orani}`,
+            miktar: formatTR(k.miktar || 0),
+            firmaTeklifleri,
+            enDusukFiyat: minPrice > 0 ? formatTR(minPrice) : '-',
+            toplamBedel: toplamBedel > 0 ? formatTR(toplamBedel) : '-'
+          }
+        }) || []
+
+        const genelToplam = formatTR(grandTotal)
+
         let context: any = {
           tarih: today,
           dosyaTarihi: dosyaRes.data?.[0]?.tarih || today,
           kurumIci: false,
           evrakSayisi: dosyaRes.data?.[0]?.temin_no || 'Belirtilmedi',
           dosyaKonusu: dosyaRes.data?.[0]?.konu || 'Konu Belirtilmedi',
+          isAdi: dosyaRes.data?.[0]?.konu || 'Konu Belirtilmedi',
           sayiYazıyla: SAYI_YAZI_MAP,
           kurumumuz: suffixes.kurumumuz,
           kurumunuz: suffixes.kurumunuz,
@@ -75,15 +162,18 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           kurumlari: suffixes.kurumlari,
           kalemSayisi,
           kalemSayisiYazi,
-          ihtiyacKalemleri: kalemlerRes.data?.map((k: any, i: number) => ({
-            siraNo: i + 1,
-            kodu: k.tasinir_kodu || k.okas_kodu || '-',
-            malzemeAdi: k.kalem_adi,
-            ozelligi: k.aciklama || '',
-            birimi: k.birim,
-            kdvOrani: `%${k.kdv_orani}`,
-            miktar: k.miktar
-          })) || []
+          baskanAdi: dosyaRes.data?.[0]?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
+          baskanUnvan: dosyaRes.data?.[0]?.onaylayan_unvan || 'Harcama Yetkilisi',
+          komisyon: commission.map((c: any) => ({
+            adSoyad: c.ad_soyad,
+            unvan: c.unvan,
+            gorevi: c.gorevi
+          })),
+          firmalar: firms.map((f: any) => ({ unvan: f.unvan })),
+          firmalarColspan: firms.length + 2,
+          firmaToplamlari,
+          genelToplam,
+          ihtiyacKalemleri: needItems
         }
 
         // Varsa test/master dummy verisini de alıp birleştir, gerçek veriler üzerine yazsın
