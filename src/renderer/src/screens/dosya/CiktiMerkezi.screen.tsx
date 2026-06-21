@@ -176,8 +176,15 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         const institutionName = settings?.institutionName || 'Kurum Adı Belirtilmedi'
         const idareAdi = rawHarcamaBirimi ? `${institutionName} - ${rawHarcamaBirimi}` : institutionName
 
+        const rawTur = dosyaRes.data?.[0]?.tur || 'mal'
+        let alimTuruText = 'mal alımı'
+        if (rawTur === 'hizmet') alimTuruText = 'hizmet alımı'
+        else if (rawTur === 'yapim_isi' || rawTur === 'yapim') alimTuruText = 'yapım işi'
+        else if (rawTur === 'danismanlik') alimTuruText = 'danışmanlık hizmet alımı'
+
         let context: any = {
           tarih: today,
+          alimTuru: alimTuruText,
           dosyaTarihi: dosyaRes.data?.[0]?.tarih || today,
           kurumIci: false,
           evrakSayisi: dosyaRes.data?.[0]?.temin_no || 'Belirtilmedi',
