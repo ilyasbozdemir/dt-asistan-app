@@ -11,6 +11,8 @@ export const DATA_TeminFirma = {
     { name: 'teslim_suresi', type: 'TEXT' },
     { name: 'para_birimi', type: 'TEXT', default: "'TRY'" },
     { name: 'aktif_mi', type: 'INTEGER', default: 1 },
+    { name: 'yasaklilik_durumu', type: 'TEXT', default: "'Sorgulanmadı'" },
+    { name: 'yasaklilik_belgesi', type: 'TEXT' },
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' },
     { name: 'updated_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],

@@ -552,6 +552,38 @@ export const workspaceManager = {
       console.error('Failed to get schema for AI:', e)
       return null
     }
+  },
+  uploadAttachment: (sourcePath: string) => {
+    if (!activeWorkspace) throw new Error('Açık bir çalışma dosyası yok.')
+    const tempDir = (activeWorkspace as any).tempDir
+    if (!tempDir) throw new Error('Geçici çalışma dizini bulunamadı.')
+    
+    const attachmentsDir = path.join(tempDir, 'attachments')
+    if (!fs.existsSync(attachmentsDir)) {
+      fs.mkdirSync(attachmentsDir, { recursive: true })
+    }
+    
+    const fileExt = path.extname(sourcePath)
+    const baseName = path.basename(sourcePath, fileExt)
+    const safeName = `${baseName}_${Date.now()}${fileExt}`.replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const destPath = path.join(attachmentsDir, safeName)
+    
+    fs.copyFileSync(sourcePath, destPath)
+    activeWorkspace.saveWorkspace()
+    return { fileName: safeName, relativePath: `attachments/${safeName}` }
+  },
+  openAttachment: async (relativePath: string) => {
+    if (!activeWorkspace) throw new Error('Açık bir çalışma dosyası yok.')
+    const tempDir = (activeWorkspace as any).tempDir
+    if (!tempDir) throw new Error('Geçici çalışma dizini bulunamadı.')
+    
+    const fullPath = path.join(tempDir, relativePath)
+    if (fs.existsSync(fullPath)) {
+      const { shell } = require('electron')
+      await shell.openPath(fullPath)
+      return true
+    }
+    return false
   }
 }
 

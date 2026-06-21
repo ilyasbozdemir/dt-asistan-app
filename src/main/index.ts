@@ -385,6 +385,25 @@ if (!gotTheLock && !isMultiInstance) {
       })
     }
 
+    ipcMain.on('window:open-external', (_, data: { url: string; title?: string }) => {
+      const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
+      const newWindow = new BrowserWindow({
+        width: 1200,
+        height: 800,
+        minWidth: 800,
+        minHeight: 600,
+        parent: parent || undefined,
+        autoHideMenuBar: false,
+        title: data.title || 'Sorgulama Ekranı',
+        icon: icon,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      })
+      newWindow.loadURL(data.url)
+    })
+
     ipcMain.on('window:open-secondary', (_, data: { path: string; search: string; title?: string }) => {
       const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
       const newWindow = new BrowserWindow({
@@ -597,6 +616,26 @@ if (!gotTheLock && !isMultiInstance) {
         return { success: true, meta }
       } catch (error: any) {
         console.error('Get meta error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('workspace:upload-file', async (_, sourcePath: string) => {
+      try {
+        const result = workspaceManager.uploadAttachment(sourcePath)
+        return { success: true, ...result }
+      } catch (error: any) {
+        console.error('Upload attachment error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('workspace:open-file', async (_, relativePath: string) => {
+      try {
+        const success = await workspaceManager.openAttachment(relativePath)
+        return { success }
+      } catch (error: any) {
+        console.error('Open attachment error:', error)
         return { success: false, error: error.message }
       }
     })
