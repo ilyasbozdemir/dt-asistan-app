@@ -13,6 +13,7 @@ interface TabState {
   setActiveTab: (path: string) => void
   updateTabLabel: (path: string, label: string) => void
   clearTabs: () => void
+  clearDosyaTabs: () => void
 }
 
 export function getTabLabel(fullPath: string): string {
@@ -117,5 +118,18 @@ export const useTabStore = create<TabState>((set, get) => ({
 
   clearTabs: () => {
     set({ tabs: [{ path: '/', label: 'Gösterge Paneli' }], activeTabPath: '/' })
+  },
+
+  clearDosyaTabs: () => {
+    const { tabs, activeTabPath } = get()
+    const newTabs = tabs.filter((t) => !t.path.startsWith('/dosya/') && t.path !== '/dosya')
+    if (newTabs.length === 0) {
+      newTabs.push({ path: '/', label: 'Gösterge Paneli' })
+    }
+    const isActiveTabCleared = !newTabs.some((t) => t.path === activeTabPath)
+    set({
+      tabs: newTabs,
+      activeTabPath: isActiveTabCleared ? newTabs[0].path : activeTabPath
+    })
   }
 }))

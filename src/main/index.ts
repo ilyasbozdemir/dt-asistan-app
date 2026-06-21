@@ -23,15 +23,37 @@ process.on('uncaughtException', (error) => {
 })
 
 let tray: Tray | null = null
+const secondaryWindows = new Set<BrowserWindow>()
+const dosyaWindows = new Map<number, BrowserWindow>()
+
+function closeAllSecondaryWindows(): void {
+  const copy = Array.from(secondaryWindows)
+  for (const win of copy) {
+    if (!win.isDestroyed()) win.close()
+  }
+  secondaryWindows.clear()
+
+  const dCopy = Array.from(dosyaWindows.values())
+  for (const win of dCopy) {
+    if (!win.isDestroyed()) win.close()
+  }
+  dosyaWindows.clear()
+}
 
 // Uygulama tamamen kapanırken (Quit) aktif dosyayı/lock'u temizle
 app.on('will-quit', () => {
-  try { workspaceManager.close() } catch (e) {}
+  try {
+    closeAllSecondaryWindows()
+    workspaceManager.close()
+  } catch (e) {}
 })
 
 // Süreç herhangi bir sebeple çökerse veya kapanırsa son bir temizlik şansı
 process.on('exit', () => {
-  try { workspaceManager.close() } catch (e) {}
+  try {
+    closeAllSecondaryWindows()
+    workspaceManager.close()
+  } catch (e) {}
 })
 
 function createWindow(): void {
@@ -114,6 +136,10 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.on('closed', () => {
+    closeAllSecondaryWindows()
+  })
 }
 
 // Single Instance Lock
@@ -385,6 +411,10 @@ if (!gotTheLock && !isMultiInstance) {
       })
     }
 
+    ipcMain.on('window:close-secondary-windows', () => {
+      closeAllSecondaryWindows()
+    })
+
     ipcMain.on('window:open-external', (_, data: { url: string; title?: string }) => {
       const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
       const newWindow = new BrowserWindow({
@@ -401,6 +431,8 @@ if (!gotTheLock && !isMultiInstance) {
           contextIsolation: true
         }
       })
+      secondaryWindows.add(newWindow)
+      newWindow.on('closed', () => secondaryWindows.delete(newWindow))
       newWindow.loadURL(data.url)
     })
 
@@ -421,6 +453,9 @@ if (!gotTheLock && !isMultiInstance) {
           sandbox: false
         }
       })
+
+      secondaryWindows.add(newWindow)
+      newWindow.on('closed', () => secondaryWindows.delete(newWindow))
 
       if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         newWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + data.path + data.search)
@@ -499,6 +534,9 @@ if (!gotTheLock && !isMultiInstance) {
           sandbox: false
         }
       })
+
+      secondaryWindows.add(newWindow)
+      newWindow.on('closed', () => secondaryWindows.delete(newWindow))
 
       const wpParam = data.workspacePath ? '&wp=' + encodeURIComponent(data.workspacePath) : ''
       if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -587,6 +625,7 @@ if (!gotTheLock && !isMultiInstance) {
 
     ipcMain.handle('workspace:open', async (_, filePath: string, allowMigration: boolean = false) => {
       try {
+        closeAllSecondaryWindows()
         const meta = workspaceManager.open(filePath, allowMigration)
         return { success: true, meta }
       } catch (error: any) {
@@ -602,6 +641,7 @@ if (!gotTheLock && !isMultiInstance) {
 
     ipcMain.handle('workspace:close', async () => {
       try {
+        closeAllSecondaryWindows()
         workspaceManager.close()
         return { success: true }
       } catch (error: any) {

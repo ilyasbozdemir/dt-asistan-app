@@ -39,9 +39,9 @@ export function PageWrapper(): React.ReactNode {
     document.title = title
   }, [routerState.location.pathname])
 
-  const { activeFilePath, openWorkspace, isAuthenticated, loadActiveMeta } = useWorkspaceStore()
+  const { activeFilePath, openWorkspace, isAuthenticated, loadActiveMeta, activeDosyaId } = useWorkspaceStore()
   const { loadSettings } = useSettingsStore()
-  const { tabs, activeTabPath, addTab, clearTabs } = useTabStore()
+  const { tabs, activeTabPath, addTab, clearTabs, clearDosyaTabs } = useTabStore()
   const queryClient = useQueryClient()
 
   const [lastActive, setLastActive] = useState<Record<string, number>>({})
@@ -112,6 +112,16 @@ export function PageWrapper(): React.ReactNode {
       clearTabs()
     }
   }, [activeFilePath, isAuthenticated, clearTabs])
+
+  // Reset file-specific tabs when no active document is selected
+  useEffect(() => {
+    if (activeDosyaId === null) {
+      clearDosyaTabs()
+      if (window.electron) {
+        window.electron.ipcRenderer.send('window:close-secondary-windows')
+      }
+    }
+  }, [activeDosyaId, clearDosyaTabs])
 
   // Listen for db change invalidations from main process
   useEffect(() => {
