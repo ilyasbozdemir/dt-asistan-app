@@ -39,10 +39,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           'db:query',
           `SELECT d.*, 
                   p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan,
-                  h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan 
+                  h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
+                  f.unvan as yuklenici_firma_adi
            FROM DATA_TeminDosyasi d 
            LEFT JOIN TANIM_Personel p ON d.onay_personel_id = p.id 
            LEFT JOIN TANIM_Personel h ON d.hazirlayan_personel_id = h.id
+           LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
            WHERE d.id = ?`,
           [activeDosyaId]
         )
@@ -202,10 +204,42 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
         const teminSekliText = dosyaRes.data?.[0]?.ihale_sekli || '4734 sayılı Kanun\'un 22/d maddesi gereğince Doğrudan Temin'
 
+        const rawKapakDetaylari: any[] = []
+        if (dosyaRes.data?.[0]?.konu) {
+          rawKapakDetaylari.push({ label: 'İŞİN ADI', value: dosyaRes.data[0].konu, isBold: true })
+        }
+        if (dosyaRes.data?.[0]?.isin_aciklamasi) {
+          rawKapakDetaylari.push({ label: 'İŞİN AÇIKLAMASI', value: dosyaRes.data[0].isin_aciklamasi })
+        }
+        rawKapakDetaylari.push({ label: 'İŞİN TÜRÜ', value: alimTuruText })
+        if (dosyaRes.data?.[0]?.temin_no) {
+          rawKapakDetaylari.push({ label: 'TEMİN NUMARASI', value: dosyaRes.data[0].temin_no })
+        }
+        if (dbYaklasikMaliyet > 0) {
+          rawKapakDetaylari.push({ label: 'YAKLAŞIK MALİYET', value: `${yaklasikMaliyetText} TL` })
+        }
+        if (butceTertibiArray && butceTertibiArray.length > 0) {
+          rawKapakDetaylari.push({ label: 'BÜTÇE TERTİBİ', value: butceTertibiArray })
+        }
+        if (dosyaRes.data?.[0]?.yuklenici_firma_adi) {
+          rawKapakDetaylari.push({ label: 'İHALEYİ ALAN FİRMA', value: dosyaRes.data[0].yuklenici_firma_adi, isBold: true })
+        }
+        if (dosyaRes.data?.[0]?.tarih) {
+          rawKapakDetaylari.push({ label: 'DOSYA TARİHİ', value: dosyaRes.data[0].tarih })
+        }
+
+        const kapakDetaylari = rawKapakDetaylari.map((item) => ({
+          label: item.label,
+          lines: Array.isArray(item.value) ? item.value : [item.value],
+          isBold: item.isBold || false
+        }))
+
         let context: any = {
+          kapakDetaylari,
           tarih: today,
           alimTuru: alimTuruText,
           dosyaTarihi: dosyaRes.data?.[0]?.tarih || today,
+          yukleniciFirma: dosyaRes.data?.[0]?.yuklenici_firma_adi || null,
           kurumIci: false,
           evrakSayisi: dosyaRes.data?.[0]?.temin_no || 'Belirtilmedi',
           dosyaKonusu: dosyaRes.data?.[0]?.konu || 'Konu Belirtilmedi',
