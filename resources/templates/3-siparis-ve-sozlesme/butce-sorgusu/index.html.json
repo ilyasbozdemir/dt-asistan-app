@@ -1,30 +1,22 @@
 {
-  "kurumUst": "T.C.",
-  "kurumAdi": "ASİ KÖRFEZ BELEDİYE BAŞKANLIĞI",
-  "mudurluk": "Destek Hizmetleri Müdürlüğü",
-  "idareAdi": "ASİ KÖRFEZ BELEDİYE BAŞKANLIĞI - Destek Hizmetleri Müdürlüğü",
-  "tarih": "12/04/2026",
-  "dosyaTarihi": "12/04/2026",
-  "evrakSayisi": "74839201",
-  "teminNo": "2026/DT-001",
-  "isAdi": "Atatürk Parkı Çevre Düzenlemesi ve Peyzaj Yapım İşi",
-  "isinAciklamasi": "Atatürk Parkı çevre düzenlemesi ve peyzaj yapım işi kapsamında gerekli inşaat ve peyzaj malzemelerinin satın alınması.",
-  "teminSekli": "4734 sayılı Kanun'un 22/d maddesi gereğince Doğrudan Temin",
-  "alimTuru": "Yapım İşi",
-  "yaklasikMaliyet": "350.000,00",
-  "odenekTutari": "400.000,00 TL",
-  "projeNo": "2026-Y-0042",
-  "butceTertibi": [
-    "3.1.3.Tekstil ve Tekstil Ürünleri Deri ve Deri Ürünleri Alımları",
-    "3.5.1.90.Diğer Müşavir Firma ve Kişilere Ödemeler"
+  "antetSatirlari": [
+    "T.C.",
+    "YEŞİLVADİ BELEDİYE BAŞKANLIĞI",
+    "Destek Hizmetleri Müdürlüğü"
   ],
-  "avansSartlari": "Avans verilmeyecektir.",
-  "fiyatFarkiSartlari": "Fiyat Farkı Ödenmeyecektir.",
-  "dokumanHazirlik": "Hazırlanacaktır.",
+  "evrakSayisi": "E-68493012-902.03-3456",
+  "dosyaKonusu": "Bütçe ve Ödenek Sorgusu",
+  "tarih": "06/05/2026",
+  "muhatapBirim": "MALİ HİZMETLER MÜDÜRLÜĞÜNE",
+  "kurumAdi": "YEŞİLVADİ BELEDİYE BAŞKANLIĞI",
+  "isAdi": "Belediyemiz park ve bahçelerinde kullanılmak üzere 150 adet dekoratif aydınlatma direği ve armatür alımı",
   "hazirlayanPersonelAdi": "Gökhan TEKİN",
   "hazirlayanPersonelUnvan": "Teknisyen",
-  "onaylayanPersonelAdi": "Kemal SOYDAN",
-  "onaylayanPersonelUnvan": "Belediye Başkanı",
-  "baskanAdi": "Kemal SOYDAN",
-  "baskanUnvan": "Belediye Başkanı"
+  "butceYili": "2026",
+  "butceTertibi": [
+    "46.70.03.01.02.05-03.2.9.90"
+  ],
+  "kullanilabilirOdenek": "185.000,00",
+  "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/refs/heads/main/resources/icon.png",
+  "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg"
 }
