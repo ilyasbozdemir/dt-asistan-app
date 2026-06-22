@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Onay Belgesi</title>
+  <title>Doğrudan Temin Sonuç Onay Belgesi</title>
   <style>
     @page {
       size: A4;
@@ -63,7 +63,7 @@
       border: 1px solid #000;
       padding: 6px 8px;
       font-size: 10pt;
-      vertical-align: top;
+      vertical-align: middle;
     }
     .info-table td.label {
       width: 40%;
@@ -88,6 +88,27 @@
       font-size: 10pt;
       text-align: justify;
       white-space: pre-wrap;
+      margin-bottom: 15px;
+    }
+    .nested-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+      margin-bottom: 15px;
+    }
+    .nested-table th, .nested-table td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+      font-size: 9.5pt;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .nested-table th {
+      font-weight: bold;
+      background-color: #f2f2f2;
+    }
+    .nested-table td.left-align {
+      text-align: left;
     }
     .approval-section {
       width: 100%;
@@ -107,12 +128,13 @@
       margin-top: 40px;
       text-align: center;
     }
+    .paged-keep-together { break-inside: avoid; }
   </style>
 </head>
 <body>
   <div class="page-container">
     <!-- TITLE -->
-    <div class="main-title">ONAY BELGESİ</div>
+    <div class="main-title">DOĞRUDAN TEMİN SONUÇ ONAY BELGESİ</div>
 
     <!-- FIRST TABLE (İdare Bilgileri) -->
     <table class="info-table">
@@ -128,16 +150,12 @@
 
     <!-- CENTERED IDARE BOX -->
     <div class="institution-box">
-      {{idareAdi}}
+      {{vmakamina}}
     </div>
 
     <!-- SECOND SECTION: BILGILER -->
     <div class="section-title">DOĞRUDAN TEMİN İLE İLGİLİ BİLGİLER</div>
     <table class="info-table">
-      <tr>
-        <td class="label">Doğrudan Temin Numarası</td>
-        <td class="value">{{teminNo}}</td>
-      </tr>
       <tr>
         <td class="label">İşin Adı</td>
         <td class="value" style="font-weight: bold;">{{isAdi}}</td>
@@ -147,43 +165,12 @@
         <td class="value">{{teminSekli}}</td>
       </tr>
       <tr>
-        <td class="label">Alım Türü</td>
+        <td class="label">İşin Türü</td>
         <td class="value">{{alimTuru}}</td>
       </tr>
       <tr>
         <td class="label">Yaklaşık Maliyet</td>
         <td class="value">{{yaklasikMaliyet}} ₺</td>
-      </tr>
-      <tr>
-        <td class="label">Kullanılabilir Ödenek Tutarı</td>
-        <td class="value">{{odenekTutari}}</td>
-      </tr>
-      <tr>
-        <td class="label">Yatırım Proje Numarası (varsa)</td>
-        <td class="value">{{projeNo}}</td>
-      </tr>
-      <tr>
-        <td class="label">Bütçe Tertibi</td>
-        <td class="value" style="font-size: 10pt; line-height: 1.5;">
-          {{#butceTertibi}}
-          <div>{{.}}</div>
-          {{/butceTertibi}}
-          {{^butceTertibi}}
-          Belirtilmedi
-          {{/butceTertibi}}
-        </td>
-      </tr>
-      <tr>
-        <td class="label">Avans Verilecekse şartları</td>
-        <td class="value">{{avansSartlari}}</td>
-      </tr>
-      <tr>
-        <td class="label">Fiyat Farkı Verilecekse Şartları</td>
-        <td class="value">{{fiyatFarkiSartlari}}</td>
-      </tr>
-      <tr>
-        <td class="label">Doküman Hazırlanıp Hazırlanmayacağı</td>
-        <td class="value">{{dokumanHazirlik}}</td>
       </tr>
     </table>
 
@@ -191,18 +178,72 @@
     <div class="section-title">DOĞRUDAN TEMİN İLE İLGİLİ DİĞER AÇIKLAMALAR</div>
     <div class="description-box">{{isinAciklamasi}}</div>
 
-    <!-- FOURTH SECTION: ONAY -->
-    <div class="section-title">ONAY</div>
+    <!-- FOURTH SECTION: TEKLİF VEREN FİRMALAR -->
+    <div class="section-title">TEKLİF VEREN GERÇEK/TÜZEL KİŞİLER</div>
+    <table class="nested-table">
+      <thead>
+        <tr>
+          <th>Gerçek/Tüzel Kişinin Adı/Unvanı</th>
+          <th>Teklif Ettiği Fiyat (₺)</th>
+          <th>Fiyat Araştırmasında Dikkate Alındı mı</th>
+          <th>Açıklama</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#teklifler}}
+        <tr>
+          <td class="left-align">{{unvan}}</td>
+          <td>{{fiyat}}</td>
+          <td>{{uygunMu}}</td>
+          <td>{{aciklama}}</td>
+        </tr>
+        {{/teklifler}}
+        {{^teklifler}}
+        <tr>
+          <td colspan="4">Teklif bilgisi bulunmamaktadır.</td>
+        </tr>
+        {{/teklifler}}
+      </tbody>
+    </table>
+
+    <!-- FIFTH SECTION: ALIM YAPILMASI UYGUN GÖRÜLEN FİRMALAR -->
+    <div class="section-title">ALIM YAPILMASI UYGUN GÖRÜLEN GERÇEK / TÜZEL KİŞİLER</div>
+    <table class="nested-table">
+      <thead>
+        <tr>
+          <th colspan="2">Gerçek/Tüzel Kişinin Adı</th>
+          <th>Gerçek/Tüzel Kişinin Adresi</th>
+          <th>Teklif Ettiği Fiyat (₺)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#uygunGorulenler}}
+        <tr>
+          <td colspan="2" class="left-align"><strong>{{unvan}}</strong></td>
+          <td class="left-align">{{adres}}</td>
+          <td><strong>{{fiyat}}</strong></td>
+        </tr>
+        {{/uygunGorulenler}}
+        {{^uygunGorulenler}}
+        <tr>
+          <td colspan="4">Alım yapılması uygun görülen kişi bulunmamaktadır.</td>
+        </tr>
+        {{/uygunGorulenler}}
+      </tbody>
+    </table>
+
+    <!-- SIXTH SECTION: ONAY -->
+    <div class="section-title" style="margin-top: 25px;">ONAY</div>
     
-    <table class="approval-section">
+    <table class="approval-section paged-keep-together">
       <tr>
         <!-- LEFT COLUMN (Arz Eden) -->
         <td>
-          <div style="text-align: justify; margin-bottom: 20px; font-size: 10pt; text-indent: 20px;">
-            Yukarıda belirtilen işin doğrudan temin yoluyla satın alınması hususunda onaylarınızı arz ederim.
+          <div style="text-align: justify; margin-bottom: 20px; font-size: 10pt; text-indent: 20px; line-height: 1.4;">
+            Belirtilen işin, yukarıda alım yapılması uygun görülen gerçek/tüzel kişilerden doğrudan temin yoluyla satın alınması hususunda onaylarınızı arz ederim.
           </div>
           <div class="signature-area">
-            {{tarih}}<br><br><br>
+            {{vonayasunustarihi}}<br><br><br>
             <strong>{{hazirlayanPersonelAdi}}</strong><br>
             {{hazirlayanPersonelUnvan}}
           </div>
@@ -214,20 +255,13 @@
             UYGUNDUR
           </div>
           <div class="signature-area">
-            {{tarih}}<br><br><br>
+            {{vonaytarihi}}<br><br><br>
             <strong>{{onaylayanPersonelAdi}}</strong><br>
-            {{onaylayanPersonelUnvan}}<br>
-            Harcama Yetkilisi
+            {{onaylayanPersonelUnvan}}
           </div>
         </td>
+      </tr>
     </table>
-
-    {{#ekler.0}}
-    <div class="paged-keep-together" style="margin-top: 25px; font-size: 10pt; text-align: left;">
-      <strong>EKLER:</strong>
-      <ol style="margin: 5px 0 0 20px; padding: 0; list-style-type: decimal; line-height: 1.5;">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ol>
-    </div>
-    {{/ekler.0}}
   </div>
 </body>
 </html>

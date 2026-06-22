@@ -26,5 +26,10 @@
   "onaylayanPersonelAdi": "Kemal SOYDAN",
   "onaylayanPersonelUnvan": "Belediye Başkanı",
   "baskanAdi": "Kemal SOYDAN",
-  "baskanUnvan": "Belediye Başkanı"
+  "baskanUnvan": "Belediye Başkanı",
+  "ekler": [
+    "Komisyon Listesi",
+    "Lüzum Müzekkeresi",
+    "Yaklaşık Maliyet Cetveli"
+  ]
 }
