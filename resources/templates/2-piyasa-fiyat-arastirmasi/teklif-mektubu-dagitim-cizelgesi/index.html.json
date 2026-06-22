@@ -1,7 +1,7 @@
 {
   "antetSatirlari": [
     "T.C.",
-    "GÜNEYYURT BELEDİYE BAŞKANLIĞI"
+    "ACME BELEDİYE BAŞKANLIĞI"
   ],
   "kurumUst": "T.C. GÜNEYYURT BELEDİYE BAŞKANLIĞI",
   "kurumAdi": "Güneyyurt Belediyesi",
@@ -9,40 +9,52 @@
   "belgeBasligi": "TEKLİF MEKTUBU DAĞITIM ÇİZELGESİ",
   "isAdi": "Belediyemize ait Yeni Mahalle Mahallesinde yapımı devam etmekte olan Düğün Salonunun Çatı yapımında kullanılmak üzere malzeme alımı 3",
   "satirlar": [
-    { "sira": 1 },
-    { "sira": 2 },
-    { "sira": 3 },
-    { "sira": 4 },
-    { "sira": 5 },
-    { "sira": 6 }
+    {
+      "sira": 1
+    },
+    {
+      "sira": 2
+    },
+    {
+      "sira": 3
+    },
+    {
+      "sira": 4
+    },
+    {
+      "sira": 5
+    },
+    {
+      "sira": 6
+    }
   ],
   "kalemSayisi": 5,
   "kalemSayisiYazi": "beş",
   "vtarih": "06/05/2026",
-  "baskanAdi": "Ahmet ARI",
+  "baskanAdi": "İSMET SARI",
   "baskanUnvan": "Belediye Başkanı",
   "komisyon": [
     {
       "gorev": "Komisyon Başkanı",
-      "adSoyad": "Mustafa ÇALIŞKAN",
+      "adSoyad": "Mustafa ER",
       "unvan": "Memur"
     },
     {
       "gorev": "Komisyon Üyesi",
-      "adSoyad": "Hasan EROĞLU",
+      "adSoyad": "Hasan ALİ",
       "unvan": "Tekniker"
     },
     {
       "gorev": "Komisyon Üyesi",
-      "adSoyad": "Mustafa TUNCER",
+      "adSoyad": "AYDIN ACAR",
       "unvan": "Tekniker"
     },
     {
       "gorev": "Komisyon Üyesi",
-      "adSoyad": "Mehmet MUTLU",
-      "unvan": "Bld.Personeli"
+      "adSoyad": "Mehmet DEMİR",
+      "unvan": "Memur"
     }
   ],
   "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/refs/heads/main/resources/icon.png",
-  "sagLogo": ""
+  "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg"
 }

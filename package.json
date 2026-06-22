@@ -1,6 +1,6 @@
 {
   "name": "dt-asistan-desktop-app",
-  "version": "1.0.0-alpha.66",
+  "version": "1.0.0-alpha.67",
   "description": "Doğrudan Temin ve Satın Alma Süreçleri Yönetim Sistemi",
   "main": "./out/main/index.js",
   "author": "ilyasbozdemir.dev",
@@ -69,6 +69,7 @@
     "statuses": "^2.0.1",
     "toidentifier": "^1.0.1",
     "http-errors": "^2.0.1",
+    "ee-first": "^1.1.1",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.6.0",

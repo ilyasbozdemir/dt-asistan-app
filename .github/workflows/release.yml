@@ -39,6 +39,17 @@ jobs:
         env:
           npm_config_msvs_version: "2022"
 
+      - name: Verify ee-first
+        shell: cmd
+        run: |
+          pnpm why ee-first
+          if exist node_modules\ee-first (
+            echo FOUND
+          ) else (
+            echo MISSING
+            exit 1
+          )
+
       - name: Build and Package
         run: pnpm run build && pnpm exec electron-builder --win --x64 -p never
         env:
