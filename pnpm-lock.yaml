@@ -158,6 +158,15 @@ importers:
       side-channel:
         specifier: ^1.1.0
         version: 1.1.0
+      side-channel-list:
+        specifier: ^1.0.0
+        version: 1.0.1
+      side-channel-map:
+        specifier: ^1.0.1
+        version: 1.0.1
+      side-channel-weakmap:
+        specifier: ^1.0.2
+        version: 1.0.2
       socket.io:
         specifier: ^4.8.3
         version: 4.8.3
