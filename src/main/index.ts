@@ -129,6 +129,14 @@ function createWindow(): void {
     }
   })
 
+  // Debug: Capture renderer console logs in the main process
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    console.log(`[RENDERER CONSOLE] (${level}) ${message} (at ${sourceId}:${line})`)
+  })
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    console.error('Renderer process gone:', details)
+  })
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
