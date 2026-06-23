@@ -2,57 +2,294 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <title>Muayene ve Kabul Tutanağı</title>
   <style>
-    @page { size: A4; margin: 2cm 1.5cm; }
-    body { font-family: "Times New Roman", Times, serif; font-size: 11pt; box-sizing: border-box; line-height: 1.5; }
-    .header { text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
-    .title { text-align: center; font-weight: bold; text-decoration: underline; margin: 20px 0; font-size: 12pt; }
-    .content-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10pt; }
-    .content-table th, .content-table td { border: 1px solid #000; padding: 6px; text-align: left; }
-
-    /* ── Paged.js Running Elements ── */
-    .paged-header {
-      position: running(pagedHeader);
-      display: block;
-      width: 100%;
+    @page {
+      size: A4;
+      margin: 1.5cm;
     }
-
-    .paged-keep-together { break-inside: avoid; }
-    .paged-break-before  { break-before: page; }
-    .paged-break-after   { break-after: page; }
-
-    /* PAGE RULES — SINGLE SOURCE OF TRUTH */
-    @page:first {
-      @top-center { content: element(pagedHeader); }
+    body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 11pt;
+      color: #000;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+    }
+    .page-container {
+      max-width: 21cm;
+      box-sizing: border-box;
+      margin: 0 auto;
+      padding: 0.5cm;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    .header-logo {
+      width: 80px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+    .header-text {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12pt;
+      line-height: 1.4;
+    }
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .info-table td {
+      padding: 4px 0;
+      font-size: 11pt;
+    }
+    .info-table td.right {
+      text-align: right;
+    }
+    .title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 14pt;
+      margin: 20px 0 25px 0;
+      text-decoration: underline;
+      text-transform: uppercase;
+    }
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    .details-table td {
+      padding: 6px 8px;
+      border: 1px solid #000;
+      font-size: 10.5pt;
+      vertical-align: top;
+    }
+    .details-table td.label {
+      font-weight: bold;
+      width: 200px;
+      background-color: #f7f7f7;
+    }
+    .tutanak-text {
+      text-align: justify;
+      text-indent: 1.5cm;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      font-size: 10pt;
+    }
+    .items-table th, .items-table td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+    }
+    .items-table th {
+      background-color: #f7f7f7;
+      font-weight: bold;
+      text-align: center;
+    }
+    .items-table td.center {
+      text-align: center;
+    }
+    .items-table td.right {
+      text-align: right;
+    }
+    .items-table tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .signatures-block {
+      width: 100%;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      text-align: center;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .signatures-title {
+      font-weight: bold;
+      margin-bottom: 25px;
+      font-size: 11pt;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .sig-box {
+      display: inline-block;
+      width: 30%;
+      text-align: center;
+      vertical-align: top;
+      margin: 10px 1.5%;
+      line-height: 1.4;
+    }
+    .sign-name {
+      font-weight: bold;
+    }
+    .olur-block {
+      text-align: center;
+      margin: 40px auto 0 auto;
+      width: 300px;
+      line-height: 1.4;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .olur-title {
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 5px;
+    }
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
     }
   </style>
 </head>
 <body>
-  <div data-behavior="first-page-only" data-slot="top-center">
-    <div class="header">T.C.<br>{{antetSatir1}}</div>
-  </div>
+  <div class="page-container">
+    
+    <!-- HEADER -->
+    <table class="header-table">
+      <tr>
+        <td style="width: 90px; text-align: left; vertical-align: middle;">
+          {{#solLogo}}
+          <img src="{{solLogo}}" alt="Sol Logo" class="header-logo" />
+          {{/solLogo}}
+        </td>
+        
+        <td class="header-text" style="vertical-align: middle;">
+          {{#antetSatirlari}}
+          <div>{{.}}</div>
+          {{/antetSatirlari}}
+          {{^antetSatirlari}}
+          <div>T.C.</div>
+          <div>{{kurumAdi}}</div>
+          {{/antetSatirlari}}
+        </td>
 
-  <div class="title">MUAYENE VE KABUL TUTANAĞI</div>
+        <td style="width: 90px; text-align: right; vertical-align: middle;">
+          {{#sagLogo}}
+          <img src="{{sagLogo}}" alt="Sağ Logo" class="header-logo" />
+          {{/sagLogo}}
+        </td>
+      </tr>
+    </table>
 
-  <div style="text-align: justify; margin-bottom: 20px;">
-    İdaremiz tarafından Doğrudan Temin usulü ile satın alınan <strong>{{dosyaKonusu}}</strong> işine ait mal/hizmetler yüklenici firma tarafından tam ve eksiksiz olarak teslim edilmiş/tamamlanmıştır.
-    <br><br>
-    Komisyonumuzca/Görevlilerimizce yapılan fiziksel muayene ve kontrol neticesinde; teslim edilen mal/hizmetlerin istenilen nitelik ve şartlara uygun olduğu görülmüş olup işbu tutanak tarafımızca imza altına alınmıştır.
-  </div>
+    <!-- INFO: SAYI & TARIH -->
+    <table class="info-table">
+      <tr>
+        <td><strong>Sayı:</strong> {{evrakSayisi}}</td>
+        <td class="right"><strong>Tarih:</strong> {{dosyaTarihi}}</td>
+      </tr>
+    </table>
 
-  <div style="margin-bottom: 20px;">
-    <strong>Yüklenici Firma:</strong> ..............................................................<br>
-    <strong>Fatura Tarih / No:</strong> ....../....../20.... - ............................<br>
-    <strong>Teslim Tarihi:</strong> ....../....../20....
-  </div>
+    <div class="title">MUAYENE VE KABUL TUTANAĞI</div>
 
-  <div class="signature" style="text-align: center; margin-top: 40px;" data-behavior="keep-together">
-    <div style="font-weight: bold; margin-bottom: 20px;">Muayene ve Kabul Komisyonu</div>
-    {{#onaylayanlar}}
-    <div style="display: inline-block; text-align: center; width: 30%; vertical-align: top;">
-      {{onaylayanPersonelAdi}}<br>{{onaylayanPersonelUnvan}}<br>Üye
+    <!-- DETAILS TABLE -->
+    <table class="details-table">
+      <tr>
+        <td class="label">İş Sahibi İdare</td>
+        <td>{{kurumAdi}}</td>
+      </tr>
+      <tr>
+        <td class="label">Yüklenici Firma</td>
+        <td>{{yukleniciFirma}}</td>
+      </tr>
+      <tr>
+        <td class="label">İşin Adı</td>
+        <td>{{dosyaKonusu}}</td>
+      </tr>
+      <tr>
+        <td class="label">Sözleşme / Sipariş Tarihi</td>
+        <td>{{#sozlesmeTarihi}}{{sozlesmeTarihi}}{{/sozlesmeTarihi}}{{^sozlesmeTarihi}}..../..../20....{{/sozlesmeTarihi}}</td>
+      </tr>
+      <tr>
+        <td class="label">Sözleşme / Sipariş Bedeli</td>
+        <td>{{sozlesmeBedeli}}{{^sozlesmeBedeli}}{{genelToplam}}{{/sozlesmeBedeli}} TL</td>
+      </tr>
+      <tr>
+        <td class="label">Fatura Tarihi ve Numarası</td>
+        <td>
+          {{#faturaTarihi}}{{faturaTarihi}}{{/faturaTarihi}}{{^faturaTarihi}}..../..../20....{{/faturaTarihi}} - 
+          {{#faturaNo}}{{faturaNo}}{{/faturaNo}}{{^faturaNo}}........................{{/faturaNo}}
+        </td>
+      </tr>
+      <tr>
+        <td class="label">Muayene / Kabul Tarihi</td>
+        <td>{{#kabulTarihi}}{{kabulTarihi}}{{/kabulTarihi}}{{^kabulTarihi}}{{dosyaTarihi}}{{/kabulTarihi}}</td>
+      </tr>
+    </table>
+
+    <!-- TUTANAK METNİ -->
+    <div class="tutanak-text">
+      Yukarıda adı geçen yüklenici firma tarafından taahhüt edilen mal/hizmet/iş, Muayene ve Kabul Komisyonumuz (veya Muayene ve Kabul görevlimiz) tarafından incelenmiş, muayene edilmiş ve kontrolü yapılmıştır.
     </div>
-    {{/onaylayanlar}}
+    <div class="tutanak-text">
+      Yapılan fiziksel ve teknik inceleme neticesinde; teslim edilen işin sözleşme/sipariş şartlarına, teknik şartnameye ve teklif mektubuna uygun olduğu, tam ve eksiksiz olarak teslim alındığı tespit edilmiştir. İşbu Muayene ve Kabul Tutanağı tarafımızca imza altına alınmıştır.
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th style="width: 8%;">Sıra No</th>
+          <th>Malzeme / İş Adı</th>
+          <th style="width: 15%;">Miktar</th>
+          <th style="width: 15%;">Birim</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#ihtiyacKalemleri}}
+        <tr>
+          <td class="center">{{siraNo}}</td>
+          <td>{{malzemeAdi}}</td>
+          <td class="right">{{miktar}}</td>
+          <td class="center">{{birimi}}</td>
+        </tr>
+        {{/ihtiyacKalemleri}}
+      </tbody>
+    </table>
+
+    <!-- SIGNATURES BLOCK -->
+    <div class="signatures-block">
+      <div class="signatures-title">Muayene ve Kabul Komisyonu</div>
+      <div class="clearfix">
+        {{#muayeneKomisyonu}}
+        <div class="sig-box">
+          <span class="sign-name">{{adSoyad}}</span><br>
+          <span>{{unvan}}</span><br>
+          <span>{{gorevi}}</span>
+        </div>
+        {{/muayeneKomisyonu}}
+        {{^muayeneKomisyonu}}
+          {{#onaylayanlar}}
+          <div class="sig-box">
+            <span class="sign-name">{{onaylayanPersonelAdi}}</span><br>
+            <span>{{onaylayanPersonelUnvan}}</span>
+          </div>
+          {{/onaylayanlar}}
+        {{/muayeneKomisyonu}}
+      </div>
+    </div>
+
+    <!-- APPROVAL (OLUR) SIGNATURE -->
+    {{#olurGoster}}
+    <div class="olur-block">
+      <div class="olur-title">OLUR</div>
+      <div style="margin-bottom: 15px;">{{dosyaTarihi}}</div>
+      <br><br>
+      <span class="sign-name">{{baskanAdi}}</span><br>
+      <span>{{baskanUnvan}}</span>
+    </div>
+    {{/olurGoster}}
+
   </div>
 </body>
 </html>
