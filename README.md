@@ -58,6 +58,28 @@ tüm birimlerle canlı olarak çalışabilirsiniz.
 
 ---
 
+## Ekran Görüntüleri
+
+<p align="center">
+  <img src="docs/screenshots/launcher_screen.png" alt="Başlatıcı Ekranı" width="600" />
+  <br/>
+  <em>Kurum veya çalışma dosyası seçimi</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/login_screen.png" alt="Giriş Ekranı" width="600" />
+  <br/>
+  <em>Dosya giriş ekranı</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard_screen.png" alt="Gösterge Paneli" width="800" />
+  <br/>
+  <em>Süreçlerinizi ve istatistikleri görüntüleyebileceğiniz ana gösterge paneli</em>
+</p>
+
+---
+
 ## Kimler Kullanabilir?
 
 Kamu İhale Kanunu kapsamında **Doğrudan Temin** ile alım yapan tüm kurum ve

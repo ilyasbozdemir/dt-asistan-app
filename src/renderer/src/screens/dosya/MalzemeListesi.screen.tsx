@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { Package, Plus, Trash2, Edit2, Check, X } from 'lucide-react'
+import { Package, Plus, Trash2, Edit2, Check, X, Printer } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { Modal } from '../../components/ui/Modal'
 import { SubScreen } from './SubScreen'
@@ -302,15 +302,18 @@ export function MalzemeListesi(): React.JSX.Element {
       </Modal>
 
       {/* ITEMS LIST */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px]">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px] print:shadow-none print:border-none print:p-0 print:m-0">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <Package className="w-4 h-4 text-blue-600" />
             Dosyadaki Kalemler
             <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full font-bold">{items.length}</span>
           </h3>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 print:hidden">
             {items.length > 0 && (<span className="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full font-extrabold uppercase">{items.reduce((s, i) => s + i.miktar, 0)} Toplam Miktar</span>)}
+            <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">
+              <Printer className="w-3.5 h-3.5" />Yazdır
+            </button>
             <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer">
               <Plus className="w-3.5 h-3.5" />Kalem Ekle
             </button>
@@ -330,7 +333,7 @@ export function MalzemeListesi(): React.JSX.Element {
               <thead className="sticky top-0 bg-slate-50 dark:bg-slate-950 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
                 <tr>
                   <th className="p-3 pl-4">Kalem Adı</th><th className="p-3">Tür</th><th className="p-3 text-center">Miktar</th>
-                  <th className="p-3">Birim</th><th className="p-3 text-center">KDV (%)</th><th className="p-3 text-right pr-4">İşlemler</th>
+                  <th className="p-3">Birim</th><th className="p-3 text-center">KDV (%)</th><th className="p-3 text-right pr-4 print:hidden">İşlemler</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
@@ -354,7 +357,7 @@ export function MalzemeListesi(): React.JSX.Element {
                       <td className="p-3 text-center">
                         {isEditing ? (<select value={editKdv} onChange={(e) => setEditKdv(parseInt(e.target.value, 10))} className="p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-955 rounded text-xs"><option value="0">%0</option><option value="1">%1</option><option value="10">%10</option><option value="20">%20</option></select>) : (<span>%{item.kdv_orani}</span>)}
                       </td>
-                      <td className="p-3 text-right pr-4">
+                      <td className="p-3 text-right pr-4 print:hidden">
                         <div className="flex justify-end gap-2">
                           {isEditing ? (
                             <>

@@ -38,7 +38,7 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* HEADER */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 print:hidden">
         <div className="flex items-center gap-3">
           <Link
             to="/dosyalar"
@@ -61,7 +61,7 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
 
       {/* ACTIVE DOSYA CONTEXT */}
       {activeDosyaId ? (
-        <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
+        <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm print:hidden">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 shrink-0">
               <FileText className="w-5 h-5" />
@@ -89,7 +89,7 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
           </Link>
         </div>
       ) : (
-        <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm">
+        <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm print:hidden">
           <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
           <div>
             Aktif bir doğrudan temin dosyası seçmediniz. Bu ekranda işlem yapabilmek için lütfen önce{' '}
