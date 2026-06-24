@@ -4,6 +4,50 @@ import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
 import { Placeholder, usePlaceholders, useAddPlaceholder, useUpdatePlaceholder, useDeletePlaceholder, useDbTables, useDbColumns, useSablonlar, useResetPlaceholders } from '../sablonlar.hooks'
 
+const UsedInCell = ({ usedIn }: { usedIn: string[] }) => {
+  const [expanded, setExpanded] = useState(false)
+  if (!usedIn || usedIn.length === 0) {
+    return <span className="text-xs text-slate-400 italic">Kullanılmıyor</span>
+  }
+  
+  if (usedIn.length <= 2 || expanded) {
+    return (
+      <div className="flex flex-wrap gap-1 max-w-[250px]">
+        {usedIn.map((tName, idx) => (
+          <span key={idx} className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[200px]" title={tName}>
+            {tName}
+          </span>
+        ))}
+        {expanded && usedIn.length > 2 && (
+          <button onClick={() => setExpanded(false)} className="text-[10px] text-indigo-500 hover:underline px-1.5 py-0.5 rounded">
+            Gizle
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  const visible = usedIn.slice(0, 2)
+  const hiddenCount = usedIn.length - 2
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 max-w-[250px]">
+      {visible.map((tName, idx) => (
+        <span key={idx} className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded truncate max-w-[200px]" title={tName}>
+          {tName}
+        </span>
+      ))}
+      <button 
+        onClick={() => setExpanded(true)}
+        className="text-[10px] bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium px-1.5 py-0.5 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+        title={usedIn.slice(2).join(', ')}
+      >
+        +{hiddenCount} daha
+      </button>
+    </div>
+  )
+}
+
 export function PlaceholderYonetimi(): React.JSX.Element {
   const { data: placeholders = [], isLoading } = usePlaceholders()
   const { data: dbTables = [] } = useDbTables()
@@ -106,14 +150,20 @@ export function PlaceholderYonetimi(): React.JSX.Element {
     return Array.from(new Set(matches.map(m => m.replace(/[{}]/g, ''))))
   }, [selectedSablon])
 
+  const getUsedInTemplates = (anahtar: string) => {
+    return sablonlar
+      .filter(s => s.icerik && s.icerik.includes(`{{${anahtar}}}`))
+      .map(s => s.ad);
+  }
+
   const displayedList = templatePlaceholders 
     ? templatePlaceholders.map(anahtar => {
         const existing = placeholders.find(p => p.anahtar === anahtar)
         return existing 
-          ? { ...existing, isNew: false } 
-          : { id: 0, anahtar, etiket: '', kaynak_tablo: null, kaynak_sutun: null, varsayilan: '', aciklama: '', isNew: true }
+          ? { ...existing, isNew: false, usedIn: getUsedInTemplates(anahtar) } 
+          : { id: 0, anahtar, etiket: '', kaynak_tablo: null, kaynak_sutun: null, varsayilan: '', aciklama: '', isNew: true, usedIn: getUsedInTemplates(anahtar) }
       })
-    : placeholders.map(p => ({ ...p, isNew: false }))
+    : placeholders.map(p => ({ ...p, isNew: false, usedIn: getUsedInTemplates(p.anahtar) }))
 
   return (
     <div className="flex flex-col h-full gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -177,6 +227,7 @@ export function PlaceholderYonetimi(): React.JSX.Element {
               <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800 sticky top-0">
                 <tr>
                   <th className="px-6 py-3">Anahtar (Key)</th>
+                  <th className="px-6 py-3">Kullanıldığı Şablonlar</th>
                   <th className="px-6 py-3">Etiket (Label)</th>
                   <th className="px-6 py-3">Veri Kaynağı</th>
                   <th className="px-6 py-3">Varsayılan Değer</th>
@@ -191,6 +242,9 @@ export function PlaceholderYonetimi(): React.JSX.Element {
                       <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded">
                         {`{{${p.anahtar}}}`}
                       </span>
+                    </td>
+                    <td className="px-6 py-3">
+                      <UsedInCell usedIn={p.usedIn} />
                     </td>
                     <td className="px-6 py-3 text-slate-800 dark:text-slate-200">{p.etiket}</td>
                     <td className="px-6 py-3">
