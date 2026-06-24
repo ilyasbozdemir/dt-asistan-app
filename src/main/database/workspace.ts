@@ -153,6 +153,10 @@ function seedTemplates(db: Database.Database): void {
       if (ad === 'TASINIR ISLEM FISI') ad = 'TAŞINIR İŞLEM FİŞİ'
       if (ad === 'IHALE KOMISYON KARARI') ad = 'İHALE KOMİSYON KARARI'
       if (ad === 'ODEME YAZISI') ad = 'ÖDEME YAZISI'
+      if (ad === 'KLASOR SIRTLIGI 3CM') ad = 'KLASÖR SIRTLIĞI (3 CM)'
+      if (ad === 'KLASOR SIRTLIGI 5CM') ad = 'KLASÖR SIRTLIĞI (5 CM)'
+      if (ad === 'KLASOR SIRTLIGI 7 5CM' || ad === 'KLASOR SIRTLIGI 7.5CM') ad = 'KLASÖR SIRTLIĞI (7.5 CM)'
+      if (ad === 'KAPAK ICI INDEKS SABLONU') ad = 'KAPAK İÇİ İNDEKS ŞABLONU'
 
       if (parentDir !== 'templates') {
         // Kategori adını klasör adından (örn: 1-ihtiyac-tespiti -> İhtiyaç Tespiti) oluştur
@@ -170,6 +174,10 @@ function seedTemplates(db: Database.Database): void {
             kategori = topLevelFolder.charAt(0).toUpperCase() + topLevelFolder.slice(1).replace(/-/g, ' ')
           }
         }
+      }
+
+      if (kategori === '5. Klasor Ve Kapaklar') {
+        kategori = '5. Klasör Sırtlıkları & Kapaklar'
       }
 
       const jsonFilePath = filePath + '.json'

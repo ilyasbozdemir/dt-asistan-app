@@ -45,12 +45,23 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
         const footerHtml = footerEl ? footerEl.outerHTML : '<div></div>';
         
         const headerEl = document.querySelector('.paged-header');
-        const headerHtml = headerEl ? headerEl.outerHTML : '<div></div>';
-        const hasHeader = !!headerEl;
+        const isFirstPageOnly = headerEl && headerEl.getAttribute('data-behavior') === 'first-page-only';
+        
+        let headerHtml = '<div></div>';
+        let hasHeader = false;
+        
+        if (headerEl) {
+          if (isFirstPageOnly) {
+            // Keep first-page-only headers in the body so they only print on the first page
+          } else {
+            headerHtml = headerEl.outerHTML;
+            hasHeader = true;
+            headerEl.remove();
+          }
+        }
 
-        // Remove footer and header from body so they don't print in the main content
+        // Remove footer from body so it doesn't print in the main content
         if (footerEl) footerEl.remove();
-        if (headerEl) headerEl.remove();
         
         return { footerHtml, headerHtml, hasHeader };
       })()
