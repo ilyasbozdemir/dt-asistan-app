@@ -278,6 +278,7 @@ export default function PersonelScreen(): React.ReactNode {
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Ad Soyad *</label>
               <Input
                 required
+                autoFocus
                 placeholder="Örn: Ahmet Yılmaz"
                 value={formData.ad_soyad}
                 onChange={(e) => setFormData({ ...formData, ad_soyad: e.target.value })}

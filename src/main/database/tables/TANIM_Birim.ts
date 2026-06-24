@@ -22,9 +22,35 @@ export const TANIM_Birim = {
     { name: 'created_at', type: 'DATETIME', default: 'CURRENT_TIMESTAMP' }
   ],
   initialData: [
-    { birim_adi: 'Fen İşleri Müdürlüğü' },
-    { birim_adi: 'Mali Hizmetler Müdürlüğü' },
-    { birim_adi: 'Yazı İşleri Müdürlüğü' },
-    { birim_adi: 'Zabıta Amirliği' }
+    {
+      birim_adi: 'Fen İşleri Müdürlüğü',
+      antet_ek_satir: 'FEN İŞLERİ MÜDÜRLÜĞÜ',
+      sunum_makami: 'FEN İŞLERİ MÜDÜRLÜĞÜNE',
+      aktif_mi: 1
+    },
+    {
+      birim_adi: 'Mali Hizmetler Müdürlüğü',
+      antet_ek_satir: 'MALİ HİZMETLER MÜDÜRLÜĞÜ',
+      sunum_makami: 'MALİ HİZMETLER MÜDÜRLÜĞÜNE',
+      aktif_mi: 1
+    },
+    {
+      birim_adi: 'Yazı İşleri Müdürlüğü',
+      antet_ek_satir: 'YAZI İŞLERİ MÜDÜRLÜĞÜ',
+      sunum_makami: 'YAZI İŞLERİ MÜDÜRLÜĞÜNE',
+      aktif_mi: 1
+    },
+    {
+      birim_adi: 'Zabıta Amirliği',
+      antet_ek_satir: 'ZABITA AMİRLİĞİ',
+      sunum_makami: 'ZABITA AMİRLİĞİNE',
+      aktif_mi: 1
+    },
+    {
+      birim_adi: 'Destek Hizmetleri Müdürlüğü',
+      antet_ek_satir: 'DESTEK HİZMETLERİ MÜDÜRLÜĞÜ',
+      sunum_makami: 'DESTEK HİZMETLERİ MÜDÜRLÜĞÜNE',
+      aktif_mi: 1
+    }
   ]
 }

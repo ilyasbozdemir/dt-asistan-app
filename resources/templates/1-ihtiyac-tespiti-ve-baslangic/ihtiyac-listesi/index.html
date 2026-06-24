@@ -284,45 +284,93 @@
   </div>
 
   <script>
-    // Tablo satırlarını sayıp maksimum satır sınırlarına göre sayfalara bölme
-    window.addEventListener('DOMContentLoaded', () => {
-      const tbody = document.querySelector('.content-table tbody');
+    // Dinamik yükseklik tabanlı sayfalama motoru (Chromium Layout Engine)
+    function performPagination() {
+      const container = document.querySelector('.page-container');
+      const table = document.querySelector('.content-table');
+      const tbody = table ? table.querySelector('tbody') : null;
       if (!tbody) return;
       const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (rows.length === 0) return;
+
+      const approval = document.querySelector('.approval');
       
-      const MAX_ROWS = 20; // Normal sayfalar için maksimum satır
-      const SAFE_LAST_PAGE_ROWS = 12; // İmzanın da sığabileceği maksimum satır
+      // Mevcut sayfa sonlarını sıfırla
+      rows.forEach(r => {
+        r.style.breakBefore = '';
+        r.style.pageBreakBefore = '';
+      });
+      if (approval) {
+        approval.style.breakBefore = '';
+        approval.style.pageBreakBefore = '';
+      }
+
+      // Elementlerin gerçek yüksekliklerini ölç
+      const containerRect = container.getBoundingClientRect();
+      const tableRect = table.getBoundingClientRect();
+      const theadRect = table.querySelector('thead').getBoundingClientRect();
       
-      let rowsOnCurrentPage = 0;
+      const beforeTableHeight = tableRect.top - containerRect.top;
+      const theadHeight = theadRect.height;
+      const rowHeights = rows.map(row => row.getBoundingClientRect().height);
+      const approvalHeight = approval ? approval.getBoundingClientRect().height : 0;
+      
+      // A4 yazdırılabilir alan yüksekliği (bütçe) ~890px
+      const PAGE_HEIGHT = 890;
+      
+      let breaks = [];
+      let currentPageHeight = beforeTableHeight + theadHeight;
+      let lastPageStartIdx = 0;
       
       for (let i = 0; i < rows.length; i++) {
-         rowsOnCurrentPage++;
-         const isLastRow = i === rows.length - 1;
-         
-         if (isLastRow) {
-            // Son satırdayız. Eğer bu sayfada imza için yeterli yer kalmadıysa
-            // son satırı (ve doğal olarak imzayı) yeni sayfaya at.
-            if (rowsOnCurrentPage > SAFE_LAST_PAGE_ROWS) {
-               rows[i].style.breakBefore = 'page';
-               rows[i].style.pageBreakBefore = 'always';
-            }
-         } else {
-            // Normal satır
-            if (rowsOnCurrentPage >= MAX_ROWS) {
-               // Maksimum satıra ulaştık, zorunlu sayfa sonu
-               rows[i + 1].style.breakBefore = 'page';
-               rows[i + 1].style.pageBreakBefore = 'always';
-               rowsOnCurrentPage = 0;
-            } else if (rows.length - i <= 5 && rowsOnCurrentPage > 15) {
-               // Kalan satır sayısı az (<= 5) ve mevcut sayfa bayağı doldu (>15)
-               // İmzayı yalnız bırakmamak için kalan satırları şimdiden yeni sayfaya atalım.
-               rows[i + 1].style.breakBefore = 'page';
-               rows[i + 1].style.pageBreakBefore = 'always';
-               rowsOnCurrentPage = 0;
-            }
-         }
+        const h = rowHeights[i];
+        if (currentPageHeight + h > PAGE_HEIGHT) {
+          breaks.push(i);
+          currentPageHeight = theadHeight + h;
+          lastPageStartIdx = i;
+        } else {
+          currentPageHeight += h;
+        }
       }
-    });
+      
+      // Yetim onay/imza bloğu kontrolü (Orphan signature prevention)
+      if (approval) {
+        if (currentPageHeight + approvalHeight > PAGE_HEIGHT) {
+          // Onay bloğu bir sonraki sayfaya taşacak.
+          // Yalnız kalmaması için son sayfada en az 2 satır olmasını garanti edelim.
+          const rowsOnLastPage = rows.length - lastPageStartIdx;
+          if (rowsOnLastPage > 2) {
+            const newBreakIdx = rows.length - 2;
+            if (!breaks.includes(newBreakIdx)) {
+              breaks = [];
+              currentPageHeight = beforeTableHeight + theadHeight;
+              lastPageStartIdx = 0;
+              for (let i = 0; i < rows.length; i++) {
+                const h = rowHeights[i];
+                if (i === newBreakIdx || (currentPageHeight + h > PAGE_HEIGHT)) {
+                  breaks.push(i);
+                  currentPageHeight = theadHeight + h;
+                  lastPageStartIdx = i;
+                } else {
+                  currentPageHeight += h;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Belirlenen satırlara sayfa sonu stilini uygula
+      breaks.forEach(idx => {
+        if (idx < rows.length) {
+          rows[idx].style.breakBefore = 'page';
+          rows[idx].style.pageBreakBefore = 'always';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', performPagination);
+    window.addEventListener('load', performPagination);
   </script>
 </body>
 </html>
