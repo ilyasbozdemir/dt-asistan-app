@@ -713,36 +713,12 @@ export default function KurumScreen(): React.JSX.Element {
                                 <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                                   Muhasebe Birim Kodu
                                 </label>
-                                <div className="flex gap-2">
-                                  <Input
-                                    value={muhasebeBirimKodu}
-                                    onChange={(e) => setMuhasebeBirimKodu(e.target.value)}
-                                    placeholder="Örn: 38220"
-                                    className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs flex-1"
-                                  />
-                                  {sozlukData.filter(d => d.tur === 'muhasebe_birimi').length > 0 && (
-                                    <select
-                                      value=""
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (val) {
-                                          setMuhasebeBirimKodu(val);
-                                          const selected = sozlukData.find(d => d.tur === 'muhasebe_birimi' && d.kod === val);
-                                          setMuhasebeBirimAdi(selected ? selected.aciklama : '');
-                                        }
-                                      }}
-                                      title="Listeden Seç"
-                                      className="bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[120px]"
-                                    >
-                                      <option value="">Seç...</option>
-                                      {sozlukData.filter(d => d.tur === 'muhasebe_birimi').map(item => (
-                                        <option key={item.kod} value={item.kod}>
-                                          {item.kod} — {item.aciklama}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  )}
-                                </div>
+                              <Input
+                                value={muhasebeBirimKodu}
+                                onChange={(e) => setMuhasebeBirimKodu(e.target.value)}
+                                placeholder="Örn: 38220"
+                                className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
+                              />
                               </div>
                               <div>
                                 <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
@@ -768,36 +744,12 @@ export default function KurumScreen(): React.JSX.Element {
                                 <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                                   Harcama Birim Kodu
                                 </label>
-                                <div className="flex gap-2">
-                                  <Input
-                                    value={harcamaBirimKodu}
-                                    onChange={(e) => setHarcamaBirimKodu(e.target.value)}
-                                    placeholder="Örn: 38.22.00.01"
-                                    className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs flex-1"
-                                  />
-                                  {sozlukData.filter(d => d.tur === 'harcama_birimi').length > 0 && (
-                                    <select
-                                      value=""
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (val) {
-                                          setHarcamaBirimKodu(val);
-                                          const selected = sozlukData.find(d => d.tur === 'harcama_birimi' && d.kod === val);
-                                          setHarcamaBirimAdi(selected ? selected.aciklama : '');
-                                        }
-                                      }}
-                                      title="Listeden Seç"
-                                      className="bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[120px]"
-                                    >
-                                      <option value="">Seç...</option>
-                                      {sozlukData.filter(d => d.tur === 'harcama_birimi').map(item => (
-                                        <option key={item.kod} value={item.kod}>
-                                          {item.kod} — {item.aciklama}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  )}
-                                </div>
+                              <Input
+                                value={harcamaBirimKodu}
+                                onChange={(e) => setHarcamaBirimKodu(e.target.value)}
+                                placeholder="Örn: 38.22.00.01"
+                                className="bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
+                              />
                               </div>
                               <div>
                                 <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">

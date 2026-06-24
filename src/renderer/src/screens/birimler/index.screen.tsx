@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useBirimlerHooks, BirimInput, usePersonelList } from './birimler.hooks'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
@@ -49,17 +49,7 @@ export default function BirimlerScreen(): React.ReactNode {
   const [viewingBirim, setViewingBirim] = useState<any | null>(null)
   
   const [ihtiyacYeriList, setIhtiyacYeriList] = useState<string[]>([''])
-  const [sozlukData, setSozlukData] = useState<{ tur: string; kod: string; aciklama: string }[]>([])
 
-  useEffect(() => {
-    window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM TANIM_KodSozlugu WHERE aktif_mi = 1')
-      .then(res => {
-        if (res.success && res.data) {
-          setSozlukData(res.data)
-        }
-      })
-      .catch(console.error)
-  }, [])
   
   const isMuhasebe = form.birim_adi.toLowerCase().includes('muhasebe') || form.birim_adi.toLowerCase().includes('mali') || form.birim_adi.toLowerCase().includes('harcama')
   
@@ -532,30 +522,8 @@ export default function BirimlerScreen(): React.ReactNode {
                         value={form.muhasebe_kodu || ''}
                         onChange={(e) => handleChange('muhasebe_kodu', e.target.value)}
                         placeholder="Örn: 38220"
-                        className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs flex-1"
+                        className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs"
                       />
-                      {sozlukData.filter(d => d.tur === 'muhasebe_birimi').length > 0 && (
-                        <select
-                          value=""
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val) {
-                              handleChange('muhasebe_kodu', val);
-                              const selected = sozlukData.find(d => d.tur === 'muhasebe_birimi' && d.kod === val);
-                              handleChange('muhasebe_adi', selected ? selected.aciklama : '');
-                            }
-                          }}
-                          title="Listeden Seç"
-                          className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[120px]"
-                        >
-                          <option value="">Seç...</option>
-                          {sozlukData.filter(d => d.tur === 'muhasebe_birimi').map(item => (
-                            <option key={item.kod} value={item.kod}>
-                              {item.kod} — {item.aciklama}
-                            </option>
-                          ))}
-                        </select>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -587,30 +555,8 @@ export default function BirimlerScreen(): React.ReactNode {
                         value={form.harcama_kodu || ''}
                         onChange={(e) => handleChange('harcama_kodu', e.target.value)}
                         placeholder="Örn: 38.22.00.01"
-                        className="bg-slate-50 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs flex-1"
+                        className="bg-slate-50 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
                       />
-                      {sozlukData.filter(d => d.tur === 'harcama_birimi').length > 0 && (
-                        <select
-                          value=""
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val) {
-                              handleChange('harcama_kodu', val);
-                              const selected = sozlukData.find(d => d.tur === 'harcama_birimi' && d.kod === val);
-                              handleChange('harcama_adi', selected ? selected.aciklama : '');
-                            }
-                          }}
-                          title="Listeden Seç"
-                          className="bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-2 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[120px]"
-                        >
-                          <option value="">Seç...</option>
-                          {sozlukData.filter(d => d.tur === 'harcama_birimi').map(item => (
-                            <option key={item.kod} value={item.kod}>
-                              {item.kod} — {item.aciklama}
-                            </option>
-                          ))}
-                        </select>
-                      )}
                     </div>
                   </div>
                   <div>
@@ -754,8 +700,9 @@ export default function BirimlerScreen(): React.ReactNode {
                 <select
                   value={form.ilgili_personel_id || ''}
                   onChange={(e) => handleChange('ilgili_personel_id', e.target.value ? Number(e.target.value) : null)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm py-2 h-10 rounded-xl px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-sm py-2 h-10 rounded-xl px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   disabled={isLoadingPersonel}
+                  title="İlgili Personel"
                 >
                   <option value="">-- Personel Seçiniz --</option>
                   {personeller.map(p => (
