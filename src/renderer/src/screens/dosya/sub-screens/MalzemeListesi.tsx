@@ -20,10 +20,11 @@ export function MalzemeListesi(): React.JSX.Element {
     try {
       setIsPrinting(true)
       const settingsRes = await (window as any).electron.ipcRenderer.invoke('db:get-settings')
-      const sablonIdStr = settingsRes ? settingsRes['MAPPING_IHTIYAC_LISTESI_SABLON_ID'] : null
+      const processPath = '/dosya/malzemeler/liste'
+      const sablonIdStr = settingsRes ? settingsRes[`MAPPING_${processPath}_SABLON_ID`] : null
       
       if (!sablonIdStr) {
-        alert("Lütfen Şablon & Kategori Yönetimi bölümünden İhtiyaç Listesi için bir şablon bağlayınız.")
+        alert("Lütfen Şablon & Kategori Yönetimi bölümünden bu süreç için bir şablon bağlayınız.")
         return
       }
 
@@ -40,9 +41,9 @@ export function MalzemeListesi(): React.JSX.Element {
 
       // Context ile override verilerini birleştir
       let finalContext = { ...dosyaContext }
-      if (settingsRes['MAPPING_IHTIYAC_LISTESI_JSON_OVERRIDE']) {
+      if (settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`]) {
          try {
-            const overrideData = JSON.parse(settingsRes['MAPPING_IHTIYAC_LISTESI_JSON_OVERRIDE'])
+            const overrideData = JSON.parse(settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`])
             finalContext = { ...finalContext, ...overrideData }
          } catch (e) {
             console.error('JSON Override parse hatası:', e)
