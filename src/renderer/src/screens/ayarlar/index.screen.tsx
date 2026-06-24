@@ -654,16 +654,6 @@ export default function AyarlarScreen(): React.ReactNode {
                   </Button>
                 </div>
               )}
-
-              <div className="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">
-                <Button
-                  onClick={() => handleSaveTab(activeTab)}
-                  disabled={saving}
-                  className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl py-2 px-5 text-sm font-semibold transition-all shadow-md shadow-primary/20"
-                >
-                  <Save className="w-4 h-4" /> Sekme Ayarlarını Kaydet
-                </Button>
-              </div>
             </>
           )}
         </div>

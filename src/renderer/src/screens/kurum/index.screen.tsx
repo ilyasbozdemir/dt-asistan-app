@@ -647,20 +647,40 @@ export default function KurumScreen(): React.JSX.Element {
                           {/* DETSİS Kodu */}
                           <div>
                             <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
-                              DETSİS Kodu (DTVT)
+                              DETSİS Kodu
                               <a href={detsisKodu ? `https://detsis.gov.tr/birim/${detsisKodu}/${detsisKodu}/${new Date().toISOString().split('T')[0]}` : "https://www.detsis.gov.tr/"} target="_blank" rel="noreferrer" className="text-[10px] text-blue-600 hover:underline flex items-center gap-1 ml-auto" title="Devlet Teşkilatı Merkezi Kayıt Sistemi">
                                 DETSİS Sorgula <ExternalLink className="w-3 h-3" />
                               </a>
                             </label>
                             <Input
                               value={detsisKodu}
-                              onChange={(e) => setDetsisKodu(e.target.value)}
+                              onChange={(e) => {
+                                setDetsisKodu(e.target.value)
+                                setDtvtKodu(e.target.value)
+                              }}
                               placeholder="DETSİS Kodunuzu girin..."
                               className="w-full bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
                             />
-                            <p className="text-[10px] text-slate-400 mt-1 leading-normal">
-                              Kurumunuzun Devlet Teşkilatı Merkezi Kayıt Sistemi'ndeki kodu.
-                            </p>
+                            <div className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex flex-col gap-1.5 leading-relaxed">
+                              {detsisKodu ? (
+                                <div className="flex items-center gap-1.5 ml-1">
+                                  <ExternalLink className="w-3 h-3 shrink-0" />
+                                  <a href={`https://detsis.gov.tr/birim/${detsisKodu}/${detsisKodu}/${new Date().toISOString().split('T')[0]}`} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">
+                                    Kurum Künyesine Git
+                                  </a>
+                                </div>
+                              ) : (
+                                <div className="flex items-start gap-1.5">
+                                  <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                  <span>
+                                    DTVT sistemi, DETSİS olarak güncellenmiştir. Kodunuzu bilmiyorsanız{' '}
+                                    <a href="https://detsis.gov.tr/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">
+                                      DETSİS'te Arama Yapın
+                                    </a>.
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           {/* Kurumsal Kod */}
@@ -793,43 +813,7 @@ export default function KurumScreen(): React.JSX.Element {
                             </div>
                           </div>
 
-                          {/* DETSİS (Eski DTVT) Kodu */}
-                          <div className="md:col-span-2">
-                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
-                              DETSİS Kodu <span className="text-[10px] font-normal text-slate-400">(Eski adıyla DTVT)</span>
-                            </label>
-                            <Input
-                              value={dtvtKodu}
-                              onChange={e => {
-                                setDtvtKodu(e.target.value)
-                                setDetsisKodu(e.target.value)
-                              }}
-                              placeholder="Kurumunuzun DETSİS kodunu girin..."
-                              className="w-full bg-slate-55 dark:bg-slate-955 border-slate-200 dark:border-slate-800 text-xs"
-                            />
-                            <div className="mt-2 text-[10px] text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-100 dark:border-amber-900/50 flex flex-col gap-1.5 leading-relaxed">
-                              
-                              {dtvtKodu ? (
-                                <div className="flex items-center gap-1.5 ml-5">
-                                  <ExternalLink className="w-3 h-3" />
-                                  <a href={`https://detsis.gov.tr/birim/${dtvtKodu}/${dtvtKodu}/${new Date().toISOString().split('T')[0]}`} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">
-                                    Kurum Künyesine Git
-                                  </a>
-                                </div>
-                              )
-                            :
-                            <>
-                            <div className="flex items-start gap-1.5">
-                                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                <span>
-                                  DTVT (Devlet Teşkilatı Veri Tabanı) sistemi, DETSİS (Devlet Teşkilatı Merkezi Kayıt Sistemi) olarak güncellenmiştir.
-                                  Kurum kodunuzu bilmiyorsanız <a href={dtvtKodu ? `https://detsis.gov.tr/birim/${dtvtKodu}/${dtvtKodu}/${new Date().toISOString().split('T')[0]}` : "https://detsis.gov.tr/"} target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-700 dark:hover:text-amber-400">DETSİS'te Arama Yapın</a>.
-                                </span>
-                              </div>
-                            </>
-                            }
-                            </div>
-                          </div>
+
 
                         </div>
                       </div>
