@@ -67,13 +67,13 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/dosyalar"
+          <button
+            onClick={() => window.history.back()}
             className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 transition-all shadow-sm"
-            title="Dosyalara Dön"
+            title="Geri Dön"
           >
             <ArrowLeft className="w-5 h-5" />
-          </Link>
+          </button>
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <Icon className="w-7 h-7 text-blue-600" />
