@@ -93,7 +93,7 @@ const komisyonGorevleriRoute = createRoute({
 })
 
 import { TakipScreen } from './screens/system/TakipScreen'
-import { CiktiMerkezi } from './screens/dosya/CiktiMerkezi'
+import { CiktiMerkeziScreen } from './screens/dosya/CiktiMerkezi.screen'
 import TaslakYoneticisi from './screens/system/TaslakYoneticisi'
 
 // Dynamic routes
@@ -112,7 +112,7 @@ const taslakYonetimiRoute = createRoute({
 const ciktiMerkeziDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/cikti-merkezi',
-  component: CiktiMerkezi
+  component: CiktiMerkeziScreen
 })
 
 
@@ -210,8 +210,7 @@ import {
   IhaleOnayBelgesi,
   ButceSorgusu,
   HarcamaTalimati,
-  HarcamaPusulasi,
-  CiktiMerkeziScreen
+  HarcamaPusulasi
 } from './screens/dosya/SubScreens.screen'
 
 const profilRoute = createRoute({
