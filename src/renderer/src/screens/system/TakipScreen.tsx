@@ -12,7 +12,13 @@ import {
   Layers,
   ChevronRight,
   FileCheck,
-  HelpCircle
+  HelpCircle,
+  Star,
+  EyeOff,
+  Save,
+  Plus,
+  XCircle,
+  FileSignature
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -42,6 +48,101 @@ export function TakipScreen(): React.JSX.Element {
     },
     enabled: !!activeDosyaId
   })
+
+  // Fetch Taslaklar
+  const { data: dbTaslaklar = [], refetch: refetchTaslaklar } = useQuery<any[]>({
+    queryKey: ['takip_taslaklar'],
+    queryFn: async () => {
+      const res = await window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM TANIM_SurecTaslak WHERE aktif_mi = 1')
+      if (!res.success) return []
+      return res.data.map((t: any) => ({
+        ...t,
+        starred_docs: t.starred_docs ? JSON.parse(t.starred_docs) : [],
+        skipped_docs: t.skipped_docs ? JSON.parse(t.skipped_docs) : []
+      }))
+    }
+  })
+
+  // Local state for active dossier configurations
+  const [starredDocs, setStarredDocs] = useState<string[]>([])
+  const [skippedDocs, setSkippedDocs] = useState<string[]>([])
+  const [isTaslakModalOpen, setIsTaslakModalOpen] = useState(false)
+  const [newTaslakAdi, setNewTaslakAdi] = useState('')
+
+  // Sync state with activeDosya
+  useEffect(() => {
+    if (activeDosya) {
+      try {
+        setStarredDocs(activeDosya.starred_docs ? JSON.parse(activeDosya.starred_docs) : [])
+      } catch { setStarredDocs([]) }
+      try {
+        setSkippedDocs(activeDosya.skipped_docs ? JSON.parse(activeDosya.skipped_docs) : [])
+      } catch { setSkippedDocs([]) }
+    } else {
+      setStarredDocs([])
+      setSkippedDocs([])
+    }
+  }, [activeDosyaId, activeDosya?.starred_docs, activeDosya?.skipped_docs])
+
+  // Update Database when starred/skipped changes
+  const saveDosyaConfig = async (newStarred: string[], newSkipped: string[]) => {
+    if (!activeDosyaId) return
+    setStarredDocs(newStarred)
+    setSkippedDocs(newSkipped)
+    await window.electron.ipcRenderer.invoke(
+      'db:execute',
+      `UPDATE DATA_TeminDosyasi SET starred_docs = ?, skipped_docs = ? WHERE id = ?`,
+      JSON.stringify(newStarred),
+      JSON.stringify(newSkipped),
+      activeDosyaId
+    )
+  }
+
+  const toggleStar = (docName: string) => {
+    let updated
+    if (starredDocs.includes(docName)) updated = starredDocs.filter(d => d !== docName)
+    else updated = [...starredDocs, docName]
+    saveDosyaConfig(updated, skippedDocs)
+  }
+
+  const toggleSkip = (docName: string) => {
+    let updated
+    if (skippedDocs.includes(docName)) updated = skippedDocs.filter(d => d !== docName)
+    else updated = [...skippedDocs, docName]
+    saveDosyaConfig(starredDocs, updated)
+  }
+
+  const applyTaslak = async (taslakId: string) => {
+    if (!taslakId || taslakId === 'none') {
+       saveDosyaConfig([], [])
+       return
+    }
+    const taslak = dbTaslaklar.find(t => t.id.toString() === taslakId)
+    if (taslak) {
+       saveDosyaConfig(taslak.starred_docs, taslak.skipped_docs)
+       await window.electron.ipcRenderer.invoke(
+         'db:execute',
+         `UPDATE DATA_TeminDosyasi SET surec_taslak_id = ? WHERE id = ?`,
+         taslak.id,
+         activeDosyaId
+       )
+    }
+  }
+
+  const saveTaslak = async () => {
+    if (!newTaslakAdi.trim()) return
+    await window.electron.ipcRenderer.invoke(
+      'db:execute',
+      `INSERT INTO TANIM_SurecTaslak (taslak_adi, tur, starred_docs, skipped_docs) VALUES (?, ?, ?, ?)`,
+      newTaslakAdi,
+      activeDosya?.tur || '',
+      JSON.stringify(starredDocs),
+      JSON.stringify(skippedDocs)
+    )
+    setIsTaslakModalOpen(false)
+    setNewTaslakAdi('')
+    refetchTaslaklar()
+  }
 
   // 2. Fetch stages from DB
   const { data: dbAsamalar = [] } = useQuery<any[]>({
@@ -109,6 +210,7 @@ export function TakipScreen(): React.JSX.Element {
   // Determine dynamic completion of documents/actions
   const getDocumentStatus = (docName: string) => {
     if (!activeDosya) return 'bekliyor'
+    if (skippedDocs.includes(docName)) return 'atlandi'
     
     const lowerName = docName.toLowerCase()
     
@@ -343,14 +445,53 @@ export function TakipScreen(): React.JSX.Element {
           {/* RIGHT: DYNAMIC DOCUMENT CHECKLIST */}
           <div className="lg:col-span-4 space-y-6">
             
+            {/* HIZLI ERİŞİM KISAYOLLARI */}
+            {starredDocs.length > 0 && (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/10 border border-amber-200/50 dark:border-amber-900/30 rounded-3xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                  <h3 className="text-sm font-bold text-amber-900 dark:text-amber-500">Hızlı Erişim Belgeleri</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {starredDocs.map((doc, idx) => (
+                    <div key={idx} className="bg-white/60 dark:bg-slate-900/50 border border-amber-200/40 dark:border-amber-800/40 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-800 dark:text-amber-400 flex items-center gap-1.5 hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                      <FileSignature className="w-3.5 h-3.5" />
+                      {doc}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm sticky top-6">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Gerekli Belgeler Rehberi</h3>
-                  <p className="text-[10px] text-slate-500 capitalize">
-                    {activeDosya.tur} Alımı Süreç Belgeleri
-                  </p>
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Gerekli Belgeler Rehberi</h3>
+                    <p className="text-[10px] text-slate-500 capitalize">
+                      {activeDosya.tur} Alımı Süreç Belgeleri
+                    </p>
+                  </div>
+                </div>
+                {/* TASLAK MENÜSÜ */}
+                <div className="flex flex-col gap-1 items-end">
+                  <select 
+                    className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 outline-none text-slate-700 dark:text-slate-300"
+                    value={activeDosya.surec_taslak_id || 'none'}
+                    onChange={(e) => applyTaslak(e.target.value)}
+                  >
+                    <option value="none">Varsayılan Süreç (Taslaksız)</option>
+                    {dbTaslaklar.map(t => (
+                      <option key={t.id} value={t.id}>{t.taslak_adi}</option>
+                    ))}
+                  </select>
+                  <button 
+                    onClick={() => setIsTaslakModalOpen(true)}
+                    className="text-[10px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    <Save className="w-3 h-3" /> Bu Ayarı Taslak Kaydet
+                  </button>
                 </div>
               </div>
 
@@ -363,13 +504,19 @@ export function TakipScreen(): React.JSX.Element {
                   {activeAlimTuru.belgeler.map((b: any, idx: number) => {
                     const documentName = typeof b === 'string' ? b : (b?.ad || '')
                     const status = getDocumentStatus(documentName)
+                    const isStarred = starredDocs.includes(documentName)
+                    const isSkipped = skippedDocs.includes(documentName)
 
                     return (
-                      <div key={idx} className="flex items-start justify-between gap-3 p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/35 border border-slate-100/50 dark:border-slate-850/50 transition-colors">
-                        <div className="flex gap-2.5">
-                          <div className="mt-0.5 shrink-0">
+                      <div key={idx} className={`flex items-start justify-between gap-3 p-2.5 rounded-xl border transition-colors group ${
+                        isSkipped ? 'bg-slate-100/50 dark:bg-slate-900/50 border-transparent opacity-60' : 'bg-slate-50/50 dark:bg-slate-950/35 border-slate-100/50 dark:border-slate-850/50'
+                      }`}>
+                        <div className="flex gap-2.5 items-center">
+                          <div className="shrink-0">
                             {status === 'tamamlandi' ? (
                               <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-500/10" />
+                            ) : status === 'atlandi' ? (
+                              <XCircle className="w-4 h-4 text-slate-400" />
                             ) : status === 'aktif' ? (
                               <Clock className="w-4 h-4 text-blue-500 animate-pulse" />
                             ) : (
@@ -377,13 +524,21 @@ export function TakipScreen(): React.JSX.Element {
                             )}
                           </div>
                           <div>
-                            <span className="text-xs font-semibold text-slate-755 dark:text-slate-300 block leading-tight">
+                            <span className={`text-xs font-semibold block leading-tight ${isSkipped ? 'text-slate-500 line-through decoration-slate-400' : 'text-slate-755 dark:text-slate-300'}`}>
                               {documentName}
                             </span>
                             <span className="text-[9px] text-slate-450 mt-0.5 block capitalize">
-                              {status === 'tamamlandi' ? 'Veri Kaydı Var / Hazır' : status === 'aktif' ? 'Veri Girişi Bekleniyor' : 'Aşama Bekliyor'}
+                              {status === 'tamamlandi' ? 'Veri Kaydı Var / Hazır' : status === 'atlandi' ? 'Atlandı / Dışarıdan Sağlandı' : status === 'aktif' ? 'Veri Girişi Bekleniyor' : 'Aşama Bekliyor'}
                             </span>
                           </div>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => toggleStar(documentName)} className={`p-1.5 rounded-md hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors ${isStarred ? 'text-amber-500' : 'text-slate-400'}`} title="Hızlı Erişime Ekle / Çıkar">
+                            <Star className={`w-3.5 h-3.5 ${isStarred ? 'fill-amber-500' : ''}`} />
+                          </button>
+                          <button onClick={() => toggleSkip(documentName)} className={`p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors ${isSkipped ? 'text-red-500' : 'text-slate-400'}`} title={isSkipped ? "Geri Al" : "Evrak Atla (Dışarıdan Sağlandı)"}>
+                            <EyeOff className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     )
@@ -524,6 +679,42 @@ export function TakipScreen(): React.JSX.Element {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* TASLAK KAYDETME MODALI */}
+      {isTaslakModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Save className="w-5 h-5 text-blue-600" />
+                Süreç Taslağı Olarak Kaydet
+              </h3>
+              <button onClick={() => setIsTaslakModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-slate-500">
+                Şu anki yıldızlı ve atlanmış belgeler konfigürasyonunuzu bir taslak olarak kaydederek diğer dosyalarda hızlıca uygulayabilirsiniz.
+              </p>
+              <div>
+                <label className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 block">Taslak Adı</label>
+                <input 
+                  type="text" 
+                  value={newTaslakAdi}
+                  onChange={(e) => setNewTaslakAdi(e.target.value)}
+                  placeholder="Örn: Dışarıdan Teklifli Alım"
+                  className="w-full text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-200"
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button variant="ghost" onClick={() => setIsTaslakModalOpen(false)} className="text-xs">İptal</Button>
+                <Button onClick={saveTaslak} disabled={!newTaslakAdi.trim()} className="bg-blue-600 hover:bg-blue-700 text-xs px-6">Kaydet</Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

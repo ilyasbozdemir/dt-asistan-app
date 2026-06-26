@@ -11,6 +11,7 @@ import { TANIM_AlimTuru } from './tables/TANIM_AlimTuru'
 import { TANIM_Sablon } from './tables/TANIM_Sablon'
 import { TANIM_Placeholder } from './tables/TANIM_Placeholder'
 import { TANIM_AlimTuru_Sablon } from './tables/TANIM_AlimTuru_Sablon'
+import { TANIM_SurecTaslak } from './tables/TANIM_SurecTaslak'
 import { SABLON_Placeholder } from './tables/SABLON_Placeholder'
 import { TANIM_Kalem } from './tables/TANIM_Kalem'
 import { TANIM_TasinirKod } from './tables/TANIM_TasinirKod'
@@ -65,6 +66,7 @@ export const schema = {
     TANIM_Sablon, // Şablonlar
     TANIM_Placeholder, // Dinamik alanlar
     TANIM_AlimTuru_Sablon, // Alım türü ve şablon eşleşmeleri
+    TANIM_SurecTaslak, // Süreç Taslakları
     SABLON_Placeholder, // Şablon içi alan eşleşmeleri
     TANIM_KodSozlugu, // Kurumsal ve Mali Kod Sözlüğü
     TANIM_KomisyonGorevi, // Komisyon Görev Tanımları
