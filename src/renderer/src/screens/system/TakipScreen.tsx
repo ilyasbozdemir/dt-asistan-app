@@ -21,7 +21,7 @@ import { Button } from '../../components/ui/Button'
 import { useEffect, useState } from 'react'
 
 export function TakipScreen(): React.JSX.Element {
-  const { activeDosyaId } = useWorkspaceStore()
+  const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
   const { dosyalar } = useDosyalarHooks()
 
   // 1. Fetch active dossier details
@@ -457,24 +457,73 @@ export function TakipScreen(): React.JSX.Element {
         </div>
       ) : (
         /* NO ACTIVE DOSSIER SELECTED STATE */
-        <div className="p-12 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center max-w-2xl mx-auto my-10 flex flex-col items-center justify-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-450 flex items-center justify-center">
-            <ClipboardList className="w-8 h-8" />
-          </div>
-          
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-105">Takip Edilecek Aktif Dosya Seçilmedi</h2>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2 leading-relaxed">
-              Süreçlerin aşama aşama takibini ve evrak kontrolünü görmek için lütfen önce sol menüden veya doğrudan temin listesinden bir dosya seçerek aktif hale getirin.
-            </p>
+        <div className="flex flex-col gap-6 max-w-4xl mx-auto my-6 w-full">
+          <div className="p-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 text-center flex flex-col items-center justify-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-450 flex items-center justify-center">
+              <ClipboardList className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-105">Takip Edilecek Aktif Dosya Seçilmedi</h2>
+              <p className="text-xs text-slate-500 max-w-md mx-auto mt-2 leading-relaxed">
+                Süreçlerin aşama aşama takibini ve evrak kontrolünü görmek için listeden bir dosya seçerek aktif hale getirin veya tüm listeye gidin.
+              </p>
+            </div>
+            <Link to="/dosyalar">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-5 flex items-center gap-2 mt-2">
+                <Building className="w-4 h-4" />
+                Tüm Dosyaları Gör
+              </Button>
+            </Link>
           </div>
 
-          <Link to="/dosyalar">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 px-5 flex items-center gap-2">
-              <Building className="w-4 h-4" />
-              Temin Dosyası Seç / Aç
-            </Button>
-          </Link>
+          {dosyalar.length > 0 && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Son İşlem Gören Dosyalar</h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Hızlıca çalışmaya devam etmek için bir dosyaya tıklayın</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                {dosyalar.slice(0, 5).map((dosya) => {
+                  const stageInfo = dbAsamalar.find(a => a.asama_sira === (dosya.durum_asama_id || 1))
+                  const stageName = stageInfo?.asama_adi || 'Süreç Başlangıcı'
+                  
+                  return (
+                    <div 
+                      key={dosya.id}
+                      onClick={() => setActiveDosyaId(dosya.id)}
+                      className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 hover:bg-blue-50 dark:bg-slate-900/30 dark:hover:bg-blue-900/10 cursor-pointer transition-colors group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-colors">
+                          <FileCheck className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                        </div>
+                        <div className="flex flex-col text-left">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                            {dosya.konu || 'İsimsiz Temin'}
+                          </span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                            <span className="font-mono bg-slate-200/50 dark:bg-slate-700/50 px-1 rounded">{dosya.temin_no}</span>
+                            <span>•</span>
+                            <span>{dosya.tur} Alımı</span>
+                            <span>•</span>
+                            <span>{formatCurrency(dosya.yaklasik_maliyet || 0)}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-200/50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {stageName}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
