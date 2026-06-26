@@ -41,7 +41,7 @@ interface KomisyonAtamaProps {
   title: string
 }
 
-function KomisyonAtamaForm({ tur, title }: KomisyonAtamaProps): React.JSX.Element {
+export function KomisyonAtamaForm({ tur, title }: KomisyonAtamaProps): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
   const [members, setMembers] = useState<any[]>([])
   const [personnel, setPersonnel] = useState<any[]>([])
@@ -146,7 +146,9 @@ function KomisyonAtamaForm({ tur, title }: KomisyonAtamaProps): React.JSX.Elemen
             >
               <option value="">Personel Seçiniz...</option>
               {personnel.map((p) => (
-                <option key={p.id} value={p.id}>{p.ad_soyad} - {p.unvan || 'Unvansız'}</option>
+                <option key={p.id} value={p.id}>
+                  {p.ad_soyad} - {p.unvan || 'Unvansız'}
+                </option>
               ))}
             </select>
           </div>
@@ -183,12 +185,16 @@ function KomisyonAtamaForm({ tur, title }: KomisyonAtamaProps): React.JSX.Elemen
         </h3>
 
         {loading ? (
-          <div className="flex-1 flex items-center justify-center text-xs text-slate-400 italic">Yükleniyor...</div>
+          <div className="flex-1 flex items-center justify-center text-xs text-slate-400 italic">
+            Yükleniyor...
+          </div>
         ) : members.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
             <Users className="w-10 h-10 text-slate-350 dark:text-slate-700 mb-2 animate-pulse" />
             <p className="text-xs">Bu komisyonda henüz görevli personel atanmamış.</p>
-            <p className="text-[10px] text-slate-500 mt-1">Sol taraftaki paneli kullanarak üyeleri atayabilirsiniz.</p>
+            <p className="text-[10px] text-slate-500 mt-1">
+              Sol taraftaki paneli kullanarak üyeleri atayabilirsiniz.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto max-h-[400px] custom-scrollbar pr-1">
@@ -202,12 +208,17 @@ function KomisyonAtamaForm({ tur, title }: KomisyonAtamaProps): React.JSX.Elemen
                     <h4 className="text-xs font-black text-slate-850 dark:text-slate-100 truncate">
                       {m.ad_soyad}
                     </h4>
-                    <span className={cn(
-                      "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider",
-                      m.gorevi === 'Başkan' && 'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400',
-                      m.gorevi === 'Üye' && 'bg-blue-100 text-blue-750 dark:bg-blue-900/30 dark:text-blue-400',
-                      m.gorevi === 'Yedek Üye' && 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    )}>
+                    <span
+                      className={cn(
+                        'px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider',
+                        m.gorevi === 'Başkan' &&
+                          'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400',
+                        m.gorevi === 'Üye' &&
+                          'bg-blue-100 text-blue-750 dark:bg-blue-900/30 dark:text-blue-400',
+                        m.gorevi === 'Yedek Üye' &&
+                          'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      )}
+                    >
                       {m.gorevi}
                     </span>
                   </div>

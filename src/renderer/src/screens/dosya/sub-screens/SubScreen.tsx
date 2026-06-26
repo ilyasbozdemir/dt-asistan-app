@@ -36,7 +36,12 @@ interface SubScreenProps {
   children?: React.ReactNode
 }
 
-export function SubScreen({ title, icon: Icon, description, children }: SubScreenProps): React.JSX.Element {
+export function SubScreen({
+  title,
+  icon: Icon,
+  description,
+  children
+}: SubScreenProps): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -48,17 +53,18 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
   useEffect(() => {
     if (!activeDosyaId) return
     setLoading(true)
-    window.electron.ipcRenderer.invoke(
-      'db:query',
-      'SELECT id, konu, temin_no FROM DATA_TeminDosyasi WHERE id = ?',
-      [activeDosyaId]
-    ).then((res) => {
-      if (res.success && res.data.length > 0) {
-        setActiveDosya(res.data[0])
-      }
-    }).finally(() => {
-      setLoading(false)
-    })
+    window.electron.ipcRenderer
+      .invoke('db:query', 'SELECT id, konu, temin_no FROM DATA_TeminDosyasi WHERE id = ?', [
+        activeDosyaId
+      ])
+      .then((res) => {
+        if (res.success && res.data.length > 0) {
+          setActiveDosya(res.data[0])
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [activeDosyaId])
 
   return (
@@ -78,9 +84,7 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
               <Icon className="w-7 h-7 text-blue-600" />
               {title}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
-              {description}
-            </p>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">{description}</p>
           </div>
         </div>
       </div>
@@ -100,7 +104,8 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
                 <span className="text-xs text-slate-500 italic">Yükleniyor...</span>
               ) : activeDosya ? (
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {activeDosya.temin_no || 'No Bekliyor'} — {activeDosya.konu} (ID: #{activeDosya.id})
+                  {activeDosya.temin_no || 'No Bekliyor'} — {activeDosya.konu} (ID: #
+                  {activeDosya.id})
                 </h3>
               ) : (
                 <span className="text-xs text-slate-500">Dosya bulunamadı (#{activeDosyaId})</span>
@@ -118,7 +123,8 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
         <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm">
           <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
           <div>
-            Aktif bir doğrudan temin dosyası seçmediniz. Bu ekranda işlem yapabilmek için lütfen önce{' '}
+            Aktif bir doğrudan temin dosyası seçmediniz. Bu ekranda işlem yapabilmek için lütfen
+            önce{' '}
             <Link to="/dosyalar" className="underline font-bold text-blue-600 dark:text-blue-400">
               dosyalar listesinden
             </Link>{' '}

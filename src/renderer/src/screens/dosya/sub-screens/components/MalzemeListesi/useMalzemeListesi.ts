@@ -109,7 +109,15 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
           'db:run',
           `INSERT INTO TANIM_Kalem (kalem_adi, tipi, birim, kdv_orani, tasinir_kodu, okas_kodu, aktif_mi, barkod_id)
            VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
-          [nameToUse, tipi, birim, kdvOrani, tasinirKodu || null, okasKodu || null, Date.now().toString()]
+          [
+            nameToUse,
+            tipi,
+            birim,
+            kdvOrani,
+            tasinirKodu || null,
+            okasKodu || null,
+            Date.now().toString()
+          ]
         )
       }
 
@@ -118,7 +126,17 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
         `INSERT INTO DATA_TeminKalem 
          (temin_dosya_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, miktar, kdv_orani, aciklama) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [activeDosyaId, tasinirKodu || null, okasKodu || null, nameToUse, tipi, birim, miktar, kdvOrani, aciklama || null]
+        [
+          activeDosyaId,
+          tasinirKodu || null,
+          okasKodu || null,
+          nameToUse,
+          tipi,
+          birim,
+          miktar,
+          kdvOrani,
+          aciklama || null
+        ]
       )
       if (res.success) {
         setKalemAdi('')
@@ -194,8 +212,16 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
           `INSERT INTO DATA_TeminKalem
            (temin_dosya_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, miktar, kdv_orani)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [activeDosyaId, libItem.tasinir_kodu || null, libItem.okas_kodu || null,
-           libItem.kalem_adi, libItem.tipi, libItem.birim, mkt, libItem.kdv_orani]
+          [
+            activeDosyaId,
+            libItem.tasinir_kodu || null,
+            libItem.okas_kodu || null,
+            libItem.kalem_adi,
+            libItem.tipi,
+            libItem.birim,
+            mkt,
+            libItem.kdv_orani
+          ]
         )
       }
       setSelectedItemIds(new Set())
@@ -209,33 +235,55 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
   }
 
   const filteredSuggestions = searchQuery.trim()
-    ? libraryItems.filter(item =>
-        item.kalem_adi.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 5)
+    ? libraryItems
+        .filter((item) => item.kalem_adi.toLowerCase().includes(searchQuery.toLowerCase()))
+        .slice(0, 5)
     : []
 
   return {
-    items, units, libraryItems, loading,
-    kalemAdi, setKalemAdi,
-    tasinirKodu, setTasinirKodu,
-    okasKodu, setOkasKodu,
-    tipi, setTipi,
-    birim, setBirim,
-    miktar, setMiktar,
-    kdvOrani, setKdvOrani,
-    aciklama, setAciklama,
-    searchQuery, setSearchQuery,
-    showSuggestions, setShowSuggestions,
+    items,
+    units,
+    libraryItems,
+    loading,
+    kalemAdi,
+    setKalemAdi,
+    tasinirKodu,
+    setTasinirKodu,
+    okasKodu,
+    setOkasKodu,
+    tipi,
+    setTipi,
+    birim,
+    setBirim,
+    miktar,
+    setMiktar,
+    kdvOrani,
+    setKdvOrani,
+    aciklama,
+    setAciklama,
+    searchQuery,
+    setSearchQuery,
+    showSuggestions,
+    setShowSuggestions,
     aiLoading,
-    isAddModalOpen, setIsAddModalOpen,
-    activeTab, setActiveTab,
-    selectedItemIds, setSelectedItemIds,
-    itemMiktarlar, setItemMiktarlar,
-    libSearchQuery, setLibSearchQuery,
-    editingId, setEditingId,
-    editMiktar, setEditMiktar,
-    editBirim, setEditBirim,
-    editKdv, setEditKdv,
+    isAddModalOpen,
+    setIsAddModalOpen,
+    activeTab,
+    setActiveTab,
+    selectedItemIds,
+    setSelectedItemIds,
+    itemMiktarlar,
+    setItemMiktarlar,
+    libSearchQuery,
+    setLibSearchQuery,
+    editingId,
+    setEditingId,
+    editMiktar,
+    setEditMiktar,
+    editBirim,
+    setEditBirim,
+    editKdv,
+    setEditKdv,
     handleAiAçiklama,
     handleSelectSuggestion,
     handleAddItem,

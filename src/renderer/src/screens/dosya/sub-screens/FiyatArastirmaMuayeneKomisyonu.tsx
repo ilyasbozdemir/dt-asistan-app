@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '../../../store/workspaceStore'
+import { KomisyonAtamaForm } from './MuayeneKabulKomisyonu'
 import { Link } from '@tanstack/react-router'
 import {
   ArrowLeft,

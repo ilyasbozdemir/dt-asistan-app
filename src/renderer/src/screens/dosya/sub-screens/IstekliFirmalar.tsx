@@ -72,7 +72,7 @@ export function IstekliFirmalar(): React.JSX.Element {
     try {
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
-        'INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, teklif_durumu) VALUES (?, ?, \'Davet Edildi\')',
+        "INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, teklif_durumu) VALUES (?, ?, 'Davet Edildi')",
         [activeDosyaId, firmaId]
       )
       if (res.success) {
@@ -109,8 +109,9 @@ export function IstekliFirmalar(): React.JSX.Element {
   }
 
   const unassociatedFirms = allFirms.filter(
-    (f) => !associatedFirms.some((af) => af.id === f.id) &&
-    f.unvan.toLowerCase().includes(searchQuery.toLowerCase())
+    (f) =>
+      !associatedFirms.some((af) => af.id === f.id) &&
+      f.unvan.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -140,15 +141,22 @@ export function IstekliFirmalar(): React.JSX.Element {
 
           <div className="max-h-64 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/50 pr-1">
             {unassociatedFirms.length === 0 ? (
-              <div className="p-3 text-center text-xs text-slate-400 italic">Eklenecek yeni firma bulunamadı.</div>
+              <div className="p-3 text-center text-xs text-slate-400 italic">
+                Eklenecek yeni firma bulunamadı.
+              </div>
             ) : (
               unassociatedFirms.map((firma) => (
                 <div key={firma.id} className="py-2.5 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="block text-xs font-bold text-slate-800 dark:text-slate-250 truncate" title={firma.unvan}>
+                    <span
+                      className="block text-xs font-bold text-slate-800 dark:text-slate-250 truncate"
+                      title={firma.unvan}
+                    >
                       {firma.unvan}
                     </span>
-                    <span className="block text-[9px] text-slate-400">Vergi No: {firma.vergi_no || 'Belirtilmemiş'}</span>
+                    <span className="block text-[9px] text-slate-400">
+                      Vergi No: {firma.vergi_no || 'Belirtilmemiş'}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleAddFirm(firma.id)}
@@ -161,7 +169,8 @@ export function IstekliFirmalar(): React.JSX.Element {
             )}
           </div>
           <p className="text-[10px] text-slate-400">
-            Eksik firmaları sol menüdeki <strong>İstekli Firma Yönetimi</strong> panelinden sisteme kaydedebilirsiniz.
+            Eksik firmaları sol menüdeki <strong>İstekli Firma Yönetimi</strong> panelinden sisteme
+            kaydedebilirsiniz.
           </p>
         </div>
 
@@ -172,12 +181,18 @@ export function IstekliFirmalar(): React.JSX.Element {
           </h3>
 
           {loading ? (
-            <div className="flex-1 flex items-center justify-center text-xs text-slate-400 italic">Yükleniyor...</div>
+            <div className="flex-1 flex items-center justify-center text-xs text-slate-400 italic">
+              Yükleniyor...
+            </div>
           ) : associatedFirms.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
               <Building2 className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
-              <p className="text-xs">Henüz bu ihale dosyası için herhangi bir istekli firma eklenmemiş.</p>
-              <p className="text-[10px] text-slate-500 mt-1">Sol taraftaki firmalardan seçip ekleyerek teklif alma sürecini başlatın.</p>
+              <p className="text-xs">
+                Henüz bu ihale dosyası için herhangi bir istekli firma eklenmemiş.
+              </p>
+              <p className="text-[10px] text-slate-500 mt-1">
+                Sol taraftaki firmalardan seçip ekleyerek teklif alma sürecini başlatın.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[450px] custom-scrollbar pr-1">
@@ -188,22 +203,31 @@ export function IstekliFirmalar(): React.JSX.Element {
                 >
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex-1" title={f.unvan}>
+                      <h4
+                        className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex-1"
+                        title={f.unvan}
+                      >
                         {f.unvan}
                       </h4>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <span className="px-1.5 py-0.5 rounded bg-blue-100/50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[9px] font-bold">
                           {f.teklif_durumu}
                         </span>
-                        <span className={cn(
-                          "px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider",
-                          f.yasaklilik_durumu === 'Yasaklı' && 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 border border-red-100 dark:border-red-900/30',
-                          f.yasaklilik_durumu === 'Temiz' && 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30',
-                          (f.yasaklilik_durumu === 'Sorgulanmadı' || !f.yasaklilik_durumu) && 'bg-slate-50 text-slate-500 dark:bg-slate-900/30 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
-                        )}>
+                        <span
+                          className={cn(
+                            'px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider',
+                            f.yasaklilik_durumu === 'Yasaklı' &&
+                              'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 border border-red-100 dark:border-red-900/30',
+                            f.yasaklilik_durumu === 'Temiz' &&
+                              'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30',
+                            (f.yasaklilik_durumu === 'Sorgulanmadı' || !f.yasaklilik_durumu) &&
+                              'bg-slate-50 text-slate-500 dark:bg-slate-900/30 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
+                          )}
+                        >
                           {f.yasaklilik_durumu === 'Yasaklı' && '🔴 Yasaklı'}
                           {f.yasaklilik_durumu === 'Temiz' && '🟢 Temiz'}
-                          {(f.yasaklilik_durumu === 'Sorgulanmadı' || !f.yasaklilik_durumu) && '⚪ Sorgulanmadı'}
+                          {(f.yasaklilik_durumu === 'Sorgulanmadı' || !f.yasaklilik_durumu) &&
+                            '⚪ Sorgulanmadı'}
                         </span>
                       </div>
                     </div>
@@ -211,8 +235,14 @@ export function IstekliFirmalar(): React.JSX.Element {
                     <div className="space-y-0.5 text-[10px] text-slate-500 dark:text-slate-400">
                       {f.telefon && <p>📞 Telefon: {f.telefon}</p>}
                       {f.email && <p>✉️ E-posta: {f.email}</p>}
-                      {f.adres && <p className="truncate" title={f.adres}>📍 Adres: {f.adres}</p>}
-                      <p>🏦 Vergi: {f.vergi_dairesi || '-'} / {f.vergi_no || '-'}</p>
+                      {f.adres && (
+                        <p className="truncate" title={f.adres}>
+                          📍 Adres: {f.adres}
+                        </p>
+                      )}
+                      <p>
+                        🏦 Vergi: {f.vergi_dairesi || '-'} / {f.vergi_no || '-'}
+                      </p>
                     </div>
                   </div>
 
@@ -276,9 +306,13 @@ export function IstekliFirmalar(): React.JSX.Element {
               </span>
               <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-800 rounded-2xl space-y-3">
                 <div>
-                  <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">Yasaklanan Adı / Ünvan</label>
+                  <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">
+                    Yasaklanan Adı / Ünvan
+                  </label>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 break-all">{activeFirmaForQuery.unvan}</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 break-all">
+                      {activeFirmaForQuery.unvan}
+                    </span>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(activeFirmaForQuery.unvan)
@@ -294,9 +328,13 @@ export function IstekliFirmalar(): React.JSX.Element {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">Vergi / Kimlik No</label>
+                    <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">
+                      Vergi / Kimlik No
+                    </label>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">{activeFirmaForQuery.vergi_no || '-'}</span>
+                      <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
+                        {activeFirmaForQuery.vergi_no || '-'}
+                      </span>
                       {activeFirmaForQuery.vergi_no && (
                         <button
                           onClick={() => {
@@ -313,8 +351,12 @@ export function IstekliFirmalar(): React.JSX.Element {
                   </div>
 
                   <div>
-                    <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">Vergi Dairesi</label>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block mt-0.5">{activeFirmaForQuery.vergi_dairesi || '-'}</span>
+                    <label className="block text-[9px] text-slate-400 font-semibold mb-0.5">
+                      Vergi Dairesi
+                    </label>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block mt-0.5">
+                      {activeFirmaForQuery.vergi_dairesi || '-'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -347,9 +389,13 @@ export function IstekliFirmalar(): React.JSX.Element {
                         if (el) (el as HTMLElement).style.display = 'block'
                       }}
                     />
-                    <span className="fallback-text hidden text-sm font-bold text-slate-700 dark:text-slate-350">EKAP Portal</span>
+                    <span className="fallback-text hidden text-sm font-bold text-slate-700 dark:text-slate-350">
+                      EKAP Portal
+                    </span>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">EKAP Yasaklı Sorgula</span>
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                    EKAP Yasaklı Sorgula
+                  </span>
                   <p className="text-[9px] text-slate-400 mt-1 leading-normal">
                     İhale Kayıt No, Vergi/TCKN, Unvan ile detaylı KİK sorgulaması yapın.
                   </p>
@@ -376,11 +422,16 @@ export function IstekliFirmalar(): React.JSX.Element {
                         if (el) (el as HTMLElement).style.display = 'block'
                       }}
                     />
-                    <span className="fallback-text hidden text-sm font-bold text-slate-700 dark:text-slate-350">e-Devlet Kapısı</span>
+                    <span className="fallback-text hidden text-sm font-bold text-slate-700 dark:text-slate-350">
+                      e-Devlet Kapısı
+                    </span>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">e-Devlet Yasaklı Sorgula</span>
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                    e-Devlet Yasaklı Sorgula
+                  </span>
                   <p className="text-[9px] text-slate-400 mt-1 leading-normal">
-                    Vergi No, Yasaklanan Adı ve TCKN/VKN ile e-Devlet kapısı üzerinden sorgulama yapın.
+                    Vergi No, Yasaklanan Adı ve TCKN/VKN ile e-Devlet kapısı üzerinden sorgulama
+                    yapın.
                   </p>
                 </button>
               </div>
@@ -391,17 +442,21 @@ export function IstekliFirmalar(): React.JSX.Element {
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 3. Sorgu Sonuç Belgesi Yükleme (PDF / Görsel)
               </span>
-              
+
               <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-800 rounded-2xl space-y-3">
                 <p className="text-[10px] text-slate-500 leading-normal">
-                  Sorgulama sonucunu içeren ekran çıktısını PDF veya Görsel olarak kaydedip dosyaya ekleyin. Belge doğrudan çalışma dosyanıza (.dtm) kaydedilecektir.
+                  Sorgulama sonucunu içeren ekran çıktısını PDF veya Görsel olarak kaydedip dosyaya
+                  ekleyin. Belge doğrudan çalışma dosyanıza (.dtm) kaydedilecektir.
                 </p>
 
                 {activeFirmaForQuery.yasaklilik_belgesi ? (
                   <div className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className="w-5 h-5 text-blue-500 shrink-0" />
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate" title={activeFirmaForQuery.yasaklilik_belgesi.split('/').pop()}>
+                      <span
+                        className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate"
+                        title={activeFirmaForQuery.yasaklilik_belgesi.split('/').pop()}
+                      >
                         {activeFirmaForQuery.yasaklilik_belgesi.split('/').pop()}
                       </span>
                     </div>
@@ -409,7 +464,10 @@ export function IstekliFirmalar(): React.JSX.Element {
                       <button
                         onClick={async () => {
                           try {
-                            const res = await window.electron.ipcRenderer.invoke('workspace:open-file', activeFirmaForQuery.yasaklilik_belgesi)
+                            const res = await window.electron.ipcRenderer.invoke(
+                              'workspace:open-file',
+                              activeFirmaForQuery.yasaklilik_belgesi
+                            )
                             if (!res.success) alert('Dosya açılamadı.')
                           } catch (err: any) {
                             alert('Hata: ' + err.message)
@@ -422,7 +480,8 @@ export function IstekliFirmalar(): React.JSX.Element {
                       </button>
                       <button
                         onClick={async () => {
-                          if (!confirm('Bu belgeyi dosyadan kaldırmak istediğinize emin misiniz?')) return
+                          if (!confirm('Bu belgeyi dosyadan kaldırmak istediğinize emin misiniz?'))
+                            return
                           try {
                             const res = await window.electron.ipcRenderer.invoke(
                               'db:run',
@@ -430,7 +489,10 @@ export function IstekliFirmalar(): React.JSX.Element {
                               [activeFirmaForQuery.temin_firma_id]
                             )
                             if (res.success) {
-                              setActiveFirmaForQuery({ ...activeFirmaForQuery, yasaklilik_belgesi: null })
+                              setActiveFirmaForQuery({
+                                ...activeFirmaForQuery,
+                                yasaklilik_belgesi: null
+                              })
                             }
                           } catch (err: any) {
                             alert('Belge kaldırılırken hata: ' + err.message)
@@ -447,9 +509,13 @@ export function IstekliFirmalar(): React.JSX.Element {
                   <button
                     onClick={async () => {
                       try {
-                        const openRes = await window.electron.ipcRenderer.invoke('dialog:showOpenDialog')
+                        const openRes =
+                          await window.electron.ipcRenderer.invoke('dialog:showOpenDialog')
                         if (openRes.success && openRes.filePaths && openRes.filePaths.length > 0) {
-                          const uploadRes = await window.electron.ipcRenderer.invoke('workspace:upload-file', openRes.filePaths[0])
+                          const uploadRes = await window.electron.ipcRenderer.invoke(
+                            'workspace:upload-file',
+                            openRes.filePaths[0]
+                          )
                           if (uploadRes.success) {
                             const dbRes = await window.electron.ipcRenderer.invoke(
                               'db:run',
@@ -457,7 +523,10 @@ export function IstekliFirmalar(): React.JSX.Element {
                               [uploadRes.relativePath, activeFirmaForQuery.temin_firma_id]
                             )
                             if (dbRes.success) {
-                              setActiveFirmaForQuery({ ...activeFirmaForQuery, yasaklilik_belgesi: uploadRes.relativePath })
+                              setActiveFirmaForQuery({
+                                ...activeFirmaForQuery,
+                                yasaklilik_belgesi: uploadRes.relativePath
+                              })
                               alert('Sorgulama belgesi başarıyla dosyaya kaydedildi.')
                             } else {
                               alert('Veritabanına kaydedilirken hata: ' + dbRes.error)
@@ -474,7 +543,9 @@ export function IstekliFirmalar(): React.JSX.Element {
                   >
                     <Upload className="w-6 h-6 text-slate-400" />
                     <span className="text-[11px] font-bold">Sonuç Belgesi Seçin ve Yükleyin</span>
-                    <span className="text-[9px] text-slate-400">PDF, JPG, PNG formatları desteklenir.</span>
+                    <span className="text-[9px] text-slate-400">
+                      PDF, JPG, PNG formatları desteklenir.
+                    </span>
                   </button>
                 )}
               </div>
@@ -500,7 +571,10 @@ export function IstekliFirmalar(): React.JSX.Element {
                             [status, activeFirmaForQuery.temin_firma_id]
                           )
                           if (res.success) {
-                            setActiveFirmaForQuery({ ...activeFirmaForQuery, yasaklilik_durumu: status })
+                            setActiveFirmaForQuery({
+                              ...activeFirmaForQuery,
+                              yasaklilik_durumu: status
+                            })
                           }
                         } catch (err: any) {
                           alert('Durum güncellenirken hata: ' + err.message)

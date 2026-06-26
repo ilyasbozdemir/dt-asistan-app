@@ -113,9 +113,7 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
 
   // Calculation helpers
   const getItemPrices = (itemId: number): number[] => {
-    return firms
-      .map((f) => bids[`${itemId}_${f.temin_firma_id}`] || 0)
-      .filter((p) => p > 0)
+    return firms.map((f) => bids[`${itemId}_${f.temin_firma_id}`] || 0).filter((p) => p > 0)
   }
 
   const getItemMinPrice = (itemId: number): number => {
@@ -158,7 +156,9 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
         [total, activeDosyaId]
       )
       if (res.success) {
-        alert(`Yaklaşık maliyet başarıyla güncellendi: ₺ ${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`)
+        alert(
+          `Yaklaşık maliyet başarıyla güncellendi: ₺ ${total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+        )
       } else {
         alert(res.error)
       }
@@ -176,8 +176,12 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-850 pb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-850 dark:text-slate-150">Teklif Girişleri & Maliyet Matrisi</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Fiyat girdikten sonra kaydetmek için alandan çıkın (onBlur).</p>
+            <h3 className="text-base font-bold text-slate-850 dark:text-slate-150">
+              Teklif Girişleri & Maliyet Matrisi
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Fiyat girdikten sonra kaydetmek için alandan çıkın (onBlur).
+            </p>
           </div>
 
           {items.length > 0 && firms.length > 0 && (
@@ -196,10 +200,23 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
         ) : items.length === 0 || firms.length === 0 ? (
           <div className="p-8 text-center text-slate-400 italic flex flex-col items-center justify-center gap-2">
             <AlertCircle className="w-8 h-8 text-slate-350" />
-            <p className="text-xs">Bu ekranda işlem yapabilmek için dosyada en az **1 adet malzeme kalemi** ve **1 adet istekli firma** bulunmalıdır.</p>
+            <p className="text-xs">
+              Bu ekranda işlem yapabilmek için dosyada en az **1 adet malzeme kalemi** ve **1 adet
+              istekli firma** bulunmalıdır.
+            </p>
             <div className="flex gap-3 mt-3">
-              <Link to="/dosya/malzemeler/liste" className="text-blue-600 underline font-bold text-xs">Kalem Ekle</Link>
-              <Link to="/dosya/firmalar-maliyet/istekliler" className="text-blue-600 underline font-bold text-xs">Firma Ekle</Link>
+              <Link
+                to="/dosya/malzemeler/liste"
+                className="text-blue-600 underline font-bold text-xs"
+              >
+                Kalem Ekle
+              </Link>
+              <Link
+                to="/dosya/firmalar-maliyet/istekliler"
+                className="text-blue-600 underline font-bold text-xs"
+              >
+                Firma Ekle
+              </Link>
             </div>
           </div>
         ) : (
@@ -207,15 +224,28 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
             <table className="w-full border-collapse border border-slate-200 dark:border-slate-800 text-[11px]">
               <thead>
                 <tr className="bg-slate-55 dark:bg-slate-950 font-bold">
-                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 min-w-[150px]">Malzeme Adı (Miktar)</th>
+                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 min-w-[150px]">
+                    Malzeme Adı (Miktar)
+                  </th>
                   {firms.map((f) => (
-                    <th key={f.temin_firma_id} className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[120px]">
-                      <span className="block truncate max-w-[110px]" title={f.unvan}>{f.unvan}</span>
-                      <span className="text-[9px] text-slate-400 font-normal">Birim Teklifi (₺)</span>
+                    <th
+                      key={f.temin_firma_id}
+                      className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[120px]"
+                    >
+                      <span className="block truncate max-w-[110px]" title={f.unvan}>
+                        {f.unvan}
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-normal">
+                        Birim Teklifi (₺)
+                      </span>
                     </th>
                   ))}
-                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[90px] bg-blue-50/50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400">En Düşük (₺)</th>
-                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[90px] bg-emerald-50/50 dark:bg-emerald-950/10 text-emerald-700 dark:text-emerald-450">Ortalama (₺)</th>
+                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[90px] bg-blue-50/50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400">
+                    En Düşük (₺)
+                  </th>
+                  <th className="border border-slate-200 dark:border-slate-800 p-2.5 text-center min-w-[90px] bg-emerald-50/50 dark:bg-emerald-950/10 text-emerald-700 dark:text-emerald-450">
+                    Ortalama (₺)
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-250 dark:divide-slate-800">
@@ -227,7 +257,9 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
                     <tr key={item.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-850/10">
                       <td className="border border-slate-200 dark:border-slate-800 p-2.5 font-bold text-slate-800 dark:text-slate-200">
                         <div>{item.kalem_adi}</div>
-                        <div className="text-[10px] text-slate-400 font-bold mt-0.5">{item.miktar} {item.birim}</div>
+                        <div className="text-[10px] text-slate-400 font-bold mt-0.5">
+                          {item.miktar} {item.birim}
+                        </div>
                       </td>
 
                       {firms.map((f) => {
@@ -238,8 +270,8 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
                           <td
                             key={f.temin_firma_id}
                             className={cn(
-                              "border border-slate-200 dark:border-slate-800 p-2 text-center transition-colors",
-                              isMin && "bg-green-50/40 dark:bg-green-950/15"
+                              'border border-slate-200 dark:border-slate-800 p-2 text-center transition-colors',
+                              isMin && 'bg-green-50/40 dark:bg-green-950/15'
                             )}
                           >
                             <input
@@ -248,13 +280,18 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
                               min="0"
                               placeholder="0.00"
                               value={bids[`${item.id}_${f.temin_firma_id}`] || ''}
-                              onChange={(e) => handlePriceChange(item.id, f.temin_firma_id, e.target.value)}
+                              onChange={(e) =>
+                                handlePriceChange(item.id, f.temin_firma_id, e.target.value)
+                              }
                               onBlur={() => handleSavePrice(item.id, f.temin_firma_id)}
                               className="w-full p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 rounded text-center text-xs font-bold font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
                             {price > 0 && (
                               <span className="text-[9px] text-slate-400 block mt-1">
-                                Toplam: ₺{(price * item.miktar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                Toplam: ₺
+                                {(price * item.miktar).toLocaleString('tr-TR', {
+                                  minimumFractionDigits: 2
+                                })}
                               </span>
                             )}
                           </td>
@@ -263,12 +300,16 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
 
                       {/* En Düşük Fiyat */}
                       <td className="border border-slate-200 dark:border-slate-800 p-2 text-center font-bold font-mono text-blue-600 dark:text-blue-400 bg-blue-50/20 dark:bg-blue-900/5">
-                        {minPrice > 0 ? `₺ ${minPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
+                        {minPrice > 0
+                          ? `₺ ${minPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+                          : '-'}
                       </td>
 
                       {/* Ortalama Fiyat */}
                       <td className="border border-slate-200 dark:border-slate-800 p-2 text-center font-bold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/5">
-                        {avgPrice > 0 ? `₺ ${avgPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
+                        {avgPrice > 0
+                          ? `₺ ${avgPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+                          : '-'}
                       </td>
                     </tr>
                   )
@@ -276,18 +317,24 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
 
                 {/* Toplam Satırı */}
                 <tr className="bg-slate-50 dark:bg-slate-950 font-black">
-                  <td className="border border-slate-200 dark:border-slate-800 p-3 text-right">TOPLAM TEKLİFLER:</td>
+                  <td className="border border-slate-200 dark:border-slate-800 p-3 text-right">
+                    TOPLAM TEKLİFLER:
+                  </td>
                   {firms.map((f) => {
                     const total = getFirmTotal(f.temin_firma_id)
                     return (
-                      <td key={f.temin_firma_id} className="border border-slate-200 dark:border-slate-800 p-3 text-center font-mono text-slate-800 dark:text-slate-100">
+                      <td
+                        key={f.temin_firma_id}
+                        className="border border-slate-200 dark:border-slate-800 p-3 text-center font-mono text-slate-800 dark:text-slate-100"
+                      >
                         ₺ {total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                       </td>
                     )
                   })}
                   <td className="border border-slate-200 dark:border-slate-800 p-3 bg-blue-50/30 dark:bg-blue-900/10"></td>
                   <td className="border border-slate-200 dark:border-slate-800 p-3 text-center font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-950/15">
-                    ₺ {getEstimatedCostTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    ₺{' '}
+                    {getEstimatedCostTotal().toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
               </tbody>

@@ -11,9 +11,14 @@ import { MalzemeTablosu } from './components/MalzemeListesi/MalzemeTablosu'
 
 export function MalzemeListesi(): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
-  const { sablons, loading: ciktiLoading, masterHtml, dosyaContext } = useCiktiMerkeziData(activeDosyaId)
+  const {
+    sablons,
+    loading: ciktiLoading,
+    masterHtml,
+    dosyaContext
+  } = useCiktiMerkeziData(activeDosyaId)
   const [isPrinting, setIsPrinting] = useState(false)
-  
+
   const state = useMalzemeListesi(activeDosyaId)
 
   const handlePrintTemplate = async () => {
@@ -22,32 +27,34 @@ export function MalzemeListesi(): React.JSX.Element {
       const settingsRes = await (window as any).electron.ipcRenderer.invoke('db:get-settings')
       const processPath = '/dosya/malzemeler/liste'
       const sablonIdStr = settingsRes ? settingsRes[`MAPPING_${processPath}_SABLON_ID`] : null
-      
+
       if (!sablonIdStr) {
-        alert("Lütfen Şablon & Kategori Yönetimi bölümünden bu süreç için bir şablon bağlayınız.")
+        alert('Lütfen Şablon & Kategori Yönetimi bölümünden bu süreç için bir şablon bağlayınız.')
         return
       }
 
-      const selectedSablon = sablons.find(s => s.id.toString() === sablonIdStr)
+      const selectedSablon = sablons.find((s) => s.id.toString() === sablonIdStr)
       if (!selectedSablon) {
-        alert("Bağlı şablon bulunamadı veya silinmiş. Lütfen Şablon & Kategori Yönetimi bölümünden kontrol ediniz.")
+        alert(
+          'Bağlı şablon bulunamadı veya silinmiş. Lütfen Şablon & Kategori Yönetimi bölümünden kontrol ediniz.'
+        )
         return
       }
 
       if (!masterHtml) {
-        alert("Master şablon yüklenemedi, veriler bekleniyor.")
+        alert('Master şablon yüklenemedi, veriler bekleniyor.')
         return
       }
 
       // Context ile override verilerini birleştir
       let finalContext = { ...dosyaContext }
       if (settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`]) {
-         try {
-            const overrideData = JSON.parse(settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`])
-            finalContext = { ...finalContext, ...overrideData }
-         } catch (e) {
-            console.error('JSON Override parse hatası:', e)
-         }
+        try {
+          const overrideData = JSON.parse(settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`])
+          finalContext = { ...finalContext, ...overrideData }
+        } catch (e) {
+          console.error('JSON Override parse hatası:', e)
+        }
       }
 
       // İhtiyaç listesi şablonunu context ile işle
@@ -57,7 +64,7 @@ export function MalzemeListesi(): React.JSX.Element {
 
       await (window as any).electron.ipcRenderer.invoke('print-html', finalHtml, { silent: false })
     } catch (error: any) {
-      alert("Yazdırma sırasında bir hata oluştu: " + error.message)
+      alert('Yazdırma sırasında bir hata oluştu: ' + error.message)
     } finally {
       setIsPrinting(false)
     }
@@ -75,14 +82,17 @@ export function MalzemeListesi(): React.JSX.Element {
           disabled={isPrinting || ciktiLoading}
           className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
         >
-          {isPrinting ? <AlertCircle className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+          {isPrinting ? (
+            <AlertCircle className="w-4 h-4 animate-spin" />
+          ) : (
+            <Printer className="w-4 h-4" />
+          )}
           Yazdır / PDF Olarak Kaydet
         </button>
       </div>
 
       <MalzemeEkleModal state={state} />
       <MalzemeTablosu state={state} />
-
     </SubScreen>
   )
 }

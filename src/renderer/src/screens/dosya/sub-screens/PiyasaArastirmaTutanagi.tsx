@@ -45,10 +45,26 @@ export function PiyasaArastirmaTutanagi(): React.JSX.Element {
 
     const fetchAll = async () => {
       try {
-        const resItems = await window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC', [activeDosyaId])
-        const resFirms = await window.electron.ipcRenderer.invoke('db:query', `SELECT df.id as temin_firma_id, f.unvan, f.id as firma_id FROM DATA_TeminFirma df JOIN TANIM_Firma f ON df.firma_id = f.id WHERE df.temin_dosya_id = ?`, [activeDosyaId])
-        const resBids = await window.electron.ipcRenderer.invoke('db:query', 'SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?', [activeDosyaId])
-        const resKoms = await window.electron.ipcRenderer.invoke('db:query', 'SELECT tk.*, p.ad_soyad, p.unvan FROM DATA_TeminKomisyon tk JOIN TANIM_Personel p ON tk.personel_id = p.id WHERE tk.temin_dosya_id = ? AND tk.komisyon_turu = \'Fiyat Araştırma\'', [activeDosyaId])
+        const resItems = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
+          [activeDosyaId]
+        )
+        const resFirms = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT df.id as temin_firma_id, f.unvan, f.id as firma_id FROM DATA_TeminFirma df JOIN TANIM_Firma f ON df.firma_id = f.id WHERE df.temin_dosya_id = ?`,
+          [activeDosyaId]
+        )
+        const resBids = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?',
+          [activeDosyaId]
+        )
+        const resKoms = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          "SELECT tk.*, p.ad_soyad, p.unvan FROM DATA_TeminKomisyon tk JOIN TANIM_Personel p ON tk.personel_id = p.id WHERE tk.temin_dosya_id = ? AND tk.komisyon_turu = 'Fiyat Araştırma'",
+          [activeDosyaId]
+        )
 
         if (resItems.success) setItems(resItems.data)
         if (resFirms.success) setFirms(resFirms.data)
@@ -71,9 +87,7 @@ export function PiyasaArastirmaTutanagi(): React.JSX.Element {
   }, [activeDosyaId])
 
   const getItemAvgPrice = (itemId: number): number => {
-    const prices = firms
-      .map((f) => bids[`${itemId}_${f.temin_firma_id}`] || 0)
-      .filter((p) => p > 0)
+    const prices = firms.map((f) => bids[`${itemId}_${f.temin_firma_id}`] || 0).filter((p) => p > 0)
     if (prices.length === 0) return 0
     const sum = prices.reduce((a, b) => a + b, 0)
     return sum / prices.length
@@ -98,52 +112,91 @@ export function PiyasaArastirmaTutanagi(): React.JSX.Element {
       <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-md max-w-5xl mx-auto font-sans text-slate-850 dark:text-slate-200 print:shadow-none print:border-none print:p-0">
         <div className="text-center font-bold uppercase space-y-1 pb-6 border-b-2 border-slate-350 dark:border-slate-850">
           <h2 className="text-sm">PİYASA FİYAT ARAŞTIRMA TUTANAĞI</h2>
-          <p className="text-[10px] text-slate-400 normal-case font-normal mt-1">4734 Sayılı KİK Madde 22/d Kapsamında Yapılan Alımlara İlişkindir</p>
+          <p className="text-[10px] text-slate-400 normal-case font-normal mt-1">
+            4734 Sayılı KİK Madde 22/d Kapsamında Yapılan Alımlara İlişkindir
+          </p>
         </div>
 
         <div className="py-6 space-y-4 text-xs">
           <p className="leading-relaxed">
-            İdaremizin ihtiyacı olan ve doğrudan temin usulüyle satın alınacak olan işbu listedeki kalemlere ait piyasada yapılan araştırmalar neticesinde firmaların teklif ettikleri birim fiyatlar ve ortalamaları aşağıdaki gibi tespit edilmiştir.
+            İdaremizin ihtiyacı olan ve doğrudan temin usulüyle satın alınacak olan işbu listedeki
+            kalemlere ait piyasada yapılan araştırmalar neticesinde firmaların teklif ettikleri
+            birim fiyatlar ve ortalamaları aşağıdaki gibi tespit edilmiştir.
           </p>
 
           <table className="w-full border-collapse border border-slate-300 dark:border-slate-800 text-[10px]">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900">
-                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-8">S.N</th>
+                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-8">
+                  S.N
+                </th>
                 <th className="border border-slate-300 dark:border-slate-800 p-2">Malzeme Adı</th>
-                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-12">Miktar</th>
-                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-12">Birim</th>
-                {firms.map(f => (
-                  <th key={f.temin_firma_id} className="border border-slate-300 dark:border-slate-800 p-2 text-center max-w-[90px] truncate" title={f.unvan}>
+                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-12">
+                  Miktar
+                </th>
+                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-12">
+                  Birim
+                </th>
+                {firms.map((f) => (
+                  <th
+                    key={f.temin_firma_id}
+                    className="border border-slate-300 dark:border-slate-800 p-2 text-center max-w-[90px] truncate"
+                    title={f.unvan}
+                  >
                     {f.unvan}
                   </th>
                 ))}
-                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-20">Ortalama (₺)</th>
+                <th className="border border-slate-300 dark:border-slate-800 p-2 text-center w-20">
+                  Ortalama (₺)
+                </th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5 + firms.length} className="border border-slate-300 dark:border-slate-800 p-4 text-center italic text-slate-400">Yükleniyor...</td>
+                  <td
+                    colSpan={5 + firms.length}
+                    className="border border-slate-300 dark:border-slate-800 p-4 text-center italic text-slate-400"
+                  >
+                    Yükleniyor...
+                  </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={5 + firms.length} className="border border-slate-300 dark:border-slate-800 p-4 text-center italic text-slate-400">Kayıtlı kalem veya istekli bulunamadı.</td>
+                  <td
+                    colSpan={5 + firms.length}
+                    className="border border-slate-300 dark:border-slate-800 p-4 text-center italic text-slate-400"
+                  >
+                    Kayıtlı kalem veya istekli bulunamadı.
+                  </td>
                 </tr>
               ) : (
                 items.map((item, idx) => {
                   const avg = getItemAvgPrice(item.id)
                   return (
                     <tr key={item.id}>
-                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center font-bold">{idx + 1}</td>
-                      <td className="border border-slate-300 dark:border-slate-800 p-2 font-bold">{item.kalem_adi}</td>
-                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center font-mono">{item.miktar}</td>
-                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center">{item.birim}</td>
-                      {firms.map(f => {
+                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center font-bold">
+                        {idx + 1}
+                      </td>
+                      <td className="border border-slate-300 dark:border-slate-800 p-2 font-bold">
+                        {item.kalem_adi}
+                      </td>
+                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center font-mono">
+                        {item.miktar}
+                      </td>
+                      <td className="border border-slate-300 dark:border-slate-800 p-2 text-center">
+                        {item.birim}
+                      </td>
+                      {firms.map((f) => {
                         const price = bids[`${item.id}_${f.temin_firma_id}`] || 0
                         return (
-                          <td key={f.temin_firma_id} className="border border-slate-300 dark:border-slate-800 p-2 text-center font-mono">
-                            {price > 0 ? price.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '-'}
+                          <td
+                            key={f.temin_firma_id}
+                            className="border border-slate-300 dark:border-slate-800 p-2 text-center font-mono"
+                          >
+                            {price > 0
+                              ? price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })
+                              : '-'}
                           </td>
                         )
                       })}
@@ -159,18 +212,25 @@ export function PiyasaArastirmaTutanagi(): React.JSX.Element {
 
           {/* SIGNATURE SECTION */}
           <div className="pt-16">
-            <h4 className="text-center font-bold mb-8 uppercase text-[10px]">FİYAT ARAŞTIRMA KOMİSYON ÜYELERİ İMZALARI</h4>
+            <h4 className="text-center font-bold mb-8 uppercase text-[10px]">
+              FİYAT ARAŞTIRMA KOMİSYON ÜYELERİ İMZALARI
+            </h4>
             <div className="flex flex-wrap justify-center gap-12">
               {komisyon.length === 0 ? (
                 <div className="text-slate-450 italic text-[10px]">
-                  Fiyat Araştırma Komisyonu atanmamış. İmzalar için lütfen önce Fiyat Araştırma Komisyonu ekranından personel görevlendirin.
+                  Fiyat Araştırma Komisyonu atanmamış. İmzalar için lütfen önce Fiyat Araştırma
+                  Komisyonu ekranından personel görevlendirin.
                 </div>
               ) : (
-                komisyon.map(m => (
+                komisyon.map((m) => (
                   <div key={m.id} className="text-center min-w-[150px] space-y-1">
                     <span className="block font-black">{m.ad_soyad}</span>
-                    <span className="block text-[10px] text-slate-500 uppercase">{m.unvan || 'Personel'}</span>
-                    <span className="block text-[10px] text-blue-600 font-bold">Komisyon {m.gorevi}</span>
+                    <span className="block text-[10px] text-slate-500 uppercase">
+                      {m.unvan || 'Personel'}
+                    </span>
+                    <span className="block text-[10px] text-blue-600 font-bold">
+                      Komisyon {m.gorevi}
+                    </span>
                     <span className="block text-[9px] text-slate-400 pt-6">(İmza)</span>
                   </div>
                 ))
