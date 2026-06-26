@@ -2127,9 +2127,14 @@ if (!gotTheLock && !isMultiInstance) {
       sendUpdaterStatus('downloaded', { version: info.version, info })
     })
 
-    autoUpdater.on('error', (err) => {
-      console.error('Güncelleme sırasında hata oluştu:', err)
-      sendUpdaterStatus('error', { error: err.message })
+    autoUpdater.on('error', (err: any) => {
+      if (err.message && err.message.includes('No published versions on GitHub')) {
+        console.log('Güncelleme yok, en güncel sürümdesiniz.')
+        sendUpdaterStatus('not-available', { version: app.getVersion(), info: null })
+      } else {
+        console.error('Güncelleme sırasında hata oluştu:', err)
+        sendUpdaterStatus('error', { error: err.message })
+      }
     })
 
     ipcMain.handle('updater:check', async () => {
@@ -2144,6 +2149,12 @@ if (!gotTheLock && !isMultiInstance) {
         // Cannot clone CancellationToken, downloadPromise etc over IPC
         return { success: true, version: result.updateInfo.version }
       } catch (error: any) {
+        if (error.message && error.message.includes('No published versions on GitHub')) {
+          console.log('Manuel kontrol: Sistem güncel.')
+          sendUpdaterStatus('not-available', { version: app.getVersion(), info: null })
+          return { success: true }
+        }
+
         console.error('Manual update check error:', error)
         
         // GİZLİ REPO (PRIVATE) HAZIRLIĞI:
