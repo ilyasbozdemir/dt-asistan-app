@@ -40,11 +40,11 @@ interface SubScreenProps {
 import { Star } from 'lucide-react'
 
 export function SubScreen({ title, icon: Icon, description, children }: SubScreenProps): React.JSX.Element {
-  const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
+  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [isStarred, setIsStarred] = useState(false)
-  const [starredDocs, setStarredDocs] = useState<string[]>([])
+
+  const isStarred = activeStarredDocs.includes(title)
 
   useEffect(() => {
     document.title = `${title} - Doğrudan Temin`
@@ -59,13 +59,11 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
       [activeDosyaId]
     ).then((res) => {
       if (res.success && res.data.length > 0) {
-        setActiveDosya(res.data[0])
-        try {
-          const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
-          setStarredDocs(docs)
-          setIsStarred(docs.includes(title))
-          setActiveStarredDocs(docs)  // Sync to global store
-        } catch (e) {}
+         setActiveDosya(res.data[0])
+         try {
+           const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
+           setActiveStarredDocs(docs)  // Sync to global store
+         } catch (e) {}
       }
     }).finally(() => {
       setLoading(false)
@@ -74,14 +72,12 @@ export function SubScreen({ title, icon: Icon, description, children }: SubScree
 
   const toggleStar = async () => {
     if (!activeDosyaId) return
-    let newDocs = [...starredDocs]
+    let newDocs = [...activeStarredDocs]
     if (isStarred) {
       newDocs = newDocs.filter(d => d !== title)
     } else {
       newDocs.push(title)
     }
-    setStarredDocs(newDocs)
-    setIsStarred(!isStarred)
     setActiveStarredDocs(newDocs)  // Instantly sync to global store
     
     await window.electron.ipcRenderer.invoke(

@@ -134,6 +134,8 @@ function seedTemplates(db: Database.Database): void {
       // Harcama
       'harcama-talimati': '/dosya/harcama/talimat',
       'harcama-pusulasi': '/dosya/harcama/pusula',
+      // Klasör ve Kapaklar
+      'ihale-kapagi': '/dosya/cikti-merkezi',
     }
 
     const findHtmlFiles = (dir: string): string[] => {
