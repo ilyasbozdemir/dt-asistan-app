@@ -23,7 +23,7 @@ nesil **Ağ Senkronizasyonu (EBYS Mimarisi)** sayesinde kurumunuzdaki diğer
 birimlerle (Satın Alma, Muhasebe vb.) yerel ağ (LAN) üzerinden anında eşzamanlı
 veri paylaşımı yapabilirsiniz.
 
-Uygulama, tüm verilerini `.dtm` uzantılı dosyalarda saklar. Bu dosya formatı,
+Uygulama, tüm verilerini `.dtal` uzantılı dosyalarda saklar. Bu dosya formatı,
 tıpkı `.docx`, `.xlsx` veya `.pptx` gibi uygulamaya özgü bir yapıya sahiptir;
 içinde SQLite veritabanı ve ilgili meta veriler yer alır. Dosyalarınızı
 yedekleyebilir, taşıyabilir, paylaşabilir veya yerel ağdaki bir Host üzerinden
@@ -132,10 +132,10 @@ alabilirsiniz.
 
 ## Dosya Formatı
 
-`.dtm` dosyaları ZIP tabanlı bir yapıya sahiptir. İçeriği:
+`.dtal` dosyaları ZIP tabanlı bir yapıya sahiptir. İçeriği:
 
 ```
-dosya.dtm
+dosya.dtal
 ├── database.sqlite    ← Tüm veriler
 ├── meta.json          ← Sürüm ve şema bilgisi
 └── attachments/       ← Varsa ek dosyalar

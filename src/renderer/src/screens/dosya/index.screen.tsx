@@ -281,7 +281,7 @@ export default function DosyaScreen(): React.JSX.Element {
   const rawJson = activeMeta
     ? JSON.stringify(
         {
-          dtm_version: activeMeta.dtm_version,
+          dtal_version: activeMeta.dtal_version,
           app_version: activeMeta.app_version,
           created_at: activeMeta.created_at,
           institution: activeMeta.institution,

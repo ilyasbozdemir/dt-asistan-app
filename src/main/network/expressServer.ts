@@ -66,7 +66,7 @@ export function startExpressServer(port: number = 4000) {
         // Before downloading, make sure it's saved.
         workspaceManager.save()
         
-        res.download(currentFile, 'paylasim.dtm')
+        res.download(currentFile, 'paylasim.dtal')
       } catch (err: any) {
         res.status(500).json({ error: err.message })
       }

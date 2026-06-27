@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export interface WorkspaceMeta {
 
-  dtm_version: string
+  dtal_version: string
   app_version: string
   created_at: string
   institution: string

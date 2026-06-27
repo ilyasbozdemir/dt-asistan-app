@@ -9,7 +9,7 @@ import { runMigrations, CURRENT_SCHEMA_VERSION, getPendingMigrations } from './m
 import tasinirKodlariSeed from './seed/tasinir_kodlari.json'
 
 export interface WorkspaceMeta {
-  dtm_version: string
+  dtal_version: string
   app_version: string
   created_at: string
   institution: string
@@ -23,7 +23,7 @@ export interface WorkspaceMeta {
 
 function calculateIntegrityHash(meta: Partial<WorkspaceMeta>): string {
   const payload = {
-    dtm_version: meta.dtm_version,
+    dtal_version: meta.dtal_version,
     app_version: meta.app_version,
     schema_version: meta.schema_version,
     created_at: meta.created_at,
@@ -35,7 +35,7 @@ function calculateIntegrityHash(meta: Partial<WorkspaceMeta>): string {
 
 function normalizeMeta(raw: any): WorkspaceMeta {
   return {
-    dtm_version: raw.dtm_version || '1.0',
+    dtal_version: raw.dtal_version || raw.dtm_version || '1.0',
     app_version: raw.app_version || raw.version || '1.0.0',
     created_at: raw.created_at || (raw.createdAt ? raw.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
     institution: raw.institution || raw.institutionName || 'Bilinmeyen Kurum',
@@ -320,9 +320,9 @@ export class DtmWorkspace {
       }
     }
 
-    const SUPPORTED_DTM_VERSION = 1.0
-    if (parseFloat(meta.dtm_version) > SUPPORTED_DTM_VERSION) {
-      throw new Error(`Bu dosya daha yeni bir dtm formatı gerektirir.`)
+    const SUPPORTED_DTAL_VERSION = 1.0
+    if (parseFloat(meta.dtal_version) > SUPPORTED_DTAL_VERSION) {
+      throw new Error(`Bu dosya daha yeni bir dtal formatı gerektirir.`)
     }
 
     if (meta.schema_version > CURRENT_SCHEMA_VERSION) {
@@ -467,7 +467,7 @@ export class DtmWorkspace {
     }
 
     const meta: WorkspaceMeta = {
-      dtm_version: '1.0',
+      dtal_version: '1.0',
       app_version: app.getVersion(),
       created_at: new Date().toISOString().split('T')[0],
       institution: institutionName,

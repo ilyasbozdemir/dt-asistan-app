@@ -10,7 +10,7 @@
   WriteRegStr HKCU "Software\Classes\.dtm" "" "DTAsistan.Document"
   WriteRegStr HKCU "Software\Classes\.dtm" "Content Type" "application/x-dtm"
   WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "NullFile" ""
-  WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "ItemName" "Doğrudan Temin Çalışma Dosyası"
+  WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "ItemName" "Doğrudan Temin Çalışma Dosyası (Eski)"
   WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "IconPath" '"$INSTDIR\DTAsistan.exe",0'
 
   ; --- .dta Uzantısı ---

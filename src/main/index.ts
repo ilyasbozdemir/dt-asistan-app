@@ -367,8 +367,8 @@ if (!gotTheLock && !isMultiInstance) {
         if (!currentFile) {
           const { canceled, filePath } = await dialog.showSaveDialog({
             title: 'Ağdan Gelen Veritabanını Kaydet',
-            defaultPath: 'paylasim.dtm',
-            filters: [{ name: 'DTM Dosyaları', extensions: ['dtm'] }]
+            defaultPath: 'paylasim.dtal',
+            filters: [{ name: 'DTAL Dosyaları', extensions: ['dtal'] }]
           })
           if (canceled || !filePath) throw new Error('İşlem iptal edildi.')
           currentFile = filePath
@@ -1103,8 +1103,8 @@ if (!gotTheLock && !isMultiInstance) {
       try {
         const { canceled, filePath } = await dialog.showSaveDialog({
           title: 'Şablonu Dışa Aktar',
-          defaultPath: 'Yeni_Sablon.dtm.template',
-          filters: [{ name: 'DTM Template', extensions: ['dtm.template'] }]
+          defaultPath: 'Yeni_Sablon.dtal.template',
+          filters: [{ name: 'DTAL Template', extensions: ['dtal.template'] }]
         })
         if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
         fs.writeFileSync(filePath, payloadStr, 'utf-8')
@@ -1118,7 +1118,7 @@ if (!gotTheLock && !isMultiInstance) {
       try {
         const { canceled, filePaths } = await dialog.showOpenDialog({
           title: 'Şablonu İçe Aktar',
-          filters: [{ name: 'DTM Template', extensions: ['dtm.template'] }],
+          filters: [{ name: 'DTAL Template', extensions: ['dtal.template'] }],
           properties: ['openFile']
         })
         if (canceled || !filePaths || filePaths.length === 0) return { success: false, error: 'İptal edildi' }

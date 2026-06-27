@@ -9,7 +9,7 @@
 - `DATA_TeminDosyasi` şemasına `tekrar_no` kolonu eklendi
 - Aynı isimde dosya kaydedilince otomatik `#2`, `#3` eki — `yeni.screen.tsx`
 - İşin Adı alanında Türkçe destekli autocomplete + duplicate uyarısı
-- `db:run` IPC handler'da `workspaceManager.save()` tetikleniyor (dosya .dtm'ye yazılıyor)
+- `db:run` IPC handler'da `workspaceManager.save()` tetikleniyor (dosya .dtal'ye yazılıyor)
 - Schema Self-Healing: `ALTER TABLE ADD COLUMN` ile UNIQUE/NOT NULL ekleme hatası düzeltildi
 - `index.screen.tsx` (dosyalar listesi) tamamen yenilendi
 - "Kurum İçi Temin Numarası" → "Doğrudan Temin Numarası" düzeltildi
