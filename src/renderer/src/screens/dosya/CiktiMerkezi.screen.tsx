@@ -151,7 +151,9 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         }
       }
       
-      return Mustache.render(masterHtml, templateContext, { content: sablon.icerik })
+      const renderedContent = Mustache.render(sablon.icerik, templateContext)
+      templateContext.icerik = renderedContent
+      return Mustache.render(masterHtml, templateContext)
     } catch (error) {
       console.error('Template render hatası:', error)
       return sablon.icerik

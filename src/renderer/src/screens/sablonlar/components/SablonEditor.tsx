@@ -62,6 +62,27 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
   const [isAiModalOpen, setIsAiModalOpen] = useState(false)
   const [isSystemTemplate, setIsSystemTemplate] = useState(false)
   const [originalDosyaAdi, setOriginalDosyaAdi] = useState('')
+  
+  useEffect(() => {
+    if (sablon?.dosya_adi && window.electron) {
+      const dosya = sablon.dosya_adi;
+      const jsonFile = dosya.endsWith('.html') ? dosya + '.json' : dosya + '/index.html.json';
+      
+      window.electron.ipcRenderer.invoke('template:read-system', jsonFile).then((res: any) => {
+        if (res && res.success) {
+          setTestJson(res.data)
+          setIsSystemTemplate(true)
+          setOriginalDosyaAdi(sablon.dosya_adi)
+        } else if (sablon.test_verisi) {
+          setTestJson(sablon.test_verisi)
+        }
+      }).catch(() => {
+        if (sablon.test_verisi) setTestJson(sablon.test_verisi)
+      })
+    } else if (sablon?.test_verisi) {
+      setTestJson(sablon.test_verisi)
+    }
+  }, [sablon])
 
   const saveSablon = useSaveSablon()
 
@@ -227,7 +248,18 @@ export function SablonEditor({ sablon, onBack }: { sablon?: Sablon, onBack: () =
       oldSablon: sablon,
       extractedPlaceholders: []
     }, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Sistem şablonuysa dosyaya da kaydetmeye çalış
+        if (isSystemTemplate && window.electron && dosyaAdi === originalDosyaAdi) {
+          try {
+             // html için
+             await window.electron.ipcRenderer.invoke('template:write-system', dosyaAdi + '.html', htmlCode);
+             // json için
+             await window.electron.ipcRenderer.invoke('template:write-system', dosyaAdi + '.html.json', testJson);
+          } catch (e) {
+             console.error('Dosyaya yazma hatası:', e);
+          }
+        }
         alert('Şablon başarıyla kaydedildi!')
         onBack()
       },

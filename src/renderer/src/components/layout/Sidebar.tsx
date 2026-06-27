@@ -285,9 +285,9 @@ export function Sidebar(): React.JSX.Element {
       {
         title: 'Dosya Navigasyonu',
         items: [
-          ...(!isDosyaWindowMode ? [{ name: '⬅ Tüm Teminlere Dön', path: '/dosyalar', icon: ChevronLeft, onClick: () => setActiveDosyaId(null) }] : []),
+          ...(!isDosyaWindowMode ? [{ name: 'Tüm Teminlere Dön', path: '/dosyalar', icon: ChevronLeft, onClick: () => setActiveDosyaId(null) }] : []),
           { name: 'Süreç Takip & Durum', path: '/takip', icon: ClipboardList },
-          { name: '🖨️ Çıktı & Üretim Merkezi', path: '/cikti-merkezi', icon: Printer }
+          { name: 'Çıktı & Üretim Merkezi', path: '/cikti-merkezi', icon: Printer }
         ]
       },
       activeGroup

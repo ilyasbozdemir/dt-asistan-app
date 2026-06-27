@@ -18,6 +18,7 @@ export function MalzemeListesi(): React.JSX.Element {
     dosyaContext
   } = useCiktiMerkeziData(activeDosyaId)
   const [isPrinting, setIsPrinting] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
 
   const state = useMalzemeListesi(activeDosyaId)
 
@@ -70,6 +71,54 @@ export function MalzemeListesi(): React.JSX.Element {
     }
   }
 
+  const handleExportPdf = async (): Promise<void> => {
+    try {
+      setIsExportingPdf(true)
+      const settingsRes = await (window as any).electron.ipcRenderer.invoke('db:get-settings')
+      const processPath = '/dosya/malzemeler/liste'
+      const sablonIdStr = settingsRes ? settingsRes[`MAPPING_${processPath}_SABLON_ID`] : null
+
+      if (!sablonIdStr) {
+        alert('Lütfen Şablon & Kategori Yönetimi bölümünden bu süreç için bir şablon bağlayınız.')
+        return
+      }
+
+      const selectedSablon = sablons.find((s) => s.id.toString() === sablonIdStr)
+      if (!selectedSablon) {
+        alert(
+          'Bağlı şablon bulunamadı veya silinmiş. Lütfen Şablon & Kategori Yönetimi bölümünden kontrol ediniz.'
+        )
+        return
+      }
+
+      if (!masterHtml) {
+        alert('Master şablon yüklenemedi, veriler bekleniyor.')
+        return
+      }
+
+      let finalContext = { ...dosyaContext }
+      if (settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`]) {
+        try {
+          const overrideData = JSON.parse(settingsRes[`MAPPING_${processPath}_JSON_OVERRIDE`])
+          finalContext = { ...finalContext, ...overrideData }
+        } catch (e) {
+          console.error('JSON Override parse hatası:', e)
+        }
+      }
+
+      const renderedContent = Mustache.render(selectedSablon.icerik, finalContext)
+      finalContext.icerik = renderedContent
+      const finalHtml = Mustache.render(masterHtml, finalContext)
+      
+      await (window as any).electron.ipcRenderer.invoke('export-pdf', finalHtml, null, `İhtiyaç Listesi`)
+      alert('PDF başarıyla kaydedildi.')
+    } catch (error: any) {
+      alert('PDF kaydetme sırasında bir hata oluştu: ' + error.message)
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }
+
   return (
     <SubScreen
       title="İhtiyaç Listesi"
@@ -77,18 +126,33 @@ export function MalzemeListesi(): React.JSX.Element {
       description="Dosya kapsamındaki malzeme, hizmet veya yapım işi ihtiyaçlarını listeleyin ve yönetin."
     >
       <div className="flex justify-end mb-4 print:hidden">
-        <button
-          onClick={handlePrintTemplate}
-          disabled={isPrinting || ciktiLoading}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
-        >
-          {isPrinting ? (
-            <AlertCircle className="w-4 h-4 animate-spin" />
-          ) : (
-            <Printer className="w-4 h-4" />
-          )}
-          Yazdır / PDF Olarak Kaydet
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrintTemplate}
+            disabled={isPrinting || ciktiLoading}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            {isPrinting ? (
+              <AlertCircle className="w-4 h-4 animate-spin" />
+            ) : (
+              <Printer className="w-4 h-4" />
+            )}
+            Yazdır
+          </button>
+          
+          <button
+            onClick={handleExportPdf}
+            disabled={isExportingPdf || ciktiLoading}
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            {isExportingPdf ? (
+              <AlertCircle className="w-4 h-4 animate-spin" />
+            ) : (
+              <Printer className="w-4 h-4" />
+            )}
+            PDF Olarak Kaydet
+          </button>
+        </div>
       </div>
 
       <MalzemeEkleModal state={state} />

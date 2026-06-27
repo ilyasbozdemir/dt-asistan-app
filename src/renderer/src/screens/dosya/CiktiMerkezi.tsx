@@ -89,7 +89,7 @@ export function CiktiMerkezi(): React.JSX.Element {
 
   // Tab Title Update
   useEffect(() => {
-    document.title = '🖨️ Çıktı & Üretim Merkezi - Doğrudan Temin'
+    document.title = 'Çıktı & Yazdırma Merkezi - Doğrudan Temin'
   }, [])
 
   if (!activeDosyaId || !activeDosya) {
