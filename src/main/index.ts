@@ -170,6 +170,16 @@ function createWindow(): void {
   })
 }
 
+// Set separate userData folder for development to avoid single-instance lock conflicts with production installation
+if (is.dev) {
+  try {
+    const defaultUserData = app.getPath('userData')
+    app.setPath('userData', defaultUserData + '-dev')
+  } catch (e) {
+    console.error('Failed to set userData path in dev mode:', e)
+  }
+}
+
 // Single Instance Lock
 const isMultiInstance = process.argv.includes('--multi-instance')
 const gotTheLock = isMultiInstance ? true : app.requestSingleInstanceLock()
