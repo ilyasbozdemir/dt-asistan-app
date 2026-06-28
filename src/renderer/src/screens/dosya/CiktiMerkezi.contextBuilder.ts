@@ -223,7 +223,7 @@ export function buildDocumentContext(
         : dosyaSayisi.includes('-')
           ? dosyaSayisi.split('-').pop()
           : dosyaSayisi
-      formattedEvrakSayisi = `${detsisNo}-${dosyaYili}-${cleanSayi}`
+      formattedEvrakSayisi = `${detsisNo}-${dosyaYili}/${cleanSayi}`
     } else {
       formattedEvrakSayisi = detsisNo
     }
@@ -336,6 +336,17 @@ export function buildDocumentContext(
     })),
     ...resolvedMappings
   }
+
+  // Evrak sayısı için özel durum kontrolü (eğer veritabanından ham temin_no gelmişse veya belirtilmemişse formatlanmış halini kullanalım)
+  let finalEvrakSayisi = resolvedMappings.evrakSayisi
+  if (
+    !finalEvrakSayisi ||
+    String(finalEvrakSayisi).startsWith('[Belirtilmedi') ||
+    finalEvrakSayisi === dosyaSayisi
+  ) {
+    finalEvrakSayisi = formattedEvrakSayisi
+  }
+  context.evrakSayisi = finalEvrakSayisi
 
   // Sadece mapping dosyasında tanımlıysa şablona gönderilsin
   if (

@@ -65,6 +65,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
            LEFT JOIN TANIM_Personel h ON d.hazirlayan_personel_id = h.id
            LEFT JOIN TANIM_Personel te ON d.talep_eden_personel_id = te.id
            LEFT JOIN TANIM_Personel su ON d.sunan_personel_id = su.id
+           LEFT JOIN TANIM_Personel iy ON d.irtibat_yetkilisi_id = iy.id
            LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
            WHERE d.id = ?`,
           [activeDosyaId]
@@ -157,6 +158,32 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
 
               if (colMap.deger !== undefined) {
                 val = colMap.deger
+              } else if (colMap.formul) {
+                val = colMap.formul.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+                  const parts = path.trim().split('.')
+                  if (parts.length === 2) {
+                    const [tbl, col] = parts
+                    if (tbl === 'TANIM_Kurum' && kurum) {
+                      return kurum[col] !== undefined && kurum[col] !== null
+                        ? String(kurum[col])
+                        : ''
+                    }
+                    if (tbl === 'DATA_TeminDosyasi' && dosyaRes.data?.[0]) {
+                      if (col === 'temin_no_clean') {
+                        const rawNo = dosyaRes.data[0].temin_no || ''
+                        return rawNo.includes('/')
+                          ? rawNo.split('/').pop()
+                          : rawNo.includes('-')
+                            ? rawNo.split('-').pop()
+                            : rawNo
+                      }
+                      return dosyaRes.data[0][col] !== undefined && dosyaRes.data[0][col] !== null
+                        ? String(dosyaRes.data[0][col])
+                        : ''
+                    }
+                  }
+                  return match
+                })
               } else if (colMap.tablo && colMap.sutun) {
                 if (colMap.iliskili_id) {
                   // Dynamic query filtered by activeDosyaId
