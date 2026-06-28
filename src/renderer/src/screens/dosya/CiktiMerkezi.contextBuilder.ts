@@ -309,6 +309,13 @@ export function buildDocumentContext(
     })),
     hazirlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || 'Görevli Personel',
     hazirlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
+    hazirlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
+    hazirlayanEposta: dosyaResData?.hazirlayan_eposta || '',
+    // Turkish characters compatibility helper
+    hazırlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || 'Görevli Personel',
+    hazırlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
+    hazırlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
+    hazırlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     talepEdenPersonelAdi: dosyaResData?.talep_eden_ad_soyad || 'Belirtilmedi',
     talepEdenPersonelUnvan: dosyaResData?.talep_eden_unvan || '',
     sunanPersonelAdi: dosyaResData?.sunan_ad_soyad || 'Belirtilmedi',

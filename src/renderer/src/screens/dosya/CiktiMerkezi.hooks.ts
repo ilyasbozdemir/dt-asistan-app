@@ -48,6 +48,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           `SELECT d.*, 
                   p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan,
                   h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
+                  h.telefon as hazirlayan_telefon, h.eposta as hazirlayan_eposta,
                   te.ad_soyad as talep_eden_ad_soyad, te.unvan as talep_eden_unvan,
                   su.ad_soyad as sunan_ad_soyad, su.unvan as sunan_unvan,
                   iy.ad_soyad as irtibat_ad_soyad, iy.unvan as irtibat_unvan,

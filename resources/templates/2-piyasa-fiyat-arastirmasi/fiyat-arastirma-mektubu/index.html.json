@@ -69,6 +69,12 @@
   "kurumWeb": "www.yildiztepe.bel.tr",
   "kurumEposta": "info@yildiztepe.bel.tr",
   "kurumKep": "yildiztepebel@hs01.kep.tr",
-  "ilgiliPersonelAdi": "Veli Özkan",
-  "ilgiliPersonelUnvan": "Fen İşleri Müdürü"
+  "hazırlayanPersonelAdi": "Veli Özkan",
+  "hazirlayanPersonelAdi": "Veli Özkan",
+  "hazırlayanPersonelUnvan": "Fen İşleri Müdürü",
+  "hazirlayanPersonelUnvan": "Fen İşleri Müdürü",
+  "hazırlayanTelefon": "0312 555 44 33",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

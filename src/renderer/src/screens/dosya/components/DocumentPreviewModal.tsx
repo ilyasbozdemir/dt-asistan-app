@@ -186,7 +186,9 @@ export function DocumentPreviewModal({
     'evrakSayisi',
     'tarih',
     'dosyaTarihi',
-    'ihtiyacYeri'
+    'ihtiyacYeri',
+    'kurumIci',
+    'olurYazisi'
   ]
   const formFields = Object.keys(mergedContext || {}).filter(
     (k) => k !== 'icerik' && usedVars.has(k) && allowedFormKeys.includes(k)

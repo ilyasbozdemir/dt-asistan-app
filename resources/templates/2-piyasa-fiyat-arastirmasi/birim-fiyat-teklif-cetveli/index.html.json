@@ -43,6 +43,12 @@
   "kurumWeb": "www.saglik.gov.tr",
   "kurumEposta": "ankara.destek@saglik.gov.tr",
   "kurumKep": "saglikbakanligi@hs01.kep.tr",
-  "ilgiliPersonelAdi": "Ayşe Demir",
-  "ilgiliPersonelUnvan": "V.H.K.İ."
+  "hazırlayanPersonelAdi": "Ayşe Demir",
+  "hazirlayanPersonelAdi": "Ayşe Demir",
+  "hazırlayanPersonelUnvan": "V.H.K.İ.",
+  "hazirlayanPersonelUnvan": "V.H.K.İ.",
+  "hazırlayanTelefon": "0312 555 44 33",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

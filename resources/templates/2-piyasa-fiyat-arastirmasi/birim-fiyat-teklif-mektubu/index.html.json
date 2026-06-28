@@ -38,6 +38,12 @@
   "kurumWeb": "www.kayabasi.bel.tr",
   "kurumEposta": "destek@kayabasi.bel.tr",
   "kurumKep": "kayabasibelediyesi@hs01.kep.tr",
-  "ilgiliPersonelAdi": "Mehmet Can",
-  "ilgiliPersonelUnvan": "İnşaat Mühendisi"
+  "hazırlayanPersonelAdi": "Mehmet Can",
+  "hazirlayanPersonelAdi": "Mehmet Can",
+  "hazırlayanPersonelUnvan": "İnşaat Mühendisi",
+  "hazirlayanPersonelUnvan": "İnşaat Mühendisi",
+  "hazırlayanTelefon": "0312 555 44 33",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

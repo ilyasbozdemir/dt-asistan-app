@@ -6,19 +6,16 @@
   "antetSatir2": "İl Sağlık Müdürlüğü",
   "antetSatir3": "Destek Hizmetleri Başkanlığı",
   "solLogo": "",
-  "solLogo": "",
   "kurumIci": false,
   "kurumAdres": "Üniversite Mahallesi, Merkez/Ankara",
   "kurumTelefon": "0312 000 00 00",
   "kurumFaks": "0312 000 00 01",
   "kurumEposta": "ankara.saglik@saglik.gov.tr",
   "kurumKep": "saglikbakanligi@hs01.kep.tr",
-  "ilgiliPersonelAdi": "Ayşe Yılmaz",
-  "ilgiliPersonelUnvan": "VHKİ",
   "sunulacakMakamAdi": "MAKAM ONAYINA",
   "dosyaKonusu": "Laboratuvar Sarf Malzemeleri",
-  "hazirlayanPersonelAdi": "Ahmet Yılmaz",
-  "hazirlayanPersonelUnvan": "Satınalma Memuru",
+  "hazirlayanPersonelAdi": "Ayşe Yılmaz",
+  "hazirlayanPersonelUnvan": "VHKİ",
   "ihtiyacKalemleri": [
     {
       "siraNo": 1,
@@ -163,5 +160,11 @@
       "onaylayanPersonelUnvan": "İl Sağlık Müdürü",
       "dosyaTarihi": "14.06.2026"
     }
-  ]
+  ],
+  "hazırlayanPersonelAdi": "Ayşe Yılmaz",
+  "hazırlayanPersonelUnvan": "VHKİ",
+  "hazırlayanTelefon": "0312 555 44 33",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

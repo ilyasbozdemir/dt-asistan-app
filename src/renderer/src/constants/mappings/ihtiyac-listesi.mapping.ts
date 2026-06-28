@@ -39,6 +39,13 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
     aciklama: 'İhtiyaç listesi yerleri'
+  },
+
+  olurYazisi: {
+    deger: true,
+    aciklama: 'Olur yazısı oluşturulacak'
+  },
+  kurumIci: {
+    deger: true
   }
-  
 }

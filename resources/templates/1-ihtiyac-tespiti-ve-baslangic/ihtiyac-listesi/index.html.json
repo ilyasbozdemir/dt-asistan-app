@@ -18,8 +18,6 @@
   "kurumWeb": "www.saglik.gov.tr",
   "kurumEposta": "ankara.destek@saglik.gov.tr",
   "kurumKep": "saglikbakanligi@hs01.kep.tr",
-  "ilgiliPersonelAdi": "Ayşe Demir",
-  "ilgiliPersonelUnvan": "V.H.K.İ.",
   "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/refs/heads/main/resources/icon.png",
   "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "ihtiyacYeri": "İhtiyacın yapılacağı yer",
@@ -118,5 +116,13 @@
   "olurYazisi": true,
   "dosyaTarihi": "14.06.2026",
   "onaylayanPersonelAdi": "Dr. Mehmet Demir",
-  "onaylayanPersonelUnvan": "İl Sağlık Müdürü"
+  "onaylayanPersonelUnvan": "İl Sağlık Müdürü",
+  "hazırlayanPersonelAdi": "Ayşe Demir",
+  "hazirlayanPersonelAdi": "Ayşe Demir",
+  "hazırlayanPersonelUnvan": "V.H.K.İ.",
+  "hazirlayanPersonelUnvan": "V.H.K.İ.",
+  "hazırlayanTelefon": "0312 555 44 33",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }
