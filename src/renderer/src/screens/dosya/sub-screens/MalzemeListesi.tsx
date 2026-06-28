@@ -104,7 +104,7 @@ export function MalzemeListesi(): React.JSX.Element {
         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
           DOSYAYA EKLENEN İHTİYAÇ MALZEMELERİ
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <button
             onClick={() => handleOpenPreview('/dosya/malzemeler/liste', 'Son Alım Fiyat Cetveli')}
             disabled={ciktiLoading}
@@ -120,6 +120,30 @@ export function MalzemeListesi(): React.JSX.Element {
           >
             <FileText className="w-4 h-4" />
             İhtiyaç Talep Formu
+          </button>
+          <button
+            onClick={() => handleOpenPreview('/dosya/luzum/belge', 'Lüzum Müzekkeresi Belgesi')}
+            disabled={ciktiLoading}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            <FileText className="w-4 h-4" />
+            Lüzum Müzekkeresi Belgesi
+          </button>
+          <button
+            onClick={() => handleOpenPreview('/dosya/luzum/onay-eki', 'Onay Eki')}
+            disabled={ciktiLoading}
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            <FileText className="w-4 h-4" />
+            Onay Eki
+          </button>
+          <button
+            onClick={() => handleOpenPreview('/dosya/onay/butce-sorgu', 'Bütçe Sorgusu')}
+            disabled={ciktiLoading}
+            className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+          >
+            <FileText className="w-4 h-4" />
+            Bütçe Sorgusu
           </button>
           <button
             onClick={() => handleOpenPreview('/dosya/malzemeler/liste', 'İhtiyaç Listesi')}
