@@ -9,6 +9,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
   const [masterHtml, setMasterHtml] = useState('')
   const [dosyaContext, setDosyaContext] = useState<any>({})
   const [activeDosya, setActiveDosya] = useState<any>(null)
+  const [placeholders, setPlaceholders] = useState<any[]>([])
 
   useEffect(() => {
     if (!activeDosyaId) return
@@ -28,6 +29,15 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           'SELECT * FROM TANIM_Sablon WHERE id IN (SELECT MAX(id) FROM TANIM_Sablon WHERE aktif_mi = 1 GROUP BY COALESCE(parent_id, id)) ORDER BY kategori ASC, ad ASC'
         )
         if (sablonsRes.success) setSablons(sablonsRes.data)
+
+        // Dinamik Değişken Tanımlarını Çek (TANIM_Placeholder)
+        const placeholdersRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM TANIM_Placeholder'
+        )
+        if (placeholdersRes.success) {
+          setPlaceholders(placeholdersRes.data)
+        }
 
         // Aktif dosya verisini al (Temel dosya bilgisi, onaylayan personel ve kalemler)
         const dosyaRes = await window.electron.ipcRenderer.invoke(
@@ -393,5 +403,5 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
     }
   }, [activeDosyaId])
 
-  return { sablons, loading, masterHtml, dosyaContext, activeDosya }
+  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders }
 }

@@ -7,7 +7,6 @@ import {
   RefreshCw,
   X,
 } from "lucide-react";
-import { TemplateVariablesSchema } from "../../../constants/templateVariables";
 import Mustache from "mustache";
 
 interface DocumentPreviewModalProps {
@@ -17,6 +16,7 @@ interface DocumentPreviewModalProps {
   templateHtml: string;
   masterHtml: string;
   baseContext: any;
+  placeholders?: any[];
   onPrint: (html: string) => Promise<void>;
   onExportPdf: (html: string) => Promise<void>;
 }
@@ -28,6 +28,7 @@ export function DocumentPreviewModal({
   templateHtml,
   masterHtml,
   baseContext,
+  placeholders = [],
   onPrint,
   onExportPdf,
 }: DocumentPreviewModalProps): React.JSX.Element | null {
@@ -197,11 +198,11 @@ export function DocumentPreviewModal({
                         : originalValue;
                       const type = typeof originalValue;
 
-                      const schemaDef = TemplateVariablesSchema[key];
-                      const label = schemaDef ? schemaDef.label : key;
+                      const schemaDef = placeholders.find(p => p.anahtar === key) || null;
+                      const label = schemaDef ? schemaDef.etiket : key;
 
                       // Schema-defined types take precedence over typeof for specific UI hints (like date)
-                      const effectiveType = schemaDef?.type === 'date' ? 'date' : type;
+                      const effectiveType = schemaDef?.veri_tipi === 'date' ? 'date' : type;
 
                       if (effectiveType === "date") {
                         // "14.06.2026" gibi TR formatındaki tarihleri YYYY-MM-DD formatına çevir, input type="date" desteklesin
@@ -219,9 +220,9 @@ export function DocumentPreviewModal({
                               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 {label}
                               </label>
-                              {schemaDef?.description && (
+                              {schemaDef?.aciklama && (
                                 <span className="text-xs text-slate-500">
-                                  {schemaDef.description}
+                                  {schemaDef.aciklama}
                                 </span>
                               )}
                             </div>
@@ -258,9 +259,9 @@ export function DocumentPreviewModal({
                               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 {label}
                               </label>
-                              {schemaDef?.description && (
+                              {schemaDef?.aciklama && (
                                 <span className="text-xs text-slate-500">
-                                  {schemaDef.description}
+                                  {schemaDef.aciklama}
                                 </span>
                               )}
                             </div>
@@ -282,9 +283,9 @@ export function DocumentPreviewModal({
                               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 {label}
                               </label>
-                              {schemaDef?.description && (
+                              {schemaDef?.aciklama && (
                                 <span className="text-xs text-slate-500">
-                                  {schemaDef.description}
+                                  {schemaDef.aciklama}
                                 </span>
                               )}
                             </div>
@@ -311,9 +312,9 @@ export function DocumentPreviewModal({
                                     : "Nesne"})
                                 </span>
                               </label>
-                              {schemaDef?.description && (
+                              {schemaDef?.aciklama && (
                                 <span className="text-xs text-slate-500">
-                                  {schemaDef.description}
+                                  {schemaDef.aciklama}
                                 </span>
                               )}
                             </div>
@@ -348,9 +349,9 @@ export function DocumentPreviewModal({
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                               {label}
                             </label>
-                            {schemaDef?.description && (
+                            {schemaDef?.aciklama && (
                               <span className="text-xs text-slate-500">
-                                {schemaDef.description}
+                                {schemaDef.aciklama}
                               </span>
                             )}
                           </div>
