@@ -25,6 +25,9 @@
         .indent { text-indent: 55px; }
         .text-justify { text-align: justify; }
         .page-break { page-break-after: always; }
+        
+        /* master.html'den gelen global td border'larını ezmek için */
+        table:not(.border-all) th, table:not(.border-all) td { border: none !important; }
     </style>
 </head>
 <body>

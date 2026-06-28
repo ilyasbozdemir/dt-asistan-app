@@ -142,6 +142,13 @@
     }
     /* ──────────────────────────────────── */
 
+    /* master.html'den gelen global td border'larını ezmek için */
+    .paged-header table, .paged-header td,
+    .meta-table, .meta-table td,
+    .paged-footer table, .paged-footer td {
+      border: none !important;
+    }
+
     .content-table th {
       font-weight: bold;
       text-align: center;
@@ -222,17 +229,19 @@
     <table class="content-table">
       <thead>
         <tr>
+          <th>Sıra No</th>
           <th>Kodu</th>
           <th>Malzeme Adı</th>
           <th>Özelliği</th>
           <th>Birimi</th>
-          <th>KDV Oranı</th>
+          <th>KDV Oranı (%)</th>
           <th>Miktar</th>
         </tr>
       </thead>
       <tbody>
         {{#ihtiyacKalemleri}}
         <tr>
+          <td>{{siraNo}}</td>
           <td>{{kodu}}</td>
           <td>{{malzemeAdi}}</td>
           <td>{{ozelligi}}</td>
@@ -243,7 +252,7 @@
         {{/ihtiyacKalemleri}}
         {{^ihtiyacKalemleri}}
         <tr>
-          <td colspan="6" style="text-align: center;">Kalem bulunamadı</td>
+          <td colspan="7" style="text-align: center;">Kalem bulunamadı</td>
         </tr>
         {{/ihtiyacKalemleri}}
       </tbody>

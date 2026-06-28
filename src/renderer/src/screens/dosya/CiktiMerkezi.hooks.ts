@@ -189,7 +189,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
             malzemeAdi: k.kalem_adi,
             ozelligi: k.aciklama || '',
             birimi: k.birim,
-            kdvOrani: `%${k.kdv_orani}`,
+            kdvOrani: k.kdv_orani,
             miktar: formatTR(k.miktar || 0),
             firmaTeklifleri,
             firmaTeklifleriDetay,

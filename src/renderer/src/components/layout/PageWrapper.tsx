@@ -40,8 +40,20 @@ export function PageWrapper(): React.ReactNode {
     document.title = title
   }, [routerState.location.pathname])
 
-  const { activeFilePath, openWorkspace, isAuthenticated, loadActiveMeta, activeDosyaId } = useWorkspaceStore()
+  const { activeFilePath, openWorkspace, isAuthenticated, loadActiveMeta, activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
   const { loadSettings } = useSettingsStore()
+
+  // Yeni pencerede açıldığında URL'den id'yi alıp aktif dosya olarak set etme (Windows Forms formlar arası veri taşıma mantığı)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    const idParam = searchParams.get('id')
+    if (idParam) {
+      const id = parseInt(idParam, 10)
+      if (!isNaN(id) && activeDosyaId !== id) {
+        setActiveDosyaId(id)
+      }
+    }
+  }, [window.location.search, setActiveDosyaId, activeDosyaId])
   const { tabs, activeTabPath, addTab, clearTabs, clearDosyaTabs } = useTabStore()
   const queryClient = useQueryClient()
 
