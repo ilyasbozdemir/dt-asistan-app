@@ -19,6 +19,12 @@ export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
   const navigate = useNavigate()
 
+  const searchParams = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const isWindowMode = searchParams.get('mode') === 'window' || hashParams.get('mode') === 'window'
+  const isDosyaWindowMode = searchParams.get('mode') === 'dosya_window' || hashParams.get('mode') === 'dosya_window'
+  const isAnyWindowMode = isWindowMode || isDosyaWindowMode
+
   useEffect(() => {
     const path = routerState.location.pathname
     let title = 'DT Asistan'
@@ -128,13 +134,14 @@ export function PageWrapper(): React.ReactNode {
 
   // Reset file-specific tabs when no active document is selected
   useEffect(() => {
+    if (isAnyWindowMode) return
     if (activeDosyaId === null) {
       clearDosyaTabs()
       if (window.electron) {
         window.electron.ipcRenderer.send('window:close-secondary-windows')
       }
     }
-  }, [activeDosyaId, clearDosyaTabs])
+  }, [activeDosyaId, clearDosyaTabs, isAnyWindowMode])
 
   // Listen for db change invalidations from main process
   useEffect(() => {
@@ -163,11 +170,7 @@ export function PageWrapper(): React.ReactNode {
     }
   }, [addTab, navigate])
 
-  const searchParams = new URLSearchParams(window.location.search)
-  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
-  const isWindowMode = searchParams.get('mode') === 'window' || hashParams.get('mode') === 'window'
-  const isDosyaWindowMode = searchParams.get('mode') === 'dosya_window' || hashParams.get('mode') === 'dosya_window'
-  const isAnyWindowMode = isWindowMode || isDosyaWindowMode
+
 
   // When opened as a detached window, restore workspace context from URL params
   useEffect(() => {

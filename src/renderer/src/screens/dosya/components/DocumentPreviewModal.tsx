@@ -7,8 +7,11 @@ import {
   Printer,
   RefreshCw,
   X,
+  Bot,
+  Loader2,
 } from "lucide-react";
 import Mustache from "mustache";
+import Editor from "@monaco-editor/react";
 
 interface DocumentPreviewModalProps {
   isOpen: boolean;
@@ -44,6 +47,37 @@ export function DocumentPreviewModal({
   const [previewHtml, setPreviewHtml] = useState("");
   const [isProcessingPrint, setIsProcessingPrint] = useState(false);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+  const handleAiEdit = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsAiGenerating(true);
+    try {
+      const res = await window.electron.ipcRenderer.invoke("ai:generate", {
+        prompt: `Mevcut JSON Yapısı:\n${overrideJson}\n\nKullanıcı Talimatı: ${aiPrompt}\n\nLütfen talimata göre JSON verisini güncelle. Sadece geçerli JSON çıktısı döndür. Markdown kod blokları (\`\`\`json) veya açıklama ekleme.`,
+        systemInstruction: "Sen JSON verilerini talimata göre güncelleyen bir yardımcı asistansın. Çıktın her zaman sadece geçerli bir JSON olmalıdır, hiçbir açıklama veya markdown bloğu içermemelidir."
+      });
+      if (res && res.success) {
+        let cleanText = res.data.trim();
+        if (cleanText.startsWith("```")) {
+          cleanText = cleanText.replace(/^```[a-zA-Z0-9]*\\n/, "").replace(/\\n```$/, "");
+        }
+        const parsed = JSON.parse(cleanText);
+        setOverrideData(parsed);
+        setOverrideJson(JSON.stringify(parsed, null, 2));
+        const mergedContextData = { ...baseContext, ...parsed };
+        updatePreview(mergedContextData);
+        setAiPrompt("");
+      } else {
+        alert("AI işlemi başarısız oldu: " + (res?.error || "Bilinmeyen hata"));
+      }
+    } catch (err: any) {
+      alert("Hata: " + err.message);
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
 
   const updatePreview = (contextData: any) => {
     try {
@@ -148,13 +182,14 @@ export function DocumentPreviewModal({
   ]);
 
   // Orijinal bağlamdaki (mergedContext) verilerden SADECE şablonda kullanılan form alanlarını üret
+  const allowedFormKeys = ["sunulacakMakamAdi", "tarih", "dosyaTarihi", "ihtiyacYeri"];
   const formFields = Object.keys(mergedContext || {}).filter((k) =>
-    k !== "icerik" && usedVars.has(k)
+    k !== "icerik" && usedVars.has(k) && allowedFormKeys.includes(k)
   );
 
   if (isInline) {
     return (
-      <div className="bg-white dark:bg-slate-900 w-full h-[calc(100vh-180px)] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+      <div className="bg-white dark:bg-slate-900 w-full h-[calc(100vh-235px)] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
         {/* HEADER */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
           <div className="flex items-center gap-3">
@@ -173,9 +208,15 @@ export function DocumentPreviewModal({
                 {title} Önizleme
               </h2>
               <p className="text-xs text-slate-500">
-                Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
-                görebilirsiniz.
+                Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
               </p>
+              <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
+                {Array.from(usedVars).filter(k => k !== "icerik").map(key => (
+                  <span key={key} className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-200/50 dark:border-slate-800">
+                    {key}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -395,21 +436,63 @@ export function DocumentPreviewModal({
                   </div>
                 )
                 : (
-                  <>
-                    <textarea
-                      value={overrideJson}
-                      onChange={(e) => handleJsonChange(e.target.value)}
-                      className="flex-1 w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-955 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder='Örn: { "talepEdenPersonelAdi": "Yeni İsim" }'
-                      spellCheck={false}
-                    />
+                  <div className="flex flex-col gap-3 flex-1 min-h-0">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl flex items-start gap-2 text-amber-800 dark:text-amber-300 text-xs shadow-sm">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block mb-0.5">⚠️ Gelişmiş Ayarlar (Geliştirici Modu)</span>
+                        Değişkenlerin yapısını veya JSON formatını bilmiyorsanız lütfen bu alanlardaki kodları değiştirmeyin. Hatalı JSON dosyanın yazdırılmasını bozabilir.
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-150 dark:border-blue-900/40 rounded-xl flex flex-col gap-2 shadow-sm">
+                      <span className="text-xs font-bold text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                        <Bot className="w-4 h-4 text-blue-500" /> AI Değişken Asistanı
+                      </span>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Örn: Tarihi 15.06.2026 yap..."
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAiEdit}
+                          disabled={isAiGenerating || !aiPrompt.trim()}
+                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1 cursor-pointer shrink-0"
+                        >
+                          {isAiGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                          Uygula
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 w-full rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 min-h-[250px]">
+                      <Editor
+                        height="100%"
+                        defaultLanguage="json"
+                        theme={document.documentElement.classList.contains("dark") ? "vs-dark" : "light"}
+                        value={overrideJson}
+                        onChange={(value) => handleJsonChange(value || "{}")}
+                        options={{
+                          minimap: { enabled: false },
+                          wordWrap: "on",
+                          fontSize: 12,
+                          lineNumbers: "on",
+                          folding: true,
+                          formatOnPaste: true
+                        }}
+                      />
+                    </div>
                     {jsonError && (
-                      <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/30 rounded-lg flex items-start gap-2 text-rose-600 dark:text-rose-400 text-xs">
+                      <div className="p-3 bg-rose-50 dark:bg-rose-955/30 border border-rose-200 dark:border-rose-900/30 rounded-lg flex items-start gap-2 text-rose-600 dark:text-rose-400 text-xs">
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>{jsonError}</span>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
             </div>
 
@@ -483,9 +566,15 @@ export function DocumentPreviewModal({
                 {title} Önizleme
               </h2>
               <p className="text-xs text-slate-500">
-                Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
-                görebilirsiniz.
+                Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
               </p>
+              <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
+                {Array.from(usedVars).filter(k => k !== "icerik").map(key => (
+                  <span key={key} className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-200/50 dark:border-slate-800">
+                    {key}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
           <button
@@ -717,21 +806,63 @@ export function DocumentPreviewModal({
                   </div>
                 )
                 : (
-                  <>
-                    <textarea
-                      value={overrideJson}
-                      onChange={(e) => handleJsonChange(e.target.value)}
-                      className="flex-1 w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder='Örn: { "talepEdenPersonelAdi": "Yeni İsim" }'
-                      spellCheck={false}
-                    />
+                  <div className="flex flex-col gap-3 flex-1 min-h-0">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl flex items-start gap-2 text-amber-800 dark:text-amber-300 text-xs shadow-sm">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block mb-0.5">⚠️ Gelişmiş Ayarlar (Geliştirici Modu)</span>
+                        Değişkenlerin yapısını veya JSON formatını bilmiyorsanız lütfen bu alanlardaki kodları değiştirmeyin. Hatalı JSON dosyanın yazdırılmasını bozabilir.
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-150 dark:border-blue-900/40 rounded-xl flex flex-col gap-2 shadow-sm">
+                      <span className="text-xs font-bold text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                        <Bot className="w-4 h-4 text-blue-500" /> AI Değişken Asistanı
+                      </span>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Örn: Tarihi 15.06.2026 yap..."
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAiEdit}
+                          disabled={isAiGenerating || !aiPrompt.trim()}
+                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1 cursor-pointer shrink-0"
+                        >
+                          {isAiGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                          Uygula
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 w-full rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 min-h-[250px]">
+                      <Editor
+                        height="100%"
+                        defaultLanguage="json"
+                        theme={document.documentElement.classList.contains("dark") ? "vs-dark" : "light"}
+                        value={overrideJson}
+                        onChange={(value) => handleJsonChange(value || "{}")}
+                        options={{
+                          minimap: { enabled: false },
+                          wordWrap: "on",
+                          fontSize: 12,
+                          lineNumbers: "on",
+                          folding: true,
+                          formatOnPaste: true
+                        }}
+                      />
+                    </div>
                     {jsonError && (
-                      <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/30 rounded-lg flex items-start gap-2 text-rose-600 dark:text-rose-400 text-xs">
+                      <div className="p-3 bg-rose-50 dark:bg-rose-955/30 border border-rose-200 dark:border-rose-900/30 rounded-lg flex items-start gap-2 text-rose-600 dark:text-rose-400 text-xs">
                         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>{jsonError}</span>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
             </div>
 
