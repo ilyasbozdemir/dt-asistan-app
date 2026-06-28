@@ -44,6 +44,7 @@ export const APP_ROUTES = {
 
   // 2. Malzemeler
   MALZEME_LISTESI: '/dosya/malzemeler/liste',
+  SON_ALIM_FIYAT_CETVELI: '/dosya/malzemeler/son-alim',
 
   // 3. Lüzum
   LUZUM_TALEP_FORMU: '/dosya/luzum/talep-formu',

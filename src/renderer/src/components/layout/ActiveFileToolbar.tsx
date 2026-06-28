@@ -152,7 +152,9 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
 
   const dynamicActiveItems: MenuItem[] = stagesToUse
     .map((asama) => {
-      const stagePages = subPagesMapping.filter((p) => p.stage === asama.asama_sira)
+      const stagePages = subPagesMapping.filter(
+        (p) => p.stage === asama.asama_sira && !p.hideFromToolbar
+      )
 
       const filteredChildren = stagePages.filter((child) => {
         if (!activeAlimTuru) return true

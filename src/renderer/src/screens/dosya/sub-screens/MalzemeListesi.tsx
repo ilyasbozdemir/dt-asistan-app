@@ -106,7 +106,7 @@ export function MalzemeListesi(): React.JSX.Element {
         </span>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           <button
-            onClick={() => handleOpenPreview('/dosya/malzemeler/liste', 'Son Alım Fiyat Cetveli')}
+            onClick={() => handleOpenPreview('/dosya/malzemeler/son-alim', 'Son Alım Fiyat Cetveli')}
             disabled={ciktiLoading}
             className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
           >

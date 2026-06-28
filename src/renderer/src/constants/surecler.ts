@@ -6,14 +6,46 @@ export interface ProcessStage {
   path: string
   icon: any
   stage: number
+  hideFromToolbar?: boolean
 }
 
 export const subPagesMapping: ProcessStage[] = [
   { name: 'İhtiyaç Listesi', path: APP_ROUTES.MALZEME_LISTESI, icon: PackageSearch, stage: 1 },
-  { name: 'İhtiyaç Talep Formu', path: APP_ROUTES.LUZUM_TALEP_FORMU, icon: FileText, stage: 1 },
-  { name: 'Lüzum Müzekkeresi Belgesi', path: APP_ROUTES.LUZUM_BELGESI, icon: FileText, stage: 1 },
-  { name: 'Onay Eki', path: APP_ROUTES.LUZUM_ONAY_EKI, icon: FileText, stage: 1 },
-  { name: 'Bütçe Sorgusu', path: APP_ROUTES.BUTCE_SORGU, icon: FileCheck, stage: 1 },
+  {
+    name: 'İhtiyaç Talep Formu',
+    path: APP_ROUTES.LUZUM_TALEP_FORMU,
+    icon: FileText,
+    stage: 1,
+    hideFromToolbar: true
+  },
+  {
+    name: 'Lüzum Müzekkeresi Belgesi',
+    path: APP_ROUTES.LUZUM_BELGESI,
+    icon: FileText,
+    stage: 1,
+    hideFromToolbar: true
+  },
+  {
+    name: 'Onay Eki',
+    path: APP_ROUTES.LUZUM_ONAY_EKI,
+    icon: FileText,
+    stage: 1,
+    hideFromToolbar: true
+  },
+  {
+    name: 'Bütçe Sorgusu',
+    path: APP_ROUTES.BUTCE_SORGU,
+    icon: FileCheck,
+    stage: 1,
+    hideFromToolbar: true
+  },
+  {
+    name: 'Son Alım Fiyat Cetveli',
+    path: APP_ROUTES.SON_ALIM_FIYAT_CETVELI,
+    icon: FileText,
+    stage: 1,
+    hideFromToolbar: true
+  },
 
   {
     name: 'Fiyat Araştırma Komisyonu',

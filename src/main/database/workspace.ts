@@ -186,6 +186,7 @@ function seedTemplates(db: Database.Database): void {
       'ihtiyac-listesi': '/dosya/malzemeler/liste',
       'ihtiyac-talep-formu': '/dosya/luzum/talep-formu',
       'malzeme-hizmet-kalem-listesi': '/dosya/malzemeler/liste',
+      'son-alim-fiyat-cetveli': '/dosya/malzemeler/son-alim',
       // Lüzum
       'luzum-muzekkeresi-belgesi': '/dosya/luzum/belge',
       'luzum-muzekkeresi': '/dosya/luzum/belge',
