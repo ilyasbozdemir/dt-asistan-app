@@ -1,11 +1,10 @@
 export * from './types'
-import { ProcessMapping } from './types'
 import { IhtiyacListesiMapping } from './ihtiyac-listesi.mapping'
-import { APP_ROUTES } from '../routeConstants'
+import { ProcessMapping } from './types'
 
 export const processMappingRegistry: Record<string, ProcessMapping> = {
-  [APP_ROUTES.MALZEME_LISTESI]: IhtiyacListesiMapping
-
+  '/dosya/malzemeler/liste': IhtiyacListesiMapping,
+  
 }
 
 export function getDefaultMappingForProcess(processPath: string): ProcessMapping {
