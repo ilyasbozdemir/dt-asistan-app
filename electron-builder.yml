@@ -24,6 +24,8 @@ fileAssociations:
 directories:
   buildResources: build
 files:
+  - out/**/*
+  - package.json
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
