@@ -502,13 +502,11 @@ if (!gotTheLock && !isMultiInstance) {
     })
 
     ipcMain.on('window:open-external', (_, data: { url: string; title?: string }) => {
-      const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
       const newWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         minWidth: 800,
         minHeight: 600,
-        parent: parent || undefined,
         autoHideMenuBar: false,
         title: data.title || 'Sorgulama Ekranı',
         icon: icon,
@@ -525,14 +523,11 @@ if (!gotTheLock && !isMultiInstance) {
     ipcMain.on(
       'window:open-secondary',
       (_, data: { path: string; search: string; title?: string }) => {
-        const parent = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
         const newWindow = new BrowserWindow({
           width: 1000,
           height: 750,
           minWidth: 800,
           minHeight: 600,
-          parent: parent || undefined,
-          modal: false,
           autoHideMenuBar: true,
           title: data.title || 'DT Asistan — Detay',
           icon: icon,
