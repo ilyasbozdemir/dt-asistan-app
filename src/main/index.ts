@@ -205,6 +205,9 @@ if (!gotTheLock && !isMultiInstance) {
           stdio: 'ignore'
         }).unref()
       } else {
+        if (!mainWindow.isVisible()) {
+          mainWindow.show()
+        }
         if (mainWindow.isMinimized()) mainWindow.restore()
         mainWindow.focus()
 
