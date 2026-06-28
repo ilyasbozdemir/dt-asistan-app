@@ -35,6 +35,9 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           `SELECT d.*, 
                   p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan,
                   h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
+                  te.ad_soyad as talep_eden_ad_soyad, te.unvan as talep_eden_unvan,
+                  su.ad_soyad as sunan_ad_soyad, su.unvan as sunan_unvan,
+                  iy.ad_soyad as irtibat_ad_soyad, iy.unvan as irtibat_unvan,
                   f.unvan as yuklenici_firma_adi,
                   f.adres as yuklenici_firma_adresi,
                   f.ilce as yuklenici_firma_ilcesi,
@@ -47,6 +50,8 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
            FROM DATA_TeminDosyasi d 
            LEFT JOIN TANIM_Personel p ON d.onay_personel_id = p.id 
            LEFT JOIN TANIM_Personel h ON d.hazirlayan_personel_id = h.id
+           LEFT JOIN TANIM_Personel te ON d.talep_eden_personel_id = te.id
+           LEFT JOIN TANIM_Personel su ON d.sunan_personel_id = su.id
            LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
            WHERE d.id = ?`,
           [activeDosyaId]
@@ -331,6 +336,12 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           })),
           hazirlayanPersonelAdi: dosyaRes.data?.[0]?.hazirlayan_ad_soyad || 'Görevli Personel',
           hazirlayanPersonelUnvan: dosyaRes.data?.[0]?.hazirlayan_unvan || 'Unvan Belirtilmedi',
+          talepEdenPersonelAdi: dosyaRes.data?.[0]?.talep_eden_ad_soyad || 'Belirtilmedi',
+          talepEdenPersonelUnvan: dosyaRes.data?.[0]?.talep_eden_unvan || '',
+          sunanPersonelAdi: dosyaRes.data?.[0]?.sunan_ad_soyad || 'Belirtilmedi',
+          sunanPersonelUnvan: dosyaRes.data?.[0]?.sunan_unvan || '',
+          ilgiliPersonelAdi: dosyaRes.data?.[0]?.irtibat_ad_soyad || 'Belirtilmedi',
+          ilgiliPersonelUnvan: dosyaRes.data?.[0]?.irtibat_unvan || '',
           firmalar: firms.map((f: any) => ({ unvan: f.unvan })),
           firmalarColspan: firms.length + 2,
           firmaToplamlari,

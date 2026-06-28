@@ -116,6 +116,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     komisyon_takdiri: '',
     tibbi_cihaz_alimi_mi: 0,
     irtibat_yetkilisi_id: null,
+    talep_eden_personel_id: null,
+    sunan_personel_id: null,
     son_teklif_verme_tarihi: '',
     teslim_tarihi: '',
     yaklasik_maliyet: 0,
@@ -1468,6 +1470,102 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                                 type="button"
                                 onClick={() => {
                                   setFormData(prev => ({ ...prev, hazirlayan_personel_id: p.id }))
+                                  setShowPersonelSearch(null)
+                                  setPersonelSearchQuery('')
+                                }}
+                                className="w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+                              >
+                                {p.ad_soyad}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* TALEP EDEN PERSONEL */}
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+                        Talep Eden Personel
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPersonelSearch(showPersonelSearch === 'talep_eden' ? null : 'talep_eden')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none text-slate-800 dark:text-slate-200 text-left"
+                      >
+                        <span>
+                          {formData.talep_eden_personel_id
+                            ? personeller.find(p => p.id === formData.talep_eden_personel_id)?.ad_soyad
+                            : 'Talep Edeni Seçin...'}
+                        </span>
+                        <Search size={14} className="text-slate-400" />
+                      </button>
+
+                      {showPersonelSearch === 'talep_eden' && (
+                        <div className="absolute left-0 mt-1.5 w-full bg-white dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-2xl shadow-xl p-2 z-50">
+                          <input
+                            type="text"
+                            placeholder="Personel ara..."
+                            value={personelSearchQuery}
+                            onChange={e => setPersonelSearchQuery(e.target.value)}
+                            className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 mb-2"
+                            autoFocus
+                          />
+                          <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-0.5">
+                            {filteredPersoneller.map(p => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, talep_eden_personel_id: p.id }))
+                                  setShowPersonelSearch(null)
+                                  setPersonelSearchQuery('')
+                                }}
+                                className="w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+                              >
+                                {p.ad_soyad}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SUNAN PERSONEL */}
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+                        Sunan Personel
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPersonelSearch(showPersonelSearch === 'sunan' ? null : 'sunan')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none text-slate-800 dark:text-slate-200 text-left"
+                      >
+                        <span>
+                          {formData.sunan_personel_id
+                            ? personeller.find(p => p.id === formData.sunan_personel_id)?.ad_soyad
+                            : 'Sunan Kişiyi Seçin...'}
+                        </span>
+                        <Search size={14} className="text-slate-400" />
+                      </button>
+
+                      {showPersonelSearch === 'sunan' && (
+                        <div className="absolute left-0 mt-1.5 w-full bg-white dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-2xl shadow-xl p-2 z-50">
+                          <input
+                            type="text"
+                            placeholder="Personel ara..."
+                            value={personelSearchQuery}
+                            onChange={e => setPersonelSearchQuery(e.target.value)}
+                            className="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 mb-2"
+                            autoFocus
+                          />
+                          <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-0.5">
+                            {filteredPersoneller.map(p => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, sunan_personel_id: p.id }))
                                   setShowPersonelSearch(null)
                                   setPersonelSearchQuery('')
                                 }}

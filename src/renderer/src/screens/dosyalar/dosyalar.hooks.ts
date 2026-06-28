@@ -51,6 +51,8 @@ export interface TeminDosyasi {
   firma_id: number | null
   onay_personel_id: number | null
   hazirlayan_personel_id: number | null
+  talep_eden_personel_id: number | null
+  sunan_personel_id: number | null
   durum_asama_id: number | null
   mevzuat_id: number | null
   notlar: string | null

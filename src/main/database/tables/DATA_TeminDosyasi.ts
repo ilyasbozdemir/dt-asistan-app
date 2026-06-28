@@ -60,6 +60,8 @@ export const DATA_TeminDosyasi = {
     { name: 'firma_id', type: 'INTEGER', description: 'Firma ID' }, // Seçilen kazanan firma
     { name: 'onay_personel_id', type: 'INTEGER', description: 'Onay Personel ID' }, // Onay veren / harcama yetkilisi
     { name: 'hazirlayan_personel_id', type: 'INTEGER', description: 'Hazirlayan Personel ID' },
+    { name: 'talep_eden_personel_id', type: 'INTEGER', description: 'Talep Eden Personel ID' },
+    { name: 'sunan_personel_id', type: 'INTEGER', description: 'Sunan Personel ID' },
     { name: 'durum_asama_id', type: 'INTEGER', description: 'Durum Asama ID' }, // TANIM_Asama referansı
     { name: 'mevzuat_id', type: 'INTEGER', description: 'Mevzuat ID' }, // TANIM_Mevzuat kaydına referans
     { name: 'surec_taslak_id', type: 'INTEGER', description: 'Surec Taslak ID' }, // TANIM_SurecTaslak referansı
