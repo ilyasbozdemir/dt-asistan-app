@@ -1,6 +1,6 @@
 {
   "name": "dt-asistan-desktop-app",
-  "version": "1.0.0-beta.14",
+  "version": "1.0.0-beta.15",
   "description": "Doğrudan Temin ve Satın Alma Süreçleri Yönetim Sistemi",
   "main": "./out/main/index.js",
   "author": "ilyasbozdemir.dev",
@@ -23,7 +23,10 @@
     "scaffold": "node scripts/scaffold.js",
     "tree": "node scripts/tree.js",
     "db:reset": "node scripts/db-reset.js",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "release": "node scripts/release.js",
+    "release:dry": "node scripts/release.js --dry-run",
+    "release:local": "node scripts/release.js --no-push"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

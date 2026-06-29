@@ -157,11 +157,11 @@ const TEMPLATE_NAMES: Record<string, string> = {
 }
 
 const TEMPLATE_CATEGORIES: Record<string, string> = {
-  '1-ihtiyac-tespiti-ve-baslangic': '1. İhtiyaç Tespiti ve Başlangıç',
-  '2-fiyat-arastirma-ve-yaklasik-maliyet': '2. Fiyat Araştırma ve Yaklaşık Maliyet',
-  '3-ihale-ve-onay-sureci': '3. İhale ve Onay Süreci',
-  '4-sozlesme-ve-teslimat': '4. Sözleşme ve Teslimat',
-  '5-klasor-ve-kapaklar': '5. Klasör Sırtlıkları & Kapaklar'
+  '1-ihtiyac-tespiti-ve-baslangic': '1. İhtiyaç Tespiti & Başlangıç',
+  '2-piyasa-fiyat-arastirmasi': '2. Piyasa Fiyat Araştırması',
+  '3-siparis-ve-sozlesme': '3. Sipariş & Sözleşme',
+  '4-kabul-ve-odeme-islemleri': '4. Kabul & Ödeme İşlemleri',
+  '5-klasor-ve-kapaklar': '5. Klasör & Kapaklar'
 }
 
 function seedTemplates(db: Database.Database): void {
@@ -207,8 +207,39 @@ function seedTemplates(db: Database.Database): void {
       // Harcama
       'harcama-talimati': '/dosya/harcama/talimat',
       'harcama-pusulasi': '/dosya/harcama/pusula',
+      // Kabul ve Ödeme İşlemleri (pure printable)
+      'hakedis-raporu': '/dosya/cikti-merkezi',
+      'hizmet-isleri-kabul-teklif-belgesi': '/dosya/cikti-merkezi',
+      'hizmet-isleri-kabul-tutanagi': '/dosya/cikti-merkezi',
+      'kabul-edilen-teklif-odeme': '/dosya/cikti-merkezi',
+      'odeme-emri-belgesi': '/dosya/cikti-merkezi',
+      'odeme-yazisi': '/dosya/cikti-merkezi',
+      'tasinir-islem-fisi': '/dosya/cikti-merkezi',
       // Klasör ve Kapaklar
-      'ihale-kapagi': '/dosya/cikti-merkezi'
+      'ihale-kapagi': '/dosya/cikti-merkezi',
+      'kapak-ici-indeks-sablonu': '/dosya/cikti-merkezi',
+      'klasor-sirtligi-3cm': '/dosya/cikti-merkezi',
+      'klasor-sirtligi-5cm': '/dosya/cikti-merkezi',
+      'klasor-sirtligi-7-5cm': '/dosya/cikti-merkezi',
+      // Diğer Safha 2 ve 3 Belgeleri (pure printable)
+      'arastirma-mektubu': '/dosya/cikti-merkezi',
+      'birim-fiyat-teklif-cetveli': '/dosya/cikti-merkezi',
+      'birim-fiyat-teklif-mektubu': '/dosya/cikti-merkezi',
+      'dagitim-cizelgesi': '/dosya/cikti-merkezi',
+      'dagitim-cizelgesi-karma': '/dosya/cikti-merkezi',
+      'fiyat-arastirma-mektubu': '/dosya/cikti-merkezi',
+      'fiyat-arastirmasi': '/dosya/cikti-merkezi',
+      'gorevlendirme-yazisi': '/dosya/cikti-merkezi',
+      'piyasa-fiyat-arastirma-gorevlendirmesi': '/dosya/cikti-merkezi',
+      'teklif-mektubu-dagitim-cizelgesi': '/dosya/cikti-merkezi',
+      'dogrudan-temin-sonuc-onay-belgesi': '/dosya/cikti-merkezi',
+      'dogrudan-temin-sozlesmesi': '/dosya/cikti-merkezi',
+      'dogrudan-temin-sozlesmesi-alternatif': '/dosya/cikti-merkezi',
+      'dogrudan-temin-sozlesmesi-uzun': '/dosya/cikti-merkezi',
+      'ihale-komisyon-karari': '/dosya/cikti-merkezi',
+      'kabul-edilen-teklif': '/dosya/cikti-merkezi',
+      'sozlesmeye-davet': '/dosya/cikti-merkezi',
+      'teklif-mektubu': '/dosya/cikti-merkezi'
     }
 
     const findHtmlFiles = (dir: string): string[] => {
