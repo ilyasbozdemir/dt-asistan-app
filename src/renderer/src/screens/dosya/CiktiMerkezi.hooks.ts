@@ -9,6 +9,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
   const [loading, setLoading] = useState(true)
   const [masterHtml, setMasterHtml] = useState('')
   const [dosyaContext, setDosyaContext] = useState<any>({})
+  const [contextsByPath, setContextsByPath] = useState<Record<string, Record<string, unknown>>>({})
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [placeholders, setPlaceholders] = useState<any[]>([])
 
@@ -138,8 +139,8 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           }
         }
 
-        // Dynamic mapping resolver
-        const resolvedMappings: Record<string, any> = {}
+        // Dynamic mapping resolver (Isolated per path)
+        const resolvedMappingsByPath: Record<string, Record<string, any>> = {}
         for (const process of subPagesMapping) {
           const defaultMap = getDefaultMappingForProcess(process.path)
           const overridesKey = `MAPPING_${process.path}_PLACEHOLDERS`
@@ -152,6 +153,8 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
             }
           }
           const activeMap = { ...defaultMap, ...overriddenMap }
+
+          const processMappings: Record<string, any> = {}
 
           for (const [sablonKey, colMap] of Object.entries(activeMap)) {
             if (colMap) {
@@ -247,13 +250,29 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
                     // JSON formatında değilse ham string olarak kalır
                   }
                 }
-                resolvedMappings[sablonKey] = val
+                processMappings[sablonKey] = val
               }
             }
           }
+          resolvedMappingsByPath[process.path] = processMappings
         }
 
-        let context = buildDocumentContext(
+        // Master JSON verisini oku
+        const mJson = await window.electron.ipcRenderer.invoke(
+          'template:read-system',
+          'master.html.json'
+        )
+        let mJsonParsed = {}
+        if (typeof mJson === 'string') {
+          try {
+            mJsonParsed = JSON.parse(mJson)
+          } catch {
+            // Hata durumunda master.html.json yok sayılır
+          }
+        }
+
+        // 1. Genel / Base Context (boş resolvedMappings ile)
+        let baseContext = buildDocumentContext(
           dosyaRes.data?.[0],
           kalemlerRes.data || [],
           firms,
@@ -262,24 +281,31 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
           muayeneKomisyonu,
           kurum,
           settings,
-          resolvedMappings
+          {}
         )
+        baseContext = { ...mJsonParsed, ...baseContext }
+        setDosyaContext(baseContext)
 
-        // Varsa test/master dummy verisini de alıp birleştir, gerçek veriler üzerine yazsın
-        const mJson = await window.electron.ipcRenderer.invoke(
-          'template:read-system',
-          'master.html.json'
-        )
-        if (typeof mJson === 'string') {
-          try {
-            const parsedJson = JSON.parse(mJson)
-            context = { ...parsedJson, ...context }
-          } catch {
-            // Hata durumunda master.html.json yok sayılır
-          }
+        // 2. Her sürecin kendi izole bağlamı
+        const pathContexts: Record<string, any> = {}
+        for (const process of subPagesMapping) {
+          const pathMappings = resolvedMappingsByPath[process.path] || {}
+          let contextForPath = buildDocumentContext(
+            dosyaRes.data?.[0],
+            kalemlerRes.data || [],
+            firms,
+            bidsMap,
+            commission,
+            muayeneKomisyonu,
+            kurum,
+            settings,
+            pathMappings
+          )
+          contextForPath = { ...mJsonParsed, ...contextForPath }
+          pathContexts[process.path] = contextForPath
         }
 
-        setDosyaContext(context)
+        setContextsByPath(pathContexts)
         setActiveDosya(dosyaRes.data?.[0] || null)
       } catch (err) {
         console.error('Veri yükleme hatası:', err)
@@ -299,5 +325,5 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
     }
   }, [activeDosyaId])
 
-  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders }
+  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders, contextsByPath }
 }

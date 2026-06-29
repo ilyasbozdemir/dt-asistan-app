@@ -41,7 +41,8 @@ export function MalzemeListesi(): React.JSX.Element {
     loading: ciktiLoading,
     masterHtml,
     dosyaContext,
-    placeholders
+    placeholders,
+    contextsByPath
   } = useCiktiMerkeziData(activeDosyaId)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
   const [previewData, setPreviewData] = useState<{
@@ -88,7 +89,7 @@ export function MalzemeListesi(): React.JSX.Element {
         title={previewData.title}
         templateHtml={previewData.templateHtml}
         masterHtml={masterHtml || ''}
-        baseContext={dosyaContext}
+        baseContext={contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         onPrint={executePrint}
         onExportPdf={executeExportPdf}

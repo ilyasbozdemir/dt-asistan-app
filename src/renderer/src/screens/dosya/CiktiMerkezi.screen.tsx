@@ -138,7 +138,7 @@ const getSablonGroup = (sablon: Sablon): string => {
 
 export function CiktiMerkeziScreen(): React.JSX.Element {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
-  const { sablons, loading, masterHtml, dosyaContext, activeDosya } =
+  const { sablons, loading, masterHtml, dosyaContext, activeDosya, contextsByPath } =
     useCiktiMerkeziData(activeDosyaId)
   const { logDocument } = useDocumentLogger()
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
@@ -332,7 +332,8 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     try {
       if (!masterHtml) return sablon.icerik
 
-      let templateContext = { ...dosyaContext }
+      const processContext = contextsByPath?.[sablon.route_path || ''] || dosyaContext
+      let templateContext = { ...processContext }
       if (sablon.test_verisi) {
         try {
           const parsedTest = JSON.parse(sablon.test_verisi)
