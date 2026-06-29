@@ -98,8 +98,6 @@ data/
 *.rpm
 
 # IDEs and Editors
-.vscode
-.vscode-test
 .idea
 *.swp
 *.swo
