@@ -314,7 +314,7 @@ export function buildDocumentContext(
     hazirlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     // Turkish characters compatibility helper
     hazırlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
-    hazırlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
+    hazirlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
     hazırlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     talepEdenPersonelAdi: dosyaResData?.talep_eden_ad_soyad || 'Belirtilmedi',
     talepEdenPersonelUnvan: dosyaResData?.talep_eden_unvan || '',
