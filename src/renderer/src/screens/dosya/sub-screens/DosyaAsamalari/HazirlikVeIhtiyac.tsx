@@ -4,6 +4,7 @@ import { useWorkspaceStore } from "../../../../store/workspaceStore";
 import { FileText, Package } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
 import { useCiktiMerkeziData } from "../../CiktiMerkezi.hooks";
+import { useDocumentLogger } from "../../../../hooks/useDocumentLogger";
 
 import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
 import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
@@ -46,6 +47,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         personelListesi,
     } = useCiktiMerkeziData(activeDosyaId);
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const { logDocument } = useDocumentLogger();
     const [previewData, setPreviewData] = useState<
         {
             title: string;
@@ -75,15 +77,22 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         await (window as any).electron.ipcRenderer.invoke("print-html", html, {
             silent: false,
         });
+        if (previewData?.title) {
+            await logDocument(previewData.title, "Yazdırıldı");
+        }
     };
 
     const executeExportPdf = async (html: string) => {
+        const filename = `${previewData?.title || "Belge"}.pdf`;
         await (window as any).electron.ipcRenderer.invoke(
             "export-pdf",
             html,
             null,
             previewData?.title || "Belge",
         );
+        if (previewData?.title) {
+            await logDocument(previewData.title, filename);
+        }
     };
 
     if (previewData && previewModalOpen) {
