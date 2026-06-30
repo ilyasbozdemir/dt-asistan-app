@@ -197,14 +197,28 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
     },
   });
 
-  const stagesToUse = dbAsamalar.length > 0 ? dbAsamalar : [
+  const stagesToUse = dbAsamalar.length > 0 ? [...dbAsamalar] : [
     { asama_sira: 1, asama_adi: "İhtiyaç Tespiti & Başlangıç" },
     { asama_sira: 2, asama_adi: "Piyasa Fiyat Araştırması" },
     { asama_sira: 3, asama_adi: "Sipariş & Sözleşme" },
     { asama_sira: 4, asama_adi: "Kabul & Ödeme İşlemleri" },
+    { asama_sira: 5, asama_adi: "Klasör & Kapaklar" },
   ];
 
-  const dynamicActiveItems: MenuItem[] = stagesToUse
+  if (dbAsamalar.length > 0 && !stagesToUse.some((a) => a.asama_sira === 5)) {
+    stagesToUse.push({ asama_sira: 5, asama_adi: "Klasör & Kapaklar" });
+  }
+
+  // Override stage names from subPagesMapping to ensure titles are synchronized
+  const stagesToUseMapped = stagesToUse.map((asama) => {
+    const match = subPagesMapping.find((p) => p.stage === asama.asama_sira);
+    return {
+      ...asama,
+      asama_adi: match ? match.name : asama.asama_adi,
+    };
+  });
+
+  const dynamicActiveItems: MenuItem[] = stagesToUseMapped
     .map((asama) => {
       const stagePages = subPagesMapping.filter(
         (p) => p.stage === asama.asama_sira && !p.hideFromToolbar,
@@ -230,6 +244,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
       else if (asama.asama_sira === 2) IconComponent = PackageSearch;
       else if (asama.asama_sira === 3) IconComponent = FileCheck;
       else if (asama.asama_sira === 4) IconComponent = CreditCard;
+      else if (asama.asama_sira === 5) IconComponent = Printer;
 
       return {
         name: `${asama.asama_sira}. ${asama.asama_adi}`,
@@ -246,7 +261,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
   const isDosyaWindowMode = searchParams.get("mode") === "dosya_window" ||
     hashParams.get("mode") === "dosya_window";
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-[3rem] py-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center px-4 gap-2 shrink-0 z-40 relative">
@@ -327,33 +342,34 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
             title="Dosya Süreci Git"
             onChange={(e) => {
               if (e.target.value) {
-                navigate({ to: e.target.value })
+                navigate({ to: e.target.value });
               }
             }}
             value=""
             className="text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1.5 text-slate-700 dark:text-slate-200 font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
             <option value="">-- Dosya Sürecine Git --</option>
-            {stagesToUse.map((asama) => {
-              let targetPath = "/dosyalar"
+            {stagesToUseMapped.map((asama) => {
+              let targetPath = "/dosyalar";
 
               if (asama.asama_sira === 1) {
-                targetPath = APP_ROUTES.HAZIRLIK_VE_IHTIYAC
+                targetPath = APP_ROUTES.HAZIRLIK_VE_IHTIYAC;
               } else if (asama.asama_sira === 2) {
-                targetPath = APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI
+                targetPath = APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI;
               } else if (asama.asama_sira === 3) {
-                targetPath = APP_ROUTES.SIPARIS_VE_SOZLESME
+                targetPath = APP_ROUTES.SIPARIS_VE_SOZLESME;
               } else if (asama.asama_sira === 4) {
-                targetPath = APP_ROUTES.KABUL_VE_ODEME
+                targetPath = APP_ROUTES.KABUL_VE_ODEME;
+              } else if (asama.asama_sira === 5) {
+                targetPath = APP_ROUTES.KLASOR_VE_KAPAKLAR;
               }
 
               return (
                 <option key={asama.asama_sira} value={targetPath}>
                   {asama.asama_sira}. {asama.asama_adi}
                 </option>
-              )
+              );
             })}
-            <option value="/dosya/cikti-merkezi">5. Klasör & Kapaklar (BETA)</option>
           </select>
         </div>
       </div>

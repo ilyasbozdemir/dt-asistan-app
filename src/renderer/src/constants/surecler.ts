@@ -1,4 +1,4 @@
-import { PackageSearch, FileText, FileCheck, Users, Compass, CreditCard } from 'lucide-react'
+import { PackageSearch, FileText, FileCheck, Users, Compass, CreditCard, Printer, FolderTree } from 'lucide-react'
 import { APP_ROUTES } from './routeConstants'
 
 export interface ProcessStage {
@@ -14,5 +14,6 @@ export const subPagesMapping: ProcessStage[] = [
   { name: 'Piyasa Fiyat Araştırması', path: APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI, icon: PackageSearch, stage: 2 },
   { name: 'Yaklaşık Maliyet', path: APP_ROUTES.YAKLASIK_MALIYET, icon: Compass, stage: 2 },
   { name: 'Sipariş & Sözleşme', path: APP_ROUTES.SIPARIS_VE_SOZLESME, icon: FileCheck, stage: 3 },
-  { name: 'Kabul & Ödeme İşlemleri', path: APP_ROUTES.KABUL_VE_ODEME, icon: CreditCard, stage: 4 }
+  { name: 'Kabul & Ödeme İşlemleri', path: APP_ROUTES.KABUL_VE_ODEME, icon: CreditCard, stage: 4 },
+  { name: 'Klasör & Kapaklar', path: APP_ROUTES.KLASOR_VE_KAPAKLAR, icon: FolderTree, stage: 5 }
 ]

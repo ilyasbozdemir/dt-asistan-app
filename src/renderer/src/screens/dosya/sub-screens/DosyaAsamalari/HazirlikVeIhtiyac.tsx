@@ -108,7 +108,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
 
     return (
         <SubScreen
-            title="İhtiyaç Listesi"
+            title="Hazırlık ve İhtiyaç"
             icon={Package}
             description="Dosya kapsamındaki malzeme, hizmet veya yapım işi ihtiyaçlarını listeleyin ve yönetin."
         >

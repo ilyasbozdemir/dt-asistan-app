@@ -199,7 +199,9 @@ import {
   PiyasaFiyatArastirmasi,
   SiparisVeSozlesme,
   KabulVeOdeme,
-  YaklasikMaliyetCetveli
+  KlasorVeKapaklar,
+  YaklasikMaliyetCetveli,
+  CiktiMerkezi
 } from './screens/dosya/SubScreens.screen'
 
 const profilRoute = createRoute({
@@ -239,6 +241,12 @@ const kabulVeOdemeRoute = createRoute({
   component: KabulVeOdeme
 })
 
+const klasorVeKapaklarRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: APP_ROUTES.KLASOR_VE_KAPAKLAR,
+  component: KlasorVeKapaklar
+})
+
 // Diğer Alt Modüller
 const yaklasikMaliyetRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -249,7 +257,7 @@ const yaklasikMaliyetRoute = createRoute({
 const ciktiMerkeziRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.DOSYA_CIKTI_MERKEZI,
-  component: CiktiMerkeziScreen
+  component: CiktiMerkezi
 })
 
 const olcubirimleriRoute = createRoute({
@@ -298,6 +306,7 @@ const routeTree = rootRoute.addChildren([
   piyasaFiyatArastirmasiRoute,
   siparisVeSozlesmeRoute,
   kabulVeOdemeRoute,
+  klasorVeKapaklarRoute,
   yaklasikMaliyetRoute,
   ciktiMerkeziRoute,
   yardimRoute

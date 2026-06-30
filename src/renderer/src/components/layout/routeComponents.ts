@@ -32,8 +32,10 @@ import {
   PiyasaFiyatArastirmasi,
   SiparisVeSozlesme,
   KabulVeOdeme,
+  KlasorVeKapaklar,
   YaklasikMaliyetCetveli,
-  CiktiMerkeziScreen
+  CiktiMerkeziScreen,
+  CiktiMerkezi
 } from '../../screens/dosya/SubScreens.screen'
 
 import TaslakYoneticisi from '../../screens/system/TaslakYoneticisi'
@@ -69,8 +71,9 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/dosya/piyasa-fiyat-arastirmasi': PiyasaFiyatArastirmasi,
   '/dosya/siparis-ve-sozlesme': SiparisVeSozlesme,
   '/dosya/kabul-ve-odeme': KabulVeOdeme,
+  '/dosya/klasor-ve-kapaklar': KlasorVeKapaklar,
   '/dosya/firmalar-maliyet/yaklasik': YaklasikMaliyetCetveli,
-  '/dosya/cikti-merkezi': CiktiMerkeziScreen,
+  '/dosya/cikti-merkezi': CiktiMerkezi,
   '/cikti-merkezi': CiktiMerkeziScreen,
   '/olcubirimleri': OlcuBirimleriScreen,
   '/malzemeler/yeni': YeniMalzemeScreen,

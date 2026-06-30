@@ -41,6 +41,7 @@ export const APP_ROUTES = {
   PIYASA_FIYAT_ARASTIRMASI: '/dosya/piyasa-fiyat-arastirmasi',
   SIPARIS_VE_SOZLESME: '/dosya/siparis-ve-sozlesme',
   KABUL_VE_ODEME: '/dosya/kabul-ve-odeme',
+  KLASOR_VE_KAPAKLAR: '/dosya/klasor-ve-kapaklar',
 
   // Diğer Alt Modüller
   YAKLASIK_MALIYET: '/dosya/firmalar-maliyet/yaklasik',
