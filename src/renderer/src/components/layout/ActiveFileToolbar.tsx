@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronDown,
   ChevronLeft,
@@ -246,7 +246,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
   const isDosyaWindowMode = searchParams.get("mode") === "dosya_window" ||
     hashParams.get("mode") === "dosya_window";
 
-  if (!activeDosyaId) return null;
+  const navigate = useNavigate()
 
   return (
     <div className="min-h-[3rem] py-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center px-4 gap-2 shrink-0 z-40 relative">
@@ -327,7 +327,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
             title="Süreç Aşaması Git"
             onChange={(e) => {
               if (e.target.value) {
-                window.location.hash = `#${e.target.value}`
+                navigate({ to: e.target.value })
               }
             }}
             value=""
