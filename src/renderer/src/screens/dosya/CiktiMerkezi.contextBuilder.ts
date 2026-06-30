@@ -274,6 +274,7 @@ export function buildDocumentContext(
     baskanUnvan: dosyaResData?.onaylayan_unvan || 'Harcama Yetkilisi',
     teminNo: dosyaResData?.temin_no || 'Belirtilmedi',
     teminSekli: teminSekliText,
+    maddeNo: dosyaResData?.ihale_sekli || '22/d',
     yaklasikMaliyet: yaklasikMaliyetText,
     odenekTutari: settings?.kullanilabilirOdenek || '500.000,00 TL',
     projeNo: dosyaResData?.yatirim_proje_no || 'Yok',
@@ -312,7 +313,6 @@ export function buildDocumentContext(
     hazirlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
     hazirlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     // Turkish characters compatibility helper
-    hazirlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || 'Görevli Personel',
     hazırlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
     hazırlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
     hazırlayanEposta: dosyaResData?.hazirlayan_eposta || '',
