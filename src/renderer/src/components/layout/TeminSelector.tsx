@@ -36,7 +36,7 @@ export function TeminSelector(): React.JSX.Element {
   const handleSelect = (id: number): void => {
     setActiveDosyaId(id)
     setIsOpen(false)
-    navigate({ to: '/dosya' })
+    navigate({ to: '/dosya/malzemeler/liste' })
   }
 
   const handleCreateYeniDosya = (e: React.MouseEvent): void => {
