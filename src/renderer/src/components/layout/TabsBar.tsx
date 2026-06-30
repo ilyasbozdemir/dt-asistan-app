@@ -105,6 +105,7 @@ export function TabsBar(): React.JSX.Element {
             key={tab.path}
             onClick={() => handleTabClick(tab.path)}
             data-active={isActive}
+            title={tab.label}
             className={cn(
               'group flex items-center gap-2 h-9 px-4 text-xs font-semibold rounded-t-xl transition-all duration-200 border-x border-t border-transparent relative shrink-0 cursor-pointer min-w-[120px] max-w-[220px]',
               isActive
