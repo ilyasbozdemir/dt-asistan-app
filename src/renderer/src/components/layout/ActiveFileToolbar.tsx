@@ -324,7 +324,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
         )}
         <div className="relative inline-block">
           <select
-            title="Süreç Aşaması Git"
+            title="Dosya Süreci Git"
             onChange={(e) => {
               if (e.target.value) {
                 navigate({ to: e.target.value })
@@ -333,7 +333,7 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
             value=""
             className="text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1.5 text-slate-700 dark:text-slate-200 font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
-            <option value="">-- Süreç Aşamasına Git --</option>
+            <option value="">-- Dosya Sürecine Git --</option>
             {stagesToUse.map((asama) => {
               let targetPath = "/dosyalar"
 

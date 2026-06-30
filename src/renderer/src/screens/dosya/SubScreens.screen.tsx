@@ -115,7 +115,7 @@ export function SubScreen({
 // 1. MALZEME LİSTESİ SCREEN
 
 export * from './SubScreen'
-export * from './sub-screens/MalzemeListesi'
+export * from './sub-screens/DosyaAsamalari/HazirlikVeIhtiyac'
 export * from './sub-screens/IstekliFirmalar'
 export * from './sub-screens/YaklasikMaliyetCetveli'
 export * from './sub-screens/PiyasaArastirmaTutanagi'

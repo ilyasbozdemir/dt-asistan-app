@@ -199,7 +199,7 @@ import {
   MuayeneKabulKomisyonu,
   FiyatArastirmaMuayeneKomisyonu,
   KomisyonAtamaOnayEki,
-  MalzemeListesi,
+  HazirlikVeIhtiyac,
   LuzumMuzekkeresiBelgesi,
   LuzumOnayEki,
   LuzumTeslimTesellum,
@@ -251,7 +251,7 @@ const komisyonOnayEkiRoute = createRoute({
 const malzemeListesiRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.MALZEME_LISTESI,
-  component: MalzemeListesi
+  component: HazirlikVeIhtiyac
 })
 
 // 3. Luzum
