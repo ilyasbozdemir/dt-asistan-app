@@ -38,6 +38,11 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     sutun: 'ihtiyac_yeri',
     aciklama: 'Lüzum Müzekkeresi yerleri'
   },
+  isinAciklamasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'isin_aciklamasi',
+    aciklama: 'İşin Açıklaması/Açıklama'
+  },
   olurYazisi: {
     deger: true,
     aciklama: 'Olur yazısı oluşturulacak'

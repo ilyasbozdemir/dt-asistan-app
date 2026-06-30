@@ -232,6 +232,7 @@ export function DocumentPreviewModal({
     "ihtiyacYeri",
     "kurumIci",
     "olurYazisi",
+    "isinAciklamasi",
     // Personel alanları
     ...personnelContextKeys,
   ];

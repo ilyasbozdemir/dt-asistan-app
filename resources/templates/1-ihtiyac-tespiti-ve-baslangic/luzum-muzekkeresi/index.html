@@ -215,10 +215,8 @@
         <br /><br />
         <div class="makam">{{sunulacakMakamAdi}}</div>
         <div class="konu-metni">
-          {{ihtiyacYeri}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi
-          gerekmektedir.<br />
-          Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunu'nun {{maddeNo}} maddesine göre temini için
-          gereğini arz ederim.
+          {{ihtiyacYeri}} ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin edilmesi gerekmektedir.<br />
+          Söz konusu ihtiyacın 4734 sayılı Kanunun {{maddeNo}} maddesine göre temini için gereğini olurlarınıza arz ederim.
         </div>
 
         <div class="hazirlayan">
@@ -254,6 +252,13 @@
             {{/ihtiyacKalemleri}}
           </tbody>
         </table>
+
+        {{#isinAciklamasi}}
+        <div class="keep-lines" style="margin-top: 15px; margin-bottom: 15px; text-align: justify;">
+          <strong>Açıklama:</strong> {{isinAciklamasi}}
+        </div>
+        {{/isinAciklamasi}}
+
 
         <div class="hazirlayan">
           {{hazirlayanPersonelAdi}}<br />
