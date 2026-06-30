@@ -77,7 +77,7 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
     ]
   },
   {
-    kategori: '5. Klasör & Kapaklar',
+    kategori: '5. Klasör & Kapaklar (BETA)',
     klasorAdi: '5-klasor-ve-kapaklar',
     sablonlar: [
       'ihale-kapagi',

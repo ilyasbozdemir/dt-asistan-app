@@ -12,6 +12,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
   const [contextsByPath, setContextsByPath] = useState<Record<string, Record<string, unknown>>>({})
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [placeholders, setPlaceholders] = useState<any[]>([])
+  const [personelListesi, setPersonelListesi] = useState<any[]>([])
 
   useEffect(() => {
     if (!activeDosyaId) return
@@ -41,6 +42,15 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
         )
         if (placeholdersRes.success) {
           setPlaceholders(placeholdersRes.data)
+        }
+
+        // Tüm aktif personelleri çek (önizleme dropdown'ları için)
+        const personelRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC'
+        )
+        if (personelRes.success) {
+          setPersonelListesi(personelRes.data)
         }
 
         // Aktif dosya verisini al (Temel dosya bilgisi, onaylayan personel ve kalemler)
@@ -325,5 +335,5 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
     }
   }, [activeDosyaId])
 
-  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders, contextsByPath }
+  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders, contextsByPath, personelListesi }
 }

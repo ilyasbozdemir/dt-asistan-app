@@ -21,6 +21,7 @@ interface DocumentPreviewModalProps {
   masterHtml: string
   baseContext: any
   placeholders?: any[]
+  personelListesi?: any[]
   onPrint: (html: string) => Promise<void>
   onExportPdf: (html: string) => Promise<void>
   isInline?: boolean
@@ -35,6 +36,7 @@ export function DocumentPreviewModal({
   masterHtml,
   baseContext,
   placeholders = [],
+  personelListesi = [],
   onPrint,
   onExportPdf,
   isInline = false,
@@ -181,6 +183,37 @@ export function DocumentPreviewModal({
   ])
 
   // Orijinal bağlamdaki (mergedContext) verilerden SADECE şablonda kullanılan form alanlarını üret
+  // Personel alanları haritası (context key -> { adiKey, unvanKey, etiket })
+  const PERSONNEL_FIELDS: Record<string, { adiKey: string; unvanKey: string; etiket: string }> = {
+    hazirlayanPersonelAdi: {
+      adiKey: 'hazirlayanPersonelAdi',
+      unvanKey: 'hazirlayanPersonelUnvan',
+      etiket: 'Hazırlayan Personel'
+    },
+    talepEdenPersonelAdi: {
+      adiKey: 'talepEdenPersonelAdi',
+      unvanKey: 'talepEdenPersonelUnvan',
+      etiket: 'Talep Eden Personel'
+    },
+    sunanPersonelAdi: {
+      adiKey: 'sunanPersonelAdi',
+      unvanKey: 'sunanPersonelUnvan',
+      etiket: 'Sunan Personel'
+    },
+    onaylayanPersonelAdi: {
+      adiKey: 'onaylayanPersonelAdi',
+      unvanKey: 'onaylayanPersonelUnvan',
+      etiket: 'Onaylayan (Harcama Yetkilisi)'
+    },
+    ilgiliPersonelAdi: {
+      adiKey: 'ilgiliPersonelAdi',
+      unvanKey: 'ilgiliPersonelUnvan',
+      etiket: 'İrtibat Yetkilisi'
+    }
+  }
+
+  const personnelContextKeys = Object.keys(PERSONNEL_FIELDS)
+
   const allowedFormKeys = [
     'sunulacakMakamAdi',
     'evrakSayisi',
@@ -188,10 +221,18 @@ export function DocumentPreviewModal({
     'dosyaTarihi',
     'ihtiyacYeri',
     'kurumIci',
-    'olurYazisi'
+    'olurYazisi',
+    // Personel alanları
+    ...personnelContextKeys
   ]
   const formFields = Object.keys(mergedContext || {}).filter(
     (k) => k !== 'icerik' && usedVars.has(k) && allowedFormKeys.includes(k)
+  )
+
+  // Personel alanları için: şablonda kullanılan personel key'lerini tespit et
+  // (usedVars'ta olmasa bile, şablonda kullanılıyor olabilir — örn. hazirlayanPersonelAdi veya hazırlayanPersonelAdi)
+  const activePersonnelFields = personnelContextKeys.filter(
+    (k) => usedVars.has(k) || usedVars.has(PERSONNEL_FIELDS[k].unvanKey)
   )
 
   if (isInline) {
@@ -410,9 +451,86 @@ export function DocumentPreviewModal({
                       </div>
                     )
                   })}
-                  {formFields.length === 0 && (
+                  {formFields.length === 0 && activePersonnelFields.length === 0 && (
                     <div className="text-center text-sm text-slate-500 mt-10">
                       Bu şablonda otomatik algılanan bir değişken bulunamadı.
+                    </div>
+                  )}
+
+                  {/* PERSONEL SEÇİM ALANI */}
+                  {activePersonnelFields.length > 0 && personelListesi.length > 0 && (
+                    <div className="mt-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Yetkili Personel Seçimi
+                      </p>
+                      {activePersonnelFields.map((key) => {
+                        const field = PERSONNEL_FIELDS[key]
+                        const currentValue = overrideData[field.adiKey] ?? mergedContext[field.adiKey] ?? ''
+
+                        return (
+                          <div key={key} className="flex flex-col gap-1.5 mb-3">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                              {field.etiket}
+                            </label>
+                            <select
+                              value={currentValue}
+                              onChange={(e) => {
+                                const selectedPersonel = personelListesi.find(
+                                  (p) => p.ad_soyad === e.target.value
+                                )
+                                if (selectedPersonel) {
+                                  // Hem adı hem unvanı birlikte güncelle
+                                  const newData = {
+                                    ...overrideData,
+                                    [field.adiKey]: selectedPersonel.ad_soyad,
+                                    [field.unvanKey]: selectedPersonel.unvan || ''
+                                  }
+                                  // Türkçe karakter uyumluluk (hazırlayan için)
+                                  if (field.adiKey === 'hazirlayanPersonelAdi') {
+                                    newData['haz\u0131rlayanPersonelAdi'] = selectedPersonel.ad_soyad
+                                    newData['haz\u0131rlayanPersonelUnvan'] = selectedPersonel.unvan || ''
+                                    newData['hazirlayanTelefon'] = selectedPersonel.telefon || ''
+                                    newData['haz\u0131rlayanTelefon'] = selectedPersonel.telefon || ''
+                                    newData['hazirlayanEposta'] = selectedPersonel.eposta || ''
+                                    newData['haz\u0131rlayanEposta'] = selectedPersonel.eposta || ''
+                                  }
+                                  if (field.adiKey === 'onaylayanPersonelAdi') {
+                                    newData['baskanAdi'] = selectedPersonel.ad_soyad
+                                    newData['baskanUnvan'] = selectedPersonel.unvan || ''
+                                  }
+                                  setOverrideData(newData)
+                                  setOverrideJson(JSON.stringify(newData, null, 2))
+                                  const merged = { ...baseContext, ...newData }
+                                  updatePreview(merged)
+                                } else if (e.target.value === '') {
+                                  // Temizle — orijinal değere dön
+                                  const newData = { ...overrideData }
+                                  delete newData[field.adiKey]
+                                  delete newData[field.unvanKey]
+                                  setOverrideData(newData)
+                                  setOverrideJson(JSON.stringify(newData, null, 2))
+                                  const merged = { ...baseContext, ...newData }
+                                  updatePreview(merged)
+                                }
+                              }}
+                              className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
+                            >
+                              <option value="">— Dosyadan gelen değer —</option>
+                              {personelListesi.map((p) => (
+                                <option key={p.id} value={p.ad_soyad}>
+                                  {p.ad_soyad}{p.unvan ? ` — ${p.unvan}` : ''}
+                                </option>
+                              ))}
+                            </select>
+                            {currentValue && (
+                              <span className="text-[10px] text-slate-400">
+                                Seçili: {currentValue} — {overrideData[field.unvanKey] ?? mergedContext[field.unvanKey] ?? ''}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </div>

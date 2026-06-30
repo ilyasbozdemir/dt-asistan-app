@@ -55,6 +55,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     dosyaContext,
     activeDosya,
     contextsByPath,
+    personelListesi,
   } = useCiktiMerkeziData(activeDosyaId);
   const { logDocument } = useDocumentLogger();
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());

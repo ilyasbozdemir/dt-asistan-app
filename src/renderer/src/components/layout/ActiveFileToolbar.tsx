@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useWorkspaceStore } from "../../store/workspaceStore";
 import { useDosyalarHooks } from "../../screens/dosyalar/dosyalar.hooks";
 import { subPagesMapping } from "../../constants/surecler";
+import { APP_ROUTES } from "../../constants/routeConstants";
 
 const parseStatusAndName = (
   name: string,
@@ -322,43 +323,44 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
           </div>
         )}
 
-        {dynamicActiveItems.map((item, idx) => (
-          <div key={idx} className="relative inline-block">
-            <button
-              onClick={() =>
-                setOpenDropdown(openDropdown === item.name ? null : item.name)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                openDropdown === item.name
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              }`}
-            >
-              <item.icon className="w-3.5 h-3.5" />
-              {item.name}
-              <ChevronDown
-                className={`w-3 h-3 transition-transform ${
-                  openDropdown === item.name ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+        {stagesToUse.map((asama) => {
+          let targetPath = '/dosyalar'
+          let IconComponent = FolderTree
 
-            {openDropdown === item.name && item.children && (
-              <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl rounded-lg py-1 z-50">
-                {item.children.map((child, cIdx) => (
-                  <Link
-                    key={cIdx}
-                    to={child.path}
-                    onClick={() => setOpenDropdown(null)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
-                  >
-                    <child.icon className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="truncate">{child.name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          if (asama.asama_sira === 1) {
+            targetPath = APP_ROUTES.MALZEME_LISTESI
+            IconComponent = FolderTree
+          } else if (asama.asama_sira === 2) {
+            targetPath = APP_ROUTES.KOMISYON_FIYAT_ARASTIRMA
+            IconComponent = PackageSearch
+          } else if (asama.asama_sira === 3) {
+            targetPath = APP_ROUTES.KOMISYON_ONAY_EKI
+            IconComponent = FileCheck
+          } else if (asama.asama_sira === 4) {
+            targetPath = APP_ROUTES.KOMISYON_MUAYENE_KABUL
+            IconComponent = CreditCard
+          }
+
+          return (
+            <Link
+              key={asama.asama_sira}
+              to={targetPath}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors text-slate-650 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <IconComponent className="w-3.5 h-3.5" />
+              {asama.asama_sira}. {asama.asama_adi}
+            </Link>
+          )
+        })}
+
+        {/* 5. Aşama: Klasör & Kapaklar (BETA) */}
+        <Link
+          to="/dosya/cikti-merkezi"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors text-slate-650 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <FolderTree className="w-3.5 h-3.5" />
+          5. Klasör & Kapaklar (BETA)
+        </Link>
       </div>
 
       <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-2">
