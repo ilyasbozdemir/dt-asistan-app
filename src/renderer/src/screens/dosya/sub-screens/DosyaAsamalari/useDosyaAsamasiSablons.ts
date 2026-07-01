@@ -55,11 +55,13 @@ export interface PreviewData {
 export const checkIsSablonDisabled = (cleanName: string, dosyaContext: any): boolean => {
     if (!dosyaContext) return false;
 
+    const normalizedName = normalizeForMatch(cleanName);
+    
     if (
-        cleanName.toLowerCase().includes("i̇htiyaç listesi") ||
-        cleanName.toLowerCase().includes("lüzum müzekkeresi")
+        normalizedName.includes("ihtiyaclistesi") ||
+        normalizedName.includes("luzummuzekkeresi")
     ) {
-        if (!dosyaContext.malzemeler || dosyaContext.malzemeler.length === 0) {
+        if (!dosyaContext.kalemSayisi || dosyaContext.kalemSayisi === 0) {
             return true;
         }
     }
