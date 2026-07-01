@@ -23,7 +23,7 @@ interface DocumentPreviewModalProps {
   placeholders?: any[];
   personelListesi?: any[];
   onPrint: (html: string) => Promise<void>;
-  onExportPdf: (html: string) => Promise<void>;
+  onExportPdf: (html: string, filenameTitle?: string) => Promise<void>;
   isInline?: boolean;
   templateTestVerisi?: string;
 }
@@ -167,7 +167,10 @@ export function DocumentPreviewModal({
     }
     setIsProcessingPdf(true);
     try {
-      await onExportPdf(previewHtml);
+      const fileWorkName = mergedContext.isAdi || "";
+      const cleanFileWorkName = fileWorkName.replace(/[\\/:*?"<>|]/g, "").trim();
+      const combinedTitle = cleanFileWorkName ? `${cleanFileWorkName} - ${title}` : title;
+      await onExportPdf(previewHtml, combinedTitle);
     } finally {
       setIsProcessingPdf(false);
     }
