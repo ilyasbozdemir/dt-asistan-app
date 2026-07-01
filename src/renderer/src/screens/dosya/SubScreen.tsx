@@ -26,7 +26,7 @@ export function SubScreen({
     if (!activeDosyaId) return
     try {
       const saved = localStorage.getItem('global_starred_docs')
-      const docs = saved ? JSON.parse(saved) : ['İhtiyaç Listesi', 'Lüzum Müzekkeresi Belgesi']
+      const docs = saved ? JSON.parse(saved) : ['İhtiyaç Listesi', 'Lüzum Müzekkeresi']
       setActiveStarredDocs(docs)
     } catch (err) {
       console.error('Failed to load global starred docs:', err)

@@ -107,7 +107,8 @@ export function TabsBar(): React.JSX.Element {
             data-active={isActive}
             title={tab.label}
             className={cn(
-              'group flex items-center gap-2 h-9 px-4 text-xs font-semibold rounded-t-xl transition-all duration-200 border-x border-t border-transparent relative shrink-0 cursor-pointer min-w-[120px] max-w-[220px]',
+              'group flex items-center gap-1.5 h-9 pl-3 text-xs font-semibold rounded-t-xl transition-all duration-200 border-x border-t border-transparent relative flex-1 min-w-[80px] max-w-[180px] cursor-pointer',
+              tab.path === '/' ? 'pr-3' : 'pr-12',
               isActive
                 ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200/80 dark:border-slate-800 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-900/20'
@@ -125,7 +126,7 @@ export function TabsBar(): React.JSX.Element {
               )}
             />
 
-            <span className={cn('truncate', tab.path !== '/' ? 'pr-10' : '')}>{tab.label}</span>
+            <span className="truncate">{tab.label}</span>
 
             {/* Open in Window button */}
             {tab.path !== '/' && (

@@ -73,7 +73,6 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/dosya/kabul-ve-odeme': KabulVeOdeme,
   '/dosya/klasor-ve-kapaklar': KlasorVeKapaklar,
   '/dosya/firmalar-maliyet/yaklasik': YaklasikMaliyetCetveli,
-  '/dosya/cikti-merkezi': CiktiMerkezi,
   '/cikti-merkezi': CiktiMerkeziScreen,
   '/olcubirimleri': OlcuBirimleriScreen,
   '/malzemeler/yeni': YeniMalzemeScreen,

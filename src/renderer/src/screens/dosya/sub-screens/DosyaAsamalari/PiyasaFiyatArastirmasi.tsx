@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
-import { FileText, PackageSearch } from "lucide-react";
+import { FileText, PackageSearch, ChevronDown, ChevronUp } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
 import { useCiktiMerkeziData } from "../../CiktiMerkezi.hooks";
 import { useDocumentLogger } from "../../../../hooks/useDocumentLogger";
@@ -31,6 +31,14 @@ const BUTTON_COLORS = [
     "bg-teal-600 hover:bg-teal-700",
 ];
 
+const CATEGORY_LABELS: Record<string, string> = {
+    "1-ihtiyac-tespiti-ve-baslangic": "Hazırlık & İhtiyaç",
+    "2-piyasa-fiyat-arastirmasi": "Teklifler & Piyasa",
+    "3-siparis-ve-sozlesme": "Sipariş & Sözleşme",
+    "4-kabul-ve-odeme-islemleri": "Kabul & Ödeme",
+    "5-klasor-ve-kapaklar": "Klasör & Kapak",
+};
+
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     const { activeDosyaId, activeStarredDocs } = useWorkspaceStore();
     const {
@@ -43,6 +51,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         personelListesi,
     } = useCiktiMerkeziData(activeDosyaId);
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [sablonsExpanded, setSablonsExpanded] = useState(false);
     const { logDocument } = useDocumentLogger();
     const [previewData, setPreviewData] = useState<
         {
@@ -110,12 +119,62 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         );
     }
 
+    const stageSablons = sablons.filter(
+        (s) => s.kategori === "2-piyasa-fiyat-arastirmasi" || s.kategori === "2. Piyasa Fiyat Araştırması"
+    );
+
     return (
         <SubScreen
-            title="Piyasa Fiyat Araştırması"
+            title="Teklifler & Piyasa Fiyat Araştırması"
             icon={PackageSearch}
-            description="Piyasa fiyat araştırması süreçlerini yönetin."
+            description="Teklifleri ve piyasa fiyat araştırması süreçlerini yönetin."
         >
+            {stageSablons.length > 0 && (
+                <div className="flex flex-col mb-6 print:hidden animate-in fade-in duration-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm">
+                    <div 
+                        onClick={() => setSablonsExpanded(!sablonsExpanded)}
+                        className="flex items-center justify-between w-full pb-2 mb-3 border-b border-slate-100 dark:border-slate-800/80 cursor-pointer select-none"
+                    >
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                            Süreç Belgeleri (Bu Aşamada Üretilecekler)
+                        </span>
+                        {sablonsExpanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+                    </div>
+                    {sablonsExpanded && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {stageSablons.map((sablon, idx) => {
+                                let status: string | null = null;
+                                let cleanName = sablon.ad;
+                                const match = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/);
+                                if (match) {
+                                    status = match[1].trim();
+                                    cleanName = match[2].trim();
+                                }
+
+                                return (
+                                    <button
+                                        key={sablon.id || sablon.ad}
+                                        onClick={() => handleOpenPreviewForSablon(sablon, sablon.ad)}
+                                        disabled={ciktiLoading}
+                                        className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 ${
+                                            BUTTON_COLORS[idx % BUTTON_COLORS.length]
+                                        }`}
+                                    >
+                                        <FileText className="w-4 h-4 shrink-0" />
+                                        <span>{cleanName}</span>
+                                        {status && (
+                                            <span className="px-1.5 py-0.5 bg-black/25 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
+                                                {status}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {activeStarredDocs && (
                 <div className="flex flex-col mb-6 print:hidden animate-in fade-in duration-300 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl">
                     <div className="flex items-center justify-between w-full pb-2 mb-3 border-b border-slate-100 dark:border-slate-800/80">
@@ -157,6 +216,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                         cleanName = match[2].trim();
                                     }
 
+                                    const stageLabel = sablon.kategori ? CATEGORY_LABELS[sablon.kategori] : null;
+
                                     return (
                                         <button
                                             key={docName}
@@ -177,6 +238,11 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                             {status && (
                                                 <span className="px-1.5 py-0.5 bg-black/25 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
                                                     {status}
+                                                </span>
+                                            )}
+                                            {stageLabel && (
+                                                <span className="px-1.5 py-0.5 bg-white/20 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
+                                                    {stageLabel}
                                                 </span>
                                             )}
                                         </button>
