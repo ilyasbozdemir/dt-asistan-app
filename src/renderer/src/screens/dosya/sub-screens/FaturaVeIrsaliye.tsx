@@ -3,11 +3,14 @@ import {
   CreditCard,
   Upload,
   Trash2,
-  Eye,
+  Edit2,
   Plus,
   Search,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  X,
+  CheckCircle,
+  Clock
 } from 'lucide-react'
 import { SubScreen } from '../SubScreens.screen'
 
@@ -18,11 +21,15 @@ interface InvoiceFile {
   amount: number
   date: string
   status: 'Approved' | 'Pending'
+  paymentStatus: 'odendi' | 'bekliyor'
+  yevmiyeNo: string
+  aciklama: string
 }
 
 export function FaturaVeIrsaliye(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'fatura' | 'irsaliye'>('all')
+  const [editingFile, setEditingFile] = useState<InvoiceFile | null>(null)
   const [files, setFiles] = useState<InvoiceFile[]>([
     {
       id: 1,
@@ -30,7 +37,10 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
       fileType: 'fatura',
       amount: 14500.0,
       date: '2026-06-28',
-      status: 'Approved'
+      status: 'Approved',
+      paymentStatus: 'odendi',
+      yevmiyeNo: 'Y-2026-0811',
+      aciklama: 'Bilişim hizmeti alım faturası (Haziran ayı hak edişi).'
     },
     {
       id: 2,
@@ -38,7 +48,10 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
       fileType: 'irsaliye',
       amount: 0,
       date: '2026-06-25',
-      status: 'Approved'
+      status: 'Approved',
+      paymentStatus: 'bekliyor',
+      yevmiyeNo: '-',
+      aciklama: 'Kırtasiye malzemesi teslimat irsaliyesi.'
     },
     {
       id: 3,
@@ -46,13 +59,16 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
       fileType: 'fatura',
       amount: 3200.5,
       date: '2026-06-20',
-      status: 'Pending'
+      status: 'Pending',
+      paymentStatus: 'bekliyor',
+      yevmiyeNo: '',
+      aciklama: 'Eksik kırtasiye ürünleri ek faturası.'
     }
   ])
 
   const [dragActive, setDragActive] = useState(false)
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e: React.DragEvent): void => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -62,25 +78,52 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent): void => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const isIrsaliye = e.dataTransfer.files[0].name.toLowerCase().includes('irsaliye')
       const newFile: InvoiceFile = {
         id: Date.now(),
         fileName: e.dataTransfer.files[0].name,
-        fileType: e.dataTransfer.files[0].name.toLowerCase().includes('irsaliye') ? 'irsaliye' : 'fatura',
-        amount: e.dataTransfer.files[0].name.toLowerCase().includes('irsaliye') ? 0 : 2500.0,
+        fileType: isIrsaliye ? 'irsaliye' : 'fatura',
+        amount: isIrsaliye ? 0 : 2500.0,
         date: new Date().toISOString().split('T')[0],
-        status: 'Pending'
+        status: 'Pending',
+        paymentStatus: 'bekliyor',
+        yevmiyeNo: '',
+        aciklama: ''
       }
       setFiles((prev) => [newFile, ...prev])
     }
   }
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: number): void => {
     setFiles((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  const togglePaymentStatus = (id: number): void => {
+    setFiles((prev) =>
+      prev.map((f) => {
+        if (f.id === id) {
+          return {
+            ...f,
+            paymentStatus: f.paymentStatus === 'odendi' ? 'bekliyor' : 'odendi'
+          }
+        }
+        return f
+      })
+    )
+  }
+
+  const handleSaveChanges = (e: React.FormEvent): void => {
+    e.preventDefault()
+    if (!editingFile) return
+    setFiles((prev) =>
+      prev.map((f) => (f.id === editingFile.id ? editingFile : f))
+    )
+    setEditingFile(null)
   }
 
   const filteredFiles = files.filter((f) => {
@@ -99,9 +142,9 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
       icon={CreditCard}
       description="Doğrudan temin dosyasına ait fatura, irsaliye, e-arşiv faturaları yükleyin ve yönetin."
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
         {/* STATS */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-2xl p-5 text-white shadow-md flex flex-col justify-between">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 rounded-2xl p-5 text-white shadow-md flex flex-col justify-between">
           <div>
             <span className="text-blue-100 text-xs font-semibold uppercase tracking-wider">
               Toplam Fatura Tutarı
@@ -134,15 +177,15 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
           <div>
             <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
-              Onay Bekleyenler
+              Ödeme Bekleyen
             </span>
             <h3 className="text-3xl font-extrabold mt-1 text-amber-600 dark:text-amber-500">
-              {files.filter((f) => f.status === 'Pending').length} Belge
+              {files.filter((f) => f.fileType === 'fatura' && f.paymentStatus === 'bekliyor').length} Fatura
             </h3>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-4 flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-            <span>İncelenmesi gereken yeni yüklenmiş dosyalar</span>
+            <span>Havale/Ödeme bekleyen muhasebe kayıtları</span>
           </div>
         </div>
       </div>
@@ -171,15 +214,19 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
             const input = document.createElement('input')
             input.type = 'file'
             input.accept = 'application/pdf,image/*'
-            input.onchange = (e: any) => {
+            input.onchange = (e: any): void => {
               if (e.target.files && e.target.files[0]) {
+                const isIrsaliye = e.target.files[0].name.toLowerCase().includes('irsaliye')
                 const newFile: InvoiceFile = {
                   id: Date.now(),
                   fileName: e.target.files[0].name,
-                  fileType: e.target.files[0].name.toLowerCase().includes('irsaliye') ? 'irsaliye' : 'fatura',
-                  amount: e.target.files[0].name.toLowerCase().includes('irsaliye') ? 0 : 3500.0,
+                  fileType: isIrsaliye ? 'irsaliye' : 'fatura',
+                  amount: isIrsaliye ? 0 : 3500.0,
                   date: new Date().toISOString().split('T')[0],
-                  status: 'Pending'
+                  status: 'Pending',
+                  paymentStatus: 'bekliyor',
+                  yevmiyeNo: '',
+                  aciklama: ''
                 }
                 setFiles((prev) => [newFile, ...prev])
               }
@@ -245,18 +292,19 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
-                <th className="p-4">Belge Tipi</th>
-                <th className="p-4">Dosya Adı</th>
+                <th className="p-4">Tip</th>
+                <th className="p-4">Dosya Adı / Açıklama</th>
                 <th className="p-4">Tutar</th>
+                <th className="p-4">Yevmiye No</th>
                 <th className="p-4">Tarih</th>
-                <th className="p-4">Durum</th>
+                <th className="p-4">Ödeme Durumu</th>
                 <th className="p-4 text-right">İşlemler</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {filteredFiles.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center p-8 text-slate-400 dark:text-slate-600">
+                  <td colSpan={7} className="text-center p-8 text-slate-400 dark:text-slate-600">
                     Eşleşen belge bulunamadı.
                   </td>
                 </tr>
@@ -274,8 +322,15 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">
-                      {file.fileName}
+                    <td className="p-4 max-w-xs">
+                      <div className="font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        {file.fileName}
+                      </div>
+                      {file.aciklama && (
+                        <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                          {file.aciklama}
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 font-mono text-slate-700 dark:text-slate-300">
                       {file.fileType === 'fatura'
@@ -284,18 +339,41 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
                           })}`
                         : '-'}
                     </td>
+                    <td className="p-4 font-mono text-slate-600 dark:text-slate-400">
+                      {file.yevmiyeNo || '-'}
+                    </td>
                     <td className="p-4 text-slate-500">{file.date}</td>
                     <td className="p-4">
-                      {file.status === 'Approved' ? (
-                        <span className="text-green-600 dark:text-green-400 font-semibold">Onaylandı</span>
-                      ) : (
-                        <span className="text-amber-600 dark:text-amber-500 font-semibold">İnceleniyor</span>
-                      )}
+                      <button
+                        onClick={() => togglePaymentStatus(file.id)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border transition-all hover:scale-105 active:scale-95 ${
+                          file.paymentStatus === 'odendi'
+                            ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800'
+                            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-955/10 dark:text-amber-400 dark:border-amber-900/20'
+                        }`}
+                        title="Durumu değiştirmek için tıklayın"
+                      >
+                        {file.paymentStatus === 'odendi' ? (
+                          <>
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            Ödendi
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                            Bekliyor
+                          </>
+                        )}
+                      </button>
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors" title="Görseli Önizle">
-                          <Eye className="w-4 h-4" />
+                        <button
+                          onClick={() => setEditingFile(file)}
+                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
+                          title="Detayları Düzenle"
+                        >
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(file.id)}
@@ -313,6 +391,135 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
           </table>
         </div>
       </div>
+
+      {/* EDIT MODAL */}
+      {editingFile && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-blue-600" />
+                Belge Detaylarını Düzenle
+              </h3>
+              <button
+                onClick={() => setEditingFile(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                title="Kapat"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveChanges} className="p-5 flex flex-col gap-4 text-xs">
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                  Dosya Adı
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={editingFile.fileName}
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-500 rounded-lg cursor-not-allowed"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {editingFile.fileType === 'fatura' && (
+                  <div>
+                    <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                      Tutar (₺)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editingFile.amount}
+                      onChange={(e) =>
+                        setEditingFile({ ...editingFile, amount: parseFloat(e.target.value) || 0 })
+                      }
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                    Yevmiye No
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Örn: Y-2026-0811"
+                    value={editingFile.yevmiyeNo}
+                    onChange={(e) => setEditingFile({ ...editingFile, yevmiyeNo: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                    Tarih
+                  </label>
+                  <input
+                    type="date"
+                    value={editingFile.date}
+                    onChange={(e) => setEditingFile({ ...editingFile, date: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                    Ödeme Durumu
+                  </label>
+                  <select
+                    value={editingFile.paymentStatus}
+                    onChange={(e) =>
+                      setEditingFile({
+                        ...editingFile,
+                        paymentStatus: e.target.value as 'odendi' | 'bekliyor'
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="bekliyor">Ödeme Bekliyor</option>
+                    <option value="odendi">Ödendi</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
+                  Açıklama / Not
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="İlgili ödemeye dair detaylar veya notlar..."
+                  value={editingFile.aciklama}
+                  onChange={(e) => setEditingFile({ ...editingFile, aciklama: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingFile(null)}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-lg font-semibold transition-colors"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition-colors"
+                >
+                  Değişiklikleri Kaydet
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </SubScreen>
   )
 }
