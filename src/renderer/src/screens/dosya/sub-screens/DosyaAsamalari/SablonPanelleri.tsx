@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText } from "lucide-react";
 import {
     BUTTON_COLORS,
     CATEGORY_LABELS,
@@ -58,8 +58,16 @@ export function SurecBelgeleriPanel({
                             <button
                                 key={sablon.id || sablon.ad}
                                 onClick={() => onSablonClick(sablon, sablon.ad)}
-                                disabled={ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))}
-                                className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName)) ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'} ${BUTTON_COLORS[idx % BUTTON_COLORS.length]}`}
+                                disabled={ciktiLoading ||
+                                    (isSablonDisabled &&
+                                        isSablonDisabled(cleanName))}
+                                className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${
+                                    ciktiLoading ||
+                                        (isSablonDisabled &&
+                                            isSablonDisabled(cleanName))
+                                        ? "opacity-40 cursor-not-allowed grayscale"
+                                        : "cursor-pointer"
+                                } ${BUTTON_COLORS[idx % BUTTON_COLORS.length]}`}
                             >
                                 <FileText className="w-4 h-4 shrink-0" />
                                 <span>{cleanName}</span>
@@ -98,6 +106,13 @@ export function KisayolBelgeleriPanel({
 }: KisayolBelgeleriPanelProps): React.JSX.Element | null {
     if (!activeStarredDocs) return null;
 
+    // Sadece bu aşamaya (stage) ait olan favori belgeleri filtrele
+    const currentStageDocs = activeStarredDocs.filter((docName) => {
+        return sablons.some((s) =>
+            normalizeForMatch(s.ad) === normalizeForMatch(docName)
+        );
+    });
+
     return (
         <div className="flex flex-col mb-6 print:hidden animate-in fade-in duration-300 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl">
             <div className="flex items-center justify-between w-full pb-2 mb-3 border-b border-slate-100 dark:border-slate-800/80">
@@ -112,17 +127,17 @@ export function KisayolBelgeleriPanel({
                 </Link>
             </div>
 
-            {activeStarredDocs.length === 0
+            {currentStageDocs.length === 0
                 ? (
                     <div className="text-xs text-slate-400 dark:text-slate-500 italic py-1">
-                        Henüz hızlı erişim belgesi seçilmemiş. Şablon Listesi ve
-                        Süreçler panelinden istediğiniz belgeleri yıldızlayarak
-                        buraya ekleyebilirsiniz.
+                        Bu aşama için henüz hızlı erişim belgesi seçilmemiş.
+                        Şablon Listesi ve Süreçler panelinden istediğiniz
+                        belgeleri yıldızlayarak buraya ekleyebilirsiniz.
                     </div>
                 )
                 : (
                     <div className="flex items-center gap-2 flex-wrap">
-                        {activeStarredDocs.map((docName, idx) => {
+                        {currentStageDocs.map((docName, idx) => {
                             const sablon = sablons.find(
                                 (s) =>
                                     normalizeForMatch(s.ad) ===
@@ -138,27 +153,31 @@ export function KisayolBelgeleriPanel({
                                 cleanName = match[2].trim();
                             }
 
-                            const stageLabel = sablon.kategori
-                                ? CATEGORY_LABELS[sablon.kategori]
-                                : null;
-
                             return (
                                 <button
                                     key={docName}
-                                    onClick={() => onSablonClick(sablon, docName)}
-                                    disabled={ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))}
-                                    className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName)) ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'} ${BUTTON_COLORS[idx % BUTTON_COLORS.length]}`}
+                                    onClick={() =>
+                                        onSablonClick(sablon, docName)}
+                                    disabled={ciktiLoading ||
+                                        (isSablonDisabled &&
+                                            isSablonDisabled(cleanName))}
+                                    className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${
+                                        ciktiLoading ||
+                                            (isSablonDisabled &&
+                                                isSablonDisabled(cleanName))
+                                            ? "opacity-40 cursor-not-allowed grayscale"
+                                            : "cursor-pointer"
+                                    } ${
+                                        BUTTON_COLORS[
+                                            idx % BUTTON_COLORS.length
+                                        ]
+                                    }`}
                                 >
                                     <FileText className="w-4 h-4 shrink-0" />
                                     <span>{cleanName}</span>
                                     {status && (
                                         <span className="px-1.5 py-0.5 bg-black/25 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
                                             {status}
-                                        </span>
-                                    )}
-                                    {stageLabel && (
-                                        <span className="px-1.5 py-0.5 bg-white/20 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
-                                            {stageLabel}
                                         </span>
                                     )}
                                 </button>

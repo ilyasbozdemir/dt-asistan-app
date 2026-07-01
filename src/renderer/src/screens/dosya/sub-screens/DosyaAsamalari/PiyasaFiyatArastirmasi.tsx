@@ -70,7 +70,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
 
             <KisayolBelgeleriPanel
                 activeStarredDocs={activeStarredDocs}
-                sablons={sablons}
+                sablons={stageSablons}
                 ciktiLoading={ciktiLoading}
                 onSablonClick={handleOpenPreviewForSablon}
             />

@@ -141,7 +141,7 @@ export function useDosyaAsamasiSablons() {
                     title,
                     templateHtml: targetSablon.icerik,
                     processPath,
-                    templateTestVerisi: targetSablon.test_verisi || "",
+                    templateTestVerisi: "", // SÜREÇLERDE MOCK VERİ KULLANILMAZ
                     snapshotContext: snapshotCtx
                 });
                 setPreviewModalOpen(true);
@@ -167,7 +167,7 @@ export function useDosyaAsamasiSablons() {
             title,
             templateHtml: sablon.icerik,
             processPath,
-            templateTestVerisi: sablon.test_verisi || "",
+            templateTestVerisi: "", // SÜREÇLERDE MOCK VERİ KULLANILMAZ
             snapshotContext: snapshotCtx
         });
         setPreviewModalOpen(true);
