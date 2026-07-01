@@ -110,5 +110,15 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     sutun: 'sunan_telefon',
     varsayilan: '',
     aciklama: 'Sunan personelin telefon numarası'
+  },
+  talepEdenPersonelAdi: {
+    tablo: 'TANIM_Personel',
+    sutun: 'ad_soyad',
+    aciklama: 'Talep eden personelin adı soyadı'
+  },
+  talepEdenPersonelUnvan: {
+    tablo: 'TANIM_Personel',
+    sutun: 'unvan',
+    aciklama: 'Talep eden personelin ünvanı'
   }
 }

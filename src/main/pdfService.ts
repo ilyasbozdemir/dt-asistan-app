@@ -88,7 +88,8 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
     })
 
     // Check if it is a single page
-    const isSinglePage = (pdfBufferFirstPass.toString().match(/\/Type\s*\/Page\b/g) || []).length === 1;
+    const isSinglePage =
+      (pdfBufferFirstPass.toString().match(/\/Type\s*\/Page\b/g) || []).length === 1
 
     if (isSinglePage) {
       // Regenerate without the pagination footer

@@ -236,11 +236,11 @@ function createWindow(): void {
     try {
       const parsedUrl = new URL(requestUrl)
       const relativePath = join(parsedUrl.host, decodeURIComponent(parsedUrl.pathname))
-      
+
       const rendererDir = app.isPackaged
         ? join(__dirname, '../renderer')
         : join(__dirname, '../../src/renderer/public')
-      
+
       let targetFilePath = join(rendererDir, relativePath)
       let fileExists = fs.existsSync(targetFilePath) && fs.statSync(targetFilePath).isFile()
 
@@ -401,7 +401,7 @@ if (!gotTheLock && !isMultiInstance) {
         const rendererDir = app.isPackaged
           ? join(__dirname, '../renderer')
           : join(__dirname, '../../src/renderer/public')
-        
+
         let targetFilePath = join(rendererDir, relativePath)
         let fileExists = fs.existsSync(targetFilePath) && fs.statSync(targetFilePath).isFile()
 
@@ -2550,7 +2550,7 @@ if (!gotTheLock && !isMultiInstance) {
       try {
         const db = workspaceManager.getDb()
         const stmt = db.prepare(sql)
-        const actualParams = (params.length === 1 && Array.isArray(params[0])) ? params[0] : params
+        const actualParams = params.length === 1 && Array.isArray(params[0]) ? params[0] : params
         const info = stmt.run(...actualParams)
         broadcastDbChange()
         workspaceManager.save()

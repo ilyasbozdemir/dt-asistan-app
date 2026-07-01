@@ -91,9 +91,7 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
 
 /** Şablon dosya adından kategori adını döndürür */
 export const SABLON_DOSYAADI_KATEGORI: Record<string, string> = Object.fromEntries(
-  SABLON_KATEGORILERI.flatMap((kat) =>
-    kat.sablonlar.map((dosyaAdi) => [dosyaAdi, kat.kategori])
-  )
+  SABLON_KATEGORILERI.flatMap((kat) => kat.sablonlar.map((dosyaAdi) => [dosyaAdi, kat.kategori]))
 )
 
 /** Kategori adlarının sıralı listesi (UI grupları için) */

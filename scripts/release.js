@@ -159,7 +159,7 @@ function main() {
   const existingTags = execSilent('git tag --list')
   if (existingTags.split('\n').includes(tag)) {
     console.error(c.red(`\n❌ Tag "${tag}" zaten mevcut!`))
-    console.error(c.dim('Versiyon numarasını artırın veya --patch flag\'ini kullanın.'))
+    console.error(c.dim("Versiyon numarasını artırın veya --patch flag'ini kullanın."))
     process.exit(1)
   }
 
@@ -246,7 +246,7 @@ function main() {
 
   // 7. Push
   if (!flags.noPush && !flags.dryRun) {
-    console.log(c.cyan('\n🚀 Remote\'a push ediliyor...'))
+    console.log(c.cyan("\n🚀 Remote'a push ediliyor..."))
     exec('git push')
     exec(`git push origin ${tag}`)
     console.log(c.green('✅ Commit ve tag push edildi'))
@@ -261,7 +261,9 @@ function main() {
   console.log(`  📌 Versiyon  : ${c.bold(version)}`)
   console.log(`  🏷️  Tag       : ${c.bold(tag)}`)
   console.log(`  💾 Commit    : ${commitMsg}`)
-  console.log(`  🚀 Push      : ${flags.noPush || flags.dryRun ? c.yellow('Hayır') : c.green('Evet')}`)
+  console.log(
+    `  🚀 Push      : ${flags.noPush || flags.dryRun ? c.yellow('Hayır') : c.green('Evet')}`
+  )
 
   if (flags.dryRun) {
     console.log(c.yellow('\n  ⚠️  DRY RUN - Hiçbir değişiklik yapılmadı'))

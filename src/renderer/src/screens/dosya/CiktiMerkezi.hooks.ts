@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Sablon } from '../sablonlar/sablonlar.hooks'
 import { subPagesMapping } from '../../constants/surecler'
-import { getDefaultMappingForProcess, ProcessMapping, processMappingRegistry } from '../../constants/mappings'
+import {
+  getDefaultMappingForProcess,
+  ProcessMapping,
+  processMappingRegistry
+} from '../../constants/mappings'
 import { buildDocumentContext } from './CiktiMerkezi.contextBuilder'
 
 export function useCiktiMerkeziData(activeDosyaId: number | null) {
@@ -345,5 +349,14 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
     }
   }, [activeDosyaId])
 
-  return { sablons, loading, masterHtml, dosyaContext, activeDosya, placeholders, contextsByPath, personelListesi }
+  return {
+    sablons,
+    loading,
+    masterHtml,
+    dosyaContext,
+    activeDosya,
+    placeholders,
+    contextsByPath,
+    personelListesi
+  }
 }

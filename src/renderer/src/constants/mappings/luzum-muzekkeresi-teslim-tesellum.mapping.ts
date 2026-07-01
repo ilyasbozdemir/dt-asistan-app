@@ -35,10 +35,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     sutun: 'olusturma_tarihi',
     aciklama: 'Dosya tarihi'
   },
-  kurumIci: {
-    deger: false,
-    aciklama: 'Kurum içi mi?'
-  },
+
   kurumAdres: {
     tablo: 'TANIM_Kurum',
     sutun: 'adres',

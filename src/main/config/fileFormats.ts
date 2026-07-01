@@ -65,4 +65,3 @@ export function isSupportedFile(filePath: string): boolean {
   const lower = cleanPath.toLowerCase()
   return allExtensions.some((ext) => lower.endsWith('.' + ext))
 }
-

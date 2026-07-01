@@ -117,7 +117,8 @@ const DOCUMENTS = [
       {
         id: 'ekonomik_ve_fonksiyonel_kodlar_rehberi',
         title: 'Ekonomik ve Fonksiyonel Kodlar Rehberi',
-        description: 'Ekonomik, kurumsal ve fonksiyonel kod yapısı, alım türleri ve bütçe ödeneklerinin (Bütçe Hazırlama Rehberi 2026-2028 esaslarına göre) malzeme ve süreçlerle ilişkilendirilmesi kılavuzu.',
+        description:
+          'Ekonomik, kurumsal ve fonksiyonel kod yapısı, alım türleri ve bütçe ödeneklerinin (Bütçe Hazırlama Rehberi 2026-2028 esaslarına göre) malzeme ve süreçlerle ilişkilendirilmesi kılavuzu.',
         file: 'economic_code_guide'
       },
       {
@@ -486,7 +487,8 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
             Ekonomik ve Fonksiyonel Kodlar Rehberi (2026 - 2028)
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Analitik bütçe sınıflandırması, ekonomik kodlar (03.02, 03.05 vb.) ve malzemeler/süreçler ile ilişkilendirilmesi
+            Analitik bütçe sınıflandırması, ekonomik kodlar (03.02, 03.05 vb.) ve
+            malzemeler/süreçler ile ilişkilendirilmesi
           </p>
         </div>
 
@@ -495,7 +497,9 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
             1. Bütçe Sınıflandırma Yapısı (Yeni Program Bütçe Düzeni)
           </h3>
           <p className="text-xs text-slate-650 dark:text-slate-400 leading-relaxed">
-            50 program bütçe sistemine geçişle birlikte, harcamalar <strong>Program - Alt Program - Faaliyet</strong> düzeyinde izlenmektedir. Bütçe tertibi şu 4 ana bileşenden oluşur:
+            50 program bütçe sistemine geçişle birlikte, harcamalar{' '}
+            <strong>Program - Alt Program - Faaliyet</strong> düzeyinde izlenmektedir. Bütçe tertibi
+            şu 4 ana bileşenden oluşur:
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
             <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800">
@@ -524,14 +528,31 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
               03.02 - Tüketime Yönelik Mal ve Malzeme Alımları
             </h3>
             <p className="text-xs text-slate-650 dark:text-slate-400 leading-relaxed mb-3">
-              Kırtasiye, büro malzemeleri, yakacak, elektrik, su, temizlik malzemeleri, giyecek, gıda ve ilaç alımlarını kapsar. Malzeme kartı oluştururken ve alım sürecine dahil ederken en sık kullanılan kodlerdir:
+              Kırtasiye, büro malzemeleri, yakacak, elektrik, su, temizlik malzemeleri, giyecek,
+              gıda ve ilaç alımlarını kapsar. Malzeme kartı oluştururken ve alım sürecine dahil
+              ederken en sık kullanılan kodlerdir:
             </p>
             <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-2 font-mono">
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.02.10.01</strong>: Kırtasiye Alımları</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.02.10.02</strong>: Büro Malzemesi Alımları</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.02.20.02</strong>: Temizlik Malzemesi Alımları</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.02.30.03</strong>: Elektrik Alımları</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.02.40.01</strong>: Yiyecek Alımları</li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.02.10.01</strong>:
+                Kırtasiye Alımları
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.02.10.02</strong>: Büro
+                Malzemesi Alımları
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.02.20.02</strong>:
+                Temizlik Malzemesi Alımları
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.02.30.03</strong>:
+                Elektrik Alımları
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.02.40.01</strong>:
+                Yiyecek Alımları
+              </li>
             </ul>
           </div>
 
@@ -541,14 +562,30 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
               03.05 - Hizmet Alımları & Kiralar
             </h3>
             <p className="text-xs text-slate-650 dark:text-slate-400 leading-relaxed mb-3">
-              Müteahhitlik, temizlik hizmetleri alımı, haberleşme giderleri, kiralama işlemleri, taşıma, bakım onarım gibi hizmet niteliğindeki doğrudan temin süreçlerinde kullanılır:
+              Müteahhitlik, temizlik hizmetleri alımı, haberleşme giderleri, kiralama işlemleri,
+              taşıma, bakım onarım gibi hizmet niteliğindeki doğrudan temin süreçlerinde kullanılır:
             </p>
             <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-2 font-mono">
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.05.10.03</strong>: Bilgisayar Hizmet Alım Giderleri</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.05.10.07</strong>: İş Sağlığı ve Güvenliği Hizmet Alımları</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.05.20.02</strong>: Telefon Abonelik ve Kullanım</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.05.50.05</strong>: Hizmet Binası Kiralama</li>
-              <li>• <strong className="text-slate-700 dark:text-slate-300">03.05.10.51</strong>: Personel Çalıştırılmasına Dayalı Temizlik Hizmeti</li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.05.10.03</strong>:
+                Bilgisayar Hizmet Alım Giderleri
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.05.10.07</strong>: İş
+                Sağlığı ve Güvenliği Hizmet Alımları
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.05.20.02</strong>:
+                Telefon Abonelik ve Kullanım
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.05.50.05</strong>:
+                Hizmet Binası Kiralama
+              </li>
+              <li>
+                • <strong className="text-slate-700 dark:text-slate-300">03.05.10.51</strong>:
+                Personel Çalıştırılmasına Dayalı Temizlik Hizmeti
+              </li>
             </ul>
           </div>
         </div>
@@ -559,7 +596,10 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
             2. Malzemelere Ekonomik Kod Bağlama
           </h3>
           <p className="text-xs text-slate-650 dark:text-slate-400 leading-relaxed">
-            Sistemde tanımladığınız her bir malzeme/hizmet kalemine bu ekonomik kodları atayabilirsiniz. Böylece yaklaşık maliyet hesap cetvelinde ve lüzum belgelerinde her kalemin bütçedeki yeri (örneğin 03.2.1.01 kırtasiye) otomatik gruplanır ve bütçe sorgu aşamasında ödenek kontrolü tam doğrulukla yapılır.
+            Sistemde tanımladığınız her bir malzeme/hizmet kalemine bu ekonomik kodları
+            atayabilirsiniz. Böylece yaklaşık maliyet hesap cetvelinde ve lüzum belgelerinde her
+            kalemin bütçedeki yeri (örneğin 03.2.1.01 kırtasiye) otomatik gruplanır ve bütçe sorgu
+            aşamasında ödenek kontrolü tam doğrulukla yapılır.
           </p>
         </div>
       </div>

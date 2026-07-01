@@ -139,12 +139,7 @@ export function ImzaliBelgeler(): React.JSX.Element {
             <label className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm cursor-pointer transition-colors flex items-center gap-1.5">
               <UploadCloud className="w-4 h-4" />
               ZIP Seç ve Yükle
-              <input
-                type="file"
-                accept=".zip"
-                onChange={handleZipUpload}
-                className="hidden"
-              />
+              <input type="file" accept=".zip" onChange={handleZipUpload} className="hidden" />
             </label>
           )}
         </div>
@@ -188,7 +183,10 @@ export function ImzaliBelgeler(): React.JSX.Element {
                   {doc.signDate !== '-' ? doc.signDate : 'İmza Bekleniyor'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <button className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors" title="Belgeyi Görüntüle">
+                  <button
+                    className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
+                    title="Belgeyi Görüntüle"
+                  >
                     <Eye className="w-4 h-4" />
                   </button>
                   <button

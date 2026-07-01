@@ -33,7 +33,8 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/olcubirimleri')) return 'Ölçü Birimleri'
   if (path.startsWith('/profil')) return 'Kullanıcı Profili'
   if (path.startsWith('/dosya/hazirlik-ve-ihtiyac')) return '1. Hazırlık ve İhtiyaç'
-  if (path.startsWith('/dosya/piyasa-fiyat-arastirmasi')) return '2. Teklifler & Piyasa Fiyat Araştırması'
+  if (path.startsWith('/dosya/piyasa-fiyat-arastirmasi'))
+    return '2. Teklifler & Piyasa Fiyat Araştırması'
   if (path.startsWith('/dosya/siparis-ve-sozlesme')) return '3. Sipariş & Sözleşme'
   if (path.startsWith('/dosya/kabul-ve-odeme')) return '4. Kabul & Ödeme İşlemleri'
   if (path.startsWith('/dosya/klasor-ve-kapaklar')) return '5. Klasör & Kapaklar'

@@ -18,7 +18,11 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
 }
 
 export function getDefaultMappingForProcess(processPath: string): ProcessMapping {
-  const cleanPath = processPath.replace(/\.html$/, '').split('/').pop() || ''
+  const cleanPath =
+    processPath
+      .replace(/\.html$/, '')
+      .split('/')
+      .pop() || ''
   if (cleanPath === 'ihtiyac-listesi' || cleanPath === 'malzeme-hizmet-kalem-listesi') {
     return IhtiyacListesiMapping
   }
@@ -28,7 +32,10 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
   if (cleanPath === 'luzum-muzekkeresi-onay-eki' || cleanPath === 'luzum-onay-eki') {
     return LuzumOnayEkiMapping
   }
-  if (cleanPath === 'luzum-muzekkeresi-teslim-tesellum' || cleanPath === 'teslim-tesellum-belgesi') {
+  if (
+    cleanPath === 'luzum-muzekkeresi-teslim-tesellum' ||
+    cleanPath === 'teslim-tesellum-belgesi'
+  ) {
     return LuzumTeslimTesellumMapping
   }
   if (cleanPath === 'ihtiyac-talep-formu') {

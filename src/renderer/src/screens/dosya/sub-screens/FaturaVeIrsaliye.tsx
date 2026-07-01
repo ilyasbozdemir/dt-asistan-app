@@ -120,9 +120,7 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
   const handleSaveChanges = (e: React.FormEvent): void => {
     e.preventDefault()
     if (!editingFile) return
-    setFiles((prev) =>
-      prev.map((f) => (f.id === editingFile.id ? editingFile : f))
-    )
+    setFiles((prev) => prev.map((f) => (f.id === editingFile.id ? editingFile : f)))
     setEditingFile(null)
   }
 
@@ -180,7 +178,11 @@ export function FaturaVeIrsaliye(): React.JSX.Element {
               Ödeme Bekleyen
             </span>
             <h3 className="text-3xl font-extrabold mt-1 text-amber-600 dark:text-amber-500">
-              {files.filter((f) => f.fileType === 'fatura' && f.paymentStatus === 'bekliyor').length} Fatura
+              {
+                files.filter((f) => f.fileType === 'fatura' && f.paymentStatus === 'bekliyor')
+                  .length
+              }{' '}
+              Fatura
             </h3>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-4 flex items-center gap-1">

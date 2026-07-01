@@ -397,15 +397,21 @@ export function TakipScreen(): React.JSX.Element {
                           }`}
                         />
                       </button>
-                      <span className={`text-[10px] font-bold flex items-center gap-1 min-w-[70px] justify-end ${
-                        belge.is_signed
-                          ? 'text-emerald-600 dark:text-emerald-500'
-                          : 'text-amber-600 dark:text-amber-400'
-                      }`}>
+                      <span
+                        className={`text-[10px] font-bold flex items-center gap-1 min-w-[70px] justify-end ${
+                          belge.is_signed
+                            ? 'text-emerald-600 dark:text-emerald-500'
+                            : 'text-amber-600 dark:text-amber-400'
+                        }`}
+                      >
                         {belge.is_signed ? (
-                          <><CheckCircle2 className="w-3.5 h-3.5" /> İmzalandı</>
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5" /> İmzalandı
+                          </>
                         ) : (
-                          <><Clock className="w-3.5 h-3.5" /> Bekliyor</>
+                          <>
+                            <Clock className="w-3.5 h-3.5" /> Bekliyor
+                          </>
                         )}
                       </span>
                     </div>
@@ -499,7 +505,9 @@ export function TakipScreen(): React.JSX.Element {
                     </div>
                   </div>
                   <p className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
-                    {formatCurrency(dosyalar.reduce((sum, d) => sum + (d.yaklasik_maliyet || 0), 0))}
+                    {formatCurrency(
+                      dosyalar.reduce((sum, d) => sum + (d.yaklasik_maliyet || 0), 0)
+                    )}
                   </p>
                   <p className="text-[10px] text-slate-500 mt-0.5">Toplam Yaklaşık Maliyet</p>
                 </div>
