@@ -11,19 +11,18 @@ import {
   Bot,
   Loader2
 } from 'lucide-react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMalzemelerHooks, Kalem } from './malzemeler.hooks'
 import { useOlcuBirimleri } from '../olcubirimleri/olcubirimleri.hooks'
 import { useOkasKodHooks } from '../okaskod/okaskod.hooks'
 import { useTasinirKodHooks } from '../tasinirkod/tasinirkod.hooks'
 
 export default function YeniMalzemeScreen(): React.JSX.Element {
-  useEffect(() => {
-    document.title = 'Mal/Hizmet/Yapım İşi Ekle - DT'
-  }, [])
+  const search: any = useSearch({ strict: false })
+  const editId = search?.id ? Number(search.id) : null
 
   const navigate = useNavigate()
-  const { addKalem } = useMalzemelerHooks()
+  const { addKalem, updateKalem, kalemList } = useMalzemelerHooks()
   const { data: birimler = [] } = useOlcuBirimleri()
   const { okasKodList, isLoading: isOkasLoading } = useOkasKodHooks()
   const { tasinirKodList, isLoading: isTasinirLoading } = useTasinirKodHooks()
@@ -37,6 +36,16 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
     personel_asgari_fark_oran: 0,
     barkod_id: Math.floor(1000000000000 + Math.random() * 9000000000000).toString()
   }))
+
+  useEffect(() => {
+    document.title = editId ? 'Mal/Hizmet/Yapım İşi Düzenle - DT' : 'Mal/Hizmet/Yapım İşi Ekle - DT'
+    if (editId && kalemList.length > 0) {
+      const existing = kalemList.find(k => k.id === editId)
+      if (existing) {
+        setFormData(existing)
+      }
+    }
+  }, [editId, kalemList])
 
   const [isOkasModalOpen, setIsOkasModalOpen] = useState(false)
   const [isTasinirModalOpen, setIsTasinirModalOpen] = useState(false)
@@ -122,13 +131,17 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
       return
     }
 
-    if (barkodError) {
+    if (barkodError && !editId) {
       alert('Barkod hatasını düzeltmeden kaydedemezsiniz!')
       return
     }
 
     try {
-      await addKalem(formData)
+      if (editId) {
+        await updateKalem({ ...formData, id: editId } as any)
+      } else {
+        await addKalem(formData)
+      }
       navigate({ to: '/malzemeler' })
     } catch (err) {
       alert('Kaydedilirken hata oluştu: ' + (err as Error).message)
@@ -138,7 +151,7 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/50">
       {/* Header */}
-      <div className="flex-none p-4 md:p-6 pb-0 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="flex-none p-4 md:p-6 pb-0 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
         <div className="flex items-center gap-4 mb-4">
           <Link
             to="/malzemeler"

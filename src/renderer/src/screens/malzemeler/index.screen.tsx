@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { APP_ROUTES } from '../../constants/routeConstants'
 import {
   PackageSearch,
   Plus,
@@ -18,6 +19,7 @@ import { useMalzemelerHooks } from './malzemeler.hooks'
 import { cn } from '../../utils/cn'
 
 export default function MalzemelerScreen(): React.JSX.Element {
+  const navigate = useNavigate()
   const { kalemList, isLoading: isKalemLoading, deleteKalem } = useMalzemelerHooks()
 
   const [search, setSearch] = useState('')
@@ -293,6 +295,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => navigate({ to: APP_ROUTES.YENI_MALZEME, search: { id: item.id } as any })}
                       className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
