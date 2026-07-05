@@ -675,9 +675,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
     const targetKonu = normalizeTr(baseKonu);
 
-    // Aynı ismin türevlerini kullanan diğer dosyaları bul
+    // Aynı ismin türevlerini kullanan diğer dosyaları (sadece aynı yıl içinde) bul
+    const currentYear = formData.butce_yili || (formData.dosya_acilis_tarihi ? new Date(formData.dosya_acilis_tarihi).getFullYear() : new Date().getFullYear());
     const matches = dosyalar.filter((d) => {
       if (isEdit && d.id === editId) return false;
+      const dYear = d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : 0);
+      if (dYear !== currentYear) return false;
+      
       const dBase = (d.konu || "")
         .trim()
         .replace(/\s*\(\d+\)$/, "")
@@ -783,11 +787,15 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     : sortedKonular.slice(0, 8); // Show top 8 frequent items if empty
 
   const exactMatchCount = formData.konu
-    ? dosyalar.filter(
-      (d) =>
-        normalizeTr(d.konu) === normalizeTr(formData.konu || "") &&
-        (!isEdit || d.id !== editId),
-    ).length
+    ? dosyalar.filter((d) => {
+        const dYear = d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : 0);
+        const currentYear = formData.butce_yili || (formData.dosya_acilis_tarihi ? new Date(formData.dosya_acilis_tarihi).getFullYear() : new Date().getFullYear());
+        return (
+          dYear === currentYear &&
+          normalizeTr(d.konu) === normalizeTr(formData.konu || "") &&
+          (!isEdit || d.id !== editId)
+        );
+      }).length
     : 0;
 
   return (
@@ -824,7 +832,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
               title="Geçmişteki bir alımı seçerek formun %80'ini otomatik doldurun"
             >
               <Copy size={14} />
-              Eski Dosyadan Kopyala
+              Mevcut Dosyalardan Kopyala
             </button>
           )}
 

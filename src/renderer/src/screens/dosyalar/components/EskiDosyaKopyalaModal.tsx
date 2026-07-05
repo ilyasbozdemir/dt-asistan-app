@@ -38,7 +38,7 @@ export function EskiDosyaKopyalaModal({
           <div>
             <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Copy className="text-blue-600" size={20} />
-              Eski Dosyadan Kopyala (Şablon Yap)
+              Mevcut Dosyalardan Kopyala (Şablon Yap)
             </h2>
             <p className="text-xs text-slate-500 mt-1">
               Geçmişteki bir alımı seçerek formun %80'ini otomatik doldurun.
