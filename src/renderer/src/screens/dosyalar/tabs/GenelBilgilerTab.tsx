@@ -35,7 +35,6 @@ export function GenelBilgilerTab(props: YeniDosyaTabProps) {
 
   return (
     <>
-                {activeTab === "genel" && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                       <FileText className="text-blue-500 w-5 h-5" />
@@ -340,10 +339,8 @@ export function GenelBilgilerTab(props: YeniDosyaTabProps) {
                       </div>
                     </div>
                   </div>
-                )}
 
                 {/* TAB 2: MALİ & BÜTÇE KODLARI (Artık Genel Bilgilerin devamı) */}
-                {activeTab === "genel" && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                       <DollarSign className="text-blue-500 w-5 h-5" />
@@ -573,10 +570,8 @@ export function GenelBilgilerTab(props: YeniDosyaTabProps) {
                       </div>
                     </div>
                   </div>
-                )}
 
                 {/* TAB 3: İHALE, TEKLİF & HESAPLAMA (Artık Genel Bilgilerin devamı) */}
-                {activeTab === "genel" && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                       <Building2 className="text-indigo-500 w-5 h-5" />
@@ -886,10 +881,8 @@ export function GenelBilgilerTab(props: YeniDosyaTabProps) {
                       </div>
                     </div>
                   </div>
-                )}
 
                 {/* TAB 4: SORUMLULAR, TARİH & KOMİSYON (Artık Genel Bilgilerin devamı) */}
-                {activeTab === "genel" && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                       <User className="text-blue-500 w-5 h-5" />
