@@ -58,7 +58,9 @@ export function IhaleVeTeklifFinansalSection(
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5 flex items-center gap-1">
             Doğrudan Temin Maddesi (İhale Şekli)
             <span
-              title={getIhaleSekliExplanation?.(formData.ihale_sekli) || ""}
+              title={getIhaleSekliExplanation?.(
+                formData.ihale_sekli ?? undefined,
+              ) || ""}
             >
               <HelpCircle size={13} className="text-slate-450 cursor-help" />
             </span>
@@ -92,7 +94,7 @@ export function IhaleVeTeklifFinansalSection(
           )}
           {!formData.ihale_sekli?.startsWith("22/d") && (
             <p className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 leading-normal">
-              {getIhaleSekliExplanation?.(formData.ihale_sekli)}
+              {getIhaleSekliExplanation?.(formData.ihale_sekli ?? undefined)}
             </p>
           )}
         </div>
