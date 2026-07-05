@@ -107,6 +107,7 @@ export default function KurumScreen(): React.JSX.Element {
     {
       id: 'iletisim',
       label: 'İletişim & Konum',
+      icon: <MapPin className="w-4 h-4 shrink-0" />
     },
     {
       id: 'logolar',
