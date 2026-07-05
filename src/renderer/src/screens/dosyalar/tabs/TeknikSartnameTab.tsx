@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Building2, HelpCircle, Loader2, Sparkles, Copy, Search, DollarSign, User, Info, ChevronDown } from 'lucide-react';
 import { YeniDosyaTabProps } from '../types';
-import { cn } from '../../../../utils/cn';
+import { cn } from '../../../utils/cn';
 
 export function TeknikSartnameTab(props: YeniDosyaTabProps) {
   const {
