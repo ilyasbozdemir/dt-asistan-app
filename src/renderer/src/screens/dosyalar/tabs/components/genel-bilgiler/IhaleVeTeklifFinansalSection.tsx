@@ -1,5 +1,5 @@
-import React from "react";
-import { Building2, HelpCircle, Info } from "lucide-react";
+import React, { useState } from "react";
+import { Building2, HelpCircle, Info, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
 import { YeniDosyaTabProps } from "../../../types";
 
@@ -14,6 +14,55 @@ export function IhaleVeTeklifFinansalSection(
     isLimitExceeded,
     getIhaleSekliExplanation,
   } = props;
+
+  const [isAiChecking, setIsAiChecking] = useState(false);
+
+  const handleAiCheckType = async () => {
+    if (!formData.konu) {
+      alert("Lütfen önce Genel Bilgiler sekmesinden 'İşin Konusu / İhale Adı' alanını doldurun.");
+      return;
+    }
+    
+    setIsAiChecking(true);
+    try {
+      const prompt = `Kullanıcı "${formData.konu}" konusuyla bir Doğrudan Temin dosyası açmak istiyor. Sence bu alım türü hangisi olmalıdır? Seçenekler: "mal", "hizmet", "yapim_isi", "danismanlik". Lütfen sadece bu dört değerden birini döndür. Açıklama veya cümle yazma. C25 beton atımı, tamirat tadilat gibi işler "yapim_isi" olur.`;
+      
+      const res = await (window as any).electron.ipcRenderer.invoke('ai:generate', {
+        prompt,
+        systemInstruction: "Sen kamu ihale mevzuatı uzmanısın. Kullanıcının iş tanımını analiz edip SADECE 'mal', 'hizmet', 'yapim_isi' veya 'danismanlik' kelimesini döndürmelisin."
+      });
+
+      if (res.success && res.data) {
+        const suggestion = res.data.trim().toLowerCase();
+        let matchedType = "";
+        
+        if (suggestion.includes("yapim") || suggestion.includes("yapım")) matchedType = "yapim_isi";
+        else if (suggestion.includes("hizmet")) matchedType = "hizmet";
+        else if (suggestion.includes("danis") || suggestion.includes("danış")) matchedType = "danismanlik";
+        else if (suggestion.includes("mal")) matchedType = "mal";
+        
+        const typeNames: Record<string, string> = { mal: "Mal Alımı", hizmet: "Hizmet Alımı", yapim_isi: "Yapım İşi", danismanlik: "Danışmanlık Alımı" };
+        
+        if (matchedType && matchedType !== formData.tur) {
+          const currentType = formData.tur || 'mal';
+          const userConfirm = window.confirm(`Yapay Zeka bu işin "${typeNames[matchedType]}" olması gerektiğini düşünüyor. Şu an "${typeNames[currentType]}" seçili.\n\nTürü "${typeNames[matchedType]}" olarak değiştirmek ister misiniz?`);
+          if (userConfirm) {
+            setFormData({ ...formData, tur: matchedType });
+          }
+        } else if (matchedType === formData.tur) {
+          alert(`Yapay Zeka da sizinle aynı fikirde. Doğru tür seçilmiş: ${typeNames[matchedType]}`);
+        } else {
+          alert(`Yapay Zeka öneride bulunamadı veya anlaşılamayan bir sonuç döndü: ${res.data}`);
+        }
+      } else {
+        alert("Yapay Zeka isteği başarısız oldu: " + (res.error || "Bilinmeyen hata (Ayarlardan API anahtarını kontrol edin)"));
+      }
+    } catch (err: any) {
+      alert("Hata oluştu: " + err.message);
+    } finally {
+      setIsAiChecking(false);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -38,9 +87,21 @@ export function IhaleVeTeklifFinansalSection(
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-            Alım / İhale Türü
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-450">
+              Alım / İhale Türü
+            </label>
+            <button
+              type="button"
+              onClick={handleAiCheckType}
+              disabled={isAiChecking}
+              title="Yapay Zeka ile tür önerisi al"
+              className="text-[10px] flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 dark:text-purple-400 px-2 py-0.5 rounded-md transition-colors font-medium border border-purple-200 dark:border-purple-800"
+            >
+              {isAiChecking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              {isAiChecking ? "Kontrol ediliyor..." : "AI Önerisi"}
+            </button>
+          </div>
           <select
             value={formData.tur || "mal"}
             onChange={(e) => setFormData({ ...formData, tur: e.target.value })}
