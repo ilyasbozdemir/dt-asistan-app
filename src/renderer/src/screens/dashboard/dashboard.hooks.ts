@@ -511,8 +511,8 @@ export function useSmartAlerts(
         message:
           'Muhasebat veya harcama birim kodları girilmemiş. Resmi yazışmalarda veya UYAP belgelerinde sorun yaşayabilirsiniz.',
         type: 'info',
-        actionLink: '/ayarlar',
-        actionSearch: { tab: 'kurum' },
+        actionLink: '/mevzuat',
+        actionSearch: { tab: 'mali' },
         actionText: 'Kodları Gir'
       })
     }

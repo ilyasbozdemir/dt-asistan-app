@@ -1,60 +1,91 @@
-import React, { useState, useEffect } from 'react'
-import { Calculator, Plus, X, CheckCircle2, Save } from 'lucide-react'
-import { useAyarlarHooks } from '../../ayarlar/ayarlar.hooks'
-import { useSettingsStore } from '../../../store/settingsStore'
+import React, { useEffect, useState } from "react";
+import { Calculator, CheckCircle2, Plus, Save, X } from "lucide-react";
+import { useAyarlarHooks } from "../../ayarlar/ayarlar.hooks";
+import { useSettingsStore } from "../../../store/settingsStore";
 
 type VergiOrani = {
-  id: string
-  ad: string
-  oran: string
-  tur: 'yuzde' | 'binde'
-  hesapKodu: string
-}
+  id: string;
+  ad: string;
+  oran: string;
+  tur: "yuzde" | "binde";
+  hesapKodu: string;
+};
 
 export function OranlarTab(): React.JSX.Element {
-  const { settings, saveSettings } = useAyarlarHooks()
-  const { loadSettings: reloadSettingsStore } = useSettingsStore()
+  const { settings, saveSettings } = useAyarlarHooks();
+  const { loadSettings: reloadSettingsStore } = useSettingsStore();
 
   const [rates, _setRates] = useState<VergiOrani[]>([
-    { id: '1', ad: 'Damga Vergisi', oran: '9,48', tur: 'binde', hesapKodu: '' },
-    { id: '2', ad: 'Karar Pulu', oran: '5,69', tur: 'binde', hesapKodu: '' },
-    { id: '3', ad: 'KDV (Genel)', oran: '20', tur: 'yuzde', hesapKodu: '' },
-    { id: '4', ad: 'KDV (İndirimli)', oran: '10', tur: 'yuzde', hesapKodu: '' },
-    { id: '5', ad: 'KDV (Özel)', oran: '1', tur: 'yuzde', hesapKodu: '' }
-  ])
-  const [isConfirmed, setIsConfirmed] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+    {
+      id: "1",
+      ad: "Hakediş Damga Vergisi", // Sözleşme bedeli veya hakediş üzerinden kesilen resmi adı
+      oran: "9,48",
+      tur: "binde",
+      hesapKodu: "360.01.01", // Ödenecek Damga Vergisi Alt Kodu
+    },
+    {
+      id: "2",
+      ad: "İhale Karar Damga Vergisi", // "Karar pulu"nun mevzuattaki resmi adı ihale karar damga vergisidir
+      oran: "5,69",
+      tur: "binde",
+      hesapKodu: "360.01.02",
+    },
+    {
+      id: "3",
+      ad: "Katma Değer Vergisi (%20)", // Genel KDV oranı
+      oran: "20",
+      tur: "yuzde",
+      hesapKodu: "360.02.01", // Eğer tevkifat yapılacaksa 360'a giren KDV payı
+    },
+    {
+      id: "4",
+      ad: "Katma Değer Vergisi (%10)", // İndirimli KDV oranı
+      oran: "10",
+      tur: "yuzde",
+      hesapKodu: "360.02.02",
+    },
+    {
+      id: "5",
+      ad: "Katma Değer Vergisi (%1)", // Özel/Temel gıda KDV oranı
+      oran: "1",
+      tur: "yuzde",
+      hesapKodu: "360.02.03",
+    },
+  ]);
+
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const setRates = (val: React.SetStateAction<typeof rates>) => {
-    _setRates(val)
-    setIsConfirmed(false)
-  }
+    _setRates(val);
+    setIsConfirmed(false);
+  };
 
   useEffect(() => {
     if (settings?.rates) {
       try {
-        _setRates(JSON.parse(settings.rates))
+        _setRates(JSON.parse(settings.rates));
       } catch (e) {
-        console.error('Error parsing rates', e)
+        console.error("Error parsing rates", e);
       }
     }
-  }, [settings])
+  }, [settings]);
 
   const handleSave = async (): Promise<void> => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       await saveSettings({
-        rates: JSON.stringify(rates)
-      })
-      await reloadSettingsStore()
+        rates: JSON.stringify(rates),
+      });
+      await reloadSettingsStore();
     } catch (error) {
-      console.error('Error saving mevzuat settings:', error)
-      alert('Kaydetme hatası!')
+      console.error("Error saving mevzuat settings:", error);
+      alert("Kaydetme hatası!");
     } finally {
-      setIsSaving(false)
-      setIsConfirmed(false)
+      setIsSaving(false);
+      setIsConfirmed(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col h-full relative">
@@ -76,8 +107,10 @@ export function OranlarTab(): React.JSX.Element {
           disabled={isSaving || !isConfirmed}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-blue-500/30 cursor-pointer"
         >
-          {isSaving ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {isSaving ? 'Kaydedildi' : 'Değişiklikleri Kaydet'}
+          {isSaving
+            ? <CheckCircle2 className="w-4 h-4" />
+            : <Save className="w-4 h-4" />}
+          {isSaving ? "Kaydedildi" : "Değişiklikleri Kaydet"}
         </button>
       </div>
 
@@ -87,8 +120,9 @@ export function OranlarTab(): React.JSX.Element {
           <div className="text-sm">
             <p className="font-semibold mb-1">Vergi ve Tevkifat Oranları</p>
             <p>
-              Burada belirlediğiniz oranlar, hakediş ve ödeme emri belgeleri oluşturulurken otomatik
-              hesaplamalarda varsayılan değer olarak kullanılır.
+              Burada belirlediğiniz oranlar, hakediş ve ödeme emri belgeleri
+              oluşturulurken otomatik hesaplamalarda varsayılan değer olarak
+              kullanılır.
             </p>
           </div>
         </div>
@@ -104,13 +138,12 @@ export function OranlarTab(): React.JSX.Element {
                   ...rates,
                   {
                     id: Date.now().toString(),
-                    ad: 'Yeni Kesinti',
-                    oran: '0',
-                    tur: 'yuzde',
-                    hesapKodu: ''
-                  }
-                ])
-              }
+                    ad: "Yeni Kesinti",
+                    oran: "0",
+                    tur: "yuzde",
+                    hesapKodu: "",
+                  },
+                ])}
               className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3 h-3" /> Yeni Ekle
@@ -130,9 +163,9 @@ export function OranlarTab(): React.JSX.Element {
                     type="text"
                     value={rate.ad}
                     onChange={(e) => {
-                      const newRates = [...rates]
-                      newRates[index].ad = e.target.value
-                      setRates(newRates)
+                      const newRates = [...rates];
+                      newRates[index].ad = e.target.value;
+                      setRates(newRates);
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
                   />
@@ -144,9 +177,9 @@ export function OranlarTab(): React.JSX.Element {
                   <select
                     value={rate.tur}
                     onChange={(e) => {
-                      const newRates = [...rates]
-                      newRates[index].tur = e.target.value as 'yuzde' | 'binde'
-                      setRates(newRates)
+                      const newRates = [...rates];
+                      newRates[index].tur = e.target.value as "yuzde" | "binde";
+                      setRates(newRates);
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
                   >
@@ -163,31 +196,31 @@ export function OranlarTab(): React.JSX.Element {
                       type="text"
                       value={rate.oran}
                       onChange={(e) => {
-                        const newRates = [...rates]
-                        newRates[index].oran = e.target.value
-                        setRates(newRates)
+                        const newRates = [...rates];
+                        newRates[index].oran = e.target.value;
+                        setRates(newRates);
                       }}
                       className="w-full pl-3 pr-8 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-right font-bold text-emerald-600 dark:text-emerald-400"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                      {rate.tur === 'yuzde' ? '%' : '‰'}
+                      {rate.tur === "yuzde" ? "%" : "‰"}
                     </span>
                   </div>
                 </div>
                 <div className="w-full sm:w-36">
                   <label
                     className="block text-[10px] font-semibold text-slate-500 mb-1"
-                    title="Hesap/Muhasebe Kodu (İsteğe Bağlı)"
+                    title="Muhasebe Kodu (Ödeme emri belgesi için)"
                   >
-                    Hesap Kodu (Ops.)
+                    Muhasebe Kodu
                   </label>
                   <input
                     type="text"
-                    value={rate.hesapKodu || ''}
+                    value={rate.hesapKodu || ""}
                     onChange={(e) => {
-                      const newRates = [...rates]
-                      newRates[index].hesapKodu = e.target.value
-                      setRates(newRates)
+                      const newRates = [...rates];
+                      newRates[index].hesapKodu = e.target.value;
+                      setRates(newRates);
                     }}
                     placeholder="Örn: 360.01.01"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
@@ -196,7 +229,15 @@ export function OranlarTab(): React.JSX.Element {
                 <div className="w-full sm:w-auto pt-4 sm:pt-0 sm:pl-2 flex items-end">
                   <button
                     onClick={() => {
-                      setRates(rates.filter((r) => r.id !== rate.id))
+                      if (
+                        window.confirm(
+                          `'${
+                            rate.ad || "Bu kesinti"
+                          }' adlı öğeyi silmek istediğinize emin misiniz?`,
+                        )
+                      ) {
+                        setRates(rates.filter((r) => r.id !== rate.id));
+                      }
                     }}
                     className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer w-full sm:w-auto flex justify-center"
                     title="Sil"
@@ -215,5 +256,5 @@ export function OranlarTab(): React.JSX.Element {
         </div>
       </div>
     </div>
-  )
+  );
 }
