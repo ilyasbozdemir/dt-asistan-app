@@ -116,8 +116,9 @@ export default function DosyalarScreen(): React.ReactNode {
   const urlId = searchParams.get('id')
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid')
   const [filterTur, setFilterTur] = useState<string>('hepsi')
+  const [filterYil, setFilterYil] = useState<string>('hepsi')
 
   const fileId = urlId ? parseInt(urlId, 10) : activeDosyaId
   const selectedDosya = dosyalar.find((d) => d.id === fileId)
@@ -252,13 +253,30 @@ export default function DosyalarScreen(): React.ReactNode {
     }
   }
 
+  const uniqueYillar = Array.from(
+    new Set(
+      dosyalar
+        .map((d) => {
+          if (d.butce_yili) return d.butce_yili
+          if (d.dosya_acilis_tarihi) return new Date(d.dosya_acilis_tarihi).getFullYear()
+          if (d.created_at) return new Date(d.created_at).getFullYear()
+          return new Date().getFullYear()
+        })
+        .filter(Boolean)
+    )
+  ).sort((a, b) => b - a)
+
   const filteredDosyalar = dosyalar.filter((d) => {
     const matchSearch =
       (d.konu || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (d.temin_no || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (d.birim_adi || '').toLowerCase().includes(searchQuery.toLowerCase())
     const matchTur = filterTur === 'hepsi' || d.tur === filterTur
-    return matchSearch && matchTur
+    
+    const dosyaYili = d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : new Date(d.created_at).getFullYear())
+    const matchYil = filterYil === 'hepsi' || dosyaYili.toString() === filterYil
+
+    return matchSearch && matchTur && matchYil
   })
 
   // İstatistikler (Sadece silinmemiş olanlar baz alınsın)
@@ -310,16 +328,28 @@ export default function DosyalarScreen(): React.ReactNode {
           {/* VIEW SWITCHER */}
           <div className="flex bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5">
             <button
-              onClick={() => setViewMode('card')}
+              onClick={() => setViewMode('grid')}
               className={cn(
                 'p-1.5 rounded-lg transition-colors cursor-pointer',
-                viewMode === 'card'
+                viewMode === 'grid'
                   ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
                   : 'text-slate-400 hover:text-slate-600'
               )}
-              title="Kart Görünümü"
+              title="Izgara (Grid) Görünümü"
             >
               <Grid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn(
+                'p-1.5 rounded-lg transition-colors cursor-pointer',
+                viewMode === 'list'
+                  ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
+                  : 'text-slate-400 hover:text-slate-600'
+              )}
+              title="Liste Görünümü"
+            >
+              <List size={16} />
             </button>
             <button
               onClick={() => setViewMode('table')}
@@ -331,7 +361,7 @@ export default function DosyalarScreen(): React.ReactNode {
               )}
               title="Tablo Görünümü"
             >
-              <List size={16} />
+              <FileText size={16} />
             </button>
           </div>
 
@@ -413,7 +443,18 @@ export default function DosyalarScreen(): React.ReactNode {
       </div>
 
       {/* FİLTRE SATIRI */}
-      <div className="flex-none flex gap-1.5">
+      <div className="flex-none flex items-center gap-1.5 flex-wrap">
+        <select 
+          value={filterYil} 
+          onChange={(e) => setFilterYil(e.target.value)}
+          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="hepsi">Tüm Yıllar</option>
+          {uniqueYillar.map(yil => (
+            <option key={yil} value={yil.toString()}>{yil} Yılı</option>
+          ))}
+        </select>
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
         {['hepsi', 'mal', 'hizmet', 'yapim_isi', 'danismanlik'].map((t) => (
           <button
             key={t}
@@ -468,9 +509,12 @@ export default function DosyalarScreen(): React.ReactNode {
                 Yeni Temin Dosyası Ekle
               </button>
             </div>
-          ) : viewMode === 'card' ? (
-            /* KART GÖRÜNÜMÜ */
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 auto-rows-max">
+          ) : viewMode === 'grid' || viewMode === 'list' ? (
+            /* KART / LİSTE GÖRÜNÜMÜ */
+            <div className={cn(
+              "flex-1 overflow-y-auto custom-scrollbar pr-1 grid gap-4 pb-4 auto-rows-max",
+              viewMode === 'grid' ? "grid-cols-1 xl:grid-cols-2" : "grid-cols-1"
+            )}>
               {filteredDosyalar.map((dosya) => (
                 <div
                   key={dosya.id}
