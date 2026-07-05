@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Building2,
-  ChevronDown,
   Copy,
   DollarSign,
   FileText,
@@ -13,17 +12,15 @@ import {
   User,
 } from "lucide-react";
 import { YeniDosyaTabProps } from "../types";
-import { cn } from "../../../../utils/cn";
+import { cn } from "../../../utils/cn";
 
-export function GenelBilgilerTab(props: YeniDosyaTabProps) {
+export function GenelBilgilerTab(props: YeniDosyaTabProps): React.JSX.Element {
   const {
     formData,
     setFormData,
-    isEdit,
     birimler,
     personeller,
     kodSozlugu,
-    dosyalar,
     isDescLoading,
     showKonuSuggestions,
     setShowKonuSuggestions,

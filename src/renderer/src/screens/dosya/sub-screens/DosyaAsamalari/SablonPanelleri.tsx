@@ -15,8 +15,6 @@ interface SurecBelgeleriPanelProps {
   stageSablons: any[];
   activeStarredDocs?: string[] | null;
   ciktiLoading: boolean;
-  ;
-  ;
   onSablonClick: (sablon: any, title: string) => void;
   isSablonDisabled?: (cleanName: string) => boolean;
 }
@@ -49,16 +47,10 @@ export function SurecBelgeleriPanel({
   return (
     <div className="flex flex-col mb-6 print:hidden animate-in fade-in duration-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm">
       <div className="flex items-center justify-between w-full pb-2 mb-3 border-b border-slate-100 dark:border-slate-800/80">
-        <div
-          onClick={() => setSablonsExpanded(!sablonsExpanded)}
-          className="flex items-center gap-2 cursor-pointer select-none"
-        >
+        <div className="flex items-center gap-2 select-none">
           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             Süreç Belgeleri
           </span>
-          {sablonsExpanded
-            ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-            : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
         </div>
 
         <div className="flex items-center gap-2">
@@ -93,56 +85,55 @@ export function SurecBelgeleriPanel({
       </div>
 
       <div className="flex flex-col gap-3">
-          {filter === "starred" && displaySablons.length === 0
-            ? (
-              <div className="text-xs text-slate-400 dark:text-slate-500 italic py-1">
-                Bu aşama için henüz hızlı erişim belgesi seçilmemiş.
-                <Link
-                  to="/dosya/cikti-merkezi"
-                  className="text-blue-500 hover:underline ml-1"
-                >
-                  Çıktı Merkezi'nden ekleyebilirsiniz.
-                </Link>
-              </div>
-            )
-            : (
-              <div className="flex items-center gap-2 flex-wrap">
-                {displaySablons.map((sablon, idx) => {
-                  let status: string | null = null;
-                  let cleanName = sablon.ad;
-                  const match = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/);
-                  if (match) {
-                    status = match[1].trim();
-                    cleanName = match[2].trim();
-                  }
+        {filter === "starred" && displaySablons.length === 0
+          ? (
+            <div className="text-xs text-slate-400 dark:text-slate-500 italic py-1">
+              Bu aşama için henüz hızlı erişim belgesi seçilmemiş.
+              <Link
+                to="/dosya/cikti-merkezi"
+                className="text-blue-500 hover:underline ml-1"
+              >
+                Çıktı Merkezi'nden ekleyebilirsiniz.
+              </Link>
+            </div>
+          )
+          : (
+            <div className="flex items-center gap-2 flex-wrap">
+              {displaySablons.map((sablon, idx) => {
+                let status: string | null = null;
+                let cleanName = sablon.ad;
+                const match = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/);
+                if (match) {
+                  status = match[1].trim();
+                  cleanName = match[2].trim();
+                }
 
-                  return (
-                    <button
-                      key={sablon.id || sablon.ad}
-                      onClick={() => onSablonClick(sablon, sablon.ad)}
-                      disabled={ciktiLoading ||
-                        (isSablonDisabled && isSablonDisabled(cleanName))}
-                      className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${
-                        ciktiLoading ||
-                          (isSablonDisabled && isSablonDisabled(cleanName))
-                          ? "opacity-40 cursor-not-allowed grayscale"
-                          : "cursor-pointer"
-                      } ${BUTTON_COLORS[idx % BUTTON_COLORS.length]}`}
-                    >
-                      <FileText className="w-4 h-4 shrink-0" />
-                      <span>{cleanName}</span>
-                      {status && (
-                        <span className="px-1.5 py-0.5 bg-black/25 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
-                          {status}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-    </div>
-  )
-}
+                return (
+                  <button
+                    key={sablon.id || sablon.ad}
+                    onClick={() => onSablonClick(sablon, sablon.ad)}
+                    disabled={ciktiLoading ||
+                      (isSablonDisabled && isSablonDisabled(cleanName))}
+                    className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm ${
+                      ciktiLoading ||
+                        (isSablonDisabled && isSablonDisabled(cleanName))
+                        ? "opacity-40 cursor-not-allowed grayscale"
+                        : "cursor-pointer"
+                    } ${BUTTON_COLORS[idx % BUTTON_COLORS.length]}`}
+                  >
+                    <FileText className="w-4 h-4 shrink-0" />
+                    <span>{cleanName}</span>
+                    {status && (
+                      <span className="px-1.5 py-0.5 bg-black/25 text-white rounded text-[9px] font-black uppercase tracking-wide shrink-0">
+                        {status}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+      </div>
     </div>
   );
 }
