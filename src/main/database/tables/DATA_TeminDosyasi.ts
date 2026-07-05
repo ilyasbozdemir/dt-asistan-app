@@ -76,6 +76,10 @@ export const DATA_TeminDosyasi = {
     { name: 'teslim_tarihi', type: 'DATE', description: 'Teslim Tarihi' }, // Tahmini bitiş tarihi
 
     { name: 'yaklasik_maliyet', type: 'REAL', default: 0, description: 'Yaklasik Maliyet' },
+    { name: 'kesinti_damga', type: 'REAL', default: 0, description: 'Damga Vergisi Kesintisi' },
+    { name: 'kesinti_karar_pulu', type: 'REAL', default: 0, description: 'Karar Pulu Kesintisi' },
+    { name: 'kesinti_kdv_tevkifat', type: 'REAL', default: 0, description: 'KDV Tevkifat Kesintisi' },
+    { name: 'net_odenen', type: 'REAL', default: 0, description: 'Net Ödenen Tutar' },
     { name: 'butce_kodu', type: 'TEXT', description: 'Butce Kodu' },
     { name: 'temin_tarihi', type: 'DATE', description: 'Temin Tarihi' },
     { name: 'firma_id', type: 'INTEGER', description: 'Firma ID' }, // Seçilen kazanan firma
