@@ -366,6 +366,15 @@ export default function DosyalarScreen(): React.ReactNode {
     return new Date(val).toLocaleDateString("tr-TR");
   };
 
+  const getDosyaNoLabel = (d: any) => {
+    if (!d || !d.temin_no) return "NO BELİRSİZ";
+    const yil = d.butce_yili ||
+      (d.dosya_acilis_tarihi
+        ? new Date(d.dosya_acilis_tarihi).getFullYear()
+        : new Date(d.created_at).getFullYear());
+    return `${yil}/${d.temin_no}`;
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 p-4 md:p-6 overflow-hidden gap-4">
       {/* ÜST BAR */}
@@ -382,18 +391,6 @@ export default function DosyalarScreen(): React.ReactNode {
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
-          {/* ARAMA */}
-          <div className="relative flex-1 md:flex-initial">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Konu, numara veya birim ara..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-64 pl-9 pr-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all text-slate-800 dark:text-slate-200"
-            />
-          </div>
-
           {/* VIEW SWITCHER */}
           <div className="flex bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5">
             <button
@@ -522,46 +519,62 @@ export default function DosyalarScreen(): React.ReactNode {
       </div>
 
       {/* FİLTRE SATIRI */}
-      <div className="flex-none flex items-center gap-1.5 flex-wrap">
-        <select
-          value={filterYil}
-          onChange={(e) => setFilterYil(e.target.value)}
-          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-        >
-          <option value="hepsi">Tüm Yıllar</option>
-          {uniqueYillar.map((yil) => (
-            <option key={yil} value={yil.toString()}>{yil} Yılı</option>
-          ))}
-        </select>
-        <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block">
-        </div>
-        {["hepsi", "mal", "hizmet", "yapim_isi", "danismanlik"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFilterTur(t)}
-            className={cn(
-              "px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border",
-              filterTur === t
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300",
-            )}
+      <div className="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <select
+            value={filterYil}
+            onChange={(e) => setFilterYil(e.target.value)}
+            className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
           >
-            {t === "hepsi"
-              ? "Tümü"
-              : t === "mal"
-              ? "Mal"
-              : t === "hizmet"
-              ? "Hizmet"
-              : t === "yapim_isi"
-              ? "Yapım"
-              : "Danışmanlık"}
-          </button>
-        ))}
-        {filteredDosyalar.length < dosyalar.length && (
-          <span className="ml-auto text-[10px] text-slate-500 self-center">
-            {filteredDosyalar.length} / {dosyalar.length} dosya gösteriliyor
-          </span>
-        )}
+            <option value="hepsi">Tüm Yıllar</option>
+            {uniqueYillar.map((yil) => (
+              <option key={yil} value={yil.toString()}>{yil} Yılı</option>
+            ))}
+          </select>
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block">
+          </div>
+          {["hepsi", "mal", "hizmet", "yapim_isi", "danismanlik"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setFilterTur(t)}
+              className={cn(
+                "px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border",
+                filterTur === t
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300",
+              )}
+            >
+              {t === "hepsi"
+                ? "Tümü"
+                : t === "mal"
+                ? "Mal"
+                : t === "hizmet"
+                ? "Hizmet"
+                : t === "yapim_isi"
+                ? "Yapım"
+                : "Danışmanlık"}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* ARAMA */}
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Dosya Konusu, No veya Birim ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-slate-800 dark:text-slate-200"
+            />
+          </div>
+          {filteredDosyalar.length < dosyalar.length && (
+            <span className="text-[10px] font-bold text-slate-500 shrink-0 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
+              {filteredDosyalar.length} / {dosyalar.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* İÇERİK - İKİ SÜTUN YAPI */}
@@ -687,7 +700,7 @@ export default function DosyalarScreen(): React.ReactNode {
                                   <div className="p-4 pb-3 border-b border-slate-100 dark:border-slate-800/80">
                                     <div className="flex justify-between items-start gap-2 mb-2">
                                       <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-800 truncate max-w-[120px]">
-                                        {dosya.temin_no || "NO BELİRSİZ"}
+                                        {getDosyaNoLabel(dosya)}
                                       </span>
                                       <div className="flex items-center gap-1.5 shrink-0">
                                         <DurumBadge
@@ -720,7 +733,7 @@ export default function DosyalarScreen(): React.ReactNode {
                                       size={10}
                                       className="text-blue-500 shrink-0"
                                     />
-                                    <span className="text-[9px] font-semibold text-blue-700 dark:text-blue-400 truncate">
+                                    <span className="text-[9px] font-semibold text-blue-700 dark:blue-400 truncate">
                                       {dosya.birim_adi || "Birim Seçilmemiş"}
                                     </span>
                                   </div>
@@ -799,8 +812,7 @@ export default function DosyalarScreen(): React.ReactNode {
                                         className="text-emerald-500"
                                       />
                                       <span className="font-black text-sm text-emerald-600 dark:text-emerald-400 font-mono">
-                                        ₺{" "}
-                                        {formatMoney(
+                                        ₺ {formatMoney(
                                           dosya.yaklasik_maliyet || 0,
                                         )}
                                       </span>
@@ -904,7 +916,7 @@ export default function DosyalarScreen(): React.ReactNode {
                                         )}
                                       >
                                         <td className="p-3.5 pl-5 font-mono font-bold text-slate-500 whitespace-nowrap">
-                                          {dosya.temin_no || "-"}
+                                          {getDosyaNoLabel(dosya)}
                                         </td>
                                         <td
                                           className="p-3.5 font-bold text-slate-800 dark:text-slate-200 max-w-xs truncate"
@@ -927,8 +939,7 @@ export default function DosyalarScreen(): React.ReactNode {
                                           <TurBadge tur={dosya.tur} />
                                         </td>
                                         <td className="p-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap">
-                                          ₺{" "}
-                                          {formatMoney(
+                                          ₺ {formatMoney(
                                             dosya.yaklasik_maliyet || 0,
                                           )}
                                         </td>
@@ -1035,8 +1046,8 @@ export default function DosyalarScreen(): React.ReactNode {
                         : null}
                     </h2>
                     {selectedDosya.temin_no && (
-                      <span className="mt-1.5 inline-block text-[9px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                        {selectedDosya.temin_no}
+                      <span className="mt-1.5 inline-block text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+                        {getDosyaNoLabel(selectedDosya)}
                       </span>
                     )}
                   </div>
