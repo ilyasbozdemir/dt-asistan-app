@@ -1076,7 +1076,7 @@ if (!gotTheLock && !isMultiInstance) {
           'TANIM_Kalem',
           'TANIM_Ambar',
           'DATA_TeminDosyasi',
-          'settings'
+          'TANIM_Kurum'
         ]
         if (!allowedTargets.includes(target)) {
           throw new Error(`Geçersiz hedef tablo: ${target}`)
@@ -1093,28 +1093,39 @@ if (!gotTheLock && !isMultiInstance) {
         const uniqueColumns = Array.from(columnMap.keys())
         if (uniqueColumns.length === 0) throw new Error('Eşleştirilmiş alan bulunamadı.')
 
-        if (target === 'settings') {
+        if (target === 'TANIM_Kurum') {
           let successCount = 0
-          const insertSettings = db.transaction((rows: any[]) => {
-            const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+          const insertKurum = db.transaction((rows: any[]) => {
+            const keys = uniqueColumns.join(', ')
+            const placeholders = uniqueColumns.map(() => '?').join(', ')
+            
+            // For TANIM_Kurum, we usually update id=1 or insert if not exists
+            const stmtUpdate = db.prepare(`UPDATE TANIM_Kurum SET ${uniqueColumns.map(c => `${c} = ?`).join(', ')} WHERE id = 1`)
+            const stmtInsert = db.prepare(`INSERT OR IGNORE INTO TANIM_Kurum (id, ${keys}) VALUES (1, ${placeholders})`)
+            
             for (const row of rows) {
               const mappedRow: any = {}
               for (const col of uniqueColumns) {
-                const keys = columnMap.get(col)!
-                const parts = keys
+                const mapKeys = columnMap.get(col)!
+                const parts = mapKeys
                   .map((k) => row[k])
                   .filter((v) => v !== undefined && v !== null && v !== '')
                 if (parts.length > 0) {
                   mappedRow[col] = String(parts.join(' '))
+                } else {
+                  mappedRow[col] = null
                 }
               }
-              for (const [k, v] of Object.entries(mappedRow)) {
-                stmt.run(k, v)
+              
+              const values = uniqueColumns.map(col => mappedRow[col])
+              const res = stmtUpdate.run(...values)
+              if (res.changes === 0) {
+                stmtInsert.run(...values)
               }
               successCount++
             }
           })
-          insertSettings(data)
+          insertKurum(data)
           return { success: true, count: successCount, total: data.length }
         }
 
@@ -1129,10 +1140,12 @@ if (!gotTheLock && !isMultiInstance) {
         // Çakışan kayıtları atla (INSERT OR IGNORE)
         const placeholders = insertColumns.map(() => '?').join(', ')
         const stmt = db.prepare(
-          `INSERT OR IGNORE INTO ${target} (${insertColumns.join(', ')}) VALUES (${placeholders})`
+          `INSERT INTO ${target} (${insertColumns.join(', ')}) VALUES (${placeholders})`
         )
 
         let successCount = 0
+        const skipReasons = new Set<string>()
+
         const insertMany = db.transaction((rows: any[]) => {
           for (const row of rows) {
             const values = insertColumns.map((col) => {
@@ -1180,14 +1193,25 @@ if (!gotTheLock && !isMultiInstance) {
 
               return combined
             })
-            const result = stmt.run(...values)
-            if (result.changes > 0) successCount++
+            
+            try {
+              const result = stmt.run(...values)
+              if (result.changes > 0) successCount++
+            } catch (err: any) {
+              if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+                skipReasons.add('Sistemde aynı benzersiz değere (Ad, Kod, TC vb.) sahip kayıt zaten var.')
+              } else if (err.code === 'SQLITE_CONSTRAINT_NOTNULL') {
+                skipReasons.add('Zorunlu bir alan boş bırakılmış veya eksik eşleştirilmiş.')
+              } else {
+                skipReasons.add(err.message || 'Bilinmeyen bir veritabanı hatası oluştu.')
+              }
+            }
           }
         })
 
         insertMany(data)
 
-        return { success: true, count: successCount, total: data.length }
+        return { success: true, count: successCount, total: data.length, skipReasons: Array.from(skipReasons) }
       } catch (error: any) {
         console.error('Bulk import error:', error)
         return { success: false, error: error.message }

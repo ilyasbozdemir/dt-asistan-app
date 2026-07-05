@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useNavigate } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTabStore } from '../../store/tabStore'
 
 interface TargetTable {
@@ -126,35 +127,44 @@ const TARGET_TABLES: TargetTable[] = [
     ]
   },
   {
-    id: 'settings',
+    id: 'TANIM_Kurum',
     label: 'Kurum Bilgileri (Ayarlar)',
     columns: [
-      'institutionName',
-      'institutionLetterhead',
-      'recipientTitle',
-      'parentInstitution',
-      'logoLeft',
-      'logoRight',
-      'institutionLogo',
-      'limitType',
-      'finansmanKodu',
-      'institutionType',
-      'eButceKodu',
-      'say2000iKodu',
-      'fonksiyonelKod',
-      'muhasebeBirimKodu',
-      'muhasebeBirimAdi',
-      'harcamaBirimKodu',
-      'harcamaBirimAdi',
-      'dtvtKodu',
-      'address',
-      'district',
-      'postalCode',
-      'city',
-      'phone',
-      'fax',
-      'institutionEmail',
-      'website'
+      'kurum_adi',
+      'kurum_anteti',
+      'makam_adi',
+      'ust_kurum_adi',
+      'logo_sol',
+      'logo_sag',
+      'logo_kurum',
+      'limit_tipi',
+      'finansman_kodu',
+      'kurum_tipi',
+      'alt_kurum_tipi',
+      'alt_kurum_ozel_tanim',
+      'alt_kurum_bizim',
+      'alt_kurum_sizin',
+      'alt_kurum_onun',
+      'alt_kurum_onlarin',
+      'ebutce_kodu',
+      'say2000i_kodu',
+      'fonksiyonel_kod',
+      'muhasebe_birim_kodu',
+      'muhasebe_birim_adi',
+      'harcama_birim_kodu',
+      'harcama_birim_adi',
+      'dtvt_kodu',
+      'detsis_kodu',
+      'konu_ortalama_siniri',
+      'adres',
+      'ilce',
+      'posta_kodu',
+      'il',
+      'telefon',
+      'faks',
+      'eposta',
+      'kep_adresi',
+      'web_sitesi'
     ]
   }
 ]
@@ -162,6 +172,7 @@ const TARGET_TABLES: TargetTable[] = [
 export default function ImportScreen(): React.JSX.Element {
   const navigate = useNavigate()
   const { addTab } = useTabStore()
+  const queryClient = useQueryClient()
   const [jsonText, setJsonText] = useState('')
   const [targetId, setTargetId] = useState<string>('TANIM_Firma')
   const [parsedData, setParsedData] = useState<any[] | null>(null)
@@ -173,6 +184,7 @@ export default function ImportScreen(): React.JSX.Element {
     count?: number
     total?: number
     error?: string
+    skipReasons?: string[]
   } | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
@@ -278,6 +290,7 @@ export default function ImportScreen(): React.JSX.Element {
       })
       setImportResult(res)
       if (res.success) {
+        queryClient.invalidateQueries()
         setToast({
           message: `İçe aktarma tamamlandı: ${res.count} kayıt eklendi.`,
           type: 'success'
@@ -448,30 +461,38 @@ export default function ImportScreen(): React.JSX.Element {
                               <strong>{importResult.count}</strong> tanesi sisteme başarıyla
                               eklendi.
                             </p>
-                            {importResult.total !== undefined &&
-                              importResult.count !== undefined &&
-                              importResult.total > importResult.count && (
-                                <div className="mt-3 p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-lg flex items-start gap-2.5 text-amber-800 dark:text-amber-400 text-xs shadow-sm">
-                                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
-                                  <div>
-                                    <strong className="text-amber-900 dark:text-amber-300">
-                                      {importResult.total - importResult.count} kayıt sisteme
-                                      eklenemedi ve atlandı.
-                                    </strong>
+                            {importResult.total > importResult.count && (
+                              <div className="mt-2 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200/50 dark:border-amber-900/50">
+                                <strong className="text-amber-900 dark:text-amber-300">
+                                  {importResult.total - importResult.count} kayıt sisteme
+                                  eklenemedi ve atlandı.
+                                </strong>
+                                {importResult.skipReasons && importResult.skipReasons.length > 0 ? (
+                                  <>
+                                    <p className="mt-1 opacity-90 text-amber-800 dark:text-amber-400">Atlanma Sebepleri:</p>
+                                    <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80 text-amber-800 dark:text-amber-400">
+                                      {importResult.skipReasons.map((reason: string, idx: number) => (
+                                        <li key={idx}>{reason}</li>
+                                      ))}
+                                    </ul>
+                                  </>
+                                ) : (
+                                  <>
                                     <p className="mt-1 opacity-90">Olası Sebepler:</p>
                                     <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80">
                                       <li>
-                                        Sistemde aynı benzersiz değere (Kod, Barkod, TC, Vergi No)
+                                        Sistemde aynı benzersiz değere (Kod, Barkod, TC, Vergi No, Ad)
                                         sahip kayıt zaten var.
                                       </li>
                                       <li>
-                                        Zorunlu alanları (Ad, Tip) boş bıraktınız veya doğru
+                                        Zorunlu alanları (Ad, Tip vb.) boş bıraktınız veya doğru
                                         eşleştirmediniz.
                                       </li>
                                     </ul>
-                                  </div>
-                                </div>
-                              )}
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </>
                       ) : (
