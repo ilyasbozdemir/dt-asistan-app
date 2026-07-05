@@ -470,7 +470,7 @@ export default function DosyalarScreen(): React.ReactNode {
             </div>
           ) : viewMode === 'card' ? (
             /* KART GÖRÜNÜMÜ */
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 content-start">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 auto-rows-max">
               {filteredDosyalar.map((dosya) => (
                 <div
                   key={dosya.id}
@@ -480,7 +480,7 @@ export default function DosyalarScreen(): React.ReactNode {
                     navigate({ to: '/dosya' })
                   }}
                   className={cn(
-                    'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative overflow-hidden',
+                    'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative overflow-hidden min-h-[180px] h-full',
                     activeDosyaId === dosya.id
                       ? 'border-blue-500 dark:border-blue-700 ring-2 ring-blue-500/15 shadow-md'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'

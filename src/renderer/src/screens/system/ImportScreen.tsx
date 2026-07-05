@@ -1,317 +1,391 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo, useState } from "react";
 import {
-  FileJson,
-  Upload,
-  CheckCircle2,
   AlertCircle,
-  RefreshCw,
   ArrowRight,
-  ExternalLink
-} from 'lucide-react'
-import { Button } from '../../components/ui/Button'
-import { useNavigate } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
-import { useTabStore } from '../../store/tabStore'
+  CheckCircle2,
+  ExternalLink,
+  FileJson,
+  RefreshCw,
+  Upload,
+} from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTabStore } from "../../store/tabStore";
 
 interface TargetTable {
-  id: string
-  label: string
-  columns: string[]
+  id: string;
+  label: string;
+  columns: string[];
 }
 
 const TARGET_TABLES: TargetTable[] = [
   {
-    id: 'TANIM_Firma',
-    label: 'İstekli Firmalar',
+    id: "TANIM_Firma",
+    label: "İstekli Firmalar",
     columns: [
-      'eski_id',
-      'firma_kodu',
-      'unvan',
-      'ilgili_adi',
-      'uyrugu',
-      'istigal_konusu',
-      'adres',
-      'ilce',
-      'posta_kodu',
-      'il',
-      'telefon',
-      'faks',
-      'email',
-      'web_adresi',
-      'banka_adi',
-      'sube_kodu_adi',
-      'hesap_no',
-      'tc_kimlik_no',
-      'dogum_tarihi',
-      'vergi_dairesi',
-      'vergi_no',
-      'aktif_mi',
-      'created_at'
-    ]
+      "eski_id",
+      "firma_kodu",
+      "unvan",
+      "ilgili_adi",
+      "uyrugu",
+      "istigal_konusu",
+      "adres",
+      "ilce",
+      "posta_kodu",
+      "il",
+      "telefon",
+      "faks",
+      "email",
+      "web_adresi",
+      "banka_adi",
+      "sube_kodu_adi",
+      "hesap_no",
+      "tc_kimlik_no",
+      "dogum_tarihi",
+      "vergi_dairesi",
+      "vergi_no",
+      "aktif_mi",
+      "created_at",
+    ],
   },
   {
-    id: 'TANIM_Personel',
-    label: 'Personel Listesi',
+    id: "TANIM_Personel",
+    label: "Personel Listesi",
     columns: [
-      'eski_id',
-      'ad_soyad',
-      'unvan',
-      'birim',
-      'sicil_no',
-      'telefon',
-      'eposta',
-      'ihale_yetkilisi_mi',
-      'harcama_yetkilisi_mi',
-      'aktif_mi',
-      'notlar',
-      'created_at'
-    ]
+      "eski_id",
+      "ad_soyad",
+      "unvan",
+      "birim",
+      "sicil_no",
+      "telefon",
+      "eposta",
+      "ihale_yetkilisi_mi",
+      "harcama_yetkilisi_mi",
+      "aktif_mi",
+      "notlar",
+      "created_at",
+    ],
   },
   {
-    id: 'TANIM_Birim',
-    label: 'Birimler',
+    id: "TANIM_Birim",
+    label: "Birimler",
     columns: [
-      'eski_id',
-      'birim_adi',
-      'antet_ek_satir',
-      'ihtiyac_yeri_eki',
-      'sunum_makami',
-      'e_butce',
-      'say2000i',
-      'dtvt_kodu',
-      'ayrintili_bilgi_personel',
-      'aktif_mi',
-      'created_at'
-    ]
+      "eski_id",
+      "birim_adi",
+      "antet_ek_satir",
+      "ihtiyac_yeri_eki",
+      "sunum_makami",
+      "e_butce",
+      "say2000i",
+      "dtvt_kodu",
+      "ayrintili_bilgi_personel",
+      "aktif_mi",
+      "created_at",
+    ],
   },
   {
-    id: 'TANIM_Kalem',
-    label: 'Malzeme/Hizmet Kalemleri',
+    id: "TANIM_Kalem",
+    label: "Malzeme/Hizmet Kalemleri",
     columns: [
-      'eski_id',
-      'barkod_id',
-      'tasinir_kodu',
-      'okas_kodu',
-      'kalem_adi',
-      'tipi',
-      'birim',
-      'kategori',
-      'ozelligi',
-      'kdv_orani',
-      'mensei',
-      'is_personel',
-      'personel_asgari_fark_oran',
-      'aktif_mi',
-      'notlar',
-      'created_at'
-    ]
+      "eski_id",
+      "barkod_id",
+      "tasinir_kodu",
+      "okas_kodu",
+      "kalem_adi",
+      "tipi",
+      "birim",
+      "kategori",
+      "ozelligi",
+      "kdv_orani",
+      "mensei",
+      "is_personel",
+      "personel_asgari_fark_oran",
+      "aktif_mi",
+      "notlar",
+      "created_at",
+    ],
   },
   {
-    id: 'TANIM_Ambar',
-    label: 'Ambar',
+    id: "TANIM_Ambar",
+    label: "Ambar",
     columns: [
-      'eski_id',
-      'ambar_adi',
-      'aciklama',
-      'adres',
-      'semt',
-      'posta_kodu',
-      'sehir',
-      'telefon',
-      'faks',
-      'web_adresi',
-      'email',
-      'tasinir_kodu',
-      'tasinir_adi',
-      'aktif_mi'
-    ]
+      "eski_id",
+      "ambar_adi",
+      "aciklama",
+      "adres",
+      "semt",
+      "posta_kodu",
+      "sehir",
+      "telefon",
+      "faks",
+      "web_adresi",
+      "email",
+      "tasinir_kodu",
+      "tasinir_adi",
+      "aktif_mi",
+    ],
   },
   {
-    id: 'TANIM_Kurum',
-    label: 'Kurum Bilgileri (Ayarlar)',
+    id: "TANIM_Kurum",
+    label: "Kurum Bilgileri (Ayarlar)",
     columns: [
-      'kurum_adi',
-      'kurum_anteti',
-      'makam_adi',
-      'ust_kurum_adi',
-      'logo_sol',
-      'logo_sag',
-      'logo_kurum',
-      'limit_tipi',
-      'finansman_kodu',
-      'kurum_tipi',
-      'alt_kurum_tipi',
-      'alt_kurum_ozel_tanim',
-      'alt_kurum_bizim',
-      'alt_kurum_sizin',
-      'alt_kurum_onun',
-      'alt_kurum_onlarin',
-      'ebutce_kodu',
-      'say2000i_kodu',
-      'fonksiyonel_kod',
-      'muhasebe_birim_kodu',
-      'muhasebe_birim_adi',
-      'harcama_birim_kodu',
-      'harcama_birim_adi',
-      'dtvt_kodu',
-      'detsis_kodu',
-      'konu_ortalama_siniri',
-      'adres',
-      'ilce',
-      'posta_kodu',
-      'il',
-      'telefon',
-      'faks',
-      'eposta',
-      'kep_adresi',
-      'web_sitesi'
-    ]
-  }
-]
+      "kurum_adi",
+      "kurum_anteti",
+      "makam_adi",
+      "ust_kurum_adi",
+      "logo_sol",
+      "logo_sag",
+      "logo_kurum",
+      "limit_tipi",
+      "finansman_kodu",
+      "kurum_tipi",
+      "alt_kurum_tipi",
+      "alt_kurum_ozel_tanim",
+      "alt_kurum_bizim",
+      "alt_kurum_sizin",
+      "alt_kurum_onun",
+      "alt_kurum_onlarin",
+      "ebutce_kodu",
+      "say2000i_kodu",
+      "fonksiyonel_kod",
+      "muhasebe_birim_kodu",
+      "muhasebe_birim_adi",
+      "harcama_birim_kodu",
+      "harcama_birim_adi",
+      "dtvt_kodu",
+      "detsis_kodu",
+      "konu_ortalama_siniri",
+      "adres",
+      "ilce",
+      "posta_kodu",
+      "il",
+      "telefon",
+      "faks",
+      "eposta",
+      "kep_adresi",
+      "web_sitesi",
+    ],
+  },
+  {
+    id: "DATA_TeminDosyasi",
+    label: "Doğrudan Temin Dosyaları",
+    columns: [
+      "id",
+      "temin_no",
+      "dosya_acilis_tarihi",
+      "butce_yili",
+      "butce_tipi",
+      "konu",
+      "isin_aciklamasi",
+      "birim_id",
+      "antet_ek_satir",
+      "sunulacak_makam",
+      "ihtiyac_yeri",
+      "e_butce",
+      "fonksiyonel_kod",
+      "muhasebe_birimi",
+      "harcama_birimi",
+      "finansman_kodu",
+      "ekonomik_kod",
+      "ihale_tipi",
+      "tur",
+      "ihale_sekli",
+      "teklif_sozlesme_turu",
+      "alt_yuklenici_olacak_mi",
+      "kismi_teklif_verilecek_mi",
+      "fiyat_farki_dayanagi",
+      "yatirim_proje_no",
+      "avans_verilecek_mi",
+      "yaklasik_maliyet_hesaplamasi",
+      "kdv",
+      "hesaplama_esasi",
+      "komisyon_takdiri",
+      "tibbi_cihaz_alimi_mi",
+      "irtibat_yetkilisi_id",
+      "son_teklif_verme_tarihi",
+      "teslim_tarihi",
+      "yaklasik_maliyet",
+      "butce_kodu",
+      "temin_tarihi",
+      "firma_id",
+      "onay_personel_id",
+      "hazirlayan_personel_id",
+      "talep_eden_personel_id",
+      "sunan_personel_id",
+      "durum_asama_id",
+      "mevzuat_id",
+      "notlar",
+      "tekrar_no",
+      "status",
+      "is_deleted",
+      "ekap_no",
+      "is_ekap_sent",
+      "surec_taslak_id",
+      "ordered_docs",
+      "starred_docs",
+      "skipped_docs",
+      "created_at",
+      "updated_at",
+    ],
+  },
+];
 
 export default function ImportScreen(): React.JSX.Element {
-  const navigate = useNavigate()
-  const { addTab } = useTabStore()
-  const queryClient = useQueryClient()
-  const [jsonText, setJsonText] = useState('')
-  const [targetId, setTargetId] = useState<string>('TANIM_Firma')
-  const [parsedData, setParsedData] = useState<any[] | null>(null)
-  const [parseError, setParseError] = useState<string | null>(null)
-  const [mappings, setMappings] = useState<Record<string, string>>({})
-  const [isImporting, setIsImporting] = useState(false)
-  const [importResult, setImportResult] = useState<{
-    success: boolean
-    count?: number
-    total?: number
-    error?: string
-    skipReasons?: string[]
-  } | null>(null)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const navigate = useNavigate();
+  const { addTab } = useTabStore();
+  const queryClient = useQueryClient();
+  const [jsonText, setJsonText] = useState("");
+  const [targetId, setTargetId] = useState<string>("TANIM_Firma");
+  const [parsedData, setParsedData] = useState<any[] | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [mappings, setMappings] = useState<Record<string, string>>({});
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<
+    {
+      success: boolean;
+      count?: number;
+      total?: number;
+      error?: string;
+      skipReasons?: string[];
+    } | null
+  >(null);
+  const [toast, setToast] = useState<
+    { message: string; type: "success" | "error" } | null
+  >(null);
 
   const handleParse = () => {
     try {
-      setParseError(null)
-      setImportResult(null)
+      setParseError(null);
+      setImportResult(null);
 
-      let data: any
+      let data: any;
       try {
-        data = JSON.parse(jsonText)
+        data = JSON.parse(jsonText);
       } catch (err) {
-        const match = jsonText.match(/\[[\s\S]*\]/)
+        const match = jsonText.match(/\[[\s\S]*\]/);
         if (match) {
           try {
-            data = new Function(`return ${match[0]}`)()
+            data = new Function(`return ${match[0]}`)();
           } catch (evalErr) {
-            throw new Error('Geçersiz format. Hem standart JSON hem de JS formatı ayrıştırılamadı.')
+            throw new Error(
+              "Geçersiz format. Hem standart JSON hem de JS formatı ayrıştırılamadı.",
+            );
           }
         } else {
           throw new Error(
-            'Geçerli bir JSON veya JS dizisi (Array) bekliyoruz. Örn: [ { "ad": "X" } ]'
-          )
+            'Geçerli bir JSON veya JS dizisi (Array) bekliyoruz. Örn: [ { "ad": "X" } ]',
+          );
         }
       }
 
       if (!Array.isArray(data)) {
-        throw new Error('Veri bir dizi (Array) formatında olmalıdır.')
+        throw new Error("Veri bir dizi (Array) formatında olmalıdır.");
       }
       if (data.length === 0) {
-        throw new Error('Dizi boş.')
+        throw new Error("Dizi boş.");
       }
-      setParsedData(data)
+      setParsedData(data);
 
       // Auto-map where keys match exactly
-      const firstObj = data[0] || {}
-      const keys = Object.keys(firstObj)
-      const targetTable = TARGET_TABLES.find((t) => t.id === targetId)
+      const firstObj = data[0] || {};
+      const keys = Object.keys(firstObj);
+      const targetTable = TARGET_TABLES.find((t) => t.id === targetId);
 
-      const newMappings: Record<string, string> = {}
+      const newMappings: Record<string, string> = {};
       keys.forEach((key) => {
         if (targetTable?.columns.includes(key)) {
-          newMappings[key] = key
+          newMappings[key] = key;
         }
-      })
-      setMappings(newMappings)
+      });
+      setMappings(newMappings);
     } catch (err: any) {
-      setParseError(err.message)
-      setParsedData(null)
+      setParseError(err.message);
+      setParsedData(null);
     }
-  }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = (event) => {
-      const content = event.target?.result as string
-      setJsonText(content)
-      setParseError(null)
-      setParsedData(null)
-      setImportResult(null)
-    }
-    reader.readAsText(file)
+      const content = event.target?.result as string;
+      setJsonText(content);
+      setParseError(null);
+      setParsedData(null);
+      setImportResult(null);
+    };
+    reader.readAsText(file);
     // reset input so the same file can be uploaded again if needed
-    e.target.value = ''
-  }
+    e.target.value = "";
+  };
 
-  const targetTable = useMemo(() => TARGET_TABLES.find((t) => t.id === targetId), [targetId])
+  const targetTable = useMemo(
+    () => TARGET_TABLES.find((t) => t.id === targetId),
+    [targetId],
+  );
 
   const jsonKeys = useMemo(() => {
-    if (!parsedData || parsedData.length === 0) return []
+    if (!parsedData || parsedData.length === 0) return [];
     // extract all unique keys from first few objects to be safe, but just first is usually enough
-    const keys = new Set<string>()
+    const keys = new Set<string>();
     parsedData.slice(0, 10).forEach((obj) => {
-      Object.keys(obj).forEach((k) => keys.add(k))
-    })
-    return Array.from(keys)
-  }, [parsedData])
+      Object.keys(obj).forEach((k) => keys.add(k));
+    });
+    return Array.from(keys);
+  }, [parsedData]);
 
   const handleMappingChange = (jsonKey: string, dbColumn: string) => {
     setMappings((prev) => {
-      const updated = { ...prev }
+      const updated = { ...prev };
       if (!dbColumn) {
-        delete updated[jsonKey]
+        delete updated[jsonKey];
       } else {
-        updated[jsonKey] = dbColumn
+        updated[jsonKey] = dbColumn;
       }
-      return updated
-    })
-  }
+      return updated;
+    });
+  };
 
   const handleImport = async () => {
-    if (!parsedData || Object.keys(mappings).length === 0) return
+    if (!parsedData || Object.keys(mappings).length === 0) return;
 
-    setIsImporting(true)
-    setImportResult(null)
+    setIsImporting(true);
+    setImportResult(null);
     try {
-      const res = await window.electron.ipcRenderer.invoke('db:bulk-import', {
+      const res = await window.electron.ipcRenderer.invoke("db:bulk-import", {
         target: targetId,
         mappings,
-        data: parsedData
-      })
-      setImportResult(res)
+        data: parsedData,
+      });
+      setImportResult(res);
       if (res.success) {
-        queryClient.invalidateQueries()
+        queryClient.invalidateQueries();
         setToast({
           message: `İçe aktarma tamamlandı: ${res.count} kayıt eklendi.`,
-          type: 'success'
-        })
-        setTimeout(() => setToast(null), 5000)
+          type: "success",
+        });
+        setTimeout(() => setToast(null), 5000);
         // clear if success
-        setJsonText('')
-        setParsedData(null)
-        setMappings({})
+        setJsonText("");
+        setParsedData(null);
+        setMappings({});
       } else {
-        setToast({ message: `İçe aktarma hatası: ${res.error}`, type: 'error' })
-        setTimeout(() => setToast(null), 5000)
+        setToast({
+          message: `İçe aktarma hatası: ${res.error}`,
+          type: "error",
+        });
+        setTimeout(() => setToast(null), 5000);
       }
     } catch (err: any) {
-      setImportResult({ success: false, error: err.message })
-      setToast({ message: `Sistemsel Hata: ${err.message}`, type: 'error' })
-      setTimeout(() => setToast(null), 5000)
+      setImportResult({ success: false, error: err.message });
+      setToast({ message: `Sistemsel Hata: ${err.message}`, type: "error" });
+      setTimeout(() => setToast(null), 5000);
     } finally {
-      setIsImporting(false)
+      setIsImporting(false);
     }
-  }
+  };
 
   return (
     <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
@@ -344,8 +418,8 @@ export default function ImportScreen(): React.JSX.Element {
               className="w-full h-10 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200"
               value={targetId}
               onChange={(e) => {
-                setTargetId(e.target.value)
-                setParsedData(null)
+                setTargetId(e.target.value);
+                setParsedData(null);
               }}
             >
               {TARGET_TABLES.map((t) => (
@@ -360,7 +434,12 @@ export default function ImportScreen(): React.JSX.Element {
               <label className="text-blue-500 cursor-pointer hover:underline text-xs flex items-center gap-1">
                 <Upload className="w-3 h-3" />
                 <span>Dosya Yükle</span>
-                <input type="file" accept=".json" className="hidden" onChange={handleFileUpload} />
+                <input
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
               </label>
             </div>
             <textarea
@@ -398,175 +477,194 @@ export default function ImportScreen(): React.JSX.Element {
               Sütun Eşleştirme ve Aktarım
             </h3>
 
-            {!parsedData ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-sm p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                <ArrowRight className="w-8 h-8 mb-3 text-slate-300 dark:text-slate-600" />
-                Devam etmek için sol taraftan geçerli bir JSON girip "Veriyi Oku" butonuna tıklayın.
-              </div>
-            ) : (
-              <div className="flex flex-col h-full">
-                <div className="text-sm text-blue-700 dark:text-blue-300 mb-4 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-2 border border-blue-100 dark:border-blue-800">
-                  <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                  <span>
-                    Başarıyla <strong>{parsedData.length}</strong> kayıt algılandı.
-                  </span>
+            {!parsedData
+              ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-sm p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                  <ArrowRight className="w-8 h-8 mb-3 text-slate-300 dark:text-slate-600" />
+                  Devam etmek için sol taraftan geçerli bir JSON girip "Veriyi
+                  Oku" butonuna tıklayın.
                 </div>
+              )
+              : (
+                <div className="flex flex-col h-full">
+                  <div className="text-sm text-blue-700 dark:text-blue-300 mb-4 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-2 border border-blue-100 dark:border-blue-800">
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                    <span>
+                      Başarıyla <strong>{parsedData.length}</strong>{" "}
+                      kayıt algılandı.
+                    </span>
+                  </div>
 
-                <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">
-                  JSON ALANLARI → HEDEF SÜTUNLAR
-                </div>
-                <div className="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[300px]">
-                  {jsonKeys.map((key) => (
-                    <div
-                      key={key}
-                      className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50"
-                    >
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">
+                    JSON ALANLARI → HEDEF SÜTUNLAR
+                  </div>
+                  <div className="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[300px]">
+                    {jsonKeys.map((key) => (
                       <div
-                        className="flex-1 text-xs font-mono truncate text-slate-700 dark:text-slate-300"
-                        title={key}
+                        key={key}
+                        className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50"
                       >
-                        {key}
+                        <div
+                          className="flex-1 text-xs font-mono truncate text-slate-700 dark:text-slate-300"
+                          title={key}
+                        >
+                          {key}
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
+                        <select
+                          className="flex-1 h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-700 dark:text-slate-300 outline-none focus:ring-1 focus:ring-blue-500"
+                          value={mappings[key] || ""}
+                          onChange={(e) =>
+                            handleMappingChange(key, e.target.value)}
+                        >
+                          <option value="">-- Atla --</option>
+                          {targetTable?.columns.map((col) => (
+                            <option key={col} value={col}>
+                              {col}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
-                      <select
-                        className="flex-1 h-8 px-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-700 dark:text-slate-300 outline-none focus:ring-1 focus:ring-blue-500"
-                        value={mappings[key] || ''}
-                        onChange={(e) => handleMappingChange(key, e.target.value)}
-                      >
-                        <option value="">-- Atla --</option>
-                        {targetTable?.columns.map((col) => (
-                          <option key={col} value={col}>
-                            {col}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
 
-                {importResult && (
-                  <div
-                    className={`mt-4 p-3 text-sm rounded-lg flex flex-col gap-2 ${importResult.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}
-                  >
-                    <div className="flex items-start gap-2">
-                      {importResult.success ? (
-                        <>
-                          <CheckCircle2 className="w-5 h-5 shrink-0" />
-                          <div className="flex-1 space-y-1">
-                            <div className="font-bold text-[13px] text-green-800 dark:text-green-300">
-                              İçe Aktarma İşlemi Tamamlandı
-                            </div>
-                            <p className="text-xs text-green-700/90 dark:text-green-400/90 leading-relaxed">
-                              İşlenen toplam <strong>{importResult.total}</strong> kayıttan{' '}
-                              <strong>{importResult.count}</strong> tanesi sisteme başarıyla
-                              eklendi.
-                            </p>
-                            {importResult.total > importResult.count && (
-                              <div className="mt-2 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200/50 dark:border-amber-900/50">
-                                <strong className="text-amber-900 dark:text-amber-300">
-                                  {importResult.total - importResult.count} kayıt sisteme
-                                  eklenemedi ve atlandı.
-                                </strong>
-                                {importResult.skipReasons && importResult.skipReasons.length > 0 ? (
-                                  <>
-                                    <p className="mt-1 opacity-90 text-amber-800 dark:text-amber-400">Atlanma Sebepleri:</p>
-                                    <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80 text-amber-800 dark:text-amber-400">
-                                      {importResult.skipReasons.map((reason: string, idx: number) => (
-                                        <li key={idx}>{reason}</li>
-                                      ))}
-                                    </ul>
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="mt-1 opacity-90">Olası Sebepler:</p>
-                                    <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80">
-                                      <li>
-                                        Sistemde aynı benzersiz değere (Kod, Barkod, TC, Vergi No, Ad)
-                                        sahip kayıt zaten var.
-                                      </li>
-                                      <li>
-                                        Zorunlu alanları (Ad, Tip vb.) boş bıraktınız veya doğru
-                                        eşleştirmediniz.
-                                      </li>
-                                    </ul>
-                                  </>
+                  {importResult && (
+                    <div
+                      className={`mt-4 p-3 text-sm rounded-lg flex flex-col gap-2 ${
+                        importResult.success
+                          ? "bg-green-50 text-green-700 border border-green-200"
+                          : "bg-red-50 text-red-600 border border-red-200"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        {importResult.success
+                          ? (
+                            <>
+                              <CheckCircle2 className="w-5 h-5 shrink-0" />
+                              <div className="flex-1 space-y-1">
+                                <div className="font-bold text-[13px] text-green-800 dark:text-green-300">
+                                  İçe Aktarma İşlemi Tamamlandı
+                                </div>
+                                <p className="text-xs text-green-700/90 dark:text-green-400/90 leading-relaxed">
+                                  İşlenen toplam{" "}
+                                  <strong>{importResult.total}</strong> kayıttan
+                                  {" "}
+                                  <strong>{importResult.count}</strong>{" "}
+                                  tanesi sisteme başarıyla eklendi.
+                                </p>
+                                {importResult.total > importResult.count && (
+                                  <div className="mt-2 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200/50 dark:border-amber-900/50">
+                                    <strong className="text-amber-900 dark:text-amber-300">
+                                      {importResult.total - importResult.count}
+                                      {" "}
+                                      kayıt sisteme eklenemedi ve atlandı.
+                                    </strong>
+                                    {importResult.skipReasons &&
+                                        importResult.skipReasons.length > 0
+                                      ? (
+                                        <>
+                                          <p className="mt-1 opacity-90 text-amber-800 dark:text-amber-400">
+                                            Atlanma Sebepleri:
+                                          </p>
+                                          <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80 text-amber-800 dark:text-amber-400">
+                                            {importResult.skipReasons.map((
+                                              reason: string,
+                                              idx: number,
+                                            ) => <li key={idx}>{reason}</li>)}
+                                          </ul>
+                                        </>
+                                      )
+                                      : (
+                                        <>
+                                          <p className="mt-1 opacity-90">
+                                            Olası Sebepler:
+                                          </p>
+                                          <ul className="list-disc pl-4 mt-0.5 space-y-0.5 opacity-80">
+                                            <li>
+                                              Sistemde aynı benzersiz değere
+                                              (Kod, Barkod, TC, Vergi No, Ad)
+                                              sahip kayıt zaten var.
+                                            </li>
+                                            <li>
+                                              Zorunlu alanları (Ad, Tip vb.) boş
+                                              bıraktınız veya doğru
+                                              eşleştirmediniz.
+                                            </li>
+                                          </ul>
+                                        </>
+                                      )}
+                                  </div>
                                 )}
                               </div>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle className="w-5 h-5 shrink-0" />
-                          <span>Hata: {importResult.error}</span>
-                        </>
+                            </>
+                          )
+                          : (
+                            <>
+                              <AlertCircle className="w-5 h-5 shrink-0" />
+                              <span>Hata: {importResult.error}</span>
+                            </>
+                          )}
+                      </div>
+                      {importResult.success && (
+                        <div className="flex justify-end mt-1">
+                          <Button
+                            variant="outline"
+                            className="bg-white border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800 text-xs py-1 h-7 gap-1.5 shadow-sm"
+                            onClick={() => {
+                              const route = targetId === "TANIM_Birim"
+                                ? "/birimler"
+                                : targetId === "TANIM_Firma"
+                                ? "/firmalar"
+                                : targetId === "TANIM_Personel"
+                                ? "/personel"
+                                : targetId === "TANIM_Kalem"
+                                ? "/malzemeler"
+                                : targetId === "TANIM_Ambar"
+                                ? "/ambar"
+                                : targetId === "settings"
+                                ? "/kurum"
+                                : "/";
+                              addTab(route);
+                              navigate({ to: route as any });
+                            }}
+                          >
+                            Sonucu Gör <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
-                    {importResult.success && (
-                      <div className="flex justify-end mt-1">
-                        <Button
-                          variant="outline"
-                          className="bg-white border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800 text-xs py-1 h-7 gap-1.5 shadow-sm"
-                          onClick={() => {
-                            const route =
-                              targetId === 'TANIM_Birim'
-                                ? '/birimler'
-                                : targetId === 'TANIM_Firma'
-                                  ? '/firmalar'
-                                  : targetId === 'TANIM_Personel'
-                                    ? '/personel'
-                                    : targetId === 'TANIM_Kalem'
-                                      ? '/malzemeler'
-                                      : targetId === 'TANIM_Ambar'
-                                        ? '/ambar'
-                                        : targetId === 'settings'
-                                          ? '/kurum'
-                                          : '/'
-                            addTab(route)
-                            navigate({ to: route as any })
-                          }}
-                        >
-                          Sonucu Gör <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleImport}
-                  disabled={isImporting || Object.keys(mappings).length === 0}
-                  className="w-full mt-6 flex justify-center items-center gap-2"
-                  variant={importResult?.success ? 'secondary' : 'default'}
-                >
-                  {isImporting ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
                   )}
-                  {isImporting ? 'Aktarılıyor...' : 'Eşleşenleri İçe Aktar'}
-                </Button>
-              </div>
-            )}
+
+                  <Button
+                    onClick={handleImport}
+                    disabled={isImporting || Object.keys(mappings).length === 0}
+                    className="w-full mt-6 flex justify-center items-center gap-2"
+                    variant={importResult?.success ? "secondary" : "default"}
+                  >
+                    {isImporting
+                      ? <RefreshCw className="w-4 h-4 animate-spin" />
+                      : <Upload className="w-4 h-4" />}
+                    {isImporting ? "Aktarılıyor..." : "Eşleşenleri İçe Aktar"}
+                  </Button>
+                </div>
+              )}
           </div>
         </div>
       </div>
       {toast && (
         <div
           className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-xl border text-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 z-50 transition-all duration-300 ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-950/80 dark:border-green-800 dark:text-green-300'
-              : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/80 dark:border-red-800 dark:text-red-300'
+            toast.type === "success"
+              ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-950/80 dark:border-green-800 dark:text-green-300"
+              : "bg-red-50 border-red-200 text-red-800 dark:bg-red-950/80 dark:border-red-800 dark:text-red-300"
           }`}
         >
-          {toast.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 shrink-0" />
-          ) : (
-            <AlertCircle className="w-5 h-5 shrink-0" />
-          )}
+          {toast.type === "success"
+            ? <CheckCircle2 className="w-5 h-5 shrink-0" />
+            : <AlertCircle className="w-5 h-5 shrink-0" />}
           <div className="font-medium">{toast.message}</div>
         </div>
       )}
     </div>
-  )
+  );
 }

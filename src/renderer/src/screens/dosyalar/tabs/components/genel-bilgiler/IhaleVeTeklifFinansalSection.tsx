@@ -212,7 +212,7 @@ export function IhaleVeTeklifFinansalSection(
 
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Yaklaşık Maliyet Hesaplama Esası
+            Hesaplama Yöntemi / Dayanağı
           </label>
           <input
             type="text"
@@ -225,6 +225,24 @@ export function IhaleVeTeklifFinansalSection(
             placeholder="Örn: Piyasa Fiyat Araştırması"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+            Hesaplama Esası
+          </label>
+          <select
+            value={formData.hesaplama_esasi || "En Düşük fiyat esasına göre"}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                hesaplama_esasi: e.target.value,
+              })}
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+          >
+            <option value="En Düşük fiyat esasına göre">En Düşük fiyat esasına göre</option>
+            <option value="Ortalama fiyat esasına göre">Ortalama fiyat esasına göre</option>
+          </select>
         </div>
       </div>
 
