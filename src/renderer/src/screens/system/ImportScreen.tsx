@@ -108,7 +108,22 @@ const TARGET_TABLES: TargetTable[] = [
   {
     id: 'TANIM_Ambar',
     label: 'Ambar',
-    columns: ['eski_id', 'ambar_kodu', 'ambar_adi', 'aktif_mi', 'created_at']
+    columns: [
+      'eski_id',
+      'ambar_adi',
+      'aciklama',
+      'adres',
+      'semt',
+      'posta_kodu',
+      'sehir',
+      'telefon',
+      'faks',
+      'web_adresi',
+      'email',
+      'tasinir_kodu',
+      'tasinir_adi',
+      'aktif_mi'
+    ]
   },
   {
     id: 'settings',

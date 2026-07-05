@@ -79,10 +79,27 @@ export function useAmbarHooks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ambarlar'] })
   })
 
+  const updateAmbarMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: AmbarInput }) => {
+      const cols = Object.keys(data)
+      const setClause = cols.map((col) => `${col} = ?`).join(', ')
+      const values = cols.map((col) => (data as any)[col] || '')
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `UPDATE TANIM_Ambar SET ${setClause} WHERE id = ?`,
+        [...values, id]
+      )
+      if (!res.success) throw new Error(res.error)
+      return res
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ambarlar'] })
+  })
+
   return {
     ambarlar,
     isLoadingAmbarlar,
     addAmbar: addAmbarMutation.mutateAsync,
+    updateAmbar: updateAmbarMutation.mutateAsync,
     deleteAmbar: deleteAmbarMutation.mutateAsync
   }
 }

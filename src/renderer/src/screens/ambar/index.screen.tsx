@@ -59,30 +59,56 @@ const Field = ({
 )
 
 export default function AmbarScreen(): React.JSX.Element {
-  const { ambarlar, isLoadingAmbarlar, addAmbar, deleteAmbar } = useAmbarHooks()
+  const { ambarlar, isLoadingAmbarlar, addAmbar, updateAmbar, deleteAmbar } = useAmbarHooks()
   const [form, setForm] = useState<AmbarInput>({ ...emptyAmbar })
   const [showExtraFields, setShowExtraFields] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editId, setEditId] = useState<number | null>(null)
 
   const handleChange = (key: keyof AmbarInput, value: string): void => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleAdd = async (e: React.FormEvent): Promise<void> => {
+  const handleSave = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
     if (!form.ambar_adi.trim()) return
     try {
-      await addAmbar(form)
+      if (editId) {
+        await updateAmbar({ id: editId, data: form })
+      } else {
+        await addAmbar(form)
+      }
       setForm({ ...emptyAmbar })
       setShowExtraFields(false)
+      setEditId(null)
       setIsModalOpen(false)
     } catch (err: any) {
       if (err.message?.includes('UNIQUE')) {
-        alert('Bu ambar zaten kayıtlı!')
+        alert('Bu ambar adı zaten kayıtlı!')
       } else {
-        alert('Ambar eklenirken hata oluştu!')
+        alert(`Ambar ${editId ? 'güncellenirken' : 'eklenirken'} hata oluştu!`)
       }
     }
+  }
+
+  const openEdit = (ambar: any) => {
+    setEditId(ambar.id)
+    setForm({
+      ambar_adi: ambar.ambar_adi,
+      aciklama: ambar.aciklama,
+      adres: ambar.adres,
+      semt: ambar.semt,
+      posta_kodu: ambar.posta_kodu,
+      sehir: ambar.sehir,
+      telefon: ambar.telefon,
+      faks: ambar.faks,
+      web_adresi: ambar.web_adresi,
+      email: ambar.email,
+      tasinir_kodu: ambar.tasinir_kodu,
+      tasinir_adi: ambar.tasinir_adi
+    })
+    setShowExtraFields(true)
+    setIsModalOpen(true)
   }
 
   const handleDelete = async (id: number): Promise<void> => {
@@ -109,7 +135,12 @@ export default function AmbarScreen(): React.JSX.Element {
           </p>
         </div>
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditId(null)
+            setForm({ ...emptyAmbar })
+            setShowExtraFields(false)
+            setIsModalOpen(true)
+          }}
           className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm shrink-0"
         >
           <Plus className="w-4 h-4" /> Yeni Ambar Deposu
@@ -184,7 +215,16 @@ export default function AmbarScreen(): React.JSX.Element {
                 key={ambar.id}
                 className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
               >
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-md shadow-sm border border-slate-200/50 dark:border-slate-700/50 p-0.5">
+                  <Button
+                    title="Düzenle"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openEdit(ambar)}
+                    className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/15"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                  </Button>
                   <Button
                     title="Sil"
                     variant="ghost"
@@ -240,10 +280,10 @@ export default function AmbarScreen(): React.JSX.Element {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Yeni Ambar Deposu Tanımla"
-        description="Kurumunuza ait ana ambar veya depo ekleyin."
+        title={editId ? "Ambar Karti Güncelle" : "Yeni Ambar Deposu Tanımla"}
+        description={editId ? "Ambar veya depo bilgilerini düzenleyin." : "Kurumunuza ait ana ambar veya depo ekleyin."}
       >
-        <form onSubmit={handleAdd} className="space-y-4">
+        <form onSubmit={handleSave} className="space-y-4">
           <Field
             label="Ambar Adı"
             field="ambar_adi"
@@ -321,7 +361,7 @@ export default function AmbarScreen(): React.JSX.Element {
               İptal
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shadow-md">
-              Ambar Kaydını Ekle
+              {editId ? 'Değişiklikleri Kaydet' : 'Ambar Kaydını Ekle'}
             </Button>
           </div>
         </form>
