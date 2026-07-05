@@ -11,17 +11,24 @@ export function FiyatFarkiTab(): React.JSX.Element {
   const ffKdvOrani = 0.2
 
   const loadFfSample = (type: 'mal' | 'hizmet'): void => {
+    // Rastgele sayı üretici (min - max arası)
+    const randomRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomFloat = (min: number, max: number, decimals: number) => (Math.random() * (max - min) + min).toFixed(decimals);
+
     if (type === 'mal') {
-      setFfHakedis('250000')
-      setFfEndeksModu(true)
-      setFfTemelEndeks('3150.20')
-      setFfGuncelEndeks('3495.50')
-      setFfAlimTuru('mal')
+      const temel = randomRange(2500, 3500) + Math.random();
+      const guncel = temel + randomRange(100, 500) + Math.random();
+      
+      setFfHakedis(randomRange(100000, 750000).toString());
+      setFfEndeksModu(true);
+      setFfTemelEndeks(temel.toFixed(2));
+      setFfGuncelEndeks(guncel.toFixed(2));
+      setFfAlimTuru('mal');
     } else {
-      setFfHakedis('480000')
-      setFfEndeksModu(false)
-      setFfPnDirect('1.1245')
-      setFfAlimTuru('hizmet')
+      setFfHakedis(randomRange(250000, 950000).toString());
+      setFfEndeksModu(false);
+      setFfPnDirect(randomFloat(1.02, 1.25, 4));
+      setFfAlimTuru('hizmet');
     }
   }
 
