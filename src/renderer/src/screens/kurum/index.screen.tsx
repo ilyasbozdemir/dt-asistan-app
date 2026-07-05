@@ -6,21 +6,25 @@ import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { IdariBilgilerTab } from './components/IdariBilgilerTab'
 import { MaliBirimTab } from './components/MaliBirimTab'
 import { IletisimTab } from './components/IletisimTab'
+import { LogolarTab } from './components/LogolarTab'
 import { useSettingsStore } from '../../store/settingsStore'
 
-type TabType = 'idari' | 'mali' | 'iletisim'
+type TabType = 'idari' | 'mali' | 'iletisim' | 'logolar'
 
 export default function KurumScreen(): React.JSX.Element {
   const { kurumData, isLoadingKurum, fetchKurum, saveKurum } = useKurumHooks()
-  const { loadSettings: reloadSettingsStore } = useSettingsStore()
+  const { institutionLogo: defaultInstitutionLogo, logoLeft: defaultLogoLeft, logoRight: defaultLogoRight, loadSettings: reloadSettingsStore } = useSettingsStore()
 
   const [activeTab, setActiveTab] = useState<TabType>('idari')
   const [saving, setSaving] = useState(false)
 
-  // Local state to hold unsaved form changes
   const [localData, setLocalData] = useState<Partial<KurumVerisi>>({})
   const [institutionLetterhead, setInstitutionLetterhead] = useState<string[]>([])
   const [sozlukData, setSozlukData] = useState<any[]>([])
+
+  const [institutionLogo, setInstitutionLogo] = useState<string | null>(defaultInstitutionLogo)
+  const [logoLeft, setLogoLeft] = useState<string | null>(defaultLogoLeft)
+  const [logoRight, setLogoRight] = useState<string | null>(defaultLogoRight)
 
   // Fetch initial data
   React.useEffect(() => {
@@ -72,7 +76,15 @@ export default function KurumScreen(): React.JSX.Element {
       dataToSave.kurum_anteti = JSON.stringify(institutionLetterhead.filter((l) => l.trim() !== ''))
 
       await saveKurum(dataToSave)
-      await reloadSettingsStore() // refresh app-wide settings store if they still rely on anything here
+
+      // Save logos to settings
+      await window.electron.ipcRenderer.invoke('db:save-settings', {
+        institutionLogo,
+        logoLeft,
+        logoRight
+      })
+
+      await reloadSettingsStore() // refresh app-wide settings store
       alert('Kurum bilgileri başarıyla kaydedildi.')
     } catch (err) {
       alert('Kaydetme hatası: ' + err)
@@ -95,7 +107,11 @@ export default function KurumScreen(): React.JSX.Element {
     {
       id: 'iletisim',
       label: 'İletişim & Konum',
-      icon: <MapPin className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'logolar',
+      label: 'Kurum Logoları',
+      icon: <Building2 className="w-4 h-4 shrink-0 text-blue-500" />
     }
   ]
 
@@ -166,6 +182,16 @@ export default function KurumScreen(): React.JSX.Element {
                 onChange={handleChange}
                 institutionLetterhead={institutionLetterhead}
                 setInstitutionLetterhead={setInstitutionLetterhead}
+              />
+            )}
+            {activeTab === 'logolar' && (
+              <LogolarTab
+                institutionLogo={institutionLogo}
+                setInstitutionLogo={setInstitutionLogo}
+                logoLeft={logoLeft}
+                setLogoLeft={setLogoLeft}
+                logoRight={logoRight}
+                setLogoRight={setLogoRight}
               />
             )}
           </div>
