@@ -178,8 +178,6 @@ export function IhtiyacListesiTab(props: YeniDosyaTabProps) {
                       </div>
                     </div>
                   </div>
-                )}
-
     </>
   );
 }

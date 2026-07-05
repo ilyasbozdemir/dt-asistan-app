@@ -17,8 +17,6 @@ export function KlasorVeKapaklar(): React.JSX.Element {
     personelListesi,
     previewModalOpen,
     setPreviewModalOpen,
-    sablonsExpanded,
-    setSablonsExpanded,
     previewData,
     handleOpenPreviewForSablon,
     executePrint,

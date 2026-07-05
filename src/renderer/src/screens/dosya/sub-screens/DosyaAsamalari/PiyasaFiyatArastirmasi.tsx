@@ -17,8 +17,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     personelListesi,
     previewModalOpen,
     setPreviewModalOpen,
-    sablonsExpanded,
-    setSablonsExpanded,
     previewData,
     handleOpenPreviewForSablon,
     executePrint,
@@ -66,8 +64,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         stageSablons={stageSablons}
         activeStarredDocs={activeStarredDocs}
         ciktiLoading={ciktiLoading}
-        sablonsExpanded={sablonsExpanded}
-        setSablonsExpanded={setSablonsExpanded}
+        ={}
+        ={}
         onSablonClick={handleOpenPreviewForSablon}
         isSablonDisabled={isSablonDisabled}
       />

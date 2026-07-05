@@ -1261,7 +1261,6 @@ export function GenelBilgilerTab(props: YeniDosyaTabProps) {
                       </div>
                     </div>
                   </div>
-                )}
     </>
   );
 }

@@ -77,9 +77,6 @@ export function TeknikSartnameTab(props: YeniDosyaTabProps) {
                       </button>
                     </div>
                   </div>
-                )}
-              </>
-            )}
     </>
   );
 }

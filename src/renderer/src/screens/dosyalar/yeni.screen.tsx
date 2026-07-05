@@ -29,9 +29,9 @@ import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
 import { logActivity } from "../../utils/logger";
 import { EskiDosyaKopyalaModal } from "./components/EskiDosyaKopyalaModal";
 import { useKikLimitDonemleri } from "../system/kik-limitleri.hooks";
-import { GenelBilgilerTab } from './tabs/GenelBilgilerTab';
-import { IhtiyacListesiTab } from './tabs/IhtiyacListesiTab';
-import { TeknikSartnameTab } from './tabs/TeknikSartnameTab';
+import { GenelBilgilerTab } from "./tabs/GenelBilgilerTab";
+import { IhtiyacListesiTab } from "./tabs/IhtiyacListesiTab";
+import { TeknikSartnameTab } from "./tabs/TeknikSartnameTab";
 
 interface DBBirim {
   id: number;
@@ -112,7 +112,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     ekonomik_kod: "",
     ihale_tipi: "Doğrudan Temin",
     tur: "mal",
-    ihale_sekli: "22/d",
+    ihale_sekli: limitType === "buyuksehir" ? "22/d*" : "22/d**",
     teklif_sozlesme_turu: "Birim Fiyat",
     alt_yuklenici_olacak_mi: 0,
     kismi_teklif_verilecek_mi: 0,
@@ -125,6 +125,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     komisyon_takdiri: "",
     tibbi_cihaz_alimi_mi: 0,
     irtibat_yetkilisi_id: null,
+    talep_eden_personel_id: null,
+    sunan_personel_id: null,
     son_teklif_verme_tarihi: new Date().toISOString().split("T")[0] + " 10:00",
     teslim_tarihi: "",
     yaklasik_maliyet: 0,
@@ -147,60 +149,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     if (!currentLimit || !formData.yaklasik_maliyet) return false;
     return formData.yaklasik_maliyet > currentLimit;
   }, [currentLimit, formData.yaklasik_maliyet]);
-
-  // Title & Tab title
-  useEffect(() => {
-    document.title = isEdit
-      ? "İhale Dosyası Düzenle - DT"
-      : "Yeni İhale Dosyası Ekle - DT";
-    const currentHref = routerState.location.href;
-    updateTabLabel(
-      currentHref,
-      isEdit ? "DT Dosyasını Düzenle" : "Yeni DT Dosyası Ekle",
-    );
-  }, [isEdit, routerState.location.href, updateTabLabel]);
-
-  // Form State
-  const [formData, setFormData] = useState<Partial<TeminDosyasi>>({
-    temin_no: "",
-    dosya_acilis_tarihi: new Date().toISOString().split("T")[0],
-    butce_yili: new Date().getFullYear(),
-    butce_tipi: "Genel Bütçe",
-    konu: "",
-    isin_aciklamasi: "",
-    birim_id: null,
-    antet_ek_satir: "",
-    sunulacak_makam: "",
-    ihtiyac_yeri: "",
-    e_butce: "",
-    fonksiyonel_kod: "",
-    muhasebe_birimi: "",
-    harcama_birimi: "",
-    finansman_kodu: "1",
-    ekonomik_kod: "",
-    ihale_tipi: "Doğrudan Temin",
-    tur: "mal",
-    ihale_sekli: limitType === "buyuksehir" ? "22/d*" : "22/d**",
-    teklif_sozlesme_turu: "Birim Fiyat",
-    alt_yuklenici_olacak_mi: 0,
-    kismi_teklif_verilecek_mi: 0,
-    fiyat_farki_dayanagi: "",
-    yatirim_proje_no: "",
-    avans_verilecek_mi: 0,
-    yaklasik_maliyet_hesaplamasi: "",
-    kdv: "20",
-    hesaplama_esasi: "",
-    komisyon_takdiri: "",
-    tibbi_cihaz_alimi_mi: 0,
-    irtibat_yetkilisi_id: null,
-    talep_eden_personel_id: null,
-    sunan_personel_id: null,
-    son_teklif_verme_tarihi: "",
-    teslim_tarihi: "",
-    yaklasik_maliyet: 0,
-    butce_kodu: "",
-    notlar: "",
-  });
 
   // Load Database values
   useEffect(() => {
@@ -1132,10 +1080,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 )}
 
                 {/* TAB 1: GENEL BİLGİLER */}
-                {activeTab === 'genel' && (
-                  <GenelBilgilerTab 
-                    formData={formData} 
-                    setFormData={setFormData} 
+                {activeTab === "genel" && (
+                  <GenelBilgilerTab
+                    formData={formData}
+                    setFormData={setFormData}
                     isEdit={isEdit}
                     birimler={birimler}
                     personeller={personeller}
@@ -1164,10 +1112,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 )}
 
                 {/* TAB 2: İHTİYAÇ LİSTESİ */}
-                {activeTab === 'ihtiyac' && (
-                  <IhtiyacListesiTab 
-                    formData={formData} 
-                    setFormData={setFormData} 
+                {activeTab === "ihtiyac" && (
+                  <IhtiyacListesiTab
+                    formData={formData}
+                    setFormData={setFormData}
                     isEdit={isEdit}
                     birimler={birimler}
                     personeller={personeller}
@@ -1177,10 +1125,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 )}
 
                 {/* TAB 3: TEKNİK ŞARTNAME & EKLER */}
-                {activeTab === 'teknik' && (
-                  <TeknikSartnameTab 
-                    formData={formData} 
-                    setFormData={setFormData} 
+                {activeTab === "teknik" && (
+                  <TeknikSartnameTab
+                    formData={formData}
+                    setFormData={setFormData}
                     isEdit={isEdit}
                     birimler={birimler}
                     personeller={personeller}
@@ -1188,6 +1136,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     dosyalar={dosyalar}
                   />
                 )}
+              </>
+            )}
           {/* TAB CONTINUATION ACTION BUTTONS */}
           <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-5 mt-6">
             <div className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold uppercase tracking-wider">
@@ -1200,7 +1150,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   type="button"
                   onClick={() => {
                     if (activeTab === "ihtiyac") setActiveTab("genel");
-                    if (activeTab === "teknik") setActiveTab("ihtiyac");
+                    if (activeTab === "teknik") {
+                      setActiveTab("ihtiyac");
+                    }
                   }}
                   className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                 >

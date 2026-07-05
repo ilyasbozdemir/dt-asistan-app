@@ -72,8 +72,7 @@ export function useDosyaAsamasiSablons() {
   const { logDocument } = useDocumentLogger()
 
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
-  const [sablonsExpanded, setSablonsExpanded] = useState(false)
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null)
+    const [previewData, setPreviewData] = useState<PreviewData | null>(null)
   const router = useRouter()
 
   // Tanstack Router'dan arama parametresini reaktif olarak al
@@ -236,9 +235,7 @@ export function useDosyaAsamasiSablons() {
     // UI state
     previewModalOpen,
     setPreviewModalOpen,
-    sablonsExpanded,
-    setSablonsExpanded,
-    previewData,
+            previewData,
     // işlemler
     handleOpenPreviewForSablon,
     executePrint,
