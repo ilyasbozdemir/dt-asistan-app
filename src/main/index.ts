@@ -1169,7 +1169,7 @@ if (!gotTheLock && !isMultiInstance) {
                   col === 'harcama_yetkilisi_mi'
                 )
                   return 0
-                return null
+                return ''
               }
               // Birden fazla alan aynı sütuna eşleştiyse aralarında boşluk bırakarak birleştir
               let combined = parts.join(' ')
