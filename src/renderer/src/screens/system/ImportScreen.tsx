@@ -552,10 +552,10 @@ export default function ImportScreen(): React.JSX.Element {
                                   <strong>{importResult.count}</strong>{" "}
                                   tanesi sisteme başarıyla eklendi.
                                 </p>
-                                {importResult.total > importResult.count && (
+                                {(importResult.total || 0) > (importResult.count || 0) && (
                                   <div className="mt-2 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200/50 dark:border-amber-900/50">
                                     <strong className="text-amber-900 dark:text-amber-300">
-                                      {importResult.total - importResult.count}
+                                      {(importResult.total || 0) - (importResult.count || 0)}
                                       {" "}
                                       kayıt sisteme eklenemedi ve atlandı.
                                     </strong>
