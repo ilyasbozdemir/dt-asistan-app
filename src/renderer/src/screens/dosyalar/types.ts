@@ -65,4 +65,11 @@ export interface YeniDosyaTabProps {
   personelSearchQuery?: string
   setPersonelSearchQuery?: React.Dispatch<React.SetStateAction<string>>
   filteredPersoneller?: DBPersonel[]
+
+  // Refactored props
+  limitType?: 'buyuksehir' | 'diger'
+  currentLimit?: number
+  isLimitExceeded?: boolean
+  getNextTeminNo?: (year: number) => string
+  getIhaleSekliExplanation?: (madde?: string) => string
 }
