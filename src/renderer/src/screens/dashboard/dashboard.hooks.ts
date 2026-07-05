@@ -483,9 +483,9 @@ export function useSmartAlerts(
         message:
           'Kurum adı ve bütçe limit türü seçilmemiş. Limitlerin doğru çalışması için ayarları tamamlayın.',
         type: 'error',
-        actionLink: '/ayarlar',
-        actionSearch: { tab: 'kurum' },
-        actionText: 'Kurum Ayarları'
+        actionLink: '/mevzuat',
+        actionSearch: { tab: 'mali' },
+        actionText: 'Kurum ve Mali Ayarlar'
       })
     }
 
@@ -497,9 +497,9 @@ export function useSmartAlerts(
         message:
           'Harcama yetkilisi (gerçekleştirme görevlisi) kimlik bilgileri boş. Çıktı evraklarında imza alanları boş kalacaktır.',
         type: 'warning',
-        actionLink: '/ayarlar',
-        actionSearch: { tab: 'kurum' },
-        actionText: 'Yetkili Ekle'
+        actionLink: '/profil',
+        actionSearch: {},
+        actionText: 'Profil Ayarları'
       })
     }
 
