@@ -71,7 +71,7 @@ const fetchDosyalar = async (): Promise<TeminDosyasi[]> => {
   if (!window.electron) return []
   const res = await window.electron.ipcRenderer.invoke(
     'db:query',
-    'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id ORDER BY d.created_at DESC'
+    'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id ORDER BY COALESCE(d.dosya_acilis_tarihi, d.created_at) DESC, d.id DESC'
   )
   if (!res.success) throw new Error(res.error)
   return res.data

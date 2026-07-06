@@ -62,7 +62,10 @@ const menuGroups: MenuGroup[] = [
   },
   {
     title: 'Süreç Yönetimi',
-    items: [{ name: 'Doğrudan Temin Dosyaları', path: '/dosyalar', icon: FileText }]
+    items: [
+      { name: 'Doğrudan Temin Dosyaları', path: '/dosyalar', icon: FileText },
+      { name: 'Hızlı Dosya Ekle / Güncelle', path: '/hizli-dosya-ekle', icon: Database }
+    ]
   },
   {
     title: 'Kayıtlar & Tanımlar',
@@ -105,7 +108,6 @@ const menuGroups: MenuGroup[] = [
         children: [
           { name: 'Genel Ayarlar', path: '/ayarlar', icon: Settings },
           { name: 'Mevzuat ve Parametreler', path: '/mevzuat', icon: Scale },
-          { name: 'Hızlı Dosya Ekle', path: '/hizli-dosya-ekle', icon: Database },
           { name: 'Toplu İçe Aktarma', path: '/import', icon: Database },
           { name: 'Şablon & Kategori Yönetimi', path: '/degiskenler', icon: Key }
         ]
