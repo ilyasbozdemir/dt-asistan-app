@@ -66,13 +66,13 @@ export default function MalzemelerScreen(): React.JSX.Element {
     }
   };
 
-  const handleExportTemplate = async () => {
+  const handleExportExcel = async () => {
     try {
       const res = await window.electron.ipcRenderer.invoke(
-        "db:export-kalem-template",
+        "db:export-kalem-excel",
       );
       if (res.error && res.error !== "İptal edildi") {
-        alert("Şablon kaydetme hatası: " + res.error);
+        alert("Excel dışa aktarma hatası: " + res.error);
       }
     } catch (e: any) {
       alert("Hata: " + e.message);
@@ -157,12 +157,12 @@ export default function MalzemelerScreen(): React.JSX.Element {
           <div className="flex flex-wrap items-center gap-2 flex-1 justify-end w-full sm:w-auto">
             <Button
               variant="outline"
-              onClick={handleExportTemplate}
+              onClick={handleExportExcel}
               className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
-              title="Örnek şablonu indir"
+              title="Tüm verileri Excel olarak indir"
             >
               <Download className="w-4 h-4 text-blue-600 shrink-0" />{" "}
-              <span className="whitespace-nowrap">Şablon İndir</span>
+              <span className="whitespace-nowrap">Excel Dışa Aktar</span>
             </Button>
             <Button
               variant="outline"

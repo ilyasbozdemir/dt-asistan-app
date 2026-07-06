@@ -16,6 +16,7 @@ export interface WorkspaceMeta {
   schema_version: number
   platform: string
   file_version: number
+  active_db_file?: string
   updated_at?: string
   integrity_hash?: string
   warnings?: string[]
@@ -44,6 +45,7 @@ function normalizeMeta(raw: any): WorkspaceMeta {
     schema_version: parseInt(raw.schema_version || raw.schemaVersion || '1', 10) || 1,
     platform: raw.platform || process.platform,
     file_version: raw.file_version || parseInt(raw.fileVersion || '1', 10) || 1,
+    active_db_file: raw.active_db_file || 'database.sqlite',
     updated_at: raw.updated_at || raw.updatedAt || new Date().toISOString(),
     integrity_hash: raw.integrity_hash,
     warnings: []
@@ -492,7 +494,8 @@ export class DtmWorkspace {
       }
 
       try {
-        const dbPath = path.join(this.tempDir, 'database.sqlite')
+        const dbFileName = meta.active_db_file || 'database.sqlite'
+        const dbPath = path.join(this.tempDir, dbFileName)
         this.db = new Database(dbPath)
 
         runMigrations(this.db, fromVersion)
@@ -539,7 +542,8 @@ export class DtmWorkspace {
         )
       }
     } else {
-      const dbPath = path.join(this.tempDir, 'database.sqlite')
+      const dbFileName = meta.active_db_file || 'database.sqlite'
+      const dbPath = path.join(this.tempDir, dbFileName)
       this.db = new Database(dbPath)
     }
 
@@ -661,6 +665,7 @@ export class DtmWorkspace {
       schema_version: CURRENT_SCHEMA_VERSION,
       platform: process.platform,
       file_version: 1,
+      active_db_file: 'database.sqlite',
       updated_at: new Date().toISOString(),
       warnings: []
     }
@@ -748,9 +753,43 @@ export class DtmWorkspace {
     }
   }
 
+  public replaceDatabase(sourceSqlitePath: string): void {
+    if (!this.currentFilePath || !this.db || !this.meta) {
+      throw new Error('Açık bir çalışma alanı yok.')
+    }
+    
+    // Close current connection
+    this.db.close()
+    
+    // Replace the database file with a versioned name
+    const newDbName = `database_${Date.now()}.sqlite`
+    const dbPath = path.join(this.tempDir, newDbName)
+    fs.copyFileSync(sourceSqlitePath, dbPath)
+    
+    // Update meta
+    this.meta.active_db_file = newDbName
+    
+    // Reopen connection
+    this.db = new Database(dbPath)
+    this.db.pragma('journal_mode = WAL')
+    this.db.pragma('foreign_keys = ON')
+    
+    // Ensure schema integrity on the imported database
+    ensureSchemaIntegrity(this.db)
+    
+    // Save to the .dtal file
+    this.saveWorkspace()
+  }
+
   public getDb(): Database.Database {
     if (!this.db) throw new Error('Veritabanı bağlı değil.')
     return this.db
+  }
+
+  public getDbPath(): string {
+    if (!this.tempDir) throw new Error('Geçici dizin yok.')
+    const dbFileName = this.meta?.active_db_file || 'database.sqlite'
+    return path.join(this.tempDir, dbFileName)
   }
 
   public getMeta(): WorkspaceMeta | null {
@@ -802,6 +841,14 @@ export const workspaceManager = {
   getCurrentFilePath: () => {
     if (!activeWorkspace) return null
     return activeWorkspace.getCurrentFilePath()
+  },
+  getDbPath: () => {
+    if (!activeWorkspace) throw new Error('Açık bir çalışma dosyası yok.')
+    return activeWorkspace.getDbPath()
+  },
+  replaceDatabase: (sourceSqlitePath: string) => {
+    if (!activeWorkspace) throw new Error('Açık bir çalışma dosyası yok.')
+    activeWorkspace.replaceDatabase(sourceSqlitePath)
   },
   getDatabaseSchema: () => {
     if (!activeWorkspace) return null

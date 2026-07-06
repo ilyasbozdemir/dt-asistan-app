@@ -2365,6 +2365,122 @@ if (!gotTheLock && !isMultiInstance) {
         console.error('Kalem Excel Template Error:', error)
         return { success: false, error: error.message }
       }
+    ipcMain.handle('db:export-kalem-excel', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'Malzemeleri Excel Olarak İndir',
+          defaultPath: 'Malzemeler_Listesi.xlsx',
+          filters: [{ name: 'Excel Dosyası', extensions: ['xlsx'] }]
+        })
+
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const headers = [
+          'Barkod / ID (Opsiyonel)',
+          'Taşınır Kodu (Opsiyonel)',
+          'OKAS Kodu (Opsiyonel)',
+          'Mal/Hizmet Adı',
+          'Türü',
+          'Ölçü Birimi',
+          'Kategorisi / Grubu',
+          'Özelliği / Açıklaması',
+          'KDV Oranı (%)',
+          'Menşei',
+          'Personel Hizmeti Mi?',
+          'Asgari Ücret Fark Oranı (%)'
+        ]
+
+        const db = workspaceManager.getDb()
+        const items = db.prepare('SELECT * FROM TANIM_Kalem').all() as any[]
+        
+        const dataRows = items.map(item => [
+          item.barkod_id,
+          item.tasinir_kodu,
+          item.okas_kodu,
+          item.kalem_adi,
+          item.tipi,
+          item.birim,
+          item.kategori,
+          item.ozelligi,
+          item.kdv_orani,
+          item.mensei,
+          item.is_personel ? 'Evet' : 'Hayır',
+          item.personel_asgari_fark_oran
+        ])
+
+        const ws = xlsx.utils.aoa_to_sheet([headers, ...dataRows])
+        ws['!cols'] = [
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 40 },
+          { wch: 15 },
+          { wch: 10 },
+          { wch: 15 },
+          { wch: 30 },
+          { wch: 15 },
+          { wch: 10 },
+          { wch: 20 },
+          { wch: 25 }
+        ]
+        const wb = xlsx.utils.book_new()
+        xlsx.utils.book_append_sheet(wb, ws, 'Malzemeler')
+
+        xlsx.writeFile(wb, filePath)
+
+        return { success: true }
+      } catch (error: any) {
+        console.error('Kalem Excel Export Error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('db:export-sqlite', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'Veritabanını Dışa Aktar',
+          defaultPath: 'database.sqlite',
+          filters: [{ name: 'SQLite Veritabanı', extensions: ['sqlite', 'db'] }]
+        })
+
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const dbPath = workspaceManager.getDbPath()
+        
+        // checkpoint wal before copy
+        const db = workspaceManager.getDb()
+        db.pragma('wal_checkpoint(TRUNCATE)')
+        
+        const fs = require('fs')
+        fs.copyFileSync(dbPath, filePath)
+
+        return { success: true }
+      } catch (error: any) {
+        console.error('SQLite Export Error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
+    ipcMain.handle('db:import-sqlite', async () => {
+      try {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+          title: 'Veritabanını İçe Aktar',
+          filters: [{ name: 'SQLite Veritabanı', extensions: ['sqlite', 'db'] }],
+          properties: ['openFile']
+        })
+
+        if (canceled || !filePaths || filePaths.length === 0)
+          return { success: false, error: 'İptal edildi' }
+
+        workspaceManager.replaceDatabase(filePaths[0])
+        broadcastDbChange()
+
+        return { success: true }
+      } catch (error: any) {
+        console.error('SQLite Import Error:', error)
+        return { success: false, error: error.message }
+      }
     })
 
     ipcMain.handle('db:import-kalem-excel', async () => {
