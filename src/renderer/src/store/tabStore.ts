@@ -72,6 +72,7 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/changelog')) return 'Sürüm Notları'
   if (path.startsWith('/yardim')) return 'Yardım & Kılavuzlar'
   if (path.startsWith('/import')) return 'Toplu Veri İçe Aktarma'
+  if (path.startsWith('/hizli-dosya-ekle')) return 'Hızlı Dosya Ekle'
   if (path.startsWith('/cikti-merkezi')) return 'Çıktı & Üretim Merkezi'
   return 'Yeni Sekme'
 }

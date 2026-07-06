@@ -6,6 +6,7 @@ import PersonelScreen from '../../screens/personel/index.screen'
 import { MevzuatScreen } from '../../screens/system/MevzuatScreen'
 import ChangelogScreen from '../../screens/system/ChangelogScreen'
 import ImportScreen from '../../screens/system/ImportScreen'
+import HizliDosyaEkleScreen from '../../screens/system/HizliDosyaEkle.screen'
 import YardimScreen from '../../screens/system/YardimScreen'
 import AyarlarScreen from '../../screens/ayarlar/index.screen'
 import TemaScreen from '../../screens/ayarlar/TemaScreen'
@@ -58,6 +59,7 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/mevzuat': MevzuatScreen,
   '/changelog': ChangelogScreen,
   '/import': ImportScreen,
+  '/hizli-dosya-ekle': HizliDosyaEkleScreen,
   '/ayarlar': AyarlarScreen,
   '/tema': TemaScreen,
   '/birimler': BirimlerScreen,

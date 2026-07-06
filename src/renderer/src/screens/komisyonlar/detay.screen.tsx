@@ -1,69 +1,115 @@
-import React, { useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Users } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
-import { useQueryClient, useQuery } from '@tanstack/react-query'
-import { PersonelAtaModal } from './components/PersonelAtaModal'
-import { useTabStore } from '../../store/tabStore'
+import React, { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft, Users, Plus, UserPlus, CheckCircle } from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PersonelAtaModal } from "./components/PersonelAtaModal";
+import { useTabStore } from "../../store/tabStore";
 
 export default function KomisyonDetayScreen(): React.JSX.Element {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   // Tab sisteminde aktif path "/komisyonlar/detay?id=5" şeklinde geliyor
   // window.location.hash yerine tabStore'dan okuyoruz
-  const { activeTabPath } = useTabStore()
-  const tabParams = new URLSearchParams(activeTabPath.split('?')[1] || '')
-  const komisyonIdStr = tabParams.get('id')
-  const komisyonId = komisyonIdStr ? parseInt(komisyonIdStr, 10) : null
+  const { activeTabPath } = useTabStore();
+  const tabParams = new URLSearchParams(activeTabPath.split("?")[1] || "");
+  const komisyonIdStr = tabParams.get("id");
+  const komisyonId = komisyonIdStr ? parseInt(komisyonIdStr, 10) : null;
 
-  const [isAtaModalOpen, setIsAtaModalOpen] = useState(false)
-  const [ataRoleId, setAtaRoleId] = useState<number | null>(null)
+  const [isAtaModalOpen, setIsAtaModalOpen] = useState(false);
+  const [ataRoleId, setAtaRoleId] = useState<number | null>(null);
+
+  const [isAddingUye, setIsAddingUye] = useState(false);
+  const [newGorevId, setNewGorevId] = useState<number | null>(null);
+  const [newAsilMi, setNewAsilMi] = useState(1);
+  const [isSavingUye, setIsSavingUye] = useState(false);
+
+  const { data: gorevler = [] } = useQuery({
+    queryKey: ["komisyon_gorevleri"],
+    queryFn: async () => {
+      const res = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT * FROM TANIM_KomisyonGorevi ORDER BY id ASC",
+      );
+      if (!res.success) throw new Error(res.error);
+      return res.data as { id: number; ad: string; aciklama: string | null }[];
+    },
+  });
+
+  const handleAddUye = async () => {
+    if (!newGorevId || !komisyonId) return;
+    setIsSavingUye(true);
+    try {
+      const res = await window.electron.ipcRenderer.invoke(
+        "db:run",
+        "INSERT INTO TANIM_KomisyonUye (komisyon_id, gorev_id, asil_mi) VALUES (?, ?, ?)",
+        [komisyonId, newGorevId, newAsilMi],
+      );
+      if (res.success) {
+        queryClient.invalidateQueries({
+          queryKey: ["komisyon_detay", komisyonId],
+        });
+        setIsAddingUye(false);
+        setNewGorevId(null);
+        setNewAsilMi(1);
+      } else {
+        alert("Kontenjan eklenirken hata oluştu: " + res.error);
+      }
+    } catch (err: unknown) {
+      alert("Hata: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setIsSavingUye(false);
+    }
+  };
 
   const {
     data: komisyon,
     isLoading,
-    error
+    error,
   } = useQuery({
-    queryKey: ['komisyon_detay', komisyonId],
+    queryKey: ["komisyon_detay", komisyonId],
     queryFn: async () => {
-      if (!komisyonId) throw new Error('Komisyon ID bulunamadı')
+      if (!komisyonId) throw new Error("Komisyon ID bulunamadı");
 
       const res = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT * FROM TANIM_Komisyon WHERE id = ?',
-        [komisyonId]
-      )
-      if (!res.success || res.data.length === 0) throw new Error('Komisyon bulunamadı')
-
-      const komisyonData = res.data[0]
-
-      const membersRes = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        `SELECT u.id as role_id, u.komisyon_id, u.personel_id, u.gorev_adi, u.asil_mi, p.ad_soyad, p.unvan, p.tc_no, p.iban
-         FROM TANIM_KomisyonUye u
-         LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
-         WHERE u.komisyon_id = ?
-         ORDER BY u.id ASC`,
-        [komisyonId]
-      )
-
-      if (membersRes.success) {
-        komisyonData.uyeler = membersRes.data
-      } else {
-        komisyonData.uyeler = []
+        "db:query",
+        "SELECT * FROM TANIM_Komisyon WHERE id = ?",
+        [komisyonId],
+      );
+      if (!res.success || res.data.length === 0) {
+        throw new Error("Komisyon bulunamadı");
       }
 
-      return komisyonData
+      const komisyonData = res.data[0];
+
+      const membersRes = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        `SELECT u.id as role_id, u.komisyon_id, u.personel_id, u.gorev_id, u.asil_mi, p.ad_soyad, p.unvan, p.tc_no, p.iban, g.ad as gorev_adi
+         FROM TANIM_KomisyonUye u
+         LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
+         LEFT JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id
+         WHERE u.komisyon_id = ?
+         ORDER BY u.id ASC`,
+        [komisyonId],
+      );
+
+      if (membersRes.success) {
+        komisyonData.uyeler = membersRes.data;
+      } else {
+        komisyonData.uyeler = [];
+      }
+
+      return komisyonData;
     },
-    enabled: !!komisyonId
-  })
+    enabled: !!komisyonId,
+  });
 
   if (!komisyonId) {
     return (
       <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500">
         Geçersiz komisyon kimliği. Lütfen listeye geri dönün.
       </div>
-    )
+    );
   }
 
   if (isLoading) {
@@ -74,15 +120,15 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
           Yükleniyor...
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !komisyon) {
     return (
       <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500 text-rose-500">
-        Bir hata oluştu: {(error as Error)?.message || 'Komisyon yüklenemedi'}
+        Bir hata oluştu: {(error as Error)?.message || "Komisyon yüklenemedi"}
       </div>
-    )
+    );
   }
 
   return (
@@ -90,13 +136,6 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/komisyonlar"
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 transition-all shadow-sm"
-            title="Komisyonlara Dön"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <Users className="w-7 h-7 text-blue-600" />
@@ -114,10 +153,95 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
             Görevli Personeller
           </h2>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
-            Toplam {komisyon.uyeler?.length || 0} Kontenjan
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+              Toplam {komisyon.uyeler?.length || 0} Kontenjan
+            </span>
+            <Button
+              className="gap-1.5 text-xs px-3 py-1.5 h-auto bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm"
+              onClick={() => setIsAddingUye((v) => !v)}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Kontenjan Ekle
+            </Button>
+          </div>
         </div>
+
+        {/* Inline ekleme formu */}
+        {isAddingUye && (
+          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex flex-col sm:flex-row gap-3 items-end">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Görev / Rol
+              </label>
+              <select
+                title="Görev seçin"
+                value={newGorevId ?? ""}
+                onChange={(e) =>
+                  setNewGorevId(e.target.value ? Number(e.target.value) : null)
+                }
+                className="w-full h-9 px-3 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">-- Görev Seçin --</option>
+                {gorevler.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.ad}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                Tür
+              </label>
+              <div className="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setNewAsilMi(1)}
+                  className={`px-4 py-2 text-xs font-semibold transition-colors ${
+                    newAsilMi === 1
+                      ? "bg-green-600 text-white"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                  }`}
+                >
+                  Asil
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewAsilMi(0)}
+                  className={`px-4 py-2 text-xs font-semibold transition-colors ${
+                    newAsilMi === 0
+                      ? "bg-orange-500 text-white"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50"
+                  }`}
+                >
+                  Yedek
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="text-xs h-9 px-3 rounded-lg"
+                onClick={() => {
+                  setIsAddingUye(false);
+                  setNewGorevId(null);
+                  setNewAsilMi(1);
+                }}
+              >
+                İptal
+              </Button>
+              <Button
+                disabled={!newGorevId || isSavingUye}
+                className="text-xs h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                onClick={handleAddUye}
+              >
+                <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                {isSavingUye ? "Ekleniyor..." : "Ekle"}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {komisyon.uyeler && komisyon.uyeler.length > 0 ? (
@@ -132,7 +256,9 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                       {uye.personel_id ? (
                         uye.ad_soyad
                       ) : (
-                        <span className="text-slate-400 italic">Boş Kontenjan</span>
+                        <span className="text-slate-400 italic">
+                          Boş Kontenjan
+                        </span>
                       )}
                     </span>
                     {uye.asil_mi === 1 ? (
@@ -152,10 +278,14 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                         <span className="bg-slate-200/50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300">
                           {uye.unvan}
                         </span>
-                        <span className="text-slate-300 dark:text-slate-600">•</span>
+                        <span className="text-slate-300 dark:text-slate-600">
+                          •
+                        </span>
                       </>
                     )}
-                    <span className="text-blue-600 dark:text-blue-400">{uye.gorev_adi}</span>
+                    <span className="text-blue-600 dark:text-blue-400">
+                      {uye.gorev_adi}
+                    </span>
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/50">
@@ -164,8 +294,8 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                         variant="outline"
                         className="w-full text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                         onClick={() => {
-                          setAtaRoleId(uye.role_id)
-                          setIsAtaModalOpen(true)
+                          setAtaRoleId(uye.role_id);
+                          setIsAtaModalOpen(true);
                         }}
                       >
                         Personel Ata
@@ -176,8 +306,8 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                           variant="outline"
                           className="flex-1 text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-white dark:bg-slate-900"
                           onClick={() => {
-                            setAtaRoleId(uye.role_id)
-                            setIsAtaModalOpen(true)
+                            setAtaRoleId(uye.role_id);
+                            setIsAtaModalOpen(true);
                           }}
                         >
                           Değiştir
@@ -186,16 +316,20 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                           variant="outline"
                           className="flex-1 text-xs py-2 h-auto rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 bg-white dark:bg-slate-900"
                           onClick={async () => {
-                            if (confirm('Personeli bu görevden almak istediğinize emin misiniz?')) {
-                              const res = await window.electron.ipcRenderer.invoke(
-                                'db:run',
-                                'UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?',
-                                [uye.role_id]
+                            if (
+                              confirm(
+                                "Personeli bu görevden almak istediğinize emin misiniz?",
                               )
+                            ) {
+                              const res = await window.electron.ipcRenderer.invoke(
+                                "db:run",
+                                "UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?",
+                                [uye.role_id],
+                              );
                               if (res.success) {
                                 queryClient.invalidateQueries({
-                                  queryKey: ['komisyon_detay', komisyonId]
-                                })
+                                  queryKey: ["komisyon_detay", komisyonId],
+                                });
                               }
                             }
                           }}
@@ -210,10 +344,17 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
             </div>
           ) : (
             <div className="py-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-              <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+              <UserPlus className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-4">
                 Bu komisyona henüz üye kontenjanı tanımlanmamış.
               </p>
+              <Button
+                className="gap-2 text-xs px-4 py-2 h-auto bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm"
+                onClick={() => setIsAddingUye(true)}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                İlk Kontenjanı Oluştur
+              </Button>
             </div>
           )}
         </div>
@@ -222,13 +363,15 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
       <PersonelAtaModal
         isOpen={isAtaModalOpen}
         onClose={() => {
-          setIsAtaModalOpen(false)
-          setAtaRoleId(null)
-          queryClient.invalidateQueries({ queryKey: ['komisyon_detay', komisyonId] })
+          setIsAtaModalOpen(false);
+          setAtaRoleId(null);
+          queryClient.invalidateQueries({
+            queryKey: ["komisyon_detay", komisyonId],
+          });
         }}
         roleId={ataRoleId}
         komisyonId={komisyonId}
       />
     </div>
-  )
+  );
 }
