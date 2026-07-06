@@ -6,21 +6,21 @@ import {
   Edit2,
   FileText,
   FolderTree,
+  LayoutGrid,
+  List as ListIcon,
   ListFilter,
   PackageSearch,
   Plus,
   Search,
+  Table as TableIcon,
   Tag,
   Trash2,
   Upload,
-  LayoutGrid,
-  List as ListIcon,
-  Table as TableIcon,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useMalzemelerHooks } from "./malzemeler.hooks";
 import { cn } from "../../utils/cn";
-import { ViewToggle, DataViewMode } from "../../components/ui/ViewToggle";
+import { DataViewMode, ViewToggle } from "../../components/ui/ViewToggle";
 
 export default function MalzemelerScreen(): React.JSX.Element {
   const navigate = useNavigate();
@@ -31,9 +31,35 @@ export default function MalzemelerScreen(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState("Tümü"); // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
   const [viewMode, setViewMode] = useState<DataViewMode>("grid");
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (
+    id: number,
+    barkod_id: string,
+    kalem_adi: string,
+  ) => {
+    // Önce bu malzemenin herhangi bir doğrudan temin dosyasında kullanılıp kullanılmadığını kontrol et
+    try {
+      const checkRes = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        `SELECT COUNT(*) as sayi FROM DATA_TeminKalem WHERE barkod_id = ?`,
+        [barkod_id],
+      );
+      if (checkRes.success && checkRes.data?.[0]?.sayi > 0) {
+        const kullanimSayisi = checkRes.data[0].sayi;
+        alert(
+          `"${kalem_adi}" kalemi silinemez!\n\n` +
+            `Bu malzeme/hizmet, ${kullanimSayisi} doğrudan temin dosyasında (kalem olarak) kullanılmaktadır.\n\n` +
+            `Silmek istiyorsanız önce ilgili temin dosyalarından bu kalemi kaldırmanız gerekmektedir.`,
+        );
+        return;
+      }
+    } catch {
+      // Kontrol başarısız olursa yine de silmeye izin vermiyoruz
+      alert("Kullanım kontrolü yapılamadı. Lütfen tekrar deneyin.");
+      return;
+    }
+
     if (
-      confirm("Bu malzeme/hizmet kaydını silmek istediğinize emin misiniz?")
+      confirm(`"${kalem_adi}" kaydını silmek istediğinize emin misiniz?`)
     ) {
       try {
         await deleteKalem(id);
@@ -279,8 +305,12 @@ export default function MalzemelerScreen(): React.JSX.Element {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-            <ViewToggle viewMode={viewMode} onChange={setViewMode} className="w-full sm:w-auto justify-center sm:justify-start" />
-            
+            <ViewToggle
+              viewMode={viewMode}
+              onChange={setViewMode}
+              className="w-full sm:w-auto justify-center sm:justify-start"
+            />
+
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -296,216 +326,239 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
         {/* LIST / GRID / TABLE */}
         <div className="flex-1 overflow-auto p-4">
-          {filteredList.length === 0 ? (
-            <div className="p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-              <ListFilter className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-700" />
-              <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
-                Kayıt Bulunamadı
-              </h3>
-              <p className="text-xs mt-1 text-slate-500">
-                Arama veya filtreleme kriterlerine uygun kayıt bulunmuyor.
-              </p>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredList.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
-                >
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate({
-                          to: APP_ROUTES.YENI_MALZEME,
-                          search: { id: item.id } as any,
-                        })}
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      title="Sil"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+          {filteredList.length === 0
+            ? (
+              <div className="p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                <ListFilter className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-700" />
+                <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
+                  Kayıt Bulunamadı
+                </h3>
+                <p className="text-xs mt-1 text-slate-500">
+                  Arama veya filtreleme kriterlerine uygun kayıt bulunmuyor.
+                </p>
+              </div>
+            )
+            : viewMode === "grid"
+            ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredList.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
+                  >
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            to: APP_ROUTES.YENI_MALZEME,
+                            search: { id: item.id } as any,
+                          })}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        title="Sil"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
 
-                  <div className="flex flex-col gap-1 mb-2 pr-12">
-                    <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      ID: {item.barkod_id}
-                    </span>
-                    {item.tasinir_kodu && (
-                      <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
-                        T: {item.tasinir_kodu}
-                      </span>
-                    )}
-                    {item.okas_kodu && (
-                      <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
-                        OKAS: {item.okas_kodu}
-                      </span>
-                    )}
-                  </div>
-
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 leading-snug line-clamp-3">
-                    {item.kalem_adi}
-                  </h4>
-
-                  <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                    <span className="font-semibold text-slate-600 dark:text-slate-300">
-                      {item.tipi}
-                    </span>
-                    <span className="font-semibold text-slate-600 dark:text-slate-300">
-                      Birim: {item.birim}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : viewMode === "list" ? (
-            <div className="flex flex-col gap-3">
-              {filteredList.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
-                >
-                  <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
-                    <div className="flex flex-col gap-1 min-w-[120px]">
+                    <div className="flex flex-col gap-1 mb-2 pr-12">
                       <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                         ID: {item.barkod_id}
                       </span>
-                      <div className="flex gap-1 flex-wrap">
-                        {item.tasinir_kodu && (
-                          <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
-                            T: {item.tasinir_kodu}
-                          </span>
-                        )}
-                        {item.okas_kodu && (
-                          <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
-                            OKAS: {item.okas_kodu}
-                          </span>
-                        )}
-                      </div>
+                      {item.tasinir_kodu && (
+                        <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
+                          T: {item.tasinir_kodu}
+                        </span>
+                      )}
+                      {item.okas_kodu && (
+                        <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
+                          OKAS: {item.okas_kodu}
+                        </span>
+                      )}
                     </div>
 
-                    <h4 className="flex-1 text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 leading-snug line-clamp-3">
                       {item.kalem_adi}
                     </h4>
 
-                    <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 min-w-[150px] justify-end">
+                    <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                       <span className="font-semibold text-slate-600 dark:text-slate-300">
                         {item.tipi}
                       </span>
-                      <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-2 py-1 rounded">
+                      <span className="font-semibold text-slate-600 dark:text-slate-300">
                         Birim: {item.birim}
                       </span>
                     </div>
                   </div>
+                ))}
+              </div>
+            )
+            : viewMode === "list"
+            ? (
+              <div className="flex flex-col gap-3">
+                {filteredList.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
+                  >
+                    <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
+                      <div className="flex flex-col gap-1 min-w-[120px]">
+                        <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                          ID: {item.barkod_id}
+                        </span>
+                        <div className="flex gap-1 flex-wrap">
+                          {item.tasinir_kodu && (
+                            <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
+                              T: {item.tasinir_kodu}
+                            </span>
+                          )}
+                          {item.okas_kodu && (
+                            <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
+                              OKAS: {item.okas_kodu}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                  <div className="absolute right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-slate-950/90 p-1 rounded-lg backdrop-blur-sm">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate({
-                          to: APP_ROUTES.YENI_MALZEME,
-                          search: { id: item.id } as any,
-                        })}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-blue-500"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      title="Sil"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="px-4 py-3 whitespace-nowrap">ID / Barkod</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Taşınır / OKAS</th>
-                    <th className="px-4 py-3">Kalem Adı</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Birim</th>
-                    <th className="px-4 py-3 text-right">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                  {filteredList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group">
-                      <td className="px-4 py-3 text-xs font-mono font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.barkod_id}
-                      </td>
-                      <td className="px-4 py-3 text-[10px] whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
-                          {item.tasinir_kodu ? (
-                            <span className="font-mono text-emerald-700 dark:text-emerald-400">T: {item.tasinir_kodu}</span>
-                          ) : <span className="text-slate-400">-</span>}
-                          {item.okas_kodu ? (
-                            <span className="font-mono text-indigo-700 dark:text-indigo-400">O: {item.okas_kodu}</span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[300px] truncate" title={item.kalem_adi}>
+                      <h4 className="flex-1 text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
                         {item.kalem_adi}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.tipi}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.birim}
-                      </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              navigate({
-                                to: APP_ROUTES.YENI_MALZEME,
-                                search: { id: item.id } as any,
-                              })}
-                            className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            title="Sil"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(item.id)}
-                            className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </td>
+                      </h4>
+
+                      <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 min-w-[150px] justify-end">
+                        <span className="font-semibold text-slate-600 dark:text-slate-300">
+                          {item.tipi}
+                        </span>
+                        <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-2 py-1 rounded">
+                          Birim: {item.birim}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="absolute right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-slate-950/90 p-1 rounded-lg backdrop-blur-sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            to: APP_ROUTES.YENI_MALZEME,
+                            search: { id: item.id } as any,
+                          })}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-blue-500"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        title="Sil"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+            : (
+              <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 whitespace-nowrap">
+                        ID / Barkod
+                      </th>
+                      <th className="px-4 py-3 whitespace-nowrap">
+                        Taşınır / OKAS
+                      </th>
+                      <th className="px-4 py-3">Kalem Adı</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Birim</th>
+                      <th className="px-4 py-3 text-right">İşlemler</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                    {filteredList.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group"
+                      >
+                        <td className="px-4 py-3 text-xs font-mono font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {item.barkod_id}
+                        </td>
+                        <td className="px-4 py-3 text-[10px] whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            {item.tasinir_kodu
+                              ? (
+                                <span className="font-mono text-emerald-700 dark:text-emerald-400">
+                                  T: {item.tasinir_kodu}
+                                </span>
+                              )
+                              : <span className="text-slate-400">-</span>}
+                            {item.okas_kodu
+                              ? (
+                                <span className="font-mono text-indigo-700 dark:text-indigo-400">
+                                  O: {item.okas_kodu}
+                                </span>
+                              )
+                              : null}
+                          </div>
+                        </td>
+                        <td
+                          className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[300px] truncate"
+                          title={item.kalem_adi}
+                        >
+                          {item.kalem_adi}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {item.tipi}
+                        </td>
+                        <td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {item.birim}
+                        </td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                navigate({
+                                  to: APP_ROUTES.YENI_MALZEME,
+                                  search: { id: item.id } as any,
+                                })}
+                              className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              title="Sil"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
+                              className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
         </div>
       </div>
     </div>
   );
 }
-
