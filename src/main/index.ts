@@ -1126,6 +1126,8 @@ if (!gotTheLock && !isMultiInstance) {
             }
           })
           insertKurum(data)
+          workspaceManager.save()
+          broadcastDbChange()
           return { success: true, count: successCount, total: data.length }
         }
 
@@ -1210,6 +1212,8 @@ if (!gotTheLock && !isMultiInstance) {
         })
 
         insertMany(data)
+        workspaceManager.save()
+        broadcastDbChange()
 
         return { success: true, count: successCount, total: data.length, skipReasons: Array.from(skipReasons) }
       } catch (error: any) {
