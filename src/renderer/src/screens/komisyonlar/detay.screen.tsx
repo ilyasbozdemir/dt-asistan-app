@@ -4,11 +4,16 @@ import { ArrowLeft, Users } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { PersonelAtaModal } from './components/PersonelAtaModal'
+import { useTabStore } from '../../store/tabStore'
 
 export default function KomisyonDetayScreen(): React.JSX.Element {
   const queryClient = useQueryClient()
-  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
-  const komisyonIdStr = hashParams.get('id')
+
+  // Tab sisteminde aktif path "/komisyonlar/detay?id=5" şeklinde geliyor
+  // window.location.hash yerine tabStore'dan okuyoruz
+  const { activeTabPath } = useTabStore()
+  const tabParams = new URLSearchParams(activeTabPath.split('?')[1] || '')
+  const komisyonIdStr = tabParams.get('id')
   const komisyonId = komisyonIdStr ? parseInt(komisyonIdStr, 10) : null
 
   const [isAtaModalOpen, setIsAtaModalOpen] = useState(false)
