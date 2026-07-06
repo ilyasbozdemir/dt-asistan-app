@@ -20,6 +20,7 @@ import {
 import { Button } from "../../components/ui/Button";
 import { useMalzemelerHooks } from "./malzemeler.hooks";
 import { cn } from "../../utils/cn";
+import { ViewToggle, DataViewMode } from "../../components/ui/ViewToggle";
 
 export default function MalzemelerScreen(): React.JSX.Element {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("Tümü"); // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
+  const [viewMode, setViewMode] = useState<DataViewMode>("grid");
 
   const handleDelete = async (id: number) => {
     if (
@@ -278,45 +279,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-            {/* View Mode Toggles */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg w-full sm:w-auto justify-center sm:justify-start">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "p-1.5 rounded-md transition-all",
-                  viewMode === "grid"
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                )}
-                title="Grid Görünümü"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn(
-                  "p-1.5 rounded-md transition-all",
-                  viewMode === "list"
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                )}
-                title="Liste Görünümü"
-              >
-                <ListIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("table")}
-                className={cn(
-                  "p-1.5 rounded-md transition-all",
-                  viewMode === "table"
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                )}
-                title="Tablo Görünümü"
-              >
-                <TableIcon className="w-4 h-4" />
-              </button>
-            </div>
+            <ViewToggle viewMode={viewMode} onChange={setViewMode} className="w-full sm:w-auto justify-center sm:justify-start" />
             
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

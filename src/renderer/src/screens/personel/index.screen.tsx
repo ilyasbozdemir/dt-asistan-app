@@ -16,7 +16,9 @@ import {
   X
 } from 'lucide-react'
 
-type ViewMode = 'list' | 'view' | 'form'
+import { ViewToggle, DataViewMode } from '../../components/ui/ViewToggle'
+
+type ScreenState = 'list' | 'view' | 'form'
 
 export default function PersonelScreen(): React.ReactNode {
   const {
@@ -29,7 +31,8 @@ export default function PersonelScreen(): React.ReactNode {
   } = usePersonelHooks()
   const { birimler } = useBirimlerHooks()
 
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [screenState, setScreenState] = useState<ScreenState>('list')
+  const [dataViewMode, setDataViewMode] = useState<DataViewMode>('grid')
   const [editingPersonel, setEditingPersonel] = useState<Personel | null>(null)
   const [viewingPersonel, setViewingPersonel] = useState<Personel | null>(null)
 
@@ -65,22 +68,22 @@ export default function PersonelScreen(): React.ReactNode {
         assignedRoles: []
       })
     }
-    setViewMode('form')
+    setScreenState('form')
   }
 
   const closeForm = (): void => {
-    setViewMode('list')
+    setScreenState('list')
     setEditingPersonel(null)
   }
 
   const handleViewClick = (personel: Personel) => {
     setViewingPersonel(personel)
-    setViewMode('view')
+    setScreenState('view')
   }
 
   const closeView = () => {
     setViewingPersonel(null)
-    setViewMode('list')
+    setScreenState('list')
   }
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -121,7 +124,7 @@ export default function PersonelScreen(): React.ReactNode {
     })
   }
 
-  if (viewMode === 'view' && viewingPersonel) {
+  if (screenState === 'view' && viewingPersonel) {
     const rolesOfViewingPerson = rollerList.filter(
       (r) => r.varsayilan_personel_id === viewingPersonel.id
     )
@@ -221,7 +224,7 @@ export default function PersonelScreen(): React.ReactNode {
     )
   }
 
-  if (viewMode === 'form') {
+  if (screenState === 'form') {
     return (
       <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
         <div className="flex items-center justify-between">
@@ -407,22 +410,25 @@ export default function PersonelScreen(): React.ReactNode {
             Kurum personelini buradan ekleyebilir ve yetkilerini belirleyebilirsiniz.
           </p>
         </div>
-        <Button
-          onClick={(e) => openForm(e)}
-          className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm shrink-0"
-        >
-          <Plus className="w-4 h-4" /> Yeni Personel Ekle
-        </Button>
+        <div className="flex items-center gap-3">
+          <ViewToggle viewMode={dataViewMode} onChange={setDataViewMode} />
+          <Button
+            onClick={(e) => openForm(e)}
+            className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-4 py-2 text-sm shrink-0"
+          >
+            <Plus className="w-4 h-4" /> Yeni Personel Ekle
+          </Button>
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[400px]">
+        <div className="flex-1 overflow-auto p-4">
           {isPersonelLoading ? (
-            <div className="col-span-full p-8 text-center text-slate-450 dark:text-slate-500 animate-pulse italic">
+            <div className="p-8 text-center text-slate-450 dark:text-slate-500 animate-pulse italic">
               Yükleniyor...
             </div>
           ) : personelList.length === 0 ? (
-            <div className="col-span-full p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl">
+            <div className="p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl">
               <Users className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-700" />
               <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
                 Henüz Personel Eklenmemiş
@@ -431,78 +437,200 @@ export default function PersonelScreen(): React.ReactNode {
                 Süreçlerde görev alacak personeli hemen eklemeye başlayın.
               </p>
             </div>
+          ) : dataViewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {personelList.map((p) => {
+                const assignedRoles = rollerList.filter((r) => r.varsayilan_personel_id === p.id)
+
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => handleViewClick(p)}
+                    className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
+                  >
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        title="Düzenle"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => openForm(e, p)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        title="Sil"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDelete(e, p.id)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center gap-3 mb-3 pr-12">
+                      <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
+                        {p.ad_soyad.slice(0, 2)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
+                          {p.ad_soyad}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                          {p.unvan || 'Unvan Belirtilmedi'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-slate-400 mb-4 flex-1">
+                      {p.birim && <div className="truncate">🏢 {p.birim}</div>}
+                      {p.sicil_no && <div className="truncate">📋 Sicil No: {p.sicil_no}</div>}
+                      {p.telefon && <div>📞 {p.telefon}</div>}
+                      {p.eposta && <div className="truncate">✉️ {p.eposta}</div>}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
+                      {assignedRoles.length > 0 ? (
+                        assignedRoles.map((role) => (
+                          <span
+                            key={role.rol_kodu}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50"
+                          >
+                            <Shield className="w-3 h-3" /> {role.rol_adi}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-slate-400 italic">Özel yetki yok</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : dataViewMode === 'list' ? (
+            <div className="flex flex-col gap-3">
+              {personelList.map((p) => {
+                const assignedRoles = rollerList.filter((r) => r.varsayilan_personel_id === p.id)
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => handleViewClick(p)}
+                    className="flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
+                  >
+                    <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
+                      <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
+                        {p.ad_soyad.slice(0, 2)}
+                      </div>
+                      
+                      <div className="flex-1 min-w-[200px]">
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
+                          {p.ad_soyad}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                          {p.unvan || 'Unvan Belirtilmedi'}
+                        </p>
+                      </div>
+
+                      <div className="flex-1 min-w-[150px] text-[11px] text-slate-500 dark:text-slate-400">
+                        {p.birim && <div className="truncate">🏢 {p.birim}</div>}
+                        {p.telefon && <div>📞 {p.telefon}</div>}
+                      </div>
+
+                      <div className="flex flex-wrap gap-1 min-w-[150px] justify-end">
+                        {assignedRoles.length > 0 ? (
+                          assignedRoles.map((role) => (
+                            <span
+                              key={role.rol_kodu}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50"
+                            >
+                              <Shield className="w-3 h-3" /> {role.rol_adi}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-slate-400 italic">Yetki yok</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="absolute right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-slate-950/90 p-1 rounded-lg backdrop-blur-sm">
+                      <Button
+                        title="Düzenle"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => openForm(e, p)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        title="Sil"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDelete(e, p.id)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           ) : (
-            personelList.map((p) => {
-              const assignedRoles = rollerList.filter((r) => r.varsayilan_personel_id === p.id)
-
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => handleViewClick(p)}
-                  className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
-                >
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      title="Düzenle"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => openForm(e, p)}
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+                <thead className="bg-slate-50 dark:bg-slate-900/50 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="px-4 py-3">Ad Soyad</th>
+                    <th className="px-4 py-3">Unvan</th>
+                    <th className="px-4 py-3">Birim</th>
+                    <th className="px-4 py-3">Telefon</th>
+                    <th className="px-4 py-3 text-right">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {personelList.map((p) => (
+                    <tr
+                      key={p.id}
+                      onClick={() => handleViewClick(p)}
+                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group cursor-pointer"
                     >
-                      <Edit className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      title="Sil"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleDelete(e, p.id)}
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center gap-3 mb-3 pr-12">
-                    <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
-                      {p.ad_soyad.slice(0, 2)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
+                      <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
                         {p.ad_soyad}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                        {p.unvan || 'Unvan Belirtilmedi'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 text-[11px] text-slate-500 dark:text-slate-400 mb-4 flex-1">
-                    {p.birim && <div className="truncate">🏢 {p.birim}</div>}
-                    {p.sicil_no && <div className="truncate">📋 Sicil No: {p.sicil_no}</div>}
-                    {p.telefon && <div>📞 {p.telefon}</div>}
-                    {p.eposta && <div className="truncate">✉️ {p.eposta}</div>}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3">
-                    {assignedRoles.length > 0 ? (
-                      assignedRoles.map((role) => (
-                        <span
-                          key={role.rol_kodu}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50"
-                        >
-                          <Shield className="w-3 h-3" /> {role.rol_adi}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-[10px] text-slate-400 italic">Özel yetki yok</span>
-                    )}
-                  </div>
-                </div>
-              )
-            })
+                      </td>
+                      <td className="px-4 py-3">{p.unvan || '-'}</td>
+                      <td className="px-4 py-3">{p.birim || '-'}</td>
+                      <td className="px-4 py-3">{p.telefon || '-'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => openForm(e, p)}
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleDelete(e, p.id)}
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
     </div>
   )
 }
+

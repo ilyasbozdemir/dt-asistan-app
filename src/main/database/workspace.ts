@@ -689,7 +689,12 @@ export class DtmWorkspace {
       throw new Error('Hiçbir veri dosyası açık değil.')
     }
 
-    this.db.pragma('wal_checkpoint(TRUNCATE)')
+    try {
+      const checkpointInfo = this.db.pragma('wal_checkpoint(TRUNCATE)')
+      console.log('WAL Checkpoint result:', checkpointInfo)
+    } catch (err) {
+      console.error('WAL Checkpoint failed:', err)
+    }
 
     const metaPath = path.join(this.tempDir, 'meta.json')
     if (fs.existsSync(metaPath)) {
@@ -725,9 +730,16 @@ export class DtmWorkspace {
       this.meta = meta
     }
 
-    const zip = new AdmZip()
-    zip.addLocalFolder(this.tempDir)
-    zip.writeZip(this.currentFilePath)
+    try {
+      console.log(`Starting to zip temp folder: ${this.tempDir} into ${this.currentFilePath}`)
+      const zip = new AdmZip()
+      zip.addLocalFolder(this.tempDir)
+      zip.writeZip(this.currentFilePath)
+      console.log('Workspace saved successfully to zip.')
+    } catch (zipErr) {
+      console.error('Error while writing zip file:', zipErr)
+      throw new Error('Dosya kaydedilirken hata oluştu: ' + (zipErr as Error).message)
+    }
   }
 
   public closeWorkspace(): void {

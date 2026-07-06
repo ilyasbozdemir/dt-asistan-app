@@ -19,6 +19,8 @@ import {
   ArrowLeft
 } from 'lucide-react'
 
+import { ViewToggle, DataViewMode } from '../../components/ui/ViewToggle'
+
 const emptyFirma: FirmaInput = {
   firma_kodu: '',
   unvan: '',
@@ -78,6 +80,7 @@ export default function FirmalarScreen(): React.JSX.Element {
   const [showExtraFields, setShowExtraFields] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [dataViewMode, setDataViewMode] = useState<DataViewMode>('grid')
 
   const [viewingFirma, setViewingFirma] = useState<any | null>(null)
 
@@ -376,23 +379,26 @@ export default function FirmalarScreen(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col flex-1 overflow-hidden min-h-[400px]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h3 className="text-sm font-bold text-slate-850 dark:text-slate-200">Kayıtlı Firmalar</h3>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Firma ünvanı, vergi no, kod veya şehir ara..."
-              className="pl-9 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-2 h-9 rounded-full"
-            />
+          <div className="flex items-center gap-3">
+            <ViewToggle viewMode={dataViewMode} onChange={setDataViewMode} />
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Firma ünvanı, vergi no, kod veya şehir ara..."
+                className="pl-9 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs py-2 h-9 rounded-full"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="flex-1 overflow-auto">
           {isLoadingFirmalar ? (
-            <div className="col-span-full p-8 text-center text-slate-450 dark:text-slate-500 animate-pulse italic">
+            <div className="text-center text-slate-450 dark:text-slate-500 animate-pulse italic py-8">
               Firmalar yükleniyor...
             </div>
           ) : filtered.length === 0 ? (
@@ -407,70 +413,174 @@ export default function FirmalarScreen(): React.JSX.Element {
                   : 'Henüz sisteme eklenmiş bir firma bulunmuyor.'}
               </p>
             </div>
+          ) : dataViewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filtered.map((firma) => (
+                <div
+                  key={firma.id}
+                  onClick={() => handleViewClick(firma)}
+                  className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
+                >
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      title="Düzenle"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => openEditModal(e, firma)}
+                      className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      title="Sil"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDelete(e, firma.id)}
+                      className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-2 pr-8">
+                    {firma.firma_kodu && (
+                      <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-100/20 dark:border-blue-900/10 px-1.5 py-0.5 rounded">
+                        {firma.firma_kodu}
+                      </span>
+                    )}
+                    {firma.il && (
+                      <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        {firma.il}
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 line-clamp-2 mb-2 leading-tight flex-1">
+                    {firma.unvan}
+                  </h4>
+
+                  <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+                    {firma.vergi_no && <div className="truncate">🏢 {firma.vergi_no}</div>}
+                    {firma.telefon && <div>📞 {firma.telefon}</div>}
+                    {firma.ilgili_adi && <div className="truncate">👤 {firma.ilgili_adi}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : dataViewMode === 'list' ? (
+            <div className="flex flex-col gap-3">
+              {filtered.map((firma) => (
+                <div
+                  key={firma.id}
+                  onClick={() => handleViewClick(firma)}
+                  className="flex flex-col sm:flex-row p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer gap-4 sm:items-center"
+                >
+                  <div className="w-10 h-10 shrink-0 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-800/50 text-blue-600 dark:text-blue-400">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  
+                  <div className="flex-1 min-w-[200px]">
+                    <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 mb-1 line-clamp-1">
+                      {firma.unvan}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {firma.firma_kodu && (
+                        <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-100/20 dark:border-blue-900/10 px-1.5 py-0.5 rounded">
+                          {firma.firma_kodu}
+                        </span>
+                      )}
+                      {firma.il && (
+                        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                          {firma.il}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-[150px] text-xs text-slate-600 dark:text-slate-400">
+                    {firma.vergi_no && <div className="truncate">🏢 VN: {firma.vergi_no}</div>}
+                    {firma.telefon && <div>📞 {firma.telefon}</div>}
+                  </div>
+                  
+                  <div className="flex-1 min-w-[150px] text-xs text-slate-600 dark:text-slate-400 hidden lg:block">
+                    {firma.ilgili_adi && <div className="truncate">👤 {firma.ilgili_adi}</div>}
+                  </div>
+                  
+                  <div className="flex items-center gap-1 pr-2">
+                    <Button
+                      title="Düzenle"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => openEditModal(e, firma)}
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      title="Sil"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDelete(e, firma.id)}
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
-            filtered.map((firma) => (
-              <div
-                key={firma.id}
-                onClick={() => handleViewClick(firma)}
-                className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
-              >
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    title="Düzenle"
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => openEditModal(e, firma)}
-                    className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    title="Sil"
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => handleDelete(e, firma.id)}
-                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-2 mb-2 pr-8">
-                  {firma.firma_kodu && (
-                    <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-100/20 dark:border-blue-900/10 px-1.5 py-0.5 rounded">
-                      {firma.firma_kodu}
-                    </span>
-                  )}
-                  {firma.il && (
-                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                      {firma.il}
-                    </span>
-                  )}
-                </div>
-
-                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-2 leading-snug pr-8 line-clamp-2">
-                  {firma.unvan}
-                </h4>
-
-                <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex flex-col gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  {firma.telefon && (
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span className="text-xs shrink-0">📞</span> {firma.telefon}
-                    </span>
-                  )}
-                  {firma.email && (
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span className="text-xs shrink-0">✉️</span> {firma.email}
-                    </span>
-                  )}
-                  {firma.vergi_no && (
-                    <span className="flex items-center gap-1.5 truncate">
-                      <span className="text-xs shrink-0">🏛️</span> VN: {firma.vergi_no}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+                <thead className="bg-slate-50 dark:bg-slate-900/50 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="px-4 py-3">Ünvan</th>
+                    <th className="px-4 py-3">Firma Kodu</th>
+                    <th className="px-4 py-3">Vergi No</th>
+                    <th className="px-4 py-3">Şehir</th>
+                    <th className="px-4 py-3">Telefon</th>
+                    <th className="px-4 py-3 text-right">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filtered.map((firma) => (
+                    <tr
+                      key={firma.id}
+                      onClick={() => handleViewClick(firma)}
+                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group cursor-pointer"
+                    >
+                      <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200 line-clamp-1">
+                        {firma.unvan}
+                      </td>
+                      <td className="px-4 py-3 font-mono">{firma.firma_kodu || '-'}</td>
+                      <td className="px-4 py-3">{firma.vergi_no || '-'}</td>
+                      <td className="px-4 py-3">{firma.il || '-'}</td>
+                      <td className="px-4 py-3">{firma.telefon || '-'}</td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => openEditModal(e, firma)}
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleDelete(e, firma.id)}
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

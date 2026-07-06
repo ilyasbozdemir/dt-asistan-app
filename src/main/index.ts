@@ -2365,6 +2365,8 @@ if (!gotTheLock && !isMultiInstance) {
         console.error('Kalem Excel Template Error:', error)
         return { success: false, error: error.message }
       }
+    })
+
     ipcMain.handle('db:export-kalem-excel', async () => {
       try {
         const { canceled, filePath } = await dialog.showSaveDialog({
