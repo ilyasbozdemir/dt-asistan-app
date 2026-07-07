@@ -4,7 +4,13 @@ import { Link } from "@tanstack/react-router";
 import { YeniDosyaTabProps } from "../../../types";
 
 export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
-  const { formData, setFormData, kodSozlugu, openTextGenerator, getNextTeminNo } = props;
+  const {
+    formData,
+    setFormData,
+    kodSozlugu,
+    openTextGenerator,
+    getNextTeminNo,
+  } = props;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -30,8 +36,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
 
               if (newYear && newYear !== oldYear) {
                 const oldYearStr = oldYear ? oldYear.toString() : "";
-                const isOldPattern =
-                  !formData.temin_no ||
+                const isOldPattern = !formData.temin_no ||
                   formData.temin_no.startsWith(`${oldYearStr}/`) ||
                   formData.temin_no.startsWith(`DT${oldYearStr}/`);
 
@@ -60,8 +65,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               setFormData({
                 ...formData,
                 butce_tipi: e.target.value,
-              })
-            }
+              })}
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
             <option value="Genel Bütçe">Genel Bütçe</option>
@@ -82,8 +86,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               setFormData({
                 ...formData,
                 finansman_kodu: e.target.value,
-              })
-            }
+              })}
             placeholder="Örn: 2, 5 veya 8"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
@@ -101,9 +104,8 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                   "butce_kodu",
                   "Bütçe/Ekonomik Kod Tahmini",
                   "Bütçe Kodu",
-                  "Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et. Sadece kodu yaz. (Örn: 03.2.1.01 veya 46.30.11.23-01.3.9.00-5-03.2.1.01)"
-                )
-              }
+                  "Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et.",
+                )}
               className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border-none"
             >
               <Sparkles size={11} /> AI ile Tahmin Et
@@ -116,9 +118,8 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               setFormData({
                 ...formData,
                 butce_kodu: e.target.value,
-              })
-            }
-            placeholder="Örn: 46.30.11.23-01.3.9.00-5-03.2.1.01"
+              })}
+            placeholder=""
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200 font-mono font-bold"
           />
         </div>
@@ -140,8 +141,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                 setFormData({
                   ...formData,
                   e_butce: e.target.value,
-                })
-              }
+                })}
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
@@ -175,8 +175,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                 setFormData({
                   ...formData,
                   fonksiyonel_kod: e.target.value,
-                })
-              }
+                })}
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
@@ -200,8 +199,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                 setFormData({
                   ...formData,
                   muhasebe_birimi: e.target.value,
-                })
-              }
+                })}
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
@@ -225,8 +223,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                 setFormData({
                   ...formData,
                   harcama_birimi: e.target.value,
-                })
-              }
+                })}
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>

@@ -690,12 +690,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     const targetKonu = normalizeTr(baseKonu);
 
     // Aynı ismin türevlerini kullanan diğer dosyaları (sadece aynı yıl içinde) bul
-    const currentYear = formData.butce_yili || (formData.dosya_acilis_tarihi ? new Date(formData.dosya_acilis_tarihi).getFullYear() : new Date().getFullYear());
+    const currentYear = formData.butce_yili ||
+      (formData.dosya_acilis_tarihi
+        ? new Date(formData.dosya_acilis_tarihi).getFullYear()
+        : new Date().getFullYear());
     const matches = dosyalar.filter((d) => {
       if (isEdit && d.id === editId) return false;
-      const dYear = d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : 0);
+      const dYear = d.butce_yili ||
+        (d.dosya_acilis_tarihi
+          ? new Date(d.dosya_acilis_tarihi).getFullYear()
+          : 0);
       if (dYear !== currentYear) return false;
-      
+
       const dBase = (d.konu || "")
         .trim()
         .replace(/\s*\(\d+\)$/, "")
@@ -802,14 +808,18 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   const exactMatchCount = formData.konu
     ? dosyalar.filter((d) => {
-        const dYear = d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : 0);
-        const currentYear = formData.butce_yili || (formData.dosya_acilis_tarihi ? new Date(formData.dosya_acilis_tarihi).getFullYear() : new Date().getFullYear());
-        return (
-          dYear === currentYear &&
-          normalizeTr(d.konu) === normalizeTr(formData.konu || "") &&
-          (!isEdit || d.id !== editId)
-        );
-      }).length
+      const dYear = d.butce_yili || (d.dosya_acilis_tarihi
+        ? new Date(d.dosya_acilis_tarihi).getFullYear()
+        : 0);
+      const currentYear = formData.butce_yili || (formData.dosya_acilis_tarihi
+        ? new Date(formData.dosya_acilis_tarihi).getFullYear()
+        : new Date().getFullYear());
+      return (
+        dYear === currentYear &&
+        normalizeTr(d.konu) === normalizeTr(formData.konu || "") &&
+        (!isEdit || d.id !== editId)
+      );
+    }).length
     : 0;
 
   return (
@@ -924,7 +934,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   harcama_birimi: "30.11.01",
                   finansman_kodu: "5",
                   ekonomik_kod: "03.2.1.01",
-                  butce_kodu: "46.30.11.23-01.3.9.00-5-03.2.1.01",
+                  butce_kodu: "",
                   ihale_tipi: "Doğrudan Temin",
                   tur: "mal",
                   ihale_sekli: "22/d*",
@@ -939,7 +949,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   yaklasik_maliyet_hesaplamasi: "Piyasa Fiyat Araştırması",
                   kdv: "20",
                   hesaplama_esasi: "",
-                  komisyon_takdiri: "Sadece araştırma fiyatları dikkate alınacak",
+                  komisyon_takdiri:
+                    "Sadece araştırma fiyatları dikkate alınacak",
                   tibbi_cihaz_alimi_mi: 0,
                   irtibat_yetkilisi_id: personeller[0]?.id || null,
                   onay_personel_id: personeller.find((p) =>

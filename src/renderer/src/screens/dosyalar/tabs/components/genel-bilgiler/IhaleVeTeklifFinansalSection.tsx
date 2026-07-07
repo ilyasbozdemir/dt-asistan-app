@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Building2, HelpCircle, Info, Sparkles, Loader2 } from "lucide-react";
+import { Building2, HelpCircle, Info, Loader2, Sparkles } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
 import { YeniDosyaTabProps } from "../../../types";
 
@@ -19,43 +19,75 @@ export function IhaleVeTeklifFinansalSection(
 
   const handleAiCheckType = async () => {
     if (!formData.konu) {
-      alert("Lütfen önce Genel Bilgiler sekmesinden 'İşin Konusu / İhale Adı' alanını doldurun.");
+      alert(
+        "Lütfen önce Genel Bilgiler sekmesinden 'İşin Konusu / İhale Adı' alanını doldurun.",
+      );
       return;
     }
-    
+
     setIsAiChecking(true);
     try {
-      const prompt = `Kullanıcı "${formData.konu}" konusuyla bir Doğrudan Temin dosyası açmak istiyor. Sence bu alım türü hangisi olmalıdır? Seçenekler: "mal", "hizmet", "yapim_isi", "danismanlik". Lütfen sadece bu dört değerden birini döndür. Açıklama veya cümle yazma. C25 beton atımı, tamirat tadilat gibi işler "yapim_isi" olur.`;
-      
-      const res = await (window as any).electron.ipcRenderer.invoke('ai:generate', {
-        prompt,
-        systemInstruction: "Sen kamu ihale mevzuatı uzmanısın. Kullanıcının iş tanımını analiz edip SADECE 'mal', 'hizmet', 'yapim_isi' veya 'danismanlik' kelimesini döndürmelisin."
-      });
+      const prompt =
+        `Kullanıcı "${formData.konu}" konusuyla bir Doğrudan Temin dosyası açmak istiyor. Sence bu alım türü hangisi olmalıdır? Seçenekler: "mal", "hizmet", "yapim_isi", "danismanlik". Lütfen sadece bu dört değerden birini döndür. Açıklama veya cümle yazma. C25 beton atımı, tamirat tadilat gibi işler "yapim_isi" olur.`;
+
+      const res = await (window as any).electron.ipcRenderer.invoke(
+        "ai:generate",
+        {
+          prompt,
+          systemInstruction:
+            "Sen kamu ihale mevzuatı uzmanısın. Kullanıcının iş tanımını analiz edip SADECE 'mal', 'hizmet', 'yapim_isi' veya 'danismanlik' kelimesini döndürmelisin.",
+        },
+      );
 
       if (res.success && res.data) {
         const suggestion = res.data.trim().toLowerCase();
         let matchedType = "";
-        
-        if (suggestion.includes("yapim") || suggestion.includes("yapım")) matchedType = "yapim_isi";
-        else if (suggestion.includes("hizmet")) matchedType = "hizmet";
-        else if (suggestion.includes("danis") || suggestion.includes("danış")) matchedType = "danismanlik";
-        else if (suggestion.includes("mal")) matchedType = "mal";
-        
-        const typeNames: Record<string, string> = { mal: "Mal Alımı", hizmet: "Hizmet Alımı", yapim_isi: "Yapım İşi", danismanlik: "Danışmanlık Alımı" };
-        
+
+        if (suggestion.includes("yapim") || suggestion.includes("yapım")) {
+          matchedType = "yapim_isi";
+        } else if (suggestion.includes("hizmet")) matchedType = "hizmet";
+        else if (suggestion.includes("danis") || suggestion.includes("danış")) {
+          matchedType = "danismanlik";
+        } else if (suggestion.includes("mal")) matchedType = "mal";
+
+        const typeNames: Record<string, string> = {
+          mal: "Mal Alımı",
+          hizmet: "Hizmet Alımı",
+          yapim_isi: "Yapım İşi",
+          danismanlik: "Danışmanlık Alımı",
+        };
+
         if (matchedType && matchedType !== formData.tur) {
-          const currentType = formData.tur || 'mal';
-          const userConfirm = window.confirm(`Yapay Zeka bu işin "${typeNames[matchedType]}" olması gerektiğini düşünüyor. Şu an "${typeNames[currentType]}" seçili.\n\nTürü "${typeNames[matchedType]}" olarak değiştirmek ister misiniz?`);
+          const currentType = formData.tur || "mal";
+          const userConfirm = window.confirm(
+            `Yapay Zeka bu işin "${
+              typeNames[matchedType]
+            }" olması gerektiğini düşünüyor. Şu an "${
+              typeNames[currentType]
+            }" seçili.\n\nTürü "${
+              typeNames[matchedType]
+            }" olarak değiştirmek ister misiniz?`,
+          );
           if (userConfirm) {
             setFormData({ ...formData, tur: matchedType });
           }
         } else if (matchedType === formData.tur) {
-          alert(`Yapay Zeka da sizinle aynı fikirde. Doğru tür seçilmiş: ${typeNames[matchedType]}`);
+          alert(
+            `Yapay Zeka da sizinle aynı fikirde. Doğru tür seçilmiş: ${
+              typeNames[matchedType]
+            }`,
+          );
         } else {
-          alert(`Yapay Zeka öneride bulunamadı veya anlaşılamayan bir sonuç döndü: ${res.data}`);
+          alert(
+            `Yapay Zeka öneride bulunamadı veya anlaşılamayan bir sonuç döndü: ${res.data}`,
+          );
         }
       } else {
-        alert("Yapay Zeka isteği başarısız oldu: " + (res.error || "Bilinmeyen hata (Ayarlardan API anahtarını kontrol edin)"));
+        alert(
+          "Yapay Zeka isteği başarısız oldu: " +
+            (res.error ||
+              "Bilinmeyen hata (Ayarlardan API anahtarını kontrol edin)"),
+        );
       }
     } catch (err: any) {
       alert("Hata oluştu: " + err.message);
@@ -98,7 +130,9 @@ export function IhaleVeTeklifFinansalSection(
               title="Yapay Zeka ile tür önerisi al"
               className="text-[10px] flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 dark:text-purple-400 px-2 py-0.5 rounded-md transition-colors font-medium border border-purple-200 dark:border-purple-800"
             >
-              {isAiChecking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              {isAiChecking
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <Sparkles className="w-3 h-3" />}
               {isAiChecking ? "Kontrol ediliyor..." : "AI Önerisi"}
             </button>
           </div>
@@ -197,47 +231,6 @@ export function IhaleVeTeklifFinansalSection(
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-450">
-              Tahmini Yaklaşık Maliyet (KDV Hariç ₺)
-            </label>
-            {currentLimit && (
-              <span className="text-[10px] text-slate-400">
-                (Limit: ₺ {currentLimit.toLocaleString("tr-TR")})
-              </span>
-            )}
-          </div>
-
-          <input
-            type="number"
-            step="0.01"
-            value={formData.yaklasik_maliyet || 0}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                yaklasik_maliyet: parseFloat(e.target.value) || 0,
-              })}
-            placeholder="₺ 0.00"
-            className={cn(
-              "w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border rounded-xl text-xs focus:outline-none focus:ring-1 font-bold",
-              isLimitExceeded
-                ? "border-red-500 focus:ring-red-500 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20"
-                : "border-slate-200 dark:border-slate-800 focus:ring-blue-500 text-slate-800 dark:text-slate-200",
-            )}
-          />
-          {isLimitExceeded && (
-            <p className="mt-2 text-xs font-semibold text-red-500 flex items-start gap-1">
-              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <span>
-                DİKKAT: Girdiğiniz tutar, seçili bütçe yılındaki 4734 Sayılı
-                Kanun 22/d KİK limitini (₺
-                {currentLimit?.toLocaleString("tr-TR")}) aşmaktadır!
-              </span>
-            </p>
-          )}
-        </div>
-
-        <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             Fiyat Farkı Dayanağı
           </label>
@@ -251,12 +244,16 @@ export function IhaleVeTeklifFinansalSection(
               })}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
-            <option value="Fiyat Farkı Ödenmeyecek">Fiyat Farkı Ödenmeyecek</option>
+            <option value="Fiyat Farkı Ödenmeyecek">
+              Fiyat Farkı Ödenmeyecek
+            </option>
             <option value="31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre">
-              31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre
+              31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu
+              Kararına Göre
             </option>
             <option value="31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre">
-              31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre
+              31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu
+              Kararına Göre
             </option>
           </select>
         </div>
@@ -284,7 +281,8 @@ export function IhaleVeTeklifFinansalSection(
           </label>
           <select
             title="Hesaplama Yöntemi / Dayanağı"
-            value={formData.komisyon_takdiri || "Sadece araştırma fiyatları dikkate alınacak"}
+            value={formData.komisyon_takdiri ||
+              "Sadece araştırma fiyatları dikkate alınacak"}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -295,8 +293,12 @@ export function IhaleVeTeklifFinansalSection(
             <option value="Sadece araştırma fiyatları dikkate alınacak">
               Sadece araştırma fiyatları dikkate alınacak
             </option>
-            <option value="Komisyon takdiri kullanılacak">Komisyon takdiri kullanılacak</option>
-            <option value="Son alım fiyatlarını da kullan">Son alım fiyatlarını da kullan</option>
+            <option value="Komisyon takdiri kullanılacak">
+              Komisyon takdiri kullanılacak
+            </option>
+            <option value="Son alım fiyatlarını da kullan">
+              Son alım fiyatlarını da kullan
+            </option>
           </select>
         </div>
 
@@ -313,8 +315,12 @@ export function IhaleVeTeklifFinansalSection(
               })}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
-            <option value="En Düşük fiyat esasına göre">En Düşük fiyat esasına göre</option>
-            <option value="Ortalama fiyat esasına göre">Ortalama fiyat esasına göre</option>
+            <option value="En Düşük fiyat esasına göre">
+              En Düşük fiyat esasına göre
+            </option>
+            <option value="Ortalama fiyat esasına göre">
+              Ortalama fiyat esasına göre
+            </option>
           </select>
         </div>
       </div>
