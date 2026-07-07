@@ -28,14 +28,33 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
   handlePersonelSelect,
   handlePersonelClear,
 }) => {
+  const originalKurumIci = mergedContext.kurumIci
+  const kurumIciValue = overrideData.kurumIci !== undefined
+    ? overrideData.kurumIci
+    : originalKurumIci
+  const isKurumIci = kurumIciValue === true || kurumIciValue === 'true' || kurumIciValue === 1 || kurumIciValue === '1' || kurumIciValue === undefined
+
+  const footerFields = [
+    'kurumAdres',
+    'kurumTelefon',
+    'kurumFaks',
+    'kurumWeb',
+    'kurumEposta',
+    'kurumKep'
+  ]
+
   return (
     <div className="flex flex-col gap-4">
       {formFields.map((key) => {
-        const originalValue = mergedContext[key];
+        if (isKurumIci && footerFields.includes(key)) {
+          return null
+        }
+
+        const originalValue = mergedContext[key]
         const value = overrideData[key] !== undefined
           ? overrideData[key]
-          : originalValue;
-        const type = typeof originalValue as string;
+          : originalValue
+        const type = typeof originalValue as string
 
         const schemaDef = placeholders.find((p) => p.anahtar === key) || null;
         const label = schemaDef

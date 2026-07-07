@@ -24,6 +24,70 @@ interface DocumentPreviewModalProps<T = any> {
   dosyaAdi?: string;
 }
 
+function parseMarkdownToHtml(markdown: string): string {
+  if (!markdown) return ''
+
+  // Escape HTML characters
+  let html = markdown
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+  // Bold: **text** or __text__ -> <strong>text</strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>')
+
+  // Italic: *text* or _text_ -> <em>text</em>
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>')
+
+  // Bullet Lists
+  const lines = html.split('\n')
+  let inList = false
+  const processedLines: string[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      if (!inList) {
+        processedLines.push('<ul>')
+        inList = true
+      }
+      processedLines.push(`<li>${trimmed.substring(2)}</li>`)
+    } else {
+      if (inList) {
+        processedLines.push('</ul>')
+        inList = false
+      }
+      processedLines.push(line)
+    }
+  }
+  if (inList) {
+    processedLines.push('</ul>')
+  }
+
+  html = processedLines.join('\n')
+
+  // Line breaks: \n -> <br /> (except for list elements)
+  html = html
+    .split('\n')
+    .map((l) => {
+      const trimmed = l.trim()
+      if (
+        trimmed.startsWith('<ul>') ||
+        trimmed.startsWith('</ul>') ||
+        trimmed.startsWith('<li>') ||
+        trimmed === ''
+      ) {
+        return l
+      }
+      return l + '<br />'
+    })
+    .join('\n')
+
+  return html
+}
+
 export function DocumentPreviewModal<T = any>({
   isOpen,
   onClose,
@@ -149,14 +213,28 @@ export function DocumentPreviewModal<T = any>({
 
   const updatePreview = (contextData: any) => {
     try {
-      const renderedContent = Mustache.render(templateHtml, contextData);
-      const finalContext = { ...contextData, icerik: renderedContent };
-      const finalHtml = Mustache.render(masterHtml, finalContext);
-      setPreviewHtml(finalHtml);
+      const parsedContext = { ...contextData }
+      const markdownKeys = ['isinAciklamasi', 'gerekce', 'aciklama', 'altNotlar']
+      for (const k of markdownKeys) {
+        if (typeof parsedContext[k] === 'string') {
+          parsedContext[k] = parseMarkdownToHtml(parsedContext[k])
+        }
+      }
+
+      let dynamicTemplateHtml = templateHtml || ''
+      for (const k of markdownKeys) {
+        const doubleBraceRegex = new RegExp('\\{\\{(' + k + ')\\}\\}', 'g')
+        dynamicTemplateHtml = dynamicTemplateHtml.replace(doubleBraceRegex, '{{{$1}}}')
+      }
+
+      const renderedContent = Mustache.render(dynamicTemplateHtml, parsedContext)
+      const finalContext = { ...parsedContext, icerik: renderedContent }
+      const finalHtml = Mustache.render(masterHtml, finalContext)
+      setPreviewHtml(finalHtml)
     } catch (err: any) {
-      console.error("Render error:", err);
+      console.error('Render error:', err)
     }
-  };
+  }
 
   const mergedContext = React.useMemo<T>(() => {
     let testData: any = {};
