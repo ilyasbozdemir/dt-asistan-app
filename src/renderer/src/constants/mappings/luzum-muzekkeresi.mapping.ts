@@ -48,7 +48,7 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     aciklama: 'Olur yazısı oluşturulacak'
   },
   kurumIci: {
-    deger: false,
+    deger: true,
     aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {

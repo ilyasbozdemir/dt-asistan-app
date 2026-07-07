@@ -253,7 +253,7 @@ export function buildDocumentContext(
     kurumEposta: kurum?.eposta || settings?.kurumEposta || '',
     kurumKep: kurum?.kep_adresi || '',
     kurumWeb: kurum?.web_sitesi || '',
-    kurumIci: false,
+    kurumIci: true,
     evrakSayisi: formattedEvrakSayisi,
     dosyaKonusu: dosyaResData?.konu || 'Konu Belirtilmedi',
     isAdi: dosyaResData?.konu || 'Konu Belirtilmedi',

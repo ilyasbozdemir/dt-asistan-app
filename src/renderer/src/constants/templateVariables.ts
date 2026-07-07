@@ -31,7 +31,7 @@ export const TemplateVariablesSchema: Record<string, TemplateVariableDef> = {
     description: 'Belgenin oluşturulduğu tarih'
   },
   dosyaTarihi: { label: 'Dosya Tarihi', type: 'date', varsayilan: '01.01.2024' },
-  kurumIci: { label: 'Kurum İçi Mi?', type: 'boolean', varsayilan: 'false' },
+  kurumIci: { label: 'Kurum İçi Mi?', type: 'boolean', varsayilan: 'true' },
   evrakSayisi: { label: 'Evrak Sayısı', type: 'string', varsayilan: 'E-12345' },
   sunulacakMakamAdi: { label: 'Sunulacak Makam Adı', type: 'string', varsayilan: 'MAKAM ONAYINA' },
   dosyaKonusu: { label: 'Dosya Konusu', type: 'string', varsayilan: 'Alım İşi' },

@@ -31,7 +31,7 @@ export const IhtiyacTalepFormuMapping: ProcessMapping = {
     aciklama: 'Birimin talep gerekçesi (İşin açıklaması baz alınır)'
   },
   kurumIci: {
-    deger: false,
+    deger: true,
     aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {

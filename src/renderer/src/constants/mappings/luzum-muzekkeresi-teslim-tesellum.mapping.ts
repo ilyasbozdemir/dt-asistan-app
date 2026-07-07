@@ -18,7 +18,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
   kurumIci: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'kurum_ici',
-    deger: false,
+    deger: true,
     aciklama: 'Kurum içi mi?'
   },
   kurumumu: {

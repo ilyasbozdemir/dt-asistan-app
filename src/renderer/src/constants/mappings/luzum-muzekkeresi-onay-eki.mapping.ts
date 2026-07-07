@@ -44,7 +44,7 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     aciklama: 'Dosya tarihi'
   },
   kurumIci: {
-    deger: false,
+    deger: true,
     aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
