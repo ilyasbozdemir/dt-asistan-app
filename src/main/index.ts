@@ -921,6 +921,12 @@ if (!gotTheLock && !isMultiInstance) {
       // Gerçek uygulama güncellemelerini manuel ekliyoruz
       const appUpdates = [
         {
+          version: '1.0.0-beta.31',
+          notes:
+            '- Hızlı Dosya Ekle / Güncelle: Excel benzeri arayüzle doğrudan temin dosyalarını toplu ekleme, panodan kopyala-yapıştır ile veri aktarma ve toplu güncelleme (UPDATE) desteği eklendi.\n- Toplu İşlemler Paneli: Seçilen doğrudan temin dosyalarına toplu aşama değiştirme, toplu tür değiştirme ve onaylama aşamalı toplu silme özellikleri eklendi.\n- Komisyon Yönetimi: Komisyon detay ekranından dinamik olarak yeni kontenjan (asil/yedek rolü) ekleme ve atama arayüzü eklendi.\n- Malzemeler: Doğrudan temin dosyalarında kullanılan malzemelerin/hizmetlerin silinmesini engelleyen silme koruması eklendi.\n- Sıralama Güncellemesi: Dosya listelerinin tarihe (dosya açılış tarihi) göre en yeniden en eskiye doğru sıralanması sağlandı.\n- Sekme/Tab Entegrasyonu: Komisyon üyeleri atama tab ve yönlendirme parametresi uyumsuzluğu giderildi.',
+          schema_max: 20
+        },
+        {
           version: '1.0.0-alpha.29',
           notes:
             '- İçe Aktarma (Import) ekranındaki buton stilleri (variant) ile ilgili TypeScript hataları düzeltildi.',
