@@ -343,8 +343,20 @@ export function buildDocumentContext(
       adSoyad: c.ad_soyad,
       unvan: c.unvan,
       gorevi: c.gorevi
-    })),
-    ...resolvedMappings
+    }))
+  }
+
+  // Güvenli birleştirme (Safe Merge): resolvedMappings içindeki placeholder (örn. [Belirtilmedi:...])
+  // olan değerlerin, veritabanından gelen dolu/geçerli değerlerin üzerine yazmasını engeller.
+  for (const [key, val] of Object.entries(resolvedMappings || {})) {
+    if (val !== undefined && val !== null) {
+      const isPlaceholder = typeof val === 'string' && val.startsWith('[Belirtilmedi')
+      const hasRealValue = context[key] !== undefined && context[key] !== '' && !String(context[key]).startsWith('[Belirtilmedi')
+      if (isPlaceholder && hasRealValue) {
+        continue
+      }
+      context[key] = val
+    }
   }
 
   // Evrak sayısı için özel durum kontrolü (eğer veritabanından ham temin_no gelmişse veya belirtilmemişse formatlanmış halini kullanalım)

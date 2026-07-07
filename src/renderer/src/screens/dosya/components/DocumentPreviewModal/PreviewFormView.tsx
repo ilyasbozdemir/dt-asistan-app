@@ -178,6 +178,144 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           );
         }
 
+        if (
+          Array.isArray(originalValue) &&
+          originalValue.length > 0 &&
+          typeof originalValue[0] === "object" &&
+          originalValue[0] !== null
+        ) {
+          const items = Array.isArray(value) ? value : [];
+          const sampleItem = originalValue[0];
+          const fields = Object.keys(sampleItem);
+
+          const handleCellChange = (rowIdx: number, field: string, val: any) => {
+            const newItems = items.map((item, idx) => {
+              if (idx === rowIdx) {
+                return { ...item, [field]: val };
+              }
+              return item;
+            });
+            handleFormChange(key, newItems);
+          };
+
+          const handleAddRow = () => {
+            const newItem = { ...sampleItem };
+            for (const f of fields) {
+              newItem[f] = typeof sampleItem[f] === "number" ? 0 : "";
+            }
+            handleFormChange(key, [...items, newItem]);
+          };
+
+          const handleRemoveRow = (rowIdx: number) => {
+            const isConfirmed = window.confirm(
+              "Bu satırı silmek istediğinize emin misiniz?",
+            );
+            if (isConfirmed) {
+              const newItems = items.filter((_, idx) => idx !== rowIdx);
+              handleFormChange(key, newItems);
+            }
+          };
+
+          return (
+            <div
+              key={key}
+              className="flex flex-col gap-3 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 bg-slate-50/50 dark:bg-slate-900/30"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {label}
+                  </label>
+                  {schemaDef?.aciklama && (
+                    <span className="text-xs text-slate-500">
+                      {schemaDef.aciklama}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddRow}
+                  className="px-3 py-1.5 text-xs font-bold bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-xl transition-colors border border-blue-200 dark:border-blue-800/30 cursor-pointer"
+                >
+                  + Satır Ekle
+                </button>
+              </div>
+
+              <div className="overflow-x-auto border border-slate-250 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-950">
+                <table className="w-full text-left text-xs table-auto border-collapse">
+                  <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-850">
+                    <tr>
+                      {fields.map((f) => (
+                        <th
+                          key={f}
+                          className="p-2.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 uppercase tracking-wider text-[9px]"
+                        >
+                          {f
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </th>
+                      ))}
+                      <th className="p-2.5 w-16 text-center">İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                    {items.map((item, rowIdx) => (
+                      <tr
+                        key={rowIdx}
+                        className="hover:bg-slate-55/40 dark:hover:bg-slate-900/40"
+                      >
+                        {fields.map((f) => {
+                          const val = item[f] !== undefined ? item[f] : "";
+                          const isNum = typeof sampleItem[f] === "number";
+                          return (
+                            <td
+                              key={f}
+                              className="p-1 border-r border-slate-200 dark:border-slate-850 last:border-r-0"
+                            >
+                              <input
+                                type={isNum ? "number" : "text"}
+                                value={val}
+                                onChange={(e) =>
+                                  handleCellChange(
+                                    rowIdx,
+                                    f,
+                                    isNum
+                                      ? Number(e.target.value)
+                                      : e.target.value,
+                                  )}
+                                className="w-full p-1.5 border-0 bg-transparent text-xs text-slate-800 dark:text-slate-250 focus:outline-none focus:ring-1 focus:ring-blue-500/50 rounded-lg"
+                              />
+                            </td>
+                          );
+                        })}
+                        <td className="p-1 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRow(rowIdx)}
+                            className="px-2 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer"
+                          >
+                            Sil
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {items.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={fields.length + 1}
+                          className="p-6 text-center text-slate-400 dark:text-slate-500 italic bg-slate-50/20"
+                        >
+                          Henüz hiçbir satır eklenmemiş.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
+
         if (Array.isArray(originalValue) || type === "object") {
           return (
             <div key={key} className="flex flex-col gap-1.5">

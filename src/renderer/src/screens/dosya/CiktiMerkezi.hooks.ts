@@ -7,6 +7,7 @@ import {
   processMappingRegistry
 } from '../../constants/mappings'
 import { buildDocumentContext } from './CiktiMerkezi.contextBuilder'
+import { filterContextForTemplate } from './CiktiMerkezi.mediator'
 
 export function useCiktiMerkeziData(activeDosyaId: number | null) {
   const [sablons, setSablons] = useState<Sablon[]>([])
@@ -326,6 +327,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
             pathMappings
           )
           contextForPath = { ...mJsonParsed, ...contextForPath }
+          contextForPath = filterContextForTemplate(path, contextForPath)
           pathContexts[path] = contextForPath
         }
 

@@ -6,13 +6,13 @@ import { PreviewFormView } from "./PreviewFormView";
 import { PreviewJsonView } from "./PreviewJsonView";
 import { PreviewFooter } from "./PreviewFooter";
 
-interface DocumentPreviewModalProps {
+interface DocumentPreviewModalProps<T = any> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   templateHtml: string;
   masterHtml: string;
-  baseContext: any;
+  baseContext: T;
   placeholders?: any[];
   personelListesi?: any[];
   onPrint: (html: string) => Promise<void>;
@@ -20,11 +20,11 @@ interface DocumentPreviewModalProps {
   isInline?: boolean;
   templateTestVerisi?: string;
   onRefreshSnapshot?: () => Promise<void>;
-  onSaveSnapshot?: (overrideData: any) => Promise<void>;
+  onSaveSnapshot?: (overrideData: Partial<T>) => Promise<void>;
   dosyaAdi?: string;
 }
 
-export function DocumentPreviewModal({
+export function DocumentPreviewModal<T = any>({
   isOpen,
   onClose,
   title,
@@ -40,8 +40,8 @@ export function DocumentPreviewModal({
   onRefreshSnapshot,
   onSaveSnapshot,
   dosyaAdi,
-}: DocumentPreviewModalProps): React.JSX.Element | null {
-  const [overrideData, setOverrideData] = useState<Record<string, any>>({});
+}: DocumentPreviewModalProps<T>): React.JSX.Element | null {
+  const [overrideData, setOverrideData] = useState<Partial<T>>({});
   const [activeTab, setActiveTab] = useState<"form" | "json">("form");
   const [overrideJson, setOverrideJson] = useState("{\n  \n}");
   const [jsonError, setJsonError] = useState("");
@@ -50,9 +50,7 @@ export function DocumentPreviewModal({
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [schemaJson, setSchemaJson] = useState<Record<string, any> | null>(
-    null,
-  );
+  const [schemaJson, setSchemaJson] = useState<Partial<T> | null>(null);
 
   const extractUsedVars = React.useCallback((html: string) => {
     const matches = Array.from(
@@ -160,8 +158,8 @@ export function DocumentPreviewModal({
     }
   };
 
-  const mergedContext = React.useMemo(() => {
-    let testData = {};
+  const mergedContext = React.useMemo<T>(() => {
+    let testData: any = {};
     if (templateTestVerisi) {
       try {
         testData = JSON.parse(templateTestVerisi);
@@ -171,22 +169,22 @@ export function DocumentPreviewModal({
     }
     const activeDosyaId = useWorkspaceStore.getState().activeDosyaId;
     const hasRealData = activeDosyaId !== null && baseContext &&
-      Object.keys(baseContext).length > 2;
+      Object.keys(baseContext as any).length > 2;
     const rawContext = hasRealData
       ? { ...testData, ...baseContext }
       : { ...baseContext, ...testData };
 
     if (schemaJson && Object.keys(schemaJson).length > 0) {
-      const filtered: Record<string, any> = {};
+      const filtered: any = {};
       for (const key of Object.keys(schemaJson)) {
-        filtered[key] = rawContext[key] !== undefined
-          ? rawContext[key]
-          : schemaJson[key];
+        filtered[key] = (rawContext as any)[key] !== undefined
+          ? (rawContext as any)[key]
+          : (schemaJson as any)[key];
       }
-      return filtered;
+      return filtered as T;
     }
 
-    const filtered: Record<string, any> = {};
+    const filtered: any = {};
     const keysToKeep = new Set(usedVars);
     keysToKeep.add("icerik");
     keysToKeep.add("solLogo");
@@ -194,10 +192,10 @@ export function DocumentPreviewModal({
 
     for (const key of Object.keys(rawContext)) {
       if (keysToKeep.has(key)) {
-        filtered[key] = rawContext[key];
+        filtered[key] = (rawContext as any)[key];
       }
     }
-    return filtered;
+    return filtered as T;
   }, [baseContext, templateTestVerisi, schemaJson, usedVars]);
 
   // Initialization: Format context to JSON on open
@@ -253,7 +251,7 @@ export function DocumentPreviewModal({
     }
     setIsProcessingPdf(true);
     try {
-      const fileWorkName = mergedContext.isAdi || "";
+      const fileWorkName = (mergedContext as any).isAdi || "";
       const cleanFileWorkName = fileWorkName.replace(/[\\/:*?"<>|]/g, "")
         .trim();
       const combinedTitle = cleanFileWorkName
