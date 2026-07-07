@@ -202,6 +202,8 @@ const TARGET_TABLES: TargetTable[] = [
       "hesaplama_esasi",
       "komisyon_takdiri",
       "tibbi_cihaz_alimi_mi",
+      "yillara_yaygin",
+      "sozlesme_yapilacak_mi",
       "irtibat_yetkilisi_id",
       "son_teklif_verme_tarihi",
       "teslim_tarihi",

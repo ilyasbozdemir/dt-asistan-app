@@ -239,19 +239,26 @@ export function IhaleVeTeklifFinansalSection(
 
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Fiyat Farkı Dayanağı (Varsa)
+            Fiyat Farkı Dayanağı
           </label>
-          <input
-            type="text"
-            value={formData.fiyat_farki_dayanagi || ""}
+          <select
+            title="Fiyat Farkı Dayanağı"
+            value={formData.fiyat_farki_dayanagi || "Fiyat Farkı Ödenmeyecek"}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 fiyat_farki_dayanagi: e.target.value,
               })}
-            placeholder="Örn: 2026/123 Fiyat Farkı Kararnamesi"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          />
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+          >
+            <option value="Fiyat Farkı Ödenmeyecek">Fiyat Farkı Ödenmeyecek</option>
+            <option value="31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre">
+              31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre
+            </option>
+            <option value="31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre">
+              31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre
+            </option>
+          </select>
         </div>
 
         <div>
@@ -267,7 +274,7 @@ export function IhaleVeTeklifFinansalSection(
                 yatirim_proje_no: e.target.value,
               })}
             placeholder="Örn: 2026-03-Y-12"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
           />
         </div>
 
@@ -275,17 +282,22 @@ export function IhaleVeTeklifFinansalSection(
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             Hesaplama Yöntemi / Dayanağı
           </label>
-          <input
-            type="text"
-            value={formData.yaklasik_maliyet_hesaplamasi || ""}
+          <select
+            title="Hesaplama Yöntemi / Dayanağı"
+            value={formData.komisyon_takdiri || "Sadece araştırma fiyatları dikkate alınacak"}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                yaklasik_maliyet_hesaplamasi: e.target.value,
+                komisyon_takdiri: e.target.value,
               })}
-            placeholder="Örn: Piyasa Fiyat Araştırması"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          />
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+          >
+            <option value="Sadece araştırma fiyatları dikkate alınacak">
+              Sadece araştırma fiyatları dikkate alınacak
+            </option>
+            <option value="Komisyon takdiri kullanılacak">Komisyon takdiri kullanılacak</option>
+            <option value="Son alım fiyatlarını da kullan">Son alım fiyatlarını da kullan</option>
+          </select>
         </div>
 
         <div>
@@ -387,6 +399,50 @@ export function IhaleVeTeklifFinansalSection(
             Tıbbi Cihaz Alımı
           </label>
         </div>
+
+        {formData.tur === "hizmet" && (
+          <>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="yillara_yaygin"
+                checked={formData.yillara_yaygin === 1}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    yillara_yaygin: e.target.checked ? 1 : 0,
+                  })}
+                className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
+              />
+              <label
+                htmlFor="yillara_yaygin"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Yıllara Yaygın Hizmet Alımı
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="sozlesme_yapilacak_mi"
+                checked={formData.sozlesme_yapilacak_mi === 1}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    sozlesme_yapilacak_mi: e.target.checked ? 1 : 0,
+                  })}
+                className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
+              />
+              <label
+                htmlFor="sozlesme_yapilacak_mi"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Sözleşme Yapılacak mı?
+              </label>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

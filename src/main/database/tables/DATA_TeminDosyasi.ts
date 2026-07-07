@@ -53,6 +53,18 @@ export const DATA_TeminDosyasi = {
     { name: 'fiyat_farki_dayanagi', type: 'TEXT', description: 'Fiyat Farki Dayanagi' },
     { name: 'yatirim_proje_no', type: 'TEXT', description: 'Yatirim Proje Numarası' },
     { name: 'avans_verilecek_mi', type: 'INTEGER', default: 0, description: 'Avans Verilecek mı?' },
+    {
+      name: 'yillara_yaygin',
+      type: 'INTEGER',
+      default: 0,
+      description: 'Yıllara Yaygın Hizmet Alımı mı?'
+    },
+    {
+      name: 'sozlesme_yapilacak_mi',
+      type: 'INTEGER',
+      default: 0,
+      description: 'Sözleşme Yapılacak mı?'
+    },
 
     // Hesaplama ve Maliyet
     {

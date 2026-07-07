@@ -31,6 +31,8 @@ export interface TeminDosyasi {
   fiyat_farki_dayanagi: string | null
   yatirim_proje_no: string | null
   avans_verilecek_mi: number
+  yillara_yaygin: number
+  sozlesme_yapilacak_mi: number
 
   yaklasik_maliyet_hesaplamasi: string | null
   kdv: string | null
