@@ -1,0 +1,308 @@
+import React from 'react'
+
+interface PreviewFormViewProps {
+  formFields: string[]
+  mergedContext: any
+  overrideData: Record<string, any>
+  placeholders: any[]
+  activePersonnelFields: string[]
+  personelListesi: any[]
+  PERSONNEL_FIELDS: Record<string, { adiKey: string; unvanKey: string; etiket: string }>
+  handleFormChange: (key: string, value: any) => void
+  handlePersonelSelect: (field: any, selectedPersonel: any) => void
+  handlePersonelClear: (field: any) => void
+}
+
+export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
+  formFields,
+  mergedContext,
+  overrideData,
+  placeholders,
+  activePersonnelFields,
+  personelListesi,
+  PERSONNEL_FIELDS,
+  handleFormChange,
+  handlePersonelSelect,
+  handlePersonelClear
+}) => {
+  return (
+    <div className="flex flex-col gap-4">
+      {formFields.map((key) => {
+        const originalValue = mergedContext[key]
+        const value = overrideData[key] !== undefined ? overrideData[key] : originalValue
+        const type = typeof originalValue
+
+        const schemaDef = placeholders.find((p) => p.anahtar === key) || null
+        const label = schemaDef ? schemaDef.etiket : key
+        const effectiveType = schemaDef?.veri_tipi === 'date' ? 'date' : type
+
+        if (effectiveType === 'date') {
+          let dateVal = value || ''
+          if (typeof value === 'string' && value.includes('.')) {
+            const parts = value.split('.')
+            if (parts.length === 3) {
+              dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`
+            }
+          }
+
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <input
+                type="date"
+                title={label}
+                placeholder={label}
+                value={dateVal}
+                onChange={(e) => {
+                  const d = e.target.value
+                  if (!d) {
+                    handleFormChange(key, '')
+                    return
+                  }
+                  const parts = d.split('-')
+                  if (parts.length === 3) {
+                    handleFormChange(key, `${parts[2]}.${parts[1]}.${parts[0]}`)
+                  } else {
+                    handleFormChange(key, d)
+                  }
+                }}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+              />
+            </div>
+          )
+        }
+
+        if (effectiveType === 'boolean') {
+          return (
+            <div key={key} className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <input
+                type="checkbox"
+                title={label}
+                checked={!!value}
+                onChange={(e) => handleFormChange(key, e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+            </div>
+          )
+        }
+
+        if (type === 'number') {
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <input
+                type="number"
+                title={label}
+                placeholder={label}
+                value={value || 0}
+                onChange={(e) => handleFormChange(key, Number(e.target.value))}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+              />
+            </div>
+          )
+        }
+
+        if (
+          Array.isArray(originalValue) &&
+          originalValue.every((v) => typeof v === 'string')
+        ) {
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}{' '}
+                  <span className="text-xs font-normal text-slate-400">
+                    (Liste - Her satır bir eleman)
+                  </span>
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <textarea
+                title={label}
+                placeholder={label}
+                value={Array.isArray(value) ? value.join('\n') : value}
+                onChange={(e) => {
+                  handleFormChange(key, e.target.value.split('\n'))
+                }}
+                className="w-full p-2.5 min-h-[100px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-y"
+              />
+            </div>
+          )
+        }
+
+        if (Array.isArray(originalValue) || type === 'object') {
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}{' '}
+                  <span className="text-xs font-normal text-slate-400">
+                    ({Array.isArray(originalValue) ? 'Dizi' : 'Nesne'})
+                  </span>
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <textarea
+                title={label}
+                placeholder={label}
+                value={
+                  typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+                }
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(
+                      e.target.value || (Array.isArray(originalValue) ? '[]' : '{}')
+                    )
+                    handleFormChange(key, parsed)
+                  } catch (err) {
+                    handleFormChange(key, e.target.value)
+                  }
+                }}
+                className="w-full p-2.5 h-24 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
+              />
+            </div>
+          )
+        }
+
+        // Schema tip uzun_metin desteği (dialog modal'da tip === 'uzun_metin' kontrolü vardı)
+        if (schemaDef?.tip === 'uzun_metin') {
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                )}
+              </div>
+              <textarea
+                title={label}
+                placeholder={label}
+                value={value || ''}
+                onChange={(e) => handleFormChange(key, e.target.value)}
+                className="w-full p-2.5 min-h-[80px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-y"
+              />
+            </div>
+          )
+        }
+
+        return (
+          <div key={key} className="flex flex-col gap-1.5">
+            <div className="flex flex-col">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {label}
+              </label>
+              {schemaDef?.aciklama && (
+                <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+              )}
+            </div>
+            <input
+              type="text"
+              title={label}
+              placeholder={label}
+              value={value || ''}
+              onChange={(e) => handleFormChange(key, e.target.value)}
+              className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+            />
+          </div>
+        )
+      })}
+      {formFields.length === 0 && activePersonnelFields.length === 0 && (
+        <div className="text-center text-sm text-slate-500 mt-10">
+          Bu şablonda otomatik algılanan bir değişken bulunamadı.
+        </div>
+      )}
+
+      {/* PERSONEL SEÇİM ALANI */}
+      {activePersonnelFields.length > 0 && personelListesi.length > 0 && (
+        <div className="mt-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Yetkili Personel Seçimi
+          </p>
+          {activePersonnelFields.map((key) => {
+            const field = PERSONNEL_FIELDS[key]
+            const currentValue = overrideData[field.adiKey] ?? mergedContext[field.adiKey] ?? ''
+
+            return (
+              <div key={key} className="flex flex-col gap-1.5 mb-3">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {field.etiket}
+                </label>
+                <select
+                  aria-label={field.etiket}
+                  value={currentValue}
+                  onChange={(e) => {
+                    const selectedPersonel = personelListesi.find(
+                      (p) => p.ad_soyad === e.target.value
+                    )
+                    if (selectedPersonel) {
+                      handlePersonelSelect(field, selectedPersonel)
+                    } else if (e.target.value === '') {
+                      handlePersonelClear(field)
+                    }
+                  }}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
+                >
+                  <option value="">— Dosyadan gelen değer —</option>
+                  {personelListesi.map((p) => (
+                    <option key={p.id} value={p.ad_soyad}>
+                      {p.ad_soyad}
+                      {p.unvan ? ` — ${p.unvan}` : ''}
+                    </option>
+                  ))}
+                </select>
+                {currentValue && (
+                  <span className="text-[10px] text-slate-400">
+                    Seçili: {currentValue} —{' '}
+                    {overrideData[field.unvanKey] ?? mergedContext[field.unvanKey] ?? ''}
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
