@@ -342,7 +342,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : !isAddingUye ? (
             <div className="py-12 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
               <UserPlus className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
               <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-4">
@@ -356,7 +356,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                 İlk Kontenjanı Oluştur
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
