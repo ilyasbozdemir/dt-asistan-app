@@ -447,8 +447,9 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {label}
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span>{label}</span>
+                  <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Markdown Desteklenir</span>
                 </label>
                 {schemaDef?.aciklama && (
                   <span className="text-xs text-slate-500">
