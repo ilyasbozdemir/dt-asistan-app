@@ -29,6 +29,7 @@ interface DocumentPreviewModalProps {
   templateTestVerisi?: string
   onRefreshSnapshot?: () => Promise<void>
   onSaveSnapshot?: (overrideData: any) => Promise<void>
+  dosyaAdi?: string
 }
 
 export function DocumentPreviewModal({
@@ -45,7 +46,8 @@ export function DocumentPreviewModal({
   isInline = false,
   templateTestVerisi = '',
   onRefreshSnapshot,
-  onSaveSnapshot
+  onSaveSnapshot,
+  dosyaAdi
 }: DocumentPreviewModalProps): React.JSX.Element | null {
   const [overrideData, setOverrideData] = useState<Record<string, any>>({})
   const [activeTab, setActiveTab] = useState<'form' | 'json'>('form')
@@ -56,6 +58,46 @@ export function DocumentPreviewModal({
   const [isProcessingPdf, setIsProcessingPdf] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [isAiGenerating, setIsAiGenerating] = useState(false)
+  const [schemaJson, setSchemaJson] = useState<Record<string, any> | null>(null)
+
+  const extractUsedVars = React.useCallback((html: string) => {
+    const matches = Array.from(html.matchAll(/\{\{(\{?)([#^\/]?)([a-zA-Z0-9_]+)(\}?)\}\}/g))
+    return matches.map((m) => m[3])
+  }, [])
+
+  const usedVars = React.useMemo(() => {
+    return new Set([
+      ...extractUsedVars(templateHtml || ''),
+      ...extractUsedVars(masterHtml || '')
+    ])
+  }, [templateHtml, masterHtml, extractUsedVars])
+
+  useEffect(() => {
+    if (isOpen && dosyaAdi) {
+      const cleanName = dosyaAdi.endsWith('.html') ? dosyaAdi.replace('.html', '') : dosyaAdi
+      const jsonFileName = `${cleanName}.html.json`
+      window.electron.ipcRenderer.invoke('template:read-system', jsonFileName)
+        .then((res) => {
+          if (res) {
+            try {
+              const parsed = JSON.parse(res)
+              setSchemaJson(parsed)
+            } catch (e) {
+              console.error('Failed to parse schema JSON:', e)
+              setSchemaJson(null)
+            }
+          } else {
+            setSchemaJson(null)
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to read schema JSON:', err)
+          setSchemaJson(null)
+        })
+    } else {
+      setSchemaJson(null)
+    }
+  }, [isOpen, dosyaAdi])
 
   const handleAiEdit = async () => {
     if (!aiPrompt.trim()) return
@@ -68,9 +110,30 @@ export function DocumentPreviewModal({
       })
       if (res && res.success) {
         let cleanText = res.data.trim()
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```[a-zA-Z0-9]*\\n/, '').replace(/\\n```$/, '')
+        
+        // Extract JSON substring robustly
+        const firstBrace = cleanText.indexOf('{')
+        const firstBracket = cleanText.indexOf('[')
+        let startIndex = -1
+        if (firstBrace !== -1 && firstBracket !== -1) {
+          startIndex = Math.min(firstBrace, firstBracket)
+        } else {
+          startIndex = firstBrace !== -1 ? firstBrace : firstBracket
         }
+
+        const lastBrace = cleanText.lastIndexOf('}')
+        const lastBracket = cleanText.lastIndexOf(']')
+        let endIndex = -1
+        if (lastBrace !== -1 && lastBracket !== -1) {
+          endIndex = Math.max(lastBrace, lastBracket)
+        } else {
+          endIndex = lastBrace !== -1 ? lastBrace : lastBracket
+        }
+
+        if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+          cleanText = cleanText.substring(startIndex, endIndex + 1)
+        }
+
         const parsed = JSON.parse(cleanText)
         setOverrideData(parsed)
         setOverrideJson(JSON.stringify(parsed, null, 2))
@@ -107,14 +170,31 @@ export function DocumentPreviewModal({
         console.error('Failed to parse template test verisi:', e)
       }
     }
-    // Eğer gerçek dosya verisi varsa (activeDosyaId null değilse), dummy test verilerini karıştırmayalım.
     const activeDosyaId = useWorkspaceStore.getState().activeDosyaId
     const hasRealData = activeDosyaId !== null && baseContext && Object.keys(baseContext).length > 2
-    if (hasRealData) {
-      return { ...testData, ...baseContext }
+    const rawContext = hasRealData ? { ...testData, ...baseContext } : { ...baseContext, ...testData }
+
+    if (schemaJson && Object.keys(schemaJson).length > 0) {
+      const filtered: Record<string, any> = {}
+      for (const key of Object.keys(schemaJson)) {
+        filtered[key] = rawContext[key] !== undefined ? rawContext[key] : schemaJson[key]
+      }
+      return filtered
     }
-    return { ...baseContext, ...testData }
-  }, [baseContext, templateTestVerisi])
+
+    const filtered: Record<string, any> = {}
+    const keysToKeep = new Set(usedVars)
+    keysToKeep.add('icerik')
+    keysToKeep.add('solLogo')
+    keysToKeep.add('sagLogo')
+
+    for (const key of Object.keys(rawContext)) {
+      if (keysToKeep.has(key)) {
+        filtered[key] = rawContext[key]
+      }
+    }
+    return filtered
+  }, [baseContext, templateTestVerisi, schemaJson, usedVars])
 
   // Initialization: Format context to JSON on open
   useEffect(() => {
@@ -179,17 +259,6 @@ export function DocumentPreviewModal({
   }
 
   if (!isOpen) return null
-
-  // Şablon ve Master HTML içerisinde gerçekten kullanılan değişkenleri tespit et
-  const extractUsedVars = (html: string) => {
-    const matches = Array.from(html.matchAll(/\{\{(\{?)([#^\/]?)([a-zA-Z0-9_]+)(\}?)\}\}/g))
-    return matches.map((m) => m[3])
-  }
-
-  const usedVars = new Set([
-    ...extractUsedVars(templateHtml || ''),
-    ...extractUsedVars(masterHtml || '')
-  ])
 
   // Orijinal bağlamdaki (mergedContext) verilerden SADECE şablonda kullanılan form alanlarını üret
   // Personel alanları haritası (context key -> { adiKey, unvanKey, etiket })

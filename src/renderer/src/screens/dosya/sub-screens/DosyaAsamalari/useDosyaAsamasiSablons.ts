@@ -50,6 +50,7 @@ export interface PreviewData {
   templateTestVerisi?: string
   sablonId?: number
   snapshotContext?: any
+  dosyaAdi?: string
 }
 
 export const checkIsSablonDisabled = (cleanName: string, dosyaContext: any): boolean => {
@@ -117,7 +118,6 @@ export function useDosyaAsamasiSablons() {
         const title = targetSablon.ad.replace(/^\[.*?\]\s*/, '')
         const processPath = targetSablon.route_path || targetSablon.dosya_adi || ''
         const currentCtx = contextsByPath[processPath] || dosyaContext
-
         const snapshotCtx = await loadOrCreateSnapshot(targetSablon.id, currentCtx)
 
         setPreviewData({
@@ -126,7 +126,8 @@ export function useDosyaAsamasiSablons() {
           templateHtml: targetSablon.icerik,
           processPath,
           templateTestVerisi: '', // SÜREÇLERDE MOCK VERİ KULLANILMAZ
-          snapshotContext: snapshotCtx
+          snapshotContext: snapshotCtx,
+          dosyaAdi: targetSablon.dosya_adi
         })
         setPreviewModalOpen(true)
       }
@@ -151,7 +152,8 @@ export function useDosyaAsamasiSablons() {
       templateHtml: sablon.icerik,
       processPath,
       templateTestVerisi: '', // SÜREÇLERDE MOCK VERİ KULLANILMAZ
-      snapshotContext: snapshotCtx
+      snapshotContext: snapshotCtx,
+      dosyaAdi: sablon.dosya_adi
     })
     setPreviewModalOpen(true)
   }

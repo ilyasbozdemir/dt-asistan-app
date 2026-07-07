@@ -26,7 +26,7 @@ export function SurecBelgeleriPanel({
   onSablonClick,
   isSablonDisabled,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
-  const [filter, setFilter] = useState<"all" | "starred">("all");
+  const [filter, setFilter] = useState<"all" | "starred">("starred");
 
   if (stageSablons.length === 0) return null;
 

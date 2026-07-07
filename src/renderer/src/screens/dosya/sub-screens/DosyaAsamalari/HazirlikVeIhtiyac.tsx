@@ -49,6 +49,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onExportPdf={executeExportPdf}
         isInline={true}
         templateTestVerisi={previewData.templateTestVerisi}
+        dosyaAdi={previewData.dosyaAdi}
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
