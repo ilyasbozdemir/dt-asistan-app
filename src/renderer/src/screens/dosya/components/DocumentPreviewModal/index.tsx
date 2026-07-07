@@ -329,12 +329,31 @@ export function DocumentPreviewModal<T = any>({
     }
     setIsProcessingPdf(true);
     try {
-      const fileWorkName = (mergedContext as any).isAdi || "";
-      const cleanFileWorkName = fileWorkName.replace(/[\\/:*?"<>|]/g, "")
+      const rawTeminNo = (mergedContext as any).teminNo || "";
+      const cleanTeminNo = (
+        rawTeminNo.includes("Belirtilmedi") ? "" : (
+          rawTeminNo.includes("/")
+            ? rawTeminNo.split("/").pop()
+            : rawTeminNo.includes("-")
+            ? rawTeminNo.split("-").pop()
+            : rawTeminNo
+        )
+      ) || "";
+
+      const fileYil = (mergedContext as any).dosyaYili || new Date().getFullYear();
+
+      const cleanTitle = title
+        .toLocaleLowerCase("tr-TR")
+        .replace(/\s+/g, "-")
+        .replace(/[\\/:*?"<>|]/g, "")
         .trim();
-      const combinedTitle = cleanFileWorkName
-        ? `${cleanFileWorkName} - ${title}`
-        : title;
+
+      const combinedTitle = [
+        fileYil,
+        cleanTeminNo,
+        cleanTitle
+      ].filter(Boolean).join("-");
+
       await onExportPdf(previewHtml, combinedTitle);
     } finally {
       setIsProcessingPdf(false);

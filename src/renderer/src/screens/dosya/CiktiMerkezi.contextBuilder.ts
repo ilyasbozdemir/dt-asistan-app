@@ -232,6 +232,7 @@ export function buildDocumentContext(
   }
 
   const context: any = {
+    dosyaYili: dosyaYili,
     kapakDetaylari,
     tarih: today,
     alimTuru: alimTuruText,
