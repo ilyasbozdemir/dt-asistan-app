@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 // ===========================================================
 // 1. AraÅŸtÄ±rma Mektubu
@@ -518,6 +518,7 @@ export const KapakIciIndeksSablonuMapping: ProcessMapping = {
 // ===========================================================
 export const KlasorSirtligi3cmMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum AdÄ±' },
+  solLogo: { tablo: 'TANIM_Kurum', sutun: 'logo_sol', aciklama: 'Sol Logo (Base64)' },
   yil: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_yili', aciklama: 'BÃ¼tÃ§e YÄ±lÄ±' },
   konu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Ä°ÅŸin AdÄ±' }
 }
@@ -527,6 +528,7 @@ export const KlasorSirtligi3cmMapping: ProcessMapping = {
 // ===========================================================
 export const KlasorSirtligi5cmMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum AdÄ±' },
+  solLogo: { tablo: 'TANIM_Kurum', sutun: 'logo_sol', aciklama: 'Sol Logo (Base64)' },
   yil: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_yili', aciklama: 'BÃ¼tÃ§e YÄ±lÄ±' },
   konu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Ä°ÅŸin AdÄ±' }
 }
@@ -536,7 +538,7 @@ export const KlasorSirtligi5cmMapping: ProcessMapping = {
 // ===========================================================
 export const KlasorSirtligi75cmMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum AdÄ±' },
+  solLogo: { tablo: 'TANIM_Kurum', sutun: 'logo_sol', aciklama: 'Sol Logo (Base64)' },
   yil: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_yili', aciklama: 'BÃ¼tÃ§e YÄ±lÄ±' },
   konu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Ä°ÅŸin AdÄ±' }
 }
-
