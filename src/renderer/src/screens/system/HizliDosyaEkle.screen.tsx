@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -97,23 +97,35 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
 
   const updateRow = (key: string, field: keyof DosyaRow, value: string) => {
     setRows((prev) =>
-      prev.map((r) => (r._key === key ? { ...r, [field]: value, _dirty: true } : r))
+      prev.map((
+        r,
+      ) => (r._key === key ? { ...r, [field]: value, _dirty: true } : r))
     );
   };
 
   const addRow = () => {
     setRows((prev) => [...prev, emptyRow()]);
     setTimeout(() => {
-      tableRef.current?.scrollTo({ top: tableRef.current.scrollHeight, behavior: "smooth" });
+      tableRef.current?.scrollTo({
+        top: tableRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }, 50);
   };
 
   const removeRow = async (row: DosyaRow) => {
     const isPersisted = row.id !== null;
-    const hasData = row.dosya_no.trim() || row.dt_no.trim() || row.dosya_adi.trim() || row.aciklama.trim();
+    const hasData = row.dosya_no.trim() || row.dt_no.trim() ||
+      row.dosya_adi.trim() || row.aciklama.trim();
 
     if (isPersisted) {
-      if (!confirm(`"${row.dosya_adi || 'Dosya'}" kaydını veritabanından tamamen silmek istediğinize emin misiniz?`)) {
+      if (
+        !confirm(
+          `"${
+            row.dosya_adi || "Dosya"
+          }" kaydını veritabanından tamamen silmek istediğinize emin misiniz?`,
+        )
+      ) {
         return;
       }
       setIsSaving(true);
@@ -121,7 +133,7 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
         const res = await window.electron.ipcRenderer.invoke(
           "db:run",
           "UPDATE DATA_TeminDosyasi SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-          [row.id]
+          [row.id],
         );
         if (res.success) {
           queryClient.invalidateQueries({ queryKey: ["dosyalar"] });
@@ -136,12 +148,21 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
         setIsSaving(false);
       }
     } else if (hasData) {
-      if (!confirm("Satırdaki doldurulmuş verileri iptal edip satırı silmek istediğinize emin misiniz?")) {
+      if (
+        !confirm(
+          "Satırdaki doldurulmuş verileri iptal edip satırı silmek istediğinize emin misiniz?",
+        )
+      ) {
         return;
       }
     }
 
-    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r._key !== row._key) : [emptyRow()]));
+    setRows((
+      prev,
+    ) => (prev.length > 1
+      ? prev.filter((r) => r._key !== row._key)
+      : [emptyRow()])
+    );
     setSelectedKeys((prev) => {
       const next = new Set(prev);
       next.delete(row._key);
@@ -159,7 +180,7 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
          WHERE is_deleted = 0
          ORDER BY COALESCE(dosya_acilis_tarihi, created_at) DESC, id DESC
          LIMIT ?`,
-         [loadLimit]
+        [loadLimit],
       );
       if (res.success) {
         const loaded: DosyaRow[] = res.data.map((d: any) => ({
@@ -175,7 +196,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
           ihale_asamasi: reverseMapStatus(d.status || "devam_ediyor"),
           _dirty: false,
         }));
-        setRows(loaded.length > 0 ? loaded : [emptyRow(), emptyRow(), emptyRow()]);
+        setRows(
+          loaded.length > 0 ? loaded : [emptyRow(), emptyRow(), emptyRow()],
+        );
         setSelectedKeys(new Set());
         setResult(null);
       } else {
@@ -228,7 +251,7 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
             row.ihale_tarihi || null,
             mapStatus(row.ihale_asamasi),
             mapTur(row.ihale_turu),
-          ]
+          ],
         );
         if (res.success) {
           insertCount++;
@@ -236,7 +259,11 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
           errors.push(`EKLE "${row.dosya_adi}" - ${res.error}`);
         }
       } catch (err: unknown) {
-        errors.push(`EKLE "${row.dosya_adi}" - ${err instanceof Error ? err.message : String(err)}`);
+        errors.push(
+          `EKLE "${row.dosya_adi}" - ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
 
@@ -260,16 +287,22 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
             mapStatus(row.ihale_asamasi),
             mapTur(row.ihale_turu),
             row.id,
-          ]
+          ],
         );
         if (res.success) {
           updateCount++;
-          setRows((prev) => prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)));
+          setRows((prev) =>
+            prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r))
+          );
         } else {
           errors.push(`GÜNCELLE "${row.dosya_adi}" - ${res.error}`);
         }
       } catch (err: unknown) {
-        errors.push(`GÜNCELLE "${row.dosya_adi}" - ${err instanceof Error ? err.message : String(err)}`);
+        errors.push(
+          `GÜNCELLE "${row.dosya_adi}" - ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
 
@@ -281,11 +314,13 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
       const erroredNames = new Set(
         errors
           .filter((e) => e.startsWith("EKLE"))
-          .map((e) => e.split('"')[1])
+          .map((e) => e.split('"')[1]),
       );
       setRows((prev) =>
         prev.filter(
-          (r) => r.id !== null || r.dosya_adi.trim() === "" || erroredNames.has(r.dosya_adi.trim())
+          (r) =>
+            r.id !== null || r.dosya_adi.trim() === "" ||
+            erroredNames.has(r.dosya_adi.trim()),
         )
       );
     }
@@ -316,7 +351,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
       });
       if (newRows.length > 0) {
         setRows((prev) => {
-          const allEmpty = prev.every((r) => r.dosya_adi === "" && r.id === null);
+          const allEmpty = prev.every((r) =>
+            r.dosya_adi === "" && r.id === null
+          );
           return allEmpty ? newRows : [...prev, ...newRows];
         });
       }
@@ -348,10 +385,16 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
 
   const handleBulkDelete = async () => {
     const selectedRows = rows.filter((r) => selectedKeys.has(r._key));
-    const idsToDelete = selectedRows.map((r) => r.id).filter((id): id is number => id !== null);
+    const idsToDelete = selectedRows.map((r) => r.id).filter((
+      id,
+    ): id is number => id !== null);
 
     if (idsToDelete.length === 0) {
-      if (!confirm("Seçilen kaydedilmemiş satırları listeden kaldırmak istediğinize emin misiniz?")) {
+      if (
+        !confirm(
+          "Seçilen kaydedilmemiş satırları listeden kaldırmak istediğinize emin misiniz?",
+        )
+      ) {
         return;
       }
       setRows((prev) => prev.filter((r) => !selectedKeys.has(r._key)));
@@ -359,7 +402,11 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
       return;
     }
 
-    if (!confirm(`Seçilen ${idsToDelete.length} dosyayı veritabanından tamamen silmek istediğinize emin misiniz?`)) {
+    if (
+      !confirm(
+        `Seçilen ${idsToDelete.length} dosyayı veritabanından tamamen silmek istediğinize emin misiniz?`,
+      )
+    ) {
       return;
     }
 
@@ -372,7 +419,7 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
         const res = await window.electron.ipcRenderer.invoke(
           "db:run",
           "UPDATE DATA_TeminDosyasi SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-          [id]
+          [id],
         );
         if (res.success) {
           deletedCount++;
@@ -380,14 +427,20 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
           errors.push(`ID #${id} silinemedi: ${res.error}`);
         }
       } catch (err: unknown) {
-        errors.push(`ID #${id} silinemedi: ${err instanceof Error ? err.message : String(err)}`);
+        errors.push(
+          `ID #${id} silinemedi: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
 
     setIsSaving(false);
     queryClient.invalidateQueries({ queryKey: ["dosyalar"] });
 
-    setRows((prev) => prev.filter((r) => r.id === null || !idsToDelete.includes(r.id)));
+    setRows((prev) =>
+      prev.filter((r) => r.id === null || !idsToDelete.includes(r.id))
+    );
     setSelectedKeys(new Set());
 
     if (errors.length > 0) {
@@ -400,7 +453,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
   const handleBulkChangeAsama = (newAsama: string) => {
     setRows((prev) =>
       prev.map((r) =>
-        selectedKeys.has(r._key) ? { ...r, ihale_asamasi: newAsama, _dirty: true } : r
+        selectedKeys.has(r._key)
+          ? { ...r, ihale_asamasi: newAsama, _dirty: true }
+          : r
       )
     );
   };
@@ -408,20 +463,29 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
   const handleBulkChangeTur = (newTur: string) => {
     setRows((prev) =>
       prev.map((r) =>
-        selectedKeys.has(r._key) ? { ...r, ihale_turu: newTur, _dirty: true } : r
+        selectedKeys.has(r._key)
+          ? { ...r, ihale_turu: newTur, _dirty: true }
+          : r
       )
     );
   };
 
-  const newCount = rows.filter((r) => r.dosya_adi.trim() !== "" && r.id === null && r._dirty).length;
-  const updateCount = rows.filter((r) => r.dosya_adi.trim() !== "" && r.id !== null && r._dirty).length;
+  const newCount =
+    rows.filter((r) => r.dosya_adi.trim() !== "" && r.id === null && r._dirty)
+      .length;
+  const updateCount =
+    rows.filter((r) => r.dosya_adi.trim() !== "" && r.id !== null && r._dirty)
+      .length;
   const totalDirty = newCount + updateCount;
 
-  const cell = "w-full h-8 px-2 text-sm bg-transparent border border-transparent focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 rounded-lg outline-none transition-colors placeholder:text-slate-300 dark:placeholder:text-slate-700";
-  const sel = "w-full h-8 pl-2 pr-6 text-sm bg-transparent border border-transparent focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 rounded-lg outline-none transition-colors appearance-none cursor-pointer";
+  const cell =
+    "w-full h-8 px-2 text-sm bg-transparent border border-transparent focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 rounded-lg outline-none transition-colors placeholder:text-slate-300 dark:placeholder:text-slate-700";
+  const sel =
+    "w-full h-8 pl-2 pr-6 text-sm bg-transparent border border-transparent focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 rounded-lg outline-none transition-colors appearance-none cursor-pointer";
 
   const validRowsCount = rows.filter((r) => r.dosya_adi.trim() !== "").length;
-  const isAllSelected = validRowsCount > 0 && selectedKeys.size === validRowsCount;
+  const isAllSelected = validRowsCount > 0 &&
+    selectedKeys.size === validRowsCount;
 
   return (
     <div className="flex flex-col gap-5 h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -456,15 +520,25 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
               onClick={loadExisting}
               className="flex items-center gap-1.5 h-9 px-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-60"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               {isLoading ? "Yükleniyor..." : "Yazıları Yükle"}
             </button>
           </div>
 
-          <Button variant="outline" className="gap-2 text-sm rounded-xl h-9 px-4" onClick={handlePaste}>
+          <Button
+            variant="outline"
+            className="gap-2 text-sm rounded-xl h-9 px-4"
+            onClick={handlePaste}
+          >
             <ClipboardList className="w-4 h-4" /> Panodan Yapıştır
           </Button>
-          <Button variant="outline" className="gap-2 text-sm rounded-xl h-9 px-4" onClick={addRow}>
+          <Button
+            variant="outline"
+            className="gap-2 text-sm rounded-xl h-9 px-4"
+            onClick={addRow}
+          >
             <Plus className="w-4 h-4" /> Satır Ekle
           </Button>
           <Button
@@ -477,7 +551,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
               ? "Kaydediliyor..."
               : totalDirty === 0
               ? "Değişiklik Yok"
-              : `${newCount > 0 ? `${newCount} Ekle` : ""}${newCount > 0 && updateCount > 0 ? " + " : ""}${updateCount > 0 ? `${updateCount} Güncelle` : ""}`}
+              : `${newCount > 0 ? `${newCount} Ekle` : ""}${
+                newCount > 0 && updateCount > 0 ? " + " : ""
+              }${updateCount > 0 ? `${updateCount} Güncelle` : ""}`}
           </Button>
         </div>
       </div>
@@ -493,7 +569,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-500 dark:text-slate-400">Aşama:</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Aşama:
+              </span>
               <select
                 title="Toplu aşama seçin"
                 onChange={(e) => {
@@ -512,7 +590,9 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-500 dark:text-slate-400">Tür:</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Tür:
+              </span>
               <select
                 title="Toplu tür seçin"
                 onChange={(e) => {
@@ -544,26 +624,45 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
 
       {/* Sonuç Bildirimi */}
       {result && (
-        <div className={`flex items-start gap-3 p-4 rounded-xl border text-sm ${result.errors.length === 0 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400" : "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"}`}>
-          {result.errors.length === 0 ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
+        <div
+          className={`flex items-start gap-3 p-4 rounded-xl border text-sm ${
+            result.errors.length === 0
+              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
+              : "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+          }`}
+        >
+          {result.errors.length === 0
+            ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+            : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
           <div>
             <p className="font-semibold">
               {result.inserted > 0 && `${result.inserted} yeni dosya eklendi. `}
               {result.updated > 0 && `${result.updated} dosya güncellendi.`}
-              {result.errors.length > 0 && ` ${result.errors.length} hatalı kayıt.`}
+              {result.errors.length > 0 &&
+                ` ${result.errors.length} hatalı kayıt.`}
             </p>
-            {result.errors.map((e, i) => <p key={i} className="text-xs mt-0.5 opacity-80">• {e}</p>)}
+            {result.errors.map((e, i) => (
+              <p key={i} className="text-xs mt-0.5 opacity-80">• {e}</p>
+            ))}
           </div>
         </div>
       )}
 
       {/* İpucu */}
       <p className="text-xs text-slate-400 dark:text-slate-500 -mb-2">
-        Sarı zemin = değiştirilmiş satır • Mavi ID = mevcut kayıt (güncelleme) • Beyaz = yeni kayıt (ekleme) &nbsp;·&nbsp; Excel sütun sırası: <strong>Dosya No | DT No | Dosya Adı | Açıklama | İhale Türü | Şekli | Tarih | Aşama</strong>
+        Sarı zemin = değiştirilmiş satır • Mavi ID = mevcut kayıt (güncelleme) •
+        Beyaz = yeni kayıt (ekleme) &nbsp;·&nbsp; Excel sütun sırası:{" "}
+        <strong>
+          Dosya No | DT No | Dosya Adı | Açıklama | İhale Türü | Şekli | Tarih |
+          Aşama
+        </strong>
       </p>
 
       {/* Tablo */}
-      <div ref={tableRef} className="flex-1 overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div
+        ref={tableRef}
+        className="flex-1 overflow-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
+      >
         <table className="w-full text-sm border-collapse min-w-[1100px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -577,14 +676,28 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                 />
               </th>
               <th className="w-16 px-3 py-3 text-center">ID</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">Dosya No</th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                Dosya No
+              </th>
               <th className="px-3 py-3 text-left whitespace-nowrap">D.T. No</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">Dosya Adı *</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">Açıklama</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">İhale Türü</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">İhale Şekli</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">İhale Tarihi</th>
-              <th className="px-3 py-3 text-left whitespace-nowrap">İhale Aşaması</th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                Dosya Adı *
+              </th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                Açıklama
+              </th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                İhale Türü
+              </th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                İhale Şekli
+              </th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                İhale Tarihi
+              </th>
+              <th className="px-3 py-3 text-left whitespace-nowrap">
+                İhale Aşaması
+              </th>
               <th className="w-10 px-3 py-3" />
             </tr>
           </thead>
@@ -617,22 +730,25 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                   </td>
 
                   <td className="px-3 py-1.5 text-center">
-                    {row.id !== null ? (
-                      <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
-                        #{row.id}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-300 dark:text-slate-700">
-                        YENİ
-                      </span>
-                    )}
+                    {row.id !== null
+                      ? (
+                        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
+                          #{row.id}
+                        </span>
+                      )
+                      : (
+                        <span className="text-xs text-slate-300 dark:text-slate-700">
+                          YENİ
+                        </span>
+                      )}
                   </td>
 
                   <td className="px-2 py-1.5">
                     <input
                       type="text"
                       value={row.dosya_no}
-                      onChange={(e) => updateRow(row._key, "dosya_no", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row._key, "dosya_no", e.target.value)}
                       placeholder="2025/001"
                       className={`${cell} min-w-[90px]`}
                     />
@@ -641,7 +757,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                     <input
                       type="text"
                       value={row.dt_no}
-                      onChange={(e) => updateRow(row._key, "dt_no", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row._key, "dt_no", e.target.value)}
                       placeholder="DT-001"
                       className={`${cell} min-w-[80px]`}
                     />
@@ -650,7 +767,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                     <input
                       type="text"
                       value={row.dosya_adi}
-                      onChange={(e) => updateRow(row._key, "dosya_adi", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row._key, "dosya_adi", e.target.value)}
                       placeholder="Kırtasiye Alımı..."
                       className={`${cell} min-w-[200px]`}
                     />
@@ -659,7 +777,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                     <input
                       type="text"
                       value={row.aciklama}
-                      onChange={(e) => updateRow(row._key, "aciklama", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row._key, "aciklama", e.target.value)}
                       placeholder="Opsiyonel..."
                       className={`${cell} min-w-[130px]`}
                     />
@@ -670,7 +789,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                       <select
                         title="İhale türü"
                         value={row.ihale_turu}
-                        onChange={(e) => updateRow(row._key, "ihale_turu", e.target.value)}
+                        onChange={(e) =>
+                          updateRow(row._key, "ihale_turu", e.target.value)}
                         className={sel}
                       >
                         {IHALE_TURLERI.map((t) => (
@@ -685,7 +805,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                       <select
                         title="İhale şekli"
                         value={row.ihale_sekli}
-                        onChange={(e) => updateRow(row._key, "ihale_sekli", e.target.value)}
+                        onChange={(e) =>
+                          updateRow(row._key, "ihale_sekli", e.target.value)}
                         className={sel}
                       >
                         {IHALE_SEKILLERI.map((s) => (
@@ -699,7 +820,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                     <input
                       type="date"
                       value={row.ihale_tarihi}
-                      onChange={(e) => updateRow(row._key, "ihale_tarihi", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row._key, "ihale_tarihi", e.target.value)}
                       className={`${cell} min-w-[130px]`}
                     />
                   </td>
@@ -708,7 +830,8 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
                       <select
                         title="İhale aşaması"
                         value={row.ihale_asamasi}
-                        onChange={(e) => updateRow(row._key, "ihale_asamasi", e.target.value)}
+                        onChange={(e) =>
+                          updateRow(row._key, "ihale_asamasi", e.target.value)}
                         className={sel}
                       >
                         {IHALE_ASAMALARI.map((a) => (
@@ -744,4 +867,3 @@ export default function HizliDosyaEkleScreen(): React.JSX.Element {
     </div>
   );
 }
-Cwd:
