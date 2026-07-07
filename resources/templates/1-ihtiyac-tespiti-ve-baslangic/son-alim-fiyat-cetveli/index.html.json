@@ -8,7 +8,7 @@
   "evrakSayisi": "E-12345",
   "dosyaKonusu": "Son Alım Fiyat Cetveli",
   "tarih": "28.06.2026",
-  "kurumIci": false,
+  "kurumIci": true,
   "kurumAdres": "Mustafa Kemal Mah. Dumlupınar Blv. No:1 Çankaya/Ankara",
   "kurumTelefon": "0312 555 44 33",
   "kurumWeb": "www.saglik.gov.tr",

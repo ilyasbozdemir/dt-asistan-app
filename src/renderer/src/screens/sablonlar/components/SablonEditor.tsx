@@ -43,7 +43,7 @@ export function SablonEditor({
   "tarih": "${today}",
   "dosyaTarihi": "${today}",
   "firma_adi": "Test Firması A.Ş.",
-  "kurumIci": false,
+  "kurumIci": true,
   "evrakSayisi": "E-12345",
   "sunulacakMakamAdi": "MAKAM ONAYINA",
   "dosyaKonusu": "KONUSU",

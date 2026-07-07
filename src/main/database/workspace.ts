@@ -106,6 +106,35 @@ function ensureSchemaIntegrity(db: Database.Database): void {
       console.error(`Error self-healing table ${table.name}:`, err.message)
     }
   }
+
+  // Legacy snapshots migration: Force kurumIci to true if it was false/null/undefined
+  try {
+    const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='DATA_DosyaSablonVeri'").get()
+    if (tableCheck) {
+      const rows = db.prepare('SELECT id, veri_json FROM DATA_DosyaSablonVeri').all() as any[]
+      const stmt = db.prepare('UPDATE DATA_DosyaSablonVeri SET veri_json = ? WHERE id = ?')
+      let migratedCount = 0
+      for (const row of rows) {
+        if (row.veri_json) {
+          try {
+            const parsed = JSON.parse(row.veri_json)
+            if (parsed.kurumIci === false || parsed.kurumIci === undefined || parsed.kurumIci === null) {
+              parsed.kurumIci = true
+              stmt.run(JSON.stringify(parsed), row.id)
+              migratedCount++
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+      if (migratedCount > 0) {
+        console.log(`[Migration] Migrated ${migratedCount} legacy document snapshots: forced kurumIci to true`)
+      }
+    }
+  } catch (err: any) {
+    console.error('Error migrating legacy snapshots:', err.message)
+  }
 }
 
 const TEMPLATE_NAMES: Record<string, string> = {

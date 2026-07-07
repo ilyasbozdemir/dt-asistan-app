@@ -14,7 +14,7 @@
   "talepEdenPersonelUnvan": "Poliklinik Hemşiresi",
   "hazirlayanPersonelAdi": "Ayşe Demir",
   "hazirlayanPersonelUnvan": "V.H.K.İ.",
-  "kurumIci": false,
+  "kurumIci": true,
   "kurumAdres": "Mustafa Kemal Mah. Dumlupınar Blv. No:1 Çankaya/Ankara",
   "kurumTelefon": "0312 555 44 33",
   "kurumFaks": "0312 555 44 34",

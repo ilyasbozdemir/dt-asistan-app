@@ -1,16 +1,19 @@
-import React from 'react'
+import React from "react";
 
 interface PreviewFormViewProps {
-  formFields: string[]
-  mergedContext: any
-  overrideData: Record<string, any>
-  placeholders: any[]
-  activePersonnelFields: string[]
-  personelListesi: any[]
-  PERSONNEL_FIELDS: Record<string, { adiKey: string; unvanKey: string; etiket: string }>
-  handleFormChange: (key: string, value: any) => void
-  handlePersonelSelect: (field: any, selectedPersonel: any) => void
-  handlePersonelClear: (field: any) => void
+  formFields: string[];
+  mergedContext: any;
+  overrideData: Record<string, any>;
+  placeholders: any[];
+  activePersonnelFields: string[];
+  personelListesi: any[];
+  PERSONNEL_FIELDS: Record<
+    string,
+    { adiKey: string; unvanKey: string; etiket: string }
+  >;
+  handleFormChange: (key: string, value: any) => void;
+  handlePersonelSelect: (field: any, selectedPersonel: any) => void;
+  handlePersonelClear: (field: any) => void;
 }
 
 export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
@@ -23,25 +26,33 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
   PERSONNEL_FIELDS,
   handleFormChange,
   handlePersonelSelect,
-  handlePersonelClear
+  handlePersonelClear,
 }) => {
   return (
     <div className="flex flex-col gap-4">
       {formFields.map((key) => {
-        const originalValue = mergedContext[key]
-        const value = overrideData[key] !== undefined ? overrideData[key] : originalValue
-        const type = typeof originalValue
+        const originalValue = mergedContext[key];
+        const value = overrideData[key] !== undefined
+          ? overrideData[key]
+          : originalValue;
+        const type = typeof originalValue;
 
-        const schemaDef = placeholders.find((p) => p.anahtar === key) || null
-        const label = schemaDef ? schemaDef.etiket : key
-        const effectiveType = schemaDef?.veri_tipi === 'date' ? 'date' : type
+        const schemaDef = placeholders.find((p) => p.anahtar === key) || null;
+        const label = schemaDef ? schemaDef.etiket : key;
+        const effectiveType = schemaDef?.veri_tipi === "date"
+          ? "date"
+          : schemaDef?.veri_tipi === "boolean"
+          ? "boolean"
+          : schemaDef?.veri_tipi === "number"
+          ? "number"
+          : type;
 
-        if (effectiveType === 'date') {
-          let dateVal = value || ''
-          if (typeof value === 'string' && value.includes('.')) {
-            const parts = value.split('.')
+        if (effectiveType === "date") {
+          let dateVal = value || "";
+          if (typeof value === "string" && value.includes(".")) {
+            const parts = value.split(".");
             if (parts.length === 3) {
-              dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`
+              dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
           }
 
@@ -52,7 +63,9 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   {label}
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <input
@@ -61,25 +74,30 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 placeholder={label}
                 value={dateVal}
                 onChange={(e) => {
-                  const d = e.target.value
+                  const d = e.target.value;
                   if (!d) {
-                    handleFormChange(key, '')
-                    return
+                    handleFormChange(key, "");
+                    return;
                   }
-                  const parts = d.split('-')
+                  const parts = d.split("-");
                   if (parts.length === 3) {
-                    handleFormChange(key, `${parts[2]}.${parts[1]}.${parts[0]}`)
+                    handleFormChange(
+                      key,
+                      `${parts[2]}.${parts[1]}.${parts[0]}`,
+                    );
                   } else {
-                    handleFormChange(key, d)
+                    handleFormChange(key, d);
                   }
                 }}
                 className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
               />
             </div>
-          )
+          );
         }
 
-        if (effectiveType === 'boolean') {
+        if (effectiveType === "boolean") {
+          const isChecked = value === true || value === "true" || value === 1 ||
+            value === "1";
           return (
             <div key={key} className="flex items-center justify-between">
               <div className="flex flex-col">
@@ -87,21 +105,23 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   {label}
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <input
                 type="checkbox"
                 title={label}
-                checked={!!value}
+                checked={isChecked}
                 onChange={(e) => handleFormChange(key, e.target.checked)}
                 className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
             </div>
-          )
+          );
         }
 
-        if (type === 'number') {
+        if (type === "number") {
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
@@ -109,7 +129,9 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   {label}
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <input
@@ -121,77 +143,82 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
               />
             </div>
-          )
+          );
         }
 
         if (
           Array.isArray(originalValue) &&
-          originalValue.every((v) => typeof v === 'string')
+          originalValue.every((v) => typeof v === "string")
         ) {
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {label}{' '}
+                  {label}{" "}
                   <span className="text-xs font-normal text-slate-400">
                     (Liste - Her satır bir eleman)
                   </span>
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <textarea
                 title={label}
                 placeholder={label}
-                value={Array.isArray(value) ? value.join('\n') : value}
+                value={Array.isArray(value) ? value.join("\n") : value}
                 onChange={(e) => {
-                  handleFormChange(key, e.target.value.split('\n'))
+                  handleFormChange(key, e.target.value.split("\n"));
                 }}
                 className="w-full p-2.5 min-h-[100px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-y"
               />
             </div>
-          )
+          );
         }
 
-        if (Array.isArray(originalValue) || type === 'object') {
+        if (Array.isArray(originalValue) || type === "object") {
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {label}{' '}
+                  {label}{" "}
                   <span className="text-xs font-normal text-slate-400">
-                    ({Array.isArray(originalValue) ? 'Dizi' : 'Nesne'})
+                    ({Array.isArray(originalValue) ? "Dizi" : "Nesne"})
                   </span>
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <textarea
                 title={label}
                 placeholder={label}
-                value={
-                  typeof value === 'object' ? JSON.stringify(value, null, 2) : value
-                }
+                value={typeof value === "object"
+                  ? JSON.stringify(value, null, 2)
+                  : value}
                 onChange={(e) => {
                   try {
                     const parsed = JSON.parse(
-                      e.target.value || (Array.isArray(originalValue) ? '[]' : '{}')
-                    )
-                    handleFormChange(key, parsed)
+                      e.target.value ||
+                        (Array.isArray(originalValue) ? "[]" : "{}"),
+                    );
+                    handleFormChange(key, parsed);
                   } catch (err) {
-                    handleFormChange(key, e.target.value)
+                    handleFormChange(key, e.target.value);
                   }
                 }}
                 className="w-full p-2.5 h-24 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
               />
             </div>
-          )
+          );
         }
 
         // Schema tip uzun_metin desteği (dialog modal'da tip === 'uzun_metin' kontrolü vardı)
-        if (schemaDef?.tip === 'uzun_metin') {
+        if (schemaDef?.tip === "uzun_metin") {
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
@@ -199,18 +226,20 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   {label}
                 </label>
                 {schemaDef?.aciklama && (
-                  <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
                 )}
               </div>
               <textarea
                 title={label}
                 placeholder={label}
-                value={value || ''}
+                value={value || ""}
                 onChange={(e) => handleFormChange(key, e.target.value)}
                 className="w-full p-2.5 min-h-[80px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-y"
               />
             </div>
-          )
+          );
         }
 
         return (
@@ -220,19 +249,21 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 {label}
               </label>
               {schemaDef?.aciklama && (
-                <span className="text-xs text-slate-500">{schemaDef.aciklama}</span>
+                <span className="text-xs text-slate-500">
+                  {schemaDef.aciklama}
+                </span>
               )}
             </div>
             <input
               type="text"
               title={label}
               placeholder={label}
-              value={value || ''}
+              value={value || ""}
               onChange={(e) => handleFormChange(key, e.target.value)}
               className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
             />
           </div>
-        )
+        );
       })}
       {formFields.length === 0 && activePersonnelFields.length === 0 && (
         <div className="text-center text-sm text-slate-500 mt-10">
@@ -261,8 +292,9 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
             Yetkili Personel Seçimi
           </p>
           {activePersonnelFields.map((key) => {
-            const field = PERSONNEL_FIELDS[key]
-            const currentValue = overrideData[field.adiKey] ?? mergedContext[field.adiKey] ?? ''
+            const field = PERSONNEL_FIELDS[key];
+            const currentValue = overrideData[field.adiKey] ??
+              mergedContext[field.adiKey] ?? "";
 
             return (
               <div key={key} className="flex flex-col gap-1.5 mb-3">
@@ -274,12 +306,12 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   value={currentValue}
                   onChange={(e) => {
                     const selectedPersonel = personelListesi.find(
-                      (p) => p.ad_soyad === e.target.value
-                    )
+                      (p) => p.ad_soyad === e.target.value,
+                    );
                     if (selectedPersonel) {
-                      handlePersonelSelect(field, selectedPersonel)
-                    } else if (e.target.value === '') {
-                      handlePersonelClear(field)
+                      handlePersonelSelect(field, selectedPersonel);
+                    } else if (e.target.value === "") {
+                      handlePersonelClear(field);
                     }
                   }}
                   className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
@@ -288,21 +320,21 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                   {personelListesi.map((p) => (
                     <option key={p.id} value={p.ad_soyad}>
                       {p.ad_soyad}
-                      {p.unvan ? ` — ${p.unvan}` : ''}
+                      {p.unvan ? ` — ${p.unvan}` : ""}
                     </option>
                   ))}
                 </select>
                 {currentValue && (
                   <span className="text-[10px] text-slate-400">
-                    Seçili: {currentValue} —{' '}
-                    {overrideData[field.unvanKey] ?? mergedContext[field.unvanKey] ?? ''}
+                    Seçili: {currentValue} — {overrideData[field.unvanKey] ??
+                      mergedContext[field.unvanKey] ?? ""}
                   </span>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,1 +1,1 @@
-export { DocumentPreviewModal } from './DocumentPreviewModal/index'
+export { DocumentPreviewModal } from "./DocumentPreviewModal/index";
