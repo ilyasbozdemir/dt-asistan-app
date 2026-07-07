@@ -4,19 +4,19 @@ export const IhtiyacListesiMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
+    aciklama: 'Dosyanın antet satırları'
   },
-  dosyaKonusu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Dosya Konusu' },
+  dosyaKonusu: { deger: 'İhtiyaç Listesi', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
     formul:
       '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi olarak otomatik Ã¼retilir'
+    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
   },
 
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Sunulacak makam adÄ±'
+    aciklama: 'Sunulacak makam adı'
   },
 
   ihtiyacKalemleri: {
@@ -31,26 +31,26 @@ export const IhtiyacListesiMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'Ä°htiyaÃ§ listesi kalemleri'
+    aciklama: 'İhtiyaç listesi kalemleri'
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
-    aciklama: 'Ä°htiyaÃ§ listesi yerleri'
+    aciklama: 'İhtiyaç listesi yerleri'
   },
 
   isinAciklamasi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
-    aciklama: 'Ä°ÅŸin AÃ§Ä±klamasÄ±/AÃ§Ä±klama'
+    aciklama: 'İşin Açıklaması/Açıklama'
   },
   olurYazisi: {
     deger: true,
-    aciklama: 'Olur yazÄ±sÄ± oluÅŸturulacak'
+    aciklama: 'Olur yazısı oluşturulacak'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',

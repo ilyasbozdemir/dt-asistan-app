@@ -9,19 +9,19 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   detsisNo: {
     tablo: 'TANIM_Kurum',
     sutun: 'detsis_kodu',
-    aciklama: 'Kurum DETSÄ°S NumarasÄ±'
+    aciklama: 'Kurum DETSİS Numarası'
   },
   yili: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'butce_yili',
-    aciklama: 'BÃ¼tÃ§e YÄ±lÄ±'
+    aciklama: 'Bütçe Yılı'
   },
   sayisi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'temin_no_clean',
-    aciklama: 'Temin NumarasÄ±'
+    aciklama: 'Temin Numarası'
   },
-  dosyaKonusu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Dosya Konusu' },
+  dosyaKonusu: { deger: 'Piyasa Fiyat Araştırma Görevlendirmesi', aciklama: 'Belgenin konusu' },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'dosya_tarihi',
@@ -30,22 +30,22 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   kurumumuz: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum AdÄ±'
+    aciklama: 'Kurum Adı'
   },
   isinAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'konu',
-    aciklama: 'Ä°ÅŸin AdÄ±'
+    aciklama: 'İşin Adı'
   },
   hazirlayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_ad',
-    aciklama: 'HazÄ±rlayan Personel'
+    aciklama: 'Hazırlayan Personel'
   },
   hazirlayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_unvan',
-    aciklama: 'HazÄ±rlayan Personel ÃœnvanÄ±'
+    aciklama: 'Hazırlayan Personel Ünvanı'
   },
   onaylayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
@@ -55,7 +55,7 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   onaylayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Yetkili ÃœnvanÄ±'
+    aciklama: 'Onaylayan Yetkili Ünvanı'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -70,7 +70,7 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   kurumFaks: {
     tablo: 'TANIM_Kurum',
     sutun: 'faks',
-    aciklama: 'Kurum FaksÄ±'
+    aciklama: 'Kurum Faksı'
   },
   kurumWeb: {
     tablo: 'TANIM_Kurum',
@@ -89,7 +89,7 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   }
 }
 

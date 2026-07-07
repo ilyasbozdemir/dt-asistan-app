@@ -4,35 +4,35 @@ export const IhtiyacTalepFormuMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
+    aciklama: 'Dosyanın antet satırları'
   },
   dosyaKonusu: {
-    deger: 'Ä°htiyaÃ§ Talep Formu',
+    deger: 'İhtiyaç Talep Formu',
     aciklama: 'Dosya konusu'
   },
   evrakSayisi: {
     formul:
       '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi olarak otomatik Ã¼retilir'
+    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
   },
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Sunulacak makam adÄ±'
+    aciklama: 'Sunulacak makam adı'
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
-    aciklama: 'Ä°htiyaÃ§ Yeri'
+    aciklama: 'İhtiyaç Yeri'
   },
   gerekce: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
-    aciklama: 'Birimin talep gerekÃ§esi (Ä°ÅŸin aÃ§Ä±klamasÄ± baz alÄ±nÄ±r)'
+    aciklama: 'Birimin talep gerekçesi (İşin açıklaması baz alınır)'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -82,7 +82,7 @@ export const IhtiyacTalepFormuMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'Ä°htiyaÃ§ talep formu kalemleri'
+    aciklama: 'İhtiyaç talep formu kalemleri'
   }
 }
 

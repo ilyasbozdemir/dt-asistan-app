@@ -4,16 +4,16 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
+    aciklama: 'Dosyanın antet satırları'
   },
   dosyaKonusu: {
-    deger: 'Son AlÄ±m Fiyat Cetveli',
+    deger: 'Son Alım Fiyat Cetveli',
     aciklama: 'Belgenin konusu'
   },
   evrakSayisi: {
     formul:
       '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi'
+    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -22,7 +22,7 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -57,34 +57,34 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
   hazirlayanPersonelAdi: {
     tablo: 'TANIM_Personel',
     sutun: 'ad_soyad',
-    aciklama: 'HazÄ±rlayan personelin adÄ± soyadÄ±'
+    aciklama: 'Hazırlayan personelin adı soyadı'
   },
   hazirlayanPersonelUnvan: {
     tablo: 'TANIM_Personel',
     sutun: 'unvan',
-    aciklama: 'HazÄ±rlayan personelin Ã¼nvanÄ±'
+    aciklama: 'Hazırlayan personelin ünvanı'
   },
   hazirlayanTelefon: {
     tablo: 'TANIM_Personel',
     sutun: 'telefon',
     varsayilan: '',
-    aciklama: 'HazÄ±rlayan personelin telefonu'
+    aciklama: 'Hazırlayan personelin telefonu'
   },
   hazirlayanEposta: {
     tablo: 'TANIM_Personel',
     sutun: 'eposta',
     varsayilan: '',
-    aciklama: 'HazÄ±rlayan personelin e-postasÄ±'
+    aciklama: 'Hazırlayan personelin e-postası'
   },
   kontrolEdenPersonelAdi: {
     tablo: 'TANIM_Personel',
     sutun: 'ad_soyad',
-    aciklama: 'Kontrol eden personelin adÄ± soyadÄ±'
+    aciklama: 'Kontrol eden personelin adı soyadı'
   },
   kontrolEdenPersonelUnvan: {
     tablo: 'TANIM_Personel',
     sutun: 'unvan',
-    aciklama: 'Kontrol eden personelin Ã¼nvanÄ±'
+    aciklama: 'Kontrol eden personelin ünvanı'
   },
   fiyatKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -102,7 +102,7 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
       kazananFirma: 'kazanan_firma',
       alimTarihi: 'alim_tarihi'
     },
-    aciklama: 'Son alÄ±m fiyat cetveli kalemleri'
+    aciklama: 'Son alım fiyat cetveli kalemleri'
   }
 }
 

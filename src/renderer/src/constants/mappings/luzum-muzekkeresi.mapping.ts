@@ -1,21 +1,21 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const LuzumMuzekkeresiMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
+    aciklama: 'Dosyanın antet satırları'
   },
-  dosyaKonusu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Dosya Konusu' },
+  dosyaKonusu: { deger: 'Lüzum Müzekkeresi', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
     formul:
       '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi olarak otomatik Ã¼retilir'
+    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
   },
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Sunulacak makam adÄ±'
+    aciklama: 'Sunulacak makam adı'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -29,25 +29,25 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'LÃ¼zum MÃ¼zekkeresi kalemleri'
+    aciklama: 'Lüzum Müzekkeresi kalemleri'
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
-    aciklama: 'LÃ¼zum MÃ¼zekkeresi yerleri'
+    aciklama: 'Lüzum Müzekkeresi yerleri'
   },
   isinAciklamasi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
-    aciklama: 'Ä°ÅŸin AÃ§Ä±klamasÄ±/AÃ§Ä±klama'
+    aciklama: 'İşin Açıklaması/Açıklama'
   },
   olurYazisi: {
     deger: true,
-    aciklama: 'Olur yazÄ±sÄ± oluÅŸturulacak'
+    aciklama: 'Olur yazısı oluşturulacak'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -89,35 +89,35 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_telefon',
     varsayilan: '',
-    aciklama: 'HazÄ±rlayan personelin irtibat numarasÄ±'
+    aciklama: 'Hazırlayan personelin irtibat numarası'
   },
   ilgiliTelefon: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'irtibat_telefon',
     varsayilan: '',
-    aciklama: 'Ä°rtibat yetkilisinin telefon numarasÄ±'
+    aciklama: 'İrtibat yetkilisinin telefon numarası'
   },
   talepEdenTelefon: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'talep_eden_telefon',
     varsayilan: '',
-    aciklama: 'Talep eden personelin telefon numarasÄ±'
+    aciklama: 'Talep eden personelin telefon numarası'
   },
   sunanTelefon: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'sunan_telefon',
     varsayilan: '',
-    aciklama: 'Sunan personelin telefon numarasÄ±'
+    aciklama: 'Sunan personelin telefon numarası'
   },
   talepEdenPersonelAdi: {
     tablo: 'TANIM_Personel',
     sutun: 'ad_soyad',
-    aciklama: 'Talep eden personelin adÄ± soyadÄ±'
+    aciklama: 'Talep eden personelin adı soyadı'
   },
   talepEdenPersonelUnvan: {
     tablo: 'TANIM_Personel',
     sutun: 'unvan',
-    aciklama: 'Talep eden personelin Ã¼nvanÄ±'
+    aciklama: 'Talep eden personelin ünvanı'
   }
 }
 

@@ -4,31 +4,31 @@ export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
   kurumUst: {
     tablo: 'TANIM_Kurum',
     sutun: 'ust_idari_birim',
-    aciklama: 'Ãœst Ä°dari Birim'
+    aciklama: 'Üst İdari Birim'
   },
   kurumAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum AdÄ±'
+    aciklama: 'Kurum Adı'
   },
   mudurluk: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'MÃ¼dÃ¼rlÃ¼k / Makam'
+    aciklama: 'Müdürlük / Makam'
   },
   kurumumuz: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum AdÄ±'
+    aciklama: 'Kurum Adı'
   },
   alimTuru: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'alim_turu',
-    aciklama: 'AlÄ±m TÃ¼rÃ¼'
+    aciklama: 'Alım Türü'
   },
   evrakSayisi: {
     formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi'
+    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -43,35 +43,35 @@ export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
   isAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'konu',
-    aciklama: 'Ä°ÅŸin AdÄ±'
+    aciklama: 'İşin Adı'
   },
   hazirlayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_ad',
-    aciklama: 'HazÄ±rlayan Personel'
+    aciklama: 'Hazırlayan Personel'
   },
   hazirlayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_unvan',
-    aciklama: 'HazÄ±rlayan Personel ÃœnvanÄ±'
+    aciklama: 'Hazırlayan Personel Ünvanı'
   },
   baskanAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_ad',
-    aciklama: 'Belediye BaÅŸkanÄ± / Harcama Yetkilisi'
+    aciklama: 'Belediye Başkanı / Harcama Yetkilisi'
   },
   baskanUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Personel ÃœnvanÄ±'
+    aciklama: 'Onaylayan Personel Ünvanı'
   },
   ekNo: {
     deger: '2',
-    aciklama: 'Onay Eki NumarasÄ±'
+    aciklama: 'Onay Eki Numarası'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   }
 }
 

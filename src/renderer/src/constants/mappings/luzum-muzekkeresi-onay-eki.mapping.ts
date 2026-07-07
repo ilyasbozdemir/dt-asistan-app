@@ -4,25 +4,25 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
+    aciklama: 'Dosyanın antet satırları'
   },
   dosyaKonusu: {
-    deger: 'LÃ¼zum MÃ¼zekkeresi',
+    deger: 'Lüzum Müzekkeresi',
     aciklama: 'Belgenin konusu'
   },
   ekNo: {
     deger: '1',
-    aciklama: 'Ek numarasÄ±'
+    aciklama: 'Ek numarası'
   },
   talepEdenPersonelAdi: {
     tablo: 'TANIM_Personel',
     sutun: 'ad_soyad',
-    aciklama: 'Talep eden personelin adÄ± soyadÄ±'
+    aciklama: 'Talep eden personelin adı soyadı'
   },
   talepEdenPersonelUnvan: {
     tablo: 'TANIM_Personel',
     sutun: 'unvan',
-    aciklama: 'Talep eden personelin Ã¼nvanÄ±'
+    aciklama: 'Talep eden personelin ünvanı'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -45,7 +45,7 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum iÃ§i mi?'
+    aciklama: 'Kurum içi mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',

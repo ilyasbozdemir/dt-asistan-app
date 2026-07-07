@@ -9,22 +9,22 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   kurumUst: {
     tablo: 'TANIM_Kurum',
     sutun: 'ust_idari_birim',
-    aciklama: 'Ãœst Ä°dari Birim'
+    aciklama: 'Üst İdari Birim'
   },
   kurumAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum AdÄ±'
+    aciklama: 'Kurum Adı'
   },
   mudurluk: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'MÃ¼dÃ¼rlÃ¼k / Makam'
+    aciklama: 'Müdürlük / Makam'
   },
   isAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'konu',
-    aciklama: 'Ä°ÅŸin AdÄ±'
+    aciklama: 'İşin Adı'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -39,7 +39,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   genelToplam: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'yaklasik_maliyet',
-    aciklama: 'Genel YaklaÅŸÄ±k Maliyet ToplamÄ±'
+    aciklama: 'Genel Yaklaşık Maliyet Toplamı'
   },
   baskanAdi: {
     tablo: 'DATA_TeminDosyasi',
@@ -49,7 +49,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   baskanUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Personel ÃœnvanÄ±'
+    aciklama: 'Onaylayan Personel Ünvanı'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -62,7 +62,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
       birimi: 'birim',
       miktar: 'miktar'
     },
-    aciklama: 'YaklaÅŸÄ±k Maliyet Malzeme Kalemleri'
+    aciklama: 'Yaklaşık Maliyet Malzeme Kalemleri'
   }
 }
 
