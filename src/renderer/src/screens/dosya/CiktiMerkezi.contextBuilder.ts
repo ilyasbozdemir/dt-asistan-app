@@ -231,7 +231,25 @@ export function buildDocumentContext(
     formattedEvrakSayisi = dosyaSayisi
   }
 
+  const rawMaddeler = dosyaResData?.isin_aciklama_maddeleri
+  let aciklamaMaddeleri: any[] = []
+  if (rawMaddeler) {
+    try {
+      const parsed = JSON.parse(rawMaddeler)
+      if (Array.isArray(parsed)) {
+        aciklamaMaddeleri = parsed.map((m: string, idx: number) => ({
+          siraNo: idx + 1,
+          maddeMetni: m
+        }))
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const context: any = {
+    aciklamaMaddeleri,
+    hasAciklamaMaddeleri: aciklamaMaddeleri.length > 0,
     dosyaYili: dosyaYili,
     kapakDetaylari,
     tarih: today,

@@ -33,6 +33,7 @@ export interface TeminDosyasi {
   avans_verilecek_mi: number
   yillara_yaygin: number
   sozlesme_yapilacak_mi: number
+  isin_aciklama_maddeleri: string | null
 
   yaklasik_maliyet_hesaplamasi: string | null
   kdv: string | null

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { Check, Edit2, Package, Plus, Printer, Trash2, X } from 'lucide-react'
+import { Check, Edit2, Package, Plus, Printer, Trash2, X, ArrowUp, ArrowDown, FileText } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { Modal } from '../../components/ui/Modal'
 import { SubScreen } from './SubScreen'
@@ -36,6 +36,39 @@ export function MalzemeListesi(): React.JSX.Element {
   const [editBirim, setEditBirim] = useState('')
   const [editKdv, setEditKdv] = useState(20)
 
+  // Madde / Şart states
+  const [maddeler, setMaddeler] = useState<string[]>([])
+  const [isMaddeModalOpen, setIsMaddeModalOpen] = useState(false)
+  const [maddeInput, setMaddeInput] = useState('')
+  const [editingMaddeIndex, setEditingMaddeIndex] = useState<number | null>(null)
+  const handleSaveMaddeler = async (newMaddeler: string[]) => {
+    if (!activeDosyaId) return
+    const rawMaddeler = JSON.stringify(newMaddeler)
+    try {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'UPDATE DATA_TeminDosyasi SET isin_aciklama_maddeleri = ? WHERE id = ?',
+        [rawMaddeler, activeDosyaId]
+      )
+      if (res.success) {
+        setMaddeler(newMaddeler)
+      } else {
+        alert('Hata: ' + (res.error || 'Kaydedilemedi'))
+      }
+    } catch (err: any) {
+      alert('Hata: ' + err.message)
+    }
+  }
+
+  const handleMoveMadde = (index: number, direction: 'up' | 'down') => {
+    const nextIdx = direction === 'up' ? index - 1 : index + 1
+    if (nextIdx < 0 || nextIdx >= maddeler.length) return
+    const updated = [...maddeler]
+    const temp = updated[index]
+    updated[index] = updated[nextIdx]
+    updated[nextIdx] = temp
+    handleSaveMaddeler(updated)
+  }
   const handleAiAçiklama = async () => {
     const name = kalemAdi.trim() || searchQuery.trim()
     if (!name) return
@@ -73,9 +106,29 @@ export function MalzemeListesi(): React.JSX.Element {
         'db:query',
         'SELECT * FROM TANIM_Kalem WHERE aktif_mi = 1 ORDER BY kalem_adi ASC'
       )
+      const resDosya = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT isin_aciklama_maddeleri FROM DATA_TeminDosyasi WHERE id = ?',
+        [activeDosyaId]
+      )
       if (resItems.success) setItems(resItems.data)
       if (resUnits.success) setUnits(resUnits.data)
       if (resLib.success) setLibraryItems(resLib.data)
+      if (resDosya.success && resDosya.data.length > 0) {
+        const rawMaddeler = resDosya.data[0].isin_aciklama_maddeleri
+        if (rawMaddeler) {
+          try {
+            const parsed = JSON.parse(rawMaddeler)
+            if (Array.isArray(parsed)) {
+              setMaddeler(parsed)
+            }
+          } catch (e) {
+            console.error(e)
+          }
+        } else {
+          setMaddeler([])
+        }
+      }
     } catch (err) {
       console.error(err)
     } finally {
@@ -812,6 +865,157 @@ export function MalzemeListesi(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      {/* AÇIKLAMA MADDELERİ LIST */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col mt-6 print:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <span className="p-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded">
+              <FileText className="w-3.5 h-3.5" />
+            </span>
+            Özel Şartlar / Açıklama Maddeleri
+            <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full font-bold">
+              {maddeler.length}
+            </span>
+          </h3>
+          <button
+            onClick={() => {
+              setEditingMaddeIndex(null)
+              setMaddeInput('')
+              setIsMaddeModalOpen(true)
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Madde / Şart Ekle
+          </button>
+        </div>
+
+        {maddeler.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center p-6 text-slate-400">
+            <FileText className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
+            <p className="text-xs">
+              Lüzum müzekkeresinde malzeme tablosunun altında görünecek herhangi bir özel şart eklenmemiş.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {maddeler.map((madde, idx) => (
+              <div
+                key={idx}
+                className="flex items-start justify-between p-3 bg-slate-50 dark:bg-slate-955 border border-slate-100 dark:border-slate-800 rounded-2xl group transition-all"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="font-mono text-xs font-black text-slate-400 dark:text-slate-500 mt-0.5">
+                    {idx + 1}.
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                    {madde}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    disabled={idx === 0}
+                    onClick={() => handleMoveMadde(idx, 'up')}
+                    className="p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 disabled:opacity-30 rounded-lg transition-colors cursor-pointer"
+                    title="Yukarı Taşı"
+                  >
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    disabled={idx === maddeler.length - 1}
+                    onClick={() => handleMoveMadde(idx, 'down')}
+                    className="p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 disabled:opacity-30 rounded-lg transition-colors cursor-pointer"
+                    title="Aşağı Taşı"
+                  >
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingMaddeIndex(idx)
+                      setMaddeInput(madde)
+                      setIsMaddeModalOpen(true)
+                    }}
+                    className="p-1 text-slate-400 hover:text-blue-600 rounded-lg transition-colors cursor-pointer"
+                    title="Düzenle"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Bu maddeyi silmek istediğinize emin misiniz?')) {
+                        const updated = maddeler.filter((_, i) => i !== idx)
+                        handleSaveMaddeler(updated)
+                      }
+                    }}
+                    className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+                    title="Sil"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* MADDE ADD/EDIT MODAL */}
+      <Modal
+        isOpen={isMaddeModalOpen}
+        onClose={() => setIsMaddeModalOpen(false)}
+        title={editingMaddeIndex !== null ? 'Madde / Şart Düzenle' : 'Yeni Madde / Şart Ekle'}
+        description="Lüzum müzekkeresinde görünecek özel şart veya açıklama maddesi metni."
+      >
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            const text = maddeInput.trim()
+            if (!text) return
+            const updated = [...maddeler]
+            if (editingMaddeIndex !== null) {
+              updated[editingMaddeIndex] = text
+            } else {
+              updated.push(text)
+            }
+            handleSaveMaddeler(updated)
+            setIsMaddeModalOpen(false)
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
+              Madde / Şart Metni
+            </label>
+            <textarea
+              required
+              rows={4}
+              value={maddeInput}
+              onChange={(e) => setMaddeInput(e.target.value)}
+              placeholder="Örn: Alınacak tüm malzemelerin garanti süresi en az 2 (iki) yıl olacaktır."
+              className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal resize-none"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsMaddeModalOpen(false)}
+              className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              İptal
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/10 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Check className="w-4 h-4" />
+              Kaydet
+            </button>
+          </div>
+        </form>
+      </Modal>
     </SubScreen>
   )
 }

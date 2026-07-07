@@ -65,6 +65,11 @@ export const DATA_TeminDosyasi = {
       default: 0,
       description: 'Sözleşme Yapılacak mı?'
     },
+    {
+      name: 'isin_aciklama_maddeleri',
+      type: 'TEXT',
+      description: 'İşin Açıklama Maddeleri (JSON Array)'
+    },
 
     // Hesaplama ve Maliyet
     {
