@@ -15,6 +15,8 @@ import { Input } from '../../components/ui/Input'
 import { KomisyonOlusturModal } from './components/KomisyonOlusturModal'
 import { PersonelAtaModal } from './components/PersonelAtaModal'
 import { useTabStore } from '../../store/tabStore'
+import { useDosyaAsamasiSablons } from '../dosya/sub-screens/DosyaAsamalari/useDosyaAsamasiSablons'
+import { DocumentPreviewModal } from '../dosya/components/DocumentPreviewModal'
 
 export default function KomisyonlarScreen(): React.JSX.Element {
   const { addTab } = useTabStore()
@@ -25,6 +27,24 @@ export default function KomisyonlarScreen(): React.JSX.Element {
 
   const [isAtaModalOpen, setIsAtaModalOpen] = useState(false)
   const [ataRoleId, setAtaRoleId] = useState<number | null>(null)
+
+  // Şablon Önizleme ve Çıktı Altyapısı
+  const {
+    activeDosyaId,
+    masterHtml,
+    dosyaContext,
+    placeholders,
+    contextsByPath,
+    personelListesi,
+    previewModalOpen,
+    setPreviewModalOpen,
+    previewData,
+    handleOpenPreviewForSablon,
+    executePrint,
+    executeExportPdf,
+    refreshSnapshot,
+    saveSnapshot
+  } = useDosyaAsamasiSablons()
   const [ataKomisyonId, setAtaKomisyonId] = useState<number | null>(null)
 
   // Oluşturulmuş Komisyonları Çek
@@ -48,7 +68,7 @@ export default function KomisyonlarScreen(): React.JSX.Element {
 
       const sablonlarRes = await window.electron.ipcRenderer.invoke(
         'db:query',
-        `SELECT ks.komisyon_id, s.id as sablon_id, s.ad, s.aciklama 
+        `SELECT ks.komisyon_id, s.id, s.ad, s.aciklama, s.icerik, s.dosya_adi, s.route_path, s.test_verisi, s.kategori 
          FROM TANIM_Komisyon_Sablon ks
          JOIN TANIM_Sablon s ON ks.sablon_id = s.id
          WHERE s.aktif_mi = 1`
@@ -182,13 +202,17 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                             <div className="flex flex-wrap gap-1.5">
                               {komisyon.sablonlar.map((sablon: any) => (
                                 <Button
-                                  key={sablon.sablon_id}
+                                  key={sablon.id}
                                   variant="outline"
                                   className="text-xs py-1.5 px-3 h-auto rounded-lg text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                   onClick={() => {
-                                    alert(
-                                      `Şablon üretiliyor: ${sablon.ad}\n(Bu özellik yapım aşamasındadır)`
-                                    )
+                                    if (!activeDosyaId) {
+                                      alert(
+                                        'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.'
+                                      )
+                                      return
+                                    }
+                                    handleOpenPreviewForSablon(sablon, sablon.ad)
                                   }}
                                 >
                                   <Printer className="w-3.5 h-3.5 mr-1.5" />
@@ -259,6 +283,28 @@ export default function KomisyonlarScreen(): React.JSX.Element {
         roleId={ataRoleId}
         komisyonId={ataKomisyonId}
       />
+
+      {previewData && previewModalOpen && (
+        <DocumentPreviewModal
+          isOpen={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          title={previewData.title}
+          templateHtml={previewData.templateHtml}
+          masterHtml={masterHtml || ''}
+          baseContext={
+            previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+          }
+          placeholders={placeholders}
+          personelListesi={personelListesi}
+          onPrint={executePrint}
+          onExportPdf={executeExportPdf}
+          isInline={false}
+          templateTestVerisi={previewData.templateTestVerisi}
+          dosyaAdi={previewData.dosyaAdi}
+          onRefreshSnapshot={refreshSnapshot}
+          onSaveSnapshot={saveSnapshot}
+        />
+      )}
     </div>
   )
 }

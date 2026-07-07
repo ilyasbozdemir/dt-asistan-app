@@ -26,7 +26,25 @@ export function SurecBelgeleriPanel({
   onSablonClick,
   isSablonDisabled,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
+  const hasStarred = stageSablons.some((sablon) => {
+    if (!activeStarredDocs) return false;
+    const cleanName = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)
+      ? sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)![2].trim()
+      : sablon.ad;
+    return activeStarredDocs.some(
+      (d) =>
+        normalizeForMatch(d) === normalizeForMatch(sablon.ad) ||
+        normalizeForMatch(d) === normalizeForMatch(cleanName),
+    );
+  });
+
   const [filter, setFilter] = useState<"all" | "starred">("starred");
+
+  React.useEffect(() => {
+    if (activeStarredDocs) {
+      setFilter(hasStarred ? "starred" : "all");
+    }
+  }, [activeStarredDocs, stageSablons, hasStarred]);
 
   if (stageSablons.length === 0) return null;
 
