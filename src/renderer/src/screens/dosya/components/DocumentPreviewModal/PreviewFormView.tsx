@@ -85,6 +85,8 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           ? "Alt Notlar"
           : key === "maddeNo"
           ? "Doğrudan Temin Maddesi"
+          : key === "komisyon_takdiri" || key === "komisyonTakdiri" || key === "vkomisyontakdiri" || key === "komisyonTakdir"
+          ? "Hesaplama Yöntemi / Dayanağı"
           : /yillaraYaygin/i.test(key)
           ? "Yıllara Yaygın Hizmet Alımı mı?"
           : /sozlesmeYapilacak/i.test(key)
@@ -481,6 +483,49 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
             options.unshift(value);
           }
           const currentValue = value || "22/d";
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
+                )}
+              </div>
+              <select
+                aria-label={label}
+                value={currentValue}
+                onChange={(e) => handleFormChange(key, e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
+              >
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        }
+
+        if (
+          key === "komisyon_takdiri" ||
+          key === "komisyonTakdiri" ||
+          key === "vkomisyontakdiri" ||
+          key === "komisyonTakdir"
+        ) {
+          const options = [
+            "Sadece araştırma fiyatları dikkate alınacak",
+            "Komisyon takdiri kullanılacak",
+            "Son alım fiyatlarını da kullan",
+          ];
+          if (value && !options.includes(value)) {
+            options.unshift(value);
+          }
+          const currentValue = value || "Sadece araştırma fiyatları dikkate alınacak";
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
