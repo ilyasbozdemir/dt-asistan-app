@@ -223,7 +223,7 @@ export function DocumentPreviewModal<T = any>({
 
       let dynamicTemplateHtml = templateHtml || ''
       for (const k of markdownKeys) {
-        const doubleBraceRegex = new RegExp('\\{\\{(' + k + ')\\}\\}', 'g')
+        const doubleBraceRegex = new RegExp('(?<!\\{)\\{\\{(' + k + ')\\}\\}(?!\\})', 'g')
         dynamicTemplateHtml = dynamicTemplateHtml.replace(doubleBraceRegex, '{{{$1}}}')
       }
 
