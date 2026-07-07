@@ -28,35 +28,47 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
   handlePersonelSelect,
   handlePersonelClear,
 }) => {
-  const originalKurumIci = mergedContext.kurumIci
+  const originalKurumIci = mergedContext.kurumIci;
   const kurumIciValue = overrideData.kurumIci !== undefined
     ? overrideData.kurumIci
-    : originalKurumIci
-  const isKurumIci = kurumIciValue === true || kurumIciValue === 'true' || kurumIciValue === 1 || kurumIciValue === '1' || kurumIciValue === undefined
+    : originalKurumIci;
+  const isKurumIci = kurumIciValue === true || kurumIciValue === "true" ||
+    kurumIciValue === 1 || kurumIciValue === "1" || kurumIciValue === undefined;
 
   const footerFields = [
-    'kurumAdres',
-    'kurumTelefon',
-    'kurumFaks',
-    'kurumWeb',
-    'kurumEposta',
-    'kurumKep'
-  ]
+    "kurumAdres",
+    "kurumTelefon",
+    "kurumFaks",
+    "kurumWeb",
+    "kurumEposta",
+    "kurumKep",
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       {formFields.map((key) => {
         if (isKurumIci && footerFields.includes(key)) {
-          return null
+          return null;
         }
 
-        const originalValue = mergedContext[key]
+        const originalValue = mergedContext[key];
         const value = overrideData[key] !== undefined
           ? overrideData[key]
-          : originalValue
-        const type = typeof originalValue as string
+          : originalValue;
+        const type = typeof originalValue as string;
 
         const schemaDef = placeholders.find((p) => p.anahtar === key) || null;
+        const isBooleanKey = key === "kurumIci" ||
+          key === "olurYazisi" ||
+          /m[ıiuü]$/i.test(key) ||
+          /yillaraYaygin/i.test(key) ||
+          /sozlesmeYapilacak/i.test(key) ||
+          /sozlesmeli/i.test(key) ||
+          /altYuklenici/i.test(key) ||
+          /kismiTeklif/i.test(key) ||
+          /avansVerilecek/i.test(key) ||
+          /tibbiCihaz/i.test(key);
+
         const label = schemaDef
           ? schemaDef.etiket
           : key === "kurumIci"
@@ -71,8 +83,23 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           ? "Açıklama"
           : key === "altNotlar"
           ? "Alt Notlar"
+          : key === "maddeNo"
+          ? "Doğrudan Temin Maddesi"
+          : /yillaraYaygin/i.test(key)
+          ? "Yıllara Yaygın Hizmet Alımı mı?"
+          : /sozlesmeYapilacak/i.test(key)
+          ? "Sözleşme Yapılacak mı?"
+          : /altYuklenici/i.test(key)
+          ? "Alt Yüklenici Çalıştırılacak mı?"
+          : /kismiTeklif/i.test(key)
+          ? "Kısmi Teklif Verilecek mi?"
+          : /avansVerilecek/i.test(key)
+          ? "Avans Verilecek mi?"
+          : /tibbiCihaz/i.test(key)
+          ? "Tıbbi Cihaz Alımı mı?"
           : key;
-        const effectiveType = (key === "kurumIci" || key === "olurYazisi")
+
+        const effectiveType = isBooleanKey
           ? "boolean"
           : schemaDef?.veri_tipi === "date"
           ? "date"
@@ -133,11 +160,19 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
         if (effectiveType === "boolean") {
           const isChecked = value === true || value === "true" || value === 1 ||
             value === "1";
-          const displayAciklama = schemaDef?.aciklama || (
-            key === "kurumIci"
-              ? "İşaretlenirse 'Kurum İçi', kaldırılırsa 'Kurum Dışı' olarak ayarlanır."
-              : undefined
-          );
+          let displayAciklama = schemaDef?.aciklama || "";
+          if (!displayAciklama) {
+            if (key === "kurumIci") {
+              displayAciklama =
+                "İşaretlenirse kurum dışı adres/iletişim bilgileri gizlenir.";
+            } else if (/sozlesmeYapilacak/i.test(key)) {
+              displayAciklama =
+                "Alım için yüklenici ile yazılı sözleşme imzalanacak mı?";
+            } else if (/yillaraYaygin/i.test(key)) {
+              displayAciklama =
+                "Hizmet alımının süresi mevcut mali yılı aşacak mı?";
+            }
+          }
           return (
             <div key={key} className="flex items-center justify-between">
               <div className="flex flex-col">
@@ -426,6 +461,50 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 onChange={(e) => handleFormChange(key, e.target.value)}
                 className="w-full p-2.5 min-h-[80px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-y"
               />
+            </div>
+          );
+        }
+
+        if (key === "maddeNo") {
+          const options = [
+            "22/d",
+            "22/d*",
+            "22/d**",
+            "22/a",
+            "22/b",
+            "22/c",
+            "22/e",
+            "22/f",
+            "3/e",
+          ];
+          if (value && !options.includes(value)) {
+            options.unshift(value);
+          }
+          const currentValue = value || "22/d";
+          return (
+            <div key={key} className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {label}
+                </label>
+                {schemaDef?.aciklama && (
+                  <span className="text-xs text-slate-500">
+                    {schemaDef.aciklama}
+                  </span>
+                )}
+              </div>
+              <select
+                aria-label={label}
+                value={currentValue}
+                onChange={(e) => handleFormChange(key, e.target.value)}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer"
+              >
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </div>
           );
         }
