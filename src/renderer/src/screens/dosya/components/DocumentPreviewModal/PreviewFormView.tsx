@@ -35,11 +35,27 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
         const value = overrideData[key] !== undefined
           ? overrideData[key]
           : originalValue;
-        const type = typeof originalValue;
+        const type = typeof originalValue as string;
 
         const schemaDef = placeholders.find((p) => p.anahtar === key) || null;
-        const label = schemaDef ? schemaDef.etiket : key;
-        const effectiveType = schemaDef?.veri_tipi === "date"
+        const label = schemaDef
+          ? schemaDef.etiket
+          : key === "kurumIci"
+          ? "Kurum İçi mi?"
+          : key === "olurYazisi"
+          ? "Olur Yazısı Gösterilsin mi?"
+          : key === "isinAciklamasi"
+          ? "İşin Açıklaması"
+          : key === "gerekce"
+          ? "Gerekçe"
+          : key === "aciklama"
+          ? "Açıklama"
+          : key === "altNotlar"
+          ? "Alt Notlar"
+          : key;
+        const effectiveType = (key === "kurumIci" || key === "olurYazisi")
+          ? "boolean"
+          : schemaDef?.veri_tipi === "date"
           ? "date"
           : schemaDef?.veri_tipi === "boolean"
           ? "boolean"
@@ -98,15 +114,20 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
         if (effectiveType === "boolean") {
           const isChecked = value === true || value === "true" || value === 1 ||
             value === "1";
+          const displayAciklama = schemaDef?.aciklama || (
+            key === "kurumIci"
+              ? "İşaretlenirse 'Kurum İçi', kaldırılırsa 'Kurum Dışı' olarak ayarlanır."
+              : undefined
+          );
           return (
             <div key={key} className="flex items-center justify-between">
               <div className="flex flex-col">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   {label}
                 </label>
-                {schemaDef?.aciklama && (
+                {displayAciklama && (
                   <span className="text-xs text-slate-500">
-                    {schemaDef.aciklama}
+                    {displayAciklama}
                   </span>
                 )}
               </div>
@@ -188,7 +209,11 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           const sampleItem = originalValue[0];
           const fields = Object.keys(sampleItem);
 
-          const handleCellChange = (rowIdx: number, field: string, val: any) => {
+          const handleCellChange = (
+            rowIdx: number,
+            field: string,
+            val: any,
+          ) => {
             const newItems = items.map((item, idx) => {
               if (idx === rowIdx) {
                 return { ...item, [field]: val };
@@ -356,7 +381,13 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
         }
 
         // Schema tip uzun_metin desteği (dialog modal'da tip === 'uzun_metin' kontrolü vardı)
-        if (schemaDef?.tip === "uzun_metin") {
+        if (
+          schemaDef?.tip === "uzun_metin" ||
+          key === "isinAciklamasi" ||
+          key === "gerekce" ||
+          key === "aciklama" ||
+          key === "altNotlar"
+        ) {
           return (
             <div key={key} className="flex flex-col gap-1.5">
               <div className="flex flex-col">
