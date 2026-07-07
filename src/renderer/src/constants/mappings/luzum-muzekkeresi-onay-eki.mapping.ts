@@ -1,28 +1,28 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const LuzumOnayEkiMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'Dosyanın antet satırları'
+    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
   },
   dosyaKonusu: {
-    deger: 'Lüzum Müzekkeresi',
+    deger: 'LÃ¼zum MÃ¼zekkeresi',
     aciklama: 'Belgenin konusu'
   },
   ekNo: {
     deger: '1',
-    aciklama: 'Ek numarası'
+    aciklama: 'Ek numarasÄ±'
   },
   talepEdenPersonelAdi: {
     tablo: 'TANIM_Personel',
     sutun: 'ad_soyad',
-    aciklama: 'Talep eden personelin adı soyadı'
+    aciklama: 'Talep eden personelin adÄ± soyadÄ±'
   },
   talepEdenPersonelUnvan: {
     tablo: 'TANIM_Personel',
     sutun: 'unvan',
-    aciklama: 'Talep eden personelin ünvanı'
+    aciklama: 'Talep eden personelin Ã¼nvanÄ±'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -45,7 +45,7 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum içi mi?'
+    aciklama: 'Kurum iÃ§i mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -84,3 +84,4 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     aciklama: 'Kurum kep adresi'
   }
 }
+

@@ -1,34 +1,34 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const LuzumTeslimTesellumMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'Dosyanın antet satırları'
+    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
   },
   dosyaKonusu: {
-    deger: 'TESLİM TESELLÜM BELGESİ',
+    deger: 'TESLÄ°M TESELLÃœM BELGESÄ°',
     aciklama: 'Belgenin konusu'
   },
   isinAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'dosya_adi',
-    aciklama: 'İşin adı'
+    aciklama: 'Ä°ÅŸin adÄ±'
   },
   kurumIci: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'kurum_ici',
     deger: true,
-    aciklama: 'Kurum içi mi?'
+    aciklama: 'Kurum iÃ§i mi?'
   },
   kurumumu: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurumun adı'
+    aciklama: 'Kurumun adÄ±'
   },
   dosyaNumarasi: {
     formul: '{{DATA_TeminDosyasi.butce_yili}}-{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'Yıl-Dosya no birleşimi'
+    aciklama: 'YÄ±l-Dosya no birleÅŸimi'
   },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
@@ -84,7 +84,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'Teslim tesellüm kalemleri'
+    aciklama: 'Teslim tesellÃ¼m kalemleri'
   },
   teslimAlanlar: {
     tablo: 'DATA_TeminKomisyonUye',
@@ -94,6 +94,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
       adSoyad: 'ad_soyad',
       unvan: 'unvan'
     },
-    aciklama: 'Teslim alan kişiler'
+    aciklama: 'Teslim alan kiÅŸiler'
   }
 }
+

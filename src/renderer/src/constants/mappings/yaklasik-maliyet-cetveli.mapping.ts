@@ -1,4 +1,4 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   antetSatirlari: {
@@ -9,22 +9,22 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   kurumUst: {
     tablo: 'TANIM_Kurum',
     sutun: 'ust_idari_birim',
-    aciklama: 'Üst İdari Birim'
+    aciklama: 'Ãœst Ä°dari Birim'
   },
   kurumAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum Adı'
+    aciklama: 'Kurum AdÄ±'
   },
   mudurluk: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Müdürlük / Makam'
+    aciklama: 'MÃ¼dÃ¼rlÃ¼k / Makam'
   },
   isAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'isin_adi',
-    aciklama: 'İşin Adı'
+    sutun: 'konu',
+    aciklama: 'Ä°ÅŸin AdÄ±'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -39,7 +39,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   genelToplam: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'yaklasik_maliyet',
-    aciklama: 'Genel Yaklaşık Maliyet Toplamı'
+    aciklama: 'Genel YaklaÅŸÄ±k Maliyet ToplamÄ±'
   },
   baskanAdi: {
     tablo: 'DATA_TeminDosyasi',
@@ -49,7 +49,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   baskanUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Personel Ünvanı'
+    aciklama: 'Onaylayan Personel ÃœnvanÄ±'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -62,6 +62,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
       birimi: 'birim',
       miktar: 'miktar'
     },
-    aciklama: 'Yaklaşık Maliyet Malzeme Kalemleri'
+    aciklama: 'YaklaÅŸÄ±k Maliyet Malzeme Kalemleri'
   }
 }
+

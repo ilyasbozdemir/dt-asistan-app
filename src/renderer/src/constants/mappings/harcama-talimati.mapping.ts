@@ -1,9 +1,9 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const HarcamaTalimatiMapping: ProcessMapping = {
   evrakSayisi: {
     formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSİS No - Yıl - Dosya No'
+    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -13,57 +13,57 @@ export const HarcamaTalimatiMapping: ProcessMapping = {
   idareAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'İdare Adı'
+    aciklama: 'Ä°dare AdÄ±'
   },
   gerekce: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_gerekcesi',
-    aciklama: 'Alımın Gerekçesi'
+    aciklama: 'AlÄ±mÄ±n GerekÃ§esi'
   },
   isAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'isin_adi',
-    aciklama: 'İşin Adı'
+    sutun: 'konu',
+    aciklama: 'Ä°ÅŸin AdÄ±'
   },
   sure: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_suresi',
-    aciklama: 'İşin Süresi'
+    aciklama: 'Ä°ÅŸin SÃ¼resi'
   },
   teminSekli: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihale_usulu',
-    aciklama: 'Temin Şekli / Usulü'
+    aciklama: 'Temin Åekli / UsulÃ¼'
   },
   yaklasikMaliyet: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'yaklasik_maliyet',
-    aciklama: 'Yaklaşık Maliyet'
+    aciklama: 'YaklaÅŸÄ±k Maliyet'
   },
   odenekTutari: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'odenek_tutari',
-    aciklama: 'Ödenek Tutarı'
+    aciklama: 'Ã–denek TutarÄ±'
   },
   butceTertibi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'butce_tertibi',
-    aciklama: 'Bütçe Tertibi'
+    aciklama: 'BÃ¼tÃ§e Tertibi'
   },
   aciklama: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
-    aciklama: 'İşin Açıklaması'
+    aciklama: 'Ä°ÅŸin AÃ§Ä±klamasÄ±'
   },
   hazirlayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_ad',
-    aciklama: 'Hazırlayan Personel'
+    aciklama: 'HazÄ±rlayan Personel'
   },
   hazirlayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_unvan',
-    aciklama: 'Hazırlayan Personel Ünvanı'
+    aciklama: 'HazÄ±rlayan Personel ÃœnvanÄ±'
   },
   onaylayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
@@ -73,6 +73,7 @@ export const HarcamaTalimatiMapping: ProcessMapping = {
   onaylayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Personel Ünvanı'
+    aciklama: 'Onaylayan Personel ÃœnvanÄ±'
   }
 }
+

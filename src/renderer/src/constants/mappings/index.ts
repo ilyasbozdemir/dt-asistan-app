@@ -34,6 +34,13 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
   '/dosya/harcama/talimat': HarcamaTalimatiMapping,
   '/dosya/firmalar-maliyet/yaklasik': YaklasikMaliyetCetveliMapping,
 
+  // Diğer süreç ve onay sayfaları
+  '/dosya/firmalar-maliyet/tutanak': allOther.PiyasaFiyatArastirmaTutanagiMapping,
+  '/dosya/onay/dt-onay': allOther.DogrudanTeminOnayBelgesiMapping,
+  '/dosya/onay/ihale-onay': allOther.IdareOnayBelgesiMapping,
+  '/dosya/onay/butce-sorgu': allOther.ButceSorgusuMapping,
+  '/dosya/harcama/pusula': allOther.HarcamaPusulasiMapping,
+
   // Diğer tüm belgeler için spesifik kayıtlar (Cikti Merkezi ve Süreç aşamaları altı)
   'arastirma-mektubu': allOther.ArastirmaMektubuMapping,
   'birim-fiyat-teklif-cetveli': allOther.BirimFiyatTeklifCetveliMapping,
@@ -79,45 +86,51 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
       .split('/')
       .pop() || ''
   
-  if (cleanPath === 'ihtiyac-listesi' || cleanPath === 'malzeme-hizmet-kalem-listesi') {
+  if (
+    cleanPath === 'ihtiyac-listesi' ||
+    cleanPath === 'malzeme-hizmet-kalem-listesi' ||
+    cleanPath === 'liste' ||
+    cleanPath === 'hazirlik-ve-ihtiyac'
+  ) {
     return IhtiyacListesiMapping
   }
-  if (cleanPath === 'luzum-muzekkeresi' || cleanPath === 'luzum-muzekkeresi-belgesi') {
+  if (cleanPath === 'luzum-muzekkeresi' || cleanPath === 'luzum-muzekkeresi-belgesi' || cleanPath === 'belge') {
     return LuzumMuzekkeresiMapping
   }
-  if (cleanPath === 'luzum-muzekkeresi-onay-eki' || cleanPath === 'luzum-onay-eki') {
+  if (cleanPath === 'luzum-muzekkeresi-onay-eki' || cleanPath === 'luzum-onay-eki' || cleanPath === 'onay-eki') {
     return LuzumOnayEkiMapping
   }
   if (
     cleanPath === 'luzum-muzekkeresi-teslim-tesellum' ||
-    cleanPath === 'teslim-tesellum-belgesi'
+    cleanPath === 'teslim-tesellum-belgesi' ||
+    cleanPath === 'teslim-tesellum'
   ) {
     return LuzumTeslimTesellumMapping
   }
-  if (cleanPath === 'ihtiyac-talep-formu') {
+  if (cleanPath === 'ihtiyac-talep-formu' || cleanPath === 'talep-formu') {
     return IhtiyacTalepFormuMapping
   }
-  if (cleanPath === 'son-alim-fiyat-cetveli') {
+  if (cleanPath === 'son-alim-fiyat-cetveli' || cleanPath === 'son-alim') {
     return SonAlimFiyatCetveliMapping
   }
   
   // Komisyon ve harcama belgeleri
-  if (cleanPath === 'komisyon-gorevlendirme-onayi') {
+  if (cleanPath === 'komisyon-gorevlendirme-onayi' || cleanPath === 'fiyat-arastirma') {
     return KomisyonGorevlendirmeOnayiMapping
   }
   if (cleanPath === 'komisyon-gorevlendirme-onayi-eki') {
     return KomisyonGorevlendirmeOnayiEkiMapping
   }
-  if (cleanPath === 'muayene-kabul-komisyonu') {
+  if (cleanPath === 'muayene-kabul-komisyonu' || cleanPath === 'muayene-kabul') {
     return MuayeneKabulKomisyonuMapping
   }
   if (cleanPath === 'piyasa-fiyat-arastirma-gorevlendirmesi') {
     return PiyasaFiyatArastirmaGorevlendirmesiMapping
   }
-  if (cleanPath === 'harcama-talimati') {
+  if (cleanPath === 'harcama-talimati' || cleanPath === 'talimat') {
     return HarcamaTalimatiMapping
   }
-  if (cleanPath === 'yaklasik-maliyet-cetveli') {
+  if (cleanPath === 'yaklasik-maliyet-cetveli' || cleanPath === 'yaklasik-maliyet-hesap-cetveli' || cleanPath === 'yaklasik') {
     return YaklasikMaliyetCetveliMapping
   }
 
@@ -140,12 +153,15 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
     case 'gorevlendirme-yazisi':
       return allOther.GorevlendirmeYazisiMapping
     case 'piyasa-fiyat-arastirma-tutanagi':
+    case 'tutanak':
       return allOther.PiyasaFiyatArastirmaTutanagiMapping
     case 'teklif-mektubu-dagitim-cizelgesi':
       return allOther.TeklifMektubuDagitimCizelgesiMapping
     case 'butce-sorgusu':
+    case 'butce-sorgu':
       return allOther.ButceSorgusuMapping
     case 'dogrudan-temin-onay-belgesi':
+    case 'dt-onay':
       return allOther.DogrudanTeminOnayBelgesiMapping
     case 'dogrudan-temin-sonuc-onay-belgesi':
       return allOther.DogrudanTeminSonucOnayBelgesiMapping
@@ -156,6 +172,7 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
     case 'dogrudan-temin-sozlesmesi-uzun':
       return allOther.DogrudanTeminSozlesmesiUzunMapping
     case 'idare-onay-belgesi':
+    case 'ihale-onay':
       return allOther.IdareOnayBelgesiMapping
     case 'ihale-komisyon-karari':
       return allOther.IhaleKomisyonKarariMapping
@@ -168,6 +185,7 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
     case 'hakedis-raporu':
       return allOther.HakedisRaporuMapping
     case 'harcama-pusulasi':
+    case 'pusula':
       return allOther.HarcamaPusulasiMapping
     case 'hizmet-isleri-kabul-teklif-belgesi':
       return allOther.HizmetIsleriKabulTeklifBelgesiMapping

@@ -1,34 +1,34 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
   kurumUst: {
     tablo: 'TANIM_Kurum',
     sutun: 'ust_idari_birim',
-    aciklama: 'Üst İdari Birim'
+    aciklama: 'Ãœst Ä°dari Birim'
   },
   kurumAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum Adı'
+    aciklama: 'Kurum AdÄ±'
   },
   mudurluk: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Müdürlük / Makam'
+    aciklama: 'MÃ¼dÃ¼rlÃ¼k / Makam'
   },
   kurumumuz: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurum Adı'
+    aciklama: 'Kurum AdÄ±'
   },
   alimTuru: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'alim_turu',
-    aciklama: 'Alım Türü'
+    aciklama: 'AlÄ±m TÃ¼rÃ¼'
   },
   evrakSayisi: {
     formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi'
+    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
@@ -42,35 +42,36 @@ export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
   },
   isAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'isin_adi',
-    aciklama: 'İşin Adı'
+    sutun: 'konu',
+    aciklama: 'Ä°ÅŸin AdÄ±'
   },
   hazirlayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_ad',
-    aciklama: 'Hazırlayan Personel'
+    aciklama: 'HazÄ±rlayan Personel'
   },
   hazirlayanPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'hazirlayan_personel_unvan',
-    aciklama: 'Hazırlayan Personel Ünvanı'
+    aciklama: 'HazÄ±rlayan Personel ÃœnvanÄ±'
   },
   baskanAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_ad',
-    aciklama: 'Belediye Başkanı / Harcama Yetkilisi'
+    aciklama: 'Belediye BaÅŸkanÄ± / Harcama Yetkilisi'
   },
   baskanUnvan: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
-    aciklama: 'Onaylayan Personel Ünvanı'
+    aciklama: 'Onaylayan Personel ÃœnvanÄ±'
   },
   ekNo: {
     deger: '2',
-    aciklama: 'Onay Eki Numarası'
+    aciklama: 'Onay Eki NumarasÄ±'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum içi mi?'
+    aciklama: 'Kurum iÃ§i mi?'
   }
 }
+

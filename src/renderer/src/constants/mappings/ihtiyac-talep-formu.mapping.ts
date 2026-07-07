@@ -1,38 +1,38 @@
-import { ProcessMapping } from './types'
+﻿import { ProcessMapping } from './types'
 
 export const IhtiyacTalepFormuMapping: ProcessMapping = {
   antetSatirlari: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_anteti',
-    aciklama: 'Dosyanın antet satırları'
+    aciklama: 'DosyanÄ±n antet satÄ±rlarÄ±'
   },
   dosyaKonusu: {
-    deger: 'İhtiyaç Talep Formu',
+    deger: 'Ä°htiyaÃ§ Talep Formu',
     aciklama: 'Dosya konusu'
   },
   evrakSayisi: {
     formul:
       '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
+    aciklama: 'DETSÄ°S No - YÄ±l - Dosya No birleÅŸimi olarak otomatik Ã¼retilir'
   },
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
-    aciklama: 'Sunulacak makam adı'
+    aciklama: 'Sunulacak makam adÄ±'
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
-    aciklama: 'İhtiyaç Yeri'
+    aciklama: 'Ä°htiyaÃ§ Yeri'
   },
   gerekce: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
-    aciklama: 'Birimin talep gerekçesi (İşin açıklaması baz alınır)'
+    aciklama: 'Birimin talep gerekÃ§esi (Ä°ÅŸin aÃ§Ä±klamasÄ± baz alÄ±nÄ±r)'
   },
   kurumIci: {
     deger: true,
-    aciklama: 'Kurum içi mi?'
+    aciklama: 'Kurum iÃ§i mi?'
   },
   kurumAdres: {
     tablo: 'TANIM_Kurum',
@@ -82,6 +82,7 @@ export const IhtiyacTalepFormuMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'İhtiyaç talep formu kalemleri'
+    aciklama: 'Ä°htiyaÃ§ talep formu kalemleri'
   }
 }
+
