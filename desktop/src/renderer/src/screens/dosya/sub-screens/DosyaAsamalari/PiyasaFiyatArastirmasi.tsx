@@ -222,30 +222,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     }
   }
 
-  if (previewData && previewModalOpen) {
-    return (
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => setPreviewModalOpen(false)}
-        title={previewData.title}
-        templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
-        placeholders={placeholders}
-        personelListesi={personelListesi}
-        onPrint={executePrint}
-        onExportPdf={executeExportPdf}
-        isInline={true}
-        templateTestVerisi={previewData.templateTestVerisi}
-        dosyaAdi={previewData.dosyaAdi}
-        onRefreshSnapshot={refreshSnapshot}
-        onSaveSnapshot={saveSnapshot}
-      />
-    )
-  }
-
   const stageSablons = sablons.filter(
     (s) =>
       s.kategori === '2-piyasa-fiyat-arastirmasi' || s.kategori === '2. Piyasa Fiyat Araştırması'
@@ -296,6 +272,30 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     })
     return minId
   }, [invitedFirms])
+
+  if (previewData && previewModalOpen) {
+    return (
+      <DocumentPreviewModal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        title={previewData.title}
+        templateHtml={previewData.templateHtml}
+        masterHtml={masterHtml || ''}
+        baseContext={
+          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+        }
+        placeholders={placeholders}
+        personelListesi={personelListesi}
+        onPrint={executePrint}
+        onExportPdf={executeExportPdf}
+        isInline={true}
+        templateTestVerisi={previewData.templateTestVerisi}
+        dosyaAdi={previewData.dosyaAdi}
+        onRefreshSnapshot={refreshSnapshot}
+        onSaveSnapshot={saveSnapshot}
+      />
+    )
+  }
 
   return (
     <SubScreen
