@@ -1,5 +1,14 @@
 import React from 'react'
-import { PackageSearch, Trash2, X } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import {
+  PackageSearch,
+  Trash2,
+  Building2,
+  Award,
+  AlertCircle,
+  CheckCircle2,
+  Coins
+} from 'lucide-react'
 import { SubScreen } from '../../SubScreens.screen'
 import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
 import { useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
@@ -61,14 +70,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const [bids, setBids] = React.useState<Record<string, number>>({}) // key: `${kalemId}_${firmaId}` -> birim_fiyat
   const [, setLoading] = React.useState(true)
   
-  const [selectedFirmIdToAdd, setSelectedFirmIdToAdd] = React.useState('')
-  const [showNewFirmModal, setShowNewFirmModal] = React.useState(false)
-
-  // New firm form state
-  const [newFirmUnvan, setNewFirmUnvan] = React.useState('')
-  const [newFirmVergiNo, setNewFirmVergiNo] = React.useState('')
-  const [newFirmPhone, setNewFirmPhone] = React.useState('')
-  const [newFirmEmail, setNewFirmEmail] = React.useState('')
+  const [isFirmModalOpen, setIsFirmModalOpen] = React.useState(false)
+  const [selectedFirmIds, setSelectedFirmIds] = React.useState<number[]>([])
 
   const loadData = React.useCallback(async (): Promise<void> => {
     if (!activeDosyaId) return
@@ -123,25 +126,26 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     loadData()
   }, [activeDosyaId, loadData])
 
-  const handleAddFirmFromPool = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    if (!selectedFirmIdToAdd || !activeDosyaId) return
-    const firmId = parseInt(selectedFirmIdToAdd)
-    const poolFirm = allPoolFirms.find((f) => f.id === firmId)
-    if (!poolFirm) return
+  const handleBulkAddFirms = async (): Promise<void> => {
+    if (selectedFirmIds.length === 0 || !activeDosyaId) {
+      setIsFirmModalOpen(false)
+      return
+    }
 
     try {
-      const res = await window.electron.ipcRenderer.invoke(
-        'db:run',
-        `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi')`,
-        [activeDosyaId, poolFirm.id, poolFirm.unvan, poolFirm.vergi_no || '', poolFirm.telefon || '', poolFirm.email || '']
-      )
-      if (res.success) {
-        setSelectedFirmIdToAdd('')
-        await loadData()
-      } else {
-        alert('Firma eklenemedi: ' + res.error)
+      for (const firmId of selectedFirmIds) {
+        const poolFirm = allPoolFirms.find((f) => f.id === firmId)
+        if (!poolFirm) continue
+        
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi')`,
+          [activeDosyaId, poolFirm.id, poolFirm.unvan, poolFirm.vergi_no || '', poolFirm.telefon || '', poolFirm.email || '']
+        )
       }
+      setSelectedFirmIds([])
+      setIsFirmModalOpen(false)
+      await loadData()
     } catch (err: any) {
       alert('Hata: ' + err.message)
     }
@@ -170,42 +174,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       )
       if (res.success) {
         await loadData()
-      }
-    } catch (err: any) {
-      alert('Hata: ' + err.message)
-    }
-  }
-
-  const handleCreateAndAddFirm = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    if (!newFirmUnvan.trim() || !activeDosyaId) return
-
-    try {
-      // 1. Insert into global pool
-      const resPool = await window.electron.ipcRenderer.invoke(
-        'db:run',
-        'INSERT INTO TANIM_Firma (unvan, vergi_no, telefon, email, aktif_mi) VALUES (?, ?, ?, ?, 1)',
-        [newFirmUnvan.trim(), newFirmVergiNo.trim(), newFirmPhone.trim(), newFirmEmail.trim()]
-      )
-      
-      if (resPool.success && resPool.lastInsertRowid) {
-        const newFirmaId = resPool.lastInsertRowid
-        // 2. Insert into invited firms
-        const resInvite = await window.electron.ipcRenderer.invoke(
-          'db:run',
-          `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi')`,
-          [activeDosyaId, newFirmaId, newFirmUnvan.trim(), newFirmVergiNo.trim(), newFirmPhone.trim(), newFirmEmail.trim()]
-        )
-        if (resInvite.success) {
-          setNewFirmUnvan('')
-          setNewFirmVergiNo('')
-          setNewFirmPhone('')
-          setNewFirmEmail('')
-          setShowNewFirmModal(false)
-          await loadData()
-        }
-      } else {
-        alert('Havuzda yeni firma oluşturulamadı: ' + resPool.error)
       }
     } catch (err: any) {
       alert('Hata: ' + err.message)
@@ -316,6 +284,19 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     return count > 0 ? sum / count : 0
   }
 
+  // Find lowest total bid amount and its associated firm ID
+  const lowestTotalFirmaId = React.useMemo(() => {
+    let minTotal = Infinity
+    let minId: number | null = null
+    invitedFirms.forEach((firma) => {
+      if (firma.teklif_toplami && firma.teklif_toplami > 0 && firma.teklif_toplami < minTotal) {
+        minTotal = firma.teklif_toplami
+        minId = firma.id
+      }
+    })
+    return minId
+  }, [invitedFirms])
+
   return (
     <SubScreen
       title="Teklifler & Piyasa Fiyat Araştırması"
@@ -334,7 +315,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
               Sürece Katılan İstekli Firmalar
             </h3>
@@ -343,84 +324,113 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <form onSubmit={handleAddFirmFromPool} className="flex items-center gap-1.5">
-              <select
-                title="İstekli Firma Seç"
-                value={selectedFirmIdToAdd}
-                onChange={(e) => setSelectedFirmIdToAdd(e.target.value)}
-                className="text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary w-48"
-              >
-                <option value="">-- Havuzdan Seçin --</option>
-                {allPoolFirms
-                  .filter((pf) => !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id))
-                  .map((pf) => (
-                    <option key={pf.id} value={pf.id}>
-                      {pf.unvan}
-                    </option>
-                  ))
-                }
-              </select>
-              <button
-                type="submit"
-                disabled={!selectedFirmIdToAdd}
-                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50 transition-all"
-              >
-                Dosyaya Ekle
-              </button>
-            </form>
-
+          <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setShowNewFirmModal(true)}
-              className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3.5 py-1.5 rounded-lg shadow-sm transition-all"
+              onClick={() => setIsFirmModalOpen(true)}
+              className="flex items-center gap-2 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all"
             >
-              + Yeni Firma Tanımla
+              <Building2 className="w-4 h-4" />
+              İstekli Firmalardan Seç
             </button>
+
+            <Link
+              to="/firmalar"
+              className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all"
+            >
+              Tedarikçi Listesini Yönet
+            </Link>
           </div>
         </div>
 
         {/* DAVET EDİLEN FİRMALARIN KART GÖRÜNÜMÜ */}
         {invitedFirms.length === 0 ? (
-          <div className="p-8 text-center bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-            <p className="text-sm text-slate-500">
-              Bu dosyaya henüz teklif veren/davet edilen firma eklenmemiş.
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              Teklif fiyat giriş matrisini açmak için lütfen yukarıdaki menüden firma ekleyin veya
-              tanımlayın.
-            </p>
+          <div className="p-12 text-center bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
+            <div className="p-3 bg-blue-500/10 text-blue-500 rounded-full">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-350">
+                Bu dosyaya henüz teklif veren/davet edilen firma eklenmemiş.
+              </p>
+              <p className="text-xs text-slate-400 mt-1 max-w-md">
+                Teklif fiyat giriş matrisini açmak için lütfen yukarıdaki menüden firma ekleyin veya
+                firma havuzunu düzenleyerek havuzu genişletin.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {invitedFirms.map((firma) => (
               <div
                 key={firma.id}
-                className="p-4 bg-slate-50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl flex items-start justify-between gap-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                className={`p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900 dark:to-slate-950/40 border ${
+                  lowestTotalFirmaId === firma.id
+                    ? 'border-emerald-500/30 dark:border-emerald-500/20 shadow-emerald-500/5 ring-1 ring-emerald-500/10'
+                    : 'border-slate-200 dark:border-slate-800'
+                } rounded-xl flex flex-col justify-between gap-3 shadow-sm hover:shadow-md hover:border-slate-350 dark:hover:border-slate-700 transition-all group relative overflow-hidden`}
               >
-                <div className="space-y-1 overflow-hidden">
-                  <h4
-                    className="font-bold text-xs text-slate-800 dark:text-slate-250 truncate"
-                    title={firma.unvan}
-                  >
-                    {firma.unvan}
-                  </h4>
-                  <p className="text-[10px] text-slate-450 truncate">
-                    {firma.vergi_no ? `Vergi/TC: ${firma.vergi_no}` : 'Vergi No Yok'}
-                  </p>
-                  <p className="text-[11px] font-bold text-slate-650 dark:text-slate-350">
-                    Toplam:{' '}
-                    {firma.teklif_toplami
-                      ? `${firma.teklif_toplami.toLocaleString('tr-TR')} ${firma.para_birimi || 'TRY'}`
-                      : '0.00 TRY'}
-                  </p>
+                {/* Visual accent top-right */}
+                <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-blue-600`}></div>
+
+                <div className="flex items-start gap-3">
+                  <div className={`p-2.5 rounded-xl shrink-0 ${
+                    lowestTotalFirmaId === firma.id
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  }`}>
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1 overflow-hidden pr-6">
+                    <h4 className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate group-hover:text-primary transition-colors" title={firma.unvan}>
+                      {firma.unvan}
+                    </h4>
+                    <p className="text-[10px] text-slate-450 truncate">
+                      {firma.vergi_no ? `Vergi/TC: ${firma.vergi_no}` : 'Vergi No Yok'}
+                    </p>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleRemoveFirm(firma.id)}
-                  className="text-red-500 hover:bg-red-50 hover:dark:bg-red-950/30 p-1.5 rounded-lg shrink-0 transition-all"
-                  title="Firmayı Sil"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-850">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Teklif Toplamı</p>
+                    <p className={`text-xs font-extrabold ${
+                      lowestTotalFirmaId === firma.id
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-slate-700 dark:text-slate-300'
+                    }`}>
+                      {firma.teklif_toplami
+                        ? `${firma.teklif_toplami.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${firma.para_birimi || 'TL'}`
+                        : 'Fiyat Girişi Yok'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {/* Status Badge */}
+                    {firma.teklif_toplami && firma.teklif_toplami > 0 ? (
+                      <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        lowestTotalFirmaId === firma.id
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                      }`}>
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        {lowestTotalFirmaId === firma.id ? 'En Uygun' : 'Girildi'}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <AlertCircle className="w-2.5 h-2.5" />
+                        Bekliyor
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => handleRemoveFirm(firma.id)}
+                      className="text-slate-400 hover:text-red-50 hover:bg-red-50 hover:dark:bg-red-950/30 hover:text-red-650 p-1.5 rounded-lg transition-all shrink-0"
+                      title="Firmayı Sil"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -430,40 +440,43 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       {/* TEKLİF VE BİRİM FİYAT GİRİŞ MATRİSİ */}
       {invitedFirms.length > 0 && items.length > 0 && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 overflow-hidden">
-          <div>
-            <h3 className="text-lg font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-              Teklif Giriş Matrisi & Karşılaştırma
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Her firma için malzeme birim fiyatlarını girin. En düşük teklifler yeşil renkle vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div>
+              <h3 className="text-lg font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                Teklif Giriş Matrisi & Karşılaştırma
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Her firma için malzeme birim fiyatlarını girin. En düşük teklifler yeşil renkle vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <Coins className="w-4 h-4 text-emerald-500" />
+              <span>Para Birimi: TL</span>
+            </div>
           </div>
 
-          <div className="overflow-x-auto w-full border border-slate-150 dark:border-slate-850 rounded-xl">
+          <div className="overflow-x-auto w-full border border-slate-150 dark:border-slate-850 rounded-xl shadow-xs">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800">
-                  <th className="p-3 font-semibold text-slate-700 dark:text-slate-300 w-48">
-                    Malzeme/Hizmet Adı
-                  </th>
-                  <th className="p-3 font-semibold text-slate-700 dark:text-slate-300 text-center w-24">
-                    Miktar / Birim
-                  </th>
+                <tr className="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-250 dark:border-slate-800">
+                  <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 w-48">Malzeme/Hizmet Adı</th>
+                  <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-center w-24">Miktar / Birim</th>
                   {invitedFirms.map((firma) => (
                     <th
                       key={firma.id}
-                      className="p-3 font-semibold text-slate-700 dark:text-slate-300 text-right min-w-[120px]"
+                      className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right min-w-[130px]"
                     >
                       <div className="truncate w-32 ml-auto" title={firma.unvan}>
                         {firma.unvan}
                       </div>
                     </th>
                   ))}
-                  <th className="p-3 font-semibold text-slate-700 dark:text-slate-300 text-right w-28">
+                  <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right w-32 bg-slate-100/30 dark:bg-slate-950/20">
                     Ort. (Yaklaşık)
                   </th>
-                  <th className="p-3 font-semibold text-slate-700 dark:text-slate-300 text-right w-28">
+                  <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right w-32 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
                     En Düşük
                   </th>
                 </tr>
@@ -474,11 +487,11 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                   const avgPrice = getAverageBid(kalem.id)
                   
                   return (
-                    <tr key={kalem.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20">
+                    <tr key={kalem.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                       <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
                         {kalem.kalem_adi}
                       </td>
-                      <td className="p-3 text-center text-slate-500">
+                      <td className="p-3 text-center text-slate-550">
                         {kalem.miktar} {kalem.birim}
                       </td>
                       {invitedFirms.map((firma) => {
@@ -489,10 +502,11 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                           <td
                             key={firma.id}
                             className={`p-2 text-right transition-colors ${
-                              isLowest ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold' : ''
+                              isLowest ? 'bg-emerald-500/[0.04]' : ''
                             }`}
                           >
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="relative flex items-center w-28 ml-auto">
+                              <span className="absolute left-2.5 text-[10px] font-bold text-slate-400 select-none">₺</span>
                               <input
                                 title="Fiyat Gir"
                                 type="number"
@@ -500,116 +514,129 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                 value={val === 0 ? '' : val}
                                 placeholder="0.00"
                                 onChange={(e) => handlePriceChange(kalem.id, firma.id, e.target.value)}
-                                className="w-24 text-right text-xs rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                                className={`w-full text-right text-xs rounded-lg border ${
+                                  isLowest
+                                    ? 'border-emerald-400 dark:border-emerald-600 bg-emerald-50/30 focus:ring-emerald-500 focus:border-emerald-500 font-semibold text-emerald-700 dark:text-emerald-400'
+                                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-primary focus:border-primary'
+                                } pl-6 pr-2.5 py-1.5 focus:outline-none focus:ring-2 transition-all`}
                               />
                             </div>
                           </td>
                         )
                       })}
-                      <td className="p-3 text-right font-bold text-slate-700 dark:text-slate-300">
-                        {avgPrice > 0 ? `${avgPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL` : '-'}
+                      <td className="p-3 text-right font-bold text-slate-700 dark:text-slate-300 bg-slate-100/10 dark:bg-slate-950/10">
+                        {avgPrice > 0 ? `${avgPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺` : '-'}
                       </td>
-                      <td className="p-3 text-right font-extrabold text-emerald-600 dark:text-emerald-400">
-                        {lowest.price > 0 ? `${lowest.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL` : '-'}
+                      <td className="p-3 text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]">
+                        <div className="flex items-center justify-end gap-1">
+                          {lowest.price > 0 && <Award className="w-3.5 h-3.5 text-emerald-500" />}
+                          <span>{lowest.price > 0 ? `${lowest.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺` : '-'}</span>
+                        </div>
                       </td>
                     </tr>
                   )
                 })}
                 {/* TOPLAM TEKLİFLER SATIRI */}
-                <tr className="bg-slate-50/60 dark:bg-slate-950/40 font-bold border-t border-slate-200 dark:border-slate-800">
-                  <td className="p-3 text-slate-800 dark:text-slate-200">Toplam Teklif Tutarı</td>
-                  <td className="p-3"></td>
+                <tr className="bg-slate-50/80 dark:bg-slate-950/40 font-bold border-t border-slate-200 dark:border-slate-800 text-slate-850 dark:text-slate-100">
+                  <td className="p-3.5">Toplam Teklif Tutarı</td>
+                  <td className="p-3.5"></td>
                   {invitedFirms.map((firma) => (
-                    <td key={firma.id} className="p-3 text-right text-slate-850 dark:text-slate-100">
-                      {firma.teklif_toplami ? `${firma.teklif_toplami.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL` : '0.00 TL'}
+                    <td key={firma.id} className="p-3.5 text-right text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                      {firma.teklif_toplami ? `${firma.teklif_toplami.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺` : '0.00 ₺'}
                     </td>
                   ))}
-                  <td className="p-3"></td>
-                  <td className="p-3"></td>
+                  <td className="p-3.5 bg-slate-100/10 dark:bg-slate-950/10"></td>
+                  <td className="p-3.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]"></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
       )}
-
-      {/* YENİ FİRMA KAYIT MODALI */}
-      {showNewFirmModal && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-bold text-slate-850 dark:text-slate-100">Yeni İstekli Firma Tanımla</h3>
-              <button
-                onClick={() => setShowNewFirmModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+      {/* İSTEKLİ FİRMALARDAN SEÇ MODALI */}
+      {isFirmModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">İstekli Firmaları Seçin</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Sürece dahil etmek istediğiniz tedarikçileri aşağıdan seçiniz.
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsFirmModalOpen(false)}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
               >
-                <X className="w-5 h-5" />
+                Kapat
               </button>
             </div>
-
-            <form onSubmit={handleCreateAndAddFirm} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Firma Unvanı *</label>
-                <input
-                  type="text"
-                  required
-                  value={newFirmUnvan}
-                  onChange={(e) => setNewFirmUnvan(e.target.value)}
-                  placeholder="Örn: ABC İnşaat San. Tic. Ltd. Şti."
-                  className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-855 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Vergi No / TCKN</label>
-                <input
-                  type="text"
-                  value={newFirmVergiNo}
-                  onChange={(e) => setNewFirmVergiNo(e.target.value)}
-                  placeholder="10 Haneli Vergi No veya TCKN"
-                  className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-855 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Telefon</label>
-                  <input
-                    type="text"
-                    value={newFirmPhone}
-                    onChange={(e) => setNewFirmPhone(e.target.value)}
-                    placeholder="0(555) 555 5555"
-                    className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-855 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
+            
+            <div className="p-5 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-950/50">
+              {allPoolFirms.filter((pf) => !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)).length === 0 ? (
+                <div className="text-center py-8 text-sm text-slate-500">
+                  Eklenebilecek yeni tedarikçi bulunamadı.
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">E-Posta</label>
-                  <input
-                    type="email"
-                    value={newFirmEmail}
-                    onChange={(e) => setNewFirmEmail(e.target.value)}
-                    placeholder="info@firma.com"
-                    className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-855 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {allPoolFirms
+                    .filter((pf) => !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id))
+                    .map((pf) => {
+                      const isSelected = selectedFirmIds.includes(pf.id)
+                      return (
+                        <div 
+                          key={pf.id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedFirmIds(prev => prev.filter(id => id !== pf.id))
+                            } else {
+                              setSelectedFirmIds(prev => [...prev, pf.id])
+                            }
+                          }}
+                          className={`p-3 rounded-xl border cursor-pointer flex items-start gap-3 transition-all ${
+                            isSelected 
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 dark:border-blue-500/50' 
+                              : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                          }`}
+                        >
+                          <div className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                            isSelected 
+                              ? 'bg-blue-500 border-blue-500 text-white' 
+                              : 'border-slate-300 dark:border-slate-600 bg-transparent'
+                          }`}>
+                            {isSelected && <CheckCircle2 className="w-3 h-3" />}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-sm text-slate-800 dark:text-slate-200 line-clamp-2" title={pf.unvan}>{pf.unvan}</div>
+                            {pf.vergi_no && <div className="text-[10px] text-slate-500 mt-1">VN: {pf.vergi_no}</div>}
+                          </div>
+                        </div>
+                      )
+                    })}
                 </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
+              <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                {selectedFirmIds.length} tedarikçi seçildi
               </div>
-
-              <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800 pt-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowNewFirmModal(false)}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-700 px-4 py-2 rounded-lg"
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setIsFirmModalOpen(false)}
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 >
-                  Vazgeç
+                  İptal
                 </button>
-                <button
-                  type="submit"
-                  className="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm transition-all"
+                <button 
+                  onClick={handleBulkAddFirms}
+                  disabled={selectedFirmIds.length === 0}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
                 >
-                  Oluştur ve Ekle
+                  Seçilenleri Dosyaya Ekle
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
