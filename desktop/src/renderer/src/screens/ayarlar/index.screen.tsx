@@ -3,13 +3,13 @@ import { useAyarlarHooks } from './ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { useSettingsStore } from '../../store/settingsStore'
-import { Save, Mail, Upload, Download, Settings, Palette, Code, Eye, EyeOff } from 'lucide-react'
+import { Save, Mail, Upload, Download, Settings, Palette, Code, Eye, EyeOff, RefreshCw } from 'lucide-react'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import TemaScreen from './TemaScreen'
 import { useLocation } from '@tanstack/react-router'
 import { Bot, Archive } from 'lucide-react'
 
-type TabType = 'smtp' | 'tema' | 'developer' | 'ai' | 'archive'
+type TabType = 'smtp' | 'tema' | 'developer' | 'ai' | 'archive' | 'sync'
 
 export default function AyarlarScreen(): React.ReactNode {
   const { settings, isLoadingSettings, saveSettings, importSmtp, exportSmtp } = useAyarlarHooks()
@@ -24,7 +24,8 @@ export default function AyarlarScreen(): React.ReactNode {
       tabParam === 'tema' ||
       tabParam === 'developer' ||
       tabParam === 'ai' ||
-      tabParam === 'archive'
+      tabParam === 'archive' ||
+      tabParam === 'sync'
     ) {
       return tabParam
     }
@@ -39,7 +40,8 @@ export default function AyarlarScreen(): React.ReactNode {
       tabParam === 'tema' ||
       tabParam === 'developer' ||
       tabParam === 'ai' ||
-      tabParam === 'archive'
+      tabParam === 'archive' ||
+      tabParam === 'sync'
     ) {
       setActiveTab(tabParam)
     }
@@ -74,6 +76,14 @@ export default function AyarlarScreen(): React.ReactNode {
   const [archiveYear, setArchiveYear] = useState<number>(new Date().getFullYear() - 1)
   const [isArchiving, setIsArchiving] = useState(false)
 
+  // Tab 9: Web Sync Ayarları
+  const [syncServerUrl, setSyncServerUrl] = useState('')
+  const [syncServerPort, setSyncServerPort] = useState('')
+  const [syncServerToken, setSyncServerToken] = useState('')
+  const [syncTestStatus, setSyncTestStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
+  const [syncTestMsg, setSyncTestMsg] = useState('')
+  const [isSyncing, setIsSyncing] = useState(false)
+
   useEffect(() => {
     window.electron.ipcRenderer
       .invoke('app:isPackaged')
@@ -106,6 +116,10 @@ export default function AyarlarScreen(): React.ReactNode {
         setAiGeminiApiKey(settings.ai_gemini_api_key || '')
         setAiOpenaiApiKey(settings.ai_openai_api_key || '')
         setAiAnthropicApiKey(settings.ai_anthropic_api_key || '')
+
+        setSyncServerUrl(settings.sync_server_url || '')
+        setSyncServerPort(settings.sync_server_port || '')
+        setSyncServerToken(settings.sync_server_token || '')
       }, 0)
     }
   }, [settings])
@@ -157,7 +171,7 @@ export default function AyarlarScreen(): React.ReactNode {
   }
 
   const handleSaveTab = async (tab: TabType): Promise<void> => {
-    if (tab !== 'smtp' && tab !== 'developer' && tab !== 'ai') return
+    if (tab !== 'smtp' && tab !== 'developer' && tab !== 'ai' && tab !== 'sync') return
     setSaving(true)
     try {
       const dataToSave: Record<string, string> = {}
@@ -181,6 +195,10 @@ export default function AyarlarScreen(): React.ReactNode {
         dataToSave.ai_gemini_api_key = aiGeminiApiKey
         dataToSave.ai_openai_api_key = aiOpenaiApiKey
         dataToSave.ai_anthropic_api_key = aiAnthropicApiKey
+      } else if (tab === 'sync') {
+        dataToSave.sync_server_url = syncServerUrl
+        dataToSave.sync_server_port = syncServerPort
+        dataToSave.sync_server_token = syncServerToken
       }
 
       await saveSettings(dataToSave)
@@ -190,6 +208,49 @@ export default function AyarlarScreen(): React.ReactNode {
       alert('Kaydetme hatası!')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSyncTestConnection = async (): Promise<void> => {
+    if (!syncServerUrl) {
+      setSyncTestStatus('error')
+      setSyncTestMsg('Lütfen sunucu adresini girin.')
+      return
+    }
+    setSyncTestStatus('loading')
+    setSyncTestMsg('')
+    try {
+      const res = await window.electron.ipcRenderer.invoke('sync:test-connection', {
+        url: syncServerUrl,
+        port: syncServerPort,
+        token: syncServerToken
+      })
+      if (res.success) {
+        setSyncTestStatus('ok')
+        setSyncTestMsg('Bağlantı başarılı! ✓')
+      } else {
+        setSyncTestStatus('error')
+        setSyncTestMsg(res.message || 'Bağlantı başarısız.')
+      }
+    } catch (err: any) {
+      setSyncTestStatus('error')
+      setSyncTestMsg('Hata: ' + err.message)
+    }
+  }
+
+  const handleManualSync = async (): Promise<void> => {
+    setIsSyncing(true)
+    try {
+      const res = await window.electron.ipcRenderer.invoke('sync:run-sync')
+      if (res.success) {
+        alert('Senkronizasyon başarıyla tamamlandı!')
+      } else {
+        alert('Senkronizasyon hatası: ' + res.message)
+      }
+    } catch (err: any) {
+      alert('Beklenmeyen senkronizasyon hatası: ' + err.message)
+    } finally {
+      setIsSyncing(false)
     }
   }
 
@@ -225,8 +286,11 @@ export default function AyarlarScreen(): React.ReactNode {
     { id: 'ai', label: 'Yapay Zeka', icon: <Bot className="w-4 h-4 shrink-0" /> },
     { id: 'div3', label: '', icon: null, isDivider: true },
     { id: 'archive', label: 'Veri & Arşiv', icon: <Archive className="w-4 h-4 shrink-0" /> },
+    { id: 'div4', label: '', icon: null, isDivider: true },
+    { id: 'sync', label: 'Web Senkronizasyon', icon: <RefreshCw className="w-4 h-4 shrink-0" /> },
     ...(import.meta.env.DEV
       ? [
+          { id: 'div5', label: '', icon: null, isDivider: true },
           {
             id: 'developer',
             label: 'Geliştirici & Test',
@@ -785,6 +849,94 @@ export default function AyarlarScreen(): React.ReactNode {
                           dosyaları arşivlenir. Oluşan <b>.dtz</b> dosyasını daha sonra uygulamadan
                           tekrar açıp inceleyebilirsiniz.
                         </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 9: WEB SENKRONİZASYON */}
+                {activeTab === 'sync' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
+                          Sunucu Senkronizasyonu
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                          Yerelde yapılan değişiklikleri uzak sunucu ile eşitleyin.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                          Sunucu Adresi (Domain / IP)
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="https://dt-sunucu.com veya http://192.168.1.100"
+                          value={syncServerUrl}
+                          onChange={(e) => setSyncServerUrl(e.target.value)}
+                          className="bg-slate-55 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                        />
+                      </div>
+
+                      <div className="md:col-span-1">
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                          Port (Opsiyonel)
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="3000"
+                          value={syncServerPort}
+                          onChange={(e) => setSyncServerPort(e.target.value)}
+                          className="bg-slate-55 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                        />
+                      </div>
+
+                      <div className="md:col-span-1">
+                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                          Güvenlik Tokenı / API Key
+                        </label>
+                        <Input
+                          type="password"
+                          placeholder="Bağlantı şifresi veya token"
+                          value={syncServerToken}
+                          onChange={(e) => setSyncServerToken(e.target.value)}
+                          className="bg-slate-55 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2 flex items-center gap-3 pt-2">
+                        <Button
+                          onClick={handleSyncTestConnection}
+                          disabled={syncTestStatus === 'loading'}
+                          className="text-xs py-1.5 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 gap-1.5"
+                        >
+                          {syncTestStatus === 'loading'
+                            ? '⏳ Test Ediliyor...'
+                            : '⚡ Bağlantıyı Test Et'}
+                        </Button>
+
+                        <Button
+                          onClick={handleManualSync}
+                          disabled={isSyncing || !syncServerUrl}
+                          className="text-xs py-1.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
+                        >
+                          {isSyncing ? '⏳ Eşitleniyor...' : '🔄 Şimdi Eşitle (Sync)'}
+                        </Button>
+
+                        {syncTestStatus === 'ok' && (
+                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {syncTestMsg}
+                          </span>
+                        )}
+                        {syncTestStatus === 'error' && (
+                          <span className="text-xs font-semibold text-red-500 dark:text-red-400">
+                            {syncTestMsg}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

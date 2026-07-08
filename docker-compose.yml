@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: dt-asistan-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: dt_asistan
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: dt-asistan-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/dt_asistan?schema=public
+      - NODE_ENV=production
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

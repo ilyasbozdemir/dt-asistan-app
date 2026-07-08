@@ -20,22 +20,30 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Sync version with tag
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
+          cd desktop
           npm pkg set version=$VERSION
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
         env:
           npm_config_msvs_version: '2022'
 
       - name: Verify ee-first
         shell: cmd
         run: |
-          npm ls ee-first
+          cd desktop
+          pnpm ls ee-first
           if exist node_modules\ee-first (
             echo FOUND
           ) else (
@@ -44,7 +52,8 @@ jobs:
           )
 
       - name: Build and Package
-        run: npm run build && npx electron-builder --win --x64 -p never
+        working-directory: desktop
+        run: pnpm build && npx electron-builder --win --x64 -p never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,9 +80,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            dist-local/*.exe
-            dist-local/*.exe.blockmap
-            dist-local/*.yml
+            desktop/dist-local/*.exe
+            desktop/dist-local/*.exe.blockmap
+            desktop/dist-local/*.yml
           draft: false
           prerelease: false
           name: ${{ env.RELEASE_NAME }}
