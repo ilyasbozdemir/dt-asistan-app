@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { ChevronDown, ChevronUp, Star, Trash2 } from 'lucide-react'
 import { useSablonlar } from '../sablonlar/sablonlar.hooks'
 import { subPagesMapping } from '../../constants/surecler'
+import { useWorkspaceStore } from '../../store/workspaceStore'
 
 const FALLBACK_ROUTE = '/dosya/hazirlik-ve-ihtiyac'
 
@@ -86,6 +87,7 @@ const normalizeForMatch = (str: string): string => {
 
 export default function TaslakYoneticisi(): React.JSX.Element {
   const { data: sablonlar = [] } = useSablonlar()
+  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const [globalStarred, setGlobalStarred] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('global_starred_docs')
@@ -94,6 +96,30 @@ export default function TaslakYoneticisi(): React.JSX.Element {
       return []
     }
   })
+
+  // Sync active file starred docs from DB on mount/change
+  React.useEffect(() => {
+    if (!activeDosyaId) return
+    window.electron.ipcRenderer
+      .invoke('db:query', 'SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?', [
+        activeDosyaId
+      ])
+      .then((res) => {
+        if (res.success && res.data.length > 0) {
+          try {
+            const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
+            setActiveStarredDocs(docs)
+          } catch (e) {
+            console.error('Failed to parse active file starred docs:', e)
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to query active file starred docs:', err)
+      })
+  }, [activeDosyaId, setActiveStarredDocs])
+
+  const starredList = activeDosyaId ? activeStarredDocs : globalStarred
 
   const saveStarred = (updated: string[]): void => {
     setGlobalStarred(updated)
@@ -114,9 +140,9 @@ export default function TaslakYoneticisi(): React.JSX.Element {
     return map
   }, [sablonlar])
 
-  const toggleStar = (docName: string): void => {
+  const toggleStar = async (docName: string): Promise<void> => {
     const normalizedTarget = normalizeForMatch(docName)
-    let updated = [...globalStarred]
+    let updated = [...starredList]
     const exists = updated.some((d) => normalizeForMatch(d) === normalizedTarget)
 
     if (exists) {
@@ -124,18 +150,38 @@ export default function TaslakYoneticisi(): React.JSX.Element {
     } else {
       updated.push(docName)
     }
-    saveStarred(updated)
+
+    if (activeDosyaId) {
+      setActiveStarredDocs(updated)
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?',
+        [JSON.stringify(updated), activeDosyaId]
+      )
+    } else {
+      saveStarred(updated)
+    }
   }
 
-  const moveShortcut = (index: number, direction: 'up' | 'down'): void => {
-    const updated = [...globalStarred]
+  const moveShortcut = async (index: number, direction: 'up' | 'down'): Promise<void> => {
+    const updated = [...starredList]
     const targetIndex = direction === 'up' ? index - 1 : index + 1
     if (targetIndex < 0 || targetIndex >= updated.length) return
 
     const temp = updated[index]
     updated[index] = updated[targetIndex]
     updated[targetIndex] = temp
-    saveStarred(updated)
+
+    if (activeDosyaId) {
+      setActiveStarredDocs(updated)
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?',
+        [JSON.stringify(updated), activeDosyaId]
+      )
+    } else {
+      saveStarred(updated)
+    }
   }
 
   const groupedSablonlar = useMemo(() => {
@@ -227,14 +273,14 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                 </span>
 
                 <div className="mt-5 pt-4">
-                  {globalStarred.length === 0 ? (
+                  {starredList.length === 0 ? (
                     <p className="text-xs italic text-slate-400">
                       Henüz kısayol eklenmemiş. Sağ taraftaki belgelerin yanındaki yıldız butonuna
                       basarak kısayol ekleyebilirsiniz.
                     </p>
                   ) : (
                     <div className="space-y-2 mb-4">
-                      {globalStarred.map((docName: string, idx: number) => {
+                      {starredList.map((docName: string, idx: number) => {
                         const route = routeMap[docName]
                         const { status, cleanName } = parseStatusAndName(docName)
                         return (
@@ -285,7 +331,7 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                               </button>
                               <button
                                 onClick={() => moveShortcut(idx, 'down')}
-                                disabled={idx === globalStarred.length - 1}
+                                disabled={idx === starredList.length - 1}
                                 className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                                 title="Aşağı Taşı"
                               >
@@ -333,7 +379,9 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                     <div className="space-y-1.5">
                       {list.map((sablon) => {
                         const route = routeMap[sablon.ad]
-                        const isStarred = globalStarred.includes(sablon.ad)
+                        const isStarred = starredList.some(
+                          (d) => normalizeForMatch(d) === normalizeForMatch(sablon.ad)
+                        )
                         const { status, cleanName } = parseStatusAndName(sablon.ad, sablon.aciklama)
                         return (
                           <div
