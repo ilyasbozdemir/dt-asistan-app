@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, ChevronUp, FileText, Filter, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Star } from "lucide-react";
 import {
   BUTTON_COLORS,
-  CATEGORY_LABELS,
+  SABLON_GRUPLARI,
   normalizeForMatch,
 } from "./useDosyaAsamasiSablons";
 
@@ -261,43 +261,50 @@ export function SurecBelgeleriPanel({
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {(() => {
                           const sablonsInGroup = groups.get(groupName)!;
+
+                          // SABLON_GRUPLARI'na göre kümeleme.
+                          // dosya_adi → grup key. Aynı grup key'e sahip şablonlar tek kartta.
                           const clusters = new Map<string, any[]>();
 
-                          sablonsInGroup.forEach((sablon) => {
-                            let cleanName = sablon.ad;
-                            const matchStatus = cleanName.match(
-                              /^\[(.*?)\]\s*(.*)$/,
-                            );
-                            if (matchStatus) cleanName = matchStatus[2].trim();
-
-                            const matchVariant = cleanName.match(
-                              /^(.*?)\s*\((.*?)\)$/,
-                            );
-                            const baseName = matchVariant
-                              ? matchVariant[1].trim()
-                              : cleanName;
-
-                            if (!clusters.has(baseName)) {
-                              clusters.set(baseName, []);
-                            }
-                            clusters.get(baseName)!.push(sablon);
+                          sablonsInGroup.forEach((sablon: any) => {
+                            const dosyaAdiNoExt = (sablon.dosya_adi as string).replace(/\.html$/, '');
+                            const grupBilgi = SABLON_GRUPLARI[dosyaAdiNoExt];
+                            const key = grupBilgi ? grupBilgi.grup : `__solo__${sablon.id ?? sablon.ad}`;
+                            if (!clusters.has(key)) clusters.set(key, []);
+                            clusters.get(key)!.push(sablon);
                           });
 
-                          return Array.from(clusters.entries()).map(
-                            ([baseName, clusteredSablons], idx) => {
-                              return (
-                                <SablonCard
-                                  key={baseName}
-                                  baseName={baseName}
-                                  sablons={clusteredSablons}
-                                  idx={idx}
-                                  ciktiLoading={ciktiLoading}
-                                  isSablonDisabled={isSablonDisabled}
-                                  onSablonClick={onSablonClick}
-                                />
-                              );
-                            },
-                          );
+                          // Her cluster'ı SABLON_GRUPLARI sıralamasına göre sırala
+                          clusters.forEach((list) => {
+                            list.sort((a: any, b: any) => {
+                              const aKey = (a.dosya_adi as string).replace(/\.html$/, '');
+                              const bKey = (b.dosya_adi as string).replace(/\.html$/, '');
+                              return (SABLON_GRUPLARI[aKey]?.siralama ?? 99) - (SABLON_GRUPLARI[bKey]?.siralama ?? 99);
+                            });
+                          });
+
+                          // Kart başlığı: ilk şablonun adından türet
+                          const getCardTitle = (list: any[]): string => {
+                            const first = list[0].ad as string;
+                            const m = first.match(/^\[(.*?)\]\s*(.*)$/);
+                            const clean = m ? m[2].trim() : first;
+                            return clean.replace(/\s*\(.*?\)\s*$/, '').trim();
+                          };
+
+                          return Array.from(clusters.values()).map((clusteredSablons, idx) => {
+                            const baseName = getCardTitle(clusteredSablons);
+                            return (
+                              <SablonCard
+                                key={baseName + idx}
+                                baseName={baseName}
+                                sablons={clusteredSablons}
+                                idx={idx}
+                                ciktiLoading={ciktiLoading}
+                                isSablonDisabled={isSablonDisabled}
+                                onSablonClick={onSablonClick}
+                              />
+                            );
+                          });
                         })()}
                       </div>
                     )}
@@ -333,12 +340,12 @@ function SablonCard({
     return 0;
   });
 
-  const [selectedId, setSelectedId] = useState(
-    sortedSablons[0].id || sortedSablons[0].ad,
+  const [selectedId, setSelectedId] = useState<string>(
+    String(sortedSablons[0].id || sortedSablons[0].ad),
   );
 
   const activeSablon =
-    sortedSablons.find((s) => (s.id || s.ad) === selectedId) ||
+    sortedSablons.find((s) => String(s.id || s.ad) === selectedId) ||
     sortedSablons[0];
 
   let cleanName = activeSablon.ad;
@@ -376,6 +383,8 @@ function SablonCard({
           onClick={() =>
             !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
           disabled={isDisabled}
+          title="Şablonu Önizle"
+          aria-label="Şablonu Önizle"
         >
           <FileText className="w-4 h-4" />
         </button>
@@ -411,20 +420,19 @@ function SablonCard({
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
                 disabled={isDisabled}
+                title="Şablon Sürümü Seçin"
+                aria-label="Şablon Sürümü Seçin"
                 className="w-full text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-medium"
               >
                 {sortedSablons.map((s) => {
-                  let variant = "Varsayılan";
-                  let cName = s.ad;
-                  const mStatus = cName.match(/^\[(.*?)\]\s*(.*)$/);
-                  if (mStatus) cName = mStatus[2].trim();
-
-                  const vMatch = cName.match(/\((.*?)\)$/);
-                  if (vMatch) variant = vMatch[1];
+                  const dosyaAdiNoExt = (s.dosya_adi as string).replace(/\.html$/, '');
+                  const grupBilgi = SABLON_GRUPLARI[dosyaAdiNoExt];
+                  // Etiketi doğrudan SABLON_GRUPLARI'ndan al
+                  const label = grupBilgi?.etiket ?? s.ad;
 
                   return (
-                    <option key={s.id || s.ad} value={s.id || s.ad}>
-                      📄 Sürüm: {variant}
+                    <option key={s.id || s.ad} value={String(s.id || s.ad)}>
+                      📄 {label}
                     </option>
                   );
                 })}

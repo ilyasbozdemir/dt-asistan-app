@@ -1,0 +1,14 @@
+app: '1.0.0-beta.34'
+schema_min: 1
+schema_max: 28
+release_date: '2026-07-08'
+changes:
+  # --- beta.34 ---
+  - schema: 28
+    type: 'alter'
+    description: 'TANIM_Sablon tablosuna grup_adi ve grup_siralama kolonları eklendi - aynı gruptaki şablonlar tek kart altında birleştirilir'
+    columns_added:
+      - table: 'TANIM_Sablon'
+        column: 'grup_adi'
+      - table: 'TANIM_Sablon'
+        column: 'grup_siralama'

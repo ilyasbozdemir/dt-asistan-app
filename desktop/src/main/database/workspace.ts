@@ -195,6 +195,100 @@ const TEMPLATE_NAMES: Record<string, string> = {
   'klasor-sirtligi-7-5cm': 'KLASÖR SIRTLIĞI (7.5 CM)'
 }
 
+/**
+ * TEMPLATE_GROUPS — hangi şablonlar aynı kart altında gösterilir?
+ *
+ * Her entry bir gruptur. "grup" değeri DB'ye grup_adi olarak yazar.
+ * Dizi sırası = grup_siralama (0-indexed). İlk eleman her zaman "Ana Belge" görünür.
+ * Buraya ekleme/çıkarma yapılınca uygulama yeniden başlatıldığında DB güncellenir.
+ */
+const TEMPLATE_GROUPS: Array<{ grup: string; sablonlar: Array<{ dosya_adi: string; etiket: string }> }> = [
+  // İhtiyaç Listesi ailesi
+  {
+    grup: 'ihtiyac-listesi',
+    sablonlar: [
+      { dosya_adi: 'ihtiyac-listesi', etiket: 'İhtiyaç Listesi' },
+      { dosya_adi: 'ihtiyac-talep-formu', etiket: 'Talep Formu' }
+    ]
+  },
+  // Lüzum Müzekkeresi ailesi
+  {
+    grup: 'luzum-muzekkeresi',
+    sablonlar: [
+      { dosya_adi: 'luzum-muzekkeresi', etiket: 'Lüzum Müzekkeresi' },
+      { dosya_adi: 'luzum-muzekkeresi-onay-eki', etiket: 'Onay Eki' },
+      { dosya_adi: 'luzum-muzekkeresi-teslim-tesellum', etiket: 'Teslim Tesellüm' }
+    ]
+  },
+  // Komisyon Görevlendirme ailesi
+  {
+    grup: 'komisyon-gorevlendirme',
+    sablonlar: [
+      { dosya_adi: 'komisyon-gorevlendirme-onayi', etiket: 'Komisyon Atama' },
+      { dosya_adi: 'komisyon-gorevlendirme-onayi-eki', etiket: 'Onay Eki' }
+    ]
+  },
+  // Onay Belgesi ailesi
+  {
+    grup: 'onay-belgesi',
+    sablonlar: [
+      { dosya_adi: 'dogrudan-temin-onay-belgesi', etiket: 'Doğrudan Temin' },
+      { dosya_adi: 'idare-onay-belgesi', etiket: 'İhale' },
+      { dosya_adi: 'butce-sorgusu', etiket: 'Bütçe Sorgusu' }
+    ]
+  },
+  // Harcama ailesi
+  {
+    grup: 'harcama',
+    sablonlar: [
+      { dosya_adi: 'harcama-talimati', etiket: 'Harcama Talimatı' },
+      { dosya_adi: 'harcama-pusulasi', etiket: 'Harcama Pusulası' }
+    ]
+  },
+  // Doğrudan Temin Sözleşmesi ailesi
+  {
+    grup: 'dt-sozlesmesi',
+    sablonlar: [
+      { dosya_adi: 'dogrudan-temin-sozlesmesi', etiket: 'Standart' },
+      { dosya_adi: 'dogrudan-temin-sozlesmesi-alternatif', etiket: 'Alternatif' },
+      { dosya_adi: 'dogrudan-temin-sozlesmesi-uzun', etiket: 'Uzun Form' }
+    ]
+  },
+  // Dağıtım Çizelgesi ailesi
+  {
+    grup: 'dagitim-cizelgesi',
+    sablonlar: [
+      { dosya_adi: 'dagitim-cizelgesi', etiket: 'Standart' },
+      { dosya_adi: 'dagitim-cizelgesi-karma', etiket: 'Karma' }
+    ]
+  },
+  // Klasör Sırtlığı ailesi
+  {
+    grup: 'klasor-sirtligi',
+    sablonlar: [
+      { dosya_adi: 'klasor-sirtligi-3cm', etiket: '3 cm' },
+      { dosya_adi: 'klasor-sirtligi-5cm', etiket: '5 cm' },
+      { dosya_adi: 'klasor-sirtligi-7-5cm', etiket: '7.5 cm' }
+    ]
+  },
+  // Muayene & Kabul ailesi
+  {
+    grup: 'muayene-kabul',
+    sablonlar: [
+      { dosya_adi: 'muayene-kabul-komisyonu', etiket: 'Komisyon' },
+      { dosya_adi: 'muayene-kabul-tutanagi', etiket: 'Tutanak' }
+    ]
+  }
+]
+
+// Hızlı lookup: dosya_adi → { grup_adi, grup_siralama, etiket }
+const TEMPLATE_GROUP_MAP = new Map<string, { grup_adi: string; grup_siralama: number; etiket: string }>()
+for (const g of TEMPLATE_GROUPS) {
+  g.sablonlar.forEach((s, i) => {
+    TEMPLATE_GROUP_MAP.set(s.dosya_adi, { grup_adi: g.grup, grup_siralama: i, etiket: s.etiket })
+  })
+}
+
 const TEMPLATE_CATEGORIES: Record<string, string> = {
   '1-ihtiyac-tespiti-ve-baslangic': '1. İhtiyaç Tespiti & Başlangıç',
   '2-piyasa-fiyat-arastirmasi': '2. Piyasa Fiyat Araştırması',
@@ -334,17 +428,19 @@ function seedTemplates(db: Database.Database): void {
         ? path.relative(targetDir, jsonFilePath)
         : null
 
-      const dosya_adi_no_ext = dosya_adi.replace(/\.html$/, '')
-      const route_path = ROUTE_BY_DOSYA_ADI[dosya_adi_no_ext] || null
-
       const existing = db
         .prepare('SELECT * FROM TANIM_Sablon WHERE dosya_adi = ?')
         .get(dosya_adi) as any
+
+      const dosya_adi_no_ext = dosya_adi.replace(/\.html$/, '')
+      const route_path = ROUTE_BY_DOSYA_ADI[dosya_adi_no_ext] || null
+      const grupBilgi = TEMPLATE_GROUP_MAP.get(dosya_adi_no_ext) || null
+
       if (!existing) {
         db.prepare(
           `
-          INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi, kategori, test_verisi, html_yolu, json_yolu, route_path)
-          VALUES (?, ?, 'html', ?, ?, 1, ?, ?, ?, ?, ?)
+          INSERT INTO TANIM_Sablon (ad, dosya_adi, dosya_turu, icerik, aciklama, aktif_mi, kategori, test_verisi, html_yolu, json_yolu, route_path, grup_adi, grup_siralama)
+          VALUES (?, ?, 'html', ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
         `
         ).run(
           ad,
@@ -355,7 +451,9 @@ function seedTemplates(db: Database.Database): void {
           testJsonContent,
           relativeHtmlPath,
           relativeJsonPath,
-          route_path
+          route_path,
+          grupBilgi?.grup_adi ?? null,
+          grupBilgi?.grup_siralama ?? 0
         )
         console.log(`[Seed] Seeded default template: ${dosya_adi} in category: ${kategori}`)
       } else {
@@ -363,7 +461,7 @@ function seedTemplates(db: Database.Database): void {
           db.prepare(
             `
             UPDATE TANIM_Sablon 
-            SET ad = ?, kategori = ?, icerik = ?, test_verisi = ?, html_yolu = ?, json_yolu = ?, route_path = COALESCE(route_path, ?)
+            SET ad = ?, kategori = ?, icerik = ?, test_verisi = ?, html_yolu = ?, json_yolu = ?, route_path = COALESCE(route_path, ?), grup_adi = ?, grup_siralama = ?
             WHERE id = ?
           `
           ).run(
@@ -374,6 +472,8 @@ function seedTemplates(db: Database.Database): void {
             relativeHtmlPath,
             relativeJsonPath,
             route_path,
+            grupBilgi?.grup_adi ?? null,
+            grupBilgi?.grup_siralama ?? 0,
             existing.id
           )
           console.log(`[Seed] Updated default template: ${dosya_adi}`)
@@ -407,6 +507,21 @@ function seedTemplates(db: Database.Database): void {
         }
       }
     }
+
+    // ---- GRUP METAVERISI ZORUNLU GUNCELLEME ----
+    // Her uygulama açılışında, TEMPLATE_GROUPS'taki tüm şablonların
+    // grup_adi ve grup_siralama alanlarını güncelle.
+    // versiyon fark etmeksizin — bu bir metadata alanıdır, kullanıcı verisini etkilemez.
+    const updateGrup = db.prepare(
+      `UPDATE TANIM_Sablon SET grup_adi = ?, grup_siralama = ? WHERE dosya_adi = ?`
+    )
+    for (const [dosyaAdi, bilgi] of TEMPLATE_GROUP_MAP.entries()) {
+      updateGrup.run(bilgi.grup_adi, bilgi.grup_siralama, `${dosyaAdi}.html`)
+    }
+    console.log(`[Seed] Grup metadata güncellendi: ${TEMPLATE_GROUP_MAP.size} şablon`)
+    // NULL yapmak istiyorsak (grup dışına çıkarılan eski şablonlar için) bunu atlayabiliriz.
+    // Şimdilik sadece aktif grupları güncelliyoruz.
+
   } catch (err: any) {
     console.error('Error seeding templates:', err)
   }
