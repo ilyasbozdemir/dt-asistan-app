@@ -79,10 +79,10 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
                          </div>
                        </div>`,
       margins: {
-        top: extracted.hasHeader ? 1.6 : 0.98, // Increase top margin if there is a header
-        bottom: 1.2, // ~3cm (Footer and pagination needs a bit more space)
-        left: 0.59, // ~1.5cm
-        right: 0.59 // ~1.5cm
+        top: extracted.hasHeader ? 1.6 : 0.59, // Standard top margin is 1.5cm (0.59 in) when no header.
+        bottom: 1.2,
+        left: 0.59,
+        right: 0.59
       },
       pageSize: 'A4'
     })
@@ -101,7 +101,7 @@ export async function renderPdfBuffer(htmlContent: string): Promise<Buffer> {
                            ${extracted.footerHtml}
                          </div>`,
         margins: {
-          top: extracted.hasHeader ? 1.6 : 0.98,
+          top: extracted.hasHeader ? 1.6 : 0.59,
           bottom: 1.2,
           left: 0.59,
           right: 0.59
