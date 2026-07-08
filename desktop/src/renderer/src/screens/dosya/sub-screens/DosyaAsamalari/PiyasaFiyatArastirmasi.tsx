@@ -1,9 +1,9 @@
-import React from 'react'
-import { PackageSearch } from 'lucide-react'
-import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
-import { SurecBelgeleriPanel } from './SablonPanelleri'
+import React from "react";
+import { PackageSearch } from "lucide-react";
+import { SubScreen } from "../../SubScreens.screen";
+import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import { useDosyaAsamasiSablons } from "./useDosyaAsamasiSablons";
+import { SurecBelgeleriPanel } from "./SablonPanelleri";
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const {
@@ -23,8 +23,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     executeExportPdf,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled
-  } = useDosyaAsamasiSablons()
+    isSablonDisabled,
+  } = useDosyaAsamasiSablons();
 
   if (previewData && previewModalOpen) {
     return (
@@ -33,10 +33,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
+        masterHtml={masterHtml || ""}
+        baseContext={previewData.snapshotContext ||
+          contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -47,13 +46,14 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    )
+    );
   }
 
   const stageSablons = sablons.filter(
     (s) =>
-      s.kategori === '2-piyasa-fiyat-arastirmasi' || s.kategori === '2. Piyasa Fiyat Araştırması'
-  )
+      s.kategori === "2-piyasa-fiyat-arastirmasi" ||
+      s.kategori === "2. Piyasa Fiyat Araştırması",
+  );
 
   return (
     <SubScreen
@@ -74,5 +74,5 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         </p>
       </div>
     </SubScreen>
-  )
+  );
 }
