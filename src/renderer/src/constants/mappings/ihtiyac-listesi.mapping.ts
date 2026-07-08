@@ -89,4 +89,3 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     aciklama: 'Kurum kep adresi'
   }
 }
-

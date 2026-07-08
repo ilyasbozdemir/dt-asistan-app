@@ -8,69 +8,63 @@ import { InlineSablonBaglayici } from './InlineSablonBaglayici'
 import { SurecSatiri } from './SurecSatiri'
 
 export function PlaceholderYonetimi(): React.JSX.Element {
-  const { data: sablonlar = [] } = useSablonlar();
-  const [allSettings, setAllSettings] = useState<Record<string, string>>({});
-  const [editingProcess, setEditingProcess] = useState<
-    (typeof subPagesMapping)[0] | null
-  >(null);
-  const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>(
-    {
-      1: true,
-      2: true,
-      3: true,
-      4: true,
-    },
-  );
+  const { data: sablonlar = [] } = useSablonlar()
+  const [allSettings, setAllSettings] = useState<Record<string, string>>({})
+  const [editingProcess, setEditingProcess] = useState<(typeof subPagesMapping)[0] | null>(null)
+  const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>({
+    1: true,
+    2: true,
+    3: true,
+    4: true
+  })
 
   const toggleStage = (stageNum: number) => {
     setExpandedStages((prev) => ({
       ...prev,
-      [stageNum]: !prev[stageNum],
-    }));
-  };
+      [stageNum]: !prev[stageNum]
+    }))
+  }
 
   const loadAllSettings = async () => {
     try {
-      const res = await (window as any).electron.ipcRenderer.invoke(
-        "db:get-settings",
-      );
-      if (res) setAllSettings(res);
+      const res = await (window as any).electron.ipcRenderer.invoke('db:get-settings')
+      if (res) setAllSettings(res)
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   useEffect(() => {
-    loadAllSettings();
-  }, []);
+    loadAllSettings()
+  }, [])
 
   const getBoundSablonAd = (processPath: string): string | undefined => {
-    const sablonId = allSettings[`MAPPING_${processPath}_SABLON_ID`];
+    const sablonId = allSettings[`MAPPING_${processPath}_SABLON_ID`]
     if (sablonId) {
-      return sablonlar.find((s) => s.id.toString() === sablonId)?.ad;
+      return sablonlar.find((s) => s.id.toString() === sablonId)?.ad
     }
-    const defaultDosyaAdi = defaultTemplatesByPath[processPath];
+    const defaultDosyaAdi = defaultTemplatesByPath[processPath]
     if (defaultDosyaAdi) {
-      return sablonlar.find((s) => s.dosya_adi === defaultDosyaAdi)?.ad;
+      return sablonlar.find((s) => s.dosya_adi === defaultDosyaAdi)?.ad
     }
-    return undefined;
-  };
+    return undefined
+  }
 
   const stageGroups = React.useMemo(() => {
-    const groups: Record<number, typeof subPagesMapping> = {};
+    const groups: Record<number, typeof subPagesMapping> = {}
     for (const p of subPagesMapping) {
-      if (!groups[p.stage]) groups[p.stage] = [];
-      groups[p.stage].push(p);
+      if (!groups[p.stage]) groups[p.stage] = []
+      groups[p.stage].push(p)
     }
-    return groups;
-  }, []);
+    return groups
+  }, [])
 
   const stageLabels: Record<number, string> = {
-    1: "İhtiyaç Tespiti ve Başlangıç",
-    2: "Fiyat Araştırma ve Maliyet",
-    3: "Onay ve İhale Süreci",
-    4: "Teslim ve Harcama",
-  };
+    1: 'İhtiyaç Tespiti ve Başlangıç',
+    2: 'Fiyat Araştırma ve Maliyet',
+    3: 'Onay ve İhale Süreci',
+    4: 'Teslim ve Harcama'
+  }
 
   if (editingProcess) {
     return (
@@ -80,11 +74,11 @@ export function PlaceholderYonetimi(): React.JSX.Element {
         stageNo={editingProcess.stage}
         sablonlar={sablonlar}
         onBack={() => {
-          setEditingProcess(null);
-          loadAllSettings();
+          setEditingProcess(null)
+          loadAllSettings()
         }}
       />
-    );
+    )
   }
 
   return (
@@ -99,10 +93,9 @@ export function PlaceholderYonetimi(): React.JSX.Element {
               Şablon Süreç Yönetimi
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-              Her süreç adımı için kullanılacak şablon belgesini ve veritabanı
-              değişken eşleşmelerini bu ekrandan yönetebilirsiniz. Aşama
-              listesini genişletmek veya gizlemek için aşama kartlarının
-              başlıklarına tıklayabilirsiniz.
+              Her süreç adımı için kullanılacak şablon belgesini ve veritabanı değişken
+              eşleşmelerini bu ekrandan yönetebilirsiniz. Aşama listesini genişletmek veya gizlemek
+              için aşama kartlarının başlıklarına tıklayabilirsiniz.
             </p>
           </div>
         </div>
@@ -111,12 +104,10 @@ export function PlaceholderYonetimi(): React.JSX.Element {
       {/* SÜREÇ LİSTESİ */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-4 pr-1">
         {Object.entries(stageGroups).map(([stage, processes]) => {
-          const stageNum = Number(stage);
-          const isExpanded = expandedStages[stageNum];
-          const boundCount = processes.filter((p) =>
-            getBoundSablonAd(p.path)
-          ).length;
-          const totalCount = processes.length;
+          const stageNum = Number(stage)
+          const isExpanded = expandedStages[stageNum]
+          const boundCount = processes.filter((p) => getBoundSablonAd(p.path)).length
+          const totalCount = processes.length
 
           return (
             <div
@@ -127,10 +118,10 @@ export function PlaceholderYonetimi(): React.JSX.Element {
               <div
                 onClick={() => toggleStage(stageNum)}
                 className={cn(
-                  "px-5 py-4 flex items-center justify-between cursor-pointer select-none transition-colors border-b",
+                  'px-5 py-4 flex items-center justify-between cursor-pointer select-none transition-colors border-b',
                   isExpanded
-                    ? "bg-slate-50/80 dark:bg-slate-950/60 border-slate-100 dark:border-slate-800/80"
-                    : "bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50/50 dark:hover:bg-slate-800/30",
+                    ? 'bg-slate-50/80 dark:bg-slate-950/60 border-slate-100 dark:border-slate-800/80'
+                    : 'bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50/50 dark:hover:bg-slate-800/30'
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -147,23 +138,19 @@ export function PlaceholderYonetimi(): React.JSX.Element {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {boundCount === totalCount
-                    ? (
-                      <span className="hidden sm:inline-flex text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-md border border-emerald-100/30 dark:border-emerald-900/20">
-                        Hepsi Bağlı
-                      </span>
-                    )
-                    : boundCount > 0
-                    ? (
-                      <span className="hidden sm:inline-flex text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-2 py-0.5 rounded-md border border-indigo-100/30 dark:border-indigo-900/20">
-                        Kısmi Bağlı
-                      </span>
-                    )
-                    : null}
+                  {boundCount === totalCount ? (
+                    <span className="hidden sm:inline-flex text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-md border border-emerald-100/30 dark:border-emerald-900/20">
+                      Hepsi Bağlı
+                    </span>
+                  ) : boundCount > 0 ? (
+                    <span className="hidden sm:inline-flex text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-2 py-0.5 rounded-md border border-indigo-100/30 dark:border-indigo-900/20">
+                      Kısmi Bağlı
+                    </span>
+                  ) : null}
                   <ChevronDown
                     className={cn(
-                      "w-4 h-4 text-slate-400 transition-transform duration-300",
-                      isExpanded ? "transform rotate-180" : "",
+                      'w-4 h-4 text-slate-400 transition-transform duration-300',
+                      isExpanded ? 'transform rotate-180' : ''
                     )}
                   />
                 </div>
@@ -183,9 +170,9 @@ export function PlaceholderYonetimi(): React.JSX.Element {
                 </div>
               )}
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

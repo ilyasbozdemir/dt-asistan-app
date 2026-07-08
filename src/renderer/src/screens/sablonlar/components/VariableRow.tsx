@@ -1,21 +1,21 @@
-import React from "react";
-import { useDbDictionary, useDbTables, useDbColumns } from "../sablonlar.hooks";
-import { TableColumnMapping } from "../../../constants/mappings";
+import React from 'react'
+import { useDbDictionary, useDbTables, useDbColumns } from '../sablonlar.hooks'
+import { TableColumnMapping } from '../../../constants/mappings'
 
 interface VariableRowProps {
-  variableKey: string;
-  mapping?: TableColumnMapping;
-  onChange: (key: string, newMapping: TableColumnMapping) => void;
+  variableKey: string
+  mapping?: TableColumnMapping
+  onChange: (key: string, newMapping: TableColumnMapping) => void
 }
 
 export function VariableRow({
   variableKey,
   mapping,
-  onChange,
+  onChange
 }: VariableRowProps): React.JSX.Element {
-  const { data: dbDictionary = {} } = useDbDictionary();
-  const { data: dbTables = [] } = useDbTables();
-  const { data: dbColumns = [] } = useDbColumns(mapping?.tablo || null);
+  const { data: dbDictionary = {} } = useDbDictionary()
+  const { data: dbTables = [] } = useDbTables()
+  const { data: dbColumns = [] } = useDbColumns(mapping?.tablo || null)
 
   return (
     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
@@ -26,52 +26,49 @@ export function VariableRow({
       </td>
       <td className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
         <select
-          value={mapping?.tablo || ""}
+          value={mapping?.tablo || ''}
           title={`Tablo Seçimi - ${variableKey}`}
           onChange={(e) =>
             onChange(variableKey, {
               ...mapping,
               tablo: e.target.value,
-              sutun: "",
-            } as TableColumnMapping)}
+              sutun: ''
+            } as TableColumnMapping)
+          }
           className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
         >
           <option value="">-- Tablo Seçin --</option>
           {dbTables.map((t) => {
-            const tableLabel = dbDictionary[t]?.label
-              ? `${t} (${dbDictionary[t].label})`
-              : t;
+            const tableLabel = dbDictionary[t]?.label ? `${t} (${dbDictionary[t].label})` : t
             return (
               <option key={t} value={t}>
                 {tableLabel}
               </option>
-            );
+            )
           })}
         </select>
       </td>
       <td className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
         <select
-          value={mapping?.sutun || ""}
+          value={mapping?.sutun || ''}
           title={`Sütun Seçimi - ${variableKey}`}
           disabled={!mapping?.tablo}
           onChange={(e) =>
-            onChange(
-              variableKey,
-              { ...mapping, sutun: e.target.value } as TableColumnMapping,
-            )}
+            onChange(variableKey, { ...mapping, sutun: e.target.value } as TableColumnMapping)
+          }
           className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
         >
           <option value="">-- Sütun Seçin --</option>
           {dbColumns.map((c) => {
-            const t = mapping?.tablo || "";
+            const t = mapping?.tablo || ''
             const colLabel = dbDictionary[t]?.columns?.[c]
               ? `${c} (${dbDictionary[t].columns[c]})`
-              : c;
+              : c
             return (
               <option key={c} value={c}>
                 {colLabel}
               </option>
-            );
+            )
           })}
         </select>
       </td>
@@ -79,8 +76,8 @@ export function VariableRow({
         className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500 truncate max-w-[200px]"
         title={mapping?.aciklama}
       >
-        {mapping?.aciklama || "-"}
+        {mapping?.aciklama || '-'}
       </td>
     </tr>
-  );
+  )
 }

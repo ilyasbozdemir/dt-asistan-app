@@ -105,4 +105,3 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
     aciklama: 'Son alım fiyat cetveli kalemleri'
   }
 }
-

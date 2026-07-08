@@ -27,7 +27,8 @@ export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
     aciklama: 'Alım Türü'
   },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'DETSİS No - Yıl - Dosya No birleşimi'
   },
   tarih: {
@@ -74,4 +75,3 @@ export const KomisyonGorevlendirmeOnayiEkiMapping: ProcessMapping = {
     aciklama: 'Kurum içi mi?'
   }
 }
-

@@ -97,4 +97,3 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     aciklama: 'Teslim alan kişiler'
   }
 }
-

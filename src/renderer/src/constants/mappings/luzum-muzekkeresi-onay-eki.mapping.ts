@@ -84,4 +84,3 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     aciklama: 'Kurum kep adresi'
   }
 }
-

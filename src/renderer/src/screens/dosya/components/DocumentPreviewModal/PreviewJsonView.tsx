@@ -26,11 +26,9 @@ export const PreviewJsonView: React.FC<PreviewJsonViewProps> = ({
       <div className="p-3 bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-xl flex items-start gap-2 text-amber-800 dark:text-amber-300 text-xs shadow-sm">
         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold block mb-0.5">
-            ⚠️ Gelişmiş Ayarlar (Geliştirici Modu)
-          </span>
-          Değişkenlerin yapısını veya JSON formatını bilmiyorsanız lütfen bu alanlardaki
-          kodları değiştirmeyin. Hatalı JSON dosyanın yazdırılmasını bozabilir.
+          <span className="font-bold block mb-0.5">⚠️ Gelişmiş Ayarlar (Geliştirici Modu)</span>
+          Değişkenlerin yapısını veya JSON formatını bilmiyorsanız lütfen bu alanlardaki kodları
+          değiştirmeyin. Hatalı JSON dosyanın yazdırılmasını bozabilir.
         </div>
       </div>
 
@@ -62,9 +60,7 @@ export const PreviewJsonView: React.FC<PreviewJsonViewProps> = ({
         <Editor
           height="100%"
           defaultLanguage="json"
-          theme={
-            document.documentElement.classList.contains('dark') ? 'vs-dark' : 'light'
-          }
+          theme={document.documentElement.classList.contains('dark') ? 'vs-dark' : 'light'}
           value={overrideJson}
           onChange={(value) => handleJsonChange(value || '{}')}
           options={{

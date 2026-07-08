@@ -1,16 +1,10 @@
-import React from "react";
-import { DollarSign, Sparkles } from "lucide-react";
-import { Link } from "@tanstack/react-router";
-import { YeniDosyaTabProps } from "../../../types";
+import React from 'react'
+import { DollarSign, Sparkles } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { YeniDosyaTabProps } from '../../../types'
 
 export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
-  const {
-    formData,
-    setFormData,
-    kodSozlugu,
-    openTextGenerator,
-    getNextTeminNo,
-  } = props;
+  const { formData, setFormData, kodSozlugu, openTextGenerator, getNextTeminNo } = props
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -30,26 +24,27 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
             type="number"
             value={formData.butce_yili || new Date().getFullYear()}
             onChange={(e) => {
-              const newYear = parseInt(e.target.value, 10);
-              const oldYear = formData.butce_yili;
-              let updatedTeminNo = formData.temin_no;
+              const newYear = parseInt(e.target.value, 10)
+              const oldYear = formData.butce_yili
+              let updatedTeminNo = formData.temin_no
 
               if (newYear && newYear !== oldYear) {
-                const oldYearStr = oldYear ? oldYear.toString() : "";
-                const isOldPattern = !formData.temin_no ||
+                const oldYearStr = oldYear ? oldYear.toString() : ''
+                const isOldPattern =
+                  !formData.temin_no ||
                   formData.temin_no.startsWith(`${oldYearStr}/`) ||
-                  formData.temin_no.startsWith(`DT${oldYearStr}/`);
+                  formData.temin_no.startsWith(`DT${oldYearStr}/`)
 
                 if (isOldPattern && getNextTeminNo) {
-                  updatedTeminNo = getNextTeminNo(newYear);
+                  updatedTeminNo = getNextTeminNo(newYear)
                 }
               }
 
               setFormData({
                 ...formData,
                 butce_yili: newYear,
-                temin_no: updatedTeminNo,
-              });
+                temin_no: updatedTeminNo
+              })
             }}
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
@@ -60,12 +55,13 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
             Bütçe Tipi
           </label>
           <select
-            value={formData.butce_tipi || "Genel Bütçe"}
+            value={formData.butce_tipi || 'Genel Bütçe'}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                butce_tipi: e.target.value,
-              })}
+                butce_tipi: e.target.value
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
             <option value="Genel Bütçe">Genel Bütçe</option>
@@ -81,12 +77,13 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
           </label>
           <input
             type="text"
-            value={formData.finansman_kodu || ""}
+            value={formData.finansman_kodu || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                finansman_kodu: e.target.value,
-              })}
+                finansman_kodu: e.target.value
+              })
+            }
             placeholder="Örn: 2, 5 veya 8"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
@@ -101,11 +98,12 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               type="button"
               onClick={() =>
                 openTextGenerator?.(
-                  "butce_kodu",
-                  "Bütçe/Ekonomik Kod Tahmini",
-                  "Bütçe Kodu",
-                  "Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et.",
-                )}
+                  'butce_kodu',
+                  'Bütçe/Ekonomik Kod Tahmini',
+                  'Bütçe Kodu',
+                  'Alımın konusuna ve türüne göre (Örn: Mal Alımı, Hizmet Alımı) uygun bir kamu maliyesi ekonomik bütçe kodu veya harcama tertibi tahmin et.'
+                )
+              }
               className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border-none"
             >
               <Sparkles size={11} /> AI ile Tahmin Et
@@ -113,12 +111,13 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
           </div>
           <input
             type="text"
-            value={formData.butce_kodu || ""}
+            value={formData.butce_kodu || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                butce_kodu: e.target.value,
-              })}
+                butce_kodu: e.target.value
+              })
+            }
             placeholder=""
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200 font-mono font-bold"
           />
@@ -136,17 +135,18 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               Kurumsal Kod (Düzey 1-2-3-4)
             </label>
             <select
-              value={formData.e_butce || ""}
+              value={formData.e_butce || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  e_butce: e.target.value,
-                })}
+                  e_butce: e.target.value
+                })
+              }
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
               {kodSozlugu
-                ?.filter((k) => k.tur === "kurumsal")
+                ?.filter((k) => k.tur === 'kurumsal')
                 .map((k) => (
                   <option key={k.id} value={k.kod}>
                     {k.kod} - {k.aciklama}
@@ -154,13 +154,10 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                 ))}
             </select>
             <p className="text-[10px] text-slate-400 mt-1">
-              Eksik kodları{" "}
-              <Link
-                to="/mevzuat"
-                className="text-blue-600 underline font-semibold"
-              >
+              Eksik kodları{' '}
+              <Link to="/mevzuat" className="text-blue-600 underline font-semibold">
                 Mevzuat & Kodlar
-              </Link>{" "}
+              </Link>{' '}
               ekranından ekleyebilirsiniz.
             </p>
           </div>
@@ -170,17 +167,18 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               Fonksiyonel Kod (Düzey 1-2-3-4)
             </label>
             <select
-              value={formData.fonksiyonel_kod || ""}
+              value={formData.fonksiyonel_kod || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  fonksiyonel_kod: e.target.value,
-                })}
+                  fonksiyonel_kod: e.target.value
+                })
+              }
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
               {kodSozlugu
-                ?.filter((k) => k.tur === "fonksiyonel")
+                ?.filter((k) => k.tur === 'fonksiyonel')
                 .map((k) => (
                   <option key={k.id} value={k.kod}>
                     {k.kod} - {k.aciklama}
@@ -194,17 +192,18 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               Muhasebe Birimi (Birim Kodu & Adı)
             </label>
             <select
-              value={formData.muhasebe_birimi || ""}
+              value={formData.muhasebe_birimi || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  muhasebe_birimi: e.target.value,
-                })}
+                  muhasebe_birimi: e.target.value
+                })
+              }
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
               {kodSozlugu
-                ?.filter((k) => k.tur === "muhasebe_birimi")
+                ?.filter((k) => k.tur === 'muhasebe_birimi')
                 .map((k) => (
                   <option key={k.id} value={k.kod}>
                     {k.kod} - {k.aciklama}
@@ -218,17 +217,18 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
               Harcama Birimi (Birim Kodu & Adı)
             </label>
             <select
-              value={formData.harcama_birimi || ""}
+              value={formData.harcama_birimi || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  harcama_birimi: e.target.value,
-                })}
+                  harcama_birimi: e.target.value
+                })
+              }
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl py-2 px-3 focus:outline-none text-slate-800 dark:text-slate-200"
             >
               <option value="">Seçiniz...</option>
               {kodSozlugu
-                ?.filter((k) => k.tur === "harcama_birimi")
+                ?.filter((k) => k.tur === 'harcama_birimi')
                 .map((k) => (
                   <option key={k.id} value={k.kod}>
                     {k.kod} - {k.aciklama}
@@ -239,5 +239,5 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

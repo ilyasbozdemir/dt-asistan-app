@@ -64,8 +64,6 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         stageSablons={stageSablons}
         activeStarredDocs={activeStarredDocs}
         ciktiLoading={ciktiLoading}
-
-
         onSablonClick={handleOpenPreviewForSablon}
         isSablonDisabled={isSablonDisabled}
       />

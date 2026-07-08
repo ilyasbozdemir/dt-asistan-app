@@ -149,29 +149,48 @@ export function initializeDatabase(db: Database.Database, institutionName: strin
   // --- TEST VERİSİ (SEED) ---
   if (!app.isPackaged) {
     try {
-      const persCountRes = db.prepare('SELECT COUNT(*) as cnt FROM TANIM_Personel').get() as { cnt: number }
+      const persCountRes = db.prepare('SELECT COUNT(*) as cnt FROM TANIM_Personel').get() as {
+        cnt: number
+      }
       if (persCountRes.cnt === 0) {
         const testPersoneller = [
-          { ad_soyad: 'İrtibat Yetkilisi (Test)', unvan: 'İrtibat Görevlisi', rol: 'ilgili_personel' },
-          { ad_soyad: 'Dosyayı Hazırlayan (Test)', unvan: 'Hazırlayan Personel', rol: 'hazirlayan' },
+          {
+            ad_soyad: 'İrtibat Yetkilisi (Test)',
+            unvan: 'İrtibat Görevlisi',
+            rol: 'ilgili_personel'
+          },
+          {
+            ad_soyad: 'Dosyayı Hazırlayan (Test)',
+            unvan: 'Hazırlayan Personel',
+            rol: 'hazirlayan'
+          },
           { ad_soyad: 'Talep Eden (Test)', unvan: 'Birim Sorumlusu', rol: 'talep_eden' },
           { ad_soyad: 'Sunan Personel (Test)', unvan: 'Sunan Görevli', rol: 'sunan_personel' },
-          { ad_soyad: 'Harcama Yetkilisi (Test)', unvan: 'Harcama Yetkilisi', rol: 'harcama_yetkilisi' }
+          {
+            ad_soyad: 'Harcama Yetkilisi (Test)',
+            unvan: 'Harcama Yetkilisi',
+            rol: 'harcama_yetkilisi'
+          }
         ]
 
-        const insertPers = db.prepare(`INSERT INTO TANIM_Personel (ad_soyad, unvan, aktif_mi) VALUES (?, ?, 1)`)
-        const updateRol = db.prepare(`UPDATE TANIM_Roller SET varsayilan_personel_id = ? WHERE rol_kodu = ?`)
+        const insertPers = db.prepare(
+          `INSERT INTO TANIM_Personel (ad_soyad, unvan, aktif_mi) VALUES (?, ?, 1)`
+        )
+        const updateRol = db.prepare(
+          `UPDATE TANIM_Roller SET varsayilan_personel_id = ? WHERE rol_kodu = ?`
+        )
 
         db.transaction(() => {
           for (const p of testPersoneller) {
             const info = insertPers.run(p.ad_soyad, p.unvan)
             const newId = info.lastInsertRowid
-            
+
             // Eğer rol_kodu TANIM_Roller tablosunda yoksa ekleyelim
             const checkRol = db.prepare('SELECT id FROM TANIM_Roller WHERE rol_kodu = ?').get(p.rol)
             if (!checkRol) {
-              db.prepare('INSERT INTO TANIM_Roller (rol_adi, rol_kodu, varsayilan_personel_id) VALUES (?, ?, ?)')
-                .run(p.rol.replace('_', ' ').toUpperCase(), p.rol, newId)
+              db.prepare(
+                'INSERT INTO TANIM_Roller (rol_adi, rol_kodu, varsayilan_personel_id) VALUES (?, ?, ?)'
+              ).run(p.rol.replace('_', ' ').toUpperCase(), p.rol, newId)
             } else {
               updateRol.run(newId, p.rol)
             }

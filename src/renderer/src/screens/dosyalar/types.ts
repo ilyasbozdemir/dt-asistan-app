@@ -28,7 +28,7 @@ export interface YeniDosyaTabProps {
   formData: Partial<TeminDosyasi>
   setFormData: React.Dispatch<React.SetStateAction<Partial<TeminDosyasi>>>
   isEdit: boolean
-  
+
   // Shared Data
   birimler: DBBirim[]
   personeller: DBPersonel[]
@@ -41,7 +41,7 @@ export interface YeniDosyaTabProps {
   setShowKonuSuggestions?: React.Dispatch<React.SetStateAction<boolean>>
   exactMatchCount?: number
   matchedSuggestions?: string[]
-  
+
   // Handlers
   handleAiDescGenerate?: () => void
   handleCopyKonuToAciklama?: () => void
@@ -61,7 +61,9 @@ export interface YeniDosyaTabProps {
   handleSelectBirim?: (birim: DBBirim) => void
 
   showPersonelSearch?: 'irtibat' | 'hazirlayan' | 'onay' | 'talep_eden' | 'sunan' | null
-  setShowPersonelSearch?: React.Dispatch<React.SetStateAction<'irtibat' | 'hazirlayan' | 'onay' | 'talep_eden' | 'sunan' | null>>
+  setShowPersonelSearch?: React.Dispatch<
+    React.SetStateAction<'irtibat' | 'hazirlayan' | 'onay' | 'talep_eden' | 'sunan' | null>
+  >
   personelSearchQuery?: string
   setPersonelSearchQuery?: React.Dispatch<React.SetStateAction<string>>
   filteredPersoneller?: DBPersonel[]

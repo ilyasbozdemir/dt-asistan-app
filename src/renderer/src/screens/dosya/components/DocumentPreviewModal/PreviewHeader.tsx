@@ -64,9 +64,7 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
           <FileText className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-            {title} Önizleme
-          </h2>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title} Önizleme</h2>
           <p className="text-xs text-slate-500">
             Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
           </p>

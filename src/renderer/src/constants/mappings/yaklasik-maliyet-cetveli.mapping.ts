@@ -65,4 +65,3 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
     aciklama: 'Yaklaşık Maliyet Malzeme Kalemleri'
   }
 }
-

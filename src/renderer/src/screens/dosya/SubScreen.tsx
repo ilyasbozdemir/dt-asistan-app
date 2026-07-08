@@ -24,13 +24,23 @@ export function SubScreen({
 
   useEffect(() => {
     if (!activeDosyaId) return
-    try {
-      const saved = localStorage.getItem('global_starred_docs')
-      const docs = saved ? JSON.parse(saved) : ['İhtiyaç Listesi', 'Lüzum Müzekkeresi']
-      setActiveStarredDocs(docs)
-    } catch (err) {
-      console.error('Failed to load global starred docs:', err)
-    }
+    window.electron.ipcRenderer
+      .invoke('db:query', 'SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?', [
+        activeDosyaId
+      ])
+      .then((res) => {
+        if (res.success && res.data.length > 0) {
+          try {
+            const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
+            setActiveStarredDocs(docs)
+          } catch (e) {
+            console.error('Failed to parse active file starred docs:', e)
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to query active file starred docs:', err)
+      })
   }, [activeDosyaId, title, setActiveStarredDocs])
 
   return (

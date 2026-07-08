@@ -1,118 +1,118 @@
-import React, { useEffect, useState } from "react";
-import { Calculator, CheckCircle2, Plus, Save, X } from "lucide-react";
-import { useAyarlarHooks } from "../../ayarlar/ayarlar.hooks";
-import { useSettingsStore } from "../../../store/settingsStore";
+import React, { useEffect, useState } from 'react'
+import { Calculator, CheckCircle2, Plus, Save, X } from 'lucide-react'
+import { useAyarlarHooks } from '../../ayarlar/ayarlar.hooks'
+import { useSettingsStore } from '../../../store/settingsStore'
 
 type VergiOrani = {
-  id: string;
-  ad: string;
-  oran: string;
-  tur: "yuzde" | "binde";
-  hesapKodu: string;
-};
+  id: string
+  ad: string
+  oran: string
+  tur: 'yuzde' | 'binde'
+  hesapKodu: string
+}
 
 type TevkifatOrani = {
-  id: string;
-  ad: string;
-  pay: number;
-  payda: number;
-};
+  id: string
+  ad: string
+  pay: number
+  payda: number
+}
 
 export function OranlarTab(): React.JSX.Element {
-  const { settings, saveSettings } = useAyarlarHooks();
-  const { loadSettings: reloadSettingsStore } = useSettingsStore();
+  const { settings, saveSettings } = useAyarlarHooks()
+  const { loadSettings: reloadSettingsStore } = useSettingsStore()
 
   const [rates, _setRates] = useState<VergiOrani[]>([
     {
-      id: "1",
-      ad: "Hakediş Damga Vergisi",
-      oran: "9,48",
-      tur: "binde",
-      hesapKodu: "360.01.01",
+      id: '1',
+      ad: 'Hakediş Damga Vergisi',
+      oran: '9,48',
+      tur: 'binde',
+      hesapKodu: '360.01.01'
     },
     {
-      id: "2",
-      ad: "İhale Karar Damga Vergisi",
-      oran: "5,69",
-      tur: "binde",
-      hesapKodu: "360.01.02",
+      id: '2',
+      ad: 'İhale Karar Damga Vergisi',
+      oran: '5,69',
+      tur: 'binde',
+      hesapKodu: '360.01.02'
     },
     {
-      id: "3",
-      ad: "Katma Değer Vergisi (%20)",
-      oran: "20",
-      tur: "yuzde",
-      hesapKodu: "360.02.01",
+      id: '3',
+      ad: 'Katma Değer Vergisi (%20)',
+      oran: '20',
+      tur: 'yuzde',
+      hesapKodu: '360.02.01'
     },
     {
-      id: "4",
-      ad: "Katma Değer Vergisi (%10)",
-      oran: "10",
-      tur: "yuzde",
-      hesapKodu: "360.02.02",
+      id: '4',
+      ad: 'Katma Değer Vergisi (%10)',
+      oran: '10',
+      tur: 'yuzde',
+      hesapKodu: '360.02.02'
     },
     {
-      id: "5",
-      ad: "Katma Değer Vergisi (%1)",
-      oran: "1",
-      tur: "yuzde",
-      hesapKodu: "360.02.03",
-    },
-  ]);
+      id: '5',
+      ad: 'Katma Değer Vergisi (%1)',
+      oran: '1',
+      tur: 'yuzde',
+      hesapKodu: '360.02.03'
+    }
+  ])
 
   const [tevkifatRates, _setTevkifatRates] = useState<TevkifatOrani[]>([
-    { id: "1", ad: "Temizlik, Çevre ve Bahçe Bakım Hizmetleri", pay: 9, payda: 10 },
-    { id: "2", ad: "Danışmanlık ve Denetim Hizmetleri", pay: 9, payda: 10 },
-    { id: "3", ad: "Makine, Teçhizat, Demirbaş Bakım Onarım", pay: 7, payda: 10 },
-    { id: "4", ad: "Diğer Hizmet Alımları", pay: 5, payda: 10 },
-  ]);
+    { id: '1', ad: 'Temizlik, Çevre ve Bahçe Bakım Hizmetleri', pay: 9, payda: 10 },
+    { id: '2', ad: 'Danışmanlık ve Denetim Hizmetleri', pay: 9, payda: 10 },
+    { id: '3', ad: 'Makine, Teçhizat, Demirbaş Bakım Onarım', pay: 7, payda: 10 },
+    { id: '4', ad: 'Diğer Hizmet Alımları', pay: 5, payda: 10 }
+  ])
 
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const setRates = (val: React.SetStateAction<typeof rates>) => {
-    _setRates(val);
-    setIsConfirmed(false);
-  };
+    _setRates(val)
+    setIsConfirmed(false)
+  }
 
   const setTevkifatRates = (val: React.SetStateAction<typeof tevkifatRates>) => {
-    _setTevkifatRates(val);
-    setIsConfirmed(false);
-  };
+    _setTevkifatRates(val)
+    setIsConfirmed(false)
+  }
 
   useEffect(() => {
     if (settings?.rates) {
       try {
-        _setRates(JSON.parse(settings.rates));
+        _setRates(JSON.parse(settings.rates))
       } catch (e) {
-        console.error("Error parsing rates", e);
+        console.error('Error parsing rates', e)
       }
     }
     if (settings?.tevkifatRates) {
       try {
-        _setTevkifatRates(JSON.parse(settings.tevkifatRates));
+        _setTevkifatRates(JSON.parse(settings.tevkifatRates))
       } catch (e) {
-        console.error("Error parsing tevkifatRates", e);
+        console.error('Error parsing tevkifatRates', e)
       }
     }
-  }, [settings]);
+  }, [settings])
 
   const handleSave = async (): Promise<void> => {
-    setIsSaving(true);
+    setIsSaving(true)
     try {
       await saveSettings({
         rates: JSON.stringify(rates),
-        tevkifatRates: JSON.stringify(tevkifatRates),
-      });
-      await reloadSettingsStore();
+        tevkifatRates: JSON.stringify(tevkifatRates)
+      })
+      await reloadSettingsStore()
     } catch (error) {
-      console.error("Error saving mevzuat settings:", error);
-      alert("Kaydetme hatası!");
+      console.error('Error saving mevzuat settings:', error)
+      alert('Kaydetme hatası!')
     } finally {
-      setIsSaving(false);
-      setIsConfirmed(false);
+      setIsSaving(false)
+      setIsConfirmed(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-full relative">
@@ -134,10 +134,8 @@ export function OranlarTab(): React.JSX.Element {
           disabled={isSaving || !isConfirmed}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-blue-500/30 cursor-pointer"
         >
-          {isSaving
-            ? <CheckCircle2 className="w-4 h-4" />
-            : <Save className="w-4 h-4" />}
-          {isSaving ? "Kaydedildi" : "Değişiklikleri Kaydet"}
+          {isSaving ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          {isSaving ? 'Kaydedildi' : 'Değişiklikleri Kaydet'}
         </button>
       </div>
 
@@ -147,9 +145,8 @@ export function OranlarTab(): React.JSX.Element {
           <div className="text-sm">
             <p className="font-semibold mb-1">Vergi ve Tevkifat Oranları</p>
             <p>
-              Burada belirlediğiniz oranlar, hakediş ve ödeme emri belgeleri
-              oluşturulurken otomatik hesaplamalarda varsayılan değer olarak
-              kullanılır.
+              Burada belirlediğiniz oranlar, hakediş ve ödeme emri belgeleri oluşturulurken otomatik
+              hesaplamalarda varsayılan değer olarak kullanılır.
             </p>
           </div>
         </div>
@@ -165,12 +162,13 @@ export function OranlarTab(): React.JSX.Element {
                   ...rates,
                   {
                     id: Date.now().toString(),
-                    ad: "Yeni Kesinti",
-                    oran: "0",
-                    tur: "yuzde",
-                    hesapKodu: "",
-                  },
-                ])}
+                    ad: 'Yeni Kesinti',
+                    oran: '0',
+                    tur: 'yuzde',
+                    hesapKodu: ''
+                  }
+                ])
+              }
               className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3 h-3" /> Yeni Ekle
@@ -190,9 +188,9 @@ export function OranlarTab(): React.JSX.Element {
                     type="text"
                     value={rate.ad}
                     onChange={(e) => {
-                      const newRates = [...rates];
-                      newRates[index].ad = e.target.value;
-                      setRates(newRates);
+                      const newRates = [...rates]
+                      newRates[index].ad = e.target.value
+                      setRates(newRates)
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
                   />
@@ -204,9 +202,9 @@ export function OranlarTab(): React.JSX.Element {
                   <select
                     value={rate.tur}
                     onChange={(e) => {
-                      const newRates = [...rates];
-                      newRates[index].tur = e.target.value as "yuzde" | "binde";
-                      setRates(newRates);
+                      const newRates = [...rates]
+                      newRates[index].tur = e.target.value as 'yuzde' | 'binde'
+                      setRates(newRates)
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
                   >
@@ -223,14 +221,14 @@ export function OranlarTab(): React.JSX.Element {
                       type="text"
                       value={rate.oran}
                       onChange={(e) => {
-                        const newRates = [...rates];
-                        newRates[index].oran = e.target.value;
-                        setRates(newRates);
+                        const newRates = [...rates]
+                        newRates[index].oran = e.target.value
+                        setRates(newRates)
                       }}
                       className="w-full pl-3 pr-8 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-right font-bold text-emerald-600 dark:text-emerald-400"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                      {rate.tur === "yuzde" ? "%" : "‰"}
+                      {rate.tur === 'yuzde' ? '%' : '‰'}
                     </span>
                   </div>
                 </div>
@@ -243,11 +241,11 @@ export function OranlarTab(): React.JSX.Element {
                   </label>
                   <input
                     type="text"
-                    value={rate.hesapKodu || ""}
+                    value={rate.hesapKodu || ''}
                     onChange={(e) => {
-                      const newRates = [...rates];
-                      newRates[index].hesapKodu = e.target.value;
-                      setRates(newRates);
+                      const newRates = [...rates]
+                      newRates[index].hesapKodu = e.target.value
+                      setRates(newRates)
                     }}
                     placeholder="Örn: 360.01.01"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
@@ -259,11 +257,11 @@ export function OranlarTab(): React.JSX.Element {
                       if (
                         window.confirm(
                           `'${
-                            rate.ad || "Bu kesinti"
-                          }' adlı öğeyi silmek istediğinize emin misiniz?`,
+                            rate.ad || 'Bu kesinti'
+                          }' adlı öğeyi silmek istediğinize emin misiniz?`
                         )
                       ) {
-                        setRates(rates.filter((r) => r.id !== rate.id));
+                        setRates(rates.filter((r) => r.id !== rate.id))
                       }
                     }}
                     className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer w-full sm:w-auto flex justify-center"
@@ -294,11 +292,12 @@ export function OranlarTab(): React.JSX.Element {
                   ...tevkifatRates,
                   {
                     id: Date.now().toString(),
-                    ad: "Yeni Tevkifat",
+                    ad: 'Yeni Tevkifat',
                     pay: 5,
-                    payda: 10,
-                  },
-                ])}
+                    payda: 10
+                  }
+                ])
+              }
               className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3 h-3" /> Yeni Ekle
@@ -318,24 +317,22 @@ export function OranlarTab(): React.JSX.Element {
                     type="text"
                     value={rate.ad}
                     onChange={(e) => {
-                      const newRates = [...tevkifatRates];
-                      newRates[index].ad = e.target.value;
-                      setTevkifatRates(newRates);
+                      const newRates = [...tevkifatRates]
+                      newRates[index].ad = e.target.value
+                      setTevkifatRates(newRates)
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
                   />
                 </div>
                 <div className="w-full sm:w-24">
-                  <label className="block text-[10px] font-semibold text-slate-500 mb-1">
-                    Pay
-                  </label>
+                  <label className="block text-[10px] font-semibold text-slate-500 mb-1">Pay</label>
                   <input
                     type="number"
                     value={rate.pay}
                     onChange={(e) => {
-                      const newRates = [...tevkifatRates];
-                      newRates[index].pay = parseInt(e.target.value) || 0;
-                      setTevkifatRates(newRates);
+                      const newRates = [...tevkifatRates]
+                      newRates[index].pay = parseInt(e.target.value) || 0
+                      setTevkifatRates(newRates)
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-center font-bold text-emerald-600 dark:text-emerald-400"
                   />
@@ -351,9 +348,9 @@ export function OranlarTab(): React.JSX.Element {
                     type="number"
                     value={rate.payda}
                     onChange={(e) => {
-                      const newRates = [...tevkifatRates];
-                      newRates[index].payda = parseInt(e.target.value) || 10;
-                      setTevkifatRates(newRates);
+                      const newRates = [...tevkifatRates]
+                      newRates[index].payda = parseInt(e.target.value) || 10
+                      setTevkifatRates(newRates)
                     }}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-center font-bold text-slate-600 dark:text-slate-400"
                   />
@@ -366,7 +363,7 @@ export function OranlarTab(): React.JSX.Element {
                           `'${rate.ad}' adlı tevkifat oranını silmek istediğinize emin misiniz?`
                         )
                       ) {
-                        setTevkifatRates(tevkifatRates.filter((r) => r.id !== rate.id));
+                        setTevkifatRates(tevkifatRates.filter((r) => r.id !== rate.id))
                       }
                     }}
                     className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer w-full sm:w-auto flex justify-center"
@@ -386,5 +383,5 @@ export function OranlarTab(): React.JSX.Element {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1104,11 +1104,15 @@ if (!gotTheLock && !isMultiInstance) {
           const insertKurum = db.transaction((rows: any[]) => {
             const keys = uniqueColumns.join(', ')
             const placeholders = uniqueColumns.map(() => '?').join(', ')
-            
+
             // For TANIM_Kurum, we usually update id=1 or insert if not exists
-            const stmtUpdate = db.prepare(`UPDATE TANIM_Kurum SET ${uniqueColumns.map(c => `${c} = ?`).join(', ')} WHERE id = 1`)
-            const stmtInsert = db.prepare(`INSERT OR IGNORE INTO TANIM_Kurum (id, ${keys}) VALUES (1, ${placeholders})`)
-            
+            const stmtUpdate = db.prepare(
+              `UPDATE TANIM_Kurum SET ${uniqueColumns.map((c) => `${c} = ?`).join(', ')} WHERE id = 1`
+            )
+            const stmtInsert = db.prepare(
+              `INSERT OR IGNORE INTO TANIM_Kurum (id, ${keys}) VALUES (1, ${placeholders})`
+            )
+
             for (const row of rows) {
               const mappedRow: any = {}
               for (const col of uniqueColumns) {
@@ -1122,8 +1126,8 @@ if (!gotTheLock && !isMultiInstance) {
                   mappedRow[col] = null
                 }
               }
-              
-              const values = uniqueColumns.map(col => mappedRow[col])
+
+              const values = uniqueColumns.map((col) => mappedRow[col])
               const res = stmtUpdate.run(...values)
               if (res.changes === 0) {
                 stmtInsert.run(...values)
@@ -1201,13 +1205,15 @@ if (!gotTheLock && !isMultiInstance) {
 
               return combined
             })
-            
+
             try {
               const result = stmt.run(...values)
               if (result.changes > 0) successCount++
             } catch (err: any) {
               if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-                skipReasons.add('Sistemde aynı benzersiz değere (Ad, Kod, TC vb.) sahip kayıt zaten var.')
+                skipReasons.add(
+                  'Sistemde aynı benzersiz değere (Ad, Kod, TC vb.) sahip kayıt zaten var.'
+                )
               } else if (err.code === 'SQLITE_CONSTRAINT_NOTNULL') {
                 skipReasons.add('Zorunlu bir alan boş bırakılmış veya eksik eşleştirilmiş.')
               } else {
@@ -1221,7 +1227,12 @@ if (!gotTheLock && !isMultiInstance) {
         workspaceManager.save()
         broadcastDbChange()
 
-        return { success: true, count: successCount, total: data.length, skipReasons: Array.from(skipReasons) }
+        return {
+          success: true,
+          count: successCount,
+          total: data.length,
+          skipReasons: Array.from(skipReasons)
+        }
       } catch (error: any) {
         console.error('Bulk import error:', error)
         return { success: false, error: error.message }
@@ -2401,8 +2412,8 @@ if (!gotTheLock && !isMultiInstance) {
 
         const db = workspaceManager.getDb()
         const items = db.prepare('SELECT * FROM TANIM_Kalem').all() as any[]
-        
-        const dataRows = items.map(item => [
+
+        const dataRows = items.map((item) => [
           item.barkod_id,
           item.tasinir_kodu,
           item.okas_kodu,
@@ -2455,11 +2466,11 @@ if (!gotTheLock && !isMultiInstance) {
         if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
 
         const dbPath = workspaceManager.getDbPath()
-        
+
         // checkpoint wal before copy
         const db = workspaceManager.getDb()
         db.pragma('wal_checkpoint(TRUNCATE)')
-        
+
         const fs = require('fs')
         fs.copyFileSync(dbPath, filePath)
 

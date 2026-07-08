@@ -1,13 +1,9 @@
-import React, { useState } from "react";
-import {
-  FileText,
-  Search,
-  Sparkles,
-} from "lucide-react";
-import { YeniDosyaTabProps } from "../types";
+import React, { useState } from 'react'
+import { FileText, Search, Sparkles } from 'lucide-react'
+import { YeniDosyaTabProps } from '../types'
 
 export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element {
-  const [, setAiKalemConfig] = useState({ isOpen: false });
+  const [, setAiKalemConfig] = useState({ isOpen: false })
 
   return (
     <>
@@ -26,8 +22,8 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
                 EKAP Uyumlu Kalem Tanımlama
               </h3>
               <p className="text-xs text-blue-600 dark:text-blue-500 mt-1">
-                İhale kalemlerinizi (OKAS kodlarıyla) ekleyerek Birim Fiyat
-                Teklif Cetveli oluşturabilirsiniz.
+                İhale kalemlerinizi (OKAS kodlarıyla) ekleyerek Birim Fiyat Teklif Cetveli
+                oluşturabilirsiniz.
               </p>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
@@ -67,8 +63,8 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
             Henüz Kalem Eklenmedi
           </h4>
           <p className="text-xs text-slate-500 mt-1 max-w-sm text-center">
-            Doğrudan temin kapsamında alınacak mal, hizmet veya yapım işi
-            kalemlerini buradan ekleyin.
+            Doğrudan temin kapsamında alınacak mal, hizmet veya yapım işi kalemlerini buradan
+            ekleyin.
           </p>
         </div>
 
@@ -81,8 +77,7 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
                 Son Alım Fiyat Cetveli
               </h3>
               <p className="text-[10px] text-slate-500 mt-0.5">
-                Önceki ihalelerdeki benzer kalemlerin fiyat geçmişi referans
-                amaçlıdır.
+                Önceki ihalelerdeki benzer kalemlerin fiyat geçmişi referans amaçlıdır.
               </p>
             </div>
           </div>
@@ -90,64 +85,34 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="px-4 py-3 whitespace-nowrap">
-                    Malzeme Adı
-                  </th>
-                  <th className="px-4 py-3 whitespace-nowrap">
-                    Özelliği
-                  </th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">
-                    Miktarı
-                  </th>
-                  <th className="px-4 py-3 whitespace-nowrap">
-                    Kazanan Firma
-                  </th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">
-                    Fiyatı
-                  </th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">
-                    Tarihi
-                  </th>
+                  <th className="px-4 py-3 whitespace-nowrap">Malzeme Adı</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Özelliği</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-right">Miktarı</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Kazanan Firma</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-right">Fiyatı</th>
+                  <th className="px-4 py-3 whitespace-nowrap text-right">Tarihi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                 <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-4 py-3 font-medium">
-                    A4 Fotokopi Kağıdı
-                  </td>
-                  <td className="px-4 py-3 text-slate-500">
-                    80 gr, 500&apos;l&uuml; Paket
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    100 Paket
-                  </td>
-                  <td className="px-4 py-3">
-                    Örnek Kırtasiye A.Ş.
-                  </td>
+                  <td className="px-4 py-3 font-medium">A4 Fotokopi Kağıdı</td>
+                  <td className="px-4 py-3 text-slate-500">80 gr, 500&apos;l&uuml; Paket</td>
+                  <td className="px-4 py-3 text-right">100 Paket</td>
+                  <td className="px-4 py-3">Örnek Kırtasiye A.Ş.</td>
                   <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                     95,00 ₺
                   </td>
-                  <td className="px-4 py-3 text-right text-slate-500">
-                    12.05.2026
-                  </td>
+                  <td className="px-4 py-3 text-right text-slate-500">12.05.2026</td>
                 </tr>
                 <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-4 py-3 font-medium">
-                    Lazer Yazıcı Toneri
-                  </td>
-                  <td className="px-4 py-3 text-slate-500">
-                    Siyah, Orjinal Çipli
-                  </td>
+                  <td className="px-4 py-3 font-medium">Lazer Yazıcı Toneri</td>
+                  <td className="px-4 py-3 text-slate-500">Siyah, Orjinal Çipli</td>
                   <td className="px-4 py-3 text-right">20 Adet</td>
-                  <td className="px-4 py-3">
-                    Bilgi Teknoloji Ltd.
-                  </td>
+                  <td className="px-4 py-3">Bilgi Teknoloji Ltd.</td>
                   <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                     1.250,00 ₺
                   </td>
-                  <td className="px-4 py-3 text-right text-slate-500">
-                    03.04.2026
-                  </td>
+                  <td className="px-4 py-3 text-right text-slate-500">03.04.2026</td>
                 </tr>
               </tbody>
             </table>
@@ -155,5 +120,5 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
         </div>
       </div>
     </>
-  );
+  )
 }

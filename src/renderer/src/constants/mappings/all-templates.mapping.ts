@@ -6,16 +6,31 @@ import { ProcessMapping } from './types'
 export const ArastirmaMektubuMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   dosyaKonusu: { deger: 'Araştırma Mektubu', aciklama: 'Belge Başlığı / Konusu' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
   kurumAdres: { tablo: 'TANIM_Kurum', sutun: 'adres', aciklama: 'Kurum Adresi' },
   kurumTelefon: { tablo: 'TANIM_Kurum', sutun: 'telefon', aciklama: 'Kurum Telefonu' },
   kurumEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'Kurum E-Posta' },
   kurumKep: { tablo: 'TANIM_Kurum', sutun: 'kep_adresi', aciklama: 'Kurum KEP Adresi' },
   kurumIci: { deger: true },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -27,16 +42,31 @@ export const BirimFiyatTeklifCetveliMapping: ProcessMapping = {
   dosyaKonusu: { deger: 'Birim Fiyat Teklif Cetveli', aciklama: 'Belge Başlığı / Konusu' },
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
   kurumAdres: { tablo: 'TANIM_Kurum', sutun: 'adres', aciklama: 'Kurum Adresi' },
   kurumTelefon: { tablo: 'TANIM_Kurum', sutun: 'telefon', aciklama: 'Kurum Telefonu' },
   kurumEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'Kurum E-Posta' },
   kurumKep: { tablo: 'TANIM_Kurum', sutun: 'kep_adresi', aciklama: 'Kurum KEP Adresi' },
   kurumIci: { deger: true },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -46,16 +76,31 @@ export const BirimFiyatTeklifCetveliMapping: ProcessMapping = {
 export const BirimFiyatTeklifMektubuMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
   kurumAdres: { tablo: 'TANIM_Kurum', sutun: 'adres', aciklama: 'Kurum Adresi' },
   kurumTelefon: { tablo: 'TANIM_Kurum', sutun: 'telefon', aciklama: 'Kurum Telefonu' },
   kurumEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'Kurum E-Posta' },
   kurumKep: { tablo: 'TANIM_Kurum', sutun: 'kep_adresi', aciklama: 'Kurum KEP Adresi' },
   kurumIci: { deger: true },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -68,8 +113,16 @@ export const DagitimCizelgesiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Başkan (Onaylayan)' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Başkan Ünvanı' }
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Başkan (Onaylayan)'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Başkan Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -81,8 +134,16 @@ export const DagitimCizelgesiKarmaMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Başkan (Onaylayan)' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Başkan Ünvanı' }
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Başkan (Onaylayan)'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Başkan Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -97,11 +158,26 @@ export const FiyatArastirmaMektubuMapping: ProcessMapping = {
   kurumEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'Kurum E-Posta' },
   kurumKep: { tablo: 'TANIM_Kurum', sutun: 'kep_adresi', aciklama: 'Kurum KEP Adresi' },
   kurumIci: { deger: true },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -110,13 +186,22 @@ export const FiyatArastirmaMektubuMapping: ProcessMapping = {
 // ===========================================================
 export const FiyatArastirmasiMapping: ProcessMapping = {
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   dosyaKonusu: { deger: 'Fiyat Araştırması', aciklama: 'Belge Başlığı / Konusu' },
   sunulacakMakamAdi: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Sunulacak Makam Adı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
   kurumAdres: { tablo: 'TANIM_Kurum', sutun: 'adres', aciklama: 'Kurum Adresi' },
   kurumEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'Kurum E-Posta' },
   kurumFaks: { tablo: 'TANIM_Kurum', sutun: 'faks', aciklama: 'Kurum Faksı' },
@@ -124,8 +209,15 @@ export const FiyatArastirmasiMapping: ProcessMapping = {
   kurumKep: { tablo: 'TANIM_Kurum', sutun: 'kep_adresi', aciklama: 'Kurum KEP Adresi' },
   kurumIci: { deger: true },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -139,7 +231,8 @@ export const GorevlendirmeYazisiMapping: ProcessMapping = {
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   }
 }
@@ -165,8 +258,16 @@ export const TeklifMektubuDagitimCizelgesiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Başkan (Onaylayan)' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Başkan Ünvanı' }
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Başkan (Onaylayan)'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Başkan Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -177,14 +278,23 @@ export const ButceSorgusuMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   dosyaKonusu: { deger: 'Bütçe Sorgusu', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   butceYili: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_yili', aciklama: 'Bütçe Yılı' },
   butceTertibi: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_tertibi', aciklama: 'Bütçe Tertibi' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -196,24 +306,57 @@ export const DogrudanTeminOnayBelgesiMapping: ProcessMapping = {
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   teminNo: { tablo: 'DATA_TeminDosyasi', sutun: 'temin_no_clean', aciklama: 'Temin Numarası' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  isinAciklamasi: { tablo: 'DATA_TeminDosyasi', sutun: 'isin_aciklamasi', aciklama: 'İşin Açıklaması' },
-  yaklasikMaliyet: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Yaklaşık Maliyet' },
+  isinAciklamasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'isin_aciklamasi',
+    aciklama: 'İşin Açıklaması'
+  },
+  yaklasikMaliyet: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Yaklaşık Maliyet'
+  },
   odenekTutari: { tablo: 'DATA_TeminDosyasi', sutun: 'odenek_tutari', aciklama: 'Ödenek Tutarı' },
   butceTertibi: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_tertibi', aciklama: 'Bütçe Tertibi' },
   teminSekli: { tablo: 'DATA_TeminDosyasi', sutun: 'ihale_usulu', aciklama: 'Temin Åekli' },
   alimTuru: { tablo: 'DATA_TeminDosyasi', sutun: 'alim_turu', aciklama: 'Alım Türü' },
   tarih: { tablo: 'DATA_TeminDosyasi', sutun: 'onay_tarihi', aciklama: 'Onay Tarihi' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Başkan / Harcama Yetkilisi' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Başkan Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Başkan / Harcama Yetkilisi'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Başkan Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -225,21 +368,54 @@ export const DogrudanTeminSonucOnayBelgesiMapping: ProcessMapping = {
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  isinAciklamasi: { tablo: 'DATA_TeminDosyasi', sutun: 'isin_aciklamasi', aciklama: 'İşin Açıklaması' },
-  yaklasikMaliyet: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Yaklaşık Maliyet' },
+  isinAciklamasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'isin_aciklamasi',
+    aciklama: 'İşin Açıklaması'
+  },
+  yaklasikMaliyet: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Yaklaşık Maliyet'
+  },
   teminSekli: { tablo: 'DATA_TeminDosyasi', sutun: 'ihale_usulu', aciklama: 'Temin Åekli' },
   alimTuru: { tablo: 'DATA_TeminDosyasi', sutun: 'alim_turu', aciklama: 'Alım Türü' },
   tarih: { tablo: 'DATA_TeminDosyasi', sutun: 'onay_tarihi', aciklama: 'Onay Tarihi' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Başkan / Harcama Yetkilisi' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Başkan Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Başkan / Harcama Yetkilisi'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Başkan Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -252,9 +428,21 @@ export const DogrudanTeminSozlesmesiMapping: ProcessMapping = {
   idareFaks: { tablo: 'TANIM_Kurum', sutun: 'faks', aciklama: 'İdare Faksı' },
   idareEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'İdare E-Posta' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  genelToplam: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Sözleşme Genel Toplamı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'İdare Yetkilisi' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'İdare Yetkilisi Ünvanı' }
+  genelToplam: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Sözleşme Genel Toplamı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'İdare Yetkilisi'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'İdare Yetkilisi Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -267,9 +455,21 @@ export const DogrudanTeminSozlesmesiAlternatifMapping: ProcessMapping = {
   idareFaks: { tablo: 'TANIM_Kurum', sutun: 'faks', aciklama: 'İdare Faksı' },
   idareEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'İdare E-Posta' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  genelToplam: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Sözleşme Genel Toplamı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'İdare Yetkilisi' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'İdare Yetkilisi Ünvanı' }
+  genelToplam: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Sözleşme Genel Toplamı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'İdare Yetkilisi'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'İdare Yetkilisi Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -282,9 +482,21 @@ export const DogrudanTeminSozlesmesiUzunMapping: ProcessMapping = {
   idareFaks: { tablo: 'TANIM_Kurum', sutun: 'faks', aciklama: 'İdare Faksı' },
   idareEposta: { tablo: 'TANIM_Kurum', sutun: 'eposta', aciklama: 'İdare E-Posta' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  genelToplam: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Sözleşme Genel Toplamı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'İdare Yetkilisi' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'İdare Yetkilisi Ünvanı' }
+  genelToplam: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Sözleşme Genel Toplamı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'İdare Yetkilisi'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'İdare Yetkilisi Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -296,21 +508,46 @@ export const IdareOnayBelgesiMapping: ProcessMapping = {
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   teminNo: { tablo: 'DATA_TeminDosyasi', sutun: 'temin_no_clean', aciklama: 'Temin Numarası' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  isinAciklamasi: { tablo: 'DATA_TeminDosyasi', sutun: 'isin_aciklamasi', aciklama: 'İşin Açıklaması' },
-  yaklasikMaliyet: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Yaklaşık Maliyet' },
+  isinAciklamasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'isin_aciklamasi',
+    aciklama: 'İşin Açıklaması'
+  },
+  yaklasikMaliyet: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Yaklaşık Maliyet'
+  },
   odenekTutari: { tablo: 'DATA_TeminDosyasi', sutun: 'odenek_tutari', aciklama: 'Ödenek Tutarı' },
   butceTertibi: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_tertibi', aciklama: 'Bütçe Tertibi' },
   teminSekli: { tablo: 'DATA_TeminDosyasi', sutun: 'ihale_usulu', aciklama: 'Temin Åekli' },
   tarih: { tablo: 'DATA_TeminDosyasi', sutun: 'onay_tarihi', aciklama: 'Onay Tarihi' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -328,16 +565,40 @@ export const KabulEdilenTeklifMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -348,14 +609,30 @@ export const SozlesmeyeDavetMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -374,8 +651,16 @@ export const TeklifMektubuMapping: ProcessMapping = {
 export const HakedisRaporuMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -385,8 +670,16 @@ export const HarcamaPusulasiMapping: ProcessMapping = {
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   alimTuru: { tablo: 'DATA_TeminDosyasi', sutun: 'alim_turu', aciklama: 'Alım Türü' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -395,8 +688,16 @@ export const HarcamaPusulasiMapping: ProcessMapping = {
 export const HizmetIsleriKabulTeklifBelgesiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   dosyaKonusu: { deger: 'Hizmet İşleri Kabul Teklif Belgesi', aciklama: 'Belge Başlığı / Konusu' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -405,8 +706,16 @@ export const HizmetIsleriKabulTeklifBelgesiMapping: ProcessMapping = {
 export const HizmetIsleriKabulTutanagiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   dosyaKonusu: { deger: 'Hizmet İşleri Kabul Tutanağı', aciklama: 'Belge Başlığı / Konusu' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -416,16 +725,40 @@ export const KabulEdilenTeklifOdemeMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -436,14 +769,30 @@ export const MuayeneKabulTutanagiMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -454,14 +803,46 @@ export const OdemeEmriBelgesiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   dosyaKonusu: { deger: 'Ödeme Emri Belgesi', aciklama: 'Belge Başlığı / Konusu' },
   butceYili: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_yili', aciklama: 'Bütçe Yılı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  onaylayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  onaylayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' },
-  gerceklestirmeGorevlisiAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Gerçekleştirme Görevlisi' },
-  gerceklestirmeGorevlisiUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Gerçekleştirme Görevlisi Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
+  gerceklestirmeGorevlisiAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Gerçekleştirme Görevlisi'
+  },
+  gerceklestirmeGorevlisiUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Gerçekleştirme Görevlisi Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -471,14 +852,31 @@ export const OdemeYazisiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   dosyaKonusu: { deger: 'Ödeme Yazısı', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
-    formul: '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
     aciklama: 'Evrak Sayısı'
   },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  hazirlayanPersonelAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_ad', aciklama: 'Hazırlayan Personel' },
-  hazirlayanPersonelUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'hazirlayan_personel_unvan', aciklama: 'Hazırlayan Personel Ünvanı' },
-  baskanAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_ad', aciklama: 'Onaylayan Yetkili' },
-  baskanUnvan: { tablo: 'DATA_TeminDosyasi', sutun: 'onaylayan_personel_unvan', aciklama: 'Onaylayan Yetkili Ünvanı' }
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_ad',
+    aciklama: 'Hazırlayan Personel'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_unvan',
+    aciklama: 'Hazırlayan Personel Ünvanı'
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_ad',
+    aciklama: 'Onaylayan Yetkili'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_unvan',
+    aciklama: 'Onaylayan Yetkili Ünvanı'
+  }
 }
 
 // ===========================================================
@@ -487,8 +885,15 @@ export const OdemeYazisiMapping: ProcessMapping = {
 export const TasinirIslemFisiMapping: ProcessMapping = {
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   ihtiyacKalemleri: {
-    tablo: 'DATA_TeminKalem', sutun: '*', iliskili_id: 'temin_dosya_id',
-    altEslestirme: { malzemeAdi: 'kalem_adi', ozelligi: 'aciklama', birimi: 'birim', miktar: 'miktar' }
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
   }
 }
 
@@ -498,8 +903,16 @@ export const TasinirIslemFisiMapping: ProcessMapping = {
 export const IhaleKapagiMapping: ProcessMapping = {
   antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  isinAciklamasi: { tablo: 'DATA_TeminDosyasi', sutun: 'isin_aciklamasi', aciklama: 'İşin Açıklaması' },
-  yaklasikMaliyet: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Yaklaşık Maliyet' },
+  isinAciklamasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'isin_aciklamasi',
+    aciklama: 'İşin Açıklaması'
+  },
+  yaklasikMaliyet: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'yaklasik_maliyet',
+    aciklama: 'Yaklaşık Maliyet'
+  },
   teminNo: { tablo: 'DATA_TeminDosyasi', sutun: 'temin_no_clean', aciklama: 'Temin Numarası' },
   alimTuru: { tablo: 'DATA_TeminDosyasi', sutun: 'alim_turu', aciklama: 'Alım Türü' },
   butceTertibi: { tablo: 'DATA_TeminDosyasi', sutun: 'butce_tertibi', aciklama: 'Bütçe Tertibi' }

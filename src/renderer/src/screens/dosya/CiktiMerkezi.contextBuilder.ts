@@ -302,12 +302,12 @@ export function buildDocumentContext(
     avansSartlari:
       dosyaResData?.avans_verilecek_mi === 1 ? 'Avans verilecektir.' : 'Avans verilmeyecek',
     fiyatFarkiSartlari: dosyaResData?.fiyat_farki_dayanagi || 'Fiyat Farkı Ödenmeyecek',
-    yillaraYaygin:
-      dosyaResData?.yillara_yaygin === 1 ? 'Yıllara Yaygın Hizmet Alımı' : 'Hayır',
-    sozlesmeYapilacak:
-      dosyaResData?.sozlesme_yapilacak_mi === 1 ? 'Evet' : 'Hayır',
-    vkomisyontakdiri: dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
-    komisyonTakdiri: dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
+    yillaraYaygin: dosyaResData?.yillara_yaygin === 1 ? 'Yıllara Yaygın Hizmet Alımı' : 'Hayır',
+    sozlesmeYapilacak: dosyaResData?.sozlesme_yapilacak_mi === 1 ? 'Evet' : 'Hayır',
+    vkomisyontakdiri:
+      dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
+    komisyonTakdiri:
+      dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
     dokumanHazirlik: 'Hazırlanmayacaktır.',
     isinAciklamasi: dosyaResData?.isin_aciklamasi || dosyaResData?.konu || 'Belirtilmedi',
     onaylayanPersonelAdi: dosyaResData?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
@@ -376,7 +376,10 @@ export function buildDocumentContext(
   for (const [key, val] of Object.entries(resolvedMappings || {})) {
     if (val !== undefined && val !== null) {
       const isPlaceholder = typeof val === 'string' && val.startsWith('[Belirtilmedi')
-      const hasRealValue = context[key] !== undefined && context[key] !== '' && !String(context[key]).startsWith('[Belirtilmedi')
+      const hasRealValue =
+        context[key] !== undefined &&
+        context[key] !== '' &&
+        !String(context[key]).startsWith('[Belirtilmedi')
       if (isPlaceholder && hasRealValue) {
         continue
       }

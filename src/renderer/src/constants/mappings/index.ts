@@ -26,7 +26,7 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
   '/dosya/luzum/onay-eki': LuzumOnayEkiMapping,
   '/dosya/luzum/teslim-tesellum': LuzumTeslimTesellumMapping,
   '/dosya/malzemeler/son-alim': SonAlimFiyatCetveliMapping,
-  
+
   // Komisyon & Harcama
   '/dosya/komisyon/fiyat-arastirma': KomisyonGorevlendirmeOnayiMapping,
   '/dosya/komisyon/onay-eki': KomisyonGorevlendirmeOnayiEkiMapping,
@@ -93,7 +93,7 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
       .replace(/\.html$/, '')
       .split('/')
       .pop() || ''
-  
+
   if (
     cleanPath === 'ihtiyac-listesi' ||
     cleanPath === 'malzeme-hizmet-kalem-listesi' ||
@@ -102,10 +102,18 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
   ) {
     return IhtiyacListesiMapping
   }
-  if (cleanPath === 'luzum-muzekkeresi' || cleanPath === 'luzum-muzekkeresi-belgesi' || cleanPath === 'belge') {
+  if (
+    cleanPath === 'luzum-muzekkeresi' ||
+    cleanPath === 'luzum-muzekkeresi-belgesi' ||
+    cleanPath === 'belge'
+  ) {
     return LuzumMuzekkeresiMapping
   }
-  if (cleanPath === 'luzum-muzekkeresi-onay-eki' || cleanPath === 'luzum-onay-eki' || cleanPath === 'onay-eki') {
+  if (
+    cleanPath === 'luzum-muzekkeresi-onay-eki' ||
+    cleanPath === 'luzum-onay-eki' ||
+    cleanPath === 'onay-eki'
+  ) {
     return LuzumOnayEkiMapping
   }
   if (
@@ -121,7 +129,7 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
   if (cleanPath === 'son-alim-fiyat-cetveli' || cleanPath === 'son-alim') {
     return SonAlimFiyatCetveliMapping
   }
-  
+
   // Komisyon ve harcama belgeleri
   if (cleanPath === 'komisyon-gorevlendirme-onayi' || cleanPath === 'fiyat-arastirma') {
     return KomisyonGorevlendirmeOnayiMapping
@@ -138,7 +146,11 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
   if (cleanPath === 'harcama-talimati' || cleanPath === 'talimat') {
     return HarcamaTalimatiMapping
   }
-  if (cleanPath === 'yaklasik-maliyet-cetveli' || cleanPath === 'yaklasik-maliyet-hesap-cetveli' || cleanPath === 'yaklasik') {
+  if (
+    cleanPath === 'yaklasik-maliyet-cetveli' ||
+    cleanPath === 'yaklasik-maliyet-hesap-cetveli' ||
+    cleanPath === 'yaklasik'
+  ) {
     return YaklasikMaliyetCetveliMapping
   }
 

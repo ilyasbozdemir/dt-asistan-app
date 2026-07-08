@@ -12,7 +12,9 @@ interface ViewToggleProps {
 
 export function ViewToggle({ viewMode, onChange, className = '' }: ViewToggleProps) {
   return (
-    <div className={`flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-800 ${className}`}>
+    <div
+      className={`flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-800 ${className}`}
+    >
       <Button
         variant="ghost"
         size="sm"

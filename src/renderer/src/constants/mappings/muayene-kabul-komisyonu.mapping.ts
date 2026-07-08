@@ -92,4 +92,3 @@ export const MuayeneKabulKomisyonuMapping: ProcessMapping = {
     aciklama: 'Kurum içi mi?'
   }
 }
-

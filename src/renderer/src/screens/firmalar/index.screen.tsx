@@ -478,7 +478,7 @@ export default function FirmalarScreen(): React.JSX.Element {
                   <div className="w-10 h-10 shrink-0 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-800/50 text-blue-600 dark:text-blue-400">
                     <Building2 className="w-5 h-5" />
                   </div>
-                  
+
                   <div className="flex-1 min-w-[200px]">
                     <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 mb-1 line-clamp-1">
                       {firma.unvan}
@@ -496,16 +496,16 @@ export default function FirmalarScreen(): React.JSX.Element {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex-1 min-w-[150px] text-xs text-slate-600 dark:text-slate-400">
                     {firma.vergi_no && <div className="truncate">🏢 VN: {firma.vergi_no}</div>}
                     {firma.telefon && <div>📞 {firma.telefon}</div>}
                   </div>
-                  
+
                   <div className="flex-1 min-w-[150px] text-xs text-slate-600 dark:text-slate-400 hidden lg:block">
                     {firma.ilgili_adi && <div className="truncate">👤 {firma.ilgili_adi}</div>}
                   </div>
-                  
+
                   <div className="flex items-center gap-1 pr-2">
                     <Button
                       title="Düzenle"

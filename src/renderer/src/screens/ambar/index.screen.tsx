@@ -280,8 +280,12 @@ export default function AmbarScreen(): React.JSX.Element {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editId ? "Ambar Karti Güncelle" : "Yeni Ambar Deposu Tanımla"}
-        description={editId ? "Ambar veya depo bilgilerini düzenleyin." : "Kurumunuza ait ana ambar veya depo ekleyin."}
+        title={editId ? 'Ambar Karti Güncelle' : 'Yeni Ambar Deposu Tanımla'}
+        description={
+          editId
+            ? 'Ambar veya depo bilgilerini düzenleyin.'
+            : 'Kurumunuza ait ana ambar veya depo ekleyin.'
+        }
       >
         <form onSubmit={handleSave} className="space-y-4">
           <Field

@@ -13,7 +13,12 @@ type TabType = 'idari' | 'mali' | 'iletisim' | 'logolar'
 
 export default function KurumScreen(): React.JSX.Element {
   const { kurumData, isLoadingKurum, fetchKurum, saveKurum } = useKurumHooks()
-  const { institutionLogo: defaultInstitutionLogo, logoLeft: defaultLogoLeft, logoRight: defaultLogoRight, loadSettings: reloadSettingsStore } = useSettingsStore()
+  const {
+    institutionLogo: defaultInstitutionLogo,
+    logoLeft: defaultLogoLeft,
+    logoRight: defaultLogoRight,
+    loadSettings: reloadSettingsStore
+  } = useSettingsStore()
 
   const [activeTab, setActiveTab] = useState<TabType>('idari')
   const [saving, setSaving] = useState(false)

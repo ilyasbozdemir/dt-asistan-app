@@ -388,7 +388,8 @@ export default function AyarlarScreen(): React.ReactNode {
                           Veritabanı İşlemleri
                         </h2>
                         <p className="text-xs text-slate-500">
-                          Mevcut çalışma alanınızdaki tüm veritabanını dışa aktarabilir veya yedekten geri yükleyebilirsiniz.
+                          Mevcut çalışma alanınızdaki tüm veritabanını dışa aktarabilir veya
+                          yedekten geri yükleyebilirsiniz.
                         </p>
                       </div>
                     </div>
@@ -399,15 +400,19 @@ export default function AyarlarScreen(): React.ReactNode {
                           <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                             <Download className="w-5 h-5" />
                           </div>
-                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">Veritabanını Dışa Aktar</h3>
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                            Veritabanını Dışa Aktar
+                          </h3>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 h-10">
-                          Tüm kalemlerinizi, dosyalarınızı ve komisyon bilgilerinizi içeren .sqlite dosyasını yedekleyin.
+                          Tüm kalemlerinizi, dosyalarınızı ve komisyon bilgilerinizi içeren .sqlite
+                          dosyasını yedekleyin.
                         </p>
                         <Button
                           onClick={async () => {
                             try {
-                              const res = await window.electron.ipcRenderer.invoke('db:export-sqlite')
+                              const res =
+                                await window.electron.ipcRenderer.invoke('db:export-sqlite')
                               if (res.success) {
                                 alert('Veritabanı başarıyla dışa aktarıldı.')
                               } else if (res.error && res.error !== 'İptal edildi') {
@@ -428,18 +433,29 @@ export default function AyarlarScreen(): React.ReactNode {
                           <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg text-amber-600 dark:text-amber-400">
                             <Upload className="w-5 h-5" />
                           </div>
-                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">Veritabanını İçe Aktar</h3>
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                            Veritabanını İçe Aktar
+                          </h3>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 h-10">
-                          Daha önce aldığınız bir .sqlite yedeğini geri yükleyin. Mevcut verilerin üzerine yazılır.
+                          Daha önce aldığınız bir .sqlite yedeğini geri yükleyin. Mevcut verilerin
+                          üzerine yazılır.
                         </p>
                         <Button
                           onClick={async () => {
-                            if (!window.confirm('DİKKAT: Bu işlem mevcut veritabanınızın üzerine yazacaktır. Devam etmek istiyor musunuz?')) return
+                            if (
+                              !window.confirm(
+                                'DİKKAT: Bu işlem mevcut veritabanınızın üzerine yazacaktır. Devam etmek istiyor musunuz?'
+                              )
+                            )
+                              return
                             try {
-                              const res = await window.electron.ipcRenderer.invoke('db:import-sqlite')
+                              const res =
+                                await window.electron.ipcRenderer.invoke('db:import-sqlite')
                               if (res.success) {
-                                alert('Veritabanı başarıyla içe aktarıldı. Değişikliklerin etkili olması için uygulamayı yeniden başlatmanızı öneririz.')
+                                alert(
+                                  'Veritabanı başarıyla içe aktarıldı. Değişikliklerin etkili olması için uygulamayı yeniden başlatmanızı öneririz.'
+                                )
                                 window.location.reload()
                               } else if (res.error && res.error !== 'İptal edildi') {
                                 alert('İçe aktarma hatası: ' + res.error)

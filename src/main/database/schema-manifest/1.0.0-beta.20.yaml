@@ -11,4 +11,3 @@ changes:
         column: 'yillara_yaygin'
       - table: 'DATA_TeminDosyasi'
         column: 'sozlesme_yapilacak_mi'
-

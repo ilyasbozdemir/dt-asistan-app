@@ -8,8 +8,20 @@ import {
 } from '../../constants/mappings'
 import { buildDocumentContext } from './CiktiMerkezi.contextBuilder'
 import { filterContextForTemplate } from './CiktiMerkezi.mediator'
+import { defaultTemplatesByPath } from '../sablonlar/components/defaultTemplates'
+export interface UseCiktiMerkeziDataResult {
+  sablons: Sablon[]
+  loading: boolean
+  masterHtml: string
+  dosyaContext: any
+  activeDosya: any
+  placeholders: any[]
+  contextsByPath: Record<string, Record<string, unknown>>
+  personelListesi: any[]
+  settings: any
+}
 
-export function useCiktiMerkeziData(activeDosyaId: number | null) {
+export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerkeziDataResult {
   const [sablons, setSablons] = useState<Sablon[]>([])
   const [loading, setLoading] = useState(true)
   const [masterHtml, setMasterHtml] = useState('')
@@ -18,11 +30,12 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [placeholders, setPlaceholders] = useState<any[]>([])
   const [personelListesi, setPersonelListesi] = useState<any[]>([])
+  const [settings, setSettings] = useState<any>(null)
 
   useEffect(() => {
     if (!activeDosyaId) return
 
-    const loadData = async (isBackgroundRefresh = false) => {
+    const loadData = async (isBackgroundRefresh = false): Promise<void> => {
       if (!activeDosyaId) return
       if (!isBackgroundRefresh) setLoading(true)
       try {
@@ -132,27 +145,13 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
         )
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
-        const subInstType = settings?.subInstitutionType || ''
-
+        setSettings(settings)
         // TANIM_Kurum'dan kurum bilgilerini al (yeni tablo)
         const kurumRes = await window.electron.ipcRenderer.invoke(
           'db:query',
           'SELECT * FROM TANIM_Kurum WHERE id = 1'
         )
         const kurum = kurumRes.success && kurumRes.data?.length > 0 ? kurumRes.data[0] : null
-
-        // Antet satırlarını parse et
-        let antetSatirlari: string[] = []
-        if (kurum?.kurum_anteti) {
-          try {
-            const parsed = JSON.parse(kurum.kurum_anteti)
-            if (Array.isArray(parsed)) {
-              antetSatirlari = parsed.filter((s: string) => s && s.trim() !== '')
-            }
-          } catch {
-            antetSatirlari = kurum.kurum_anteti ? [kurum.kurum_anteti] : []
-          }
-        }
 
         // Dynamic mapping resolver (Isolated per path)
         const resolvedMappingsByPath: Record<string, Record<string, any>> = {}
@@ -167,8 +166,25 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
         Object.keys(processMappingRegistry).forEach((p) => allPathsToResolve.add(p))
 
         for (const path of allPathsToResolve) {
-          const defaultMap = getDefaultMappingForProcess(path)
-          const overridesKey = `MAPPING_${path}_PLACEHOLDERS`
+          let lookupPath = path
+          if (path.endsWith('.html')) {
+            const associatedRoute = Object.keys(defaultTemplatesByPath).find((route) => {
+              const boundId = settings?.[`MAPPING_${route}_SABLON_ID`]
+              if (boundId && sablonsRes.success && sablonsRes.data) {
+                const sablon = sablonsRes.data.find(
+                  (s: any) => s.id.toString() === boundId.toString()
+                )
+                if (sablon && sablon.dosya_adi === path) return true
+              }
+              return defaultTemplatesByPath[route] === path
+            })
+            if (associatedRoute) {
+              lookupPath = associatedRoute
+            }
+          }
+
+          const defaultMap = getDefaultMappingForProcess(lookupPath)
+          const overridesKey = `MAPPING_${lookupPath}_PLACEHOLDERS`
           let overriddenMap: ProcessMapping = {}
           if (settings && settings[overridesKey]) {
             try {
@@ -359,6 +375,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null) {
     activeDosya,
     placeholders,
     contextsByPath,
-    personelListesi
+    personelListesi,
+    settings
   }
 }

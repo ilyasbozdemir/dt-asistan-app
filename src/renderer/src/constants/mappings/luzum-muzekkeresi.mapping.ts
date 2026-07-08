@@ -120,4 +120,3 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     aciklama: 'Talep eden personelin ünvanı'
   }
 }
-

@@ -169,12 +169,16 @@ export function ActiveFileToolbar(): React.JSX.Element | null {
           {stagesToUseMapped.map((asama) => {
             const kategoriler = STAGE_KATEGORI[asama.asama_sira] || []
             let stageSablons = sablons.filter((s: any) => kategoriler.includes(s.kategori))
-            
+
             // Kullanıcı menüde (Hızlı Erişim panelinde) sadece hızlı erişimdekileri görmek istiyor
             if (activeStarredDocs && activeStarredDocs.length > 0) {
               stageSablons = stageSablons.filter((sablon: any) => {
                 const { cleanName } = parseStatusAndName(sablon.ad)
-                const normalize = (str: string) => str.replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g, '').toLowerCase().trim()
+                const normalize = (str: string) =>
+                  str
+                    .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g, '')
+                    .toLowerCase()
+                    .trim()
                 return activeStarredDocs.some(
                   (d: string) =>
                     normalize(d) === normalize(sablon.ad) || normalize(d) === normalize(cleanName)

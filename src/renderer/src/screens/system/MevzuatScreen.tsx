@@ -1,82 +1,69 @@
-import React, { useState } from "react";
-import {
-  BookOpen,
-  Calculator,
-  Coins,
-  FileCode,
-  FileText,
-  Scale,
-} from "lucide-react";
-import { InnerMenu, InnerMenuItem } from "../../components/ui/InnerMenu";
-import { KikLimitleriSection } from "./KikLimitleriSection";
-import { OranlarTab } from "./tabs/OranlarTab";
-import { MaliTab } from "./tabs/MaliTab";
-import { FiyatFarkiTab } from "./tabs/FiyatFarkiTab";
-import { AsamalarTab } from "./tabs/AsamalarTab";
-import { BentlerTab } from "./tabs/BentlerTab";
-import { ButceKodlariTab } from "./tabs/ButceKodlariTab";
+import React, { useState } from 'react'
+import { BookOpen, Calculator, Coins, FileCode, FileText, Scale } from 'lucide-react'
+import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
+import { KikLimitleriSection } from './KikLimitleriSection'
+import { OranlarTab } from './tabs/OranlarTab'
+import { MaliTab } from './tabs/MaliTab'
+import { FiyatFarkiTab } from './tabs/FiyatFarkiTab'
+import { AsamalarTab } from './tabs/AsamalarTab'
+import { BentlerTab } from './tabs/BentlerTab'
+import { ButceKodlariTab } from './tabs/ButceKodlariTab'
 
 export function MevzuatScreen(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<
-    | "limitler"
-    | "oranlar"
-    | "mali"
-    | "butcekodlari"
-    | "asamalar"
-    | "bentler"
-    | "fiyatfarki"
+    'limitler' | 'oranlar' | 'mali' | 'butcekodlari' | 'asamalar' | 'bentler' | 'fiyatfarki'
   >(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("tab");
-    return (t as any) || "limitler";
-  });
+    const params = new URLSearchParams(window.location.search)
+    const t = params.get('tab')
+    return (t as any) || 'limitler'
+  })
 
   const menuItems: InnerMenuItem[] = [
     {
-      id: "limitler",
-      label: "KİK Kanun Limitleri",
-      description: "Madde 22/d dönem limitleri",
-      icon: <Scale className="w-4 h-4 shrink-0" />,
+      id: 'limitler',
+      label: 'KİK Kanun Limitleri',
+      description: 'Madde 22/d dönem limitleri',
+      icon: <Scale className="w-4 h-4 shrink-0" />
     },
     {
-      id: "oranlar",
-      label: "Vergi & Kesinti Oranları",
-      description: "KDV, Damga, Tevkifat vb.",
-      icon: <Calculator className="w-4 h-4 shrink-0" />,
+      id: 'oranlar',
+      label: 'Vergi & Kesinti Oranları',
+      description: 'KDV, Damga, Tevkifat vb.',
+      icon: <Calculator className="w-4 h-4 shrink-0" />
     },
     {
-      id: "fiyatfarki",
-      label: "Fiyat Farkı Katsayıları",
-      description: "Kararname endeksleri",
-      icon: <Coins className="w-4 h-4 shrink-0" />,
+      id: 'fiyatfarki',
+      label: 'Fiyat Farkı Katsayıları',
+      description: 'Kararname endeksleri',
+      icon: <Coins className="w-4 h-4 shrink-0" />
     },
-    { id: "div1", label: "", icon: null, isDivider: true },
+    { id: 'div1', label: '', icon: null, isDivider: true },
     {
-      id: "mali",
-      label: "Kurumsal Mali Kodlar",
-      description: "Fonksiyonel, muhasebe birimi",
-      icon: <FileCode className="w-4 h-4 shrink-0" />,
-    },
-    {
-      id: "butcekodlari",
-      label: "ABS Bütçe Kodları",
-      description: "Ekonomik gelir/gider",
-      icon: <FileText className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div2", label: "", icon: null, isDivider: true },
-    {
-      id: "asamalar",
-      label: "İşlem Aşamaları",
-      description: "Varsayılan işlem sıraları",
-      icon: <FileText className="w-4 h-4 shrink-0" />,
+      id: 'mali',
+      label: 'Kurumsal Mali Kodlar',
+      description: 'Fonksiyonel, muhasebe birimi',
+      icon: <FileCode className="w-4 h-4 shrink-0" />
     },
     {
-      id: "bentler",
-      label: "Madde 22 Bentleri",
-      description: "Kanun madde içerikleri",
-      icon: <BookOpen className="w-4 h-4 shrink-0" />,
+      id: 'butcekodlari',
+      label: 'ABS Bütçe Kodları',
+      description: 'Ekonomik gelir/gider',
+      icon: <FileText className="w-4 h-4 shrink-0" />
     },
-  ];
+    { id: 'div2', label: '', icon: null, isDivider: true },
+    {
+      id: 'asamalar',
+      label: 'İşlem Aşamaları',
+      description: 'Varsayılan işlem sıraları',
+      icon: <FileText className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'bentler',
+      label: 'Madde 22 Bentleri',
+      description: 'Kanun madde içerikleri',
+      icon: <BookOpen className="w-4 h-4 shrink-0" />
+    }
+  ]
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -87,8 +74,8 @@ export function MevzuatScreen(): React.JSX.Element {
             Mevzuat ve Sistem Parametreleri
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Uygulama genelinde kullanılacak 4734 Sayılı K.İ.K yasal limitlerini
-            ve oranları buradan yönetebilirsiniz.
+            Uygulama genelinde kullanılacak 4734 Sayılı K.İ.K yasal limitlerini ve oranları buradan
+            yönetebilirsiniz.
           </p>
         </div>
       </div>
@@ -104,29 +91,29 @@ export function MevzuatScreen(): React.JSX.Element {
 
         {/* SAĞ PANEL */}
         <div className="lg:col-span-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm min-h-[450px] flex flex-col overflow-y-auto max-h-[calc(100vh-220px)] custom-scrollbar flex-1">
-          {activeTab === "limitler" && (
+          {activeTab === 'limitler' && (
             <div className="p-6">
               <KikLimitleriSection />
             </div>
           )}
-          {activeTab === "oranlar" && <OranlarTab />}
-          {activeTab === "mali" && <MaliTab />}
-          {activeTab === "fiyatfarki" && (
+          {activeTab === 'oranlar' && <OranlarTab />}
+          {activeTab === 'mali' && <MaliTab />}
+          {activeTab === 'fiyatfarki' && (
             <div className="p-6">
               <FiyatFarkiTab />
             </div>
           )}
-          {activeTab === "butcekodlari" && (
+          {activeTab === 'butcekodlari' && (
             <div className="p-6">
               <ButceKodlariTab />
             </div>
           )}
-          {activeTab === "asamalar" && (
+          {activeTab === 'asamalar' && (
             <div className="p-6">
               <AsamalarTab />
             </div>
           )}
-          {activeTab === "bentler" && (
+          {activeTab === 'bentler' && (
             <div className="p-6">
               <BentlerTab />
             </div>
@@ -134,5 +121,5 @@ export function MevzuatScreen(): React.JSX.Element {
         </div>
       </div>
     </div>
-  );
+  )
 }

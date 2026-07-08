@@ -92,4 +92,3 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
     aciklama: 'Kurum içi mi?'
   }
 }
-

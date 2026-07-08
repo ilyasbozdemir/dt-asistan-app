@@ -40,7 +40,7 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
   useEffect(() => {
     document.title = editId ? 'Mal/Hizmet/Yapım İşi Düzenle - DT' : 'Mal/Hizmet/Yapım İşi Ekle - DT'
     if (editId && kalemList.length > 0) {
-      const existing = kalemList.find(k => k.id === editId)
+      const existing = kalemList.find((k) => k.id === editId)
       if (existing) {
         setFormData(existing)
       }

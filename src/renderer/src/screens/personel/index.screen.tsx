@@ -522,7 +522,7 @@ export default function PersonelScreen(): React.ReactNode {
                       <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
                         {p.ad_soyad.slice(0, 2)}
                       </div>
-                      
+
                       <div className="flex-1 min-w-[200px]">
                         <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
                           {p.ad_soyad}
@@ -633,4 +633,3 @@ export default function PersonelScreen(): React.ReactNode {
     </div>
   )
 }
-

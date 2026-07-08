@@ -85,4 +85,3 @@ export const IhtiyacTalepFormuMapping: ProcessMapping = {
     aciklama: 'İhtiyaç talep formu kalemleri'
   }
 }
-

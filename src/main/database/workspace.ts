@@ -109,7 +109,9 @@ function ensureSchemaIntegrity(db: Database.Database): void {
 
   // Legacy snapshots migration: Force kurumIci to true if it was false/null/undefined
   try {
-    const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='DATA_DosyaSablonVeri'").get()
+    const tableCheck = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='DATA_DosyaSablonVeri'")
+      .get()
     if (tableCheck) {
       const rows = db.prepare('SELECT id, veri_json FROM DATA_DosyaSablonVeri').all() as any[]
       const stmt = db.prepare('UPDATE DATA_DosyaSablonVeri SET veri_json = ? WHERE id = ?')
@@ -118,7 +120,11 @@ function ensureSchemaIntegrity(db: Database.Database): void {
         if (row.veri_json) {
           try {
             const parsed = JSON.parse(row.veri_json)
-            if (parsed.kurumIci === false || parsed.kurumIci === undefined || parsed.kurumIci === null) {
+            if (
+              parsed.kurumIci === false ||
+              parsed.kurumIci === undefined ||
+              parsed.kurumIci === null
+            ) {
               parsed.kurumIci = true
               stmt.run(JSON.stringify(parsed), row.id)
               migratedCount++
@@ -129,7 +135,9 @@ function ensureSchemaIntegrity(db: Database.Database): void {
         }
       }
       if (migratedCount > 0) {
-        console.log(`[Migration] Migrated ${migratedCount} legacy document snapshots: forced kurumIci to true`)
+        console.log(
+          `[Migration] Migrated ${migratedCount} legacy document snapshots: forced kurumIci to true`
+        )
       }
     }
   } catch (err: any) {
@@ -798,26 +806,26 @@ export class DtmWorkspace {
     if (!this.currentFilePath || !this.db || !this.meta) {
       throw new Error('Açık bir çalışma alanı yok.')
     }
-    
+
     // Close current connection
     this.db.close()
-    
+
     // Replace the database file with a versioned name
     const newDbName = `database_${Date.now()}.sqlite`
     const dbPath = path.join(this.tempDir, newDbName)
     fs.copyFileSync(sourceSqlitePath, dbPath)
-    
+
     // Update meta
     this.meta.active_db_file = newDbName
-    
+
     // Reopen connection
     this.db = new Database(dbPath)
     this.db.pragma('journal_mode = WAL')
     this.db.pragma('foreign_keys = ON')
-    
+
     // Ensure schema integrity on the imported database
     ensureSchemaIntegrity(this.db)
-    
+
     // Save to the .dtal file
     this.saveWorkspace()
   }
