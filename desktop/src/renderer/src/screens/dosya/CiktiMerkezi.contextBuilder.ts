@@ -183,20 +183,24 @@ export function buildDocumentContext(
   }
   rawKapakDetaylari.push({ label: 'İŞİN TÜRÜ', value: alimTuruText })
   if (dosyaResData?.temin_no) {
-    rawKapakDetaylari.push({ label: 'TEMİN NUMARASI', value: dosyaResData.temin_no })
+    rawKapakDetaylari.push({ label: 'DOĞRUDAN TEMİN NUMARASI', value: dosyaResData.temin_no })
   }
   if (dbYaklasikMaliyet > 0) {
     rawKapakDetaylari.push({ label: 'YAKLAŞIK MALİYET', value: `${yaklasikMaliyetText} TL` })
   }
-  if (butceTertibiArray && butceTertibiArray.length > 0) {
-    rawKapakDetaylari.push({ label: 'BÜTÇE TERTİBİ', value: butceTertibiArray })
-  }
   if (dosyaResData?.yuklenici_firma_adi) {
     rawKapakDetaylari.push({
-      label: 'İHALEYİ ALAN FİRMA',
+      label: 'YÜKLENİCİ FİRMA',
       value: dosyaResData.yuklenici_firma_adi,
       isBold: true
     })
+    if (grandTotal > 0) {
+      rawKapakDetaylari.push({
+        label: 'FATURA TUTARI',
+        value: `${genelToplam} TL`,
+        isBold: true
+      })
+    }
   }
   if (dosyaResData?.tarih) {
     rawKapakDetaylari.push({ label: 'DOSYA TARİHİ', value: dosyaResData.tarih })
