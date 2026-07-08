@@ -41,6 +41,14 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
   '/dosya/onay/butce-sorgu': allOther.ButceSorgusuMapping,
   '/dosya/harcama/pusula': allOther.HarcamaPusulasiMapping,
 
+  // Wizard subscreen fallbacks
+  '/dosya/piyasa-fiyat-arastirmasi': allOther.PiyasaFiyatArastirmaTutanagiMapping,
+  '/dosya/siparis-ve-sozlesme': allOther.DogrudanTeminSozlesmesiMapping,
+  '/dosya/kabul-ve-odeme': allOther.MuayeneKabulTutanagiMapping,
+  '/dosya/fatura-ve-irsaliye': allOther.HakedisRaporuMapping,
+  '/dosya/klasor-ve-kapaklar': allOther.IhaleKapagiMapping,
+  '/dosya/imzali-belgeler': allOther.DogrudanTeminSonucOnayBelgesiMapping,
+
   // Diğer tüm belgeler için spesifik kayıtlar (Cikti Merkezi ve Süreç aşamaları altı)
   'arastirma-mektubu': allOther.ArastirmaMektubuMapping,
   'birim-fiyat-teklif-cetveli': allOther.BirimFiyatTeklifCetveliMapping,
