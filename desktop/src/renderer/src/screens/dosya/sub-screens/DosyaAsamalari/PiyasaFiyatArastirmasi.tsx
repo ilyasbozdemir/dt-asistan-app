@@ -59,7 +59,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     <SubScreen
       title="Teklifler & Piyasa Fiyat Araştırması"
       icon={PackageSearch}
-      description="Teklifleri ve piyasa fiyat araştırması süreçlerini yönetin."
+      description="Piyasa araştırması yapıp birim fiyat tekliflerinizi toplayabilir, komisyon görevlendirme onay belgesi hazırlayabilir ve tüm süreç dökümanlarınızı bu panel üzerinden oluşturup çıktı alabilirsiniz."
     >
       <SurecBelgeleriPanel
         stageSablons={stageSablons}
