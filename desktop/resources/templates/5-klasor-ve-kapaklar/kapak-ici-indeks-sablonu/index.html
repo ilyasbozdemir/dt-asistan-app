@@ -41,35 +41,30 @@
         }
       }
 
-      .header-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 25px;
+      .logo-container {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 15px;
       }
-      .header-table td {
-        vertical-align: middle;
-        padding: 5px;
+      .logo-img {
+        max-width: 80px;
+        max-height: 80px;
+        object-fit: contain;
       }
-
-      .tc-crest {
-        width: 1.8cm;
-        height: 1.8cm;
-      }
-
-      .title-area {
+      .antet-text {
         text-align: center;
         font-weight: bold;
-      }
-      .kurum-adi {
         font-size: 12pt;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-        white-space: pre-wrap;
+        line-height: 1.35;
       }
-      .birim-adi {
-        font-size: 11pt;
-        color: #333;
-        white-space: pre-wrap;
+      .antet-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+        margin-bottom: 25px;
+      }
+      .antet-table td {
+        padding: 5px;
       }
       .klasor-baslik {
         font-size: 14pt;
@@ -134,38 +129,62 @@
   <body>
     <div class="page-container">
       <!-- Header -->
-      <table class="header-table">
-        <tr>
-          <td style="width: 15%">
-            <svg
-              class="tc-crest"
-              viewBox="0 0 100 100"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="50" cy="50" r="45" stroke="#000" stroke-width="4.5" fill="none" />
-              <path
-                d="M50 15C30.67 15 15 30.67 15 50C15 69.33 30.67 85 50 85C69.33 85 85 69.33 85 50"
-                stroke="#000"
-                stroke-width="4.5"
-                stroke-linecap="round"
-              />
-              <path
-                d="M50 35L53.5 43.5H62.5L55 48.5L58 57.5L50 52L42 57.5L45 48.5L37.5 43.5H46.5L50 35Z"
-                fill="#000"
-              />
-            </svg>
-          </td>
-          <td style="width: 70%" class="title-area">
-            <div class="kurum-adi">{{{kurumAdi}}}</div>
-            <div class="birim-adi">{{{birimAdi}}}</div>
-            <div class="klasor-baslik">{{klasorBasligi}}</div>
-          </td>
-          <td style="width: 15%">
-            <!-- Spacer for alignment -->
-          </td>
-        </tr>
-      </table>
+      <!-- CENTERED TOP LOGO LAYOUT (when ustLogo exists) -->
+      {{#ustLogo}}
+      <div class="logo-container">
+        <img src="{{ustLogo}}" alt="Logo" class="logo-img" />
+      </div>
+
+      <div class="antet-text" style="margin-bottom: 25px;">
+        {{#antetSatirlari}}
+        <div>{{.}}</div>
+        {{/antetSatirlari}}
+        <div class="klasor-baslik">{{klasorBasligi}}</div>
+      </div>
+      {{/ustLogo}}
+
+      <!-- DEFAULT LAYOUTS (when ustLogo does not exist) -->
+      {{^ustLogo}}
+        <!-- DOUBLE LOGO LAYOUT (when sagLogo exists) -->
+        {{#sagLogo}}
+        <table class="antet-table">
+          <tr>
+            <td style="width: 90px; text-align: left; vertical-align: top; padding-top: 12px;">
+              {{#solLogo}}
+              <img src="{{solLogo}}" alt="Sol Logo" class="logo-img" />
+              {{/solLogo}}
+            </td>
+            
+            <td class="antet-text" style="vertical-align: top; padding-top: 2px; margin-bottom: 0;">
+              {{#antetSatirlari}}
+              <div>{{.}}</div>
+              {{/antetSatirlari}}
+              <div class="klasor-baslik">{{klasorBasligi}}</div>
+            </td>
+
+            <td style="width: 90px; text-align: right; vertical-align: top; padding-top: 12px;">
+              <img src="{{sagLogo}}" alt="Sağ Logo" class="logo-img" />
+            </td>
+          </tr>
+        </table>
+        {{/sagLogo}}
+
+        <!-- SINGLE CENTERED LOGO LAYOUT (when sagLogo does not exist) -->
+        {{^sagLogo}}
+        {{#solLogo}}
+        <div class="logo-container">
+          <img src="{{solLogo}}" alt="Logo" class="logo-img" />
+        </div>
+        {{/solLogo}}
+
+        <div class="antet-text" style="margin-bottom: 25px;">
+          {{#antetSatirlari}}
+          <div>{{.}}</div>
+          {{/antetSatirlari}}
+          <div class="klasor-baslik">{{klasorBasligi}}</div>
+        </div>
+        {{/sagLogo}}
+      {{/ustLogo}}
 
       <!-- Metadata Box -->
       <table class="metadata-box">

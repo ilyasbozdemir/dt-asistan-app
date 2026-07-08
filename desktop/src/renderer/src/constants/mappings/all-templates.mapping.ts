@@ -922,6 +922,9 @@ export const IhaleKapagiMapping: ProcessMapping = {
 // 32. Kapak İçi İndeks Åablonu
 // ===========================================================
 export const KapakIciIndeksSablonuMapping: ProcessMapping = {
+  antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
+  solLogo: { tablo: 'TANIM_Kurum', sutun: 'logo_sol', aciklama: 'Sol Logo (Base64)' },
+  sagLogo: { tablo: 'TANIM_Kurum', sutun: 'logo_sag', aciklama: 'Sağ Logo (Base64)' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' }
 }
