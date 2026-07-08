@@ -1,12 +1,12 @@
-import React from 'react'
-import { Package } from 'lucide-react'
-import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
-import { SurecBelgeleriPanel } from './SablonPanelleri'
-import { useMalzemeListesi } from '../components/MalzemeListesi/useMalzemeListesi'
-import { MalzemeEkleModal } from '../components/MalzemeListesi/MalzemeEkleModal'
-import { MalzemeTablosu } from '../components/MalzemeListesi/MalzemeTablosu'
+import React from "react";
+import { Package } from "lucide-react";
+import { SubScreen } from "../../SubScreens.screen";
+import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import { useDosyaAsamasiSablons } from "./useDosyaAsamasiSablons";
+import { SurecBelgeleriPanel } from "./SablonPanelleri";
+import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
+import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
+import { MalzemeTablosu } from "../components/MalzemeListesi/MalzemeTablosu";
 
 export function HazirlikVeIhtiyac(): React.JSX.Element {
   const {
@@ -27,10 +27,10 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     executeExportPdf,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled
-  } = useDosyaAsamasiSablons()
+    isSablonDisabled,
+  } = useDosyaAsamasiSablons();
 
-  const state = useMalzemeListesi(activeDosyaId)
+  const state = useMalzemeListesi(activeDosyaId);
 
   if (previewData && previewModalOpen) {
     return (
@@ -39,10 +39,9 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
+        masterHtml={masterHtml || ""}
+        baseContext={previewData.snapshotContext ||
+          contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -53,14 +52,14 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    )
+    );
   }
 
   const stageSablons = sablons.filter(
     (s) =>
-      s.kategori === '1-ihtiyac-tespiti-ve-baslangic' ||
-      s.kategori === '1. İhtiyaç Tespiti & Başlangıç'
-  )
+      s.kategori === "1-ihtiyac-tespiti-ve-baslangic" ||
+      s.kategori === "1. İhtiyaç Tespiti & Başlangıç",
+  );
 
   return (
     <SubScreen
@@ -72,8 +71,6 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         stageSablons={stageSablons}
         activeStarredDocs={activeStarredDocs}
         ciktiLoading={ciktiLoading}
-
-
         onSablonClick={handleOpenPreviewForSablon}
         isSablonDisabled={isSablonDisabled}
       />
@@ -81,5 +78,5 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       <MalzemeEkleModal state={state} />
       <MalzemeTablosu state={state} />
     </SubScreen>
-  )
+  );
 }

@@ -32,12 +32,6 @@ export function MalzemeTablosu({ state }: { state: any }) {
           </span>
         </h3>
         <div className="flex items-center gap-3">
-          {items.length > 0 && (
-            <span className="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full font-extrabold uppercase">
-              {items.reduce((s: number, i: any) => s + i.miktar, 0)}{" "}
-              Toplam Miktar
-            </span>
-          )}
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
