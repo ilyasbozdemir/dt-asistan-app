@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronRight,
   Download,
-  Eye,
   FileText,
   Layers,
   Loader2,
@@ -25,6 +24,7 @@ import { useDocumentLogger } from '../../hooks/useDocumentLogger'
 import { useRouterState } from '@tanstack/react-router'
 import { PrintManagerModal } from './components/PrintManagerModal'
 import { SABLON_DOSYAADI_KATEGORI } from '../../constants/sablonKategorileri'
+import { BelgeAksiyonlari } from '../../components/ui/BelgeAksiyonlari'
 
 const normalizeForMatch = (str: string) => {
   return str
@@ -149,8 +149,8 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     }
   }
 
-  const toggleStar = async (sablonAd: string, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const toggleStar = async (sablonAd: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
     if (!activeDosyaId) return
 
     const existingIdx = activeStarredDocs.findIndex(
@@ -441,29 +441,14 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                 </p>
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setPreviewSablon(sablon)
-                                  }}
-                                  className="p-1.5 rounded-lg transition-colors text-slate-300 hover:text-blue-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:bg-slate-800"
-                                  title="Önizle"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={(e) => toggleStar(sablon.ad, e)}
-                                  className={`p-1.5 rounded-lg transition-colors ${
-                                    isStarred
-                                      ? 'text-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40'
-                                      : 'text-slate-300 hover:text-amber-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:bg-slate-800'
-                                  }`}
-                                  title={isStarred ? 'Hızlı Erişimden Çıkar' : 'Hızlı Erişime Ekle'}
-                                >
-                                  <Star
-                                    className={`w-4 h-4 ${isStarred ? 'fill-amber-500' : ''}`}
-                                  />
-                                </button>
+                                <BelgeAksiyonlari
+                                  isStarred={isStarred}
+                                  onPreview={() => setPreviewSablon(sablon)}
+                                  onQuickPrint={() => handleAction('print', [sablon.id])}
+                                  onExport={(fmt) => handleAction(fmt, [sablon.id])}
+                                  onToggleStar={() => toggleStar(sablon.ad)}
+                                  disabled={!!missingMsg}
+                                />
                               </div>
                             </div>
                           )

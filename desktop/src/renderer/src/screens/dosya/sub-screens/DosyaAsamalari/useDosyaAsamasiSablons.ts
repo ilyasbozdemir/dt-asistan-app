@@ -3,6 +3,7 @@ import { useRouter, useSearch } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../../../store/workspaceStore'
 import { useCiktiMerkeziData } from '../../CiktiMerkezi.hooks'
 import { useDocumentLogger } from '../../../../hooks/useDocumentLogger'
+import Mustache from 'mustache'
 
 // -----------------------------------------------------------------------
 // Sabitler – tüm dosya aşaması ekranları tarafından paylaşılır
@@ -111,7 +112,7 @@ export const checkIsSablonDisabled = (cleanName: string, dosyaContext: any): boo
 }
 
 export function useDosyaAsamasiSablons() {
-  const { activeDosyaId, activeStarredDocs } = useWorkspaceStore()
+  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const {
     sablons,
     loading: ciktiLoading,
@@ -271,6 +272,92 @@ export function useDosyaAsamasiSablons() {
     }
   }
 
+  const executeExportDocx = async (html: string, filenameTitle?: string) => {
+    const titleForFile = filenameTitle || previewData?.title || 'Belge'
+    const filename = `${titleForFile}.docx`
+    await (window as any).electron.ipcRenderer.invoke('export-docx', html, titleForFile)
+    if (previewData?.title) {
+      await logDocument(previewData.title, filename)
+    }
+  }
+
+  const executeExportUdf = async (html: string, filenameTitle?: string) => {
+    const titleForFile = filenameTitle || previewData?.title || 'Belge'
+    const filename = `${titleForFile}.udf`
+    await (window as any).electron.ipcRenderer.invoke('export-udf', html, titleForFile)
+    if (previewData?.title) {
+      await logDocument(previewData.title, filename)
+    }
+  }
+
+  const renderHtmlForSablon = async (sablon: any) => {
+    if (!masterHtml) return ''
+    const processPath = sablon.route_path || sablon.dosya_adi || ''
+    const currentCtx = contextsByPath[processPath] || dosyaContext
+    const snapshotCtx = await loadOrCreateSnapshot(sablon.id, currentCtx)
+
+    if (sablon.test_verisi) {
+      try {
+        const parsedTest = JSON.parse(sablon.test_verisi)
+        Object.assign(snapshotCtx, parsedTest)
+      } catch (e) {
+        console.error('Şablon mock/test verisi ayrıştırılamadı:', e)
+      }
+    }
+
+    const renderedContent = Mustache.render(sablon.icerik, snapshotCtx)
+    const masterContext = { ...snapshotCtx, icerik: renderedContent }
+    return Mustache.render(masterHtml, masterContext)
+  }
+
+  const quickPrint = async (sablon: any) => {
+    const html = await renderHtmlForSablon(sablon)
+    if (!html) return
+    await (window as any).electron.ipcRenderer.invoke('print-html', html, {
+      silent: true
+    })
+    await logDocument(sablon.ad, 'Yazdırıldı')
+  }
+
+  const quickExport = async (sablon: any, format: 'pdf' | 'docx' | 'udf') => {
+    const html = await renderHtmlForSablon(sablon)
+    if (!html) return
+    const safeName = sablon.ad.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+    const filename = `${safeName}_${activeDosyaId}.${format}`
+
+    if (format === 'pdf') {
+      await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, `${safeName}_${activeDosyaId}`)
+    } else if (format === 'docx') {
+      await (window as any).electron.ipcRenderer.invoke('export-docx', html, `${safeName}_${activeDosyaId}`)
+    } else if (format === 'udf') {
+      await (window as any).electron.ipcRenderer.invoke('export-udf', html, `${safeName}_${activeDosyaId}`)
+    }
+
+    await logDocument(sablon.ad, filename)
+  }
+
+  const toggleStar = async (sablonAd: string) => {
+    if (!activeDosyaId) return
+
+    const existingIdx = activeStarredDocs.findIndex(
+      (d) => normalizeForMatch(d) === normalizeForMatch(sablonAd)
+    )
+    let newDocs = [...activeStarredDocs]
+
+    if (existingIdx >= 0) {
+      newDocs.splice(existingIdx, 1)
+    } else {
+      newDocs.push(sablonAd)
+    }
+
+    setActiveStarredDocs(newDocs)
+    await (window as any).electron.ipcRenderer.invoke(
+      'db:run',
+      'UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?',
+      [JSON.stringify(newDocs), activeDosyaId]
+    )
+  }
+
   const isSablonDisabled = (cleanName: string): boolean => {
     return checkIsSablonDisabled(cleanName, dosyaContext)
   }
@@ -294,6 +381,11 @@ export function useDosyaAsamasiSablons() {
     handleOpenPreviewForSablon,
     executePrint,
     executeExportPdf,
+    executeExportDocx,
+    executeExportUdf,
+    quickPrint,
+    quickExport,
+    toggleStar,
     refreshSnapshot,
     saveSnapshot,
     isSablonDisabled

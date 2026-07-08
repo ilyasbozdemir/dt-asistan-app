@@ -3,9 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, FileText, Star } from "lucide-react";
 import {
   BUTTON_COLORS,
-  SABLON_GRUPLARI,
   normalizeForMatch,
+  SABLON_GRUPLARI,
 } from "./useDosyaAsamasiSablons";
+import { BelgeAksiyonlari } from "../../../../components/ui/BelgeAksiyonlari";
 
 // -----------------------------------------------------------------------
 // SurecBelgeleriPanel
@@ -17,6 +18,9 @@ interface SurecBelgeleriPanelProps {
   ciktiLoading: boolean;
   onSablonClick: (sablon: any, title: string) => void;
   isSablonDisabled?: (cleanName: string) => boolean;
+  onQuickPrint: (sablon: any) => void;
+  onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
+  onToggleStar: (sablonAd: string) => void;
 }
 
 const getSablonDescription = (cleanName: string) => {
@@ -106,6 +110,9 @@ export function SurecBelgeleriPanel({
   ciktiLoading,
   onSablonClick,
   isSablonDisabled,
+  onQuickPrint,
+  onExport,
+  onToggleStar,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
   const hasStarred = stageSablons.some((sablon) => {
     if (!activeStarredDocs) return false;
@@ -267,9 +274,12 @@ export function SurecBelgeleriPanel({
                           const clusters = new Map<string, any[]>();
 
                           sablonsInGroup.forEach((sablon: any) => {
-                            const dosyaAdiNoExt = (sablon.dosya_adi as string).replace(/\.html$/, '');
+                            const dosyaAdiNoExt = (sablon.dosya_adi as string)
+                              .replace(/\.html$/, "");
                             const grupBilgi = SABLON_GRUPLARI[dosyaAdiNoExt];
-                            const key = grupBilgi ? grupBilgi.grup : `__solo__${sablon.id ?? sablon.ad}`;
+                            const key = grupBilgi
+                              ? grupBilgi.grup
+                              : `__solo__${sablon.id ?? sablon.ad}`;
                             if (!clusters.has(key)) clusters.set(key, []);
                             clusters.get(key)!.push(sablon);
                           });
@@ -277,9 +287,16 @@ export function SurecBelgeleriPanel({
                           // Her cluster'ı SABLON_GRUPLARI sıralamasına göre sırala
                           clusters.forEach((list) => {
                             list.sort((a: any, b: any) => {
-                              const aKey = (a.dosya_adi as string).replace(/\.html$/, '');
-                              const bKey = (b.dosya_adi as string).replace(/\.html$/, '');
-                              return (SABLON_GRUPLARI[aKey]?.siralama ?? 99) - (SABLON_GRUPLARI[bKey]?.siralama ?? 99);
+                              const aKey = (a.dosya_adi as string).replace(
+                                /\.html$/,
+                                "",
+                              );
+                              const bKey = (b.dosya_adi as string).replace(
+                                /\.html$/,
+                                "",
+                              );
+                              return (SABLON_GRUPLARI[aKey]?.siralama ?? 99) -
+                                (SABLON_GRUPLARI[bKey]?.siralama ?? 99);
                             });
                           });
 
@@ -288,23 +305,29 @@ export function SurecBelgeleriPanel({
                             const first = list[0].ad as string;
                             const m = first.match(/^\[(.*?)\]\s*(.*)$/);
                             const clean = m ? m[2].trim() : first;
-                            return clean.replace(/\s*\(.*?\)\s*$/, '').trim();
+                            return clean.replace(/\s*\(.*?\)\s*$/, "").trim();
                           };
 
-                          return Array.from(clusters.values()).map((clusteredSablons, idx) => {
-                            const baseName = getCardTitle(clusteredSablons);
-                            return (
-                              <SablonCard
-                                key={baseName + idx}
-                                baseName={baseName}
-                                sablons={clusteredSablons}
-                                idx={idx}
-                                ciktiLoading={ciktiLoading}
-                                isSablonDisabled={isSablonDisabled}
-                                onSablonClick={onSablonClick}
-                              />
-                            );
-                          });
+                          return Array.from(clusters.values()).map(
+                            (clusteredSablons, idx) => {
+                              const baseName = getCardTitle(clusteredSablons);
+                              return (
+                                <SablonCard
+                                  key={baseName + idx}
+                                  baseName={baseName}
+                                  sablons={clusteredSablons}
+                                  idx={idx}
+                                  ciktiLoading={ciktiLoading}
+                                  isSablonDisabled={isSablonDisabled}
+                                  onSablonClick={onSablonClick}
+                                  onQuickPrint={onQuickPrint}
+                                  onExport={onExport}
+                                  onToggleStar={onToggleStar}
+                                  activeStarredDocs={activeStarredDocs || []}
+                                />
+                              );
+                            },
+                          );
                         })()}
                       </div>
                     )}
@@ -324,6 +347,10 @@ function SablonCard({
   onSablonClick,
   ciktiLoading,
   isSablonDisabled,
+  onQuickPrint,
+  onExport,
+  onToggleStar,
+  activeStarredDocs,
 }: {
   baseName: string;
   sablons: any[];
@@ -331,6 +358,10 @@ function SablonCard({
   onSablonClick: (sablon: any, title: string) => void;
   ciktiLoading: boolean;
   isSablonDisabled?: (cleanName: string) => boolean;
+  onQuickPrint: (sablon: any) => void;
+  onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
+  onToggleStar: (sablonAd: string) => void;
+  activeStarredDocs: string[];
 }) {
   const sortedSablons = [...sablons].sort((a, b) => {
     const aHasParen = a.ad.includes("(");
@@ -356,6 +387,12 @@ function SablonCard({
   const isDisabled = ciktiLoading ||
     (isSablonDisabled && isSablonDisabled(cleanName));
 
+  const isStarred = activeStarredDocs.some(
+    (d) =>
+      normalizeForMatch(d) === normalizeForMatch(activeSablon.ad) ||
+      normalizeForMatch(d) === normalizeForMatch(cleanName),
+  );
+
   return (
     <div
       className={`text-left p-3.5 rounded-xl border transition-all flex flex-col gap-2 group relative overflow-visible ${
@@ -373,23 +410,18 @@ function SablonCard({
       >
       </div>
 
-      <div className="flex items-start gap-3 pl-1">
-        <button
-          className={`p-2 rounded-lg shrink-0 ${
-            isDisabled
-              ? "bg-slate-100 dark:bg-slate-800 text-slate-400"
-              : "bg-blue-50 dark:bg-blue-900/20 text-blue-500 cursor-pointer"
-          }`}
-          onClick={() =>
-            !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
-          disabled={isDisabled}
-          title="Şablonu Önizle"
-          aria-label="Şablonu Önizle"
-        >
-          <FileText className="w-4 h-4" />
-        </button>
-        <div className="flex flex-col flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
+      <div className="flex items-start justify-between gap-3 pl-1 w-full">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div
+            className={`p-2 rounded-lg shrink-0 ${
+              isDisabled
+                ? "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                : "bg-blue-50 dark:bg-blue-900/20 text-blue-500"
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+          </div>
+          <div className="flex flex-col flex-1 min-w-0">
             <button
               className={`font-bold text-sm line-clamp-1 text-left ${
                 isDisabled
@@ -403,42 +435,55 @@ function SablonCard({
             >
               {baseName}
             </button>
-          </div>
-          <span
-            className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed line-clamp-2"
-            title={description}
-          >
-            {description}
-          </span>
-
-          {sortedSablons.length > 1 && (
-            <div
-              className="mt-2.5"
-              onClick={(e) => e.stopPropagation()}
+            <span
+              className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed line-clamp-2"
+              title={description}
             >
-              <select
-                value={selectedId}
-                onChange={(e) => setSelectedId(e.target.value)}
-                disabled={isDisabled}
-                title="Şablon Sürümü Seçin"
-                aria-label="Şablon Sürümü Seçin"
-                className="w-full text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-medium"
-              >
-                {sortedSablons.map((s) => {
-                  const dosyaAdiNoExt = (s.dosya_adi as string).replace(/\.html$/, '');
-                  const grupBilgi = SABLON_GRUPLARI[dosyaAdiNoExt];
-                  // Etiketi doğrudan SABLON_GRUPLARI'ndan al
-                  const label = grupBilgi?.etiket ?? s.ad;
+              {description}
+            </span>
 
-                  return (
-                    <option key={s.id || s.ad} value={String(s.id || s.ad)}>
-                      📄 {label}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-          )}
+            {sortedSablons.length > 1 && (
+              <div
+                className="mt-2.5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <select
+                  value={selectedId}
+                  onChange={(e) => setSelectedId(e.target.value)}
+                  disabled={isDisabled}
+                  title="Şablon Sürümü Seçin"
+                  aria-label="Şablon Sürümü Seçin"
+                  className="w-full text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-medium"
+                >
+                  {sortedSablons.map((s) => {
+                    const dosyaAdiNoExt = (s.dosya_adi as string).replace(
+                      /\.html$/,
+                      "",
+                    );
+                    const grupBilgi = SABLON_GRUPLARI[dosyaAdiNoExt];
+                    const label = grupBilgi?.etiket ?? s.ad;
+
+                    return (
+                      <option key={s.id || s.ad} value={String(s.id || s.ad)}>
+                        📄 {label}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 self-center">
+          <BelgeAksiyonlari
+            isStarred={isStarred}
+            onPreview={() => onSablonClick(activeSablon, activeSablon.ad)}
+            onQuickPrint={() => onQuickPrint(activeSablon)}
+            onExport={(fmt) => onExport(activeSablon, fmt)}
+            onToggleStar={() => onToggleStar(activeSablon.ad)}
+            disabled={isDisabled}
+          />
         </div>
       </div>
     </div>

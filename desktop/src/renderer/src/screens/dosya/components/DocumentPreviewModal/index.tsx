@@ -17,6 +17,10 @@ interface DocumentPreviewModalProps<T = any> {
   personelListesi?: any[]
   onPrint: (html: string) => Promise<void>
   onExportPdf: (html: string, filenameTitle?: string) => Promise<void>
+  onExportDocx?: (html: string, filenameTitle?: string) => Promise<void>
+  onExportUdf?: (html: string, filenameTitle?: string) => Promise<void>
+  isStarred?: boolean
+  onToggleStar?: () => void
   isInline?: boolean
   templateTestVerisi?: string
   onRefreshSnapshot?: () => Promise<void>
@@ -96,6 +100,10 @@ export function DocumentPreviewModal<T = any>({
   personelListesi = [],
   onPrint,
   onExportPdf,
+  onExportDocx,
+  onExportUdf,
+  isStarred = false,
+  onToggleStar,
   isInline = false,
   templateTestVerisi = '',
   onRefreshSnapshot,
@@ -111,7 +119,33 @@ export function DocumentPreviewModal<T = any>({
   const [isProcessingPdf, setIsProcessingPdf] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [isAiGenerating, setIsAiGenerating] = useState(false)
+  const [isProcessingDocx, setIsProcessingDocx] = useState(false)
+  const [isProcessingUdf, setIsProcessingUdf] = useState(false)
   const [schemaJson, setSchemaJson] = useState<Partial<T> | null>(null)
+
+  const handleDocx = async () => {
+    if (!onExportDocx || !previewHtml) return
+    setIsProcessingDocx(true)
+    try {
+      await onExportDocx(previewHtml, title)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsProcessingDocx(false)
+    }
+  }
+
+  const handleUdf = async () => {
+    if (!onExportUdf || !previewHtml) return
+    setIsProcessingUdf(true)
+    try {
+      await onExportUdf(previewHtml, title)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsProcessingUdf(false)
+    }
+  }
 
   const extractUsedVars = React.useCallback((html: string) => {
     const matches = Array.from(html.matchAll(/\{\{(\{?)([#^\/]?)([a-zA-Z0-9_]+)(\}?)\}\}/g))
@@ -629,8 +663,14 @@ export function DocumentPreviewModal<T = any>({
           onClose={onClose}
           handlePrint={handlePrint}
           handlePdf={handlePdf}
+          handleDocx={onExportDocx ? handleDocx : undefined}
+          handleUdf={onExportUdf ? handleUdf : undefined}
           isProcessingPrint={isProcessingPrint}
           isProcessingPdf={isProcessingPdf}
+          isProcessingDocx={isProcessingDocx}
+          isProcessingUdf={isProcessingUdf}
+          isStarred={isStarred}
+          onToggleStar={onToggleStar}
           jsonError={jsonError}
           activeTab={activeTab}
           onRefreshSnapshot={onRefreshSnapshot}

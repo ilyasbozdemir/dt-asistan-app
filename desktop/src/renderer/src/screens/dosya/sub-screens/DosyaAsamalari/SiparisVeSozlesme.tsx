@@ -2,7 +2,7 @@ import React from 'react'
 import { FileCheck } from 'lucide-react'
 import { SubScreen } from '../../SubScreens.screen'
 import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
+import { useDosyaAsamasiSablons, normalizeForMatch } from './useDosyaAsamasiSablons'
 import { SurecBelgeleriPanel } from './SablonPanelleri'
 
 export function SiparisVeSozlesme(): React.JSX.Element {
@@ -21,12 +21,21 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     handleOpenPreviewForSablon,
     executePrint,
     executeExportPdf,
+    executeExportDocx,
+    executeExportUdf,
+    quickPrint,
+    quickExport,
+    toggleStar,
     refreshSnapshot,
     saveSnapshot,
     isSablonDisabled
   } = useDosyaAsamasiSablons()
 
   if (previewData && previewModalOpen) {
+    const isStarred = previewData?.title
+      ? activeStarredDocs.some((d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || ''))
+      : false
+
     return (
       <DocumentPreviewModal
         isOpen={previewModalOpen}
@@ -41,6 +50,10 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         personelListesi={personelListesi}
         onPrint={executePrint}
         onExportPdf={executeExportPdf}
+        onExportDocx={executeExportDocx}
+        onExportUdf={executeExportUdf}
+        isStarred={isStarred}
+        onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
         isInline={true}
         templateTestVerisi={previewData.templateTestVerisi}
         dosyaAdi={previewData.dosyaAdi}
@@ -65,6 +78,9 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         activeStarredDocs={activeStarredDocs}
         ciktiLoading={ciktiLoading}
         onSablonClick={handleOpenPreviewForSablon}
+        onQuickPrint={quickPrint}
+        onExport={quickExport}
+        onToggleStar={toggleStar}
         isSablonDisabled={isSablonDisabled}
       />
 
