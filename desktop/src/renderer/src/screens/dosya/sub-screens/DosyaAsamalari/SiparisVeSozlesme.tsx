@@ -25,6 +25,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     executeExportUdf,
     quickPrint,
     quickExport,
+    quickOpenExternal,
     toggleStar,
     refreshSnapshot,
     saveSnapshot,
@@ -81,6 +82,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         onQuickPrint={quickPrint}
         onExport={quickExport}
         onToggleStar={toggleStar}
+        onOpenExternal={quickOpenExternal}
         isSablonDisabled={isSablonDisabled}
       />
 

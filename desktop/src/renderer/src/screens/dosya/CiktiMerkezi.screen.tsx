@@ -269,30 +269,32 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
       for (const sablon of selectedSablons) {
         const html = renderHtml(sablon)
-        const safeName = sablon.ad.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+        // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
+        const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, '_').trim()
+        const fileBase = `${safeName}_${activeDosyaId}`
 
         if (action === 'pdf') {
           await window.electron.ipcRenderer.invoke(
             'export-pdf',
             html,
             null,
-            `${safeName}_${activeDosyaId}`
+            fileBase
           )
-          await logDocument(sablon.ad, `${safeName}_${activeDosyaId}.pdf`)
+          await logDocument(sablon.ad, `${fileBase}.pdf`)
         } else if (action === 'udf') {
           await window.electron.ipcRenderer.invoke(
             'export-udf',
             html,
-            `${safeName}_${activeDosyaId}`
+            fileBase
           )
-          await logDocument(sablon.ad, `${safeName}_${activeDosyaId}.udf`)
+          await logDocument(sablon.ad, `${fileBase}.udf`)
         } else if (action === 'docx') {
           await window.electron.ipcRenderer.invoke(
             'export-docx',
             html,
-            `${safeName}_${activeDosyaId}`
+            fileBase
           )
-          await logDocument(sablon.ad, `${safeName}_${activeDosyaId}.docx`)
+          await logDocument(sablon.ad, `${fileBase}.docx`)
         } else if (action === 'print') {
           await window.electron.ipcRenderer.invoke('print-html', html, {
             silent: true
@@ -447,6 +449,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                   onQuickPrint={() => handleAction('print', [sablon.id])}
                                   onExport={(fmt) => handleAction(fmt, [sablon.id])}
                                   onToggleStar={() => toggleStar(sablon.ad)}
+                                  onOpenExternal={async () => {
+                                    const html = renderHtml(sablon)
+                                    if (html) {
+                                      await window.electron.ipcRenderer.invoke('open-pdf-external', html)
+                                    }
+                                  }}
                                   disabled={!!missingMsg}
                                 />
                               </div>

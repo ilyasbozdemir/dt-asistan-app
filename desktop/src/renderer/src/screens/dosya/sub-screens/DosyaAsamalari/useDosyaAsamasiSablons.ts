@@ -322,18 +322,26 @@ export function useDosyaAsamasiSablons() {
   const quickExport = async (sablon: any, format: 'pdf' | 'docx' | 'udf') => {
     const html = await renderHtmlForSablon(sablon)
     if (!html) return
-    const safeName = sablon.ad.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-    const filename = `${safeName}_${activeDosyaId}.${format}`
+    // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
+    const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, '_').trim()
+    const fileBase = `${safeName}_${activeDosyaId}`
+    const filename = `${fileBase}.${format}`
 
     if (format === 'pdf') {
-      await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, `${safeName}_${activeDosyaId}`)
+      await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, fileBase)
     } else if (format === 'docx') {
-      await (window as any).electron.ipcRenderer.invoke('export-docx', html, `${safeName}_${activeDosyaId}`)
+      await (window as any).electron.ipcRenderer.invoke('export-docx', html, fileBase)
     } else if (format === 'udf') {
-      await (window as any).electron.ipcRenderer.invoke('export-udf', html, `${safeName}_${activeDosyaId}`)
+      await (window as any).electron.ipcRenderer.invoke('export-udf', html, fileBase)
     }
 
     await logDocument(sablon.ad, filename)
+  }
+
+  const quickOpenExternal = async (sablon: any) => {
+    const html = await renderHtmlForSablon(sablon)
+    if (!html) return
+    await (window as any).electron.ipcRenderer.invoke('open-pdf-external', html)
   }
 
   const toggleStar = async (sablonAd: string) => {
@@ -385,6 +393,7 @@ export function useDosyaAsamasiSablons() {
     executeExportUdf,
     quickPrint,
     quickExport,
+    quickOpenExternal,
     toggleStar,
     refreshSnapshot,
     saveSnapshot,

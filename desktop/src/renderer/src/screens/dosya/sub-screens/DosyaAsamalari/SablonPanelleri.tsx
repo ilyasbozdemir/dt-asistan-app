@@ -21,6 +21,7 @@ interface SurecBelgeleriPanelProps {
   onQuickPrint: (sablon: any) => void;
   onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
   onToggleStar: (sablonAd: string) => void;
+  onOpenExternal: (sablon: any) => void;
 }
 
 const getSablonDescription = (cleanName: string) => {
@@ -113,6 +114,7 @@ export function SurecBelgeleriPanel({
   onQuickPrint,
   onExport,
   onToggleStar,
+  onOpenExternal,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
   const hasStarred = stageSablons.some((sablon) => {
     if (!activeStarredDocs) return false;
@@ -482,6 +484,7 @@ function SablonCard({
             onQuickPrint={() => onQuickPrint(activeSablon)}
             onExport={(fmt) => onExport(activeSablon, fmt)}
             onToggleStar={() => onToggleStar(activeSablon.ad)}
+            onOpenExternal={() => onOpenExternal(activeSablon)}
             disabled={isDisabled}
           />
         </div>

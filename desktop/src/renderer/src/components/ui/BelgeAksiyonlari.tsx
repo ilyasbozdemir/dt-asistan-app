@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Eye, Printer, Download, Star } from 'lucide-react'
+import { Eye, Printer, Download, Star, ExternalLink } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
 export interface Sablon {
@@ -18,6 +18,7 @@ interface BelgeAksiyonlariProps {
   onQuickPrint: () => void
   onExport: (format: 'pdf' | 'docx' | 'udf') => void
   onToggleStar: () => void
+  onOpenExternal: () => void
   disabled?: boolean
 }
 
@@ -27,6 +28,7 @@ export function BelgeAksiyonlari({
   onQuickPrint,
   onExport,
   onToggleStar,
+  onOpenExternal,
   disabled
 }: BelgeAksiyonlariProps): React.JSX.Element {
   const [indirMenuOpen, setIndirMenuOpen] = useState(false)
@@ -56,6 +58,18 @@ export function BelgeAksiyonlari({
         )}
       >
         <Eye className="w-4 h-4" />
+      </button>
+
+      <button
+        onClick={onOpenExternal}
+        disabled={disabled}
+        title="Tarayıcıda PDF Olarak Aç"
+        className={cn(
+          'p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed',
+          'hover:bg-emerald-50 text-emerald-500 dark:hover:bg-emerald-900/20'
+        )}
+      >
+        <ExternalLink className="w-4 h-4" />
       </button>
 
       <button
