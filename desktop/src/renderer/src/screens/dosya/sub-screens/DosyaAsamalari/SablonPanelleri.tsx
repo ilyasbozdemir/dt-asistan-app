@@ -267,7 +267,7 @@ export function SurecBelgeleriPanel({
 
                     {/* Group Items Grid */}
                     {!isCollapsed && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {(() => {
                           const sablonsInGroup = groups.get(groupName)!;
 
@@ -425,7 +425,7 @@ function SablonCard({
           </div>
           <div className="flex flex-col flex-1 min-w-0">
             <button
-              className={`font-bold text-sm line-clamp-1 text-left ${
+              className={`font-bold text-sm line-clamp-2 text-left leading-tight ${
                 isDisabled
                   ? "text-slate-500 dark:text-slate-400"
                   : "text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
