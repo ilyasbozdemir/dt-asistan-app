@@ -59,7 +59,7 @@ export function KabulVeOdeme(): React.JSX.Element {
     <SubScreen
       title="Kabul & Ödeme İşlemleri"
       icon={CreditCard}
-      description="Kabul ve ödeme süreçlerini yönetin."
+      description="Muayene kabul tutanağı, hakediş raporu, taşınır işlem fişi (TİF) ve ödeme emri belgesi gibi evrakları düzenleyebilir, kabul ve ödeme süreçlerinizi tamamlayabilirsiniz."
     >
       <SurecBelgeleriPanel
         stageSablons={stageSablons}

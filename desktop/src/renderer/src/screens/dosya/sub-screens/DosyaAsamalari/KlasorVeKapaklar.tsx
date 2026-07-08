@@ -58,7 +58,7 @@ export function KlasorVeKapaklar(): React.JSX.Element {
     <SubScreen
       title="Klasör & Kapaklar"
       icon={FolderTree}
-      description="Klasör sırtlıkları ve kapak hazırlama süreçlerini yönetin."
+      description="İhale kapağı, kapak içi indeks şablonu ve farklı boyutlardaki (3cm, 5cm, 7.5cm) klasör sırtlıklarını hızlıca oluşturup fiziksel arşiv dosyalarınızı hazırlayabilirsiniz."
     >
       <SurecBelgeleriPanel
         stageSablons={stageSablons}

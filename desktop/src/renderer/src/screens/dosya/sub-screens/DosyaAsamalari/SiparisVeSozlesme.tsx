@@ -58,7 +58,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     <SubScreen
       title="Sipariş & Sözleşme"
       icon={FileCheck}
-      description="Sipariş ve sözleşme süreçlerini yönetin."
+      description="Doğrudan temin onay belgesi, ihale komisyon kararı ve sözleşmeye davet gibi dökümanları hazırlayabilir, doğrudan temin sözleşme süreçlerinizi bu panelden yönetebilirsiniz."
     >
       <SurecBelgeleriPanel
         stageSablons={stageSablons}
