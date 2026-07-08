@@ -276,6 +276,7 @@ export function buildDocumentContext(
     evrakSayisi: formattedEvrakSayisi,
     dosyaKonusu: dosyaResData?.konu || 'Konu Belirtilmedi',
     isAdi: dosyaResData?.konu || 'Konu Belirtilmedi',
+    isinAdi: dosyaResData?.konu || 'Konu Belirtilmedi',
     sayiYazıyla: SAYI_YAZI_MAP,
     kurumumuz: suffixes.kurumumuz,
     kurumunuz: suffixes.kurumunuz,
