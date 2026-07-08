@@ -274,7 +274,7 @@ export function buildDocumentContext(
     kurumWeb: kurum?.web_sitesi || '',
     kurumIci: true,
     evrakSayisi: formattedEvrakSayisi,
-    dosyaKonusu: dosyaResData?.konu || 'Konu Belirtilmedi',
+    dosyaKonusu: undefined,
     isAdi: dosyaResData?.konu || 'Konu Belirtilmedi',
     isinAdi: dosyaResData?.konu || 'Konu Belirtilmedi',
     sayiYazıyla: SAYI_YAZI_MAP,

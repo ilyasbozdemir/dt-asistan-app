@@ -88,11 +88,11 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
 }
 
 export function getDefaultMappingForProcess(processPath: string): ProcessMapping {
-  const cleanPath =
-    processPath
-      .replace(/\.html$/, '')
-      .split('/')
-      .pop() || ''
+  const parts = processPath.replace(/\.html$/, '').split('/')
+  let cleanPath = parts.pop() || ''
+  if (cleanPath === 'index' && parts.length > 0) {
+    cleanPath = parts.pop() || ''
+  }
 
   if (
     cleanPath === 'ihtiyac-listesi' ||
