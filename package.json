@@ -16,5 +16,17 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@google/genai",
+      "better-sqlite3",
+      "electron",
+      "electron-winstaller",
+      "esbuild",
+      "protobufjs",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
