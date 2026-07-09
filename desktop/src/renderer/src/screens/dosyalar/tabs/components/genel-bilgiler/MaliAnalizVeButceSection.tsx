@@ -3,8 +3,8 @@ import { DollarSign, Sparkles } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { YeniDosyaTabProps } from '../../../types'
 
-export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
-  const { formData, setFormData, kodSozlugu, openTextGenerator, getNextTeminNo } = props
+export function MaliAnalizVeButceSection(props: YeniDosyaTabProps): React.JSX.Element {
+  const { formData, setFormData, kodSozlugu, openTextGenerator } = props
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -15,62 +15,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Bütçe Yılı
-          </label>
-          <input
-            type="number"
-            value={formData.butce_yili || new Date().getFullYear()}
-            onChange={(e) => {
-              const newYear = parseInt(e.target.value, 10)
-              const oldYear = formData.butce_yili
-              let updatedTeminNo = formData.temin_no
-
-              if (newYear && newYear !== oldYear) {
-                const oldYearStr = oldYear ? oldYear.toString() : ''
-                const isOldPattern =
-                  !formData.temin_no ||
-                  formData.temin_no.startsWith(`${oldYearStr}/`) ||
-                  formData.temin_no.startsWith(`DT${oldYearStr}/`)
-
-                if (isOldPattern && getNextTeminNo) {
-                  updatedTeminNo = getNextTeminNo(newYear)
-                }
-              }
-
-              setFormData({
-                ...formData,
-                butce_yili: newYear,
-                temin_no: updatedTeminNo
-              })
-            }}
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Bütçe Tipi
-          </label>
-          <select
-            value={formData.butce_tipi || 'Genel Bütçe'}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                butce_tipi: e.target.value
-              })
-            }
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          >
-            <option value="Genel Bütçe">Genel Bütçe</option>
-            <option value="Döner Sermaye">Döner Sermaye</option>
-            <option value="Özel Bütçe">Özel Bütçe</option>
-            <option value="Diğer">Diğer</option>
-          </select>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             Finansman Kodu
@@ -89,7 +34,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
           />
         </div>
 
-        <div className="md:col-span-3">
+        <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-xs font-bold text-slate-600 dark:text-slate-455">
               Bütçe Kodu / Harcama Tertibi (Ekonomik Kod)
@@ -124,7 +69,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
         </div>
       </div>
 
-      <div className="bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-4">
+      <div className="bg-slate-50 dark:bg-slate-955 p-5 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-4">
         <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
           Mevzuat ve Sistem Parametreleri
         </h3>
@@ -153,7 +98,7 @@ export function MaliAnalizVeButceSection(props: YeniDosyaTabProps) {
                   </option>
                 ))}
             </select>
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[10px] text-slate-450 mt-1">
               Eksik kodları{' '}
               <Link to="/mevzuat" className="text-blue-600 underline font-semibold">
                 Mevzuat & Kodlar

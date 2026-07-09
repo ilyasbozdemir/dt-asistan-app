@@ -1169,7 +1169,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer"
                 >
                   <Save size={16} />
-                  {isEdit ? 'Tüm Dosyayı Güncelle' : 'Dosyayı Kaydet ve Bitir'}
+                  {isEdit ? 'Değişiklikleri Kaydet' : 'Dosyayı Oluştur'}
                 </button>
               )}
             </div>

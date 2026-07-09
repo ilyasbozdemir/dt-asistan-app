@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FileText, Search, Sparkles } from 'lucide-react'
 import { YeniDosyaTabProps } from '../types'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element {
   const [, setAiKalemConfig] = useState({ isOpen: false })
 
@@ -37,7 +38,7 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
                 type="button"
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-colors w-full md:w-auto whitespace-nowrap"
               >
-                + OKAS'tan Aktar
+                + OKAS&apos;tan Aktar
               </button>
               <button
                 type="button"
