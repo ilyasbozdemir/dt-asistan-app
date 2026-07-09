@@ -902,6 +902,68 @@ export default function AyarlarScreen(): React.ReactNode {
                       </div>
                     </div>
 
+                    {/* Sunucu Durum & Güncelleme Bilgi Paneli */}
+                    <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+                      syncServerUrl
+                        ? syncTestStatus === 'ok'
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                          : syncTestStatus === 'error'
+                          ? 'bg-rose-500/10 border-rose-500/20 text-rose-800 dark:text-rose-300'
+                          : 'bg-blue-500/10 border-blue-500/20 text-blue-800 dark:text-blue-300'
+                        : 'bg-amber-500/10 border-amber-500/20 text-amber-800 dark:text-amber-300'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
+                          syncServerUrl
+                            ? syncTestStatus === 'ok'
+                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                              : syncTestStatus === 'error'
+                              ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                              : 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                        }`}>
+                          {syncServerUrl
+                            ? syncTestStatus === 'ok'
+                              ? '✓'
+                              : syncTestStatus === 'error'
+                              ? '✗'
+                              : '⏳'
+                            : '!'
+                          }
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wider">
+                            {!syncServerUrl 
+                              ? 'Bağlantı Kurulmadı' 
+                              : syncTestStatus === 'ok' 
+                              ? 'Sunucu Aktif & Bağlı' 
+                              : syncTestStatus === 'error' 
+                              ? 'Bağlantı Başarısız' 
+                              : 'Bağlantı Test Edilmedi'}
+                          </div>
+                          <div className="text-[11px] opacity-90 mt-0.5">
+                            {!syncServerUrl 
+                              ? 'Lütfen veri senkronizasyonu için geçerli bir Sunucu Adresi girin.' 
+                              : syncTestStatus === 'ok' 
+                              ? `Uzak sunucu (${syncServerUrl}) ile iletişim başarıyla sağlandı. Verileri senkronize edebilirsiniz.` 
+                              : syncTestStatus === 'error' 
+                              ? 'Girdiğiniz adrese ulaşılamadı. Sunucu ayarlarınızı veya internetinizi kontrol edin.' 
+                              : 'Sunucu adresi tanımlandı. Lütfen aşağıdaki buton ile bağlantıyı test edin.'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {syncServerUrl && syncTestStatus !== 'ok' && (
+                        <Button
+                          onClick={handleSyncTestConnection}
+                          disabled={syncTestStatus === 'loading'}
+                          className="text-[10px] font-bold py-1.5 px-3 rounded-lg bg-white/80 dark:bg-slate-950/80 hover:bg-white dark:hover:bg-slate-950 text-slate-800 dark:text-slate-100 shadow-sm border border-black/5"
+                        >
+                          {syncTestStatus === 'loading' ? 'Bağlantı Sınanıyor...' : 'Bağlantıyı Şimdi Sına'}
+                        </Button>
+                      )}
+                    </div>
+
                     {/* Bağlantı Ayarları */}
                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-4">
                       <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bağlantı Ayarları</h3>
