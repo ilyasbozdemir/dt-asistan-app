@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Save,
   Square,
+  Star,
   Trash2,
   X,
 } from "lucide-react";

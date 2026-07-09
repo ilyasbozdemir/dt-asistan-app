@@ -162,6 +162,11 @@ export default function TaslakYoneticisi(): React.JSX.Element {
     globalStarred,
   ]);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newPresetName, setNewPresetName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [presetToDeleteId, setPresetToDeleteId] = useState("");
+
   const saveStarred = (updated: string[]): void => {
     setGlobalStarred(updated);
     localStorage.setItem("global_starred_docs", JSON.stringify(updated));
@@ -169,32 +174,40 @@ export default function TaslakYoneticisi(): React.JSX.Element {
   };
 
   const handleAddPreset = (): void => {
-    const name = prompt("Yeni belge paketi taslağı için bir isim girin:");
-    if (!name || name.trim() === "") return;
+    setNewPresetName("");
+    setShowAddModal(true);
+  };
+
+  const handleAddPresetSubmit = (): void => {
+    if (!newPresetName || newPresetName.trim() === "") return;
     const newPreset: DocumentPreset = {
       id: Date.now().toString(),
-      name: name.trim(),
+      name: newPresetName.trim(),
       docs: [],
     };
     const updated = [...presets, newPreset];
     setPresets(updated);
     localStorage.setItem("dta_document_presets", JSON.stringify(updated));
     setSelectedPresetId(newPreset.id);
+    setShowAddModal(false);
     window.dispatchEvent(new Event("dta_presets_changed"));
   };
 
   const handleDeletePreset = (id: string): void => {
-    const preset = presets.find((p) => p.id === id);
-    if (!preset) return;
-    if (
-      !confirm(`'${preset.name}' paketini silmek istediğinize emin misiniz?`)
-    ) return;
-    const updated = presets.filter((p) => p.id !== id);
+    setPresetToDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeletePresetSubmit = (): void => {
+    if (!presetToDeleteId) return;
+    const updated = presets.filter((p) => p.id !== presetToDeleteId);
     setPresets(updated);
     localStorage.setItem("dta_document_presets", JSON.stringify(updated));
-    if (selectedPresetId === id) {
+    if (selectedPresetId === presetToDeleteId) {
       setSelectedPresetId("");
     }
+    setPresetToDeleteId("");
+    setShowDeleteModal(false);
     window.dispatchEvent(new Event("dta_presets_changed"));
   };
 
@@ -636,6 +649,79 @@ export default function TaslakYoneticisi(): React.JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* Yeni Paket Ekleme Modalı */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
+              Yeni Belge Paketi Oluştur
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Bu paket için ayırt edici bir isim belirleyin. Örneğin: "İller
+              Bankası Şablonları" veya "Doğrudan Temin Standart".
+            </p>
+            <input
+              type="text"
+              value={newPresetName}
+              onChange={(e) => setNewPresetName(e.target.value)}
+              placeholder="Paket Adı..."
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddPresetSubmit();
+              }}
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleAddPresetSubmit}
+                disabled={!newPresetName.trim()}
+                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              >
+                Oluştur
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Paket Silme Onay Modalı */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
+              Paketi Sil
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Bu belge paketini silmek istediğinize emin misiniz? Bu işlem geri
+              alınamaz.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setPresetToDeleteId("");
+                }}
+                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
+              >
+                Vazgeç
+              </button>
+              <button
+                onClick={handleDeletePresetSubmit}
+                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all bg-rose-600 hover:bg-rose-700 text-white"
+              >
+                Evet, Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

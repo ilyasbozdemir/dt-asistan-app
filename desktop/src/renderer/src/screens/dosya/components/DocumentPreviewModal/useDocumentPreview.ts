@@ -275,6 +275,20 @@ export function useDocumentPreview<T = any>({
     }
   }
 
+  const handleAiEdit = async () => {
+    if (!aiPrompt.trim()) return
+    setIsAiGenerating(true)
+    try {
+      // TODO: AI entegrasyonu buraya gelecek
+      console.log('AI edit prompt:', aiPrompt)
+      setAiPrompt('')
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsAiGenerating(false)
+    }
+  }
+
   return {
     overrideData,
     setOverrideData,
@@ -304,6 +318,7 @@ export function useDocumentPreview<T = any>({
     handlePdf,
     handleDocx,
     handleUdf,
+    handleAiEdit,
     updatePreview
   }
 }
