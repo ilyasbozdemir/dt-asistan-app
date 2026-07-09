@@ -325,6 +325,7 @@ export function SurecBelgeleriPanel({
                                   onQuickPrint={onQuickPrint}
                                   onExport={onExport}
                                   onToggleStar={onToggleStar}
+                                  onOpenExternal={onOpenExternal}
                                   activeStarredDocs={activeStarredDocs || []}
                                 />
                               );
@@ -352,6 +353,7 @@ function SablonCard({
   onQuickPrint,
   onExport,
   onToggleStar,
+  onOpenExternal,
   activeStarredDocs,
 }: {
   baseName: string;
@@ -363,6 +365,7 @@ function SablonCard({
   onQuickPrint: (sablon: any) => void;
   onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
   onToggleStar: (sablonAd: string) => void;
+  onOpenExternal: (sablon: any) => void;
   activeStarredDocs: string[];
 }) {
   const sortedSablons = [...sablons].sort((a, b) => {
