@@ -165,7 +165,7 @@ const AYLAR = [
   'Aralık'
 ]
 
-const YILLAR = ['2022', '2023', '2024', '2025']
+// Yıllar veritabanından dinamik olarak yüklenecektir.
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 const fmt = (n: number) =>
@@ -565,11 +565,39 @@ function ButceView({ yil }: { yil: string }) {
 // ─── MAIN SCREEN ─────────────────────────────────────────────────────────────
 export default function RaporlarScreen() {
   const [seciliTip, setSeciliTip] = useState<RaporTipi>('kayit-formu')
-  const [seciliYil, setSeciliYil] = useState('2024')
+  const [dinamikYillar, setDinamikYillar] = useState<string[]>([])
+  const [seciliYil, setSeciliYil] = useState('')
   const [seciliAy, setSeciliAy] = useState('Ocak')
   const [raporAktif, setRaporAktif] = useState(false)
-  const [raporYil, setRaporYil] = useState('2024')
+  const [raporYil, setRaporYil] = useState('')
   const [raporAy, setRaporAy] = useState('Ocak')
+
+  React.useEffect(() => {
+    // Veritabanındaki tüm farklı bütçe yıllarını sorgula
+    window.electron.ipcRenderer
+      .invoke('db:query', 'SELECT DISTINCT butce_yili FROM DATA_TeminDosyasi WHERE butce_yili IS NOT NULL AND is_deleted = 0 ORDER BY butce_yili DESC')
+      .then((res: any) => {
+        if (res.success && res.data && res.data.length > 0) {
+          const list = res.data.map((row: any) => String(row.butce_yili))
+          setDinamikYillar(list)
+          setSeciliYil(list[0])
+          setRaporYil(list[0])
+        } else {
+          // Fallback if no files exist yet
+          const currentYear = new Date().getFullYear().toString()
+          setDinamikYillar([currentYear])
+          setSeciliYil(currentYear)
+          setRaporYil(currentYear)
+        }
+      })
+      .catch((err) => {
+        console.error('Yıllar yüklenirken hata:', err)
+        const currentYear = new Date().getFullYear().toString()
+        setDinamikYillar([currentYear])
+        setSeciliYil(currentYear)
+        setRaporYil(currentYear)
+      })
+  }, [])
 
   const handleRaporla = () => {
     setRaporYil(seciliYil)
@@ -647,7 +675,7 @@ export default function RaporlarScreen() {
                 }}
                 className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                {YILLAR.map((y) => (
+                {dinamikYillar.map((y) => (
                   <option key={y}>{y}</option>
                 ))}
               </select>
@@ -659,8 +687,8 @@ export default function RaporlarScreen() {
                 <select
                   value={seciliAy}
                   onChange={(e) => {
-                    setSeciliAy(e.target.value)
-                    setRaporAktif(false)
+                     setSeciliAy(e.target.value)
+                     setRaporAktif(false)
                   }}
                   className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
