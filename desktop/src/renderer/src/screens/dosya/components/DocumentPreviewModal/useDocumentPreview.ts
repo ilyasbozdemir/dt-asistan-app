@@ -133,7 +133,7 @@ export function useDocumentPreview<T = any>({
     setOverrideData(newData)
     setOverrideJson(JSON.stringify(newData, null, 2))
 
-    const merged = { ...baseContext, ...newData }
+    const merged = { ...mergedContext, ...newData }
     updatePreview(merged)
   }
 
@@ -143,7 +143,7 @@ export function useDocumentPreview<T = any>({
       const parsedOverride = JSON.parse(val || '{}')
       setJsonError('')
       setOverrideData(parsedOverride)
-      const merged = { ...baseContext, ...parsedOverride }
+      const merged = { ...mergedContext, ...parsedOverride }
       updatePreview(merged)
     } catch (err: any) {
       setJsonError('Geçersiz JSON formatı: ' + err.message)
