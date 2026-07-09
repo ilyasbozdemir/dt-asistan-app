@@ -658,8 +658,8 @@ export default function TaslakYoneticisi(): React.JSX.Element {
               Yeni Belge Paketi Oluştur
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Bu paket için ayırt edici bir isim belirleyin. Örneğin: "İller
-              Bankası Şablonları" veya "Doğrudan Temin Standart".
+              Belge paketinize kolayca tanıyabileceğiniz bir isim verin.
+              Oluşturduktan sonra içine istediğiniz şablonları ekleyebilirsiniz.
             </p>
             <input
               type="text"
