@@ -5,7 +5,8 @@
   "antetSatir1": "SAĞLIK BAKANLIĞI",
   "antetSatir2": "İl Sağlık Müdürlüğü",
   "antetSatir3": "Destek Hizmetleri Başkanlığı",
-  "solLogo": "",
+  "solLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svgcon.png",
+  "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "kurumIci": false,
   "kurumAdres": "Üniversite Mahallesi, Merkez/Ankara",
   "kurumTelefon": "0312 000 00 00",
@@ -164,7 +165,5 @@
   "hazirlayanPersonelAdi": "Ayşe Yılmaz",
   "hazırlayanPersonelUnvan": "VHKİ",
   "hazirlayanTelefon": "0312 555 44 33",
-  "hazirlayanTelefon": "0312 555 44 33",
-  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
   "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

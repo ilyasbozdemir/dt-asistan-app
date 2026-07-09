@@ -12,8 +12,8 @@
     "Ankara İl Sağlık Müdürlüğü",
     "Destek Hizmetleri Başkanlığı"
   ],
-  "solLogo": "",
-  "sagLogo": "",
+  "solLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svgcon.png",
+  "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "sayinIlgili": "Sayın İlgili,",
   "aciklamaMetni": "Aşağıda cins ve miktarları belirtilen mal/hizmet kalemlerinin yaklaşık maliyet tespiti için piyasa araştırması yapılmaktadır, birim fiyatlarını KDV hariç bildirmenizi rica ederim/ederiz.",
   "gorevlendirilenler": [
@@ -56,11 +56,7 @@
   "kurumEposta": "ankara.destek@saglik.gov.tr",
   "kurumKep": "saglikbakanligi@hs01.kep.tr",
   "hazirlayanPersonelAdi": "Ayşe Demir",
-  "hazirlayanPersonelAdi": "Ayşe Demir",
-  "hazırlayanPersonelUnvan": "V.H.K.İ.",
   "hazirlayanPersonelUnvan": "V.H.K.İ.",
   "hazirlayanTelefon": "0312 555 44 33",
-  "hazirlayanTelefon": "0312 555 44 33",
-  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
   "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
 }

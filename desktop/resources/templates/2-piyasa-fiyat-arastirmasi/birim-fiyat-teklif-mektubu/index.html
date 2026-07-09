@@ -99,7 +99,8 @@
       }
       .firma-imza-container {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: flex-start;
         margin-top: 15px;
         margin-bottom: 15px;
         page-break-inside: avoid;
@@ -110,6 +111,13 @@
         width: 250px;
         font-size: 11pt;
         line-height: 1.5;
+        margin-left: auto;
+      }
+      .para-birimi-info {
+        text-align: left;
+        font-style: italic;
+        color: #333;
+        font-size: 11pt;
       }
       .content-table {
         width: 100%;
@@ -255,6 +263,9 @@
 
         <!-- FİRMA YETKİLİSİ İMZA ALANI -->
         <div class="firma-imza-container">
+          <div class="para-birimi-info">
+            Para Birimi: Türk Lirası (TL)
+          </div>
           <div class="firma-imza-box">
             ……/……/……<br /><br /><br />
             Kaşe - İmza
