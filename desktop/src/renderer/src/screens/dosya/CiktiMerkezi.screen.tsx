@@ -334,15 +334,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
       const processContext = contextsByPath?.[sablon.route_path || ""] ||
         dosyaContext;
-      let templateContext = { ...processContext };
-      if (sablon.test_verisi) {
-        try {
-          const parsedTest = JSON.parse(sablon.test_verisi);
-          templateContext = { ...parsedTest, ...templateContext };
-        } catch (e) {
-          console.error("Şablon test verisi ayrıştırılamadı:", e);
-        }
-      }
+      const templateContext = { ...processContext };
 
       const renderedContent = Mustache.render(sablon.icerik, templateContext);
       templateContext.icerik = renderedContent;
