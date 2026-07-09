@@ -1765,7 +1765,7 @@ if (!gotTheLock && !isMultiInstance) {
         const res = await fetch(fullUrl, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         })
@@ -1785,43 +1785,51 @@ if (!gotTheLock && !isMultiInstance) {
         if (!db) {
           return { success: false, message: 'Aktif çalışma dosyası bulunamadı.' }
         }
-        
+
         // Fetch server connection parameters
-        const urlRow = db.prepare("SELECT value FROM settings WHERE key = 'sync_server_url'").get() as { value: string } | undefined
-        const portRow = db.prepare("SELECT value FROM settings WHERE key = 'sync_server_port'").get() as { value: string } | undefined
-        const tokenRow = db.prepare("SELECT value FROM settings WHERE key = 'sync_server_token'").get() as { value: string } | undefined
-        
+        const urlRow = db
+          .prepare("SELECT value FROM settings WHERE key = 'sync_server_url'")
+          .get() as { value: string } | undefined
+        const portRow = db
+          .prepare("SELECT value FROM settings WHERE key = 'sync_server_port'")
+          .get() as { value: string } | undefined
+        const tokenRow = db
+          .prepare("SELECT value FROM settings WHERE key = 'sync_server_token'")
+          .get() as { value: string } | undefined
+
         if (!urlRow?.value) {
           return { success: false, message: 'Senkronizasyon sunucu adresi ayarlanmamış.' }
         }
-        
+
         const url = urlRow.value
         const port = portRow?.value || ''
         const token = tokenRow?.value || ''
-        
+
         // Pull local data to sync
-        const dosyaList = db.prepare("SELECT * FROM DATA_TeminDosyasi").all()
-        const sablonList = db.prepare("SELECT * FROM TANIM_Sablon").all()
-        
+        const dosyaList = db.prepare('SELECT * FROM DATA_TeminDosyasi').all()
+        const sablonList = db.prepare('SELECT * FROM TANIM_Sablon').all()
+
         const payload = {
           dosyalar: dosyaList,
           sablonlar: sablonList,
           syncedAt: new Date().toISOString()
         }
-        
+
         const fullUrl = port ? `${url}:${port}/api/sync` : `${url}/api/sync`
         const res = await fetch(fullUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         })
-        
+
         if (res.ok) {
           // Save last sync time in settings
-          db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_sync_time', ?)").run(new Date().toISOString())
+          db.prepare(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('last_sync_time', ?)"
+          ).run(new Date().toISOString())
           workspaceManager.save()
           return { success: true }
         } else {
@@ -1839,9 +1847,9 @@ if (!gotTheLock && !isMultiInstance) {
         if (!db) {
           return { success: false, message: 'Aktif çalışma dosyası bulunamadı.' }
         }
-        const dosyaList = db.prepare("SELECT * FROM DATA_TeminDosyasi").all()
-        const sablonList = db.prepare("SELECT * FROM TANIM_Sablon").all()
-        
+        const dosyaList = db.prepare('SELECT * FROM DATA_TeminDosyasi').all()
+        const sablonList = db.prepare('SELECT * FROM TANIM_Sablon').all()
+
         const payload = {
           action: 'push',
           dosyalar: dosyaList,
@@ -1853,18 +1861,21 @@ if (!gotTheLock && !isMultiInstance) {
         const res = await fetch(fullUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         })
-        
+
         if (res.ok) {
           return { success: true }
         }
         // Fallback for test connection or mock mode
         if (res.status === 404) {
-          return { success: true, message: 'Mock Modu: Sunucu adresi test edildi, veri push simüle edildi.' }
+          return {
+            success: true,
+            message: 'Mock Modu: Sunucu adresi test edildi, veri push simüle edildi.'
+          }
         }
         const text = await res.text()
         return { success: false, message: `Sunucu hatası (${res.status}): ${text}` }
@@ -1880,18 +1891,21 @@ if (!gotTheLock && !isMultiInstance) {
         const res = await fetch(fullUrl, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         })
-        
+
         if (res.ok) {
-          const serverData = await res.json() as any
+          const serverData = (await res.json()) as any
           // Burası veritabanına yazma mantığıyla geliştirilecek
           return { success: true, data: serverData }
         }
         if (res.status === 404) {
-          return { success: true, message: 'Mock Modu: Sunucu pull simülasyonu başarıyla tamamlandı.' }
+          return {
+            success: true,
+            message: 'Mock Modu: Sunucu pull simülasyonu başarıyla tamamlandı.'
+          }
         }
         const text = await res.text()
         return { success: false, message: `Sunucu hatası (${res.status}): ${text}` }

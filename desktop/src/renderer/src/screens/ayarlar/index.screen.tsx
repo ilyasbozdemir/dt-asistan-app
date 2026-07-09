@@ -3,7 +3,18 @@ import { useAyarlarHooks } from './ayarlar.hooks'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { useSettingsStore } from '../../store/settingsStore'
-import { Save, Mail, Upload, Download, Settings, Palette, Code, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import {
+  Save,
+  Mail,
+  Upload,
+  Download,
+  Settings,
+  Palette,
+  Code,
+  Eye,
+  EyeOff,
+  RefreshCw
+} from 'lucide-react'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import TemaScreen from './TemaScreen'
 import { useLocation } from '@tanstack/react-router'
@@ -85,7 +96,10 @@ export default function AyarlarScreen(): React.ReactNode {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isPushing, setIsPushing] = useState(false)
   const [isPulling, setIsPulling] = useState(false)
-  const [syncLastResult, setSyncLastResult] = useState<{ type: 'ok' | 'error'; msg: string } | null>(null)
+  const [syncLastResult, setSyncLastResult] = useState<{
+    type: 'ok' | 'error'
+    msg: string
+  } | null>(null)
 
   useEffect(() => {
     window.electron.ipcRenderer
@@ -246,7 +260,10 @@ export default function AyarlarScreen(): React.ReactNode {
     setSyncLastResult(null)
     try {
       const res = await window.electron.ipcRenderer.invoke('sync:run-sync')
-      setSyncLastResult({ type: res.success ? 'ok' : 'error', msg: res.success ? 'Senkronizasyon tamamlandı.' : (res.message || 'Hata') })
+      setSyncLastResult({
+        type: res.success ? 'ok' : 'error',
+        msg: res.success ? 'Senkronizasyon tamamlandı.' : res.message || 'Hata'
+      })
     } catch (err: any) {
       setSyncLastResult({ type: 'error', msg: err.message })
     } finally {
@@ -263,7 +280,12 @@ export default function AyarlarScreen(): React.ReactNode {
         port: syncServerPort,
         token: syncServerToken
       })
-      setSyncLastResult({ type: res.success ? 'ok' : 'error', msg: res.success ? '✅ Veriler başarıyla sunucuya gönderildi.' : (res.message || 'Push hatası') })
+      setSyncLastResult({
+        type: res.success ? 'ok' : 'error',
+        msg: res.success
+          ? '✅ Veriler başarıyla sunucuya gönderildi.'
+          : res.message || 'Push hatası'
+      })
     } catch (err: any) {
       setSyncLastResult({ type: 'error', msg: '❌ ' + err.message })
     } finally {
@@ -280,7 +302,10 @@ export default function AyarlarScreen(): React.ReactNode {
         port: syncServerPort,
         token: syncServerToken
       })
-      setSyncLastResult({ type: res.success ? 'ok' : 'error', msg: res.success ? '✅ Veriler başarıyla sunucudan alındı.' : (res.message || 'Pull hatası') })
+      setSyncLastResult({
+        type: res.success ? 'ok' : 'error',
+        msg: res.success ? '✅ Veriler başarıyla sunucudan alındı.' : res.message || 'Pull hatası'
+      })
     } catch (err: any) {
       setSyncLastResult({ type: 'error', msg: '❌ ' + err.message })
     } finally {
@@ -903,52 +928,55 @@ export default function AyarlarScreen(): React.ReactNode {
                     </div>
 
                     {/* Sunucu Durum & Güncelleme Bilgi Paneli */}
-                    <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-                      syncServerUrl
-                        ? syncTestStatus === 'ok'
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
-                          : syncTestStatus === 'error'
-                          ? 'bg-rose-500/10 border-rose-500/20 text-rose-800 dark:text-rose-300'
-                          : 'bg-blue-500/10 border-blue-500/20 text-blue-800 dark:text-blue-300'
-                        : 'bg-amber-500/10 border-amber-500/20 text-amber-800 dark:text-amber-300'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+                        syncServerUrl
+                          ? syncTestStatus === 'ok'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                            : syncTestStatus === 'error'
+                              ? 'bg-rose-500/10 border-rose-500/20 text-rose-800 dark:text-rose-300'
+                              : 'bg-blue-500/10 border-blue-500/20 text-blue-800 dark:text-blue-300'
+                          : 'bg-amber-500/10 border-amber-500/20 text-amber-800 dark:text-amber-300'
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                          syncServerUrl
-                            ? syncTestStatus === 'ok'
-                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                              : syncTestStatus === 'error'
-                              ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
-                              : 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
-                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                        }`}>
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
+                            syncServerUrl
+                              ? syncTestStatus === 'ok'
+                                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                : syncTestStatus === 'error'
+                                  ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                                  : 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                              : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                          }`}
+                        >
                           {syncServerUrl
                             ? syncTestStatus === 'ok'
                               ? '✓'
                               : syncTestStatus === 'error'
-                              ? '✗'
-                              : '⏳'
-                            : '!'
-                          }
+                                ? '✗'
+                                : '⏳'
+                            : '!'}
                         </div>
                         <div>
                           <div className="text-xs font-bold uppercase tracking-wider">
-                            {!syncServerUrl 
-                              ? 'Bağlantı Kurulmadı' 
-                              : syncTestStatus === 'ok' 
-                              ? 'Sunucu Aktif & Bağlı' 
-                              : syncTestStatus === 'error' 
-                              ? 'Bağlantı Başarısız' 
-                              : 'Bağlantı Test Edilmedi'}
+                            {!syncServerUrl
+                              ? 'Bağlantı Kurulmadı'
+                              : syncTestStatus === 'ok'
+                                ? 'Sunucu Aktif & Bağlı'
+                                : syncTestStatus === 'error'
+                                  ? 'Bağlantı Başarısız'
+                                  : 'Bağlantı Test Edilmedi'}
                           </div>
                           <div className="text-[11px] opacity-90 mt-0.5">
-                            {!syncServerUrl 
-                              ? 'Lütfen veri senkronizasyonu için geçerli bir Sunucu Adresi girin.' 
-                              : syncTestStatus === 'ok' 
-                              ? `Uzak sunucu (${syncServerUrl}) ile iletişim başarıyla sağlandı. Verileri senkronize edebilirsiniz.` 
-                              : syncTestStatus === 'error' 
-                              ? 'Girdiğiniz adrese ulaşılamadı. Sunucu ayarlarınızı veya internetinizi kontrol edin.' 
-                              : 'Sunucu adresi tanımlandı. Lütfen aşağıdaki buton ile bağlantıyı test edin.'}
+                            {!syncServerUrl
+                              ? 'Lütfen veri senkronizasyonu için geçerli bir Sunucu Adresi girin.'
+                              : syncTestStatus === 'ok'
+                                ? `Uzak sunucu (${syncServerUrl}) ile iletişim başarıyla sağlandı. Verileri senkronize edebilirsiniz.`
+                                : syncTestStatus === 'error'
+                                  ? 'Girdiğiniz adrese ulaşılamadı. Sunucu ayarlarınızı veya internetinizi kontrol edin.'
+                                  : 'Sunucu adresi tanımlandı. Lütfen aşağıdaki buton ile bağlantıyı test edin.'}
                           </div>
                         </div>
                       </div>
@@ -959,14 +987,18 @@ export default function AyarlarScreen(): React.ReactNode {
                           disabled={syncTestStatus === 'loading'}
                           className="text-[10px] font-bold py-1.5 px-3 rounded-lg bg-white/80 dark:bg-slate-950/80 hover:bg-white dark:hover:bg-slate-950 text-slate-800 dark:text-slate-100 shadow-sm border border-black/5"
                         >
-                          {syncTestStatus === 'loading' ? 'Bağlantı Sınanıyor...' : 'Bağlantıyı Şimdi Sına'}
+                          {syncTestStatus === 'loading'
+                            ? 'Bağlantı Sınanıyor...'
+                            : 'Bağlantıyı Şimdi Sına'}
                         </Button>
                       )}
                     </div>
 
                     {/* Bağlantı Ayarları */}
                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-4">
-                      <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bağlantı Ayarları</h3>
+                      <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        Bağlantı Ayarları
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
@@ -1013,7 +1045,9 @@ export default function AyarlarScreen(): React.ReactNode {
                             disabled={syncTestStatus === 'loading'}
                             className="text-xs py-1.5 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 gap-1.5"
                           >
-                            {syncTestStatus === 'loading' ? '⏳ Test Ediliyor...' : '⚡ Bağlantıyı Test Et'}
+                            {syncTestStatus === 'loading'
+                              ? '⏳ Test Ediliyor...'
+                              : '⚡ Bağlantıyı Test Et'}
                           </Button>
                           <Button
                             onClick={() => handleSaveTab('sync')}
@@ -1024,10 +1058,14 @@ export default function AyarlarScreen(): React.ReactNode {
                             {saving ? 'Kaydediliyor...' : 'Kaydet'}
                           </Button>
                           {syncTestStatus === 'ok' && (
-                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{syncTestMsg}</span>
+                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                              {syncTestMsg}
+                            </span>
                           )}
                           {syncTestStatus === 'error' && (
-                            <span className="text-xs font-semibold text-red-500 dark:text-red-400">{syncTestMsg}</span>
+                            <span className="text-xs font-semibold text-red-500 dark:text-red-400">
+                              {syncTestMsg}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -1042,12 +1080,17 @@ export default function AyarlarScreen(): React.ReactNode {
                             <Upload className="w-5 h-5" />
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">Ana Sunucuya Gönder</div>
-                            <div className="text-[10px] text-slate-500">Yereldeki değişiklikleri uzak sunucuya ilet (Push)</div>
+                            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                              Ana Sunucuya Gönder
+                            </div>
+                            <div className="text-[10px] text-slate-500">
+                              Yereldeki değişiklikleri uzak sunucuya ilet (Push)
+                            </div>
                           </div>
                         </div>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-                          Yerel veritabanındaki güncel verileri (dosyalar, belgeler, ayarlar) uzak web sunucusuna göndererek yayınlar.
+                          Yerel veritabanındaki güncel verileri (dosyalar, belgeler, ayarlar) uzak
+                          web sunucusuna göndererek yayınlar.
                         </p>
                         <Button
                           onClick={handlePushToServer}
@@ -1065,12 +1108,17 @@ export default function AyarlarScreen(): React.ReactNode {
                             <Download className="w-5 h-5" />
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">Sunucudan Al</div>
-                            <div className="text-[10px] text-slate-500">Uzak sunucudaki verileri yerele çek (Pull)</div>
+                            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                              Sunucudan Al
+                            </div>
+                            <div className="text-[10px] text-slate-500">
+                              Uzak sunucudaki verileri yerele çek (Pull)
+                            </div>
                           </div>
                         </div>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-                          Uzak sunucudaki güncel verileri yerel veritabanına indirir. Mevcut yereldeki veriler üzerine yazılabilir.
+                          Uzak sunucudaki güncel verileri yerel veritabanına indirir. Mevcut
+                          yereldeki veriler üzerine yazılabilir.
                         </p>
                         <Button
                           onClick={handlePullFromServer}
@@ -1085,7 +1133,9 @@ export default function AyarlarScreen(): React.ReactNode {
                     {/* Genel Eşitle */}
                     <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3">
                       <RefreshCw className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="text-xs text-slate-500 flex-1">İki yönlü otomatik eşitleme (Push + Pull)</span>
+                      <span className="text-xs text-slate-500 flex-1">
+                        İki yönlü otomatik eşitleme (Push + Pull)
+                      </span>
                       <Button
                         onClick={handleManualSync}
                         disabled={isSyncing || !syncServerUrl}
@@ -1097,11 +1147,13 @@ export default function AyarlarScreen(): React.ReactNode {
 
                     {/* Sonuç */}
                     {syncLastResult && (
-                      <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                        syncLastResult.type === 'ok'
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
-                          : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
-                      }`}>
+                      <div
+                        className={`rounded-xl px-4 py-3 text-sm font-medium ${
+                          syncLastResult.type === 'ok'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                            : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
+                        }`}
+                      >
                         {syncLastResult.msg}
                       </div>
                     )}

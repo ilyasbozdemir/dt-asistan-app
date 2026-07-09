@@ -1,6 +1,6 @@
-import React from "react";
-import { Building2, HelpCircle } from "lucide-react";
-import { YeniDosyaTabProps } from "../types";
+import React from 'react'
+import { Building2, HelpCircle } from 'lucide-react'
+import { YeniDosyaTabProps } from '../types'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TeknikSartnameTab(props: YeniDosyaTabProps): React.JSX.Element {
@@ -22,8 +22,7 @@ export function TeknikSartnameTab(props: YeniDosyaTabProps): React.JSX.Element {
             <li>Yükleyeceğiniz dosyalar zip veya rar formatında olmalıdır.</li>
             <li>Virüs taramasından geçirilmiş olmalıdır.</li>
             <li>
-              Dokümanlar teknik şartname, proforma fatura örneği veya idari
-              belgeleri içerebilir.
+              Dokümanlar teknik şartname, proforma fatura örneği veya idari belgeleri içerebilir.
             </li>
           </ul>
         </div>
@@ -34,9 +33,7 @@ export function TeknikSartnameTab(props: YeniDosyaTabProps): React.JSX.Element {
           <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
             Dosyaları sürükleyip bırakın veya seçin
           </span>
-          <span className="text-[10px] text-slate-500 mt-1">
-            .zip, .rar, .pdf (Max: 50MB)
-          </span>
+          <span className="text-[10px] text-slate-500 mt-1">.zip, .rar, .pdf (Max: 50MB)</span>
           <button
             type="button"
             className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"

@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react'
 
 interface PresetModalsProps {
-  showAddModal: boolean;
-  newPresetName: string;
-  setNewPresetName: (name: string) => void;
-  onAddCancel: () => void;
-  onAddSubmit: () => void;
-  showDeleteModal: boolean;
-  onDeleteCancel: () => void;
-  onDeleteSubmit: () => void;
+  showAddModal: boolean
+  newPresetName: string
+  setNewPresetName: (name: string) => void
+  onAddCancel: () => void
+  onAddSubmit: () => void
+  showDeleteModal: boolean
+  onDeleteCancel: () => void
+  onDeleteSubmit: () => void
 }
 
 export const PresetModals: React.FC<PresetModalsProps> = ({
@@ -19,7 +19,7 @@ export const PresetModals: React.FC<PresetModalsProps> = ({
   onAddSubmit,
   showDeleteModal,
   onDeleteCancel,
-  onDeleteSubmit,
+  onDeleteSubmit
 }) => {
   return (
     <>
@@ -31,7 +31,8 @@ export const PresetModals: React.FC<PresetModalsProps> = ({
               Yeni Belge Paketi Oluştur
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Belge paketinize kolayca tanıyabileceğiniz bir isim verin. Oluşturduktan sonra içine istediğiniz şablonları ekleyebilirsiniz.
+              Belge paketinize kolayca tanıyabileceğiniz bir isim verin. Oluşturduktan sonra içine
+              istediğiniz şablonları ekleyebilirsiniz.
             </p>
             <input
               type="text"
@@ -41,7 +42,7 @@ export const PresetModals: React.FC<PresetModalsProps> = ({
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === "Enter") onAddSubmit();
+                if (e.key === 'Enter') onAddSubmit()
               }}
             />
             <div className="flex justify-end gap-2 pt-2">
@@ -67,9 +68,7 @@ export const PresetModals: React.FC<PresetModalsProps> = ({
       {showDeleteModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-9999 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
-              Paketi Sil
-            </h3>
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Paketi Sil</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Bu belge paketini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
             </p>
@@ -91,5 +90,5 @@ export const PresetModals: React.FC<PresetModalsProps> = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}

@@ -1,8 +1,5 @@
 {
-  "antetSatirlari": [
-    "T.C.",
-    "ÖRNEK BELEDİYE BAŞKANLIĞI"
-  ],
+  "antetSatirlari": ["T.C.", "ÖRNEK BELEDİYE BAŞKANLIĞI"],
   "solLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svgcon.png",
   "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "isAdi": "Belediyemiz Hizmet Binası Çatı Onarım İşi İçin Malzeme Alımı",
@@ -20,9 +17,7 @@
   "kapakDetaylari": [
     {
       "label": "İŞİN ADI",
-      "lines": [
-        "Belediyemiz Hizmet Binası Çatı Onarım İşi İçin Malzeme Alımı"
-      ],
+      "lines": ["Belediyemiz Hizmet Binası Çatı Onarım İşi İçin Malzeme Alımı"],
       "isBold": true
     },
     {
@@ -34,23 +29,17 @@
     },
     {
       "label": "İŞİN TÜRÜ",
-      "lines": [
-        "Mal Alımı"
-      ],
+      "lines": ["Mal Alımı"],
       "isBold": false
     },
     {
       "label": "TEMİN NUMARASI",
-      "lines": [
-        "2026/DT-1004"
-      ],
+      "lines": ["2026/DT-1004"],
       "isBold": false
     },
     {
       "label": "YAKLAŞIK MALİYET",
-      "lines": [
-        "340.153,00 TL"
-      ],
+      "lines": ["340.153,00 TL"],
       "isBold": false
     },
     {
@@ -63,16 +52,12 @@
     },
     {
       "label": "İHALEYİ ALAN FİRMA",
-      "lines": [
-        "ÖRNEK YÜKLENİCİ İNŞAAT TİC. LTD. ŞTİ."
-      ],
+      "lines": ["ÖRNEK YÜKLENİCİ İNŞAAT TİC. LTD. ŞTİ."],
       "isBold": true
     },
     {
       "label": "DOSYA TARİHİ",
-      "lines": [
-        "06/05/2026"
-      ],
+      "lines": ["06/05/2026"],
       "isBold": false
     }
   ]

@@ -135,7 +135,7 @@
         <img src="{{ustLogo}}" alt="Logo" class="logo-img" />
       </div>
 
-      <div class="antet-text" style="margin-bottom: 25px;">
+      <div class="antet-text" style="margin-bottom: 25px">
         {{#antetSatirlari}}
         <div>{{.}}</div>
         {{/antetSatirlari}}
@@ -145,46 +145,44 @@
 
       <!-- DEFAULT LAYOUTS (when ustLogo does not exist) -->
       {{^ustLogo}}
-        <!-- DOUBLE LOGO LAYOUT (when sagLogo exists) -->
-        {{#sagLogo}}
-        <table class="antet-table">
-          <tr>
-            <td style="width: 90px; text-align: left; vertical-align: top; padding-top: 0;">
-              {{#solLogo}}
-              <img src="{{solLogo}}" alt="Sol Logo" class="logo-img" />
-              {{/solLogo}}
-            </td>
-            
-            <td class="antet-text" style="vertical-align: top; padding-top: 2px; margin-bottom: 0;">
-              {{#antetSatirlari}}
-              <div>{{.}}</div>
-              {{/antetSatirlari}}
-              <div class="klasor-baslik">{{klasorBasligi}}</div>
-            </td>
+      <!-- DOUBLE LOGO LAYOUT (when sagLogo exists) -->
+      {{#sagLogo}}
+      <table class="antet-table">
+        <tr>
+          <td style="width: 90px; text-align: left; vertical-align: top; padding-top: 0">
+            {{#solLogo}}
+            <img src="{{solLogo}}" alt="Sol Logo" class="logo-img" />
+            {{/solLogo}}
+          </td>
 
-            <td style="width: 90px; text-align: right; vertical-align: top; padding-top: 0;">
-              <img src="{{sagLogo}}" alt="Sağ Logo" class="logo-img" />
-            </td>
-          </tr>
-        </table>
-        {{/sagLogo}}
+          <td class="antet-text" style="vertical-align: top; padding-top: 2px; margin-bottom: 0">
+            {{#antetSatirlari}}
+            <div>{{.}}</div>
+            {{/antetSatirlari}}
+            <div class="klasor-baslik">{{klasorBasligi}}</div>
+          </td>
 
-        <!-- SINGLE CENTERED LOGO LAYOUT (when sagLogo does not exist) -->
-        {{^sagLogo}}
-        {{#solLogo}}
-        <div class="logo-container">
-          <img src="{{solLogo}}" alt="Logo" class="logo-img" />
-        </div>
-        {{/solLogo}}
+          <td style="width: 90px; text-align: right; vertical-align: top; padding-top: 0">
+            <img src="{{sagLogo}}" alt="Sağ Logo" class="logo-img" />
+          </td>
+        </tr>
+      </table>
+      {{/sagLogo}}
 
-        <div class="antet-text" style="margin-bottom: 25px;">
-          {{#antetSatirlari}}
-          <div>{{.}}</div>
-          {{/antetSatirlari}}
-          <div class="klasor-baslik">{{klasorBasligi}}</div>
-        </div>
-        {{/sagLogo}}
-      {{/ustLogo}}
+      <!-- SINGLE CENTERED LOGO LAYOUT (when sagLogo does not exist) -->
+      {{^sagLogo}} {{#solLogo}}
+      <div class="logo-container">
+        <img src="{{solLogo}}" alt="Logo" class="logo-img" />
+      </div>
+      {{/solLogo}}
+
+      <div class="antet-text" style="margin-bottom: 25px">
+        {{#antetSatirlari}}
+        <div>{{.}}</div>
+        {{/antetSatirlari}}
+        <div class="klasor-baslik">{{klasorBasligi}}</div>
+      </div>
+      {{/sagLogo}} {{/ustLogo}}
 
       <!-- Metadata Box -->
       <table class="metadata-box">

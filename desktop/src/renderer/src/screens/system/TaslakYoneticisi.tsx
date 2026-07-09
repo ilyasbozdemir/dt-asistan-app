@@ -1,385 +1,281 @@
-import React, { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import {
-  ChevronDown,
-  ChevronUp,
-  FolderHeart,
-  Star,
-  Trash2,
-} from "lucide-react";
-import { useSablonlar } from "../sablonlar/sablonlar.hooks";
-import { subPagesMapping } from "../../constants/surecler";
-import { useWorkspaceStore } from "../../store/workspaceStore";
+import React, { useMemo, useState } from 'react'
+import { Star } from 'lucide-react'
+import { useSablonlar } from '../sablonlar/sablonlar.hooks'
+import { subPagesMapping } from '../../constants/surecler'
+import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useDosyaAsamasiSablons } from '../dosya/sub-screens/DosyaAsamalari/useDosyaAsamasiSablons'
+import { DocumentPreviewModal } from '../dosya/components/DocumentPreviewModal'
 
-const parseStatusAndName = (
-  name: string,
-  description?: string | null,
-): { status: string | null; cleanName: string } => {
-  let status: string | null = null;
-  let cleanName = name;
+// Subcomponents
+import { DocumentCard } from './components/DocumentCard'
+import { StarredListSorter } from './components/StarredListSorter'
+import { PresetSelector, DocumentPreset } from './components/PresetSelector'
+import { PresetEditor } from './components/PresetEditor'
+import { PresetModals } from './components/PresetModals'
 
-  const nameMatch = name.match(/^\[(.*?)\]\s*(.*)$/);
-  if (nameMatch) {
-    status = nameMatch[1].trim();
-    cleanName = nameMatch[2].trim();
-  } else if (description) {
-    const descMatch = description.match(/^\[(.*?)\]/);
-    if (descMatch) {
-      status = descMatch[1].trim();
-    }
-  }
-
-  return { status, cleanName };
-};
-
-const getStatusBadgeClass = (status: string): string => {
-  const lower = status.toLowerCase();
-  if (
-    lower.includes("bakım") ||
-    lower.includes("güncel") ||
-    lower.includes("geliş") ||
-    lower.includes("maint")
-  ) {
-    return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-  }
-  if (
-    lower.includes("aktif") ||
-    lower.includes("hazır") ||
-    lower.includes("tamam") ||
-    lower.includes("ready") ||
-    lower.includes("active")
-  ) {
-    return "bg-green-500/20 text-green-300 border border-green-500/30";
-  }
-  return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
-};
-
-const getStatusBadgeLightClass = (status: string): string => {
-  const lower = status.toLowerCase();
-  if (
-    lower.includes("bakım") ||
-    lower.includes("güncel") ||
-    lower.includes("geliş") ||
-    lower.includes("maint")
-  ) {
-    return "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-500/20";
-  }
-  if (
-    lower.includes("aktif") ||
-    lower.includes("hazır") ||
-    lower.includes("tamam") ||
-    lower.includes("ready") ||
-    lower.includes("active")
-  ) {
-    return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-500/20";
-  }
-  return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-500/20";
-};
-
-const normalizeForMatch = (str: string): string => {
-  return str
-    .toLocaleLowerCase("tr-TR")
-    .toLowerCase()
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/[^a-z0-9]/g, "");
-};
-
-const STAGES = [
-  { key: "1. İhtiyaç Tespiti & Başlangıç", label: "İhtiyaç Tespiti" },
-  { key: "2. Teklifler & Piyasa Fiyat Araştırması", label: "Teklifler & Piyasa" },
-  { key: "3. Sipariş & Sözleşme", label: "Sipariş & Sözleşme" },
-  { key: "4. Kabul & Ödeme İşlemleri", label: "Kabul & Ödeme" },
-  { key: "5. Klasör & Kapaklar", label: "Klasör & Kapaklar" },
-];
+// Utilities
+import { parseStatusAndName, normalizeForMatch } from './utils/statusUtils'
 
 export default function TaslakYoneticisi(): React.JSX.Element {
-  const { data: sablonlar = [] } = useSablonlar();
-  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } =
-    useWorkspaceStore();
+  const { data: sablonlar = [] } = useSablonlar()
+  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
 
-  const [activeStage, setActiveStage] = useState<string>("1. İhtiyaç Tespiti & Başlangıç");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const {
+    sablons,
+    masterHtml,
+    dosyaContext,
+    placeholders,
+    contextsByPath,
+    personelListesi,
+    previewModalOpen,
+    setPreviewModalOpen,
+    previewData,
+    handleOpenPreviewForSablon,
+    quickPrint,
+    quickExport,
+    executePrint,
+    executeExportPdf,
+    executeExportDocx,
+    executeExportUdf,
+    refreshSnapshot,
+    saveSnapshot
+  } = useDosyaAsamasiSablons()
 
-  interface DocumentPreset {
-    id: string;
-    name: string;
-    docs: string[];
-  }
+  const [activeStage, setActiveStage] = useState<string>('1. İhtiyaç Tespiti & Başlangıç')
+  const [isEditing, setIsEditing] = useState<boolean>(false)
 
   const [presets, setPresets] = useState<DocumentPreset[]>(() => {
     try {
-      const saved = localStorage.getItem("dta_document_presets");
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem('dta_document_presets')
+      return saved ? JSON.parse(saved) : []
     } catch {
-      return [];
+      return []
     }
-  });
-  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  })
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('')
 
   const [globalStarred, setGlobalStarred] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem("global_starred_docs");
-      return saved
-        ? JSON.parse(saved)
-        : ["İhtiyaç Listesi", "Lüzum Müzekkeresi"];
+      const saved = localStorage.getItem('global_starred_docs')
+      return saved ? JSON.parse(saved) : ['İhtiyaç Listesi', 'Lüzum Müzekkeresi']
     } catch {
-      return [];
+      return []
     }
-  });
+  })
 
   // Sync active file starred docs from DB on mount/change
   React.useEffect(() => {
-    if (!activeDosyaId) return;
+    if (!activeDosyaId) return
     window.electron.ipcRenderer
-      .invoke(
-        "db:query",
-        "SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?",
-        [
-          activeDosyaId,
-        ],
-      )
+      .invoke('db:query', 'SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?', [
+        activeDosyaId
+      ])
       .then((res) => {
         if (res.success && res.data.length > 0) {
           try {
-            const docs = res.data[0].starred_docs
-              ? JSON.parse(res.data[0].starred_docs)
-              : [];
-            setActiveStarredDocs(docs);
+            const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
+            setActiveStarredDocs(docs)
           } catch (e) {
-            console.error("Failed to parse active file starred docs:", e);
+            console.error('Failed to parse active file starred docs:', e)
           }
         }
       })
       .catch((err) => {
-        console.error("Failed to query active file starred docs:", err);
-      });
-  }, [activeDosyaId, setActiveStarredDocs]);
+        console.error('Failed to query active file starred docs:', err)
+      })
+  }, [activeDosyaId, setActiveStarredDocs])
 
   const starredList = useMemo(() => {
     if (selectedPresetId) {
-      const preset = presets.find((p) => p.id === selectedPresetId);
-      return preset ? preset.docs : [];
+      const preset = presets.find((p) => p.id === selectedPresetId)
+      return preset ? preset.docs : []
     }
-    return activeDosyaId ? activeStarredDocs : globalStarred;
-  }, [
-    selectedPresetId,
-    presets,
-    activeDosyaId,
-    activeStarredDocs,
-    globalStarred,
-  ]);
+    return activeDosyaId ? activeStarredDocs : globalStarred
+  }, [selectedPresetId, presets, activeDosyaId, activeStarredDocs, globalStarred])
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newPresetName, setNewPresetName] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [presetToDeleteId, setPresetToDeleteId] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newPresetName, setNewPresetName] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [presetToDeleteId, setPresetToDeleteId] = useState('')
 
   const saveStarred = (updated: string[]): void => {
-    setGlobalStarred(updated);
-    localStorage.setItem("global_starred_docs", JSON.stringify(updated));
-    window.dispatchEvent(new Event("global_starred_changed"));
-  };
+    setGlobalStarred(updated)
+    localStorage.setItem('global_starred_docs', JSON.stringify(updated))
+    window.dispatchEvent(new Event('global_starred_changed'))
+  }
 
   const handleAddPreset = (): void => {
-    setNewPresetName("");
-    setShowAddModal(true);
-  };
+    setNewPresetName('')
+    setShowAddModal(true)
+  }
 
   const handleAddPresetSubmit = (): void => {
-    if (!newPresetName || newPresetName.trim() === "") return;
+    if (!newPresetName || newPresetName.trim() === '') return
     const newPreset: DocumentPreset = {
       id: Date.now().toString(),
       name: newPresetName.trim(),
-      docs: [],
-    };
-    const updated = [...presets, newPreset];
-    setPresets(updated);
-    localStorage.setItem("dta_document_presets", JSON.stringify(updated));
-    setSelectedPresetId(newPreset.id);
-    setShowAddModal(false);
-    window.dispatchEvent(new Event("dta_presets_changed"));
-  };
+      docs: []
+    }
+    const updated = [...presets, newPreset]
+    setPresets(updated)
+    localStorage.setItem('dta_document_presets', JSON.stringify(updated))
+    setSelectedPresetId(newPreset.id)
+    setShowAddModal(false)
+    window.dispatchEvent(new Event('dta_presets_changed'))
+  }
 
   const handleDeletePreset = (id: string): void => {
-    setPresetToDeleteId(id);
-    setShowDeleteModal(true);
-  };
+    setPresetToDeleteId(id)
+    setShowDeleteModal(true)
+  }
 
   const handleDeletePresetSubmit = (): void => {
-    if (!presetToDeleteId) return;
-    const updated = presets.filter((p) => p.id !== presetToDeleteId);
-    setPresets(updated);
-    localStorage.setItem("dta_document_presets", JSON.stringify(updated));
+    if (!presetToDeleteId) return
+    const updated = presets.filter((p) => p.id !== presetToDeleteId)
+    setPresets(updated)
+    localStorage.setItem('dta_document_presets', JSON.stringify(updated))
     if (selectedPresetId === presetToDeleteId) {
-      setSelectedPresetId("");
+      setSelectedPresetId('')
     }
-    setPresetToDeleteId("");
-    setShowDeleteModal(false);
-    window.dispatchEvent(new Event("dta_presets_changed"));
-  };
+    setPresetToDeleteId('')
+    setShowDeleteModal(false)
+    window.dispatchEvent(new Event('dta_presets_changed'))
+  }
 
   const routeMap = useMemo(() => {
-    const map: Record<string, string> = {};
+    const map: Record<string, string> = {}
     subPagesMapping.forEach((p) => {
-      map[p.name] = p.path;
-    });
+      map[p.name] = p.path
+    })
     sablonlar.forEach((s) => {
       if (s.route_path) {
-        map[s.ad] = s.route_path;
+        map[s.ad] = s.route_path
       }
-    });
-    return map;
-  }, [sablonlar]);
+    })
+    return map
+  }, [sablonlar])
 
   const saveUpdatedStarredList = async (updated: string[]): Promise<void> => {
     if (selectedPresetId) {
       const updatedPresets = presets.map((p) => {
         if (p.id === selectedPresetId) {
-          return { ...p, docs: updated };
+          return { ...p, docs: updated }
         }
-        return p;
-      });
-      setPresets(updatedPresets);
-      localStorage.setItem(
-        "dta_document_presets",
-        JSON.stringify(updatedPresets),
-      );
-      window.dispatchEvent(new Event("dta_presets_changed"));
+        return p
+      })
+      setPresets(updatedPresets)
+      localStorage.setItem('dta_document_presets', JSON.stringify(updatedPresets))
+      window.dispatchEvent(new Event('dta_presets_changed'))
     } else {
       if (activeDosyaId) {
-        setActiveStarredDocs(updated);
+        setActiveStarredDocs(updated)
         await window.electron.ipcRenderer.invoke(
-          "db:run",
-          "UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?",
-          [JSON.stringify(updated), activeDosyaId],
-        );
+          'db:run',
+          'UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?',
+          [JSON.stringify(updated), activeDosyaId]
+        )
       } else {
-        saveStarred(updated);
+        saveStarred(updated)
       }
     }
-  };
+  }
 
   const toggleStar = async (docName: string): Promise<void> => {
-    const normalizedTarget = normalizeForMatch(docName);
-    let updated = [...starredList];
-    const exists = updated.some((d) =>
-      normalizeForMatch(d) === normalizedTarget
-    );
+    const cleanTarget = parseStatusAndName(docName).cleanName
+    const normalizedTarget = normalizeForMatch(cleanTarget)
+    let updated = [...starredList]
+    const exists = updated.some(
+      (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedTarget
+    )
 
     if (exists) {
-      updated = updated.filter((d) =>
-        normalizeForMatch(d) !== normalizedTarget
-      );
+      updated = updated.filter(
+        (d) => normalizeForMatch(parseStatusAndName(d).cleanName) !== normalizedTarget
+      )
     } else {
-      updated.push(docName);
+      updated.push(cleanTarget)
     }
 
-    await saveUpdatedStarredList(updated);
-  };
+    await saveUpdatedStarredList(updated)
+  }
 
-  const moveShortcut = async (
-    index: number,
-    direction: "up" | "down",
-  ): Promise<void> => {
-    const updated = [...starredList];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= updated.length) return;
+  const moveShortcut = async (index: number, direction: 'up' | 'down'): Promise<void> => {
+    const updated = [...starredList]
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= updated.length) return
 
-    const temp = updated[index];
-    updated[index] = updated[targetIndex];
-    updated[targetIndex] = temp;
+    const temp = updated[index]
+    updated[index] = updated[targetIndex]
+    updated[targetIndex] = temp
 
-    await saveUpdatedStarredList(updated);
-  };
+    await saveUpdatedStarredList(updated)
+  }
 
   const groupedSablonlar = useMemo(() => {
     const groups: Record<string, typeof sablonlar> = {
-      "1. İhtiyaç Tespiti & Başlangıç": [],
-      "2. Teklifler & Piyasa Fiyat Araştırması": [],
-      "3. Sipariş & Sözleşme": [],
-      "4. Kabul & Ödeme İşlemleri": [],
-      "5. Klasör & Kapaklar": [],
-    };
+      '1. İhtiyaç Tespiti & Başlangıç': [],
+      '2. Teklifler & Piyasa Fiyat Araştırması': [],
+      '3. Sipariş & Sözleşme': [],
+      '4. Kabul & Ödeme İşlemleri': [],
+      '5. Klasör & Kapaklar': []
+    }
 
     sablonlar.forEach((s) => {
-      const cat = (s.kategori || "").toLowerCase();
-      if (
-        cat.includes("1") ||
-        cat.includes("ihtiyac") ||
-        cat.includes("başlangıç") ||
-        cat.includes("baslangic")
-      ) {
-        groups["1. İhtiyaç Tespiti & Başlangıç"].push(s);
+      const cat = (s.kategori || '').toLowerCase()
+      if (cat.includes('1') || cat.includes('ihtiyac') || cat.includes('baslangic')) {
+        groups['1. İhtiyaç Tespiti & Başlangıç'].push(s)
       } else if (
-        cat.includes("2") ||
-        cat.includes("fiyat") ||
-        cat.includes("araştırma") ||
-        cat.includes("arastirma") ||
-        cat.includes("maliyet") ||
-        cat.includes("piyasa")
+        cat.includes('2') ||
+        cat.includes('fiyat') ||
+        cat.includes('arastirma') ||
+        cat.includes('maliyet') ||
+        cat.includes('piyasa')
       ) {
-        groups["2. Teklifler & Piyasa Fiyat Araştırması"].push(s);
+        groups['2. Teklifler & Piyasa Fiyat Araştırması'].push(s)
       } else if (
-        cat.includes("3") ||
-        cat.includes("sipariş") ||
-        cat.includes("siparis") ||
-        cat.includes("sözleşme") ||
-        cat.includes("sozlesme") ||
-        cat.includes("ihale") ||
-        cat.includes("onay")
+        cat.includes('3') ||
+        cat.includes('siparis') ||
+        cat.includes('sozlesme') ||
+        cat.includes('ihale') ||
+        cat.includes('onay')
       ) {
-        groups["3. Sipariş & Sözleşme"].push(s);
-      } else if (
-        cat.includes("4") ||
-        cat.includes("kabul") ||
-        cat.includes("ödeme") ||
-        cat.includes("odeme") ||
-        cat.includes("teslim")
-      ) {
-        groups["4. Kabul & Ödeme İşlemleri"].push(s);
-      } else if (
-        cat.includes("5") ||
-        cat.includes("klasör") ||
-        cat.includes("klasor") ||
-        cat.includes("kapak")
-      ) {
-        groups["5. Klasör & Kapaklar"].push(s);
-      } else {
-        groups["1. İhtiyaç Tespiti & Başlangıç"].push(s);
+        groups['3. Sipariş & Sözleşme'].push(s)
+      } else if (cat.includes('4') || cat.includes('kabul') || cat.includes('odeme')) {
+        groups['4. Kabul & Ödeme İşlemleri'].push(s)
+      } else if (cat.includes('5') || cat.includes('klasor') || cat.includes('kapak')) {
+        groups['5. Klasör & Kapaklar'].push(s)
       }
-    });
+    })
 
-    return groups;
-  }, [sablonlar]);
+    return groups
+  }, [sablonlar])
 
   const handleAddAllStageDocs = async (): Promise<void> => {
-    const list = groupedSablonlar[activeStage] || [];
-    const updated = [...starredList];
+    const list = groupedSablonlar[activeStage] || []
+    const updated = [...starredList]
     list.forEach((sablon) => {
-      const normalizedTarget = normalizeForMatch(sablon.ad);
+      const cleanName = parseStatusAndName(sablon.ad).cleanName
+      const normalizedTarget = normalizeForMatch(cleanName)
       const exists = updated.some(
-        (d) => normalizeForMatch(d) === normalizedTarget,
-      );
+        (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedTarget
+      )
       if (!exists) {
-        updated.push(sablon.ad);
+        updated.push(cleanName)
       }
-    });
-    await saveUpdatedStarredList(updated);
-  };
+    })
+    await saveUpdatedStarredList(updated)
+  }
 
   const handleRemoveAllStageDocs = async (): Promise<void> => {
-    const list = groupedSablonlar[activeStage] || [];
-    const stageNormalizedNames = list.map((s) => normalizeForMatch(s.ad));
+    const list = groupedSablonlar[activeStage] || []
+    const stageNormalizedNames = list.map((s) =>
+      normalizeForMatch(parseStatusAndName(s.ad).cleanName)
+    )
     const updated = starredList.filter(
-      (d) => !stageNormalizedNames.includes(normalizeForMatch(d)),
-    );
-    await saveUpdatedStarredList(updated);
-  };
+      (d) => !stageNormalizedNames.includes(normalizeForMatch(parseStatusAndName(d).cleanName))
+    )
+    await saveUpdatedStarredList(updated)
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -390,9 +286,8 @@ export default function TaslakYoneticisi(): React.JSX.Element {
             Hızlı Erişim Paneli
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-2xl">
-            Sık kullandığınız belge şablonlarını yıldızlayarak hızlı erişim
-            listesine ekleyin. Yıldızladığınız belgeler sol panelde ve menülerde
-            görünecektir.
+            Sık kullandığınız belge şablonlarını yıldızlayarak hızlı erişim listesine ekleyin.
+            Yıldızladığınız belgeler sol panelde ve menülerde görünecektir.
           </p>
         </div>
       </div>
@@ -401,159 +296,20 @@ export default function TaslakYoneticisi(): React.JSX.Element {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sol Panel: Genel Yıldızlı Kısayollar */}
           <div className="lg:col-span-1 space-y-4">
-            {/* Belge Paketleri Taslakları Kartı */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <FolderHeart className="w-4 h-4 text-blue-500" />
-                  Belge Paketleri
-                </h3>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Belgeleri gruplandırarak özel paketler oluşturabilirsiniz.
-                Seçtiğiniz pakete sağ taraftan yıldız ekleyip çıkararak
-                düzenleyebilirsiniz.
-              </p>
+            <PresetSelector
+              selectedPresetId={selectedPresetId}
+              setSelectedPresetId={setSelectedPresetId}
+              presets={presets}
+              onAddPreset={handleAddPreset}
+              onDeletePreset={handleDeletePreset}
+            />
 
-              <div className="space-y-2">
-                <select
-                  value={selectedPresetId}
-                  onChange={(e) => setSelectedPresetId(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-1.5 px-3 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">-- Genel Hızlı Erişim (Kişisel) --</option>
-                  {presets.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      📦 {p.name} ({p.docs.length} Belge)
-                    </option>
-                  ))}
-                </select>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAddPreset}
-                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all border bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 justify-center shadow-sm"
-                  >
-                    + Paket Ekle
-                  </button>
-                  {selectedPresetId && (
-                    <button
-                      onClick={() => handleDeletePreset(selectedPresetId)}
-                      className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-rose-200 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-950/30 text-rose-500 flex items-center justify-center"
-                      title="Paketi Sil"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-linear-to-br from-slate-900 to-slate-800 text-white border border-slate-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-              <div className="absolute -right-10 -bottom-10 opacity-10">
-                <Star className="w-40 h-40 fill-white text-white" />
-              </div>
-              <div className="relative z-10">
-                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-bold rounded border border-amber-500/30 uppercase tracking-wider">
-                  Hızlı Erişim Belgeleri (Sıralama)
-                </span>
-
-                <div className="mt-5 pt-4">
-                  {starredList.length === 0
-                    ? (
-                      <p className="text-xs italic text-slate-400">
-                        Henüz kısayol eklenmemiş. Sağ taraftaki belgelerin
-                        yanındaki yıldız butonuna basarak kısayol
-                        ekleyebilirsiniz.
-                      </p>
-                    )
-                    : (
-                      <div className="space-y-2 mb-4">
-                        {starredList.map((docName: string, idx: number) => {
-                          const route = routeMap[docName];
-                          const { status, cleanName } = parseStatusAndName(
-                            docName,
-                          );
-                          return (
-                            <div
-                              key={idx}
-                              className="flex items-center justify-between bg-slate-800/80 hover:bg-slate-800 border border-slate-700/50 p-2 rounded-xl"
-                            >
-                              {route
-                                ? (
-                                  <Link
-                                    to={route}
-                                    className="flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 truncate flex-1 min-w-0 pr-2"
-                                  >
-                                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                                    <span className="truncate">
-                                      {cleanName}
-                                    </span>
-                                    {status && (
-                                      <span
-                                        className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                          getStatusBadgeClass(
-                                            status,
-                                          )
-                                        }`}
-                                      >
-                                        {status}
-                                      </span>
-                                    )}
-                                  </Link>
-                                )
-                                : (
-                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-400 truncate flex-1 min-w-0 pr-2 select-none">
-                                    <Star className="w-3.5 h-3.5 fill-slate-600 text-slate-600 shrink-0" />
-                                    <span className="truncate">
-                                      {cleanName}
-                                    </span>
-                                    {status && (
-                                      <span
-                                        className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                          getStatusBadgeClass(
-                                            status,
-                                          )
-                                        }`}
-                                      >
-                                        {status}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              <div className="flex items-center gap-1 shrink-0 ml-2">
-                                <button
-                                  onClick={() => moveShortcut(idx, "up")}
-                                  disabled={idx === 0}
-                                  className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-                                  title="Yukarı Taşı"
-                                >
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => moveShortcut(idx, "down")}
-                                  disabled={idx === starredList.length - 1}
-                                  className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-                                  title="Aşağı Taşı"
-                                >
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => toggleStar(docName)}
-                                  className="p-1 hover:bg-red-955/50 rounded text-slate-400 hover:text-red-400 cursor-pointer"
-                                  title="Kısayoldan Kaldır"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                </div>
-              </div>
-            </div>
+            <StarredListSorter
+              starredList={starredList}
+              routeMap={routeMap}
+              moveShortcut={moveShortcut}
+              toggleStar={toggleStar}
+            />
           </div>
 
           {/* Sağ Panel: Süreç Belgeleri Listesi */}
@@ -565,11 +321,10 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
                       <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        📦 {selectedPresetId ? (
-                          presets.find((p) => p.id === selectedPresetId)?.name
-                        ) : (
-                          "Genel Hızlı Erişim"
-                        )}
+                        📦{' '}
+                        {selectedPresetId
+                          ? presets.find((p) => p.id === selectedPresetId)?.name
+                          : 'Genel Hızlı Erişim'}
                       </h2>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         Bu paketin sahip olduğu tüm süreç belgeleri aşağıda listelenmiştir.
@@ -585,71 +340,37 @@ export default function TaslakYoneticisi(): React.JSX.Element {
 
                   <div className="space-y-2">
                     {starredList.map((docName: string) => {
-                      const sablon = sablonlar.find((s) => s.ad === docName);
-                      const route = routeMap[docName];
+                      const sablon =
+                        sablons.find((s) => s.ad === docName) ||
+                        sablonlar.find((s) => s.ad === docName)
+                      const route = routeMap[docName]
                       const { status, cleanName } = parseStatusAndName(
                         docName,
-                        sablon ? sablon.aciklama : undefined,
-                      );
+                        sablon ? sablon.aciklama : undefined
+                      )
                       return (
-                        <div
+                        <DocumentCard
                           key={docName}
-                          className="flex items-center justify-between p-3 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850 transition-all"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                            {route ? (
-                              <Link
-                                to={route}
-                                className="flex items-center gap-2 truncate text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                              >
-                                <span>{cleanName}</span>
-                                {status && (
-                                  <span
-                                    className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                      getStatusBadgeLightClass(status)
-                                    }`}
-                                  >
-                                    {status}
-                                  </span>
-                                )}
-                              </Link>
-                            ) : (
-                              <div className="flex items-center gap-2 truncate text-xs font-medium text-slate-400 dark:text-slate-550 cursor-default select-none">
-                                <span>{cleanName}</span>
-                                {status && (
-                                  <span
-                                    className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                      getStatusBadgeLightClass(status)
-                                    }`}
-                                  >
-                                    {status}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0 ml-2">
-                            <button
-                              onClick={() => toggleStar(docName)}
-                              className="p-1 hover:bg-rose-50 dark:hover:bg-rose-955/20 rounded text-slate-400 hover:text-rose-500 cursor-pointer"
-                              title="Paketten Kaldır"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
+                          sablon={sablon}
+                          route={route}
+                          status={status}
+                          cleanName={cleanName}
+                          onPreview={() => sablon && handleOpenPreviewForSablon(sablon, cleanName)}
+                          onQuickPrint={() => sablon && quickPrint(sablon)}
+                          onQuickExport={(fmt) => sablon && quickExport(sablon, fmt)}
+                          onToggleStar={() => toggleStar(docName)}
+                        />
+                      )
                     })}
 
                     {starredList.length === 0 && (
                       <div className="text-center py-10 px-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-                        <FolderHeart className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
                           Bu pakette henüz hiç belge bulunmuyor.
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-slate-550 mb-4">
-                          Sol taraftaki veya yukarıdaki butona tıklayarak belge eklemeye başlayabilirsiniz.
+                          Sol taraftaki veya yukarıdaki butona tıklayarak belge eklemeye
+                          başlayabilirsiniz.
                         </p>
                         <button
                           onClick={() => setIsEditing(true)}
@@ -662,252 +383,70 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                // --- PAKET DÜZENLEME (LİSTE SEÇİM) MODU ---
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        ✍️ Belge Seçimi: {selectedPresetId ? (
-                          presets.find((p) => p.id === selectedPresetId)?.name
-                        ) : (
-                          "Genel Hızlı Erişim"
-                        )}
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Aşağıdaki aşamalardan pakete eklenecek belgeleri seçin. Checkbox'ları işaretlemek belgenin anında eklenmesini/çıkarılmasını sağlar.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-xs cursor-pointer"
-                    >
-                      ✓ Tamamlandı
-                    </button>
-                  </div>
-
-                  {/* Aşama Seçici (Tabs) */}
-                  <div className="flex flex-wrap gap-2 pb-4">
-                    {STAGES.map((stage) => {
-                      const isActive = activeStage === stage.key;
-                      const count = (groupedSablonlar[stage.key] || []).length;
-                      return (
-                        <button
-                          key={stage.key}
-                          onClick={() => setActiveStage(stage.key)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            isActive
-                              ? "bg-blue-600 text-white shadow-xs"
-                              : "bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800"
-                          }`}
-                        >
-                          {stage.label} ({count})
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Belge Listesi */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                        📋 {activeStage} ({(groupedSablonlar[activeStage] || []).length} belge)
-                      </h3>
-                    </div>
-
-                    <div className="space-y-2">
-                      {(groupedSablonlar[activeStage] || []).map((sablon) => {
-                        const route = routeMap[sablon.ad];
-                        const isStarred = starredList.some(
-                          (d) =>
-                            normalizeForMatch(d) === normalizeForMatch(sablon.ad),
-                        );
-                        const { status, cleanName } = parseStatusAndName(
-                          sablon.ad,
-                          sablon.aciklama,
-                        );
-                        return (
-                          <div
-                            key={sablon.id}
-                            className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                              isStarred
-                                ? "bg-blue-50/30 dark:bg-blue-950/10 border-blue-300 dark:border-blue-800"
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                              <input
-                                type="checkbox"
-                                checked={isStarred}
-                                onChange={() => toggleStar(sablon.ad)}
-                                className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 dark:bg-slate-700 dark:border-slate-600 focus:ring-2 cursor-pointer"
-                              />
-                              {route ? (
-                                <Link
-                                  to={route}
-                                  className="flex items-center gap-2 truncate text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                                >
-                                  <span>{cleanName}</span>
-                                  {status && (
-                                    <span
-                                      className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                        getStatusBadgeLightClass(status)
-                                      }`}
-                                    >
-                                      {status}
-                                    </span>
-                                  )}
-                                </Link>
-                              ) : (
-                                <div className="flex items-center gap-2 truncate text-xs font-medium text-slate-400 dark:text-slate-550 cursor-default select-none">
-                                  <span>{cleanName}</span>
-                                  {status && (
-                                    <span
-                                      className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                                        getStatusBadgeLightClass(status)
-                                      }`}
-                                    >
-                                      {status}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0 ml-2">
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  toggleStar(sablon.ad);
-                                }}
-                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded shrink-0 cursor-pointer"
-                                title={
-                                  isStarred
-                                    ? "Kısayoldan Kaldır"
-                                    : "Kısayol Ekle (Yıldızla)"
-                                }
-                              >
-                                <Star
-                                  className={`w-3.5 h-3.5 ${
-                                    isStarred
-                                      ? "fill-amber-500 text-amber-500"
-                                      : "text-slate-400 hover:text-amber-500"
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {(groupedSablonlar[activeStage] || []).length === 0 && (
-                        <span className="text-xs italic text-slate-400 block py-1">
-                          Bu aşamada bağlı şablon bulunamadı.
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Alt Aksiyon Paneli */}
-                    <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="text-xs text-slate-600 dark:text-slate-400">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
-                          {starredList.length}
-                        </span>{" "}
-                        belge pakete dahil.
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={handleAddAllStageDocs}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
-                        >
-                          Tümünü Seç
-                        </button>
-                        <button
-                          onClick={handleRemoveAllStageDocs}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
-                        >
-                          Tümünü Kaldır
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <PresetEditor
+                  presetName={
+                    selectedPresetId
+                      ? presets.find((p) => p.id === selectedPresetId)?.name || ''
+                      : 'Genel Hızlı Erişim'
+                  }
+                  activeStage={activeStage}
+                  setActiveStage={setActiveStage}
+                  groupedSablonlar={groupedSablonlar}
+                  starredList={starredList}
+                  routeMap={routeMap}
+                  toggleStar={toggleStar}
+                  onAddAllStageDocs={handleAddAllStageDocs}
+                  onRemoveAllStageDocs={handleRemoveAllStageDocs}
+                  onCloseEdit={() => setIsEditing(false)}
+                />
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Yeni Paket Ekleme Modalı */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
-              Yeni Belge Paketi Oluştur
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Belge paketinize kolayca tanıyabileceğiniz bir isim verin.
-              Oluşturduktan sonra içine istediğiniz şablonları ekleyebilirsiniz.
-            </p>
-            <input
-              type="text"
-              value={newPresetName}
-              onChange={(e) => setNewPresetName(e.target.value)}
-              placeholder="Paket Adı..."
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddPresetSubmit();
-              }}
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
-              >
-                İptal
-              </button>
-              <button
-                onClick={handleAddPresetSubmit}
-                disabled={!newPresetName.trim()}
-                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-              >
-                Oluştur
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PresetModals
+        showAddModal={showAddModal}
+        newPresetName={newPresetName}
+        setNewPresetName={setNewPresetName}
+        onAddCancel={() => setShowAddModal(false)}
+        onAddSubmit={handleAddPresetSubmit}
+        showDeleteModal={showDeleteModal}
+        onDeleteCancel={() => {
+          setShowDeleteModal(false)
+          setPresetToDeleteId('')
+        }}
+        onDeleteSubmit={handleDeletePresetSubmit}
+      />
 
-      {/* Paket Silme Onay Modalı */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
-              Paketi Sil
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Bu belge paketini silmek istediğinize emin misiniz? Bu işlem geri
-              alınamaz.
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setPresetToDeleteId("");
-                }}
-                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"
-              >
-                Vazgeç
-              </button>
-              <button
-                onClick={handleDeletePresetSubmit}
-                className="py-1.5 px-3 rounded-lg text-xs font-bold transition-all bg-rose-600 hover:bg-rose-700 text-white"
-              >
-                Evet, Sil
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Document Preview Modal */}
+      {previewData && previewModalOpen && (
+        <DocumentPreviewModal
+          isOpen={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          title={previewData.title}
+          templateHtml={previewData.templateHtml}
+          masterHtml={masterHtml || ''}
+          baseContext={
+            previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+          }
+          placeholders={placeholders}
+          personelListesi={personelListesi}
+          onPrint={executePrint}
+          onExportPdf={executeExportPdf}
+          onExportDocx={executeExportDocx}
+          onExportUdf={executeExportUdf}
+          isStarred={starredList.some(
+            (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
+          )}
+          onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
+          isInline={false}
+          templateTestVerisi={previewData.templateTestVerisi}
+          dosyaAdi={previewData.dosyaAdi}
+          onRefreshSnapshot={refreshSnapshot}
+          onSaveSnapshot={saveSnapshot}
+        />
       )}
     </div>
-  );
+  )
 }

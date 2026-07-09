@@ -28,7 +28,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   return (
     <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-md dark:hover:shadow-blue-950/20 transition-all duration-200 group">
       {/* Left accent bar */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-xs" />
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-blue-500 to-indigo-600 rounded-r-xs" />
 
       <div className="flex items-start gap-3.5 min-w-0 flex-1 pl-1">
         {/* Icon container */}

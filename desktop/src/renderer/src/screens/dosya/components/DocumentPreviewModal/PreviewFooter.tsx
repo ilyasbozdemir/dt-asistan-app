@@ -54,7 +54,8 @@ export const PreviewFooter: React.FC<PreviewFooterProps> = ({
     }
   }, [])
 
-  const isAnyProcessing = isProcessingPdf || isProcessingPrint || isProcessingDocx || isProcessingUdf
+  const isAnyProcessing =
+    isProcessingPdf || isProcessingPrint || isProcessingDocx || isProcessingUdf
 
   return (
     <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 flex items-center justify-between">
@@ -106,7 +107,9 @@ export const PreviewFooter: React.FC<PreviewFooterProps> = ({
               <Download className="w-4 h-4" />
             )}
             <span>Dışa Aktar / İndir</span>
-            <ChevronUp className={cn('w-3.5 h-3.5 transition-transform', downloadOpen && 'rotate-180')} />
+            <ChevronUp
+              className={cn('w-3.5 h-3.5 transition-transform', downloadOpen && 'rotate-180')}
+            />
           </button>
 
           {downloadOpen && (

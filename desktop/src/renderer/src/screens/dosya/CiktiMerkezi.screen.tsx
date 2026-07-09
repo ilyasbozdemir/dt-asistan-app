@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { SubScreen } from "./SubScreens.screen";
+import React, { useCallback, useMemo, useState } from 'react'
+import { SubScreen } from './SubScreens.screen'
 import {
   AlertCircle,
   CheckCircle2,
@@ -17,40 +17,39 @@ import {
   Square,
   Star,
   Trash2,
-  X,
-} from "lucide-react";
-import { useWorkspaceStore } from "../../store/workspaceStore";
-import Mustache from "mustache";
-import { Sablon } from "../sablonlar/sablonlar.hooks";
-import { useCiktiMerkeziData } from "./CiktiMerkezi.hooks";
-import { useDocumentLogger } from "../../hooks/useDocumentLogger";
-import { useRouterState } from "@tanstack/react-router";
-import { PrintManagerModal } from "./components/PrintManagerModal";
-import { SABLON_DOSYAADI_KATEGORI } from "../../constants/sablonKategorileri";
-import { BelgeAksiyonlari } from "../../components/ui/BelgeAksiyonlari";
+  X
+} from 'lucide-react'
+import { useWorkspaceStore } from '../../store/workspaceStore'
+import Mustache from 'mustache'
+import { Sablon } from '../sablonlar/sablonlar.hooks'
+import { useCiktiMerkeziData } from './CiktiMerkezi.hooks'
+import { useDocumentLogger } from '../../hooks/useDocumentLogger'
+import { useRouterState } from '@tanstack/react-router'
+import { PrintManagerModal } from './components/PrintManagerModal'
+import { SABLON_DOSYAADI_KATEGORI } from '../../constants/sablonKategorileri'
+import { BelgeAksiyonlari } from '../../components/ui/BelgeAksiyonlari'
 
 const normalizeForMatch = (str: string) => {
   return str
-    .toLocaleLowerCase("tr-TR")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/i̇/g, "i")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/[^a-z0-9]/g, "");
-};
+    .toLocaleLowerCase('tr-TR')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/i̇/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]/g, '')
+}
 
 const getSablonGroup = (sablon: Sablon): string => {
-  if (sablon.kategori) return sablon.kategori;
-  const dosyaAdiNoExt = (sablon.dosya_adi || "").replace(/\.html$/, "");
-  return SABLON_DOSYAADI_KATEGORI[dosyaAdiNoExt] || "Genel";
-};
+  if (sablon.kategori) return sablon.kategori
+  const dosyaAdiNoExt = (sablon.dosya_adi || '').replace(/\.html$/, '')
+  return SABLON_DOSYAADI_KATEGORI[dosyaAdiNoExt] || 'Genel'
+}
 
 export function CiktiMerkeziScreen(): React.JSX.Element {
-  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } =
-    useWorkspaceStore();
+  const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const {
     sablons,
     loading,
@@ -58,359 +57,320 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     dosyaContext,
     activeDosya,
     contextsByPath,
-    personelListesi,
-  } = useCiktiMerkeziData(activeDosyaId);
-  const { logDocument } = useDocumentLogger();
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [processing, setProcessing] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(),
-  );
-  const [previewSablon, setPreviewSablon] = useState<Sablon | null>(null);
-  const [isPrintManagerOpen, setIsPrintManagerOpen] = useState(false);
-  const [toast, setToast] = useState<
-    {
-      message: string;
-      type: "success" | "error" | "warning";
-    } | null
-  >(null);
+    personelListesi
+  } = useCiktiMerkeziData(activeDosyaId)
+  const { logDocument } = useDocumentLogger()
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [processing, setProcessing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const [previewSablon, setPreviewSablon] = useState<Sablon | null>(null)
+  const [isPrintManagerOpen, setIsPrintManagerOpen] = useState(false)
+  const [toast, setToast] = useState<{
+    message: string
+    type: 'success' | 'error' | 'warning'
+  } | null>(null)
 
   const showToast = useCallback(
-    (message: string, type: "success" | "error" | "warning" = "success") => {
-      setToast({ message, type });
-      setTimeout(() => setToast(null), 4000);
+    (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+      setToast({ message, type })
+      setTimeout(() => setToast(null), 4000)
     },
-    [],
-  );
+    []
+  )
 
-  const router = useRouterState();
-  const searchSablonAd = (router.location.search as any)?.sablonAd;
+  const router = useRouterState()
+  const searchSablonAd = (router.location.search as any)?.sablonAd
 
   interface DocumentPreset {
-    id: string;
-    name: string;
-    docs: string[];
+    id: string
+    name: string
+    docs: string[]
   }
 
   const [presets, setPresets] = useState<DocumentPreset[]>(() => {
     try {
-      const saved = localStorage.getItem("dta_document_presets");
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem('dta_document_presets')
+      return saved ? JSON.parse(saved) : []
     } catch {
-      return [];
+      return []
     }
-  });
-  const [activePresetId, setActivePresetId] = useState<string>("");
+  })
+  const [activePresetId, setActivePresetId] = useState<string>('')
 
   const handleSelectPreset = (presetId: string): void => {
-    setActivePresetId(presetId);
+    setActivePresetId(presetId)
     if (!presetId) {
-      setSelectedIds(new Set());
-      return;
+      setSelectedIds(new Set())
+      return
     }
-    const preset = presets.find((p) => p.id === presetId);
+    const preset = presets.find((p) => p.id === presetId)
     if (preset) {
-      const ids = new Set<number>();
+      const ids = new Set<number>()
       sablons.forEach((s) => {
-        if (
-          preset.docs.some(
-            (docAd) => normalizeForMatch(docAd) === normalizeForMatch(s.ad),
-          )
-        ) {
-          ids.add(s.id);
+        if (preset.docs.some((docAd) => normalizeForMatch(docAd) === normalizeForMatch(s.ad))) {
+          ids.add(s.id)
         }
-      });
-      setSelectedIds(ids);
-      showToast(
-        `'${preset.name}' paketi seçildi. (${ids.size} belge)`,
-        "success",
-      );
+      })
+      setSelectedIds(ids)
+      showToast(`'${preset.name}' paketi seçildi. (${ids.size} belge)`, 'success')
     }
-  };
+  }
 
   const handleSavePreset = (): void => {
     if (selectedIds.size === 0) {
-      showToast(
-        "Lütfen paket oluşturmak için önce en az bir belge seçin.",
-        "warning",
-      );
-      return;
+      showToast('Lütfen paket oluşturmak için önce en az bir belge seçin.', 'warning')
+      return
     }
-    const name = prompt("Lütfen bu belge paketi taslağı için bir isim girin:");
-    if (!name || name.trim() === "") return;
+    const name = prompt('Lütfen bu belge paketi taslağı için bir isim girin:')
+    if (!name || name.trim() === '') return
 
-    const selectedDocs = sablons
-      .filter((s) => selectedIds.has(s.id))
-      .map((s) => s.ad);
+    const selectedDocs = sablons.filter((s) => selectedIds.has(s.id)).map((s) => s.ad)
     const newPreset: DocumentPreset = {
       id: Date.now().toString(),
       name: name.trim(),
-      docs: selectedDocs,
-    };
-    const updated = [...presets, newPreset];
-    setPresets(updated);
-    localStorage.setItem("dta_document_presets", JSON.stringify(updated));
-    setActivePresetId(newPreset.id);
-    showToast(`'${newPreset.name}' paketi kaydedildi.`, "success");
-  };
+      docs: selectedDocs
+    }
+    const updated = [...presets, newPreset]
+    setPresets(updated)
+    localStorage.setItem('dta_document_presets', JSON.stringify(updated))
+    setActivePresetId(newPreset.id)
+    showToast(`'${newPreset.name}' paketi kaydedildi.`, 'success')
+  }
 
   const handleDeletePreset = (presetId: string, e: React.MouseEvent): void => {
-    e.stopPropagation();
-    const preset = presets.find((p) => p.id === presetId);
-    if (!preset) return;
-    if (
-      !confirm(`'${preset.name}' paketini silmek istediğinize emin misiniz?`)
-    ) {
-      return;
+    e.stopPropagation()
+    const preset = presets.find((p) => p.id === presetId)
+    if (!preset) return
+    if (!confirm(`'${preset.name}' paketini silmek istediğinize emin misiniz?`)) {
+      return
     }
 
-    const updated = presets.filter((p) => p.id !== presetId);
-    setPresets(updated);
-    localStorage.setItem("dta_document_presets", JSON.stringify(updated));
+    const updated = presets.filter((p) => p.id !== presetId)
+    setPresets(updated)
+    localStorage.setItem('dta_document_presets', JSON.stringify(updated))
     if (activePresetId === presetId) {
-      setActivePresetId("");
-      setSelectedIds(new Set());
+      setActivePresetId('')
+      setSelectedIds(new Set())
     }
-    showToast(`'${preset.name}' paketi silindi.`, "success");
-  };
+    showToast(`'${preset.name}' paketi silindi.`, 'success')
+  }
 
   // localStarredDocs artık global store'dan geliyor; DB'deki starred_docs ile sync
   React.useEffect(() => {
     if (activeDosya?.starred_docs) {
       try {
-        const docs = JSON.parse(activeDosya.starred_docs);
-        setActiveStarredDocs(docs);
+        const docs = JSON.parse(activeDosya.starred_docs)
+        setActiveStarredDocs(docs)
       } catch (_e) {
-        setActiveStarredDocs([]);
+        setActiveStarredDocs([])
       }
     } else {
-      setActiveStarredDocs([]);
+      setActiveStarredDocs([])
     }
-  }, [activeDosya?.starred_docs, setActiveStarredDocs]);
+  }, [activeDosya?.starred_docs, setActiveStarredDocs])
 
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
+    setRefreshing(true)
     try {
       if (activeDosyaId) {
         const res = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?",
-          [activeDosyaId],
-        );
+          'db:query',
+          'SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?',
+          [activeDosyaId]
+        )
         if (res.success && res.data.length > 0) {
           try {
-            const docs = JSON.parse(res.data[0].starred_docs || "[]");
-            setActiveStarredDocs(docs);
+            const docs = JSON.parse(res.data[0].starred_docs || '[]')
+            setActiveStarredDocs(docs)
           } catch (_e) {
             /* noop */
           }
         }
       }
     } finally {
-      setRefreshing(false);
+      setRefreshing(false)
     }
-  }, [activeDosyaId, setActiveStarredDocs]);
+  }, [activeDosyaId, setActiveStarredDocs])
 
   React.useEffect(() => {
     if (searchSablonAd && sablons.length > 0) {
       const found = sablons.find(
-        (s) => normalizeForMatch(s.ad) === normalizeForMatch(searchSablonAd),
-      );
+        (s) => normalizeForMatch(s.ad) === normalizeForMatch(searchSablonAd)
+      )
       if (found && !selectedIds.has(found.id)) {
-        setSelectedIds((prev) => new Set([...prev, found.id]));
-        const cat = getSablonGroup(found);
-        setExpandedCategories((prev) => new Set([...prev, cat]));
+        setSelectedIds((prev) => new Set([...prev, found.id]))
+        const cat = getSablonGroup(found)
+        setExpandedCategories((prev) => new Set([...prev, cat]))
       }
     }
-  }, [searchSablonAd, sablons]);
+  }, [searchSablonAd, sablons])
 
   const toggleCategory = (kategori: string) => {
-    const newSet = new Set(expandedCategories);
+    const newSet = new Set(expandedCategories)
     if (newSet.has(kategori)) {
-      newSet.delete(kategori);
+      newSet.delete(kategori)
     } else {
-      newSet.add(kategori);
+      newSet.add(kategori)
     }
-    setExpandedCategories(newSet);
-  };
+    setExpandedCategories(newSet)
+  }
 
   const toggleAllCategories = () => {
-    const allCats = Object.keys(groupedSablons);
-    const allExpanded = allCats.every((cat) => expandedCategories.has(cat));
+    const allCats = Object.keys(groupedSablons)
+    const allExpanded = allCats.every((cat) => expandedCategories.has(cat))
     if (allExpanded) {
-      setExpandedCategories(new Set());
+      setExpandedCategories(new Set())
     } else {
-      setExpandedCategories(new Set(allCats));
+      setExpandedCategories(new Set(allCats))
     }
-  };
+  }
 
   const toggleStar = async (sablonAd: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (!activeDosyaId) return;
+    if (e) e.stopPropagation()
+    if (!activeDosyaId) return
 
     const existingIdx = activeStarredDocs.findIndex(
-      (d) => normalizeForMatch(d) === normalizeForMatch(sablonAd),
-    );
-    let newDocs = [...activeStarredDocs];
+      (d) => normalizeForMatch(d) === normalizeForMatch(sablonAd)
+    )
+    let newDocs = [...activeStarredDocs]
 
     if (existingIdx >= 0) {
-      newDocs.splice(existingIdx, 1);
+      newDocs.splice(existingIdx, 1)
     } else {
-      newDocs.push(sablonAd);
+      newDocs.push(sablonAd)
     }
 
-    setActiveStarredDocs(newDocs); // Instantly update global store
+    setActiveStarredDocs(newDocs) // Instantly update global store
     await window.electron.ipcRenderer.invoke(
-      "db:run",
-      "UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?",
-      [JSON.stringify(newDocs), activeDosyaId],
-    );
-  };
+      'db:run',
+      'UPDATE DATA_TeminDosyasi SET starred_docs = ? WHERE id = ?',
+      [JSON.stringify(newDocs), activeDosyaId]
+    )
+  }
 
   const groupedSablons = useMemo((): Record<string, Sablon[]> => {
-    const groups: Record<string, Sablon[]> = {};
+    const groups: Record<string, Sablon[]> = {}
     sablons.forEach((s) => {
-      const cat = getSablonGroup(s);
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(s);
-    });
-    return groups;
-  }, [sablons]);
+      const cat = getSablonGroup(s)
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(s)
+    })
+    return groups
+  }, [sablons])
 
   const toggleGroup = (cat: string) => {
-    const groupIds = groupedSablons[cat].map((s) => s.id);
+    const groupIds = groupedSablons[cat].map((s) => s.id)
     const validIds = groupIds.filter(
-      (id) => !getMissingRequirement(sablons.find((s) => s.id === id)!),
-    );
-    const allSelected = validIds.every((id) => selectedIds.has(id));
-    const newSet = new Set(selectedIds);
+      (id) => !getMissingRequirement(sablons.find((s) => s.id === id)!)
+    )
+    const allSelected = validIds.every((id) => selectedIds.has(id))
+    const newSet = new Set(selectedIds)
 
     if (allSelected) {
-      validIds.forEach((id) => newSet.delete(id));
+      validIds.forEach((id) => newSet.delete(id))
     } else {
-      validIds.forEach((id) => newSet.add(id));
+      validIds.forEach((id) => newSet.add(id))
     }
-    setSelectedIds(newSet);
-  };
+    setSelectedIds(newSet)
+  }
 
   const getMissingRequirement = (sablon: Sablon): string | null => {
-    if (!sablon) return null;
+    if (!sablon) return null
     if (
-      sablon.icerik.includes("{{#kalemler}}") &&
+      sablon.icerik.includes('{{#kalemler}}') &&
       (!dosyaContext.kalemler || dosyaContext.kalemler.length === 0)
     ) {
-      return "İhtiyaç listesinde (malzeme kalemi) tanımlanmamış.";
+      return 'İhtiyaç listesinde (malzeme kalemi) tanımlanmamış.'
     }
     if (
-      sablon.icerik.includes("{{#firmalar}}") &&
+      sablon.icerik.includes('{{#firmalar}}') &&
       (!dosyaContext.firmalar || dosyaContext.firmalar.length === 0)
     ) {
-      return "Dosyaya yüklenici/davetli firma eklenmemiş.";
+      return 'Dosyaya yüklenici/davetli firma eklenmemiş.'
     }
     if (
-      sablon.icerik.includes("{{#komisyon_uyeleri}}") &&
-      (!dosyaContext.komisyon_uyeleri ||
-        dosyaContext.komisyon_uyeleri.length === 0)
+      sablon.icerik.includes('{{#komisyon_uyeleri}}') &&
+      (!dosyaContext.komisyon_uyeleri || dosyaContext.komisyon_uyeleri.length === 0)
     ) {
-      return "İlgili komisyon üyeleri belirlenmemiş.";
+      return 'İlgili komisyon üyeleri belirlenmemiş.'
     }
-    return null;
-  };
+    return null
+  }
 
   const toggleSelect = (id: number) => {
-    const sablon = sablons.find((s) => s.id === id);
-    if (sablon && getMissingRequirement(sablon)) return; // Block selection if missing requirement
+    const sablon = sablons.find((s) => s.id === id)
+    if (sablon && getMissingRequirement(sablon)) return // Block selection if missing requirement
 
-    const newSet = new Set(selectedIds);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setSelectedIds(newSet);
-  };
+    const newSet = new Set(selectedIds)
+    if (newSet.has(id)) newSet.delete(id)
+    else newSet.add(id)
+    setSelectedIds(newSet)
+  }
 
   const renderHtml = (sablon: Sablon) => {
     try {
-      if (!masterHtml) return sablon.icerik;
+      if (!masterHtml) return sablon.icerik
 
-      const processContext = contextsByPath?.[sablon.route_path || ""] ||
-        dosyaContext;
-      const templateContext = { ...processContext };
+      const processContext = contextsByPath?.[sablon.route_path || ''] || dosyaContext
+      const templateContext = { ...processContext }
 
-      const renderedContent = Mustache.render(sablon.icerik, templateContext);
-      templateContext.icerik = renderedContent;
-      return Mustache.render(masterHtml, templateContext);
+      const renderedContent = Mustache.render(sablon.icerik, templateContext)
+      templateContext.icerik = renderedContent
+      return Mustache.render(masterHtml, templateContext)
     } catch (error) {
-      console.error("Template render hatası:", error);
-      return sablon.icerik;
+      console.error('Template render hatası:', error)
+      return sablon.icerik
     }
-  };
+  }
 
-  const handleAction = async (
-    action: "pdf" | "udf" | "docx" | "print",
-    specificIds?: number[],
-  ) => {
-    const targetIds = specificIds ? new Set(specificIds) : selectedIds;
+  const handleAction = async (action: 'pdf' | 'udf' | 'docx' | 'print', specificIds?: number[]) => {
+    const targetIds = specificIds ? new Set(specificIds) : selectedIds
 
     if (targetIds.size === 0) {
-      showToast("Lütfen en az bir belge seçin.", "warning");
-      return;
+      showToast('Lütfen en az bir belge seçin.', 'warning')
+      return
     }
 
-    setProcessing(true);
+    setProcessing(true)
     try {
-      const selectedSablons = sablons.filter((s) => targetIds.has(s.id));
+      const selectedSablons = sablons.filter((s) => targetIds.has(s.id))
 
       for (const sablon of selectedSablons) {
-        const html = renderHtml(sablon);
+        const html = renderHtml(sablon)
         // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
-        const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, "_").trim();
-        const fileBase = `${safeName}_${activeDosyaId}`;
+        const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, '_').trim()
+        const fileBase = `${safeName}_${activeDosyaId}`
 
-        if (action === "pdf") {
-          await window.electron.ipcRenderer.invoke(
-            "export-pdf",
-            html,
-            null,
-            fileBase,
-          );
-          await logDocument(sablon.ad, `${fileBase}.pdf`);
-        } else if (action === "udf") {
-          await window.electron.ipcRenderer.invoke(
-            "export-udf",
-            html,
-            fileBase,
-          );
-          await logDocument(sablon.ad, `${fileBase}.udf`);
-        } else if (action === "docx") {
-          await window.electron.ipcRenderer.invoke(
-            "export-docx",
-            html,
-            fileBase,
-          );
-          await logDocument(sablon.ad, `${fileBase}.docx`);
-        } else if (action === "print") {
-          await window.electron.ipcRenderer.invoke("print-html", html, {
-            silent: true,
-          }); // Silent true for batch printing
-          await logDocument(sablon.ad, "Yazdırıldı");
+        if (action === 'pdf') {
+          await window.electron.ipcRenderer.invoke('export-pdf', html, null, fileBase)
+          await logDocument(sablon.ad, `${fileBase}.pdf`)
+        } else if (action === 'udf') {
+          await window.electron.ipcRenderer.invoke('export-udf', html, fileBase)
+          await logDocument(sablon.ad, `${fileBase}.udf`)
+        } else if (action === 'docx') {
+          await window.electron.ipcRenderer.invoke('export-docx', html, fileBase)
+          await logDocument(sablon.ad, `${fileBase}.docx`)
+        } else if (action === 'print') {
+          await window.electron.ipcRenderer.invoke('print-html', html, {
+            silent: true
+          }) // Silent true for batch printing
+          await logDocument(sablon.ad, 'Yazdırıldı')
         }
       }
 
-      if (action === "print") {
-        setIsPrintManagerOpen(false);
-        showToast(
-          "Belgeler başarıyla yazdırma kuyruğuna gönderildi.",
-          "success",
-        );
+      if (action === 'print') {
+        setIsPrintManagerOpen(false)
+        showToast('Belgeler başarıyla yazdırma kuyruğuna gönderildi.', 'success')
       } else {
-        showToast("Belgeler başarıyla oluşturuldu ve kaydedildi.", "success");
+        showToast('Belgeler başarıyla oluşturuldu ve kaydedildi.', 'success')
       }
     } catch (error: any) {
-      showToast(`İşlem sırasında hata oluştu: ${error.message}`, "error");
+      showToast(`İşlem sırasında hata oluştu: ${error.message}`, 'error')
     } finally {
-      setProcessing(false);
+      setProcessing(false)
     }
-  };
+  }
 
   return (
     <SubScreen
@@ -436,20 +396,16 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 hover:border-blue-300 transition-all"
                 title="Hızlı Erişim listesini yenile"
               >
-                <RefreshCw
-                  className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
-                />
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               </button>
               <button
                 onClick={toggleAllCategories}
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 hover:border-blue-300 transition-all text-xs font-bold flex items-center gap-1"
                 title="Tüm Grupları Aç / Kapat"
               >
-                {Object.keys(groupedSablons).every((cat) =>
-                    expandedCategories.has(cat)
-                  )
-                  ? "Hepsini Kapat"
-                  : "Hepsini Aç"}
+                {Object.keys(groupedSablons).every((cat) => expandedCategories.has(cat))
+                  ? 'Hepsini Kapat'
+                  : 'Hepsini Aç'}
               </button>
             </div>
           </div>
@@ -500,193 +456,188 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
             </div>
           </div>
 
-          {loading
-            ? (
-              <div className="flex-1 flex items-center justify-center text-slate-400">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            )
-            : (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
-                {Object.entries(groupedSablons).map(([kategori, items]) => {
-                  const isExpanded = expandedCategories.has(kategori);
-                  return (
-                    <div key={kategori} className="space-y-2">
-                      <div
-                        className="flex items-center justify-between px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-                        onClick={() => toggleCategory(kategori)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleGroup(kategori);
-                            }}
-                            className="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                          >
-                            {items
-                                .filter((i) => !getMissingRequirement(i))
-                                .every((i) => selectedIds.has(i.id))
-                              ? (
-                                <CheckSquare className="w-4 h-4 text-blue-600" />
-                              )
-                              : <Square className="w-4 h-4 text-slate-400" />}
-                          </button>
-                          <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            {kategori}
-                          </h4>
-                        </div>
-                        <div>
-                          {isExpanded
-                            ? <ChevronDown className="w-4 h-4 text-slate-400" />
-                            : (
-                              <ChevronRight className="w-4 h-4 text-slate-400" />
-                            )}
-                        </div>
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+              {Object.entries(groupedSablons).map(([kategori, items]) => {
+                const isExpanded = expandedCategories.has(kategori)
+                return (
+                  <div key={kategori} className="space-y-2">
+                    <div
+                      className="flex items-center justify-between px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+                      onClick={() => toggleCategory(kategori)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleGroup(kategori)
+                          }}
+                          className="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          {items
+                            .filter((i) => !getMissingRequirement(i))
+                            .every((i) => selectedIds.has(i.id)) ? (
+                            <CheckSquare className="w-4 h-4 text-blue-600" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-400" />
+                          )}
+                        </button>
+                        <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          {kategori}
+                        </h4>
                       </div>
-                      {isExpanded && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
-                          {items.map((sablon) => {
-                            const missingMsg = getMissingRequirement(sablon);
-                            const isStarred = activeStarredDocs.some(
-                              (d) =>
-                                normalizeForMatch(d) ===
-                                  normalizeForMatch(sablon.ad),
-                            );
-
-                            return (
-                              <div
-                                key={sablon.id}
-                                onClick={() => toggleSelect(sablon.id)}
-                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                                  missingMsg
-                                    ? "bg-slate-50 border-slate-200 opacity-70 cursor-not-allowed dark:bg-slate-900 dark:border-slate-800"
-                                    : selectedIds.has(sablon.id)
-                                    ? "bg-blue-50/50 border-blue-200 text-blue-800 cursor-pointer dark:bg-blue-900/20 dark:border-blue-800/50 dark:text-blue-300"
-                                    : "bg-white border-slate-200 text-slate-700 cursor-pointer hover:border-blue-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 dark:hover:border-slate-700"
-                                }`}
-                              >
-                                <div className="shrink-0">
-                                  {missingMsg
-                                    ? (
-                                      <span title={missingMsg ?? undefined}>
-                                        <AlertCircle className="w-4 h-4 text-rose-500" />
-                                      </span>
-                                    )
-                                    : selectedIds.has(sablon.id)
-                                    ? (
-                                      <CheckSquare className="w-4 h-4 text-blue-600" />
-                                    )
-                                    : (
-                                      <Square className="w-4 h-4 text-slate-300 dark:text-slate-600" />
-                                    )}
-                                </div>
-                                <div
-                                  className="flex-1 min-w-0"
-                                  title={missingMsg || sablon.ad}
-                                >
-                                  <p
-                                    className={`text-xs font-bold truncate ${
-                                      missingMsg
-                                        ? "text-slate-500 line-through"
-                                        : ""
-                                    }`}
-                                  >
-                                    {sablon.ad}
-                                  </p>
-                                  <p
-                                    className="text-[10px] text-slate-500 truncate"
-                                    title={sablon.dosya_adi}
-                                  >
-                                    {sablon.dosya_adi}
-                                  </p>
-                                </div>
-
-                                <div className="flex items-center gap-1 shrink-0">
-                                  <BelgeAksiyonlari
-                                    isStarred={isStarred}
-                                    onPreview={() => setPreviewSablon(sablon)}
-                                    onQuickPrint={() =>
-                                      handleAction("print", [sablon.id])}
-                                    onExport={(fmt) =>
-                                      handleAction(fmt, [sablon.id])}
-                                    onToggleStar={() => toggleStar(sablon.ad)}
-                                    onOpenExternal={async () => {
-                                      const processCtx = contextsByPath?.[sablon.route_path || ""] || dosyaContext;
-                                      const eksikAlanlar: string[] = [];
-                                      const doluAlanlar: string[] = [];
-                                      for (const [key, value] of Object.entries(processCtx)) {
-                                        if (key === "icerik" || key.startsWith("_")) continue;
-                                        if (typeof value === "string" && value.includes("[Belirtilmedi:")) {
-                                          const match = value.match(/\[Belirtilmedi:\s*(.+?)\]/);
-                                          eksikAlanlar.push(match ? match[1] : key);
-                                        } else if (Array.isArray(value)) {
-                                          if (value.length > 0) doluAlanlar.push(key);
-                                        } else if (value !== null && value !== undefined && value !== "") {
-                                          doluAlanlar.push(key);
-                                        }
-                                      }
-                                      if (eksikAlanlar.length > 0) {
-                                        const maxGoster = 12;
-                                        const eksikListesi = eksikAlanlar.slice(0, maxGoster).map((m) => `  • ${m}`).join("\n");
-                                        const fazla = eksikAlanlar.length > maxGoster ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha` : "";
-                                        const devam = confirm(
-                                          `⚠️ ${eksikAlanlar.length} alan eksik / belirtilmemiş:\n\n${eksikListesi}${fazla}\n\n✅ ${doluAlanlar.length} alan dolu.\n\nYine de PDF olarak açmak istiyor musunuz?`
-                                        );
-                                        if (!devam) return;
-                                      }
-                                      const html = renderHtml(sablon);
-                                      if (html) {
-                                        await window.electron.ipcRenderer
-                                          .invoke("open-pdf-external", html);
-                                      }
-                                    }}
-                                    disabled={!!missingMsg}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <div>
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
+                        )}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    {isExpanded && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
+                        {items.map((sablon) => {
+                          const missingMsg = getMissingRequirement(sablon)
+                          const isStarred = activeStarredDocs.some(
+                            (d) => normalizeForMatch(d) === normalizeForMatch(sablon.ad)
+                          )
+
+                          return (
+                            <div
+                              key={sablon.id}
+                              onClick={() => toggleSelect(sablon.id)}
+                              className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                                missingMsg
+                                  ? 'bg-slate-50 border-slate-200 opacity-70 cursor-not-allowed dark:bg-slate-900 dark:border-slate-800'
+                                  : selectedIds.has(sablon.id)
+                                    ? 'bg-blue-50/50 border-blue-200 text-blue-800 cursor-pointer dark:bg-blue-900/20 dark:border-blue-800/50 dark:text-blue-300'
+                                    : 'bg-white border-slate-200 text-slate-700 cursor-pointer hover:border-blue-300 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 dark:hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="shrink-0">
+                                {missingMsg ? (
+                                  <span title={missingMsg ?? undefined}>
+                                    <AlertCircle className="w-4 h-4 text-rose-500" />
+                                  </span>
+                                ) : selectedIds.has(sablon.id) ? (
+                                  <CheckSquare className="w-4 h-4 text-blue-600" />
+                                ) : (
+                                  <Square className="w-4 h-4 text-slate-300 dark:text-slate-600" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0" title={missingMsg || sablon.ad}>
+                                <p
+                                  className={`text-xs font-bold truncate ${
+                                    missingMsg ? 'text-slate-500 line-through' : ''
+                                  }`}
+                                >
+                                  {sablon.ad}
+                                </p>
+                                <p
+                                  className="text-[10px] text-slate-500 truncate"
+                                  title={sablon.dosya_adi}
+                                >
+                                  {sablon.dosya_adi}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-1 shrink-0">
+                                <BelgeAksiyonlari
+                                  isStarred={isStarred}
+                                  onPreview={() => setPreviewSablon(sablon)}
+                                  onQuickPrint={() => handleAction('print', [sablon.id])}
+                                  onExport={(fmt) => handleAction(fmt, [sablon.id])}
+                                  onToggleStar={() => toggleStar(sablon.ad)}
+                                  onOpenExternal={async () => {
+                                    const processCtx =
+                                      contextsByPath?.[sablon.route_path || ''] || dosyaContext
+                                    const eksikAlanlar: string[] = []
+                                    const doluAlanlar: string[] = []
+                                    for (const [key, value] of Object.entries(processCtx)) {
+                                      if (key === 'icerik' || key.startsWith('_')) continue
+                                      if (
+                                        typeof value === 'string' &&
+                                        value.includes('[Belirtilmedi:')
+                                      ) {
+                                        const match = value.match(/\[Belirtilmedi:\s*(.+?)\]/)
+                                        eksikAlanlar.push(match ? match[1] : key)
+                                      } else if (Array.isArray(value)) {
+                                        if (value.length > 0) doluAlanlar.push(key)
+                                      } else if (
+                                        value !== null &&
+                                        value !== undefined &&
+                                        value !== ''
+                                      ) {
+                                        doluAlanlar.push(key)
+                                      }
+                                    }
+                                    if (eksikAlanlar.length > 0) {
+                                      const maxGoster = 12
+                                      const eksikListesi = eksikAlanlar
+                                        .slice(0, maxGoster)
+                                        .map((m) => `  • ${m}`)
+                                        .join('\n')
+                                      const fazla =
+                                        eksikAlanlar.length > maxGoster
+                                          ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha`
+                                          : ''
+                                      const devam = confirm(
+                                        `⚠️ ${eksikAlanlar.length} alan eksik / belirtilmemiş:\n\n${eksikListesi}${fazla}\n\n✅ ${doluAlanlar.length} alan dolu.\n\nYine de PDF olarak açmak istiyor musunuz?`
+                                      )
+                                      if (!devam) return
+                                    }
+                                    const html = renderHtml(sablon)
+                                    if (html) {
+                                      await window.electron.ipcRenderer.invoke(
+                                        'open-pdf-external',
+                                        html
+                                      )
+                                    }
+                                  }}
+                                  disabled={!!missingMsg}
+                                />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* SAĞ: İŞLEM MENÜSÜ */}
         <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-900/50 p-6 flex flex-col gap-4">
           <div className="mb-2">
-            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">
-              Toplu İşlemler
-            </h3>
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">Toplu İşlemler</h3>
             <p className="text-[11px] text-slate-500">
-              Seçtiğiniz {selectedIds.size}{" "}
-              belge için uygulamak istediğiniz işlemi seçin.
+              Seçtiğiniz {selectedIds.size} belge için uygulamak istediğiniz işlemi seçin.
             </p>
           </div>
 
           <button
             onClick={() => setIsPrintManagerOpen(true)}
-            disabled={processing ||
-              (selectedIds.size === 0 && activeStarredDocs.length === 0)}
+            disabled={processing || (selectedIds.size === 0 && activeStarredDocs.length === 0)}
             className="w-full flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-slate-900/10 cursor-pointer"
           >
             <Printer className="w-5 h-5 text-slate-300" />
             <div className="text-left flex-1">
               <div className="text-sm font-bold">Sırayla Yazdır</div>
-              <div className="text-[10px] text-slate-400">
-                Varsayılan yazıcıya gönderilir
-              </div>
+              <div className="text-[10px] text-slate-400">Varsayılan yazıcıya gönderilir</div>
             </div>
           </button>
 
           <div className="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
 
           <button
-            onClick={() => handleAction("pdf")}
+            onClick={() => handleAction('pdf')}
             disabled={processing || selectedIds.size === 0}
             className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
@@ -697,14 +648,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
               <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 PDF Olarak İndir
               </div>
-              <div className="text-[9px] text-slate-500">
-                Orijinal sayfa yapısıyla
-              </div>
+              <div className="text-[9px] text-slate-500">Orijinal sayfa yapısıyla</div>
             </div>
           </button>
 
           <button
-            onClick={() => handleAction("docx")}
+            onClick={() => handleAction('docx')}
             disabled={processing || selectedIds.size === 0}
             className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
@@ -715,14 +664,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
               <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 ODF / DOCX İndir
               </div>
-              <div className="text-[9px] text-slate-500">
-                Düzenlenebilir ofis belgesi
-              </div>
+              <div className="text-[9px] text-slate-500">Düzenlenebilir ofis belgesi</div>
             </div>
           </button>
 
           <button
-            onClick={() => handleAction("udf")}
+            onClick={() => handleAction('udf')}
             disabled={processing || selectedIds.size === 0}
             className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
@@ -730,12 +677,8 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
               <Download className="w-4 h-4" />
             </div>
             <div className="text-left flex-1">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                UDF İndir
-              </div>
-              <div className="text-[9px] text-slate-500">
-                UYAP formatında (Salt metin)
-              </div>
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">UDF İndir</div>
+              <div className="text-[9px] text-slate-500">UYAP formatında (Salt metin)</div>
             </div>
           </button>
         </div>
@@ -751,44 +694,42 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                 <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">
                   {previewSablon.ad}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  {previewSablon.dosya_adi}
-                </p>
+                <p className="text-xs text-slate-500">{previewSablon.dosya_adi}</p>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={(e) => toggleStar(previewSablon.ad, e as any)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                     activeStarredDocs.some(
-                        (d) =>
-                          d.localeCompare(previewSablon.ad, "tr", {
-                            sensitivity: "base",
-                          }) === 0,
-                      )
-                      ? "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-700/50"
-                      : "bg-white text-slate-600 hover:text-amber-600 hover:border-amber-400 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700"
+                      (d) =>
+                        d.localeCompare(previewSablon.ad, 'tr', {
+                          sensitivity: 'base'
+                        }) === 0
+                    )
+                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-700/50'
+                      : 'bg-white text-slate-600 hover:text-amber-600 hover:border-amber-400 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
                   }`}
                 >
                   <Star
                     className={`w-4 h-4 ${
                       activeStarredDocs.some(
-                          (d) =>
-                            d.localeCompare(previewSablon.ad, "tr", {
-                              sensitivity: "base",
-                            }) === 0,
-                        )
-                        ? "fill-current"
-                        : ""
+                        (d) =>
+                          d.localeCompare(previewSablon.ad, 'tr', {
+                            sensitivity: 'base'
+                          }) === 0
+                      )
+                        ? 'fill-current'
+                        : ''
                     }`}
                   />
                   {activeStarredDocs.some(
-                      (d) =>
-                        d.localeCompare(previewSablon.ad, "tr", {
-                          sensitivity: "base",
-                        }) === 0,
-                    )
-                    ? "Hızlı Erişimden Çıkar"
-                    : "Hızlı Erişime Ekle"}
+                    (d) =>
+                      d.localeCompare(previewSablon.ad, 'tr', {
+                        sensitivity: 'base'
+                      }) === 0
+                  )
+                    ? 'Hızlı Erişimden Çıkar'
+                    : 'Hızlı Erişime Ekle'}
                 </button>
                 <button
                   onClick={() => setPreviewSablon(null)}
@@ -819,21 +760,19 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         selectedIds={selectedIds}
         onRemoveFromQueue={(sablonId) => {
           setSelectedIds((prev) => {
-            const next = new Set(prev);
-            next.delete(sablonId);
-            return next;
-          });
-          const sab = sablons.find((s) => s.id === sablonId);
+            const next = new Set(prev)
+            next.delete(sablonId)
+            return next
+          })
+          const sab = sablons.find((s) => s.id === sablonId)
           if (
             sab &&
-            activeStarredDocs.some((d) =>
-              normalizeForMatch(d) === normalizeForMatch(sab.ad)
-            )
+            activeStarredDocs.some((d) => normalizeForMatch(d) === normalizeForMatch(sab.ad))
           ) {
-            toggleStar(sab.ad, { stopPropagation: () => {} } as any);
+            toggleStar(sab.ad, { stopPropagation: () => {} } as any)
           }
         }}
-        onPrint={(validIds) => handleAction("print", validIds)}
+        onPrint={(validIds) => handleAction('print', validIds)}
         processing={processing}
         normalizeForMatch={normalizeForMatch}
         getMissingRequirement={getMissingRequirement}
@@ -842,21 +781,23 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
       {toast && (
         <div
           className={`fixed bottom-6 right-6 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md text-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 z-[9999] transition-all duration-300 ${
-            toast.type === "success"
-              ? "bg-emerald-50/90 border-emerald-200 text-emerald-800 dark:bg-emerald-950/90 dark:border-emerald-800 dark:text-emerald-300"
-              : toast.type === "warning"
-              ? "bg-amber-50/90 border-amber-200 text-amber-800 dark:bg-amber-950/90 dark:border-amber-800 dark:text-amber-300"
-              : "bg-rose-50/90 border-rose-200 text-rose-800 dark:bg-rose-950/90 dark:border-rose-800 dark:text-rose-300"
+            toast.type === 'success'
+              ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800 dark:bg-emerald-950/90 dark:border-emerald-800 dark:text-emerald-300'
+              : toast.type === 'warning'
+                ? 'bg-amber-50/90 border-amber-200 text-amber-800 dark:bg-amber-950/90 dark:border-amber-800 dark:text-amber-300'
+                : 'bg-rose-50/90 border-rose-200 text-rose-800 dark:bg-rose-950/90 dark:border-rose-800 dark:text-rose-300'
           }`}
         >
-          {toast.type === "success"
-            ? <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
-            : toast.type === "warning"
-            ? <AlertCircle className="w-5 h-5 shrink-0 text-amber-500" />
-            : <AlertCircle className="w-5 h-5 shrink-0 text-rose-500" />}
+          {toast.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
+          ) : toast.type === 'warning' ? (
+            <AlertCircle className="w-5 h-5 shrink-0 text-amber-500" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-500" />
+          )}
           <div className="font-semibold">{toast.message}</div>
         </div>
       )}
     </SubScreen>
-  );
+  )
 }

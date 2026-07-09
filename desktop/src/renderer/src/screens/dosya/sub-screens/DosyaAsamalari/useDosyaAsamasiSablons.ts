@@ -3,6 +3,7 @@ import { useRouter, useSearch } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../../../store/workspaceStore'
 import { useCiktiMerkeziData } from '../../CiktiMerkezi.hooks'
 import { useDocumentLogger } from '../../../../hooks/useDocumentLogger'
+import { parseStatusAndName } from '../../../system/utils/statusUtils'
 import Mustache from 'mustache'
 
 // -----------------------------------------------------------------------
@@ -52,44 +53,60 @@ export const normalizeForMatch = (str: string): string =>
  */
 export const SABLON_GRUPLARI: Record<string, { grup: string; etiket: string; siralama: number }> = {
   // ── İhtiyaç Listesi ailesi (İhtiyaç Listesi + Talep Formu)
-  'ihtiyac-listesi':    { grup: 'ihtiyac-listesi', etiket: 'İhtiyaç Listesi', siralama: 0 },
-  'ihtiyac-talep-formu': { grup: 'ihtiyac-listesi', etiket: 'Talep Formu',    siralama: 1 },
+  'ihtiyac-listesi': { grup: 'ihtiyac-listesi', etiket: 'İhtiyaç Listesi', siralama: 0 },
+  'ihtiyac-talep-formu': { grup: 'ihtiyac-listesi', etiket: 'Talep Formu', siralama: 1 },
 
   // ── Komisyon Görevlendirme ailesi (Komisyon Atama + Onay Eki)
-  'komisyon-gorevlendirme-onayi':     { grup: 'komisyon-gorevlendirme', etiket: 'Komisyon Atama', siralama: 0 },
-  'komisyon-gorevlendirme-onayi-eki': { grup: 'komisyon-gorevlendirme', etiket: 'Onay Eki',       siralama: 1 },
+  'komisyon-gorevlendirme-onayi': {
+    grup: 'komisyon-gorevlendirme',
+    etiket: 'Komisyon Atama',
+    siralama: 0
+  },
+  'komisyon-gorevlendirme-onayi-eki': {
+    grup: 'komisyon-gorevlendirme',
+    etiket: 'Onay Eki',
+    siralama: 1
+  },
 
   // ── Lüzum Müzekkeresi ailesi
-  'luzum-muzekkeresi':                 { grup: 'luzum-muzekkeresi', etiket: 'Lüzum Müzekkeresi', siralama: 0 },
-  'luzum-muzekkeresi-onay-eki':        { grup: 'luzum-muzekkeresi', etiket: 'Onay Eki',           siralama: 1 },
-  'luzum-muzekkeresi-teslim-tesellum': { grup: 'luzum-muzekkeresi', etiket: 'Teslim Tesellüm',   siralama: 2 },
+  'luzum-muzekkeresi': { grup: 'luzum-muzekkeresi', etiket: 'Lüzum Müzekkeresi', siralama: 0 },
+  'luzum-muzekkeresi-onay-eki': { grup: 'luzum-muzekkeresi', etiket: 'Onay Eki', siralama: 1 },
+  'luzum-muzekkeresi-teslim-tesellum': {
+    grup: 'luzum-muzekkeresi',
+    etiket: 'Teslim Tesellüm',
+    siralama: 2
+  },
 
   // ── Onay Belgesi ailesi (Doğrudan Temin + İdare/İhale + Bütçe Sorgusu)
-  'dogrudan-temin-onay-belgesi':       { grup: 'onay-belgesi', etiket: 'Doğrudan Temin', siralama: 0 },
-  'idare-onay-belgesi':                { grup: 'onay-belgesi', etiket: 'İhale',           siralama: 1 },
-  'butce-sorgusu':                     { grup: 'onay-belgesi', etiket: 'Bütçe Sorgusu',  siralama: 2 },
+  'dogrudan-temin-onay-belgesi': { grup: 'onay-belgesi', etiket: 'Doğrudan Temin', siralama: 0 },
+  'idare-onay-belgesi': { grup: 'onay-belgesi', etiket: 'İhale', siralama: 1 },
+  'butce-sorgusu': { grup: 'onay-belgesi', etiket: 'Bütçe Sorgusu', siralama: 2 },
 
   // ── Harcama ailesi (Harcama Talimatı + Harcama Pusulası)
-  'harcama-talimati':  { grup: 'harcama', etiket: 'Harcama Talimatı', siralama: 0 },
-  'harcama-pusulasi':  { grup: 'harcama', etiket: 'Harcama Pusulası', siralama: 1 },
+  'harcama-talimati': { grup: 'harcama', etiket: 'Harcama Talimatı', siralama: 0 },
+  'harcama-pusulasi': { grup: 'harcama', etiket: 'Harcama Pusulası', siralama: 1 },
 
   // ── Doğrudan Temin Sözleşmesi ailesi
-  'dogrudan-temin-sozlesmesi':            { grup: 'dt-sozlesmesi', etiket: 'Standart',   siralama: 0 },
-  'dogrudan-temin-sozlesmesi-alternatif': { grup: 'dt-sozlesmesi', etiket: 'Alternatif', siralama: 1 },
-  'dogrudan-temin-sozlesmesi-uzun':       { grup: 'dt-sozlesmesi', etiket: 'Uzun Form',  siralama: 2 },
+  'dogrudan-temin-sozlesmesi': { grup: 'dt-sozlesmesi', etiket: 'Standart', siralama: 0 },
+  'dogrudan-temin-sozlesmesi-alternatif': {
+    grup: 'dt-sozlesmesi',
+    etiket: 'Alternatif',
+    siralama: 1
+  },
+  'dogrudan-temin-sozlesmesi-uzun': { grup: 'dt-sozlesmesi', etiket: 'Uzun Form', siralama: 2 },
 
   // ── Dağıtım Çizelgesi ailesi
-  'dagitim-cizelgesi':       { grup: 'dagitim-cizelgesi', etiket: 'Standart', siralama: 0 },
-  'dagitim-cizelgesi-karma': { grup: 'dagitim-cizelgesi', etiket: 'Karma',    siralama: 1 },
+  'dagitim-cizelgesi': { grup: 'dagitim-cizelgesi', etiket: 'Standart', siralama: 0 },
+  'dagitim-cizelgesi-karma': { grup: 'dagitim-cizelgesi', etiket: 'Karma', siralama: 1 },
 
   // ── Klasör Sırtlığı ailesi
-  'klasor-sirtligi-3cm':   { grup: 'klasor-sirtligi', etiket: '3 cm',   siralama: 0 },
-  'klasor-sirtligi-5cm':   { grup: 'klasor-sirtligi', etiket: '5 cm',   siralama: 1 },
+  'klasor-sirtligi-3cm': { grup: 'klasor-sirtligi', etiket: '3 cm', siralama: 0 },
+  'klasor-sirtligi-5cm': { grup: 'klasor-sirtligi', etiket: '5 cm', siralama: 1 },
   'klasor-sirtligi-7-5cm': { grup: 'klasor-sirtligi', etiket: '7.5 cm', siralama: 2 },
 
   // ── Muayene & Kabul ailesi
   'muayene-kabul-komisyonu': { grup: 'muayene-kabul', etiket: 'Komisyon', siralama: 0 },
-  'muayene-kabul-tutanagi':  { grup: 'muayene-kabul', etiket: 'Tutanak',  siralama: 1 },
+  'muayene-kabul-tutanagi': { grup: 'muayene-kabul', etiket: 'Tutanak', siralama: 1 }
 }
 
 // -----------------------------------------------------------------------
@@ -353,10 +370,14 @@ export function useDosyaAsamasiSablons() {
 
     if (eksikAlanlar.length > 0) {
       const maxGoster = 12
-      const eksikListesi = eksikAlanlar.slice(0, maxGoster).map((m) => `  • ${m}`).join('\n')
-      const fazla = eksikAlanlar.length > maxGoster
-        ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha`
-        : ''
+      const eksikListesi = eksikAlanlar
+        .slice(0, maxGoster)
+        .map((m) => `  • ${m}`)
+        .join('\n')
+      const fazla =
+        eksikAlanlar.length > maxGoster
+          ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha`
+          : ''
       const devam = confirm(
         `⚠️ ${eksikAlanlar.length} alan eksik / belirtilmemiş:\n\n${eksikListesi}${fazla}\n\n✅ ${doluAlanlar.length} alan dolu.\n\nYine de PDF olarak açmak istiyor musunuz?`
       )
@@ -368,18 +389,20 @@ export function useDosyaAsamasiSablons() {
     await (window as any).electron.ipcRenderer.invoke('open-pdf-external', html)
   }
 
-  const toggleStar = async (sablonAd: string) => {
+  const toggleStar = async (sablonAd: string): Promise<void> => {
     if (!activeDosyaId) return
 
-    const existingIdx = activeStarredDocs.findIndex(
-      (d) => normalizeForMatch(d) === normalizeForMatch(sablonAd)
+    const cleanTarget = parseStatusAndName(sablonAd).cleanName
+    const normalizedTarget = normalizeForMatch(cleanTarget)
+    const newDocs = [...activeStarredDocs]
+    const existingIdx = newDocs.findIndex(
+      (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedTarget
     )
-    let newDocs = [...activeStarredDocs]
 
     if (existingIdx >= 0) {
       newDocs.splice(existingIdx, 1)
     } else {
-      newDocs.push(sablonAd)
+      newDocs.push(cleanTarget)
     }
 
     setActiveStarredDocs(newDocs)

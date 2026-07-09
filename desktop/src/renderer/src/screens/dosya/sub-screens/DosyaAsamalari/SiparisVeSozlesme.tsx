@@ -34,7 +34,9 @@ export function SiparisVeSozlesme(): React.JSX.Element {
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
-      ? activeStarredDocs.some((d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || ''))
+      ? activeStarredDocs.some(
+          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
+        )
       : false
 
     return (

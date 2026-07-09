@@ -202,7 +202,10 @@ const TEMPLATE_NAMES: Record<string, string> = {
  * Dizi sırası = grup_siralama (0-indexed). İlk eleman her zaman "Ana Belge" görünür.
  * Buraya ekleme/çıkarma yapılınca uygulama yeniden başlatıldığında DB güncellenir.
  */
-const TEMPLATE_GROUPS: Array<{ grup: string; sablonlar: Array<{ dosya_adi: string; etiket: string }> }> = [
+const TEMPLATE_GROUPS: Array<{
+  grup: string
+  sablonlar: Array<{ dosya_adi: string; etiket: string }>
+}> = [
   // İhtiyaç Listesi ailesi
   {
     grup: 'ihtiyac-listesi',
@@ -282,7 +285,10 @@ const TEMPLATE_GROUPS: Array<{ grup: string; sablonlar: Array<{ dosya_adi: strin
 ]
 
 // Hızlı lookup: dosya_adi → { grup_adi, grup_siralama, etiket }
-const TEMPLATE_GROUP_MAP = new Map<string, { grup_adi: string; grup_siralama: number; etiket: string }>()
+const TEMPLATE_GROUP_MAP = new Map<
+  string,
+  { grup_adi: string; grup_siralama: number; etiket: string }
+>()
 for (const g of TEMPLATE_GROUPS) {
   g.sablonlar.forEach((s, i) => {
     TEMPLATE_GROUP_MAP.set(s.dosya_adi, { grup_adi: g.grup, grup_siralama: i, etiket: s.etiket })
@@ -521,7 +527,6 @@ function seedTemplates(db: Database.Database): void {
     console.log(`[Seed] Grup metadata güncellendi: ${TEMPLATE_GROUP_MAP.size} şablon`)
     // NULL yapmak istiyorsak (grup dışına çıkarılan eski şablonlar için) bunu atlayabiliriz.
     // Şimdilik sadece aktif grupları güncelliyoruz.
-
   } catch (err: any) {
     console.error('Error seeding templates:', err)
   }

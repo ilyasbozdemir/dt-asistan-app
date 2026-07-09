@@ -96,10 +96,7 @@ export function useDocumentPreview<T = any>({
     if (schemaJson && Object.keys(schemaJson).length > 0) {
       const filtered: any = {}
       for (const key of Object.keys(schemaJson)) {
-        filtered[key] =
-          (rawContext as any)[key] !== undefined
-            ? (rawContext as any)[key]
-            : ''
+        filtered[key] = (rawContext as any)[key] !== undefined ? (rawContext as any)[key] : ''
       }
       return filtered as T
     }

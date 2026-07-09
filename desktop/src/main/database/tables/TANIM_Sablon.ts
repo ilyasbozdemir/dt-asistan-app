@@ -15,8 +15,17 @@ export const TANIM_Sablon = {
     { name: 'test_verisi', type: 'TEXT', description: 'Test Verisi' },
     { name: 'html_yolu', type: 'TEXT', description: 'Html Yolu' },
     { name: 'json_yolu', type: 'TEXT', description: 'Json Yolu' },
-    { name: 'grup_adi', type: 'TEXT', description: 'Şablon Grubu - aynı grup adına sahip şablonlar tek kart altında birleştirilir' },
-    { name: 'grup_siralama', type: 'INTEGER', default: 0, description: 'Grup içindeki sıralama (0 = ana belge)' },
+    {
+      name: 'grup_adi',
+      type: 'TEXT',
+      description: 'Şablon Grubu - aynı grup adına sahip şablonlar tek kart altında birleştirilir'
+    },
+    {
+      name: 'grup_siralama',
+      type: 'INTEGER',
+      default: 0,
+      description: 'Grup içindeki sıralama (0 = ana belge)'
+    },
     { name: 'route_path', type: 'TEXT', description: 'Route Path' },
     {
       name: 'created_at',

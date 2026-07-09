@@ -229,8 +229,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       (d) =>
         !d.is_deleted &&
         d.temin_no &&
-        (d.temin_no.includes(yearStr) || 
-         (d.created_at && d.created_at.startsWith(yearStr)))
+        (d.temin_no.includes(yearStr) || (d.created_at && d.created_at.startsWith(yearStr)))
     )
 
     let maxSeq = 0

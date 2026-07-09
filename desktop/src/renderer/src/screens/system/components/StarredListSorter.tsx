@@ -1,20 +1,20 @@
-import React from "react";
-import { Link } from "@tanstack/react-router";
-import { Star, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
-import { parseStatusAndName, getStatusBadgeClass } from "../utils/statusUtils";
+import React from 'react'
+import { Link } from '@tanstack/react-router'
+import { Star, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
+import { parseStatusAndName, getStatusBadgeClass } from '../utils/statusUtils'
 
 interface StarredListSorterProps {
-  starredList: string[];
-  routeMap: Record<string, string>;
-  moveShortcut: (index: number, direction: "up" | "down") => void;
-  toggleStar: (name: string) => void;
+  starredList: string[]
+  routeMap: Record<string, string>
+  moveShortcut: (index: number, direction: 'up' | 'down') => void
+  toggleStar: (name: string) => void
 }
 
 export const StarredListSorter: React.FC<StarredListSorterProps> = ({
   starredList,
   routeMap,
   moveShortcut,
-  toggleStar,
+  toggleStar
 }) => {
   return (
     <div className="bg-linear-to-br from-slate-900 to-slate-800 text-white border border-slate-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden">
@@ -29,13 +29,14 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
         <div className="mt-5 pt-4">
           {starredList.length === 0 ? (
             <p className="text-xs italic text-slate-400">
-              Henüz kısayol eklenmemiş. Sağ taraftaki belgelerin yanındaki yıldız butonuna basarak kısayol ekleyebilirsiniz.
+              Henüz kısayol eklenmemiş. Sağ taraftaki belgelerin yanındaki yıldız butonuna basarak
+              kısayol ekleyebilirsiniz.
             </p>
           ) : (
             <div className="space-y-2 mb-4">
               {starredList.map((docName: string, idx: number) => {
-                const route = routeMap[docName];
-                const { status, cleanName } = parseStatusAndName(docName);
+                const route = routeMap[docName]
+                const { status, cleanName } = parseStatusAndName(docName)
                 return (
                   <div
                     key={idx}
@@ -50,9 +51,9 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                         <span className="truncate">{cleanName}</span>
                         {status && (
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                              getStatusBadgeClass(status)
-                            }`}
+                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${getStatusBadgeClass(
+                              status
+                            )}`}
                           >
                             {status}
                           </span>
@@ -64,9 +65,9 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                         <span className="truncate">{cleanName}</span>
                         {status && (
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                              getStatusBadgeClass(status)
-                            }`}
+                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${getStatusBadgeClass(
+                              status
+                            )}`}
                           >
                             {status}
                           </span>
@@ -75,7 +76,7 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                     )}
                     <div className="flex items-center gap-1 shrink-0 ml-2">
                       <button
-                        onClick={() => moveShortcut(idx, "up")}
+                        onClick={() => moveShortcut(idx, 'up')}
                         disabled={idx === 0}
                         className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                         title="Yukarı Taşı"
@@ -83,7 +84,7 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                         <ChevronUp className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => moveShortcut(idx, "down")}
+                        onClick={() => moveShortcut(idx, 'down')}
                         disabled={idx === starredList.length - 1}
                         className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                         title="Aşağı Taşı"
@@ -99,12 +100,12 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                       </button>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

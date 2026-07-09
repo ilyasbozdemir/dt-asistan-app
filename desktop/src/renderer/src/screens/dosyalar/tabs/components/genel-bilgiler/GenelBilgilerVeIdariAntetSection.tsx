@@ -94,7 +94,9 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
           <label className="block text-xs font-bold text-slate-650 dark:text-slate-405 mb-1.5 flex items-center justify-between">
             <span>Doğrudan Temin Numarası *</span>
             {!formData.temin_no && (
-              <span className="text-[10px] text-amber-500 font-normal animate-pulse">Otomatik üretilecek</span>
+              <span className="text-[10px] text-amber-500 font-normal animate-pulse">
+                Otomatik üretilecek
+              </span>
             )}
           </label>
           <input

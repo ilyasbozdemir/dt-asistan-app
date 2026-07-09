@@ -575,7 +575,10 @@ export default function RaporlarScreen() {
   React.useEffect(() => {
     // Veritabanındaki tüm farklı bütçe yıllarını sorgula
     window.electron.ipcRenderer
-      .invoke('db:query', 'SELECT DISTINCT butce_yili FROM DATA_TeminDosyasi WHERE butce_yili IS NOT NULL AND is_deleted = 0 ORDER BY butce_yili DESC')
+      .invoke(
+        'db:query',
+        'SELECT DISTINCT butce_yili FROM DATA_TeminDosyasi WHERE butce_yili IS NOT NULL AND is_deleted = 0 ORDER BY butce_yili DESC'
+      )
       .then((res: any) => {
         if (res.success && res.data && res.data.length > 0) {
           const list = res.data.map((row: any) => String(row.butce_yili))
@@ -687,8 +690,8 @@ export default function RaporlarScreen() {
                 <select
                   value={seciliAy}
                   onChange={(e) => {
-                     setSeciliAy(e.target.value)
-                     setRaporAktif(false)
+                    setSeciliAy(e.target.value)
+                    setRaporAktif(false)
                   }}
                   className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 >

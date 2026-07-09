@@ -43,7 +43,9 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
               miktar: `${(idx + 1) * 15} ${item.birim || 'Adet'}`,
               firma: mockFirms[idx % mockFirms.length],
               fiyat: `${((idx + 2) * 195 + 45).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺`,
-              tarih: new Date(Date.now() - (idx + 1) * 8 * 24 * 60 * 60 * 1000).toLocaleDateString('tr-TR')
+              tarih: new Date(Date.now() - (idx + 1) * 8 * 24 * 60 * 60 * 1000).toLocaleDateString(
+                'tr-TR'
+              )
             })
           )
           setLastPurchases(items)
@@ -52,7 +54,7 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
           setLastPurchases([
             {
               kalem_adi: 'A4 Fotokopi Kağıdı',
-              ozelligi: '80 gr, 500\'lü Paket',
+              ozelligi: "80 gr, 500'lü Paket",
               miktar: '100 Paket',
               firma: 'Gökkuşağı Ofis Kırtasiye',
               fiyat: '115,00 ₺',
@@ -170,7 +172,10 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                   {lastPurchases.map((item, index) => (
-                    <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <tr
+                      key={index}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    >
                       <td className="px-4 py-3 font-medium">{item.kalem_adi}</td>
                       <td className="px-4 py-3 text-slate-500">{item.ozelligi}</td>
                       <td className="px-4 py-3 text-right">{item.miktar}</td>
