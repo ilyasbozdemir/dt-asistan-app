@@ -28,7 +28,6 @@ import { EskiDosyaKopyalaModal } from './components/EskiDosyaKopyalaModal'
 import { useKikLimitDonemleri } from '../system/kik-limitleri.hooks'
 import { GenelBilgilerTab } from './tabs/GenelBilgilerTab'
 import { IhtiyacListesiTab } from './tabs/IhtiyacListesiTab'
-import { TeknikSartnameTab } from './tabs/TeknikSartnameTab'
 
 interface DBBirim {
   id: number
@@ -267,7 +266,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   }, [isEdit, formData.temin_no, loadingDb, dosyalar, formData.dosya_acilis_tarihi])
 
   // Active Tab (Stepper)
-  const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac' | 'teknik'>('genel')
+  const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac'>('genel')
 
   // Kopyalama (Şablon) State
   const [showKopyalaModal, setShowKopyalaModal] = useState(false)
@@ -962,7 +961,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 onClick={() => setActiveTab('genel')}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
-                  activeTab === 'genel' || activeTab === 'ihtiyac' || activeTab === 'teknik'
+                  activeTab === 'genel' || activeTab === 'ihtiyac'
                     ? 'bg-blue-600 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
                 )}
@@ -988,7 +987,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 onClick={() => setActiveTab('ihtiyac')}
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
-                  activeTab === 'ihtiyac' || activeTab === 'teknik'
+                  activeTab === 'ihtiyac'
                     ? 'bg-blue-500 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
                 )}
@@ -1004,32 +1003,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 )}
               >
                 İhtiyaç Listesi
-              </span>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative z-10 flex flex-col items-center">
-              <button
-                type="button"
-                onClick={() => setActiveTab('teknik')}
-                className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all',
-                  activeTab === 'teknik'
-                    ? 'bg-blue-600 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-                )}
-              >
-                3
-              </button>
-              <span
-                className={cn(
-                  'mt-2 text-[11px] font-bold uppercase tracking-wider',
-                  activeTab === 'teknik'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-500 dark:text-slate-400'
-                )}
-              >
-                Teknik Şart. & Ekler
               </span>
             </div>
           </div>
@@ -1114,19 +1087,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   dosyalar={dosyalar}
                 />
               )}
-
-              {/* TAB 3: TEKNİK ŞARTNAME & EKLER */}
-              {activeTab === 'teknik' && (
-                <TeknikSartnameTab
-                  formData={formData}
-                  setFormData={setFormData}
-                  isEdit={isEdit}
-                  birimler={birimler}
-                  personeller={personeller}
-                  kodSozlugu={kodSozlugu}
-                  dosyalar={dosyalar}
-                />
-              )}
             </>
           )}
           {/* TAB CONTINUATION ACTION BUTTONS */}
@@ -1141,9 +1101,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   type="button"
                   onClick={() => {
                     if (activeTab === 'ihtiyac') setActiveTab('genel')
-                    if (activeTab === 'teknik') {
-                      setActiveTab('ihtiyac')
-                    }
                   }}
                   className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                 >
@@ -1151,12 +1108,11 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </button>
               )}
 
-              {activeTab !== 'teknik' ? (
+              {activeTab !== 'ihtiyac' ? (
                 <button
                   type="button"
                   onClick={() => {
                     if (activeTab === 'genel') setActiveTab('ihtiyac')
-                    else if (activeTab === 'ihtiyac') setActiveTab('teknik')
                   }}
                   className="px-4 py-2 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                 >
