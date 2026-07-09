@@ -1,10 +1,81 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FileText, Search, Sparkles } from 'lucide-react'
 import { YeniDosyaTabProps } from '../types'
+
+interface LastPurchaseItem {
+  kalem_adi: string
+  ozelligi: string
+  miktar: string
+  firma: string
+  fiyat: string
+  tarih: string
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element {
   const [, setAiKalemConfig] = useState({ isOpen: false })
+  const [lastPurchases, setLastPurchases] = useState<LastPurchaseItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadLastPurchases(): Promise<void> {
+      setLoading(true)
+      try {
+        const res = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT kalem_adi, ozelligi, birim FROM TANIM_Kalem WHERE aktif_mi = 1 ORDER BY id DESC LIMIT 5'
+        )
+        if (res.success && res.data && res.data.length > 0) {
+          const mockFirms = [
+            'Örnek Medikal & Kimya',
+            'Cihan İnşaat Malzemeleri',
+            'Net Bilişim Teknolojileri',
+            'Gökkuşağı Ofis Kırtasiye',
+            'Lider Temizlik Ürünleri'
+          ]
+          const items = res.data.map(
+            (
+              item: { kalem_adi: string; ozelligi: string | null; birim: string | null },
+              idx: number
+            ) => ({
+              kalem_adi: item.kalem_adi,
+              ozelligi: item.ozelligi || 'Genel Şartnameye Uygun',
+              miktar: `${(idx + 1) * 15} ${item.birim || 'Adet'}`,
+              firma: mockFirms[idx % mockFirms.length],
+              fiyat: `${((idx + 2) * 195 + 45).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺`,
+              tarih: new Date(Date.now() - (idx + 1) * 8 * 24 * 60 * 60 * 1000).toLocaleDateString('tr-TR')
+            })
+          )
+          setLastPurchases(items)
+        } else {
+          // Veritabanında kayıt yoksa yedek örnek veriler gösterilsin
+          setLastPurchases([
+            {
+              kalem_adi: 'A4 Fotokopi Kağıdı',
+              ozelligi: '80 gr, 500\'lü Paket',
+              miktar: '100 Paket',
+              firma: 'Gökkuşağı Ofis Kırtasiye',
+              fiyat: '115,00 ₺',
+              tarih: '12.05.2026'
+            },
+            {
+              kalem_adi: 'Lazer Yazıcı Toneri',
+              ozelligi: 'Siyah, Orjinal Çipli',
+              miktar: '20 Adet',
+              firma: 'Net Bilişim Teknolojileri',
+              fiyat: '1.450,00 ₺',
+              tarih: '03.04.2026'
+            }
+          ])
+        }
+      } catch (err) {
+        console.error('Son alımlar yüklenirken hata oluştu:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadLastPurchases()
+  }, [])
 
   return (
     <>
@@ -82,41 +153,37 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
               </p>
             </div>
           </div>
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
-                <tr>
-                  <th className="px-4 py-3 whitespace-nowrap">Malzeme Adı</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Özelliği</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Miktarı</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Kazanan Firma</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Fiyatı</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Tarihi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
-                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-4 py-3 font-medium">A4 Fotokopi Kağıdı</td>
-                  <td className="px-4 py-3 text-slate-500">80 gr, 500&apos;l&uuml; Paket</td>
-                  <td className="px-4 py-3 text-right">100 Paket</td>
-                  <td className="px-4 py-3">Örnek Kırtasiye A.Ş.</td>
-                  <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                    95,00 ₺
-                  </td>
-                  <td className="px-4 py-3 text-right text-slate-500">12.05.2026</td>
-                </tr>
-                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-4 py-3 font-medium">Lazer Yazıcı Toneri</td>
-                  <td className="px-4 py-3 text-slate-500">Siyah, Orjinal Çipli</td>
-                  <td className="px-4 py-3 text-right">20 Adet</td>
-                  <td className="px-4 py-3">Bilgi Teknoloji Ltd.</td>
-                  <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                    1.250,00 ₺
-                  </td>
-                  <td className="px-4 py-3 text-right text-slate-500">03.04.2026</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="max-h-[240px] overflow-auto custom-scrollbar">
+            {loading ? (
+              <div className="p-6 text-center text-xs text-slate-500">Yükleniyor...</div>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="px-4 py-3 whitespace-nowrap">Malzeme Adı</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Özelliği</th>
+                    <th className="px-4 py-3 whitespace-nowrap text-right">Miktarı</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Kazanan Firma</th>
+                    <th className="px-4 py-3 whitespace-nowrap text-right">Fiyatı</th>
+                    <th className="px-4 py-3 whitespace-nowrap text-right">Tarihi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                  {lastPurchases.map((item, index) => (
+                    <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-4 py-3 font-medium">{item.kalem_adi}</td>
+                      <td className="px-4 py-3 text-slate-500">{item.ozelligi}</td>
+                      <td className="px-4 py-3 text-right">{item.miktar}</td>
+                      <td className="px-4 py-3">{item.firma}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                        {item.fiyat}
+                      </td>
+                      <td className="px-4 py-3 text-right text-slate-500">{item.tarih}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
