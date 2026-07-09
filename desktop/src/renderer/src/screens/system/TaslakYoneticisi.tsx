@@ -150,6 +150,11 @@ export default function TaslakYoneticisi(): React.JSX.Element {
     sablonlar.forEach((s) => {
       if (s.route_path) {
         map[s.ad] = s.route_path
+        // Also map by cleanName so starred items (stored as clean names) resolve routes
+        const { cleanName } = parseStatusAndName(s.ad)
+        if (cleanName !== s.ad) {
+          map[cleanName] = s.route_path
+        }
       }
     })
     return map
@@ -340,9 +345,20 @@ export default function TaslakYoneticisi(): React.JSX.Element {
 
                   <div className="space-y-2">
                     {starredList.map((docName: string) => {
+                      const normalizedDocName = normalizeForMatch(docName)
                       const sablon =
-                        sablons.find((s) => s.ad === docName) ||
-                        sablonlar.find((s) => s.ad === docName)
+                        sablons.find(
+                          (s) =>
+                            normalizeForMatch(s.ad) === normalizedDocName ||
+                            normalizeForMatch(parseStatusAndName(s.ad).cleanName) ===
+                              normalizedDocName
+                        ) ||
+                        sablonlar.find(
+                          (s) =>
+                            normalizeForMatch(s.ad) === normalizedDocName ||
+                            normalizeForMatch(parseStatusAndName(s.ad).cleanName) ===
+                              normalizedDocName
+                        )
                       const route = routeMap[docName]
                       const { status, cleanName } = parseStatusAndName(
                         docName,
