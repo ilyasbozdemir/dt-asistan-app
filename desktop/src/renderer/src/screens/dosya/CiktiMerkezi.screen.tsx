@@ -609,6 +609,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                     {sablon.dosya_adi}
                                   </p>
                                 </div>
+
                                 <div className="flex items-center gap-1 shrink-0">
                                   <BelgeAksiyonlari
                                     isStarred={isStarred}

@@ -35,7 +35,7 @@ export function BelgeAksiyonlari({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent): void {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIndirMenuOpen(false)
       }

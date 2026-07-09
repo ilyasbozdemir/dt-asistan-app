@@ -111,6 +111,7 @@ export const checkIsSablonDisabled = (cleanName: string, dosyaContext: any): boo
   return false
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useDosyaAsamasiSablons() {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const {
@@ -295,15 +296,6 @@ export function useDosyaAsamasiSablons() {
     const processPath = sablon.route_path || sablon.dosya_adi || ''
     const currentCtx = contextsByPath[processPath] || dosyaContext
     const snapshotCtx = await loadOrCreateSnapshot(sablon.id, currentCtx)
-
-    if (sablon.test_verisi) {
-      try {
-        const parsedTest = JSON.parse(sablon.test_verisi)
-        Object.assign(snapshotCtx, parsedTest)
-      } catch (e) {
-        console.error('Şablon mock/test verisi ayrıştırılamadı:', e)
-      }
-    }
 
     const renderedContent = Mustache.render(sablon.icerik, snapshotCtx)
     const masterContext = { ...snapshotCtx, icerik: renderedContent }

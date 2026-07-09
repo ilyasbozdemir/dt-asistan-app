@@ -367,7 +367,7 @@ function SablonCard({
   onToggleStar: (sablonAd: string) => void;
   onOpenExternal: (sablon: any) => void;
   activeStarredDocs: string[];
-}) {
+}): React.JSX.Element {
   const sortedSablons = [...sablons].sort((a, b) => {
     const aHasParen = a.ad.includes("(");
     const bHasParen = b.ad.includes("(");
