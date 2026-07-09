@@ -675,6 +675,10 @@ export function DocumentPreviewModal<T = any>({
           activeTab={activeTab}
           onRefreshSnapshot={onRefreshSnapshot}
           onRefreshClick={onRefreshClick}
+          handleOpenExternal={async () => {
+            if (!previewHtml) return
+            await window.electron.ipcRenderer.invoke('open-pdf-external', previewHtml)
+          }}
         />
       </div>
     </div>

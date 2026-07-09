@@ -225,22 +225,27 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   // Yıla göre sıradaki Doğrudan Temin Numarasını Hesaplama
   const getNextTeminNo = (year: number) => {
     const yearStr = year.toString()
+    // Sadece aktif yılın silinmemiş dosyalarını filtrele
     const yearDosyalar = dosyalar.filter(
       (d) =>
+        !d.is_deleted &&
         d.temin_no &&
-        (d.temin_no.startsWith(`${yearStr}/`) || d.temin_no.startsWith(`DT${yearStr}/`))
+        (d.temin_no.includes(yearStr) || 
+         (d.created_at && d.created_at.startsWith(yearStr)))
     )
 
     let maxSeq = 0
     yearDosyalar.forEach((d) => {
       const no = d.temin_no!
-      const parts = no.split('/')
-      const seqStr = parts[parts.length - 1]
-
-      if (seqStr) {
-        const seq = parseInt(seqStr, 10)
+      // Sayı dizisindeki son rakam grubunu bul (Örn: 2026/5 -> 5, DT-003 -> 3, 4 -> 4)
+      const match = no.match(/(\d+)(?!.*\d)/)
+      if (match) {
+        const seq = parseInt(match[1], 10)
         if (!isNaN(seq) && seq > maxSeq) {
-          maxSeq = seq
+          // Eğer bulunan sayı aktif yılı temsil etmiyorsa sıraya dahil et
+          if (seq !== year) {
+            maxSeq = seq
+          }
         }
       }
     })
