@@ -612,6 +612,29 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                       handleAction(fmt, [sablon.id])}
                                     onToggleStar={() => toggleStar(sablon.ad)}
                                     onOpenExternal={async () => {
+                                      const processCtx = contextsByPath?.[sablon.route_path || ""] || dosyaContext;
+                                      const eksikAlanlar: string[] = [];
+                                      const doluAlanlar: string[] = [];
+                                      for (const [key, value] of Object.entries(processCtx)) {
+                                        if (key === "icerik" || key.startsWith("_")) continue;
+                                        if (typeof value === "string" && value.includes("[Belirtilmedi:")) {
+                                          const match = value.match(/\[Belirtilmedi:\s*(.+?)\]/);
+                                          eksikAlanlar.push(match ? match[1] : key);
+                                        } else if (Array.isArray(value)) {
+                                          if (value.length > 0) doluAlanlar.push(key);
+                                        } else if (value !== null && value !== undefined && value !== "") {
+                                          doluAlanlar.push(key);
+                                        }
+                                      }
+                                      if (eksikAlanlar.length > 0) {
+                                        const maxGoster = 12;
+                                        const eksikListesi = eksikAlanlar.slice(0, maxGoster).map((m) => `  • ${m}`).join("\n");
+                                        const fazla = eksikAlanlar.length > maxGoster ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha` : "";
+                                        const devam = confirm(
+                                          `⚠️ ${eksikAlanlar.length} alan eksik / belirtilmemiş:\n\n${eksikListesi}${fazla}\n\n✅ ${doluAlanlar.length} alan dolu.\n\nYine de PDF olarak açmak istiyor musunuz?`
+                                        );
+                                        if (!devam) return;
+                                      }
                                       const html = renderHtml(sablon);
                                       if (html) {
                                         await window.electron.ipcRenderer
