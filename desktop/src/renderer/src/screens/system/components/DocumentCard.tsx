@@ -1,0 +1,140 @@
+import React from 'react'
+import { Link } from '@tanstack/react-router'
+import { FileText, Eye, Printer, Download, ExternalLink, Trash2 } from 'lucide-react'
+import { getStatusBadgeLightClass } from '../utils/statusUtils'
+import { Sablon } from '../../sablonlar/sablonlar.hooks'
+
+interface DocumentCardProps {
+  sablon: Sablon | null | undefined
+  route?: string
+  status: string | null
+  cleanName: string
+  onPreview: () => void
+  onQuickPrint: () => void
+  onQuickExport: (format: 'pdf' | 'docx' | 'udf') => void
+  onToggleStar: () => void
+}
+
+export const DocumentCard: React.FC<DocumentCardProps> = ({
+  sablon,
+  route,
+  status,
+  cleanName,
+  onPreview,
+  onQuickPrint,
+  onQuickExport,
+  onToggleStar
+}) => {
+  return (
+    <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-md dark:hover:shadow-blue-950/20 transition-all duration-200 group">
+      {/* Left accent bar */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-r-xs" />
+
+      <div className="flex items-start gap-3.5 min-w-0 flex-1 pl-1">
+        {/* Icon container */}
+        <div className="p-2.5 bg-blue-50/50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+          <FileText className="w-5 h-5" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold text-slate-850 dark:text-slate-105 text-xs tracking-wide group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {cleanName}
+            </span>
+            {status && (
+              <span
+                className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${getStatusBadgeLightClass(
+                  status
+                )}`}
+              >
+                {status}
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+            {sablon?.aciklama ||
+              `${cleanName} belgesini güncel verilerinizle otomatik doldurabilir, önizleyebilir veya indirebilirsiniz.`}
+          </p>
+        </div>
+      </div>
+
+      {/* Actions on the right */}
+      <div className="flex items-center justify-end gap-1.5 shrink-0 mt-3 sm:mt-0 ml-0 sm:ml-4 border-t sm:border-t-0 border-slate-100 dark:border-slate-855 pt-3 sm:pt-0">
+        {/* 👁️ Preview button */}
+        <button
+          onClick={onPreview}
+          title="Belgeyi Önizle / Düzenle"
+          className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-blue-50 dark:bg-slate-955 dark:hover:bg-blue-950/20 text-slate-400 hover:text-blue-500 hover:scale-105 border border-slate-150 dark:border-slate-850"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+
+        {/* ↗️ Navigate / Fill button */}
+        {route ? (
+          <Link
+            to={route}
+            title="Veri Giriş Ekranına Git"
+            className="p-2 rounded-xl transition-all bg-slate-50 hover:bg-emerald-50 dark:bg-slate-955 dark:hover:bg-emerald-950/20 text-slate-400 hover:text-emerald-500 hover:scale-105 border border-slate-150 dark:border-slate-850"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Link>
+        ) : (
+          <button
+            disabled
+            title="Bu belge için özel veri giriş ekranı bulunmuyor"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-955 text-slate-300 dark:text-slate-700 border border-slate-100 dark:border-slate-900 cursor-not-allowed"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* 🖨️ Quick Print button */}
+        <button
+          onClick={onQuickPrint}
+          title="Hızlı Yazdır"
+          className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-indigo-50 dark:bg-slate-955 dark:hover:bg-indigo-950/20 text-slate-400 hover:text-indigo-500 hover:scale-105 border border-slate-150 dark:border-slate-850"
+        >
+          <Printer className="w-4 h-4" />
+        </button>
+
+        {/* 📥 Download button (PDF / Word) */}
+        <div className="relative group/download">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onQuickExport('pdf')
+            }}
+            title="PDF Olarak İndir (Diğer formatlar için üzerine gelin)"
+            className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 dark:bg-slate-955 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-105 border border-slate-150 dark:border-slate-850"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+          {/* Dropdown on hover */}
+          <div className="absolute right-0 bottom-full mb-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 py-1 hidden group-hover/download:block w-24">
+            {(['pdf', 'docx', 'udf'] as const).map((fmt) => (
+              <button
+                key={fmt}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onQuickExport(fmt)
+                }}
+                className="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 uppercase font-bold text-slate-600 dark:text-slate-450 transition-colors cursor-pointer"
+              >
+                {fmt}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 🗑️ Delete/Unstar button */}
+        <button
+          onClick={onToggleStar}
+          title="Paketten Kaldır"
+          className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-rose-50 dark:bg-slate-955 dark:hover:bg-rose-955/20 text-slate-400 hover:text-rose-600 hover:scale-105 border border-slate-150 dark:border-slate-850"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  )
+}
