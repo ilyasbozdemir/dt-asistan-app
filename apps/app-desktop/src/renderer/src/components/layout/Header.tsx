@@ -25,9 +25,8 @@ export function Header(): React.JSX.Element {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const { institutionName, adminUsername, eButceKodu, loadSettings } =
-    useSettingsStore();
-  const { closeWorkspace, fileName } = useWorkspaceStore();
+  const { loadSettings } = useSettingsStore();
+  const { closeWorkspace } = useWorkspaceStore();
   const queryClient = useQueryClient();
 
   const handleCloseWorkspace = async (): Promise<void> => {
@@ -237,6 +236,10 @@ export function Header(): React.JSX.Element {
           onClick: () => navigate({ to: "/" as any }),
         },
         {
+          label: "Yeni Dosya Oluştur",
+          onClick: () => navigate({ to: "/dosyalar/yeni" as any }),
+        },
+        {
           label: "Veri Dosyası Detayları (.dtal)",
           onClick: () => navigate({ to: "/dosya" as any }),
         },
@@ -266,21 +269,55 @@ export function Header(): React.JSX.Element {
           label: "Hızlı Dosya Ekle / Güncelle",
           onClick: () => navigate({ to: "/hizli-dosya-ekle" as any }),
         },
+        {
+          label: "Süreç Takip & Durum",
+          onClick: () => navigate({ to: "/takip" as any }),
+        },
+        {
+          label: "Belge Çıktı Merkezi",
+          onClick: () => navigate({ to: "/cikti-merkezi" as any }),
+        },
       ],
     },
     {
       name: "Doğrudan Temin",
       items: [
-        { label: "1. Hazırlık ve İhtiyaç", onClick: () => navigate({ to: "/dosya/hazirlik-ve-ihtiyac" as any }) },
-        { label: "2. Piyasa Fiyat Araştırması", onClick: () => navigate({ to: "/dosya/piyasa-fiyat-arastirmasi" as any }) },
-        { label: "3. Yaklaşık Maliyet", onClick: () => navigate({ to: "/dosya/firmalar-maliyet/yaklasik" as any }) },
-        { label: "4. Sipariş & Sözleşme", onClick: () => navigate({ to: "/dosya/siparis-ve-sozlesme" as any }) },
-        { label: "5. Kabul & Ödeme İşlemleri", onClick: () => navigate({ to: "/dosya/kabul-ve-odeme" as any }) },
+        {
+          label: "1. Hazırlık ve İhtiyaç",
+          onClick: () => navigate({ to: "/dosya/hazirlik-ve-ihtiyac" as any }),
+        },
+        {
+          label: "2. Piyasa Fiyat Araştırması",
+          onClick: () =>
+            navigate({ to: "/dosya/piyasa-fiyat-arastirmasi" as any }),
+        },
+        {
+          label: "3. Yaklaşık Maliyet",
+          onClick: () =>
+            navigate({ to: "/dosya/firmalar-maliyet/yaklasik" as any }),
+        },
+        {
+          label: "4. Sipariş & Sözleşme",
+          onClick: () => navigate({ to: "/dosya/siparis-ve-sozlesme" as any }),
+        },
+        {
+          label: "5. Kabul & Ödeme İşlemleri",
+          onClick: () => navigate({ to: "/dosya/kabul-ve-odeme" as any }),
+        },
         { divider: true },
-        { label: "6. Fatura & İrsaliye", onClick: () => navigate({ to: "/dosya/fatura-ve-irsaliye" as any }) },
-        { label: "7. Klasör & Kapaklar", onClick: () => navigate({ to: "/dosya/klasor-ve-kapaklar" as any }) },
-        { label: "8. İmzalı Belgeler", onClick: () => navigate({ to: "/dosya/imzali-belgeler" as any }) }
-      ]
+        {
+          label: "6. Fatura & İrsaliye",
+          onClick: () => navigate({ to: "/dosya/fatura-ve-irsaliye" as any }),
+        },
+        {
+          label: "7. Klasör & Kapaklar",
+          onClick: () => navigate({ to: "/dosya/klasor-ve-kapaklar" as any }),
+        },
+        {
+          label: "8. İmzalı Belgeler",
+          onClick: () => navigate({ to: "/dosya/imzali-belgeler" as any }),
+        },
+      ],
     },
     {
       name: "Tanımlar",
@@ -790,68 +827,12 @@ export function Header(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ALT SATIR: Çalışma Dosyası Seçimi ve Aktif Dosya Bilgileri */}
+      {/* ALT SATIR: Çalışma Dosyası Seçimi */}
       <div
-        className="min-h-9 py-1 flex items-center justify-between px-4 bg-slate-100/50 dark:bg-slate-950/20 border-t border-slate-200/30 dark:border-slate-800/30 gap-4 text-xs select-none"
+        className="min-h-9 py-1 flex items-center justify-center bg-slate-100/50 dark:bg-slate-950/20 border-t border-slate-200/30 dark:border-slate-800/30 select-none"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        {/* SOL: Kurum / Dosya Bilgileri */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          {fileName
-            ? (
-              <div className="flex items-center gap-1.5 min-w-0 flex-shrink-0">
-                <span className="text-[9px] uppercase font-bold text-slate-450 dark:text-slate-500 tracking-wider shrink-0 hidden lg:inline">
-                  Dosya:
-                </span>
-                <span
-                  className="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/80 px-2 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60 shadow-xs truncate max-w-[200px] lg:max-w-[320px]"
-                  title={fileName}
-                >
-                  {fileName}
-                </span>
-              </div>
-            )
-            : (
-              <div className="text-xs font-medium text-slate-400 dark:text-slate-550 truncate shrink-0">
-                Dosya Seçilmedi
-              </div>
-            )}
-          {institutionName && institutionName !== "Kurum Adı Bulunamadı" && institutionName !== "Kurum Bilgisi Bekleniyor..." && (
-            <div 
-              className="hidden md:flex items-center gap-1.5 pl-2 border-l border-slate-250 dark:border-slate-800 text-[11px] text-slate-500 min-w-0"
-              title={`Kurum: ${institutionName}`}
-            >
-              <span className="shrink-0 font-bold text-[9px] uppercase tracking-wider text-slate-450 dark:text-slate-500">Kurum:</span>
-              <span className="font-semibold text-slate-650 dark:text-slate-350 truncate max-w-[200px] lg:max-w-[400px]">{institutionName}</span>
-            </div>
-          )}
-          {eButceKodu && (
-            <div 
-              className="hidden lg:flex items-center gap-1.5 pl-2 border-l border-slate-250 dark:border-slate-800 text-[11px] text-slate-500 min-w-0"
-              title={`Bütçe Kodu: ${eButceKodu}`}
-            >
-              <span className="shrink-0 font-bold text-[9px] uppercase tracking-wider text-slate-450 dark:text-slate-500">Kod:</span>
-              <span className="font-mono font-semibold text-slate-650 dark:text-slate-350 truncate">{eButceKodu}</span>
-            </div>
-          )}
-        </div>
-
-        {/* ORTA: TeminSelector */}
-        <div className="flex-shrink-0 flex justify-center px-4">
-          <TeminSelector />
-        </div>
-
-        {/* SAĞ: Kullanıcı Detayı */}
-        <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-          {adminUsername && (
-            <span
-              className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-200/40 dark:bg-slate-800/40 px-2 py-0.5 rounded truncate max-w-[120px]"
-              title={`Kullanıcı: ${adminUsername}`}
-            >
-              {adminUsername}
-            </span>
-          )}
-        </div>
+        <TeminSelector />
       </div>
     </header>
   );
