@@ -13,6 +13,15 @@
 **4734 Sayılı Kamu İhale Kanunu Madde 22 kapsamında doğrudan temin yoluyla
 yapılan alımları yönetmek için geliştirilmiş masaüstü uygulama.**
 
+## 📥 Masaüstü Uygulamasını İndirin (Download Desktop App)
+
+Uygulamanın en güncel sürümünü (Windows `.exe` yükleyicisi, güncelleme yansımaları vb.) aşağıdaki resmi kaynaklardan indirebilirsiniz:
+
+👉 **[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest)**
+👉 **[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases)**
+
+*Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni sürümler arka planda otomatik olarak denetlenip güncellenir.*
+
 ---
 
 ## Hakkında
