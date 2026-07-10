@@ -249,14 +249,12 @@ export function Header(): React.JSX.Element {
                   ? "bg-emerald-500 animate-pulse"
                   : "bg-rose-500 animate-pulse"
               }`}
-            />
-            <span className="hidden sm:inline">
-              {isOfflineMode
+              title={isOfflineMode
                 ? "Ev Modu (Çevrimdışı)"
                 : isOnline
                 ? "Ofis Modu (Çevrimiçi)"
                 : "Ofis Modu (Bağlantı Yok)"}
-            </span>
+            />
           </button>
 
           {showSyncPopover && (
