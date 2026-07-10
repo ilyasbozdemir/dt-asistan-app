@@ -5,20 +5,16 @@ import {
   Activity,
   ArrowRight,
   BookOpen,
-  Check,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Copy,
   Cpu,
   Database,
   Download,
   Eye,
   EyeOff,
-  Info,
   Key,
-  Layers,
   LogOut,
   Menu,
   Moon,
@@ -66,12 +62,6 @@ export default function Home(): React.JSX.Element {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // New Popover state for credentials
-  const [isSyncPopoverOpen, setIsSyncPopoverOpen] = useState(false);
-  const [copiedText, setCopiedText] = useState<"url" | "token" | "key" | null>(
-    null,
-  );
-
   // Mock stats
   const [requestCount, setRequestCount] = useState(14890);
   const [avgResponseTime, setAvgResponseTime] = useState(38);
@@ -94,8 +84,10 @@ export default function Home(): React.JSX.Element {
     size: "68.4 MB",
     date: "10.07.2026",
     url: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
-    downloadUrlExe: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
-    downloadUrlDmg: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest"
+    downloadUrlExe:
+      "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
+    downloadUrlDmg:
+      "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
   });
 
   // Live Logs state
@@ -135,7 +127,6 @@ export default function Home(): React.JSX.Element {
   ]);
 
   const terminalEndRef = useRef<HTMLDivElement>(null);
-  const popoverRef = useRef<HTMLDivElement>(null);
 
   // Initialize theme & load remember me credentials
   useEffect(() => {
@@ -159,41 +150,41 @@ export default function Home(): React.JSX.Element {
 
   // Fetch GitHub Latest Release dynamically
   useEffect(() => {
-    fetch("https://api.github.com/repos/ilyasbozdemir/dt-asistan-desktop-app/releases/latest")
+    fetch(
+      "https://api.github.com/repos/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data && data.tag_name) {
-          const exeAsset = data.assets?.find((a: any) => a.name.endsWith(".exe"));
-          const dmgAsset = data.assets?.find((a: any) => a.name.endsWith(".dmg"));
+          const exeAsset = data.assets?.find((a: any) =>
+            a.name.endsWith(".exe")
+          );
+          const dmgAsset = data.assets?.find((a: any) =>
+            a.name.endsWith(".dmg")
+          );
           const mainAsset = exeAsset || dmgAsset || data.assets?.[0];
-          const sizeMb = mainAsset ? `${(mainAsset.size / (1024 * 1024)).toFixed(1)} MB` : "68.4 MB";
-          const dateStr = data.published_at ? new Date(data.published_at).toLocaleDateString("tr-TR") : "10.07.2026";
+          const sizeMb = mainAsset
+            ? `${(mainAsset.size / (1024 * 1024)).toFixed(1)} MB`
+            : "68.4 MB";
+          const dateStr = data.published_at
+            ? new Date(data.published_at).toLocaleDateString("tr-TR")
+            : "10.07.2026";
           setLatestRelease({
             tag: data.tag_name,
             size: sizeMb,
             date: dateStr,
-            url: data.html_url || "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
-            downloadUrlExe: exeAsset?.browser_download_url || data.html_url || "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
-            downloadUrlDmg: dmgAsset?.browser_download_url || data.html_url || "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest"
+            url: data.html_url ||
+              "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
+            downloadUrlExe: exeAsset?.browser_download_url || data.html_url ||
+              "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
+            downloadUrlDmg: dmgAsset?.browser_download_url || data.html_url ||
+              "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
           });
         }
       })
       .catch((err) => {
         console.error("Failed to fetch github release:", err);
       });
-  }, []);
-
-  // Close popover when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        popoverRef.current && !popoverRef.current.contains(event.target as Node)
-      ) {
-        setIsSyncPopoverOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const toggleTheme = () => {
@@ -275,12 +266,6 @@ export default function Home(): React.JSX.Element {
       setUsername("");
       setPassword("");
     }
-  };
-
-  const copyToClipboard = (text: string, type: "url" | "token" | "key") => {
-    navigator.clipboard.writeText(text);
-    setCopiedText(type);
-    setTimeout(() => setCopiedText(null), 2000);
   };
 
   const startSyncSimulation = () => {
@@ -386,10 +371,6 @@ export default function Home(): React.JSX.Element {
       setTestingEndpoint(false);
     }
   };
-
-  const serverUrlVal = "http://localhost:3000";
-  const bearerTokenVal = "Bearer dta_token_9f83a2bcde7582506e";
-  const apiKeyVal = "dta_key_8e4a90f121d5a7b8e1f2";
 
   // --- LOGIN SCREEN ---
   if (!isLoggedIn) {
@@ -562,99 +543,6 @@ export default function Home(): React.JSX.Element {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Send / Receive (Sync Keys) Popover Trigger */}
-          <div className="relative" ref={popoverRef}>
-            <button
-              onClick={() => setIsSyncPopoverOpen(!isSyncPopoverOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] md:text-xs font-bold bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 transition-all cursor-pointer shadow-2xs"
-              title="Senkronizasyon Anahtarları"
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Bağlantı & Auth</span>
-            </button>
-
-            {isSyncPopoverOpen && (
-              <div className="absolute right-0 mt-2.5 w-72 md:w-80 p-4 md:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-blue-500" />
-                    Masaüstü Bağlantı Bilgileri
-                  </h4>
-                  <p className="text-[10px] text-slate-505 mt-0.5">
-                    Masaüstü uygulamanızdaki eşitleme ayarlarına yapıştırın.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-1 text-left">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        Sunucu URL
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(serverUrlVal, "url")}
-                        className="text-slate-400 hover:text-blue-500 transition-colors"
-                      >
-                        {copiedText === "url"
-                          ? <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-lg p-2 font-mono text-[9px] md:text-[10px] text-slate-700 dark:text-slate-300 break-all select-all">
-                      {serverUrlVal}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-left">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        Authorization Header
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(bearerTokenVal, "token")}
-                        className="text-slate-400 hover:text-blue-500 transition-colors"
-                      >
-                        {copiedText === "token"
-                          ? <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-lg p-2 font-mono text-[9px] md:text-[10px] text-slate-700 dark:text-slate-300 break-all select-all">
-                      {bearerTokenVal}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-left">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        API Anahtarı (X-API-Key)
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(apiKeyVal, "key")}
-                        className="text-slate-400 hover:text-blue-500 transition-colors"
-                      >
-                        {copiedText === "key"
-                          ? <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 rounded-lg p-2 font-mono text-[9px] md:text-[10px] text-slate-700 dark:text-slate-300 break-all select-all">
-                      {apiKeyVal}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-2 flex gap-2 text-left">
-                  <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                  <p className="text-[9px] leading-relaxed text-blue-800 dark:text-blue-300">
-                    Masaüstünde **Ayarlar &gt; Entegrasyon** panelinden bu
-                    anahtarları girip senkronizasyonu başlatabilirsiniz.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Theme Toggle inside App */}
           <button
             onClick={toggleTheme}
@@ -852,7 +740,7 @@ export default function Home(): React.JSX.Element {
                     {syncProgress === 100 ? "Hazır" : `%${syncProgress}`}
                   </span>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">
-                    Local SQLite Dosyası
+                    Bulut Veritabanı
                   </span>
                 </div>
 
@@ -1123,7 +1011,7 @@ export default function Home(): React.JSX.Element {
                   Veritabanı Eşitleme (Sync)
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Yerel SQLite veritabanı şemasını sunucu arşivi ile eşitleyin.
+                  Bulut veritabanı şemasını sunucu arşivi ile eşitleyin.
                 </p>
               </div>
 
@@ -1151,7 +1039,7 @@ export default function Home(): React.JSX.Element {
                   <div className="space-y-2 pt-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-500 dark:text-slate-400">
-                        SQLite Dosya Boyutu:
+                        Veritabanı Dosya Boyutu:
                       </span>
                       <span className="font-mono font-semibold text-slate-850 dark:text-slate-200">
                         12.4 MB
@@ -1318,7 +1206,7 @@ export default function Home(): React.JSX.Element {
                           step: "4",
                           title: "Çift Yönlü Senkronizasyonu Başlatın",
                           desc:
-                            'Bağlantıyı doğrulamak için "Bağlantıyı Test Et" butonuna basın. Masaüstündeki SQLite veri tabanınız anında Next.js API Gateway sunucunuz ile çift yönlü senkronize olacaktır.',
+                            'Bağlantıyı doğrulamak için "Bağlantıyı Test Et" butonuna basın. Masaüstündeki veri tabanınız anında Next.js API Gateway sunucunuz ile çift yönlü senkronize olacaktır.',
                         },
                       ].map((s, idx) => (
                         <div key={idx} className="flex gap-4">
