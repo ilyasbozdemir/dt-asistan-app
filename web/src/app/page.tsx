@@ -1198,15 +1198,15 @@ export default function Home(): React.JSX.Element {
                         },
                         {
                           step: "3",
-                          title: "Giriş & Gateway Bilgilerini Yapıştırın",
+                          title: "Gateway Sunucu Bilgilerini Tanımlayın",
                           desc:
-                            "Sağ üst köşedeki **\"Bağlantı & Auth\"** menüsündeki Sunucu URL'sini, Bearer Token'ını ve API Anahtarını kopyalayarak Masaüstü uygulamasındaki ilgili alanlara yapıştırın.",
+                            "Masaüstü uygulamasındaki Bulut Popover'ına Next.js sunucunuzun IP/alan adını ve yetkilendirme anahtarınızı girin.",
                         },
                         {
                           step: "4",
-                          title: "Çift Yönlü Senkronizasyonu Başlatın",
+                          title: "Eşitlemeyi Başlatın",
                           desc:
-                            'Bağlantıyı doğrulamak için "Bağlantıyı Test Et" butonuna basın. Masaüstündeki veri tabanınız anında Next.js API Gateway sunucunuz ile çift yönlü senkronize olacaktır.',
+                            "Masaüstündeki yerel veritabanınız anında Next.js API Gateway sunucunuz ile senkronize olacak ve verileri buluta aktaracaktır.",
                         },
                       ].map((s, idx) => (
                         <div key={idx} className="flex gap-4">
