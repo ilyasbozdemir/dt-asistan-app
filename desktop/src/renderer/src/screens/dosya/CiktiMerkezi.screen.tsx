@@ -6,18 +6,11 @@ import {
   CheckSquare,
   ChevronDown,
   ChevronRight,
-  Download,
-  FileText,
-  FolderHeart,
   Layers,
   Loader2,
-  Printer,
   RefreshCw,
-  Save,
   Square,
-  Star,
-  Trash2,
-  X
+  Printer
 } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import Mustache from 'mustache'
@@ -28,6 +21,9 @@ import { useRouterState } from '@tanstack/react-router'
 import { PrintManagerModal } from './components/PrintManagerModal'
 import { SABLON_DOSYAADI_KATEGORI } from '../../constants/sablonKategorileri'
 import { BelgeAksiyonlari } from '../../components/ui/BelgeAksiyonlari'
+import { CiktiPresetManager } from './components/CiktiPresetManager'
+import { CiktiSidebar } from './components/CiktiSidebar'
+import { CiktiPreviewModal } from './components/CiktiPreviewModal'
 
 const normalizeForMatch = (str: string) => {
   return str
@@ -411,50 +407,14 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           </div>
 
           {/* BELGE PAKETLERİ VE TASLAKLAR */}
-          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FolderHeart className="w-4 h-4 text-blue-500 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">
-                  Belge Paketi Taslağı
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <select
-                    value={activePresetId}
-                    onChange={(e) => handleSelectPreset(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-1 px-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="">-- Paket Seçin --</option>
-                    {presets.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.docs.length} Belge)
-                      </option>
-                    ))}
-                  </select>
-                  {activePresetId && (
-                    <button
-                      onClick={(e) => handleDeletePreset(activePresetId, e)}
-                      className="p-1 rounded-lg hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-950/30 text-slate-400 transition-colors"
-                      title="Paketi Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-end shrink-0 sm:mt-4">
-              <button
-                type="button"
-                onClick={handleSavePreset}
-                disabled={selectedIds.size === 0}
-                className="w-full sm:w-auto py-1 px-2.5 rounded-lg text-xs font-bold transition-all border bg-white dark:bg-slate-850 text-blue-600 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 justify-center shadow-sm"
-              >
-                <Save className="w-3.5 h-3.5" />
-                Paket Olarak Kaydet
-              </button>
-            </div>
-          </div>
+          <CiktiPresetManager
+            presets={presets}
+            activePresetId={activePresetId}
+            selectedIdsSize={selectedIds.size}
+            onSelectPreset={handleSelectPreset}
+            onSavePreset={handleSavePreset}
+            onDeletePreset={handleDeletePreset}
+          />
 
           {loading ? (
             <div className="flex-1 flex items-center justify-center text-slate-400">
@@ -615,142 +575,24 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         </div>
 
         {/* SAĞ: İŞLEM MENÜSÜ */}
-        <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-900/50 p-6 flex flex-col gap-4">
-          <div className="mb-2">
-            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">Toplu İşlemler</h3>
-            <p className="text-[11px] text-slate-500">
-              Seçtiğiniz {selectedIds.size} belge için uygulamak istediğiniz işlemi seçin.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsPrintManagerOpen(true)}
-            disabled={processing || (selectedIds.size === 0 && activeStarredDocs.length === 0)}
-            className="w-full flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-slate-900/10 cursor-pointer"
-          >
-            <Printer className="w-5 h-5 text-slate-300" />
-            <div className="text-left flex-1">
-              <div className="text-sm font-bold">Sırayla Yazdır</div>
-              <div className="text-[10px] text-slate-400">Varsayılan yazıcıya gönderilir</div>
-            </div>
-          </button>
-
-          <div className="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
-
-          <button
-            onClick={() => handleAction('pdf')}
-            disabled={processing || selectedIds.size === 0}
-            className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 shrink-0">
-              <Download className="w-4 h-4" />
-            </div>
-            <div className="text-left flex-1">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                PDF Olarak İndir
-              </div>
-              <div className="text-[9px] text-slate-500">Orijinal sayfa yapısıyla</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleAction('docx')}
-            disabled={processing || selectedIds.size === 0}
-            className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 shrink-0">
-              <FileText className="w-4 h-4" />
-            </div>
-            <div className="text-left flex-1">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                ODF / DOCX İndir
-              </div>
-              <div className="text-[9px] text-slate-500">Düzenlenebilir ofis belgesi</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleAction('udf')}
-            disabled={processing || selectedIds.size === 0}
-            className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-900 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 shrink-0">
-              <Download className="w-4 h-4" />
-            </div>
-            <div className="text-left flex-1">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">UDF İndir</div>
-              <div className="text-[9px] text-slate-500">UYAP formatında (Salt metin)</div>
-            </div>
-          </button>
-        </div>
+        <CiktiSidebar
+          selectedCount={selectedIds.size}
+          processing={processing}
+          hasStarredDocs={activeStarredDocs.length > 0}
+          onPrintClick={() => setIsPrintManagerOpen(true)}
+          onDownloadClick={(action) => handleAction(action)}
+        />
       </div>
 
       {/* ÖNİZLEME MODALI */}
       {previewSablon && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-900/50">
-              <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">
-                  {previewSablon.ad}
-                </h3>
-                <p className="text-xs text-slate-500">{previewSablon.dosya_adi}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={(e) => toggleStar(previewSablon.ad, e as any)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                    activeStarredDocs.some(
-                      (d) =>
-                        d.localeCompare(previewSablon.ad, 'tr', {
-                          sensitivity: 'base'
-                        }) === 0
-                    )
-                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-700/50'
-                      : 'bg-white text-slate-600 hover:text-amber-600 hover:border-amber-400 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
-                  }`}
-                >
-                  <Star
-                    className={`w-4 h-4 ${
-                      activeStarredDocs.some(
-                        (d) =>
-                          d.localeCompare(previewSablon.ad, 'tr', {
-                            sensitivity: 'base'
-                          }) === 0
-                      )
-                        ? 'fill-current'
-                        : ''
-                    }`}
-                  />
-                  {activeStarredDocs.some(
-                    (d) =>
-                      d.localeCompare(previewSablon.ad, 'tr', {
-                        sensitivity: 'base'
-                      }) === 0
-                  )
-                    ? 'Hızlı Erişimden Çıkar'
-                    : 'Hızlı Erişime Ekle'}
-                </button>
-                <button
-                  onClick={() => setPreviewSablon(null)}
-                  className="p-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 bg-slate-100 dark:bg-slate-950 p-4 relative min-h-0">
-              <iframe
-                srcDoc={renderHtml(previewSablon)}
-                className="w-full h-full bg-white rounded-xl shadow-inner border border-slate-200 dark:border-slate-800"
-                sandbox="allow-same-origin"
-              />
-            </div>
-          </div>
-        </div>
+        <CiktiPreviewModal
+          previewSablon={previewSablon}
+          activeStarredDocs={activeStarredDocs}
+          onClose={() => setPreviewSablon(null)}
+          onToggleStar={toggleStar}
+          srcDoc={renderHtml(previewSablon)}
+        />
       )}
 
       <PrintManagerModal
