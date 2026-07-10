@@ -28,6 +28,7 @@ import YeniDosyaScreen from './screens/dosyalar/yeni.screen'
 import KomisyonlarScreen from './screens/komisyonlar/index.screen'
 import KomisyonDetayScreen from './screens/komisyonlar/detay.screen'
 import KomisyonGorevleriScreen from './screens/komisyon-gorevleri/index.screen'
+import HakedisScreen from './screens/system/HakedisScreen'
 
 const rootRoute = createRootRoute({
   component: PageWrapper
@@ -286,6 +287,12 @@ const imzaliBelgelerRoute = createRoute({
   component: ImzaliBelgeler
 })
 
+const hakedisRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: APP_ROUTES.HAKEDIS,
+  component: HakedisScreen
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dosyalarRoute,
@@ -325,6 +332,7 @@ const routeTree = rootRoute.addChildren([
   ciktiMerkeziRoute,
   faturaVeIrsaliyeRoute,
   imzaliBelgelerRoute,
+  hakedisRoute,
   yardimRoute
 ])
 

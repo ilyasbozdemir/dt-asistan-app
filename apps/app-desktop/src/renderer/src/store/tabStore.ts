@@ -57,6 +57,7 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/dosya/harcama/talimat')) return 'Harcama Talimatı'
   if (path.startsWith('/dosya/harcama/pusula')) return 'Harcama Pusulası'
   if (path.startsWith('/dosya/cikti-merkezi')) return 'Çıktı & Üretim Merkezi'
+  if (path.startsWith('/hakedis')) return 'Hakediş & Süreç Yönetimi'
   if (path.startsWith('/dosya')) return 'Dosya Detayları'
   if (path.startsWith('/takip')) return 'Takip & Durum'
   if (path.startsWith('/raporlar')) return 'Raporlar'

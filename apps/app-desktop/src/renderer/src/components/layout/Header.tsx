@@ -320,6 +320,24 @@ export function Header(): React.JSX.Element {
       ],
     },
     {
+      name: "Hakediş (Beta)",
+      items: [
+        {
+          label: "Hakediş Raporları",
+          onClick: () => navigate({ to: "/hakedis" as any }),
+        },
+        {
+          label: "Yeni Hakediş Dosyası",
+          onClick: () => navigate({ to: "/hakedis" as any }),
+        },
+        { divider: true },
+        {
+          label: "Hakediş Mevzuat Tanımları",
+          onClick: () => navigate({ to: "/hakedis" as any }),
+        },
+      ],
+    },
+    {
       name: "Tanımlar",
       items: [
         {

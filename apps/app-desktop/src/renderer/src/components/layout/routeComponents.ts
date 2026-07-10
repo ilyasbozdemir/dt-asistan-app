@@ -7,6 +7,7 @@ import { MevzuatScreen } from '../../screens/system/MevzuatScreen'
 import ChangelogScreen from '../../screens/system/ChangelogScreen'
 import ImportScreen from '../../screens/system/ImportScreen'
 import HizliDosyaEkleScreen from '../../screens/system/HizliDosyaEkle.screen'
+import HakedisScreen from '../../screens/system/HakedisScreen'
 import YardimScreen from '../../screens/system/YardimScreen'
 import AyarlarScreen from '../../screens/ayarlar/index.screen'
 import TemaScreen from '../../screens/ayarlar/TemaScreen'
@@ -78,5 +79,6 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/cikti-merkezi': CiktiMerkeziScreen,
   '/olcubirimleri': OlcuBirimleriScreen,
   '/malzemeler/yeni': YeniMalzemeScreen,
+  '/hakedis': HakedisScreen,
   '/yardim': YardimScreen
 }

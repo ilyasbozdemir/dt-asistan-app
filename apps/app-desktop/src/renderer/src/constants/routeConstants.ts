@@ -34,6 +34,7 @@ export const APP_ROUTES = {
   OLCU_BIRIMLERI: '/olcubirimleri',
   KURUM: '/kurum',
   PROFIL: '/profil',
+  HAKEDIS: '/hakedis',
 
   // Dosya Alt Süreçleri (SubScreens)
   // Aşamalar
