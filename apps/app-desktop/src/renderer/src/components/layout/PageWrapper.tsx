@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useRouterState, useNavigate } from '@tanstack/react-router'
-import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { ActiveFileToolbar } from './ActiveFileToolbar'
 import { Footer } from './Footer'
@@ -378,7 +377,6 @@ export function PageWrapper(): React.ReactNode {
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {isDosyaWindowMode && <Sidebar />}
           <main className="flex-1 overflow-auto p-6">
             <Outlet />
           </main>
@@ -398,7 +396,6 @@ export function PageWrapper(): React.ReactNode {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <DisclaimerModal />
-      <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
         {activeDosyaId && <ActiveFileToolbar />}

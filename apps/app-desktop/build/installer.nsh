@@ -9,23 +9,14 @@
   ; --- .dtm Uzantısı ---
   WriteRegStr HKCU "Software\Classes\.dtm" "" "DTAsistan.Document"
   WriteRegStr HKCU "Software\Classes\.dtm" "Content Type" "application/x-dtm"
-  WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "NullFile" ""
-  WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "ItemName" "Doğrudan Temin Çalışma Dosyası (Eski)"
-  WriteRegStr HKCU "Software\Classes\.dtm\ShellNew" "IconPath" '"$INSTDIR\DTAsistan.exe",0'
 
   ; --- .dta Uzantısı ---
   WriteRegStr HKCU "Software\Classes\.dta" "" "DTAsistan.Document"
   WriteRegStr HKCU "Software\Classes\.dta" "Content Type" "application/x-dta"
-  WriteRegStr HKCU "Software\Classes\.dta\ShellNew" "NullFile" ""
-  WriteRegStr HKCU "Software\Classes\.dta\ShellNew" "ItemName" "DT Asistan Lite Proje Dosyası"
-  WriteRegStr HKCU "Software\Classes\.dta\ShellNew" "IconPath" '"$INSTDIR\DTAsistan.exe",0'
 
   ; --- .dte Uzantısı ---
   WriteRegStr HKCU "Software\Classes\.dte" "" "DTAsistan.Document"
   WriteRegStr HKCU "Software\Classes\.dte" "Content Type" "application/x-dte"
-  WriteRegStr HKCU "Software\Classes\.dte\ShellNew" "NullFile" ""
-  WriteRegStr HKCU "Software\Classes\.dte\ShellNew" "ItemName" "DT Asistan Lite Veri Aktarım Dosyası"
-  WriteRegStr HKCU "Software\Classes\.dte\ShellNew" "IconPath" '"$INSTDIR\DTAsistan.exe",0'
 
   ; --- ProgID Tanımı ve Açma Komutu ---
   WriteRegStr HKCU "Software\Classes\DTAsistan.Document" "" "DT Asistan Lite Çalışma Dosyası"

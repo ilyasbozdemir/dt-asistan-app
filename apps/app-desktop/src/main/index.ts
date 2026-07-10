@@ -231,6 +231,15 @@ function createWindow(): void {
     if (win) win.close()
   })
 
+  ipcMain.on('window-toggle-devtools', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) win.webContents.toggleDevTools()
+  })
+
+  ipcMain.on('open-external-url', (_event, url) => {
+    shell.openExternal(url)
+  })
+
   // Helper to open dta-res URLs in external application safely
   function openDtaResExternally(requestUrl: string): void {
     try {
