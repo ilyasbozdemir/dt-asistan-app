@@ -226,8 +226,11 @@ export function Sidebar(): React.JSX.Element {
               {institutionName}
             </span>
 
-            <span className="text-sidebar-hover-text font-bold text-base tracking-wide whitespace-nowrap truncate leading-tight mt-1">
+            <span className="text-sidebar-hover-text font-bold text-base tracking-wide whitespace-nowrap leading-tight mt-1 flex items-center gap-1.5 justify-center">
               DT Asistan
+              <span className="text-[8px] bg-blue-500/15 text-blue-500 dark:text-blue-400 border border-blue-500/25 px-1 py-0.2 rounded font-black uppercase tracking-wider scale-90">
+                ALPHA
+              </span>
             </span>
           </div>
         )}
