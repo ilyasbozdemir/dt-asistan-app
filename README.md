@@ -2,12 +2,21 @@
 
 Bu depo (repository), hem masaüstü uygulamasını hem de web sunucusu bileşenlerini içeren bir **pnpm monorepo** çalışma alanıdır.
 
+## 📥 Masaüstü Uygulaması İndir (Desktop App Download)
+
+DT Asistan Lite uygulamasının en güncel sürümlerini doğrudan GitHub Releases sayfası üzerinden indirebilirsiniz:
+
+👉 **[DT Asistan Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases)**
+
+*Not: Windows için `.exe` kurulum sihirbazını indirip doğrudan çalıştırabilirsiniz.*
+
 ---
 
 ## 📂 Dizin Yapısı
 
-- **[`/desktop`](file:///d:/Github/ilyas-bozdemir/dt-desktop-app/desktop):** Electron + React + TypeScript kullanılarak geliştirilen masaüstü asistan uygulamasıdır.
-- **[`/web`](file:///d:/Github/ilyas-bozdemir/dt-desktop-app/web):** Sunucu tarafındaki veri eşitleme, API yolları ve web arayüzü için Next.js (App Router, Tailwind CSS, TypeScript) ile geliştirilen web uygulamasıdır.
+- **[`apps/app-desktop`](file:///d:/Github/ilyas-bozdemir/dt-desktop-app/apps/app-desktop):** Electron + React + TypeScript kullanılarak geliştirilen masaüstü asistan uygulamasıdır.
+- **[`apps/app-web`](file:///d:/Github/ilyas-bozdemir/dt-desktop-app/apps/app-web):** Sunucu tarafındaki veri eşitleme, API yolları ve web arayüzü Next.js ile geliştirilmiştir.
+- **[`apps/app-landing`](file:///d:/Github/ilyas-bozdemir/dt-desktop-app/apps/app-landing):** Web tanıtım ve açılış sayfasıdır.
 
 ---
 
@@ -26,8 +35,6 @@ Projeleri yerelde çalıştırmak için kök dizinden aşağıdaki komutları ku
 
 - **Masaüstü Uygulaması (Electron):**
   ```bash
-  pnpm dev
-  # veya
   pnpm dev:desktop
   ```
 
@@ -58,7 +65,7 @@ Kök dizinden tüm alt projeleri yönetebilmeniz için tanımlanmış kısayol s
 
 | Komut | Açıklama |
 | :--- | :--- |
-| `pnpm dev` | Masaüstü uygulamasını geliştirme modunda açar |
+| `pnpm dev:desktop` | Masaüstü uygulamasını geliştirme modunda açar |
 | `pnpm dev:web` | Web sunucusunu geliştirme modunda açar |
 | `pnpm build:desktop` | Masaüstü uygulamasının production derlemesini alır |
 | `pnpm build:web` | Web sunucusunun production derlemesini alır |
