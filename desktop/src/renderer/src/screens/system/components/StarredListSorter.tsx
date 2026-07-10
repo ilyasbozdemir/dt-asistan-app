@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
-import { Star, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
+import { Star, ChevronUp, ChevronDown } from 'lucide-react'
 import { parseStatusAndName, getStatusBadgeClass } from '../utils/statusUtils'
 
 interface StarredListSorterProps {
@@ -93,10 +93,10 @@ export const StarredListSorter: React.FC<StarredListSorterProps> = ({
                       </button>
                       <button
                         onClick={() => toggleStar(docName)}
-                        className="p-1 hover:bg-red-955/50 rounded text-slate-400 hover:text-red-400 cursor-pointer"
+                        className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-amber-400 cursor-pointer"
                         title="Kısayoldan Kaldır"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                       </button>
                     </div>
                   </div>

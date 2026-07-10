@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
-import { FileText, Eye, Printer, Download, ExternalLink, Trash2 } from 'lucide-react'
+import { FileText, Eye, Printer, Download, ExternalLink, Star } from 'lucide-react'
 import { getStatusBadgeLightClass } from '../utils/statusUtils'
 import { Sablon } from '../../sablonlar/sablonlar.hooks'
 
@@ -126,13 +126,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
           </div>
         </div>
 
-        {/* 🗑️ Delete/Unstar button */}
+        {/* ⭐ Star/Unstar button */}
         <button
           onClick={onToggleStar}
           title="Paketten Kaldır"
-          className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-rose-50 dark:bg-slate-955 dark:hover:bg-rose-955/20 text-slate-400 hover:text-rose-600 hover:scale-105 border border-slate-150 dark:border-slate-850"
+          className="p-2 rounded-xl transition-all cursor-pointer bg-slate-50 hover:bg-amber-55/20 dark:bg-slate-955 dark:hover:bg-amber-955/20 text-amber-550 hover:scale-105 border border-slate-150 dark:border-slate-800"
         >
-          <Trash2 className="w-4 h-4" />
+          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
         </button>
       </div>
     </div>

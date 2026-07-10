@@ -552,6 +552,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                   onQuickPrint={() => handleAction('print', [sablon.id])}
                                   onExport={(fmt) => handleAction(fmt, [sablon.id])}
                                   onToggleStar={() => toggleStar(sablon.ad)}
+                                  docName={sablon.ad}
                                   onOpenExternal={async () => {
                                     const processCtx =
                                       contextsByPath?.[sablon.route_path || ''] || dosyaContext

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ChevronDown, ChevronUp, FileText, Star } from 'lucide-react'
 import { BUTTON_COLORS, normalizeForMatch, SABLON_GRUPLARI } from './useDosyaAsamasiSablons'
+import { parseStatusAndName } from '../../../system/utils/statusUtils'
 import { BelgeAksiyonlari } from '../../../../components/ui/BelgeAksiyonlari'
 
 // -----------------------------------------------------------------------
@@ -116,14 +117,8 @@ export function SurecBelgeleriPanel({
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
   const hasStarred = stageSablons.some((sablon) => {
     if (!activeStarredDocs) return false
-    const cleanName = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)
-      ? sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)![2].trim()
-      : sablon.ad
-    return activeStarredDocs.some(
-      (d) =>
-        normalizeForMatch(d) === normalizeForMatch(sablon.ad) ||
-        normalizeForMatch(d) === normalizeForMatch(cleanName)
-    )
+    const { cleanName } = parseStatusAndName(sablon.ad)
+    return activeStarredDocs.some((d) => normalizeForMatch(d) === normalizeForMatch(cleanName))
   })
 
   const [filter, setFilter] = useState<'all' | 'starred'>('starred')
@@ -148,14 +143,8 @@ export function SurecBelgeleriPanel({
   const displaySablons = React.useMemo(() => {
     if (filter === 'starred' && activeStarredDocs) {
       return stageSablons.filter((sablon) => {
-        const cleanName = sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)
-          ? sablon.ad.match(/^\[(.*?)\]\s*(.*)$/)![2].trim()
-          : sablon.ad
-        return activeStarredDocs.some(
-          (d) =>
-            normalizeForMatch(d) === normalizeForMatch(sablon.ad) ||
-            normalizeForMatch(d) === normalizeForMatch(cleanName)
-        )
+        const { cleanName } = parseStatusAndName(sablon.ad)
+        return activeStarredDocs.some((d) => normalizeForMatch(d) === normalizeForMatch(cleanName))
       })
     }
     return stageSablons
@@ -367,9 +356,7 @@ function SablonCard({
   const isDisabled = ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))
 
   const isStarred = activeStarredDocs.some(
-    (d) =>
-      normalizeForMatch(d) === normalizeForMatch(activeSablon.ad) ||
-      normalizeForMatch(d) === normalizeForMatch(cleanName)
+    (d) => normalizeForMatch(d) === normalizeForMatch(cleanName)
   )
 
   return (
@@ -450,9 +437,10 @@ function SablonCard({
             onPreview={() => onSablonClick(activeSablon, activeSablon.ad)}
             onQuickPrint={() => onQuickPrint(activeSablon)}
             onExport={(fmt) => onExport(activeSablon, fmt)}
-            onToggleStar={() => onToggleStar(activeSablon.ad)}
+            onToggleStar={() => onToggleStar(cleanName)}
             onOpenExternal={() => onOpenExternal(activeSablon)}
             disabled={isDisabled}
+            docName={cleanName}
           />
         </div>
       </div>
