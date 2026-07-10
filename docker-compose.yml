@@ -16,7 +16,7 @@ services:
 
   web:
     build:
-      context: ./web
+      context: ./apps/app-web
       dockerfile: Dockerfile
     container_name: dt-asistan-web
     restart: always

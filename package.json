@@ -3,16 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:desktop": "pnpm --filter ./desktop dev",
-    "dev:web": "pnpm --filter ./web dev",
+    "dev:desktop": "pnpm --filter app-desktop dev",
+    "dev:web": "pnpm --filter app-web dev",
+    "dev:website": "pnpm --filter app-landing dev",
     "dev": "pnpm dev:desktop",
-    "build:desktop": "pnpm --filter ./desktop build",
-    "build:web": "pnpm --filter ./web build",
-    "typecheck:desktop": "pnpm --filter ./desktop typecheck",
-    "typecheck:web": "pnpm --filter ./web build",
+    "build:desktop": "pnpm --filter app-desktop build",
+    "build:web": "pnpm --filter app-web build",
+    "build:website": "pnpm --filter app-landing build",
+    "typecheck:desktop": "pnpm --filter app-desktop typecheck",
+    "typecheck:web": "pnpm --filter app-web build",
     "typecheck": "pnpm typecheck:desktop && pnpm typecheck:web",
-    "format": "pnpm --filter ./desktop format",
-    "lint": "pnpm --filter ./desktop lint && pnpm --filter ./web lint"
+    "format": "pnpm --filter app-desktop format",
+    "lint": "pnpm --filter app-desktop lint && pnpm --filter app-web lint"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
