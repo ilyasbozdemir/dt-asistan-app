@@ -25,8 +25,8 @@ export function Header(): React.JSX.Element {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
-  const { loadSettings } = useSettingsStore()
   const { closeWorkspace } = useWorkspaceStore()
+  const { loadSettings } = useSettingsStore()
   const queryClient = useQueryClient()
 
   const handleCloseWorkspace = async (): Promise<void> => {
