@@ -60,6 +60,13 @@ const DOCUMENTS = [
         title: 'Faydalı Doküman (20200610-8)',
         description: 'İlgili resmi mevzuat dokümanı.',
         file: 'dta-res://docs/20200610-8.pdf'
+      },
+      {
+        id: '100_soruda_dogrudan_temin',
+        title: '100 Soruda Doğrudan Temin Kılavuzu',
+        description:
+          'Doğrudan temin süreçleri ve yasal usuller hakkında 100 soru-cevaplık detaylı kılavuz.',
+        file: 'dta-res://docs/100_soruda_dogrudan_temin.pdf'
       }
     ]
   },
