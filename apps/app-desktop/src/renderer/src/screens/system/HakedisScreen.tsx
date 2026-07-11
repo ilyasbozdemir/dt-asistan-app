@@ -1,12 +1,5 @@
-import React from "react";
-import {
-  ChevronRight,
-  Construction,
-  FileText,
-  Settings,
-  ShieldAlert,
-  Sparkles,
-} from "lucide-react";
+import React from 'react'
+import { ChevronRight, Construction, FileText, Settings, ShieldAlert, Sparkles } from 'lucide-react'
 
 export default function HakedisScreen(): React.JSX.Element {
   return (
@@ -24,8 +17,8 @@ export default function HakedisScreen(): React.JSX.Element {
               </span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
-              Yapım işleri, hizmet ve mal alımları için hakediş dosyaları, yeşil
-              defter, icmaller ve raporlama modülü.
+              Yapım işleri, hizmet ve mal alımları için hakediş dosyaları, yeşil defter, icmaller ve
+              raporlama modülü.
             </p>
           </div>
         </div>
@@ -45,10 +38,9 @@ export default function HakedisScreen(): React.JSX.Element {
               Hakediş Süreçlerinizi Uçtan Uca Dijitalleştiriyoruz
             </h2>
             <p className="text-xs text-white/80 leading-relaxed font-normal">
-              Kamu İhale Mevzuatına tam uyumlu; yeşil defter girişi, hakediş
-              raporları, fiyat farkı hesaplamaları ve kapak evraklarının
-              otomatik hazırlanacağı yeni nesil hakediş modülü çok yakında
-              yayında olacaktır.
+              Kamu İhale Mevzuatına tam uyumlu; yeşil defter girişi, hakediş raporları, fiyat farkı
+              hesaplamaları ve kapak evraklarının otomatik hazırlanacağı yeni nesil hakediş modülü
+              çok yakında yayında olacaktır.
             </p>
           </div>
         </div>
@@ -59,20 +51,15 @@ export default function HakedisScreen(): React.JSX.Element {
             💡 Neden Hakediş Modülü? (Hizmet ve Yapım İşleri İçin Önemli)
           </h3>
           <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-normal">
-            Doğrudan temin süreçlerinde <strong>Mal Alımları</strong>{" "}
-            genellikle tek seferde teslim edilip kapatılırken; zamana yayılan
-            {" "}
-            <strong>Hizmet Alımları</strong>{" "}
-            (temizlik, veri girişi, güvenlik vb.) ve{" "}
-            <strong>Yapım / Bakım Onarım İşleri</strong>{" "}
-            periyodik olarak ara ödemeler yani <strong>Hakediş</strong>{" "}
-            gerektirir.
+            Doğrudan temin süreçlerinde <strong>Mal Alımları</strong> genellikle tek seferde teslim
+            edilip kapatılırken; zamana yayılan <strong>Hizmet Alımları</strong> (temizlik, veri
+            girişi, güvenlik vb.) ve <strong>Yapım / Bakım Onarım İşleri</strong> periyodik olarak
+            ara ödemeler yani <strong>Hakediş</strong> gerektirir.
           </p>
           <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-normal">
-            Bu modül, doğrudan temin limitleri dahilinde yaptığınız sürekli
-            hizmet ve küçük ölçekli yapım işlerinizin metrajlarını, yeşil defter
-            girdilerini ve ara ödeme süreçlerini yasal kesintileriyle birlikte
-            hatasız yönetebilmeniz için geliştirilmektedir.
+            Bu modül, doğrudan temin limitleri dahilinde yaptığınız sürekli hizmet ve küçük ölçekli
+            yapım işlerinizin metrajlarını, yeşil defter girdilerini ve ara ödeme süreçlerini yasal
+            kesintileriyle birlikte hatasız yönetebilmeniz için geliştirilmektedir.
           </p>
         </div>
 
@@ -97,8 +84,8 @@ export default function HakedisScreen(): React.JSX.Element {
                   Yeşil Defter & Metraj Cetveli
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-normal">
-                  Yapılan iş kalemlerinin metraj cetvellerini dinamik olarak
-                  girerek yeşil deftere otomatik işleme.
+                  Yapılan iş kalemlerinin metraj cetvellerini dinamik olarak girerek yeşil deftere
+                  otomatik işleme.
                 </p>
               </div>
             </div>
@@ -118,8 +105,8 @@ export default function HakedisScreen(): React.JSX.Element {
                   Fiyat Farkı Hesaplamaları
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-normal">
-                  Mevzuata ve güncel endekslere göre fiyat farkı
-                  hesaplamalarının saniyeler içinde hatasız yapılması.
+                  Mevzuata ve güncel endekslere göre fiyat farkı hesaplamalarının saniyeler içinde
+                  hatasız yapılması.
                 </p>
               </div>
             </div>
@@ -139,8 +126,8 @@ export default function HakedisScreen(): React.JSX.Element {
                   Hakediş İcmalleri & Raporlar
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-normal">
-                  Hakediş kapak raporu, dizi pusulası, gerçekleştirme raporu ve
-                  ödeme emri belgelerinin birleştirilmesi.
+                  Hakediş kapak raporu, dizi pusulası, gerçekleştirme raporu ve ödeme emri
+                  belgelerinin birleştirilmesi.
                 </p>
               </div>
             </div>
@@ -160,8 +147,8 @@ export default function HakedisScreen(): React.JSX.Element {
                   Mevzuat Kontrol Mekanizması
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-normal">
-                  Yasal kesintilerin (Gelir vergisi, Damga vergisi, SGK vb.)
-                  otomatik ve hatasız kontrolü.
+                  Yasal kesintilerin (Gelir vergisi, Damga vergisi, SGK vb.) otomatik ve hatasız
+                  kontrolü.
                 </p>
               </div>
             </div>
@@ -171,8 +158,8 @@ export default function HakedisScreen(): React.JSX.Element {
         {/* Footer/Contact */}
         <div className="p-4 bg-slate-100 dark:bg-slate-955/40 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-500 dark:text-slate-450 leading-relaxed flex items-center justify-between">
           <span>
-            💡 Bu modülle ilgili talepleriniz veya öncelik verilmesini
-            istediğiniz evrak türleri varsa bizimle iletişime geçebilirsiniz.
+            💡 Bu modülle ilgili talepleriniz veya öncelik verilmesini istediğiniz evrak türleri
+            varsa bizimle iletişime geçebilirsiniz.
           </span>
           <button className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold hover:underline shrink-0">
             Destek Al <ChevronRight className="w-4 h-4" />
@@ -180,5 +167,5 @@ export default function HakedisScreen(): React.JSX.Element {
         </div>
       </div>
     </div>
-  );
+  )
 }

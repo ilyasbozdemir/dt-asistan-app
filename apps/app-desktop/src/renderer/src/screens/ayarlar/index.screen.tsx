@@ -1154,18 +1154,44 @@ export default function AyarlarScreen(): React.ReactNode {
                         </h3>
                       </div>
                       <p className="text-xs text-slate-550 leading-relaxed">
-                        Masaüstündeki yerel verileri merkezi bir bulut veri tabanında toplamak ve eşitlemek için, projenin <code className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-805 text-blue-600 dark:text-blue-400 font-mono text-[10px] rounded">web/</code> klasöründeki API sunucusunu Docker ile saniyeler içinde ayağa kaldırabilirsiniz. Eşitleme sonrası yerel dosya (.dtal) workspace{"'"}leriniz bulut sunucunuza aktarılır.
+                        Masaüstündeki yerel verileri merkezi bir bulut veri tabanında toplamak ve
+                        eşitlemek için, projenin{' '}
+                        <code className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-805 text-blue-600 dark:text-blue-400 font-mono text-[10px] rounded">
+                          web/
+                        </code>{' '}
+                        klasöründeki API sunucusunu Docker ile saniyeler içinde ayağa
+                        kaldırabilirsiniz. Eşitleme sonrası yerel dosya (.dtal) workspace{"'"}
+                        leriniz bulut sunucunuza aktarılır.
                       </p>
 
                       <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3.5 space-y-2.5 font-mono text-[10px] text-slate-700 dark:text-slate-400">
-                        <div className="text-slate-400">{"// 1. Terminalde projenin ana klasörüne gidin ve derleyin"}</div>
-                        <div className="text-blue-600 dark:text-blue-400">docker build -t dt-asistan-server ./web</div>
-                        
-                        <div className="text-slate-400 mt-2">{"// 2. Sunucuyu 3000 portundan çalıştırın"}</div>
-                        <div className="text-blue-600 dark:text-blue-400">docker run -p 3000:3000 --name dt-server -d dt-asistan-server</div>
-                        
-                        <div className="text-slate-400 mt-2">{"// 3. Masaüstü bağlantısında Sunucu Adresi alanına girilecek değer"}</div>
-                        <div>Varsayılan Adres: <span className="text-emerald-600 dark:text-emerald-400 font-bold">http://localhost:3000</span> veya <span className="text-emerald-600 dark:text-emerald-400 font-bold">http://[LAN_SUNUCU_IP]:3000</span></div>
+                        <div className="text-slate-400">
+                          {'// 1. Terminalde projenin ana klasörüne gidin ve derleyin'}
+                        </div>
+                        <div className="text-blue-600 dark:text-blue-400">
+                          docker build -t dt-asistan-server ./web
+                        </div>
+
+                        <div className="text-slate-400 mt-2">
+                          {'// 2. Sunucuyu 3000 portundan çalıştırın'}
+                        </div>
+                        <div className="text-blue-600 dark:text-blue-400">
+                          docker run -p 3000:3000 --name dt-server -d dt-asistan-server
+                        </div>
+
+                        <div className="text-slate-400 mt-2">
+                          {'// 3. Masaüstü bağlantısında Sunucu Adresi alanına girilecek değer'}
+                        </div>
+                        <div>
+                          Varsayılan Adres:{' '}
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                            http://localhost:3000
+                          </span>{' '}
+                          veya{' '}
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                            http://[LAN_SUNUCU_IP]:3000
+                          </span>
+                        </div>
                       </div>
                     </div>
 

@@ -116,9 +116,7 @@ export function BelgeAksiyonlari({
       )
 
   const isInAnyPreset = presets.some((p) =>
-    p.docs.some(
-      (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedDocName
-    )
+    p.docs.some((d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedDocName)
   )
 
   const isStarredComputed = isInDefaultList || isInAnyPreset
@@ -293,7 +291,10 @@ export function BelgeAksiyonlari({
                   (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedDocName
                 )
                 return (
-                  <label key={p.id} className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                  <label
+                    key={p.id}
+                    className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
                     <input
                       type="checkbox"
                       checked={checked}

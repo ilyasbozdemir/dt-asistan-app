@@ -20,7 +20,7 @@ Uygulamanın en güncel sürümünü (Windows `.exe` yükleyicisi, güncelleme y
 👉 **[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest)**
 👉 **[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases)**
 
-*Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni sürümler arka planda otomatik olarak denetlenip güncellenir.*
+_Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni sürümler arka planda otomatik olarak denetlenip güncellenir._
 
 ---
 
