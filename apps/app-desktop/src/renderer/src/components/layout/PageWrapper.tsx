@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Header } from './Header'
 import { ActiveFileToolbar } from './ActiveFileToolbar'
 import { ActiveFileSidebar } from './ActiveFileSidebar'
+import { ActiveFileShortcuts } from './ActiveFileShortcuts'
 import { Footer } from './Footer'
 import { TabsBar } from './TabsBar'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -411,7 +412,7 @@ export function PageWrapper(): React.ReactNode {
         {activeDosyaId && <ActiveFileToolbar />}
         <TabsBar />
         <div className="flex flex-1 overflow-hidden relative">
-          {activeDosyaId && <ActiveFileSidebar />}
+          {activeDosyaId && <ActiveFileShortcuts />}
           <main className="flex-1 relative overflow-hidden">
             {tabs.map((tab) => {
               const isActive = tab.path === activeTabPath
@@ -434,6 +435,7 @@ export function PageWrapper(): React.ReactNode {
               )
             })}
           </main>
+          {activeDosyaId && <ActiveFileSidebar />}
         </div>
         <Footer />
       </div>

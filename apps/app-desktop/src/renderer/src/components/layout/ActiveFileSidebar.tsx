@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import {
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  FolderTree,
-  PackageSearch,
-  FileCheck,
-  CreditCard
-} from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCiktiMerkeziData } from '../../screens/dosya/CiktiMerkezi.hooks'
 import { useQuery } from '@tanstack/react-query'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -155,7 +146,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
     <div
       ref={dropdownRef}
       className={cn(
-        'h-full bg-white dark:bg-slate-900 border-r border-slate-250 dark:border-slate-800/80 flex flex-col transition-all duration-300 relative shrink-0 z-30 select-none',
+        'h-full bg-white dark:bg-slate-900 border-l border-slate-250 dark:border-slate-800/80 flex flex-col transition-all duration-300 relative shrink-0 z-30 select-none',
         isCollapsed ? 'w-16' : 'w-64'
       )}
     >
@@ -171,7 +162,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
           className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-auto cursor-pointer"
           title={isCollapsed ? 'Genişlet' : 'Daralt'}
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
       </div>
 
@@ -200,13 +191,6 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
 
           const stageRoute = STAGE_ROUTE[asama.asama_sira]
           const dropdownKey = `sidebar_asama_${asama.asama_sira}`
-
-          let IconComponent: React.ElementType = FolderTree
-          if (asama.asama_sira === 1) IconComponent = FolderTree
-          else if (asama.asama_sira === 2) IconComponent = PackageSearch
-          else if (asama.asama_sira === 3) IconComponent = FileCheck
-          else if (asama.asama_sira === 4) IconComponent = CreditCard
-          else if (asama.asama_sira === 5) IconComponent = FolderTree
 
           const isCompleted = activeDosya?.durum_asama_id
             ? asama.asama_sira < activeDosya.durum_asama_id
@@ -269,7 +253,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
 
               {/* Collapsed Tooltip / Hover Menu */}
               {isCollapsed && (
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 hidden group-hover:block z-50 bg-slate-900 text-white text-xs rounded-lg py-1.5 px-3 shadow-xl whitespace-nowrap">
+                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover:block z-50 bg-slate-900 text-white text-xs rounded-lg py-1.5 px-3 shadow-xl whitespace-nowrap">
                   {asama.asama_adi}
                 </div>
               )}
