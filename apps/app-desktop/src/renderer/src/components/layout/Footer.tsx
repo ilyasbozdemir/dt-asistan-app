@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Info, ExternalLink, Bug, Star, Wifi } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import packageJson from '../../../../../package.json'
 import { NetworkSyncModal } from '../network/NetworkSyncModal'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -25,23 +26,20 @@ export function Footer(): React.JSX.Element {
     }
   }
 
-  useEffect(() => {
-    fetchVersion()
-
-    // Start local server to get IP
-    if ((window as any).electron?.ipcRenderer) {
-      ;(window as any).electron.ipcRenderer
-        .invoke('network:start-express', 4000)
-        .then((res: any) => {
-          if (res && res.success) {
-            setLocalIp(`${res.ip}:${res.port}`)
-          }
+  const fetchLocalIp = () => {
+    if ((window as any).api?.getLocalIp) {
+      ;(window as any).api
+        .getLocalIp()
+        .then((ip: string) => {
+          if (ip) setLocalIp(ip)
         })
         .catch(console.error)
     }
+  }
 
-    window.addEventListener('app-version-changed', fetchVersion)
-    return () => window.removeEventListener('app-version-changed', fetchVersion)
+  useEffect(() => {
+    fetchVersion()
+    fetchLocalIp()
   }, [])
 
   useEffect(() => {
@@ -55,9 +53,8 @@ export function Footer(): React.JSX.Element {
   }, [])
 
   const openExternal = (url: string) => {
-    const electron = window.electron as any
-    if (electron && electron.shell && typeof electron.shell.openExternal === 'function') {
-      electron.shell.openExternal(url)
+    if ((window as any).api?.openExternal) {
+      ;(window as any).api.openExternal(url)
     } else {
       window.open(url, '_blank')
     }
@@ -70,12 +67,18 @@ export function Footer(): React.JSX.Element {
         {activeDosyaId && fileName && (
           <>
             <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
-            <span className="flex items-center gap-1">
+            <Link
+              to="/dosya"
+              className="flex items-center gap-1 hover:text-blue-650 dark:hover:text-blue-400 transition-colors cursor-pointer group"
+              title="Aktif Çalışma Dosyası (.dtal) Detaylarını Gör"
+            >
               <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
                 Dosya:
               </span>
-              <span className="font-semibold text-slate-700 dark:text-slate-305">{fileName}</span>
-            </span>
+              <span className="font-semibold text-slate-700 dark:text-slate-305 group-hover:underline">
+                {fileName}
+              </span>
+            </Link>
             {institutionName && institutionName !== 'Kurum Adı Bulunamadı' && (
               <>
                 <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>

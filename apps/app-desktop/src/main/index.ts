@@ -528,6 +528,20 @@ if (!gotTheLock && !isMultiInstance) {
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
     app.on('browser-window-created', (_, window) => {
       optimizer.watchWindowShortcuts(window)
+
+      // Ctrl + R / Cmd + R reload support in production
+      window.webContents.on('before-input-event', (event, input) => {
+        const isR = input.key.toLowerCase() === 'r'
+        const isCommandOrControl = input.control || input.meta
+        if (isCommandOrControl && isR) {
+          if (input.shift) {
+            window.webContents.reloadIgnoringCache()
+          } else {
+            window.webContents.reload()
+          }
+          event.preventDefault()
+        }
+      })
     })
 
     // Güvenlik: Tüm donanım (kamera, mikrofon) izinlerini varsayılan olarak reddet
@@ -924,10 +938,93 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
-    ipcMain.handle('get-changelog', async () => {
-      const allChanges: { version: string; notes: string; schema_max: number }[] = []
+    interface ChangelogSection {
+      version: string
+      date?: string
+      notes: string
+      isBacklog: boolean
+    }
 
-      // Gerçek uygulama güncellemelerini manuel ekliyoruz
+    function parseChangelogFile(filePath: string): ChangelogSection[] | null {
+      try {
+        if (!fs.existsSync(filePath)) {
+          return null
+        }
+        const content = fs.readFileSync(filePath, 'utf8')
+        const sections: ChangelogSection[] = []
+
+        // Split on ## lines
+        const parts = content.split(/\n##\s+/)
+        for (let i = 1; i < parts.length; i++) {
+          const part = parts[i].trim()
+          if (!part) continue
+
+          const lines = part.split('\n')
+          const headerLine = lines[0].trim()
+          const body = lines.slice(1).join('\n').trim()
+
+          // Matches: [1.0.0-beta.16] - 2026-07-01 or [Unreleased]
+          const versionMatch = headerLine.match(/\[?([^\]\s]+)\]?(?:\s*-\s*([\d-]+))?/)
+          if (!versionMatch) continue
+
+          const version = versionMatch[1]
+          const date = versionMatch[2] || undefined
+          const isBacklog =
+            version.toLowerCase() === 'unreleased' ||
+            headerLine.toLowerCase().includes('unreleased') ||
+            headerLine.toLowerCase().includes('backlog')
+
+          sections.push({
+            version,
+            date,
+            notes: body,
+            isBacklog
+          })
+        }
+        return sections
+      } catch (error) {
+        console.error('Error parsing changelog file:', error)
+        return null
+      }
+    }
+
+    ipcMain.handle('get-changelog', async () => {
+      const allChanges: { version: string; date?: string; notes: string; schema_max: number }[] = []
+      const backlog: { title: string; items: string[] }[] = []
+
+      // Parse CHANGELOG.md
+      const changelogPath = join(app.getAppPath(), 'CHANGELOG.md')
+      const parsed = parseChangelogFile(changelogPath)
+
+      if (parsed) {
+        parsed.forEach((section) => {
+          if (section.isBacklog) {
+            const items: string[] = []
+            const lines = section.notes.split('\n')
+            lines.forEach((line) => {
+              const trimmed = line.trim()
+              if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                items.push(trimmed.replace(/^[-*]\s*/, '').trim())
+              }
+            })
+            backlog.push({
+              title: section.version === 'Unreleased' ? 'Planlanan / Gelecek Sürüm' : section.version,
+              items
+            })
+          } else {
+            const matchingManifest = manifests.find((m: any) => m.app === section.version)
+            const schema_max = matchingManifest ? matchingManifest.schema_max : 20
+            allChanges.push({
+              version: section.version,
+              date: section.date,
+              notes: section.notes,
+              schema_max
+            })
+          }
+        })
+      }
+
+      // Fallback/hardcoded updates (from index.ts)
       const appUpdates = [
         {
           version: '1.0.0-beta.31',
@@ -966,34 +1063,53 @@ if (!gotTheLock && !isMultiInstance) {
         }
       ]
 
+      // Populate manifests first for those not matching parsed markdown updates
       for (const v of manifests) {
-        if (v.changes && v.changes.length > 0) {
-          const notes = v.changes
-            .map((c: any) => `- Schema ${c.schema}: ${c.description}`)
-            .join('\n')
-          allChanges.push({ version: v.app, notes, schema_max: v.schema_max })
-        } else {
-          allChanges.push({
-            version: v.app,
-            notes: 'Yapısal bir veritabanı değişikliği yok.',
-            schema_max: v.schema_max
-          })
+        const alreadyInMd = allChanges.some((c) => c.version === v.app)
+        if (!alreadyInMd) {
+          if (v.changes && v.changes.length > 0) {
+            const notes = v.changes
+              .map((c: any) => `- Schema ${c.schema}: ${c.description}`)
+              .join('\n')
+            allChanges.push({ version: v.app, notes, schema_max: v.schema_max })
+          } else {
+            allChanges.push({
+              version: v.app,
+              notes: 'Yapısal bir veritabanı değişikliği yok.',
+              schema_max: v.schema_max
+            })
+          }
         }
       }
 
-      // App güncellemelerini ekle
+      // App güncellemelerini (hardcoded) ekle/üzerine yaz
       appUpdates.forEach((update) => {
-        // Eğer manifest'te aynı versiyon varsa onu ez
         const index = allChanges.findIndex((c) => c.version === update.version)
         if (index !== -1) {
-          allChanges[index] = update
+          if (
+            allChanges[index].notes.includes('Yapısal bir veritabanı değişikliği yok') ||
+            allChanges[index].notes.length < update.notes.length
+          ) {
+            allChanges[index].notes = update.notes
+          }
         } else {
           allChanges.push(update)
         }
       })
 
+      // Add a fallback backlog if no backlog was parsed from CHANGELOG.md
+      if (backlog.length === 0) {
+        backlog.push({
+          title: 'Planlanan / Gelecek Sürüm (v1.0.0 Backlog)',
+          items: [
+            'Fatura ve İrsaliye Yönetimi: İlgili doğrudan temin dosyalarına ödeme faturaları ve irsaliyelerin yüklenmesi için sistematik bir dosya yönetim alanı.',
+            'İmzalı Belge Yönetimi: İmzalanan evrakların toplu olarak ZIP dosyası ile sisteme yüklenebilmesi ve yönetimi.'
+          ]
+        })
+      }
+
       // Versionlara göre SemVer formatında sırala (descending)
-      return allChanges.sort((a, b) => {
+      const sortedChanges = allChanges.sort((a, b) => {
         const regex = /^v?(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z]+)\.(\d+))?$/
         const parseVer = (v: string) => {
           const m = v.match(regex)
@@ -1002,7 +1118,7 @@ if (!gotTheLock && !isMultiInstance) {
             major: parseInt(m[1]),
             minor: parseInt(m[2]),
             patch: parseInt(m[3]),
-            preType: m[4] || 'z', // no pre-release (z) is greater than alpha/beta
+            preType: m[4] || 'z',
             preNum: parseInt(m[5] || '0')
           }
         }
@@ -1016,6 +1132,12 @@ if (!gotTheLock && !isMultiInstance) {
         if (va.preType !== vb.preType) return vb.preType.localeCompare(va.preType)
         return vb.preNum - va.preNum
       })
+
+      return {
+        success: true,
+        changelog: sortedChanges,
+        backlog: backlog
+      }
     })
 
     ipcMain.handle(
