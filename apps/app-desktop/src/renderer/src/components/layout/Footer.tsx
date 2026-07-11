@@ -3,9 +3,11 @@ import { Info, ExternalLink, Bug, Star, Wifi } from 'lucide-react'
 import packageJson from '../../../../../package.json'
 import { NetworkSyncModal } from '../network/NetworkSyncModal'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useSettingsStore } from '../../store/settingsStore'
 
 export function Footer(): React.JSX.Element {
-  const { activeMeta } = useWorkspaceStore()
+  const { activeMeta, activeDosyaId, fileName } = useWorkspaceStore()
+  const { institutionName, eButceKodu } = useSettingsStore()
   const [showAbout, setShowAbout] = useState(false)
   const [showNetwork, setShowNetwork] = useState(false)
   const [appVersion, setAppVersion] = useState(packageJson.version)
@@ -63,14 +65,49 @@ export function Footer(): React.JSX.Element {
 
   return (
     <footer className="h-8 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 text-xs text-slate-500 dark:text-slate-400 z-50">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3 select-none">
         <span>Doğrudan Temin Yönetim Sistemi</span>
-        <span className="w-px h-3 bg-slate-300 dark:bg-slate-700"></span>
-        <span>Hazır</span>
-        {activeMeta?.updated_at && (
+        {activeDosyaId && fileName && (
+          <>
+            <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
+            <span className="flex items-center gap-1">
+              <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
+                Dosya:
+              </span>
+              <span className="font-semibold text-slate-700 dark:text-slate-305">{fileName}</span>
+            </span>
+            {institutionName && institutionName !== 'Kurum Adı Bulunamadı' && (
+              <>
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
+                <span className="flex items-center gap-1">
+                  <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
+                    Kurum:
+                  </span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-305">
+                    {institutionName}
+                  </span>
+                </span>
+              </>
+            )}
+            {eButceKodu && (
+              <>
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
+                <span className="flex items-center gap-1">
+                  <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
+                    Bütçe:
+                  </span>
+                  <span className="font-mono font-semibold text-slate-700 dark:text-slate-305">
+                    {eButceKodu}
+                  </span>
+                </span>
+              </>
+            )}
+          </>
+        )}
+        {!activeDosyaId && activeMeta?.updated_at && (
           <>
             <span className="w-px h-3 bg-slate-300 dark:bg-slate-700"></span>
-            <span className="text-slate-600 dark:text-slate-400">
+            <span className="text-slate-650 dark:text-slate-400">
               Son Güncelleme:{' '}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 {new Date(activeMeta.updated_at).toLocaleString('tr-TR')}
@@ -117,23 +154,29 @@ export function Footer(): React.JSX.Element {
               </span>
             </div>
 
-            <div className="p-3 text-[11px] text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700 leading-relaxed">
-              <p className="mb-2">
-                Bu sürüm <strong>tek kullanıcılı</strong> ve yerel{' '}
-                <strong>SQLite tabanlı (.dtal)</strong> olarak çalışan ücretsiz sürümdür.
+            <div className="p-3 text-[11px] text-slate-650 dark:text-slate-350 border-b border-slate-100 dark:border-slate-700 leading-relaxed">
+              <p className="mb-2.5">
+                Bu uygulama, kamu kurumlarının doğrudan temin süreçlerini standartlaştırmak,
+                hızlandırmak ve hatasız yürütmesini sağlamak amacıyla{' '}
+                <strong>
+                  tamamen ücretsiz olarak desteklenen ve sürdürülen bağımsız bir girişimdir.
+                </strong>{' '}
+                Yerel dosya mimarisi (.dtal) üzerinde tek kullanıcılı olarak sınırsızca
+                çalışmaktadır.
               </p>
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40 p-2.5 rounded-lg">
-                <p className="font-semibold text-blue-800 dark:text-blue-300 mb-1 flex items-center gap-1.5">
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-2.5 rounded-lg">
+                <p className="font-bold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-1.5 text-xs">
                   <span className="flex h-2 w-2 relative">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                   </span>
-                  Kurumsal Çözümler İçin
+                  İleri Seviye Kurumsal Çözümler
                 </p>
-                <p className="text-[10px] text-blue-700/80 dark:text-blue-300/80 leading-snug">
-                  Kurum içi harici sunucu kurulumu, rol bazlı yetkilendirme (Role-Based Access
-                  Control), gelişmiş çoklu kullanıcı senkronizasyonu ve log yönetimi gibi
-                  profesyonel ihtiyaçlarınız için geliştiriciyle iletişime geçebilirsiniz.
+                <p className="text-[10px] text-blue-700/90 dark:text-blue-300/80 leading-relaxed font-medium">
+                  Merkezi ağ üzerinde ortak veri havuzu, rol bazlı personel yetkilendirmesi (RBAC),
+                  bulut api gateway üzerinden anlık veri eşitlemesi ve merkezi işlem loglama
+                  denetimleri gibi ileri seviye kurumsal modüllerimiz için geliştiriciyle iletişime
+                  geçebilirsiniz.
                 </p>
               </div>
             </div>
