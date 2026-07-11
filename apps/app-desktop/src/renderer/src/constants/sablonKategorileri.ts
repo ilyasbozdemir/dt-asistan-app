@@ -72,6 +72,7 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
       'muayene-kabul-komisyonu',
       'muayene-kabul-tutanagi',
       'odeme-emri-belgesi',
+      'odeme-talep-dilekcesi',
       'odeme-yazisi',
       'tasinir-islem-fisi'
     ]

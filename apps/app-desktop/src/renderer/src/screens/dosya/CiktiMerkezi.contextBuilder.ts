@@ -153,6 +153,10 @@ export function buildDocumentContext(
   else if (rawTur === 'yapim_isi' || rawTur === 'yapim') alimTuruText = 'Yapım İşi'
   else if (rawTur === 'danismanlik') alimTuruText = 'Danışmanlık Hizmet Alımı'
 
+  const isMal = rawTur === 'mal'
+  const isHizmet = rawTur === 'hizmet' || rawTur === 'danismanlik'
+  const isYapim = rawTur === 'yapim_isi' || rawTur === 'yapim'
+
   const rawButceKodu = dosyaResData?.butce_kodu || ''
   const butceTertibiArray = rawButceKodu
     .split(/[\n,;]+/)
@@ -258,6 +262,9 @@ export function buildDocumentContext(
     kapakDetaylari,
     tarih: today,
     alimTuru: alimTuruText,
+    isMal,
+    isHizmet,
+    isYapim,
     dosyaTarihi: dosyaResData?.tarih || today,
     yukleniciFirma: dosyaResData?.yuklenici_firma_adi || null,
     yukleniciAdresi: dosyaResData?.yuklenici_firma_adresi || '',
