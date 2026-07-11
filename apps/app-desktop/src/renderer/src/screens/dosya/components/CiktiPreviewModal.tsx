@@ -1,15 +1,6 @@
 import React from 'react'
 import { Star, X } from 'lucide-react'
-
-interface Sablon {
-  id: number
-  ad: string
-  dosya_adi: string
-  kategori: string
-  icerik: string
-  route_path?: string
-  test_verisi?: string
-}
+import { Sablon } from '../../sablonlar/sablonlar.hooks'
 
 interface CiktiPreviewModalProps {
   previewSablon: Sablon
