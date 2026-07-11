@@ -125,7 +125,7 @@
     <div class="page-container">
       <!-- TARIH -->
       <div class="date-block">
-        {{dilekceTarihi}}
+        {{#dilekceTarihi}}{{dilekceTarihi}}{{/dilekceTarihi}}{{^dilekceTarihi}}{{tarih}}{{/dilekceTarihi}}
       </div>
 
       <!-- MAKAMA HİTAP -->
