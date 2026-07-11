@@ -240,6 +240,23 @@ function createWindow(): void {
     shell.openExternal(url)
   })
 
+  ipcMain.on('find-in-page:start', (event, text, options = {}) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win && text) {
+      win.webContents.findInPage(text, {
+        forward: options.forward !== false,
+        findNext: options.findNext === true
+      })
+    }
+  })
+
+  ipcMain.on('find-in-page:stop', (event, action = 'clearSelection') => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) {
+      win.webContents.stopFindInPage(action)
+    }
+  })
+
   // Helper to open dta-res URLs in external application safely
   function openDtaResExternally(requestUrl: string): void {
     try {
@@ -529,10 +546,12 @@ if (!gotTheLock && !isMultiInstance) {
     app.on('browser-window-created', (_, window) => {
       optimizer.watchWindowShortcuts(window)
 
-      // Ctrl + R / Cmd + R reload support in production
+      // Ctrl + R / Cmd + R reload support in production, and Ctrl + F search support
       window.webContents.on('before-input-event', (event, input) => {
         const isR = input.key.toLowerCase() === 'r'
+        const isF = input.key.toLowerCase() === 'f'
         const isCommandOrControl = input.control || input.meta
+        
         if (isCommandOrControl && isR) {
           if (input.shift) {
             window.webContents.reloadIgnoringCache()
@@ -540,7 +559,18 @@ if (!gotTheLock && !isMultiInstance) {
             window.webContents.reload()
           }
           event.preventDefault()
+        } else if (isCommandOrControl && isF) {
+          window.webContents.send('find-in-page:toggle')
+          event.preventDefault()
         }
+      })
+
+      // Send found-in-page match results back to renderer
+      window.webContents.on('found-in-page', (_, result) => {
+        window.webContents.send('find-in-page:result', {
+          activeMatchOrdinal: result.activeMatchOrdinal,
+          matches: result.matches
+        })
       })
     })
 

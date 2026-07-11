@@ -15,6 +15,7 @@ import { DisclaimerModal } from '../modals/DisclaimerModal'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
 import { routeComponents } from './routeComponents'
+import { FindInPage } from './FindInPage'
 
 export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
@@ -335,6 +336,7 @@ export function PageWrapper(): React.ReactNode {
 
     return (
       <div className="h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col">
+        <FindInPage />
         {/* Window Title Bar */}
         <div
           className="h-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex items-center px-3 shrink-0 gap-2"
@@ -407,6 +409,7 @@ export function PageWrapper(): React.ReactNode {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <DisclaimerModal />
+      <FindInPage />
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
         {activeDosyaId && <ActiveFileToolbar />}
