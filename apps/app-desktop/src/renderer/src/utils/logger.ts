@@ -16,6 +16,21 @@ export async function logActivity(
   try {
     const q = 'INSERT INTO LOG_SystemLog (title, message, type) VALUES (?, ?, ?)'
     await window.electron.ipcRenderer.invoke('db:query', q, [title, message, type])
+
+    // Trigger HTML5 desktop notification for success, warning, or error severity logs
+    if (type === 'success' || type === 'warning' || type === 'error') {
+      try {
+        const notification = new window.Notification(`DT Asistan - ${title}`, {
+          body: message,
+          icon: '/icon.png'
+        })
+        notification.onclick = () => {
+          window.focus()
+        }
+      } catch (notifyErr) {
+        console.warn('Desktop notification could not be shown:', notifyErr)
+      }
+    }
   } catch (error) {
     console.error('Failed to write system log:', error)
   }

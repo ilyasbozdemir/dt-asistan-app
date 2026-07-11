@@ -7,6 +7,7 @@ import { Button } from '../../../components/ui/Button'
 import { Sablon, useSaveSablon } from '../sablonlar.hooks'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { getInstitutionSuffixes } from '../../../utils/kurumHelper'
+import { logActivity } from '../../../utils/logger'
 
 import { AiTemplateGeneratorModal } from './AiTemplateGeneratorModal'
 import { A4Editor } from '../../../components/editor/A4Editor'
@@ -290,6 +291,11 @@ export function SablonEditor({
               console.error('Dosyaya yazma hatası:', e)
             }
           }
+          await logActivity(
+            'Şablon Kaydedildi',
+            `"${ad}" isimli şablon başarıyla güncellendi.`,
+            'success'
+          )
           alert('Şablon başarıyla kaydedildi!')
           onBack()
         },
