@@ -9,7 +9,12 @@ import {
   Clock,
   FileCheck,
   HelpCircle,
-  Layers
+  Layers,
+  Calculator,
+  FileSpreadsheet,
+  Coins,
+  Printer,
+  FileText
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -173,15 +178,15 @@ export function TakipScreen(): React.JSX.Element {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT: STEPPER & STAGE TIMELINE */}
           <div className="lg:col-span-8 space-y-6">
-            {/* ACTIVE FILE SUMMARY INFO */}
-            <div className="p-6 rounded-3xl bg-linear-to-r from-blue-650/10 via-indigo-650/5 to-transparent border border-blue-500/10 dark:border-blue-500/5 relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-36 h-36 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-950/40 px-2.5 py-1 rounded-full border border-blue-500/15">
+            {/* ACTIVE FILE SUMMARY & ACTIONS PANEL */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-6">
+              {/* Dossier Basic Info */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-955/40 px-2.5 py-1 rounded-full border border-blue-500/15">
                     {activeDosya.temin_no || 'Dosya No Belirtilmedi'}
                   </span>
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                  <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
                     {activeDosya.konu}
                   </h2>
                   <p className="text-xs text-slate-550 dark:text-slate-400 capitalize">
@@ -203,6 +208,140 @@ export function TakipScreen(): React.JSX.Element {
                   <span className="text-xl font-mono font-extrabold text-slate-850 dark:text-slate-100">
                     {formatCurrency(activeDosya.yaklasik_maliyet || 0)}
                   </span>
+                </div>
+              </div>
+
+              {/* Process Navigation Grid (Drill down options) */}
+              <div>
+                <h4 className="text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-3 select-none">
+                  Süreç Adımları Hızlı Erişim Paneli
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {/* İhtiyaç ve Hazırlık */}
+                  <Link
+                    to="/dosya/hazirlik-ve-ihtiyac"
+                    className="group p-4 bg-slate-50/50 hover:bg-blue-50/40 dark:bg-slate-900/50 dark:hover:bg-blue-950/10 border border-slate-200/60 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-450 flex items-center justify-center">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        İhtiyaç & Hazırlık
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        Malzeme Girişi & Başlangıç Onayı
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Yaklaşık Maliyet */}
+                  <Link
+                    to="/dosya/firmalar-maliyet/yaklasik"
+                    className="group p-4 bg-slate-50/50 hover:bg-indigo-50/40 dark:bg-slate-900/50 dark:hover:bg-indigo-950/10 border border-slate-200/60 hover:border-indigo-200 dark:border-slate-800 dark:hover:border-indigo-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-405 flex items-center justify-center">
+                        <Calculator className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        Yaklaşık Maliyet Cetveli
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        Fiyat Girişleri & Maliyet Tespiti
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Piyasa Fiyat Araştırması */}
+                  <Link
+                    to="/dosya/piyasa-fiyat-arastirmasi"
+                    className="group p-4 bg-slate-50/50 hover:bg-emerald-50/40 dark:bg-slate-900/50 dark:hover:bg-emerald-950/10 border border-slate-200/60 hover:border-emerald-200 dark:border-slate-800 dark:hover:border-emerald-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 flex items-center justify-center">
+                        <FileSpreadsheet className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        Teklifler & Araştırma
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        Firma Teklifleri & Karar Tutanağı
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Sipariş ve Sözleşme */}
+                  <Link
+                    to="/dosya/siparis-ve-sozlesme"
+                    className="group p-4 bg-slate-50/50 hover:bg-amber-50/40 dark:bg-slate-900/50 dark:hover:bg-amber-950/10 border border-slate-200/60 hover:border-amber-200 dark:border-slate-800 dark:hover:border-amber-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-450 flex items-center justify-center">
+                        <FileCheck className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        Onay Belgesi & Sözleşme
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        Sipariş Mektubu & Sözleşme Hazırlama
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Kabul ve Ödeme */}
+                  <Link
+                    to="/dosya/kabul-ve-odeme"
+                    className="group p-4 bg-slate-50/50 hover:bg-purple-50/40 dark:bg-slate-900/50 dark:hover:bg-purple-950/10 border border-slate-200/60 hover:border-purple-200 dark:border-slate-800 dark:hover:border-purple-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-650 dark:text-purple-400 flex items-center justify-center">
+                        <Coins className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        Kabul, Ödeme & Hakediş
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        Muayene Kabul, TİF & Ödeme Emri
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Çıktı Merkezi */}
+                  <Link
+                    to="/dosya/cikti-merkezi"
+                    className="group p-4 bg-slate-50/50 hover:bg-pink-50/40 dark:bg-slate-900/50 dark:hover:bg-pink-950/10 border border-slate-200/60 hover:border-pink-200 dark:border-slate-800 dark:hover:border-pink-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center">
+                        <Printer className="w-4 h-4" />
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                        Dosya Çıktı Merkezi
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
+                        İndeks, Sırtlıklar & Tüm Çıktılar
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -417,15 +556,6 @@ export function TakipScreen(): React.JSX.Element {
                     </div>
                   ))
                 )}
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Link to="/dosyalar">
-                  <Button className="w-full text-xs font-semibold py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-150 border-0 flex items-center justify-center gap-1">
-                    Dosya Detayına Git
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </Link>
               </div>
             </div>
           </div>
