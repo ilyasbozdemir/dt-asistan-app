@@ -64,16 +64,20 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
     kategori: '4. Kabul & Ödeme İşlemleri',
     klasorAdi: '4-kabul-ve-odeme-islemleri',
     sablonlar: [
+      'banka-degisiklik-bildirimi',
       'hakedis-raporu',
       'harcama-pusulasi',
       'hizmet-isleri-kabul-teklif-belgesi',
       'hizmet-isleri-kabul-tutanagi',
+      'is-deneyim-belgesi-talebi',
       'kabul-edilen-teklif-odeme',
+      'kesin-teminat-iadesi',
       'muayene-kabul-komisyonu',
       'muayene-kabul-tutanagi',
       'odeme-emri-belgesi',
       'odeme-talep-dilekcesi',
       'odeme-yazisi',
+      'sure-uzatim-talebi',
       'tasinir-islem-fisi'
     ]
   },
