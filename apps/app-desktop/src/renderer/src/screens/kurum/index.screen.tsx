@@ -143,7 +143,7 @@ export default function KurumScreen(): React.JSX.Element {
 
   if (queryTab === "kadro") {
     return (
-      <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
         <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
           <Link
             to="/kurum"
@@ -169,7 +169,7 @@ export default function KurumScreen(): React.JSX.Element {
     );
   }
   return (
-    <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+    <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 dark:border-slate-800 pb-4 gap-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
