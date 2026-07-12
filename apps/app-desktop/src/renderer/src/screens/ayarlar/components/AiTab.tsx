@@ -37,7 +37,9 @@ export const AiTab: React.FC<AiTabProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
         <div>
-          <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100">Yapay Zeka (AI) Ayarları</h2>
+          <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100">
+            Yapay Zeka (AI) Ayarları
+          </h2>
           <p className="text-xs text-slate-500">
             Yer tutucular ve metin üretimi için kullanılacak AI sağlayıcısını seçin.
           </p>
@@ -101,7 +103,9 @@ export const AiTab: React.FC<AiTabProps> = ({
         {/* OpenAI */}
         {aiProvider === 'openai' && (
           <div className="md:col-span-2 space-y-1">
-            <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400">OpenAI API Anahtarı</label>
+            <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400">
+              OpenAI API Anahtarı
+            </label>
             <Input
               type="password"
               placeholder="sk-..."
@@ -170,10 +174,14 @@ export const AiTab: React.FC<AiTabProps> = ({
             {aiTestStatus === 'loading' ? '⏳ Test Ediliyor...' : '⚡ Bağlantıyı Test Et'}
           </Button>
           {aiTestStatus === 'ok' && (
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{aiTestMsg}</span>
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              {aiTestMsg}
+            </span>
           )}
           {aiTestStatus === 'error' && (
-            <span className="text-xs font-semibold text-red-500 dark:text-red-400">{aiTestMsg}</span>
+            <span className="text-xs font-semibold text-red-500 dark:text-red-400">
+              {aiTestMsg}
+            </span>
           )}
         </div>
       </div>

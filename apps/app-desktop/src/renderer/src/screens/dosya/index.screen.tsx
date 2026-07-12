@@ -1,48 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { useWorkspaceStore } from "../../store/workspaceStore";
-import { Link } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Cpu,
-  FileArchive,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import React, { useEffect, useState } from 'react'
+import { useWorkspaceStore } from '../../store/workspaceStore'
+import { Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { AlertTriangle, ArrowLeft, Cpu, FileArchive, ChevronDown, ChevronUp } from 'lucide-react'
 
-import { ProcessStats } from "./components/ProcessStats";
-import { DteTransfer } from "./components/DteTransfer";
-import { PackageStructure } from "./components/PackageStructure";
-import { SelectedFileInspector } from "./components/SelectedFileInspector";
-import { UpdaterWidget } from "./components/UpdaterWidget";
-import { ChangelogWidget } from "./components/ChangelogWidget";
+import { ProcessStats } from './components/ProcessStats'
+import { DteTransfer } from './components/DteTransfer'
+import { PackageStructure } from './components/PackageStructure'
+import { SelectedFileInspector } from './components/SelectedFileInspector'
+import { UpdaterWidget } from './components/UpdaterWidget'
+import { ChangelogWidget } from './components/ChangelogWidget'
 
 interface TableStat {
-  tableName: string;
-  label: string;
-  count: number;
-  description: string;
+  tableName: string
+  label: string
+  count: number
+  description: string
 }
 
-type PackageFile = "meta.json" | "database.sqlite" | "attachments/";
+type PackageFile = 'meta.json' | 'database.sqlite' | 'attachments/'
 
 export default function DosyaScreen(): React.JSX.Element {
-  const { activeMeta, activeFilePath, fileName } = useWorkspaceStore();
-  const [selectedFile, setSelectedFile] = useState<PackageFile>("meta.json");
-  const [copied, setCopied] = useState(false);
+  const { activeMeta, activeFilePath, fileName } = useWorkspaceStore()
+  const [selectedFile, setSelectedFile] = useState<PackageFile>('meta.json')
+  const [copied, setCopied] = useState(false)
 
-  const queryClient = useQueryClient();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const queryClient = useQueryClient()
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [changelog, setChangelog] = useState<
     { version: string; notes: string; schema_max: number }[]
-  >([]);
-  const [backlog, setBacklog] = useState<{ title: string; items: string[] }[]>(
-    [],
-  );
-  const [activeHistoryTab, setActiveHistoryTab] = useState<
-    "releases" | "backlog"
-  >("releases");
+  >([])
+  const [backlog, setBacklog] = useState<{ title: string; items: string[] }[]>([])
+  const [activeHistoryTab, setActiveHistoryTab] = useState<'releases' | 'backlog'>('releases')
 
   // Süreç Yönetimi States
   const [processStats, setProcessStats] = useState({
@@ -50,310 +39,300 @@ export default function DosyaScreen(): React.JSX.Element {
     asama2: 0,
     asama3: 0,
     asama4: 0,
-    tamamlandi: 0,
-  });
-  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+    tamamlandi: 0
+  })
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
 
   useEffect(() => {
-    if (!window.electron) return;
+    if (!window.electron) return
     window.electron.ipcRenderer
-      .invoke("get-changelog")
+      .invoke('get-changelog')
       .then((res) => {
         if (res && res.success) {
-          setChangelog(res.changelog || []);
-          setBacklog(res.backlog || []);
+          setChangelog(res.changelog || [])
+          setBacklog(res.backlog || [])
         } else if (Array.isArray(res)) {
-          setChangelog(res);
+          setChangelog(res)
         }
       })
-      .catch(console.error);
-  }, []);
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
-    if (!window.electron || !activeFilePath) return;
+    if (!window.electron || !activeFilePath) return
     const fetchProcessStats = async () => {
       try {
         const res = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT durum_asama_id, COUNT(*) as count FROM DATA_TeminDosyasi GROUP BY durum_asama_id",
-        );
+          'db:query',
+          'SELECT durum_asama_id, COUNT(*) as count FROM DATA_TeminDosyasi GROUP BY durum_asama_id'
+        )
         if (res.success && res.data) {
           const stats = {
             asama1: 0,
             asama2: 0,
             asama3: 0,
             asama4: 0,
-            tamamlandi: 0,
-          };
+            tamamlandi: 0
+          }
           res.data.forEach((row: any) => {
-            const asama = row.durum_asama_id || 1;
-            if (asama === 1) stats.asama1 += row.count;
-            else if (asama === 2) stats.asama2 += row.count;
-            else if (asama === 3) stats.asama3 += row.count;
-            else if (asama === 4) stats.asama4 += row.count;
-            else if (asama === 5) stats.tamamlandi += row.count;
-          });
-          setProcessStats(stats);
+            const asama = row.durum_asama_id || 1
+            if (asama === 1) stats.asama1 += row.count
+            else if (asama === 2) stats.asama2 += row.count
+            else if (asama === 3) stats.asama3 += row.count
+            else if (asama === 4) stats.asama4 += row.count
+            else if (asama === 5) stats.tamamlandi += row.count
+          })
+          setProcessStats(stats)
         }
       } catch (e) {
-        console.error("Süreç istatistikleri alınamadı", e);
+        console.error('Süreç istatistikleri alınamadı', e)
       }
-    };
-    fetchProcessStats();
-  }, [activeFilePath, refreshTrigger]);
+    }
+    fetchProcessStats()
+  }, [activeFilePath, refreshTrigger])
 
   // DTE Data Transfer States
-  const [dteContentType, setDteContentType] = useState<
-    "firms" | "items" | "all"
-  >("firms");
-  const [dteStatus, setDteStatus] = useState<
-    {
-      type: "success" | "error" | "info";
-      message: string;
-    } | null
-  >(null);
-  const [dteLoading, setDteLoading] = useState(false);
+  const [dteContentType, setDteContentType] = useState<'firms' | 'items' | 'all'>('firms')
+  const [dteStatus, setDteStatus] = useState<{
+    type: 'success' | 'error' | 'info'
+    message: string
+  } | null>(null)
+  const [dteLoading, setDteLoading] = useState(false)
 
   const handleExportDte = async (): Promise<void> => {
-    setDteLoading(true);
-    setDteStatus(null);
+    setDteLoading(true)
+    setDteStatus(null)
     try {
-      const res = await window.electron.ipcRenderer.invoke(
-        "db:export-dte",
-        dteContentType,
-      );
+      const res = await window.electron.ipcRenderer.invoke('db:export-dte', dteContentType)
       if (res.success) {
         setDteStatus({
-          type: "success",
-          message:
-            `Veriler başarıyla dışa aktarıldı. (${res.recordCount} kayıt)`,
-        });
+          type: 'success',
+          message: `Veriler başarıyla dışa aktarıldı. (${res.recordCount} kayıt)`
+        })
       } else {
-        if (res.error !== "İptal edildi") {
+        if (res.error !== 'İptal edildi') {
           setDteStatus({
-            type: "error",
-            message: `Dışa aktarma hatası: ${res.error}`,
-          });
+            type: 'error',
+            message: `Dışa aktarma hatası: ${res.error}`
+          })
         }
       }
     } catch (err: any) {
       setDteStatus({
-        type: "error",
-        message: err.message || "Dışa aktarım sırasında beklenmedik hata.",
-      });
+        type: 'error',
+        message: err.message || 'Dışa aktarım sırasında beklenmedik hata.'
+      })
     } finally {
-      setDteLoading(false);
+      setDteLoading(false)
     }
-  };
+  }
 
   const handleImportDte = async (): Promise<void> => {
-    setDteLoading(true);
-    setDteStatus(null);
+    setDteLoading(true)
+    setDteStatus(null)
     try {
-      const res = await window.electron.ipcRenderer.invoke("db:import-dte");
+      const res = await window.electron.ipcRenderer.invoke('db:import-dte')
       if (res.success) {
-        let msg = "";
+        let msg = ''
         if (res.importedFirmsCount > 0) {
-          msg += `${res.importedFirmsCount} adet firma `;
+          msg += `${res.importedFirmsCount} adet firma `
         }
         if (res.importedItemsCount > 0) {
-          msg += `${
-            msg ? "ve " : ""
-          }${res.importedItemsCount} adet malzeme/hizmet kalemi `;
+          msg += `${msg ? 've ' : ''}${res.importedItemsCount} adet malzeme/hizmet kalemi `
         }
 
         if (res.totalImportedCount > 0 && !msg) {
-          msg = `Toplam ${res.totalImportedCount} adet kayıt `;
+          msg = `Toplam ${res.totalImportedCount} adet kayıt `
         }
 
         if (!msg && res.totalImportedCount === 0) {
-          msg = "Aktarılacak yeni kayıt bulunamadı veya atlandı.";
+          msg = 'Aktarılacak yeni kayıt bulunamadı veya atlandı.'
         } else {
-          msg += "başarıyla içe aktarıldı.";
+          msg += 'başarıyla içe aktarıldı.'
         }
 
         if (res.warnings && res.warnings.length > 0) {
-          msg += ` (Uyarı: ${res.warnings.join(", ")})`;
+          msg += ` (Uyarı: ${res.warnings.join(', ')})`
         }
 
         setDteStatus({
-          type: "success",
-          message: msg,
-        });
+          type: 'success',
+          message: msg
+        })
 
         // Invalidate react-query cache
-        queryClient.invalidateQueries();
+        queryClient.invalidateQueries()
         // Refresh local stats
-        setRefreshTrigger((prev) => prev + 1);
+        setRefreshTrigger((prev) => prev + 1)
       } else {
-        if (res.error !== "İptal edildi") {
+        if (res.error !== 'İptal edildi') {
           setDteStatus({
-            type: "error",
-            message: `İçe aktarma hatası: ${res.error}`,
-          });
+            type: 'error',
+            message: `İçe aktarma hatası: ${res.error}`
+          })
         }
       }
     } catch (err: any) {
       setDteStatus({
-        type: "error",
-        message: err.message || "İçe aktarım sırasında beklenmedik hata.",
-      });
+        type: 'error',
+        message: err.message || 'İçe aktarım sırasında beklenmedik hata.'
+      })
     } finally {
-      setDteLoading(false);
+      setDteLoading(false)
     }
-  };
+  }
 
   // Database stats state
-  const [dbStats, setDbStats] = useState<TableStat[]>([]);
-  const [loadingStats, setLoadingStats] = useState(false);
-  const [statsError, setStatsError] = useState<string | null>(null);
+  const [dbStats, setDbStats] = useState<TableStat[]>([])
+  const [loadingStats, setLoadingStats] = useState(false)
+  const [statsError, setStatsError] = useState<string | null>(null)
 
   // Auto-Updater States
-  const [updaterStatus, setUpdaterStatus] = useState<string>("idle"); // idle, checking, available, not-available, downloaded, error
-  const [updateVersion, setUpdateVersion] = useState<string>("");
-  const [updaterError, setUpdaterError] = useState<string>("");
+  const [updaterStatus, setUpdaterStatus] = useState<string>('idle') // idle, checking, available, not-available, downloaded, error
+  const [updateVersion, setUpdateVersion] = useState<string>('')
+  const [updaterError, setUpdaterError] = useState<string>('')
 
   useEffect(() => {
-    if (!window.electron) return;
+    if (!window.electron) return
 
     const removeListener = window.electron.ipcRenderer.on(
-      "updater:status",
+      'updater:status',
       (_, data: { status: string; version?: string; error?: string }) => {
-        setUpdaterStatus(data.status);
-        if (data.version) setUpdateVersion(data.version);
-        if (data.error) setUpdaterError(data.error);
-      },
-    );
+        setUpdaterStatus(data.status)
+        if (data.version) setUpdateVersion(data.version)
+        if (data.error) setUpdaterError(data.error)
+      }
+    )
 
     return () => {
-      if (removeListener) removeListener();
-    };
-  }, []);
+      if (removeListener) removeListener()
+    }
+  }, [])
 
   const handleCheckUpdates = async (): Promise<void> => {
-    setUpdaterStatus("checking");
-    setUpdaterError("");
+    setUpdaterStatus('checking')
+    setUpdaterError('')
     try {
-      const res = await window.electron.ipcRenderer.invoke("updater:check");
+      const res = await window.electron.ipcRenderer.invoke('updater:check')
       if (!res.success) {
-        setUpdaterStatus("error");
-        setUpdaterError(res.error || "Güncelleme kontrolü başarısız.");
+        setUpdaterStatus('error')
+        setUpdaterError(res.error || 'Güncelleme kontrolü başarısız.')
       }
     } catch (err: any) {
-      setUpdaterStatus("error");
-      setUpdaterError(err.message || "Hata oluştu.");
+      setUpdaterStatus('error')
+      setUpdaterError(err.message || 'Hata oluştu.')
     }
-  };
+  }
 
   const handleQuitAndInstall = async (): Promise<void> => {
     try {
-      await window.electron.ipcRenderer.invoke("updater:quit-and-install");
+      await window.electron.ipcRenderer.invoke('updater:quit-and-install')
     } catch (err: any) {
-      alert("Güncelleme yüklenirken hata oluştu: " + err.message);
+      alert('Güncelleme yüklenirken hata oluştu: ' + err.message)
     }
-  };
+  }
 
   // Fetch SQLite stats when workspace changes or database.sqlite is selected
   useEffect(() => {
-    if (!window.electron || !activeFilePath) return;
+    if (!window.electron || !activeFilePath) return
 
     const fetchStats = async (): Promise<void> => {
-      setLoadingStats(true);
-      setStatsError(null);
+      setLoadingStats(true)
+      setStatsError(null)
       try {
         const tables = [
           {
-            name: "DATA_TeminDosyasi",
-            label: "Doğrudan Temin Dosyaları",
-            desc: "Süreçteki doğrudan temin dosyaları ve ihale teklifleri",
+            name: 'DATA_TeminDosyasi',
+            label: 'Doğrudan Temin Dosyaları',
+            desc: 'Süreçteki doğrudan temin dosyaları ve ihale teklifleri'
           },
           {
-            name: "TANIM_Birim",
-            label: "Kurum Birimleri",
-            desc: "Bütçe harcaması yapan belediye müdürlükleri/birimleri",
+            name: 'TANIM_Birim',
+            label: 'Kurum Birimleri',
+            desc: 'Bütçe harcaması yapan belediye müdürlükleri/birimleri'
           },
           {
-            name: "TANIM_Personel",
-            label: "Personel Havuzu",
-            desc: "Evraklarda imza yetkilisi olan kurum çalışanları",
+            name: 'TANIM_Personel',
+            label: 'Personel Havuzu',
+            desc: 'Evraklarda imza yetkilisi olan kurum çalışanları'
           },
           {
-            name: "TANIM_Mevzuat",
-            label: "Mevzuat ve Limitler",
-            desc: "Yıllara göre doğrudan temin bütçe ve KDV limitleri",
+            name: 'TANIM_Mevzuat',
+            label: 'Mevzuat ve Limitler',
+            desc: 'Yıllara göre doğrudan temin bütçe ve KDV limitleri'
           },
           {
-            name: "TANIM_Firma",
-            label: "Kayıtlı Firmalar",
-            desc: "Sistemde kayıtlı tedarikçiler ve firmalar havuzu",
+            name: 'TANIM_Firma',
+            label: 'Kayıtlı Firmalar',
+            desc: 'Sistemde kayıtlı tedarikçiler ve firmalar havuzu'
           },
           {
-            name: "TANIM_Kalem",
-            label: "Malzeme/Hizmet Kütüphanesi",
-            desc: "Yaklaşık maliyet kalem kütüphanesi",
+            name: 'TANIM_Kalem',
+            label: 'Malzeme/Hizmet Kütüphanesi',
+            desc: 'Yaklaşık maliyet kalem kütüphanesi'
           },
           {
-            name: "settings",
-            label: "Sistem Ayarları",
-            desc: "Uygulamanın yerel yapılandırma anahtar-değer çiftleri",
-          },
-        ];
+            name: 'settings',
+            label: 'Sistem Ayarları',
+            desc: 'Uygulamanın yerel yapılandırma anahtar-değer çiftleri'
+          }
+        ]
 
         const statsPromises = tables.map(async (table) => {
           const res = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            `SELECT COUNT(*) as row_count FROM ${table.name}`,
-          );
+            'db:query',
+            `SELECT COUNT(*) as row_count FROM ${table.name}`
+          )
           if (res.success && res.data && res.data.length > 0) {
             return {
               tableName: table.name,
               label: table.label,
               count: res.data[0].row_count,
-              description: table.desc,
-            };
+              description: table.desc
+            }
           }
           return {
             tableName: table.name,
             label: table.label,
             count: 0,
-            description: table.desc,
-          };
-        });
+            description: table.desc
+          }
+        })
 
-        const results = await Promise.all(statsPromises);
-        setDbStats(results);
+        const results = await Promise.all(statsPromises)
+        setDbStats(results)
       } catch (err: any) {
-        console.error("Veritabanı istatistikleri alınamadı:", err);
-        setStatsError(err.message || "İstatistikler okunamadı.");
+        console.error('Veritabanı istatistikleri alınamadı:', err)
+        setStatsError(err.message || 'İstatistikler okunamadı.')
       } finally {
-        setLoadingStats(false);
+        setLoadingStats(false)
       }
-    };
+    }
 
-    fetchStats();
-  }, [activeFilePath, refreshTrigger]);
+    fetchStats()
+  }, [activeFilePath, refreshTrigger])
 
   const handleCopyPath = (): void => {
-    if (!activeFilePath) return;
-    navigator.clipboard.writeText(activeFilePath);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    if (!activeFilePath) return
+    navigator.clipboard.writeText(activeFilePath)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   // Prettified JSON representation of activeMeta
   const rawJson = activeMeta
     ? JSON.stringify(
-      {
-        dtal_version: activeMeta.dtal_version,
-        app_version: activeMeta.app_version,
-        created_at: activeMeta.created_at,
-        institution: activeMeta.institution,
-        schema_version: activeMeta.schema_version,
-      },
-      null,
-      2,
-    )
-    : "";
+        {
+          dtal_version: activeMeta.dtal_version,
+          app_version: activeMeta.app_version,
+          created_at: activeMeta.created_at,
+          institution: activeMeta.institution,
+          schema_version: activeMeta.schema_version
+        },
+        null,
+        2
+      )
+    : ''
 
   return (
     <div className="p-4 sm:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
@@ -373,8 +352,8 @@ export default function DosyaScreen(): React.JSX.Element {
               Aktif Çalışma Dosyası (.dtal)
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
-              Uygulamanın veri alışverişi yaptığı sıkıştırılmış veritabanı arşiv
-              paketinin detayları.
+              Uygulamanın veri alışverişi yaptığı sıkıştırılmış veritabanı arşiv paketinin
+              detayları.
             </p>
           </div>
         </div>
@@ -434,7 +413,7 @@ export default function DosyaScreen(): React.JSX.Element {
             <div className="lg:col-span-5 flex flex-col gap-6">
               {/* Paket Yapısı Kartı */}
               <PackageStructure
-                fileName={fileName || ""}
+                fileName={fileName || ''}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
               />
@@ -455,11 +434,10 @@ export default function DosyaScreen(): React.JSX.Element {
                   Dosya Değişiklik Davranışı
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-medium font-sans">
-                  Uygulama çalışırken SQLite veritabanında yaptığınız tüm
-                  işlemler anlık kaydedilir. Uygulamadan çıkış yaparken veya
-                  dosya kapatılırken tüm veriler ve ekler otomatik olarak tekrar
-                  sıkıştırılıp tek bir <strong>.dtal</strong>{" "}
-                  arşiv dosyası olarak paketlenir.
+                  Uygulama çalışırken SQLite veritabanında yaptığınız tüm işlemler anlık kaydedilir.
+                  Uygulamadan çıkış yaparken veya dosya kapatılırken tüm veriler ve ekler otomatik
+                  olarak tekrar sıkıştırılıp tek bir <strong>.dtal</strong> arşiv dosyası olarak
+                  paketlenir.
                 </p>
               </div>
             </div>
@@ -499,5 +477,5 @@ export default function DosyaScreen(): React.JSX.Element {
         handleQuitAndInstall={handleQuitAndInstall}
       />
     </div>
-  );
+  )
 }

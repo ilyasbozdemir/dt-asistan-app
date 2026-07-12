@@ -22,9 +22,12 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
           <div>
-            <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">Veritabanı İşlemleri</h2>
+            <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
+              Veritabanı İşlemleri
+            </h2>
             <p className="text-xs text-slate-500">
-              Mevcut çalışma alanınızdaki tüm veritabanını dışa aktarabilir veya yedekten geri yükleyebilirsiniz.
+              Mevcut çalışma alanınızdaki tüm veritabanını dışa aktarabilir veya yedekten geri
+              yükleyebilirsiniz.
             </p>
           </div>
         </div>
@@ -35,10 +38,13 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
               <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-450">
                 <Download className="w-5 h-5" />
               </div>
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200">Veritabanını Dışa Aktar</h3>
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                Veritabanını Dışa Aktar
+              </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 h-10">
-              Tüm kalemlerinizi, dosyalarınızı ve komisyon bilgilerinizi içeren .sqlite dosyasını yedekleyin.
+              Tüm kalemlerinizi, dosyalarınızı ve komisyon bilgilerinizi içeren .sqlite dosyasını
+              yedekleyin.
             </p>
             <Button
               onClick={async () => {
@@ -64,10 +70,13 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
               <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg text-amber-600 dark:text-amber-400">
                 <Upload className="w-5 h-5" />
               </div>
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200">Veritabanını İçe Aktar</h3>
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                Veritabanını İçe Aktar
+              </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 h-10">
-              Daha önce aldığınız bir .sqlite yedeğini geri yükleyin. Mevcut verilerin üzerine yazılır.
+              Daha önce aldığınız bir .sqlite yedeğini geri yükleyin. Mevcut verilerin üzerine
+              yazılır.
             </p>
             <Button
               onClick={async () => {
@@ -103,10 +112,13 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
       <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-800">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
           <div>
-            <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">Eski Yılları Arşivle</h2>
+            <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
+              Eski Yılları Arşivle
+            </h2>
             <p className="text-xs text-slate-500">
-              Belirlediğiniz yıldan daha eski olan doğrudan temin dosyalarını ana veritabanından çıkartıp, sıkıştırılmış
-              arşiv dosyasına (.dtz) aktarır. Böylece sisteminiz daha hızlı çalışır ve dosya boyutu küçülür.
+              Belirlediğiniz yıldan daha eski olan doğrudan temin dosyalarını ana veritabanından
+              çıkartıp, sıkıştırılmış arşiv dosyasına (.dtz) aktarır. Böylece sisteminiz daha hızlı
+              çalışır ve dosya boyutu küçülür.
             </p>
           </div>
         </div>
@@ -134,9 +146,14 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
                   ) {
                     setIsArchiving(true)
                     try {
-                      const res = await window.electron.ipcRenderer.invoke('db:archive-old-records', archiveYear)
+                      const res = await window.electron.ipcRenderer.invoke(
+                        'db:archive-old-records',
+                        archiveYear
+                      )
                       if (res.success) {
-                        alert(`Başarılı! ${res.count} adet dosya arşivlendi.\nKaydedilen Yer: ${res.filePath}`)
+                        alert(
+                          `Başarılı! ${res.count} adet dosya arşivlendi.\nKaydedilen Yer: ${res.filePath}`
+                        )
                         window.location.reload()
                       } else {
                         alert('Hata: ' + res.message)
@@ -155,8 +172,9 @@ export const DatabaseArchiveTab: React.FC<DatabaseArchiveTabProps> = ({
               </Button>
             </div>
             <p className="text-xs text-slate-500 mt-3">
-              Not: Firma, personel ve birim tanımlarınız silinmez. Yalnızca eski temin dosyaları arşivlenir. Oluşan{' '}
-              <b>.dtz</b> dosyasını daha sonra uygulamadan tekrar açıp inceleyebilirsiniz.
+              Not: Firma, personel ve birim tanımlarınız silinmez. Yalnızca eski temin dosyaları
+              arşivlenir. Oluşan <b>.dtz</b> dosyasını daha sonra uygulamadan tekrar açıp
+              inceleyebilirsiniz.
             </p>
           </div>
         </div>

@@ -235,7 +235,9 @@ export default function AyarlarScreen(): React.ReactNode {
       })
       setSyncLastResult({
         type: res.success ? 'ok' : 'error',
-        msg: res.success ? '✅ Veriler başarıyla sunucuya gönderildi.' : res.message || 'Push hatası'
+        msg: res.success
+          ? '✅ Veriler başarıyla sunucuya gönderildi.'
+          : res.message || 'Push hatası'
       })
     } catch (err: any) {
       setSyncLastResult({ type: 'error', msg: '❌ ' + err.message })
@@ -359,18 +361,27 @@ export default function AyarlarScreen(): React.ReactNode {
             <Settings className="w-8 h-8 text-blue-605" />
             Sistem Ayarları
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">SMTP sunucu ve tema ayarlarını yönetin.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+            SMTP sunucu ve tema ayarlarını yönetin.
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* SOL MENÜ (DİKEY SEKME LİSTESİ) */}
-        <InnerMenu className="lg:col-span-3" items={menuItems} activeId={activeTab} onChange={(id) => setActiveTab(id as TabType)} />
+        <InnerMenu
+          className="lg:col-span-3"
+          items={menuItems}
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id as TabType)}
+        />
 
         {/* SAĞ PANEL (İÇERİK ALANI) */}
         <div className="lg:col-span-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col justify-between">
           {isLoadingSettings ? (
-            <div className="flex items-center justify-center flex-1 text-slate-500">Yükleniyor...</div>
+            <div className="flex items-center justify-center flex-1 text-slate-500">
+              Yükleniyor...
+            </div>
           ) : activeTab === 'tema' ? (
             <TemaScreen isEmbedded={true} />
           ) : (

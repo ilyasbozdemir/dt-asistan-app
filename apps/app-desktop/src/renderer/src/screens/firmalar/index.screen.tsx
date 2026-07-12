@@ -110,12 +110,7 @@ export default function FirmalarScreen(): React.JSX.Element {
   })
 
   if (viewingFirma) {
-    return (
-      <FirmaDetail
-        viewingFirma={viewingFirma}
-        setViewingFirma={setViewingFirma}
-      />
-    )
+    return <FirmaDetail viewingFirma={viewingFirma} setViewingFirma={setViewingFirma} />
   }
 
   return (

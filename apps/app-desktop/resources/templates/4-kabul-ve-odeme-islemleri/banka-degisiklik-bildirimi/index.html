@@ -139,17 +139,20 @@
         <div class="recipient-title">{{kurumAdi}}</div>
         {{#birimAdi}}
         <div class="recipient-sub">{{birimAdi}}</div>
-        {{/birimAdi}}
-        {{^birimAdi}}
+        {{/birimAdi}} {{^birimAdi}}
         <div class="recipient-sub">Destek Hizmetleri Müdürlüğüne</div>
         {{/birimAdi}}
       </div>
 
       <!-- DİLEKÇE METNİ -->
       <div class="petition-body">
-        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen 
-        <b>{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b> tarihli 
-        <b>"{{dosyaKonusu}}"</b> işi kapsamında firmamıza yapılacak hakediş ve fatura ödemelerinin, daha önce bildirilmiş olan hesap yerine, bundan sonra aşağıda detayları belirtilen yeni banka hesabımıza yatırılması hususunda gereğini arz ederim.
+        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen
+        <b
+          >{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b
+        >
+        tarihli <b>"{{dosyaKonusu}}"</b> işi kapsamında firmamıza yapılacak hakediş ve fatura
+        ödemelerinin, daha önce bildirilmiş olan hesap yerine, bundan sonra aşağıda detayları
+        belirtilen yeni banka hesabımıza yatırılması hususunda gereğini arz ederim.
       </div>
 
       <!-- İMZA BLOK -->
@@ -194,7 +197,11 @@
       {{#ekler.length}}
       <div class="attachments-block">
         <div class="attachments-title">Ekler:</div>
-        <ul class="attachments-list">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ul>
+        <ul class="attachments-list">
+          {{#ekler}}
+          <li>{{.}}</li>
+          {{/ekler}}
+        </ul>
       </div>
       {{/ekler.length}}
     </div>

@@ -60,11 +60,15 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ isLoading, stats, format
           <div className="text-[9px] text-slate-500 dark:text-slate-450 mt-2 flex flex-col gap-0.5 font-semibold">
             <div className="flex justify-between">
               <span>Aktif Süreç:</span>
-              <span className="font-bold text-blue-600 dark:text-blue-400">{stats.aktifDosyaSayisi}</span>
+              <span className="font-bold text-blue-600 dark:text-blue-400">
+                {stats.aktifDosyaSayisi}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Tamamlanan:</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.tamamlananDosyaSayisi}</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                {stats.tamamlananDosyaSayisi}
+              </span>
             </div>
           </div>
         </div>

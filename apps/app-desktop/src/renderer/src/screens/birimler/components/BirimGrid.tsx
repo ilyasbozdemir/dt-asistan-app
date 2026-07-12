@@ -108,9 +108,7 @@ export const BirimGrid: React.FC<BirimGridProps> = ({
                     <span className="font-semibold text-slate-700 dark:text-slate-300 mr-1">
                       DETSİS Kodu:
                     </span>
-                    <span className="font-mono">
-                      {birim.detsis_kodu || birim.dtvt_kodu}
-                    </span>
+                    <span className="font-mono">{birim.detsis_kodu || birim.dtvt_kodu}</span>
                   </div>
                 </div>
               )}
@@ -157,9 +155,7 @@ export const BirimGrid: React.FC<BirimGridProps> = ({
                     <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
                       Antet Ek Satır
                     </span>
-                    <span className="line-clamp-2 leading-relaxed">
-                      {birim.antet_ek_satir}
-                    </span>
+                    <span className="line-clamp-2 leading-relaxed">{birim.antet_ek_satir}</span>
                   </div>
                 </div>
               )}
@@ -171,9 +167,7 @@ export const BirimGrid: React.FC<BirimGridProps> = ({
                     <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
                       İhtiyaç Yeri
                     </span>
-                    <span className="line-clamp-2 leading-relaxed">
-                      {birim.ihtiyac_yeri_eki}
-                    </span>
+                    <span className="line-clamp-2 leading-relaxed">{birim.ihtiyac_yeri_eki}</span>
                   </div>
                 </div>
               )}

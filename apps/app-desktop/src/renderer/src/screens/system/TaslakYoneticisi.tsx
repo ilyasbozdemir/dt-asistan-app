@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Star } from 'lucide-react'
+import { Star, Trash2 } from 'lucide-react'
 import { useSablonlar } from '../sablonlar/sablonlar.hooks'
 import { subPagesMapping } from '../../constants/surecler'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -9,12 +9,12 @@ import { DocumentPreviewModal } from '../dosya/components/DocumentPreviewModal'
 // Subcomponents
 import { DocumentCard } from './components/DocumentCard'
 import { StarredListSorter } from './components/StarredListSorter'
-import { PresetSelector, DocumentPreset } from './components/PresetSelector'
+import { DocumentPreset } from './components/PresetSelector'
 import { PresetEditor } from './components/PresetEditor'
 import { PresetModals } from './components/PresetModals'
 
 // Utilities
-import { parseStatusAndName, normalizeForMatch } from './utils/statusUtils'
+import { normalizeForMatch, parseStatusAndName } from './utils/statusUtils'
 
 export default function TaslakYoneticisi(): React.JSX.Element {
   const { data: sablonlar = [] } = useSablonlar()
@@ -311,10 +311,10 @@ export default function TaslakYoneticisi(): React.JSX.Element {
 
   return (
     <div className="p-8 max-w-6xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-3">
-            <Star className="w-8 h-8 text-amber-500 fill-amber-500" />
+            <Star className="w-8 h-8 text-amber-500 fill-amber-500 animate-pulse" />
             Hızlı Erişim Paneli
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-2xl">
@@ -322,20 +322,52 @@ export default function TaslakYoneticisi(): React.JSX.Element {
             Yıldızladığınız belgeler sol panelde ve menülerde görünecektir.
           </p>
         </div>
+
+        {/* Üst Preset Seçici ve Kontrolleri */}
+        <div className="flex items-center gap-2.5 shrink-0 bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] uppercase font-bold text-slate-450 dark:text-slate-500 tracking-wider mb-0.5 ml-1">
+              Aktif Paket / Hızlı Erişim
+            </span>
+            <select
+              value={selectedPresetId}
+              onChange={(e) => setSelectedPresetId(e.target.value)}
+              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-700 dark:text-slate-350 font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 min-w-[200px]"
+            >
+              <option value="">🌟 Genel Hızlı Erişim</option>
+              {presets.map((p) => (
+                <option key={p.id} value={p.id}>
+                  📦 {p.name} ({p.docs.length} Belge)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex gap-1.5 pt-3.5">
+            <button
+              onClick={handleAddPreset}
+              className="py-1.5 px-3 rounded-xl text-xs font-bold transition-all bg-blue-650 hover:bg-blue-700 text-white flex items-center gap-1 shadow-sm cursor-pointer"
+              title="Yeni Paket Ekle"
+            >
+              + Yeni Paket
+            </button>
+            {selectedPresetId && (
+              <button
+                onClick={() => handleDeletePreset(selectedPresetId)}
+                className="p-2 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-955/30 text-rose-500 flex items-center justify-center cursor-pointer"
+                title="Paketi Sil"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sol Panel: Genel Yıldızlı Kısayollar */}
           <div className="lg:col-span-1 space-y-4">
-            <PresetSelector
-              selectedPresetId={selectedPresetId}
-              setSelectedPresetId={setSelectedPresetId}
-              presets={presets}
-              onAddPreset={handleAddPreset}
-              onDeletePreset={handleDeletePreset}
-            />
-
             <StarredListSorter
               starredList={starredList}
               routeMap={routeMap}

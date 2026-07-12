@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, FileText, FolderClosed, Plus, Search, TrendingUp, LogOut, X } from 'lucide-react'
+import {
+  ChevronDown,
+  FileText,
+  FolderClosed,
+  Plus,
+  Search,
+  TrendingUp,
+  LogOut,
+  X
+} from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
 import { useNavigate } from '@tanstack/react-router'

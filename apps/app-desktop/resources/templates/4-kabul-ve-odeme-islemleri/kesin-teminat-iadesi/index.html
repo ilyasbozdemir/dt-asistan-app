@@ -139,20 +139,25 @@
         <div class="recipient-title">{{kurumAdi}}</div>
         {{#birimAdi}}
         <div class="recipient-sub">{{birimAdi}}</div>
-        {{/birimAdi}}
-        {{^birimAdi}}
+        {{/birimAdi}} {{^birimAdi}}
         <div class="recipient-sub">Destek Hizmetleri Müdürlüğüne</div>
         {{/birimAdi}}
       </div>
 
       <!-- DİLEKÇE METNİ -->
       <div class="petition-body">
-        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen 
-        <b>{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b> tarihli 
-        <b>"{{dosyaKonusu}}"</b> işi başarıyla tamamlanmış olup, kabul işlemleri <b>{{kabulTarihi}}</b> tarihinde gerçekleştirilmiştir.
+        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen
+        <b
+          >{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b
+        >
+        tarihli <b>"{{dosyaKonusu}}"</b> işi başarıyla tamamlanmış olup, kabul işlemleri
+        <b>{{kabulTarihi}}</b> tarihinde gerçekleştirilmiştir.
       </div>
       <div class="petition-body">
-        Söz konusu iş kapsamında firmamızca idarenize sunulmuş olan <b>{{teminatTutari}}</b> TL tutarındaki kesin teminatın / teminat mektubunun (SGK ve Vergi Dairesi ilişiğinin kesilmesini müteakip) iade edilerek aşağıda detayları belirtilen banka hesabımıza aktarılması hususunda gereğini arz ederim.
+        Söz konusu iş kapsamında firmamızca idarenize sunulmuş olan <b>{{teminatTutari}}</b> TL
+        tutarındaki kesin teminatın / teminat mektubunun (SGK ve Vergi Dairesi ilişiğinin
+        kesilmesini müteakip) iade edilerek aşağıda detayları belirtilen banka hesabımıza
+        aktarılması hususunda gereğini arz ederim.
       </div>
 
       <!-- İMZA BLOK -->
@@ -197,7 +202,11 @@
       {{#ekler.length}}
       <div class="attachments-block">
         <div class="attachments-title">Ekler:</div>
-        <ul class="attachments-list">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ul>
+        <ul class="attachments-list">
+          {{#ekler}}
+          <li>{{.}}</li>
+          {{/ekler}}
+        </ul>
       </div>
       {{/ekler.length}}
     </div>

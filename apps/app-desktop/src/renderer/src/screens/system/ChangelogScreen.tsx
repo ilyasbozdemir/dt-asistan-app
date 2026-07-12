@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Megaphone, History, Compass, ArrowRight, Lightbulb, Sparkles, FileArchive } from 'lucide-react'
+import {
+  Megaphone,
+  History,
+  Compass,
+  ArrowRight,
+  Lightbulb,
+  Sparkles,
+  FileArchive
+} from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Link } from '@tanstack/react-router'
 
@@ -35,7 +43,8 @@ export default function ChangelogScreen(): React.JSX.Element {
             Güncellemeler & Yol Haritası
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-            DT Asistan uygulamasına gelen yenilikleri, düzeltmeleri takip edin ve planlanan gelecek özellikleri inceleyin.
+            DT Asistan uygulamasına gelen yenilikleri, düzeltmeleri takip edin ve planlanan gelecek
+            özellikleri inceleyin.
           </p>
         </div>
 
@@ -49,8 +58,13 @@ export default function ChangelogScreen(): React.JSX.Element {
               <FileArchive className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <div className="text-xs font-bold text-amber-800 dark:text-amber-450">Aktif Çalışma Alanı</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 max-w-[150px] truncate" title={fileName}>
+              <div className="text-xs font-bold text-amber-800 dark:text-amber-450">
+                Aktif Çalışma Alanı
+              </div>
+              <div
+                className="text-[10px] text-slate-500 dark:text-slate-400 max-w-[150px] truncate"
+                title={fileName}
+              >
                 {fileName || 'Detayları Gör'}
               </div>
             </div>
@@ -81,7 +95,8 @@ export default function ChangelogScreen(): React.JSX.Element {
           }`}
         >
           <Compass className="w-4 h-4" />
-          Yol Haritası & Düşünceler ({backlog.reduce((acc, curr) => acc + (curr.items?.length || 0), 0)})
+          Yol Haritası & Düşünceler (
+          {backlog.reduce((acc, curr) => acc + (curr.items?.length || 0), 0)})
         </button>
       </div>
 

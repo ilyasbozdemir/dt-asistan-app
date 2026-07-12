@@ -27,7 +27,9 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
         <>
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
             <div>
-              <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">Geliştirici ve Test Ayarları</h2>
+              <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
+                Geliştirici ve Test Ayarları
+              </h2>
               <p className="text-xs text-slate-500">
                 Geliştirme modunda otomatik güncellemeleri test etmek için kullanılır.
               </p>

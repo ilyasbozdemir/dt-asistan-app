@@ -21,7 +21,10 @@ interface DatabaseBrowserModalProps {
   onClose: () => void
 }
 
-export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalProps): React.JSX.Element {
+export function DatabaseBrowserModal({
+  isOpen,
+  onClose
+}: DatabaseBrowserModalProps): React.JSX.Element {
   const [tables, setTables] = useState<TableInfo[]>([])
   const [selectedTable, setSelectedTable] = useState<string>('')
   const [tableSearch, setTableSearch] = useState<string>('')
@@ -171,7 +174,9 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Database className={`w-3.5 h-3.5 ${selectedTable === t.name ? 'text-white' : 'text-slate-400'}`} />
+                  <Database
+                    className={`w-3.5 h-3.5 ${selectedTable === t.name ? 'text-white' : 'text-slate-400'}`}
+                  />
                   <span className="truncate font-mono">{t.name}</span>
                 </div>
                 <span
@@ -186,7 +191,9 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
               </button>
             ))}
             {filteredTables.length === 0 && (
-              <div className="text-center py-8 text-xs text-slate-400 italic">Tablo bulunamadı.</div>
+              <div className="text-center py-8 text-xs text-slate-400 italic">
+                Tablo bulunamadı.
+              </div>
             )}
           </div>
         </div>
@@ -272,17 +279,26 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                         {rows.map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 font-mono">
+                          <tr
+                            key={idx}
+                            className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 font-mono"
+                          >
                             {columns.map((c) => {
                               const val = row[c.name]
                               return (
                                 <td
                                   key={c.name}
                                   className="p-2 border-r border-slate-150 dark:border-slate-850 truncate max-w-[200px] text-slate-600 dark:text-slate-400"
-                                  title={val !== null && typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                                  title={
+                                    val !== null && typeof val === 'object'
+                                      ? JSON.stringify(val)
+                                      : String(val)
+                                  }
                                 >
                                   {val === null ? (
-                                    <span className="text-slate-350 dark:text-slate-600 italic">NULL</span>
+                                    <span className="text-slate-350 dark:text-slate-600 italic">
+                                      NULL
+                                    </span>
                                   ) : typeof val === 'object' ? (
                                     JSON.stringify(val)
                                   ) : (
@@ -299,7 +315,8 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                 </div>
                 {rows.length > 0 && (
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-medium">
-                    * Güvenli performans için ilk 100 satır gösterilmektedir. Tüm verileri incelemek için{' '}
+                    * Güvenli performans için ilk 100 satır gösterilmektedir. Tüm verileri incelemek
+                    için{' '}
                     <button
                       onClick={() => setQuickConsoleQuery(`SELECT * FROM ${selectedTable}`)}
                       className="text-blue-600 dark:text-blue-400 underline font-bold cursor-pointer"
@@ -318,18 +335,30 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                 <table className="w-full border-collapse text-xs text-left">
                   <thead className="bg-slate-50 dark:bg-slate-900 sticky top-0 font-bold border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">Sıra (cid)</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">Kolon Adı</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">Veri Türü</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 text-center">Nullable (NotNull)</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 text-center">Birincil Anahtar (PK)</th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">
+                        Sıra (cid)
+                      </th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">
+                        Kolon Adı
+                      </th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">
+                        Veri Türü
+                      </th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 text-center">
+                        Nullable (NotNull)
+                      </th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 text-center">
+                        Birincil Anahtar (PK)
+                      </th>
                       <th className="p-3">Varsayılan Değer</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-850 font-mono text-[11px]">
                     {columns.map((c) => (
                       <tr key={c.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
-                        <td className="p-3 border-r border-slate-150 dark:border-slate-850 text-slate-500">{c.cid}</td>
+                        <td className="p-3 border-r border-slate-150 dark:border-slate-850 text-slate-500">
+                          {c.cid}
+                        </td>
                         <td className="p-3 border-r border-slate-150 dark:border-slate-850 font-bold text-slate-800 dark:text-slate-250">
                           {c.name}
                         </td>
@@ -375,7 +404,11 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                       SQL Sorgu Girişi (Sadece SELECT sorguları desteklenir)
                     </label>
                     <button
-                      onClick={() => setConsoleQuery(`SELECT * FROM ${selectedTable || 'DATA_TeminDosyasi'} LIMIT 20`)}
+                      onClick={() =>
+                        setConsoleQuery(
+                          `SELECT * FROM ${selectedTable || 'DATA_TeminDosyasi'} LIMIT 20`
+                        )
+                      }
                       className="text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline cursor-pointer"
                     >
                       Taslak Sorgu Doldur
@@ -394,7 +427,9 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                       disabled={consoleLoading}
                       className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-bold px-5 text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10 active:scale-95 transition-all shrink-0 cursor-pointer"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 ${consoleLoading ? 'animate-spin' : ''}`} />
+                      <RefreshCw
+                        className={`w-3.5 h-3.5 ${consoleLoading ? 'animate-spin' : ''}`}
+                      />
                       Sorguyu Çalıştır
                     </button>
                   </div>
@@ -413,14 +448,18 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                       <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold block mb-1">SQL Hatası</span>
-                        <pre className="font-mono text-[10px] whitespace-pre-wrap">{consoleError}</pre>
+                        <pre className="font-mono text-[10px] whitespace-pre-wrap">
+                          {consoleError}
+                        </pre>
                       </div>
                     </div>
                   )}
 
                   {!consoleError && consoleResults.length === 0 ? (
                     <div className="text-center py-20 text-xs text-slate-400 italic">
-                      {consoleLoading ? 'Sonuçlar bekleniyor...' : 'Sorgu çalıştırıldıktan sonra sonuçlar burada listelenecektir.'}
+                      {consoleLoading
+                        ? 'Sonuçlar bekleniyor...'
+                        : 'Sorgu çalıştırıldıktan sonra sonuçlar burada listelenecektir.'}
                     </div>
                   ) : !consoleError ? (
                     <div className="h-full overflow-auto custom-scrollbar">
@@ -439,17 +478,26 @@ export function DatabaseBrowserModal({ isOpen, onClose }: DatabaseBrowserModalPr
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-850 font-mono">
                           {consoleResults.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
+                            <tr
+                              key={idx}
+                              className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20"
+                            >
                               {Object.keys(row).map((key) => {
                                 const val = row[key]
                                 return (
                                   <td
                                     key={key}
                                     className="p-2 border-r border-slate-150 dark:border-slate-850 truncate max-w-[200px] text-slate-650 dark:text-slate-400"
-                                    title={val !== null && typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                                    title={
+                                      val !== null && typeof val === 'object'
+                                        ? JSON.stringify(val)
+                                        : String(val)
+                                    }
                                   >
                                     {val === null ? (
-                                      <span className="text-slate-350 dark:text-slate-600 italic">NULL</span>
+                                      <span className="text-slate-350 dark:text-slate-600 italic">
+                                        NULL
+                                      </span>
                                     ) : typeof val === 'object' ? (
                                       JSON.stringify(val)
                                     ) : (

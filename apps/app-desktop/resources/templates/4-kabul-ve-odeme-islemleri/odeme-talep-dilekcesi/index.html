@@ -139,29 +139,41 @@
         <div class="recipient-title">{{kurumAdi}}</div>
         {{#birimAdi}}
         <div class="recipient-sub">{{birimAdi}}</div>
-        {{/birimAdi}}
-        {{^birimAdi}}
+        {{/birimAdi}} {{^birimAdi}}
         <div class="recipient-sub">Destek Hizmetleri Müdürlüğüne</div>
         {{/birimAdi}}
       </div>
 
       <!-- DİLEKÇE METNİ -->
       <div class="petition-body">
-        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen 
-        <b>{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b> tarihli 
-        <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz; 
-        {{#isMal}}malzemeleri <b>{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b> tarihinde teslim etmiş olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isMal}}
-        {{#isHizmet}}hizmetleri <b>{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b> tarihinde tamamlamış olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isHizmet}}
-        {{#isYapim}}yapım işlerini <b>{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b> tarihinde tamamlamış olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isYapim}}
-        {{^isMal}}
-          {{^isHizmet}}
-            {{^isYapim}}
-            iş kalemlerini <b>{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b> tarihinde teslim etmiş olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.
-            {{/isYapim}}
-          {{/isHizmet}}
-        {{/isMal}}
-        Söz konusu işe ilişkin düzenlenen <b>{{faturaTarihi}}</b> tarihli ve <b>{{faturaNo}}</b> no'lu fatura bedeli olan KDV hariç 
-        <b>{{genelToplam}}</b> TL (KDV dahil <b>{{kdvDahilToplam}}</b> TL) hak edişimizin, aşağıda belirtilen banka hesabımıza yatırılması hususunda gereğini arz ederim.
+        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen
+        <b
+          >{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b
+        >
+        tarihli <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz; {{#isMal}}malzemeleri
+        <b
+          >{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b
+        >
+        tarihinde teslim etmiş olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isMal}}
+        {{#isHizmet}}hizmetleri
+        <b
+          >{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b
+        >
+        tarihinde tamamlamış olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isHizmet}}
+        {{#isYapim}}yapım işlerini
+        <b
+          >{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b
+        >
+        tarihinde tamamlamış olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır.{{/isYapim}}
+        {{^isMal}} {{^isHizmet}} {{^isYapim}} iş kalemlerini
+        <b
+          >{{#teslimTarihi}}{{teslimTarihi}}{{/teslimTarihi}}{{^teslimTarihi}}..../..../20....{{/teslimTarihi}}</b
+        >
+        tarihinde teslim etmiş olup, kabulü {{kabulTarihi}} tarihinde yapılmıştır. {{/isYapim}}
+        {{/isHizmet}} {{/isMal}} Söz konusu işe ilişkin düzenlenen <b>{{faturaTarihi}}</b> tarihli
+        ve <b>{{faturaNo}}</b> no'lu fatura bedeli olan KDV hariç <b>{{genelToplam}}</b> TL (KDV
+        dahil <b>{{kdvDahilToplam}}</b> TL) hak edişimizin, aşağıda belirtilen banka hesabımıza
+        yatırılması hususunda gereğini arz ederim.
       </div>
 
       <!-- İMZA BLOK -->
@@ -206,7 +218,11 @@
       {{#ekler.length}}
       <div class="attachments-block">
         <div class="attachments-title">Ekler:</div>
-        <ul class="attachments-list">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ul>
+        <ul class="attachments-list">
+          {{#ekler}}
+          <li>{{.}}</li>
+          {{/ekler}}
+        </ul>
       </div>
       {{/ekler.length}}
     </div>

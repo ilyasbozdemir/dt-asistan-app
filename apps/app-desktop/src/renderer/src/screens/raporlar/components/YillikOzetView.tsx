@@ -31,7 +31,9 @@ export const YillikOzetView: React.FC<YillikOzetViewProps> = ({ yil }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">Yıllık Özet Raporu</div>
+          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            Yıllık Özet Raporu
+          </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">{yil} Yılı Geneli</div>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs text-white transition-colors">
@@ -73,7 +75,9 @@ export const YillikOzetView: React.FC<YillikOzetViewProps> = ({ yil }) => {
       </div>
 
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
-        <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">En Çok İşlem Yapılan Firmalar</div>
+        <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          En Çok İşlem Yapılan Firmalar
+        </div>
         {['Temizlik A.Ş.', 'Ofis Dünyası Ltd. Şti.', 'Kırtasiye Plus'].map((firma, i) => (
           <div
             key={firma}

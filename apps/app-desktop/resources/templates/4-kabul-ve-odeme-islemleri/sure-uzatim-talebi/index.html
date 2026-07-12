@@ -134,23 +134,28 @@
         <div class="recipient-title">{{kurumAdi}}</div>
         {{#birimAdi}}
         <div class="recipient-sub">{{birimAdi}}</div>
-        {{/birimAdi}}
-        {{^birimAdi}}
+        {{/birimAdi}} {{^birimAdi}}
         <div class="recipient-sub">Destek Hizmetleri Müdürlüğüne</div>
         {{/birimAdi}}
       </div>
 
       <!-- DİLEKÇE METNİ -->
       <div class="petition-body">
-        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen 
-        <b>{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b> tarihli 
-        <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz;
-        {{#isMal}}malzemelerin teslimi sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle teslimatımız gecikmiştir.{{/isMal}}
-        {{#isHizmet}}hizmetlerin ifası sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle iş sürecimiz gecikmiştir.{{/isHizmet}}
-        {{#isYapim}}yapım işlerinin tamamlanması sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle yapım sürecimiz gecikmiştir.{{/isYapim}}
-        {{^isMal}}{{^isHizmet}}{{^isYapim}}iş kalemlerinin teslimi/ifası sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle gecikmeler meydana gelmiştir.{{/isYapim}}{{/isHizmet}}{{/isMal}}
-        Bu doğrultuda, taahhütlerimizin eksiksiz ve şartnamelere uygun şekilde tamamlanabilmesi amacıyla firmamıza 
-        <b>{{#ekSureGun}}{{ekSureGun}}{{/ekSureGun}}{{^ekSureGun}}....{{/ekSureGun}}</b> takvim günü ek süre verilmesi hususunda gereğini arz ederim.
+        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen
+        <b
+          >{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b
+        >
+        tarihli <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz; {{#isMal}}malzemelerin teslimi
+        sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle teslimatımız gecikmiştir.{{/isMal}}
+        {{#isHizmet}}hizmetlerin ifası sürecinde, aşağıda belirtilen gerekçe(ler) nedeniyle iş
+        sürecimiz gecikmiştir.{{/isHizmet}} {{#isYapim}}yapım işlerinin tamamlanması sürecinde,
+        aşağıda belirtilen gerekçe(ler) nedeniyle yapım sürecimiz gecikmiştir.{{/isYapim}}
+        {{^isMal}}{{^isHizmet}}{{^isYapim}}iş kalemlerinin teslimi/ifası sürecinde, aşağıda
+        belirtilen gerekçe(ler) nedeniyle gecikmeler meydana
+        gelmiştir.{{/isYapim}}{{/isHizmet}}{{/isMal}} Bu doğrultuda, taahhütlerimizin eksiksiz ve
+        şartnamelere uygun şekilde tamamlanabilmesi amacıyla firmamıza
+        <b>{{#ekSureGun}}{{ekSureGun}}{{/ekSureGun}}{{^ekSureGun}}....{{/ekSureGun}}</b> takvim günü
+        ek süre verilmesi hususunda gereğini arz ederim.
       </div>
 
       <!-- GEREKÇE DETAYI -->
@@ -187,7 +192,11 @@
       {{#ekler.length}}
       <div class="attachments-block">
         <div class="attachments-title">Ekler:</div>
-        <ul class="attachments-list">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ul>
+        <ul class="attachments-list">
+          {{#ekler}}
+          <li>{{.}}</li>
+          {{/ekler}}
+        </ul>
       </div>
       {{/ekler.length}}
     </div>

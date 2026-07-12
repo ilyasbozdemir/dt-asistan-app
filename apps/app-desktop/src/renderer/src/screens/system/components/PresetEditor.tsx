@@ -1,25 +1,25 @@
-import React from "react";
-import { Link } from "@tanstack/react-router";
-import { Star } from "lucide-react";
+import React from 'react'
+import { Link } from '@tanstack/react-router'
+import { Star } from 'lucide-react'
 import {
   getStatusBadgeLightClass,
   normalizeForMatch,
   parseStatusAndName,
-  STAGES,
-} from "../utils/statusUtils";
-import { Sablon } from "../../sablonlar/sablonlar.hooks";
+  STAGES
+} from '../utils/statusUtils'
+import { Sablon } from '../../sablonlar/sablonlar.hooks'
 
 interface PresetEditorProps {
-  presetName: string;
-  activeStage: string;
-  setActiveStage: (stage: string) => void;
-  groupedSablonlar: Record<string, Sablon[]>;
-  starredList: string[];
-  routeMap: Record<string, string>;
-  toggleStar: (name: string) => void;
-  onAddAllStageDocs: () => void;
-  onRemoveAllStageDocs: () => void;
-  onCloseEdit: () => void;
+  presetName: string
+  activeStage: string
+  setActiveStage: (stage: string) => void
+  groupedSablonlar: Record<string, Sablon[]>
+  starredList: string[]
+  routeMap: Record<string, string>
+  toggleStar: (name: string) => void
+  onAddAllStageDocs: () => void
+  onRemoveAllStageDocs: () => void
+  onCloseEdit: () => void
 }
 
 export const PresetEditor: React.FC<PresetEditorProps> = ({
@@ -32,7 +32,7 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
   toggleStar,
   onAddAllStageDocs,
   onRemoveAllStageDocs,
-  onCloseEdit,
+  onCloseEdit
 }) => {
   return (
     <div className="space-y-6">
@@ -42,9 +42,8 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
             ✍️ Belge Seçimi: {presetName}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Aşağıdaki aşamalardan pakete eklenecek belgeleri seçin.
-            Checkbox&apos;ları işaretlemek belgenin anında
-            eklenmesini/çıkarılmasını sağlar.
+            Aşağıdaki aşamalardan pakete eklenecek belgeleri seçin. Checkbox&apos;ları işaretlemek
+            belgenin anında eklenmesini/çıkarılmasını sağlar.
           </p>
         </div>
         <button
@@ -58,21 +57,21 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
       {/* Aşama Seçici (Tabs) */}
       <div className="flex flex-wrap gap-2 pb-4">
         {STAGES.map((stage) => {
-          const isActive = activeStage === stage.key;
-          const count = (groupedSablonlar[stage.key] || []).length;
+          const isActive = activeStage === stage.key
+          const count = (groupedSablonlar[stage.key] || []).length
           return (
             <button
               key={stage.key}
               onClick={() => setActiveStage(stage.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800"
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
               }`}
             >
               {stage.label} ({count})
             </button>
-          );
+          )
         })}
       </div>
 
@@ -80,29 +79,24 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            📋 {activeStage} ({(groupedSablonlar[activeStage] || []).length}
-            {" "}
-            belge)
+            📋 {activeStage} ({(groupedSablonlar[activeStage] || []).length} belge)
           </h3>
         </div>
 
         <div className="space-y-2">
           {(groupedSablonlar[activeStage] || []).map((sablon) => {
-            const route = routeMap[sablon.ad];
-            const { status, cleanName } = parseStatusAndName(
-              sablon.ad,
-              sablon.aciklama,
-            );
+            const route = routeMap[sablon.ad]
+            const { status, cleanName } = parseStatusAndName(sablon.ad, sablon.aciklama)
             const isStarred = starredList.some(
-              (d) => normalizeForMatch(d) === normalizeForMatch(cleanName),
-            );
+              (d) => normalizeForMatch(d) === normalizeForMatch(cleanName)
+            )
             return (
               <div
                 key={sablon.id}
                 className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                   isStarred
-                    ? "bg-blue-50/30 dark:bg-blue-950/10 border-blue-300 dark:border-blue-800"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-855"
+                    ? 'bg-blue-50/30 dark:bg-blue-950/10 border-blue-300 dark:border-blue-800'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-855'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
@@ -112,66 +106,58 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
                     onChange={() => toggleStar(sablon.ad)}
                     className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 dark:bg-slate-700 dark:border-slate-600 focus:ring-2 cursor-pointer"
                   />
-                  {route
-                    ? (
-                      <Link
-                        to={route}
-                        className="flex items-center gap-2 truncate text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                      >
-                        <span>{cleanName}</span>
-                        {status && (
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                              getStatusBadgeLightClass(
-                                status,
-                              )
-                            }`}
-                          >
-                            {status}
-                          </span>
-                        )}
-                      </Link>
-                    )
-                    : (
-                      <div className="flex items-center gap-2 truncate text-xs font-medium text-slate-400 dark:text-slate-550 cursor-default select-none">
-                        <span>{cleanName}</span>
-                        {status && (
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${
-                              getStatusBadgeLightClass(
-                                status,
-                              )
-                            }`}
-                          >
-                            {status}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                  {route ? (
+                    <Link
+                      to={route}
+                      className="flex items-center gap-2 truncate text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    >
+                      <span>{cleanName}</span>
+                      {status && (
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${getStatusBadgeLightClass(
+                            status
+                          )}`}
+                        >
+                          {status}
+                        </span>
+                      )}
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-2 truncate text-xs font-medium text-slate-400 dark:text-slate-550 cursor-default select-none">
+                      <span>{cleanName}</span>
+                      {status && (
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide shrink-0 ${getStatusBadgeLightClass(
+                            status
+                          )}`}
+                        >
+                          {status}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   <button
                     onClick={(e) => {
-                      e.preventDefault();
-                      toggleStar(sablon.ad);
+                      e.preventDefault()
+                      toggleStar(sablon.ad)
                     }}
                     className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded shrink-0 cursor-pointer"
-                    title={isStarred
-                      ? "Kısayoldan Kaldır"
-                      : "Kısayol Ekle (Yıldızla)"}
+                    title={isStarred ? 'Kısayoldan Kaldır' : 'Kısayol Ekle (Yıldızla)'}
                   >
                     <Star
                       className={`w-3.5 h-3.5 ${
                         isStarred
-                          ? "fill-amber-500 text-amber-500"
-                          : "text-slate-400 hover:text-amber-500"
+                          ? 'fill-amber-500 text-amber-500'
+                          : 'text-slate-400 hover:text-amber-500'
                       }`}
                     />
                   </button>
                 </div>
               </div>
-            );
+            )
           })}
           {(groupedSablonlar[activeStage] || []).length === 0 && (
             <span className="text-xs italic text-slate-400 block py-1">
@@ -185,7 +171,7 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
           <div className="text-xs text-slate-600 dark:text-slate-400">
             <span className="font-bold text-slate-800 dark:text-slate-200">
               {starredList.length}
-            </span>{" "}
+            </span>{' '}
             belge pakete dahil.
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -205,5 +191,5 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

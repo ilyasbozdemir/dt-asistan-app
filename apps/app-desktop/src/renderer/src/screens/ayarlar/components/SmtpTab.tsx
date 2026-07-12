@@ -40,8 +40,12 @@ export const SmtpTab: React.FC<SmtpTabProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
         <div>
-          <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">SMTP Sunucu Ayarları</h2>
-          <p className="text-xs text-slate-500">Şifre sıfırlama kodlarının gönderileceği SMTP ayarları.</p>
+          <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
+            SMTP Sunucu Ayarları
+          </h2>
+          <p className="text-xs text-slate-500">
+            Şifre sıfırlama kodlarının gönderileceği SMTP ayarları.
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -63,7 +67,9 @@ export const SmtpTab: React.FC<SmtpTabProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400 mb-1">SMTP Host</label>
+          <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400 mb-1">
+            SMTP Host
+          </label>
           <Input
             placeholder="smtp.kurum.bel.tr"
             value={smtpHost}
@@ -72,7 +78,9 @@ export const SmtpTab: React.FC<SmtpTabProps> = ({
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400 mb-1">SMTP Port</label>
+          <label className="block text-xs font-semibold text-slate-650 dark:text-slate-400 mb-1">
+            SMTP Port
+          </label>
           <Input
             placeholder="587"
             value={smtpPort}
@@ -121,7 +129,10 @@ export const SmtpTab: React.FC<SmtpTabProps> = ({
             onChange={(e) => setSmtpSecure(e.target.checked)}
             className="rounded border-slate-300 dark:border-slate-700 bg-slate-55 dark:bg-slate-950 text-primary focus:ring-primary accent-primary"
           />
-          <label htmlFor="smtpSecure" className="text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer">
+          <label
+            htmlFor="smtpSecure"
+            className="text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer"
+          >
             SSL/TLS Bağlantısı (Güvenli)
           </label>
         </div>

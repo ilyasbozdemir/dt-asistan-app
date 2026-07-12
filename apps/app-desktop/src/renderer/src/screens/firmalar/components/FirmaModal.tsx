@@ -138,12 +138,7 @@ export const FirmaModal: React.FC<FirmaModalProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Field
-                label="Banka Adı"
-                field="banka_adi"
-                form={form}
-                handleChange={handleChange}
-              />
+              <Field label="Banka Adı" field="banka_adi" form={form} handleChange={handleChange} />
               <Field
                 label="Şube Kodu / Adı"
                 field="sube_kodu_adi"

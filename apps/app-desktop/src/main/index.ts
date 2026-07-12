@@ -548,7 +548,7 @@ if (!gotTheLock && !isMultiInstance) {
         const isR = input.key.toLowerCase() === 'r'
         const isF = input.key.toLowerCase() === 'f'
         const isCommandOrControl = input.control || input.meta
-        
+
         if (isCommandOrControl && isR) {
           if (input.shift) {
             window.webContents.reloadIgnoringCache()
@@ -1035,7 +1035,8 @@ if (!gotTheLock && !isMultiInstance) {
               }
             })
             backlog.push({
-              title: section.version === 'Unreleased' ? 'Planlanan / Gelecek Sürüm' : section.version,
+              title:
+                section.version === 'Unreleased' ? 'Planlanan / Gelecek Sürüm' : section.version,
               items
             })
           } else {

@@ -138,7 +138,9 @@ export default function RaporlarScreen(): React.ReactNode {
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <span className={`mt-0.5 ${seciliTip === tip.id ? 'text-primary' : 'text-slate-400'}`}>
+                <span
+                  className={`mt-0.5 ${seciliTip === tip.id ? 'text-primary' : 'text-slate-400'}`}
+                >
                   {tip.icon}
                 </span>
                 <div>
@@ -147,7 +149,9 @@ export default function RaporlarScreen(): React.ReactNode {
                     {tip.desc}
                   </div>
                 </div>
-                {seciliTip === tip.id && <ChevronRight className="w-4 h-4 ml-auto mt-0.5 text-primary" />}
+                {seciliTip === tip.id && (
+                  <ChevronRight className="w-4 h-4 ml-auto mt-0.5 text-primary" />
+                )}
               </button>
             ))}
           </div>
@@ -179,7 +183,9 @@ export default function RaporlarScreen(): React.ReactNode {
 
             {(seciliTip === 'kayit-formu' || seciliTip === 'aylik-ozet') && (
               <div className="space-y-2">
-                <label className="block text-xs text-slate-505 dark:text-slate-400 font-semibold mb-1">Ay</label>
+                <label className="block text-xs text-slate-505 dark:text-slate-400 font-semibold mb-1">
+                  Ay
+                </label>
                 <select
                   value={seciliAy}
                   onChange={(e) => {
@@ -212,7 +218,9 @@ export default function RaporlarScreen(): React.ReactNode {
                 <BarChart2 className="w-8 h-8" />
               </div>
               <div>
-                <div className="font-semibold text-slate-500 dark:text-slate-500">Rapor Önizlemesi</div>
+                <div className="font-semibold text-slate-500 dark:text-slate-500">
+                  Rapor Önizlemesi
+                </div>
                 <div className="text-xs mt-1 leading-relaxed">
                   Sol panelden rapor türü ve dönemi seçerek
                   <br />

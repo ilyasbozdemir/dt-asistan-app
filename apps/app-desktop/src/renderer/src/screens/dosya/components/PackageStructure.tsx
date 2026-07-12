@@ -100,8 +100,8 @@ export const PackageStructure: React.FC<PackageStructureProps> = ({
       <div className="mt-5 p-3.5 bg-blue-50/45 dark:bg-blue-955/10 border border-blue-100/30 dark:border-blue-900/20 rounded-2xl flex gap-2">
         <Info className="w-4 h-4 text-blue-600 dark:text-blue-450 shrink-0 mt-0.5" />
         <p className="text-[10px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
-          Sol taraftaki dosya yapısından bir dosyaya tıklayarak içeriğini ve o dosyanın
-          format ayrıntılarını sağ taraftaki panele yükleyebilirsiniz.
+          Sol taraftaki dosya yapısından bir dosyaya tıklayarak içeriğini ve o dosyanın format
+          ayrıntılarını sağ taraftaki panele yükleyebilirsiniz.
         </p>
       </div>
     </div>

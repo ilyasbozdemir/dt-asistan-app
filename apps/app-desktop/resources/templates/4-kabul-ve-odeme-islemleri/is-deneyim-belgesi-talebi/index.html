@@ -113,20 +113,25 @@
         <div class="recipient-title">{{kurumAdi}}</div>
         {{#birimAdi}}
         <div class="recipient-sub">{{birimAdi}}</div>
-        {{/birimAdi}}
-        {{^birimAdi}}
+        {{/birimAdi}} {{^birimAdi}}
         <div class="recipient-sub">Destek Hizmetleri Müdürlüğüne</div>
         {{/birimAdi}}
       </div>
 
       <!-- DİLEKÇE METNİ -->
       <div class="petition-body">
-        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen 
-        <b>{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b> tarihli 
-        <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz tüm iş kalemleri/teslimatlar başarıyla tamamlanmış ve kabul işlemleri <b>{{kabulTarihi}}</b> tarihinde gerçekleştirilmiştir.
+        Kurumunuzca 4734 sayılı Kamu İhale Kanunu’nun 22/d maddesi kapsamında gerçekleştirilen
+        <b
+          >{{#dosyaTarihi}}{{dosyaTarihi}}{{/dosyaTarihi}}{{^dosyaTarihi}}..../..../20....{{/dosyaTarihi}}</b
+        >
+        tarihli <b>"{{dosyaKonusu}}"</b> işine ait taahhüt ettiğimiz tüm iş kalemleri/teslimatlar
+        başarıyla tamamlanmış ve kabul işlemleri <b>{{kabulTarihi}}</b> tarihinde
+        gerçekleştirilmiştir.
       </div>
       <div class="petition-body">
-        Bu kapsamda, ilgili İhale Uygulama Yönetmeliği hükümleri çerçevesinde firmamız adına <b>İş Deneyim Belgesi (İş Bitirme Belgesi)</b> düzenlenerek tarafımıza verilmesi hususunda gereğini arz ederim.
+        Bu kapsamda, ilgili İhale Uygulama Yönetmeliği hükümleri çerçevesinde firmamız adına
+        <b>İş Deneyim Belgesi (İş Bitirme Belgesi)</b> düzenlenerek tarafımıza verilmesi hususunda
+        gereğini arz ederim.
       </div>
 
       <!-- İMZA BLOK -->
@@ -150,7 +155,11 @@
       {{#ekler.length}}
       <div class="attachments-block">
         <div class="attachments-title">Ekler:</div>
-        <ul class="attachments-list">{{#ekler}}<li>{{.}}</li>{{/ekler}}</ul>
+        <ul class="attachments-list">
+          {{#ekler}}
+          <li>{{.}}</li>
+          {{/ekler}}
+        </ul>
       </div>
       {{/ekler.length}}
     </div>

@@ -25,8 +25,12 @@ export const ButceView: React.FC<ButceViewProps> = ({ yil }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-bold text-slate-808 dark:text-slate-100">Bütçe Durum Raporu</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">{yil} Yılı Bütçe Kullanımı</div>
+          <div className="text-lg font-bold text-slate-808 dark:text-slate-100">
+            Bütçe Durum Raporu
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            {yil} Yılı Bütçe Kullanımı
+          </div>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs text-white transition-colors">
           <Download className="w-3.5 h-3.5" /> Dışa Aktar
@@ -38,11 +42,17 @@ export const ButceView: React.FC<ButceViewProps> = ({ yil }) => {
         <div className="flex justify-between items-end">
           <div>
             <div className="text-xs text-slate-500 dark:text-slate-400">Toplam Bütçe Kullanımı</div>
-            <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono">{fmt(kullanilanButce)}</div>
-            <div className="text-xs text-slate-400 dark:text-slate-505">/ {fmt(yillikLimit)} yıllık limit</div>
+            <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-mono">
+              {fmt(kullanilanButce)}
+            </div>
+            <div className="text-xs text-slate-400 dark:text-slate-505">
+              / {fmt(yillikLimit)} yıllık limit
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">%{gerceklesmePct}</div>
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              %{gerceklesmePct}
+            </div>
             <div className="text-xs text-slate-400 dark:text-slate-505">gerçekleşme oranı</div>
           </div>
         </div>
@@ -75,10 +85,17 @@ export const ButceView: React.FC<ButceViewProps> = ({ yil }) => {
               key={b.label}
               className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-3"
             >
-              <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">{b.label}</div>
-              <div className="text-lg font-bold font-mono text-slate-800 dark:text-slate-100">{fmt(b.kullanilan)}</div>
+              <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                {b.label}
+              </div>
+              <div className="text-lg font-bold font-mono text-slate-800 dark:text-slate-100">
+                {fmt(b.kullanilan)}
+              </div>
               <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                <div className={`h-full bg-gradient-to-r ${b.color} rounded-full`} style={{ width: `${pct}%` }} />
+                <div
+                  className={`h-full bg-gradient-to-r ${b.color} rounded-full`}
+                  style={{ width: `${pct}%` }}
+                />
               </div>
               <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-505">
                 <span>%{pct} kullanıldı</span>

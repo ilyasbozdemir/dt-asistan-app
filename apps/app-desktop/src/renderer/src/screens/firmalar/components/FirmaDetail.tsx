@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  ArrowLeft,
-  Building2,
-  Phone,
-  Landmark,
-  FileText,
-  User,
-  MapPin
-} from 'lucide-react'
+import { ArrowLeft, Building2, Phone, Landmark, FileText, User, MapPin } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 
 interface FirmaDetailProps {
@@ -15,10 +7,7 @@ interface FirmaDetailProps {
   setViewingFirma: (firma: any | null) => void
 }
 
-export const FirmaDetail: React.FC<FirmaDetailProps> = ({
-  viewingFirma,
-  setViewingFirma
-}) => {
+export const FirmaDetail: React.FC<FirmaDetailProps> = ({ viewingFirma, setViewingFirma }) => {
   return (
     <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
       <Button

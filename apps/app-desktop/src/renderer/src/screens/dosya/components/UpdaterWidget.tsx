@@ -33,7 +33,9 @@ export const UpdaterWidget: React.FC<UpdaterWidgetProps> = ({
           </div>
 
           <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal max-w-2xl font-medium font-sans">
-            Kurumsal bilgisayarlardaki internet kotaları düşünülerek, güncellemeler GitHub üzerinden <strong>.blockmap</strong> teknolojisiyle sadece değişen paketleri (delta) indirerek kota tasarrufu sağlar.
+            Kurumsal bilgisayarlardaki internet kotaları düşünülerek, güncellemeler GitHub üzerinden{' '}
+            <strong>.blockmap</strong> teknolojisiyle sadece değişen paketleri (delta) indirerek
+            kota tasarrufu sağlar.
           </div>
         </div>
 
@@ -81,7 +83,8 @@ export const UpdaterWidget: React.FC<UpdaterWidgetProps> = ({
           )}
           {updaterStatus === 'downloaded' && (
             <div className="p-3.5 bg-emerald-50/40 border border-emerald-250/30 rounded-2xl text-[11px] text-emerald-700 font-bold dark:bg-emerald-955/15">
-              Güncelleme başarıyla indirildi. Yüklemek için yukarıdaki <strong>Kapat ve Yükle</strong> butonuna basın.
+              Güncelleme başarıyla indirildi. Yüklemek için yukarıdaki{' '}
+              <strong>Kapat ve Yükle</strong> butonuna basın.
             </div>
           )}
           {updaterStatus === 'error' && (

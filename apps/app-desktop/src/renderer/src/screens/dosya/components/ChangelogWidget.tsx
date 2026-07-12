@@ -61,7 +61,8 @@ export const ChangelogWidget: React.FC<ChangelogWidgetProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            Yol Haritası & Düşünceler ({backlog.reduce((acc, curr) => acc + (curr.items?.length || 0), 0)})
+            Yol Haritası & Düşünceler (
+            {backlog.reduce((acc, curr) => acc + (curr.items?.length || 0), 0)})
           </button>
         </div>
       </div>
@@ -168,7 +169,9 @@ export const ChangelogWidget: React.FC<ChangelogWidgetProps> = ({
             </div>
           ))}
           {backlog.length === 0 && (
-            <div className="text-sm text-slate-500 italic">Planlanan gelecek sürüm düşüncesi bulunamadı.</div>
+            <div className="text-sm text-slate-500 italic">
+              Planlanan gelecek sürüm düşüncesi bulunamadı.
+            </div>
           )}
         </div>
       )}

@@ -48,7 +48,9 @@ export const KpiCards: React.FC<KpiCardsProps> = ({
               </div>
               <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
                 {isLoading ? '-' : stats.ihaleDosyaSayisi}{' '}
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Dosya</span>
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  Dosya
+                </span>
               </div>
             </div>
           </div>
@@ -89,7 +91,9 @@ export const KpiCards: React.FC<KpiCardsProps> = ({
               </div>
               <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
                 {isLoading ? '-' : stats.aktifDosyaSayisi}{' '}
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Dosya</span>
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  Dosya
+                </span>
               </div>
             </div>
           </div>
@@ -110,7 +114,9 @@ export const KpiCards: React.FC<KpiCardsProps> = ({
               </div>
               <div className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 flex items-baseline gap-1">
                 {isLoading ? '-' : stats.tamamlananDosyaSayisi}{' '}
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Dosya</span>
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  Dosya
+                </span>
               </div>
             </div>
           </div>

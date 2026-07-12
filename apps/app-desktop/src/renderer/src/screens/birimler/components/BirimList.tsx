@@ -124,7 +124,9 @@ export const BirimList: React.FC<BirimListProps> = ({
                   {birim.birim_adi}
                 </td>
                 <td className="px-4 py-3 font-mono">{birim.e_butce || '-'}</td>
-                <td className="px-4 py-3">{personel ? personel.ad_soyad : legacyPersonelText || '-'}</td>
+                <td className="px-4 py-3">
+                  {personel ? personel.ad_soyad : legacyPersonelText || '-'}
+                </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button

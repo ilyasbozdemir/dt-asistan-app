@@ -116,7 +116,9 @@ export const KayitFormuView: React.FC<KayitFormuViewProps> = ({ ay, yil }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-bold text-slate-805 dark:text-slate-100">Doğrudan Temin Kayıt Formu</div>
+          <div className="text-lg font-bold text-slate-805 dark:text-slate-100">
+            Doğrudan Temin Kayıt Formu
+          </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             {ay} {yil} • {filtered.length} kayıt
           </div>
@@ -156,9 +158,15 @@ export const KayitFormuView: React.FC<KayitFormuViewProps> = ({ ay, yil }) => {
                     i % 2 === 0 ? '' : 'bg-slate-50/50 dark:bg-slate-800/30'
                   } hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-colors`}
                 >
-                  <td className="px-4 py-3 text-slate-400 dark:text-slate-600 font-mono">{row.id}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{row.tarih}</td>
-                  <td className="px-4 py-3 text-slate-800 dark:text-slate-200 font-medium">{row.firma}</td>
+                  <td className="px-4 py-3 text-slate-400 dark:text-slate-600 font-mono">
+                    {row.id}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">
+                    {row.tarih}
+                  </td>
+                  <td className="px-4 py-3 text-slate-800 dark:text-slate-200 font-medium">
+                    {row.firma}
+                  </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{row.kalem}</td>
                   <td className="px-4 py-3 text-right font-semibold text-slate-805 dark:text-slate-200 font-mono">
                     {fmt(row.tutar)}
@@ -179,7 +187,10 @@ export const KayitFormuView: React.FC<KayitFormuViewProps> = ({ ay, yil }) => {
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/60">
-                <td colSpan={4} className="px-4 py-3 text-right font-bold text-slate-700 dark:text-slate-300 text-sm">
+                <td
+                  colSpan={4}
+                  className="px-4 py-3 text-right font-bold text-slate-700 dark:text-slate-300 text-sm"
+                >
                   TOPLAM
                 </td>
                 <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 font-mono">

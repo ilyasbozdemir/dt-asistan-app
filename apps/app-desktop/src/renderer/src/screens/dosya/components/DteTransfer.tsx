@@ -30,7 +30,8 @@ export const DteTransfer: React.FC<DteTransferProps> = ({
         Veri İçe/Dışa Aktar (.dte)
       </h2>
       <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-normal font-medium">
-        Firma listesi ve malzeme/hizmet kütüphanesi kayıtlarını başka çalışma dosyalarıyla paylaşmak için <strong>.dte</strong> formatını kullanın.
+        Firma listesi ve malzeme/hizmet kütüphanesi kayıtlarını başka çalışma dosyalarıyla paylaşmak
+        için <strong>.dte</strong> formatını kullanın.
       </p>
 
       <div className="space-y-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 p-3.5 rounded-2xl">

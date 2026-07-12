@@ -31,8 +31,12 @@ export const AylikOzetView: React.FC<AylikOzetViewProps> = ({ yil }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-lg font-bold text-slate-805 dark:text-slate-100">Aylık Özet Raporu</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">{yil} Yılı • Aylık harcama dağılımı</div>
+          <div className="text-lg font-bold text-slate-805 dark:text-slate-100">
+            Aylık Özet Raporu
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            {yil} Yılı • Aylık harcama dağılımı
+          </div>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs text-white transition-colors">
           <Download className="w-3.5 h-3.5" /> Dışa Aktar
@@ -43,11 +47,15 @@ export const AylikOzetView: React.FC<AylikOzetViewProps> = ({ yil }) => {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="text-xs text-slate-505 dark:text-slate-400 mb-1">Yıllık Toplam</div>
-          <div className="text-xl font-bold text-slate-800 dark:text-slate-100 font-mono">{fmt(toplam)}</div>
+          <div className="text-xl font-bold text-slate-800 dark:text-slate-100 font-mono">
+            {fmt(toplam)}
+          </div>
         </div>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="text-xs text-slate-505 dark:text-slate-400 mb-1">Aylık Ortalama</div>
-          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 font-mono">{fmt(toplam / 12)}</div>
+          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 font-mono">
+            {fmt(toplam / 12)}
+          </div>
         </div>
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="text-xs text-slate-505 dark:text-slate-400 mb-1">Toplam İşlem</div>
@@ -78,7 +86,9 @@ export const AylikOzetView: React.FC<AylikOzetViewProps> = ({ yil }) => {
                   }`}
                   style={{ height: `${Math.max(pct, 2)}%` }}
                 />
-                <div className="text-[9px] text-slate-400 dark:text-slate-505">{row.ay.slice(0, 3)}</div>
+                <div className="text-[9px] text-slate-400 dark:text-slate-505">
+                  {row.ay.slice(0, 3)}
+                </div>
               </div>
             )
           })}
@@ -104,11 +114,19 @@ export const AylikOzetView: React.FC<AylikOzetViewProps> = ({ yil }) => {
                   i % 2 === 0 ? '' : 'bg-slate-50/50 dark:bg-slate-800/30'
                 }`}
               >
-                <td className="px-4 py-3 text-slate-700 dark:text-slate-300 font-medium">{row.ay}</td>
-                <td className="px-4 py-3 text-right font-mono text-slate-800 dark:text-slate-200">
-                  {row.harcama > 0 ? fmt(row.harcama) : <span className="text-slate-305 dark:text-slate-600">—</span>}
+                <td className="px-4 py-3 text-slate-700 dark:text-slate-300 font-medium">
+                  {row.ay}
                 </td>
-                <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">{row.islem > 0 ? row.islem : '—'}</td>
+                <td className="px-4 py-3 text-right font-mono text-slate-800 dark:text-slate-200">
+                  {row.harcama > 0 ? (
+                    fmt(row.harcama)
+                  ) : (
+                    <span className="text-slate-305 dark:text-slate-600">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right text-slate-655 dark:text-slate-400">
+                  {row.islem > 0 ? row.islem : '—'}
+                </td>
                 <td className="px-4 py-3 text-right font-mono text-slate-655 dark:text-slate-400">
                   {row.islem > 0 ? fmt(row.harcama / row.islem) : '—'}
                 </td>

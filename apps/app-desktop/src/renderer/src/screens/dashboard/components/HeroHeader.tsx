@@ -47,8 +47,9 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
             <div>
               <h4 className="text-sm font-bold">Mail (SMTP) Ayarları Yapılandırılmamış</h4>
               <p className="text-xs mt-0.5 opacity-90">
-                Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz için posta sunucunuzu ayarlamanız
-                gerekmektedir. Şifrenizi unutursanız sisteme erişiminizi kaybedebilirsiniz!
+                Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz için posta
+                sunucunuzu ayarlamanız gerekmektedir. Şifrenizi unutursanız sisteme erişiminizi
+                kaybedebilirsiniz!
               </p>
             </div>
           </div>
@@ -151,13 +152,17 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                       <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">
                         Çalışılan Aktif Dosya
                       </h4>
-                      <p className="text-[9px] text-slate-400">Şu anda üzerinde işlem yapılan doğrudan temin dosyası</p>
+                      <p className="text-[9px] text-slate-400">
+                        Şu anda üzerinde işlem yapılan doğrudan temin dosyası
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-2.5">
                     <div className="grid grid-cols-2 gap-2 text-[11px]">
                       <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
-                        <span className="text-[9px] font-bold text-slate-450 uppercase block">No & Konu</span>
+                        <span className="text-[9px] font-bold text-slate-450 uppercase block">
+                          No & Konu
+                        </span>
                         <span className="font-mono text-blue-650 dark:text-blue-450 font-bold block">
                           {activeSummary.dosyaNo}
                         </span>
@@ -169,23 +174,33 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
                         </span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
-                        <span className="text-[9px] font-bold text-slate-450 uppercase block">Maliyet & KDV</span>
+                        <span className="text-[9px] font-bold text-slate-450 uppercase block">
+                          Maliyet & KDV
+                        </span>
                         <span className="font-bold text-slate-800 dark:text-slate-100 block">
                           {formatCurrency(activeSummary.yaklasikMaliyet)}
                         </span>
-                        <span className="text-slate-450 block mt-0.5">KDV: %{activeSummary.kdv}</span>
+                        <span className="text-slate-450 block mt-0.5">
+                          KDV: %{activeSummary.kdv}
+                        </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-[11px]">
                       <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
-                        <span className="text-[9px] font-bold text-slate-450 uppercase block">Birim & Tür</span>
+                        <span className="text-[9px] font-bold text-slate-450 uppercase block">
+                          Birim & Tür
+                        </span>
                         <span className="font-semibold text-slate-700 dark:text-slate-305 block truncate">
                           {activeSummary.birimAdi}
                         </span>
-                        <span className="text-slate-450 capitalize block mt-0.5">{activeSummary.tur} Alımı</span>
+                        <span className="text-slate-450 capitalize block mt-0.5">
+                          {activeSummary.tur} Alımı
+                        </span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-100/50 dark:border-slate-850/50">
-                        <span className="text-[9px] font-bold text-slate-450 uppercase block">Yüklenici Firma</span>
+                        <span className="text-[9px] font-bold text-slate-450 uppercase block">
+                          Yüklenici Firma
+                        </span>
                         <span
                           className="font-semibold text-emerald-650 dark:text-emerald-450 block truncate"
                           title={activeSummary.secilenFirma}

@@ -48,8 +48,12 @@ export const SyncTab: React.FC<SyncTabProps> = ({
     <div className="space-y-5">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
         <div>
-          <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100">Sunucu Senkronizasyonu</h2>
-          <p className="text-xs text-slate-500">Yereldeki verileri uzak web sunucusu ile eşitleyin.</p>
+          <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100">
+            Sunucu Senkronizasyonu
+          </h2>
+          <p className="text-xs text-slate-500">
+            Yereldeki verileri uzak web sunucusu ile eşitleyin.
+          </p>
         </div>
       </div>
 
@@ -77,7 +81,13 @@ export const SyncTab: React.FC<SyncTabProps> = ({
                 : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
             }`}
           >
-            {syncServerUrl ? (syncTestStatus === 'ok' ? '✓' : syncTestStatus === 'error' ? '✗' : '⏳') : '!'}
+            {syncServerUrl
+              ? syncTestStatus === 'ok'
+                ? '✓'
+                : syncTestStatus === 'error'
+                  ? '✗'
+                  : '⏳'
+              : '!'}
           </div>
           <div>
             <div className="text-xs font-bold uppercase tracking-wider">
@@ -174,10 +184,14 @@ export const SyncTab: React.FC<SyncTabProps> = ({
               {saving ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
             {syncTestStatus === 'ok' && (
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{syncTestMsg}</span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                {syncTestMsg}
+              </span>
             )}
             {syncTestStatus === 'error' && (
-              <span className="text-xs font-semibold text-red-505 dark:text-red-400">{syncTestMsg}</span>
+              <span className="text-xs font-semibold text-red-505 dark:text-red-400">
+                {syncTestMsg}
+              </span>
             )}
           </div>
         </div>
@@ -192,12 +206,17 @@ export const SyncTab: React.FC<SyncTabProps> = ({
               <Upload className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-100">Ana Sunucuya Gönder</div>
-              <div className="text-[10px] text-slate-500">Yereldeki değişiklikleri uzak sunucuya ilet (Push)</div>
+              <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                Ana Sunucuya Gönder
+              </div>
+              <div className="text-[10px] text-slate-500">
+                Yereldeki değişiklikleri uzak sunucuya ilet (Push)
+              </div>
             </div>
           </div>
           <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            Yerel veritabanındaki güncel verileri (dosyalar, belgeler, ayarlar) uzak web sunucusuna göndererek yayınlar.
+            Yerel veritabanındaki güncel verileri (dosyalar, belgeler, ayarlar) uzak web sunucusuna
+            göndererek yayınlar.
           </p>
           <Button
             onClick={handlePushToServer}
@@ -215,12 +234,17 @@ export const SyncTab: React.FC<SyncTabProps> = ({
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-100">Sunucudan Al</div>
-              <div className="text-[10px] text-slate-500">Uzak sunucudaki verileri yerele çek (Pull)</div>
+              <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                Sunucudan Al
+              </div>
+              <div className="text-[10px] text-slate-500">
+                Uzak sunucudaki verileri yerele çek (Pull)
+              </div>
             </div>
           </div>
           <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            Uzak sunucudaki güncel verileri yerel veritabanına indirir. Mevcut yereldeki veriler üzerine yazılabilir.
+            Uzak sunucudaki güncel verileri yerel veritabanına indirir. Mevcut yereldeki veriler
+            üzerine yazılabilir.
           </p>
           <Button
             onClick={handlePullFromServer}
@@ -235,7 +259,9 @@ export const SyncTab: React.FC<SyncTabProps> = ({
       {/* Genel Eşitle */}
       <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3">
         <RefreshCw className="w-4 h-4 text-slate-400 shrink-0" />
-        <span className="text-xs text-slate-500 flex-1">İki yönlü otomatik eşitleme (Push + Pull)</span>
+        <span className="text-xs text-slate-500 flex-1">
+          İki yönlü otomatik eşitleme (Push + Pull)
+        </span>
         <Button
           onClick={handleManualSync}
           disabled={isSyncing || !syncServerUrl}
@@ -254,17 +280,22 @@ export const SyncTab: React.FC<SyncTabProps> = ({
           </h3>
         </div>
         <p className="text-xs text-slate-500 leading-relaxed">
-          Masaüstündeki yerel verileri merkezi bir bulut veri tabanında toplamak ve eşitlemek için, projenin{' '}
+          Masaüstündeki yerel verileri merkezi bir bulut veri tabanında toplamak ve eşitlemek için,
+          projenin{' '}
           <code className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-450 font-mono text-[10px] rounded">
             web/
           </code>{' '}
-          klasöründeki API sunucusunu Docker ile saniyeler içinde ayağa kaldırabilirsiniz. Eşitleme sonrası yerel dosya
-          (.dtal) workspace'leriniz bulut sunucunuza aktarılır.
+          klasöründeki API sunucusunu Docker ile saniyeler içinde ayağa kaldırabilirsiniz. Eşitleme
+          sonrası yerel dosya (.dtal) workspace'leriniz bulut sunucunuza aktarılır.
         </p>
 
         <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3.5 space-y-2.5 font-mono text-[10px] text-slate-700 dark:text-slate-400">
-          <div className="text-slate-400">{'// 1. Terminalde projenin ana klasörüne gidin ve derleyin'}</div>
-          <div className="text-blue-600 dark:text-blue-450">docker build -t dt-asistan-server ./web</div>
+          <div className="text-slate-400">
+            {'// 1. Terminalde projenin ana klasörüne gidin ve derleyin'}
+          </div>
+          <div className="text-blue-600 dark:text-blue-450">
+            docker build -t dt-asistan-server ./web
+          </div>
 
           <div className="text-slate-400 mt-2">{'// 2. Sunucuyu 3000 portundan çalıştırın'}</div>
           <div className="text-blue-600 dark:text-blue-450">
@@ -276,8 +307,13 @@ export const SyncTab: React.FC<SyncTabProps> = ({
           </div>
           <div>
             Varsayılan Adres:{' '}
-            <span className="text-emerald-600 dark:text-emerald-450 font-bold">http://localhost:3000</span> veya{' '}
-            <span className="text-emerald-600 dark:text-emerald-450 font-bold">http://[LAN_SUNUCU_IP]:3000</span>
+            <span className="text-emerald-600 dark:text-emerald-450 font-bold">
+              http://localhost:3000
+            </span>{' '}
+            veya{' '}
+            <span className="text-emerald-600 dark:text-emerald-450 font-bold">
+              http://[LAN_SUNUCU_IP]:3000
+            </span>
           </div>
         </div>
       </div>

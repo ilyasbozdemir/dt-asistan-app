@@ -1,5 +1,15 @@
 import React from 'react'
-import { Building, Users, Calendar, Hash, AlignLeft, Type, User, MapPin, ArrowLeft } from 'lucide-react'
+import {
+  Building,
+  Users,
+  Calendar,
+  Hash,
+  AlignLeft,
+  Type,
+  User,
+  MapPin,
+  ArrowLeft
+} from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 
 interface BirimDetailProps {
@@ -36,15 +46,17 @@ export const BirimDetail: React.FC<BirimDetailProps> = ({
             <div className="text-sm text-slate-500 flex gap-4">
               {viewingBirim.personel_sayisi !== undefined && (
                 <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  <Users className="w-4 h-4 text-blue-500" /> {viewingBirim.personel_sayisi} Personel
+                  <Users className="w-4 h-4 text-blue-500" /> {viewingBirim.personel_sayisi}{' '}
+                  Personel
                 </span>
               )}
-              {viewingBirim.created_at && new Date(viewingBirim.created_at).getFullYear() > 2000 && (
-                <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  <Calendar className="w-4 h-4 text-slate-400" />{' '}
-                  {new Date(viewingBirim.created_at).toLocaleDateString('tr-TR')}
-                </span>
-              )}
+              {viewingBirim.created_at &&
+                new Date(viewingBirim.created_at).getFullYear() > 2000 && (
+                  <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <Calendar className="w-4 h-4 text-slate-400" />{' '}
+                    {new Date(viewingBirim.created_at).toLocaleDateString('tr-TR')}
+                  </span>
+                )}
             </div>
           </div>
         </div>
@@ -113,14 +125,18 @@ export const BirimDetail: React.FC<BirimDetailProps> = ({
             <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               <AlignLeft className="w-4 h-4 text-slate-400" /> Sunum Makamı
             </span>
-            <span className="text-sm text-slate-800 dark:text-slate-200">{viewingBirim.sunum_makami || '-'}</span>
+            <span className="text-sm text-slate-800 dark:text-slate-200">
+              {viewingBirim.sunum_makami || '-'}
+            </span>
           </div>
 
           <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
             <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               <Type className="w-4 h-4 text-slate-400" /> Antet Ek Satır
             </span>
-            <span className="text-sm text-slate-800 dark:text-slate-200">{viewingBirim.antet_ek_satir || '-'}</span>
+            <span className="text-sm text-slate-800 dark:text-slate-200">
+              {viewingBirim.antet_ek_satir || '-'}
+            </span>
           </div>
 
           {(viewingBirim.ilgili_personel_id || viewingBirim.ayrintili_bilgi_personel) && (
@@ -152,7 +168,9 @@ export const BirimDetail: React.FC<BirimDetailProps> = ({
                       <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0">
                         {index + 1}
                       </div>
-                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate">{yer}</span>
+                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate">
+                        {yer}
+                      </span>
                     </div>
                   ))}
               </div>

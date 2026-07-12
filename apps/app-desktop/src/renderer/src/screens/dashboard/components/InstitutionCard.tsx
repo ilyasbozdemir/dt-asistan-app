@@ -46,7 +46,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
         <div className="p-1.5 bg-blue-100/80 dark:bg-blue-900/40 rounded-xl shadow-sm border border-blue-200/50 dark:border-blue-800/50">
           <Building className="w-4 h-4 text-blue-700 dark:text-blue-450" />
         </div>
-        <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Kurum Kimlik Kartı</h3>
+        <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">
+          Kurum Kimlik Kartı
+        </h3>
       </div>
 
       <div className="space-y-3 text-xs relative z-10">
@@ -91,7 +93,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
                   <Info className="w-2.5 h-2.5 cursor-help" />
                 </span>
               </span>
-              <span className="font-mono font-bold text-slate-850 dark:text-slate-100">{eButceKodu}</span>
+              <span className="font-mono font-bold text-slate-850 dark:text-slate-100">
+                {eButceKodu}
+              </span>
             </div>
           </div>
         )}
@@ -109,7 +113,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
                     <Info className="w-2.5 h-2.5 cursor-help" />
                   </span>
                 </span>
-                <span className="font-mono font-bold text-slate-850 dark:text-slate-100">{say2000iKodu}</span>
+                <span className="font-mono font-bold text-slate-850 dark:text-slate-100">
+                  {say2000iKodu}
+                </span>
               </div>
             </div>
           )}
@@ -134,7 +140,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{detsisKodu}</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                {detsisKodu}
+              </span>
             </div>
           )}
           {kurumsalKod && (
@@ -142,7 +150,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
               <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase mb-0.5 flex items-center justify-between">
                 Kurumsal Kod
               </span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{kurumsalKod}</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                {kurumsalKod}
+              </span>
             </div>
           )}
           {fonksiyonelKod && (
@@ -150,7 +160,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
               <span className="text-[9px] font-bold text-slate-450 dark:text-slate-500 block uppercase mb-0.5">
                 Fonksiyonel Kod
               </span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{fonksiyonelKod}</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                {fonksiyonelKod}
+              </span>
             </div>
           )}
         </div>
@@ -213,7 +225,8 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
                 Birimler
               </span>
               <span className="font-extrabold text-slate-800 dark:text-slate-200">
-                {stats.kayitliBirimSayisi} <span className="text-[10px] font-medium text-slate-500">Adet</span>
+                {stats.kayitliBirimSayisi}{' '}
+                <span className="text-[10px] font-medium text-slate-500">Adet</span>
               </span>
             </div>
             <div className="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm group-hover/stat:bg-blue-100 dark:group-hover/stat:bg-blue-900/50 transition-colors">
@@ -226,7 +239,8 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
                 Ambarlar
               </span>
               <span className="font-extrabold text-slate-800 dark:text-slate-200">
-                {stats.kayitliAmbarSayisi} <span className="text-[10px] font-medium text-slate-500">Depo</span>
+                {stats.kayitliAmbarSayisi}{' '}
+                <span className="text-[10px] font-medium text-slate-500">Depo</span>
               </span>
             </div>
           </div>
@@ -239,7 +253,9 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({
             Harcama Yetkilisi
           </span>
           <span className="font-extrabold text-sm block leading-tight">{adminName}</span>
-          <span className="text-[10px] text-blue-100 font-medium block mt-0.5 opacity-90">{adminTitle}</span>
+          <span className="text-[10px] text-blue-100 font-medium block mt-0.5 opacity-90">
+            {adminTitle}
+          </span>
         </div>
       </div>
     </div>

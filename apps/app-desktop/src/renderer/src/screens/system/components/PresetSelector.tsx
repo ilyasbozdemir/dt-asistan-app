@@ -1,18 +1,18 @@
-import React from "react";
-import { FolderHeart, Trash2 } from "lucide-react";
+import React from 'react'
+import { FolderHeart, Trash2 } from 'lucide-react'
 
 export interface DocumentPreset {
-  id: string;
-  name: string;
-  docs: string[];
+  id: string
+  name: string
+  docs: string[]
 }
 
 interface PresetSelectorProps {
-  selectedPresetId: string;
-  setSelectedPresetId: (id: string) => void;
-  presets: DocumentPreset[];
-  onAddPreset: () => void;
-  onDeletePreset: (id: string) => void;
+  selectedPresetId: string
+  setSelectedPresetId: (id: string) => void
+  presets: DocumentPreset[]
+  onAddPreset: () => void
+  onDeletePreset: (id: string) => void
 }
 
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
@@ -20,7 +20,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   setSelectedPresetId,
   presets,
   onAddPreset,
-  onDeletePreset,
+  onDeletePreset
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
@@ -31,8 +31,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         </h3>
       </div>
       <p className="text-[11px] text-slate-500 dark:text-slate-400">
-        Belgeleri gruplandırarak özel paketler oluşturabilirsiniz. Seçtiğiniz
-        pakete sağ taraftan yıldız ekleyip çıkararak düzenleyebilirsiniz.
+        Belgeleri gruplandırarak özel paketler oluşturabilirsiniz. Seçtiğiniz pakete sağ taraftan
+        yıldız ekleyip çıkararak düzenleyebilirsiniz.
       </p>
 
       <div className="space-y-2">
@@ -67,5 +67,5 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
