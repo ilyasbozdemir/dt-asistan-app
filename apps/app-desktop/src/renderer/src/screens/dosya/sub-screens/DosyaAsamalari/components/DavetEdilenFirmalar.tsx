@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle, Building2, CheckCircle2, Trash2 } from "lucide-react";
+import { AlertCircle, Building2, CheckCircle2 } from "lucide-react";
 
 interface BiddingFirm {
   id: number;
@@ -12,13 +12,11 @@ interface BiddingFirm {
 interface DavetEdilenFirmalarProps {
   invitedFirms: BiddingFirm[];
   lowestTotalFirmaId: number | null;
-  handleRemoveFirm: (id: number) => Promise<void>;
 }
 
 export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
   invitedFirms,
-  lowestTotalFirmaId,
-  handleRemoveFirm
+  lowestTotalFirmaId
 }) => {
   if (invitedFirms.length === 0) {
     return (
@@ -115,14 +113,6 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
                   Bekliyor
                 </span>
               )}
-
-              <button
-                onClick={() => handleRemoveFirm(firma.id)}
-                className="text-slate-400 hover:text-red-50 hover:bg-red-50 hover:dark:bg-red-950/30 hover:text-red-650 p-1.5 rounded-lg transition-all shrink-0 cursor-pointer"
-                title="Firmayı Sil"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </div>

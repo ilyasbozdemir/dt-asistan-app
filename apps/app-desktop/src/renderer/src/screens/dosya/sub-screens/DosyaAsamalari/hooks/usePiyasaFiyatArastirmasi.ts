@@ -167,7 +167,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
       const resItems = await window.electron.ipcRenderer.invoke(
         "db:query",
-        "SELECT id, kalem_adi, miktar, birim FROM DATA_TeminKalemi WHERE temin_dosya_id = ? AND aktif_mi = 1 ORDER BY id ASC",
+        "SELECT id, kalem_adi, miktar, birim FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC",
         [activeDosyaId],
       );
 
