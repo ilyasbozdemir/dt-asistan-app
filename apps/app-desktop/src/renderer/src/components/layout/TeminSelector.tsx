@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, FileText, FolderClosed, Plus, Search, TrendingUp } from 'lucide-react'
+import { ChevronDown, FileText, FolderClosed, Plus, Search, TrendingUp, LogOut } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
 import { useNavigate } from '@tanstack/react-router'
@@ -39,6 +39,12 @@ export function TeminSelector(): React.JSX.Element {
     navigate({ to: '/takip' })
   }
 
+  const handleCloseDosya = (): void => {
+    setActiveDosyaId(null)
+    setIsOpen(false)
+    navigate({ to: '/' })
+  }
+
   const handleCreateYeniDosya = (e: React.MouseEvent): void => {
     e.stopPropagation()
     setIsCreatingDosya(true)
@@ -60,7 +66,7 @@ export function TeminSelector(): React.JSX.Element {
     danismanlik: 'bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-300'
   }
 
-  const formatMoney = (val: number) =>
+  const formatMoney = (val: number): string =>
     val
       ? val.toLocaleString('tr-TR', {
           minimumFractionDigits: 2,
@@ -234,6 +240,21 @@ export function TeminSelector(): React.JSX.Element {
               ))
             )}
           </div>
+
+          {activeDosyaId && (
+            <div className="border-t border-slate-100 dark:border-slate-800/80 mt-2 pt-2 flex justify-between items-center text-xs">
+              <span className="text-slate-450 dark:text-slate-500 font-medium">
+                Aktif dosya işlemlerini sonlandırmak için kapatabilirsiniz.
+              </span>
+              <button
+                onClick={handleCloseDosya}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-650 dark:text-red-405 hover:text-white hover:bg-red-600 dark:hover:bg-red-650 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Doğrudan Temin Dosyasını Kapat
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

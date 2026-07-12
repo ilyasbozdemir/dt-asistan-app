@@ -1,64 +1,66 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Info, ExternalLink, Bug, Star, Wifi } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import packageJson from '../../../../../package.json'
-import { NetworkSyncModal } from '../network/NetworkSyncModal'
-import { useWorkspaceStore } from '../../store/workspaceStore'
-import { useSettingsStore } from '../../store/settingsStore'
+import React, { useEffect, useRef, useState } from "react";
+import { Bug, ExternalLink, Info, Star, Wifi } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import packageJson from "../../../../../package.json";
+import { NetworkSyncModal } from "../network/NetworkSyncModal";
+import { useWorkspaceStore } from "../../store/workspaceStore";
+import { useSettingsStore } from "../../store/settingsStore";
 
 export function Footer(): React.JSX.Element {
-  const { activeMeta, activeDosyaId, fileName } = useWorkspaceStore()
-  const { institutionName, eButceKodu } = useSettingsStore()
-  const [showAbout, setShowAbout] = useState(false)
-  const [showNetwork, setShowNetwork] = useState(false)
-  const [appVersion, setAppVersion] = useState(packageJson.version)
-  const [localIp, setLocalIp] = useState<string | null>(null)
-  const aboutRef = useRef<HTMLDivElement>(null)
+  const { activeMeta, activeDosyaId, fileName } = useWorkspaceStore();
+  const { institutionName, eButceKodu } = useSettingsStore();
+  const [showAbout, setShowAbout] = useState(false);
+  const [showNetwork, setShowNetwork] = useState(false);
+  const [appVersion, setAppVersion] = useState(packageJson.version);
+  const [localIp, setLocalIp] = useState<string | null>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
 
   const fetchVersion = () => {
     if ((window as any).api?.getAppVersion) {
-      ;(window as any).api
+      (window as any).api
         .getAppVersion()
         .then((v: string) => {
-          if (v) setAppVersion(v)
+          if (v) setAppVersion(v);
         })
-        .catch(console.error)
+        .catch(console.error);
     }
-  }
+  };
 
   const fetchLocalIp = () => {
     if ((window as any).api?.getLocalIp) {
-      ;(window as any).api
+      (window as any).api
         .getLocalIp()
         .then((ip: string) => {
-          if (ip) setLocalIp(ip)
+          if (ip) setLocalIp(ip);
         })
-        .catch(console.error)
+        .catch(console.error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchVersion()
-    fetchLocalIp()
-  }, [])
+    fetchVersion();
+    fetchLocalIp();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (aboutRef.current && !aboutRef.current.contains(event.target as Node)) {
-        setShowAbout(false)
+      if (
+        aboutRef.current && !aboutRef.current.contains(event.target as Node)
+      ) {
+        setShowAbout(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const openExternal = (url: string) => {
     if ((window as any).api?.openExternal) {
-      ;(window as any).api.openExternal(url)
+      (window as any).api.openExternal(url);
     } else {
-      window.open(url, '_blank')
+      window.open(url, "_blank");
     }
-  }
+  };
 
   return (
     <footer className="h-8 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 text-xs text-slate-500 dark:text-slate-400 z-50">
@@ -79,22 +81,28 @@ export function Footer(): React.JSX.Element {
                 {fileName}
               </span>
             </Link>
-            {institutionName && institutionName !== 'Kurum Adı Bulunamadı' && (
+            {institutionName && institutionName !== "Kurum Adı Bulunamadı" && (
               <>
-                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
-                <span className="flex items-center gap-1">
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750">
+                </span>
+                <Link
+                  to="/kurum"
+                  className="flex items-center gap-1 hover:text-blue-655 dark:hover:text-blue-400 transition-colors cursor-pointer group"
+                  title="Kurum Detaylarını Gör"
+                >
                   <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
                     Kurum:
                   </span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-305">
+                  <span className="font-semibold text-slate-700 dark:text-slate-305 group-hover:underline">
                     {institutionName}
                   </span>
-                </span>
+                </Link>
               </>
             )}
             {eButceKodu && (
               <>
-                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750">
+                </span>
                 <span className="flex items-center gap-1">
                   <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
                     Bütçe:
@@ -111,9 +119,9 @@ export function Footer(): React.JSX.Element {
           <>
             <span className="w-px h-3 bg-slate-300 dark:bg-slate-700"></span>
             <span className="text-slate-650 dark:text-slate-400">
-              Son Güncelleme:{' '}
+              Son Güncelleme:{" "}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {new Date(activeMeta.updated_at).toLocaleString('tr-TR')}
+                {new Date(activeMeta.updated_at).toLocaleString("tr-TR")}
               </span>
             </span>
           </>
@@ -159,26 +167,31 @@ export function Footer(): React.JSX.Element {
 
             <div className="p-3 text-[11px] text-slate-650 dark:text-slate-350 border-b border-slate-100 dark:border-slate-700 leading-relaxed">
               <p className="mb-2.5">
-                Bu uygulama, kamu kurumlarının doğrudan temin süreçlerini standartlaştırmak,
-                hızlandırmak ve hatasız yürütmesini sağlamak amacıyla{' '}
+                Bu uygulama, kamu kurumlarının doğrudan temin süreçlerini
+                standartlaştırmak, hızlandırmak ve hatasız yürütmesini sağlamak
+                amacıyla{" "}
                 <strong>
-                  tamamen ücretsiz olarak desteklenen ve sürdürülen bağımsız bir girişimdir.
-                </strong>{' '}
-                Yerel dosya mimarisi (.dtal) üzerinde tek kullanıcılı olarak sınırsızca
-                çalışmaktadır.
+                  tamamen ücretsiz olarak desteklenen ve sürdürülen bağımsız bir
+                  girişimdir.
+                </strong>{" "}
+                Yerel dosya mimarisi (.dtal) üzerinde tek kullanıcılı olarak
+                sınırsızca çalışmaktadır.
               </p>
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-2.5 rounded-lg">
                 <p className="font-bold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-1.5 text-xs">
                   <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75">
+                    </span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500">
+                    </span>
                   </span>
                   İleri Seviye Kurumsal Çözümler
                 </p>
                 <p className="text-[10px] text-blue-700/90 dark:text-blue-300/80 leading-relaxed font-medium">
-                  Merkezi ağ üzerinde ortak veri havuzu, rol bazlı personel yetkilendirmesi (RBAC),
-                  bulut api gateway üzerinden anlık veri eşitlemesi ve merkezi işlem loglama
-                  denetimleri gibi ileri seviye kurumsal modüllerimiz için geliştiriciyle iletişime
+                  Merkezi ağ üzerinde ortak veri havuzu, rol bazlı personel
+                  yetkilendirmesi (RBAC), bulut api gateway üzerinden anlık veri
+                  eşitlemesi ve merkezi işlem loglama denetimleri gibi ileri
+                  seviye kurumsal modüllerimiz için geliştiriciyle iletişime
                   geçebilirsiniz.
                 </p>
               </div>
@@ -187,8 +200,9 @@ export function Footer(): React.JSX.Element {
             <div className="p-1.5 flex flex-col gap-0.5 bg-slate-50/50 dark:bg-slate-800/20">
               <button
                 onClick={() =>
-                  openExternal('https://github.com/ilyasbozdemir/dt-asistan-desktop-app')
-                }
+                  openExternal(
+                    "https://github.com/ilyasbozdemir/dt-asistan-desktop-app",
+                  )}
                 className="flex items-center gap-2 w-full p-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all font-semibold cursor-pointer group"
               >
                 <Star className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform shrink-0" />
@@ -199,7 +213,7 @@ export function Footer(): React.JSX.Element {
               </button>
 
               <button
-                onClick={() => openExternal('https://ilyasbozdemir.dev')}
+                onClick={() => openExternal("https://ilyasbozdemir.dev")}
                 className="flex items-center gap-2 w-full p-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
               >
                 <Info className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0" />
@@ -211,8 +225,9 @@ export function Footer(): React.JSX.Element {
 
               <button
                 onClick={() =>
-                  openExternal('https://github.com/ilyasbozdemir/dt-asistan-desktop-app/issues')
-                }
+                  openExternal(
+                    "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/issues",
+                  )}
                 className="flex items-center gap-2 w-full p-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
               >
                 <Bug className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />
@@ -226,7 +241,9 @@ export function Footer(): React.JSX.Element {
         )}
       </div>
 
-      {showNetwork && <NetworkSyncModal onClose={() => setShowNetwork(false)} />}
+      {showNetwork && <NetworkSyncModal
+        onClose={() => setShowNetwork(false)}
+      />}
     </footer>
-  )
+  );
 }
