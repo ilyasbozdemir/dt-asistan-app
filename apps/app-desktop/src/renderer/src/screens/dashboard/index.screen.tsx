@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSettingsStore } from "../../store/settingsStore";
 import { useWorkspaceStore } from "../../store/workspaceStore";
+import { logActivity } from "../../utils/logger";
 import {
   useActiveDosyaSummary,
   useAnnouncements,
@@ -240,6 +241,54 @@ export default function DashboardScreen(): React.JSX.Element {
   };
 
   const smartAlerts = useSmartAlerts(settings, activeDosyaId, activeSummary);
+
+  // Trigger system notification logs for warnings and errors
+  useEffect(() => {
+    if (isLoading || isAnnouncementsLoading) return;
+
+    // Cache to prevent duplicate notifications in the current session
+    const notifiedStr = localStorage.getItem("dta_notified_syslog_keys") || "[]";
+    let notifiedKeys: string[] = [];
+    try {
+      notifiedKeys = JSON.parse(notifiedStr);
+    } catch {
+      notifiedKeys = [];
+    }
+
+    const newNotifiedKeys = [...notifiedKeys];
+    let hasNewLog = false;
+
+    // 1. SMTP mail check
+    if (!isMailConfigured) {
+      const key = "smtp_not_configured";
+      if (!notifiedKeys.includes(key)) {
+        logActivity(
+          "Mail (SMTP) Yapılandırılmamış",
+          "Posta sunucu ayarlarınız eksik. Şifre sıfırlama veya onay mailleri çalışmayabilir.",
+          "warning"
+        );
+        newNotifiedKeys.push(key);
+        hasNewLog = true;
+      }
+    }
+
+    // 2. Smart Alerts check
+    smartAlerts.forEach((alert) => {
+      // Only notify warning or error type alerts
+      if (alert.type === "error" || alert.type === "warning") {
+        const key = `alert_${alert.id}`;
+        if (!notifiedKeys.includes(key)) {
+          logActivity(alert.title, alert.message, alert.type);
+          newNotifiedKeys.push(key);
+          hasNewLog = true;
+        }
+      }
+    });
+
+    if (hasNewLog) {
+      localStorage.setItem("dta_notified_syslog_keys", JSON.stringify(newNotifiedKeys));
+    }
+  }, [smartAlerts, isMailConfigured, isLoading, isAnnouncementsLoading]);
 
   if (activeDosyaId) {
     return <TakipScreen />;
