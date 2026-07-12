@@ -118,7 +118,10 @@ export function buildDocumentContext(
   const ikinciAvantajliTeklifSahibi = calculatedTeklifler[1]?.istekliUnvani || ''
   const ikinciAvantajliTeklifBedeli = calculatedTeklifler[1]?.teklifBedeli || ''
 
-  // En düşük fiyatlar ve genel toplam hesaplama
+  // Fiyatlar ve genel toplam hesaplama (aktif dosyanın hesaplama esasına göre)
+  const isAverageBasis = dosyaResData?.hesaplama_esasi?.toLowerCase().includes('ortalama')
+  const isLowestBasis = !isAverageBasis
+
   let grandTotal = 0
   const needItems =
     kalemlerData?.map((k: any, index: number) => {
@@ -129,7 +132,11 @@ export function buildDocumentContext(
       const validPrices = itemPrices.filter((p: any) => p.price > 0)
       const minPrice =
         validPrices.length > 0 ? Math.min(...validPrices.map((p: any) => p.price)) : 0
-      const toplamBedel = minPrice * (k.miktar || 0)
+      const avgPrice =
+        validPrices.length > 0 ? (validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length) : 0
+      
+      const chosenPrice = isLowestBasis ? minPrice : avgPrice
+      const toplamBedel = chosenPrice * (k.miktar || 0)
       grandTotal += toplamBedel
 
       const enUygunFirma =
@@ -347,6 +354,8 @@ export function buildDocumentContext(
     fiyatFarkiSartlari: dosyaResData?.fiyat_farki_dayanagi || 'Fiyat Farkı Ödenmeyecek',
     yillaraYaygin: dosyaResData?.yillara_yaygin === 1 ? 'Yıllara Yaygın Hizmet Alımı' : 'Hayır',
     sozlesmeYapilacak: dosyaResData?.sozlesme_yapilacak_mi === 1 ? 'Evet' : 'Hayır',
+    hesaplamaEsasi:
+      dosyaResData?.hesaplama_esasi || 'Ortalama fiyat esasına göre',
     vkomisyontakdiri:
       dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
     komisyonTakdiri:

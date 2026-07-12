@@ -376,8 +376,31 @@ export function usePiyasaFiyatArastirmasiLogic() {
         [total, teminTarihi || null, activeDosyaId],
       );
       if (res.success) {
+        // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
+        const documentsToLog = ["Yaklaşık Maliyet Cetveli", "Piyasa Fiyat Araştırma Tutanağı"];
+        for (const docName of documentsToLog) {
+          const existRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            "SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ?",
+            [activeDosyaId, docName],
+          );
+          if (existRes.success && existRes.data && existRes.data.length > 0) {
+            await window.electron.ipcRenderer.invoke(
+              "db:run",
+              "UPDATE DATA_TeminBelge SET created_at = CURRENT_TIMESTAMP WHERE id = ?",
+              [existRes.data[0].id],
+            );
+          } else {
+            await window.electron.ipcRenderer.invoke(
+              "db:run",
+              "INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, dosya_yolu) VALUES (?, ?, ?)",
+              [activeDosyaId, docName, ""],
+            );
+          }
+        }
+
         alert(
-          `Yaklaşık maliyet başarıyla güncellendi: ₺ ${
+          `Yaklaşık maliyet ve tutanak başarıyla kaydedildi: ₺ ${
             total.toLocaleString("tr-TR", {
               minimumFractionDigits: 2,
             })
