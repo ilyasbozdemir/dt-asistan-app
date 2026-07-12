@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
         margin: 1.5cm;
       }
       body {
-        font-family: 'Times New Roman', Times, serif;
+        font-family: "Times New Roman", Times, serif;
         font-size: 12pt;
         color: #000;
         line-height: 1.5;
@@ -53,7 +53,11 @@
   </head>
   <body>
     <div class="page-container">
-      <table border="0" align="center" style="border-collapse: collapse; width: 100%">
+      <table
+        border="0"
+        align="center"
+        style="border-collapse: collapse; width: 100%"
+      >
         <tbody>
           <!-- HEADER -->
           <tr>
@@ -106,13 +110,21 @@
             <td colspan="99">
               <table width="100%" style="border-collapse: collapse">
                 <tr>
-                  <td style="font-size: 11pt; line-height: 1.8; vertical-align: top">
-                    Tarih &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+                  <td
+                    style="font-size: 11pt; line-height: 1.8; vertical-align: top"
+                  >
+                    Tarih
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
                     {{dosyaTarihi}}<br />
-                    Sayı &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+                    Sayı
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
                     {{evrakSayisi}}
                   </td>
-                  <td align="right" style="vertical-align: bottom; font-size: 10pt"></td>
+                  <td
+                    align="right"
+                    style="vertical-align: bottom; font-size: 10pt"
+                  >
+                  </td>
                 </tr>
               </table>
             </td>
@@ -153,8 +165,13 @@
                     <td class="right">
                       {{bugunKabulEdilenMiktar}}{{^bugunKabulEdilenMiktar}}{{miktar}}{{/bugunKabulEdilenMiktar}}
                     </td>
-                    <td class="right">{{kalanMiktar}}{{^kalanMiktar}}0{{/kalanMiktar}}</td>
-                    <td>{{teslimYeri}}{{^teslimYeri}}Belediye Deposu{{/teslimYeri}}</td>
+                    <td class="right">
+                      {{kalanMiktar}}{{^kalanMiktar}}0{{/kalanMiktar}}
+                    </td>
+                    <td>
+                      {{teslimYeri}}{{^teslimYeri}}Belediye
+                      Deposu{{/teslimYeri}}
+                    </td>
                   </tr>
                   {{/ihtiyacKalemleri}}
                 </tbody>
@@ -164,9 +181,12 @@
 
           <!-- NOT -->
           <tr>
-            <td colspan="99" style="padding-top: 15px; font-size: 10.5pt; text-align: left">
-              <b>Not:</b> {{tutanakNotu}}{{^tutanakNotu}}Belediye Deposundan Yeni mahalle
-              mahallesindeki yapımı devam eden düğün soluna aktarıldı{{/tutanakNotu}}
+            <td
+              colspan="99"
+              style="padding-top: 15px; font-size: 10.5pt; text-align: left"
+            >
+              {{#tutanakNotu}}
+              {{tutanakNotu}} {{/tutanakNotu}}
             </td>
           </tr>
 
@@ -183,13 +203,15 @@
               {{yukleniciFirma}} tarafından
               {{#faturaTarihi}}{{faturaTarihi}}{{/faturaTarihi}}{{^faturaTarihi}}..../..../20....{{/faturaTarihi}}
               tarih ve
-              {{#faturaNo}}{{faturaNo}}{{/faturaNo}}{{^faturaNo}}................{{/faturaNo}} no’lu
-              faturayla KDV hariç {{genelToplam}} TL ye doğrudan temin yoluyla alınan,
+              {{#faturaNo}}{{faturaNo}}{{/faturaNo}}{{^faturaNo}}................{{/faturaNo}}
+              no’lu faturayla KDV hariç {{genelToplam}} TL ye doğrudan temin
+              yoluyla alınan,
               {{#kabulTarihi}}{{kabulTarihi}}{{/kabulTarihi}}{{^kabulTarihi}}{{dosyaTarihi}}{{/kabulTarihi}}
-              tarihinde teslim edilen ve yukarıda cins, birim ve miktarı belirtilen mal/hizmet
-              kalemleri, doğrudan temin kapsamında istenilen şartlara göre tarafımızca muayene
-              edilmiştir. Söz konusu mal kalemlerinden niteliklere uygun olanların (kabul
-              edilenlerin) teslim alınmasında ve kullanılmasında herhangi bir sakınca yoktur.
+              tarihinde teslim edilen ve yukarıda cins, birim ve miktarı
+              belirtilen mal/hizmet kalemleri, doğrudan temin kapsamında
+              istenilen şartlara göre tarafımızca muayene edilmiştir. Söz konusu
+              mal kalemlerinden niteliklere uygun olanların (kabul edilenlerin)
+              teslim alınmasında ve kullanılmasında herhangi bir sakınca yoktur.
             </td>
           </tr>
 
@@ -224,7 +246,8 @@
                     align="center"
                     style="width: 50%; padding: 10px; vertical-align: top; line-height: 1.4"
                   >
-                    <span style="font-weight: bold">{{onaylayanPersonelAdi}}</span><br />
+                    <span style="font-weight: bold"
+                    >{{onaylayanPersonelAdi}}</span><br />
                     <span>{{onaylayanPersonelUnvan}}</span>
                   </td>
                   {{/onaylayanlar}} {{/muayeneKomisyonu}}
@@ -241,13 +264,7 @@
           <tr>
             <td colspan="99" align="center">
               <table
-                style="
-                  border-collapse: collapse;
-                  text-align: center;
-                  line-height: 1.4;
-                  font-size: 11pt;
-                  margin: 0 auto;
-                "
+                style="border-collapse: collapse; text-align: center; line-height: 1.4; font-size: 11pt; margin: 0 auto"
               >
                 <tr>
                   <td align="center">
@@ -260,19 +277,12 @@
                     <input
                       type="text"
                       value="{{dosyaTarihi}}"
-                      style="
-                        text-align: center;
-                        width: 100px;
-                        font-family: inherit;
-                        font-size: inherit;
-                        border: 1px solid #7a7a7a;
-                        padding: 2px 5px;
-                      "
+                      style="text-align: center; width: 100px; font-family: inherit; font-size: inherit; border: 1px solid #7a7a7a; padding: 2px 5px"
                       readonly
                     /><br />
-                    <span style="font-weight: bold; display: block; margin-top: 10px"
-                      >{{baskanAdi}}</span
-                    >
+                    <span
+                      style="font-weight: bold; display: block; margin-top: 10px"
+                    >{{baskanAdi}}</span>
                     <span>{{baskanUnvan}}</span>
                   </td>
                 </tr>
