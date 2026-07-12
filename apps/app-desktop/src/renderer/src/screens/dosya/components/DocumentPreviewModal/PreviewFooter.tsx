@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Download, Printer, RefreshCw, Star, ChevronUp } from 'lucide-react'
+import { Download, Printer, RefreshCw, Star, ChevronUp, Check } from 'lucide-react'
 import { cn } from '../../../../utils/cn'
 
 interface PreviewFooterProps {
@@ -8,10 +8,12 @@ interface PreviewFooterProps {
   handlePdf: () => Promise<void>
   handleDocx?: () => Promise<void>
   handleUdf?: () => Promise<void>
+  handleSave?: () => Promise<void>
   isProcessingPrint: boolean
   isProcessingPdf: boolean
   isProcessingDocx?: boolean
   isProcessingUdf?: boolean
+  isProcessingSave?: boolean
   isStarred?: boolean
   onToggleStar?: () => void
   jsonError: string
@@ -27,10 +29,12 @@ export const PreviewFooter: React.FC<PreviewFooterProps> = ({
   handlePdf,
   handleDocx,
   handleUdf,
+  handleSave,
   isProcessingPrint,
   isProcessingPdf,
   isProcessingDocx = false,
   isProcessingUdf = false,
+  isProcessingSave = false,
   isStarred = false,
   onToggleStar,
   jsonError,
@@ -75,6 +79,21 @@ export const PreviewFooter: React.FC<PreviewFooterProps> = ({
           >
             <RefreshCw className="w-4 h-4" />
             Güncel Verileri Al
+          </button>
+        )}
+
+        {handleSave && (
+          <button
+            onClick={handleSave}
+            disabled={isAnyProcessing || isProcessingSave || !!jsonError}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 text-sm shadow-sm cursor-pointer text-white"
+          >
+            {isProcessingSave ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
+            Değişiklikleri Kaydet
           </button>
         )}
 

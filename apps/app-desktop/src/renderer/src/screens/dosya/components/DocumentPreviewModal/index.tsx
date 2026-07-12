@@ -45,9 +45,23 @@ export function DocumentPreviewModal<T = any>({
   isInline = false,
   templateTestVerisi = "",
   onRefreshSnapshot,
+  onSaveSnapshot,
   dosyaAdi,
 }: DocumentPreviewModalProps<T>): React.JSX.Element | null {
   const [schemaJson, setSchemaJson] = useState<Partial<T> | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveClick = async () => {
+    if (!onSaveSnapshot) return;
+    setIsSaving(true);
+    try {
+      await onSaveSnapshot(overrideData);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Load Schema JSON dynamically
   useEffect(() => {
@@ -370,8 +384,10 @@ export function DocumentPreviewModal<T = any>({
           onClose={onClose}
           handlePrint={handlePrint}
           handlePdf={handlePdf}
+          handleSave={onSaveSnapshot ? handleSaveClick : undefined}
           isProcessingPrint={isProcessingPrint}
           isProcessingPdf={isProcessingPdf}
+          isProcessingSave={isSaving}
           jsonError={jsonError}
           activeTab={activeTab}
           onRefreshSnapshot={onRefreshSnapshot}
@@ -522,10 +538,12 @@ export function DocumentPreviewModal<T = any>({
           handlePdf={handlePdf}
           handleDocx={onExportDocx ? handleDocx : undefined}
           handleUdf={onExportUdf ? handleUdf : undefined}
+          handleSave={onSaveSnapshot ? handleSaveClick : undefined}
           isProcessingPrint={isProcessingPrint}
           isProcessingPdf={isProcessingPdf}
           isProcessingDocx={isProcessingDocx}
           isProcessingUdf={isProcessingUdf}
+          isProcessingSave={isSaving}
           isStarred={isStarred}
           onToggleStar={onToggleStar}
           jsonError={jsonError}

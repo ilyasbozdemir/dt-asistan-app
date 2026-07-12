@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Sablon } from '../sablonlar/sablonlar.hooks'
 import { subPagesMapping } from '../../constants/surecler'
 import {
@@ -19,6 +19,7 @@ export interface UseCiktiMerkeziDataResult {
   contextsByPath: Record<string, Record<string, unknown>>
   personelListesi: any[]
   settings: any
+  refresh: (isBackgroundRefresh?: boolean) => Promise<void>
 }
 
 export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerkeziDataResult {
@@ -32,10 +33,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
   const [personelListesi, setPersonelListesi] = useState<any[]>([])
   const [settings, setSettings] = useState<any>(null)
 
-  useEffect(() => {
-    if (!activeDosyaId) return
-
-    const loadData = async (isBackgroundRefresh = false): Promise<void> => {
+  const loadData = useCallback(async (isBackgroundRefresh = false): Promise<void> => {
       if (!activeDosyaId) return
       if (!isBackgroundRefresh) setLoading(true)
       try {
@@ -373,12 +371,15 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
 
         setContextsByPath(pathContexts)
         setActiveDosya(dosyaRes.data?.[0] || null)
-      } catch (err) {
-        console.error('Veri yükleme hatası:', err)
-      } finally {
-        setLoading(false)
-      }
+    } catch (err) {
+      console.error('Veri yükleme hatası:', err)
+    } finally {
+      setLoading(false)
     }
+  }, [activeDosyaId])
+
+  useEffect(() => {
+    if (!activeDosyaId) return
 
     loadData()
 
@@ -389,7 +390,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
     return () => {
       if (unlisten) unlisten()
     }
-  }, [activeDosyaId])
+  }, [activeDosyaId, loadData])
 
   return {
     sablons,
@@ -400,6 +401,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
     placeholders,
     contextsByPath,
     personelListesi,
-    settings
+    settings,
+    refresh: loadData
   }
 }

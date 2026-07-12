@@ -138,7 +138,8 @@ export function useDosyaAsamasiSablons() {
     dosyaContext,
     placeholders,
     contextsByPath,
-    personelListesi
+    personelListesi,
+    refresh
   } = useCiktiMerkeziData(activeDosyaId)
 
   const { logDocument } = useDocumentLogger()
@@ -178,34 +179,29 @@ export function useDosyaAsamasiSablons() {
 
     const loadFromUrl = async () => {
       // Şablon adından durumu temizleyip eşleştir
-      const cleanSablonAd = sablonAd.replace(/^\[.*?\]\s*/, '')
-
-      const targetSablon = sablons.find((s: any) => {
-        const cleanSName = s.ad.replace(/^\[.*?\]\s*/, '')
-        return cleanSName === cleanSablonAd || s.ad === sablonAd
-      })
-
-      if (targetSablon) {
-        const title = targetSablon.ad.replace(/^\[.*?\]\s*/, '')
-        const processPath = targetSablon.route_path || targetSablon.dosya_adi || ''
-        const currentCtx = contextsByPath[processPath] || dosyaContext
-        const snapshotCtx = await loadOrCreateSnapshot(targetSablon.id, currentCtx)
-
+      const cleanTarget = parseStatusAndName(sablonAd).cleanName
+      const normalizedTarget = normalizeForMatch(cleanTarget)
+      const sablon = sablons.find(
+        (s) => normalizeForMatch(parseStatusAndName(s.ad).cleanName) === normalizedTarget
+      )
+      if (sablon) {
+        const processPath = sablon.route_path || sablon.dosya_adi || ''
+        const baseCtx = contextsByPath[processPath] || dosyaContext
+        const mergedCtx = await loadOrCreateSnapshot(sablon.id, baseCtx)
         setPreviewData({
-          sablonId: targetSablon.id,
-          title,
-          templateHtml: targetSablon.icerik,
+          title: sablon.ad,
+          templateHtml: sablon.icerik,
           processPath,
-          templateTestVerisi: '', // SÜREÇLERDE MOCK VERİ KULLANILMAZ
-          snapshotContext: snapshotCtx,
-          dosyaAdi: targetSablon.dosya_adi
+          templateTestVerisi: sablon.test_verisi || undefined,
+          sablonId: sablon.id,
+          snapshotContext: mergedCtx,
+          dosyaAdi: sablon.dosya_adi
         })
         setPreviewModalOpen(true)
       }
     }
-
     loadFromUrl()
-  }, [masterHtml, sablons, sablonAd, activeDosyaId, dosyaContext])
+  }, [sablonAd, sablons, masterHtml, activeDosyaId, dosyaContext])
 
   const handleOpenPreviewForSablon = async (sablon: any, title: string) => {
     if (!masterHtml) {
@@ -231,7 +227,8 @@ export function useDosyaAsamasiSablons() {
 
   const refreshSnapshot = async () => {
     if (!previewData?.sablonId || !activeDosyaId) return
-    const currentCtx = contextsByPath[previewData.processPath] || dosyaContext
+    const processPath = previewData.processPath
+    const currentCtx = contextsByPath[processPath] || dosyaContext
     try {
       // Güncel verileri almak, o şablon için kaydedilmiş (dondurulmuş) veriyi temizlemek anlamına gelir
       await (window as any).electron.ipcRenderer.invoke(
@@ -261,6 +258,42 @@ export function useDosyaAsamasiSablons() {
         'INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)',
         [activeDosyaId, previewData.sablonId, JSON.stringify(mergedCtx)]
       )
+
+      // Eşleşen personelleri doğrudan temin dosyası ana kaydı (DATA_TeminDosyasi) ile eşleştir
+      const updates: { col: string; val: number | null }[] = []
+      
+      const checkAndAddUpdate = (fieldName: string, colName: string) => {
+        if (overrideData[fieldName] !== undefined) {
+          const nameVal = overrideData[fieldName]
+          if (nameVal === '' || nameVal === null) {
+            updates.push({ col: colName, val: null })
+          } else {
+            const found = personelListesi.find((p: any) => p.ad_soyad === nameVal)
+            if (found) {
+              updates.push({ col: colName, val: found.id })
+            }
+          }
+        }
+      }
+
+      checkAndAddUpdate('onaylayanPersonelAdi', 'onay_personel_id')
+      checkAndAddUpdate('hazirlayanPersonelAdi', 'hazirlayan_personel_id')
+      checkAndAddUpdate('talepEdenPersonelAdi', 'talep_eden_personel_id')
+      checkAndAddUpdate('sunanPersonelAdi', 'sunan_personel_id')
+      checkAndAddUpdate('ilgiliPersonelAdi', 'irtibat_yetkilisi_id')
+
+      if (updates.length > 0) {
+        for (const update of updates) {
+          await (window as any).electron.ipcRenderer.invoke(
+            'db:run',
+            `UPDATE DATA_TeminDosyasi SET ${update.col} = ? WHERE id = ?`,
+            [update.val, activeDosyaId]
+          )
+        }
+        // Değişikliklerin ekranda hemen güncellenmesi için veri kaynağını yenile
+        await refresh(true)
+      }
+
       setPreviewData({
         ...previewData,
         snapshotContext: mergedCtx
