@@ -141,6 +141,48 @@ export default function TaslakYoneticisi(): React.JSX.Element {
   const [newPresetName, setNewPresetName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [presetToDeleteId, setPresetToDeleteId] = useState("");
+  const [showCopyModal, setShowCopyModal] = useState(false);
+
+  const otherPresetsDocs = useMemo(() => {
+    if (!selectedPresetId) return [];
+    const allOtherDocsSet = new Set<string>();
+    presets.forEach((p) => {
+      if (p.id !== selectedPresetId) {
+        p.docs.forEach((d) =>
+          allOtherDocsSet.add(parseStatusAndName(d).cleanName)
+        );
+      }
+    });
+    const activeStarred = activeDosyaId ? activeStarredDocs : globalStarred;
+    activeStarred.forEach((d) =>
+      allOtherDocsSet.add(parseStatusAndName(d).cleanName)
+    );
+
+    const currentPreset = presets.find((p) => p.id === selectedPresetId);
+    const currentDocsNormalized = new Set(
+      (currentPreset?.docs || []).map((d) =>
+        normalizeForMatch(parseStatusAndName(d).cleanName)
+      ),
+    );
+
+    return Array.from(allOtherDocsSet).filter(
+      (d) => !currentDocsNormalized.has(normalizeForMatch(d)),
+    );
+  }, [
+    presets,
+    selectedPresetId,
+    activeStarredDocs,
+    globalStarred,
+    activeDosyaId,
+  ]);
+
+  const handleCopyDocToCurrentPreset = async (
+    docName: string,
+  ): Promise<void> => {
+    const cleanDocName = parseStatusAndName(docName).cleanName;
+    const updated = [...starredList, cleanDocName];
+    await saveUpdatedStarredList(updated);
+  };
 
   const saveStarred = (updated: string[]): void => {
     setGlobalStarred(updated);
@@ -252,6 +294,33 @@ export default function TaslakYoneticisi(): React.JSX.Element {
     }
 
     await saveUpdatedStarredList(updated);
+  };
+
+  const handleCopyToPreset = async (
+    docName: string,
+    presetId: string,
+  ): Promise<void> => {
+    const cleanDocName = parseStatusAndName(docName).cleanName;
+    const normalizedTarget = normalizeForMatch(cleanDocName);
+    const updatedPresets = presets.map((p) => {
+      if (p.id === presetId) {
+        const exists = p.docs.some(
+          (d) =>
+            normalizeForMatch(parseStatusAndName(d).cleanName) ===
+              normalizedTarget,
+        );
+        if (!exists) {
+          return { ...p, docs: [...p.docs, cleanDocName] };
+        }
+      }
+      return p;
+    });
+    setPresets(updatedPresets);
+    localStorage.setItem(
+      "dta_document_presets",
+      JSON.stringify(updatedPresets),
+    );
+    window.dispatchEvent(new Event("dta_presets_changed"));
   };
 
   const moveShortcut = async (
@@ -371,7 +440,7 @@ export default function TaslakYoneticisi(): React.JSX.Element {
             <select
               value={selectedPresetId}
               onChange={(e) => setSelectedPresetId(e.target.value)}
-              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-700 dark:text-slate-350 font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 min-w-[200px]"
+              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-xs text-slate-700 dark:text-slate-350 font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 min-w-[200px] h-9"
             >
               {presets.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -381,10 +450,10 @@ export default function TaslakYoneticisi(): React.JSX.Element {
             </select>
           </div>
 
-          <div className="flex gap-1.5 pt-3.5">
+          <div className="flex items-end gap-1.5 h-full self-end mb-[1px]">
             <button
               onClick={handleAddPreset}
-              className="py-1.5 px-3 rounded-xl text-xs font-bold transition-all bg-blue-650 hover:bg-blue-700 text-white flex items-center gap-1 shadow-sm cursor-pointer"
+              className="h-9 px-3 rounded-xl text-xs font-bold transition-all bg-blue-650 hover:bg-blue-700 text-white flex items-center gap-1 shadow-sm cursor-pointer whitespace-nowrap"
               title="Yeni Paket Ekle"
             >
               + Yeni Paket
@@ -392,7 +461,7 @@ export default function TaslakYoneticisi(): React.JSX.Element {
             {selectedPresetId && (
               <button
                 onClick={() => handleDeletePreset(selectedPresetId)}
-                className="p-2 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-955/30 text-rose-500 flex items-center justify-center cursor-pointer"
+                className="h-9 w-9 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:border-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-955/30 text-rose-500 flex items-center justify-center cursor-pointer shrink-0"
                 title="Paketi Sil"
               >
                 <Trash2 className="w-4 h-4" />
@@ -434,12 +503,22 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                           listelenmiştir.
                         </p>
                       </div>
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-xs cursor-pointer"
-                      >
-                        ✍️ Belgeleri Seç / Düzenle
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {selectedPresetId && (
+                          <button
+                            onClick={() => setShowCopyModal(true)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-slate-100 hover:bg-slate-205 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-250 flex items-center gap-1.5 shadow-2xs border border-slate-200 dark:border-slate-700 cursor-pointer"
+                          >
+                            📋 Diğerlerinden Kopyala
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          ✍️ Belgeleri Seç / Düzenle
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -480,6 +559,9 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                             onQuickExport={(fmt) =>
                               sablon && quickExport(sablon, fmt)}
                             onToggleStar={() => toggleStar(docName)}
+                            presets={presets}
+                            onCopyToPreset={(presetId) =>
+                              handleCopyToPreset(docName, presetId)}
                           />
                         );
                       })}
@@ -518,7 +600,8 @@ export default function TaslakYoneticisi(): React.JSX.Element {
                     toggleStar={toggleStar}
                     onAddAllStageDocs={handleAddAllStageDocs}
                     onRemoveAllStageDocs={handleRemoveAllStageDocs}
-                    onCloseEdit={() => setIsEditing(false)}
+                    onCloseEdit={() =>
+                      setIsEditing(false)}
                   />
                 )}
             </div>
@@ -539,6 +622,58 @@ export default function TaslakYoneticisi(): React.JSX.Element {
         }}
         onDeleteSubmit={handleDeletePresetSubmit}
       />
+
+      {/* Diğer Paketlerden Kopyala Modal */}
+      {showCopyModal && selectedPresetId && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh] text-left">
+            <h3 className="text-lg font-extrabold text-slate-850 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              📋 Diğerlerinden Kopyala
+            </h3>
+            <p className="text-xs text-slate-500 mt-2">
+              Diğer paketlerinizde veya genel hızlı erişim listenizde olan ama
+              bu pakette bulunmayan belgeleri aşağıdan seçip
+              kopyalayabilirsiniz.
+            </p>
+
+            <div className="flex-1 overflow-y-auto my-4 space-y-2 pr-1">
+              {otherPresetsDocs.length === 0
+                ? (
+                  <p className="text-xs text-slate-400 italic text-center py-6">
+                    Kopyalanacak yeni bir belge bulunamadı.
+                  </p>
+                )
+                : (
+                  otherPresetsDocs.map((docName) => (
+                    <div
+                      key={docName}
+                      className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950/40 border border-slate-105 dark:border-slate-850 rounded-xl gap-3"
+                    >
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        {docName}
+                      </span>
+                      <button
+                        onClick={() => handleCopyDocToCurrentPreset(docName)}
+                        className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-extrabold transition-all cursor-pointer shrink-0"
+                      >
+                        + Ekle
+                      </button>
+                    </div>
+                  ))
+                )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={() => setShowCopyModal(false)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Document Preview Modal */}
       {previewData && previewModalOpen && (

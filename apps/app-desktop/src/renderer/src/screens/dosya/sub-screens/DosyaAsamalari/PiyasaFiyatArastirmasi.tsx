@@ -11,6 +11,7 @@ import {
   PackageSearch,
   Printer,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
 import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
@@ -82,6 +83,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const [items, setItems] = React.useState<BiddingKalem[]>([]);
   const [bids, setBids] = React.useState<Record<string, number>>({}); // key: `${kalemId}_${firmaId}` -> birim_fiyat
   const [, setLoading] = React.useState(true);
+
+  const [hesaplamaEsasi, setHesaplamaEsasi] = React.useState<string>("Ortalama fiyat esasına göre");
+  const [komisyonTakdiri, setKomisyonTakdiri] = React.useState<string>("Sadece araştırma fiyatları dikkate alınacak");
 
   const [isFirmModalOpen, setIsFirmModalOpen] = React.useState(false);
   const [selectedFirmIds, setSelectedFirmIds] = React.useState<number[]>([]);
@@ -218,9 +222,20 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         [activeDosyaId],
       );
 
+      // 5. Load dossier config
+      const resDosya = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT hesaplama_esasi, komisyon_takdiri FROM DATA_TeminDosyasi WHERE id = ?",
+        [activeDosyaId],
+      );
+
       if (resInvited.success) setInvitedFirms(resInvited.data || []);
       if (resPool.success) setAllPoolFirms(resPool.data || []);
       if (resItems.success) setItems(resItems.data || []);
+      if (resDosya.success && resDosya.data && resDosya.data.length > 0) {
+        setHesaplamaEsasi(resDosya.data[0].hesaplama_esasi || "Ortalama fiyat esasına göre");
+        setKomisyonTakdiri(resDosya.data[0].komisyon_takdiri || "Sadece araştırma fiyatları dikkate alınacak");
+      }
 
       if (resBids.success && resBids.data) {
         const bidsMap: Record<string, number> = {};
@@ -381,6 +396,41 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       }
     });
     return count > 0 ? sum / count : 0;
+  };
+
+  const getEstimatedCostTotal = React.useCallback((): number => {
+    return items.reduce((sum, item) => {
+      const avg = getAverageBid(item.id);
+      return sum + (item.miktar || 0) * avg;
+    }, 0);
+  }, [items, bids, invitedFirms]);
+
+  const handleSaveToDosya = async (): Promise<void> => {
+    const total = getEstimatedCostTotal();
+    if (total === 0) {
+      alert("Yaklaşık maliyet ₺0.00 olamaz. Lütfen önce teklif fiyatları girin.");
+      return;
+    }
+    try {
+      const res = await window.electron.ipcRenderer.invoke(
+        "db:run",
+        "UPDATE DATA_TeminDosyasi SET yaklasik_maliyet = ? WHERE id = ?",
+        [total, activeDosyaId],
+      );
+      if (res.success) {
+        alert(
+          `Yaklaşık maliyet başarıyla güncellendi: ₺ ${
+            total.toLocaleString("tr-TR", {
+              minimumFractionDigits: 2,
+            })
+          }`,
+        );
+      } else {
+        alert(res.error);
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   // Find lowest total bid amount and its associated firm ID
@@ -782,9 +832,20 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Coins className="w-4 h-4 text-emerald-500" />
-              <span>Para Birimi: TL</span>
+            <div className="flex items-center gap-2">
+              {getEstimatedCostTotal() > 0 && (
+                <button
+                  onClick={handleSaveToDosya}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer h-10"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Maliyeti Dosyaya Kaydet
+                </button>
+              )}
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
+                <Coins className="w-4 h-4 text-emerald-500" />
+                <span>Para Birimi: TL</span>
+              </div>
             </div>
           </div>
 
@@ -922,7 +983,15 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                         : "0.00 ₺"}
                     </td>
                   ))}
-                  <td className="p-3.5 bg-slate-100/10 dark:bg-slate-950/10">
+                  <td className="p-3.5 bg-slate-100/10 dark:bg-slate-950/10 text-right font-extrabold text-slate-900 dark:text-slate-100">
+                    {getEstimatedCostTotal() > 0
+                      ? `${
+                          getEstimatedCostTotal().toLocaleString("tr-TR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        } ₺`
+                      : "-"}
                   </td>
                   <td className="p-3.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]">
                   </td>
