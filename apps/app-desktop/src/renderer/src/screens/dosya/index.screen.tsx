@@ -2,7 +2,20 @@ import React, { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, ArrowLeft, Cpu, FileArchive, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Cpu,
+  FileArchive,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  Layers,
+  Users,
+  ClipboardList,
+  ChevronRight,
+  FileText
+} from 'lucide-react'
 
 import { ProcessStats } from './components/ProcessStats'
 import { DteTransfer } from './components/DteTransfer'
@@ -21,7 +34,7 @@ interface TableStat {
 type PackageFile = 'meta.json' | 'database.sqlite' | 'attachments/'
 
 export default function DosyaScreen(): React.JSX.Element {
-  const { activeMeta, activeFilePath, fileName } = useWorkspaceStore()
+  const { activeMeta, activeFilePath, fileName, activeDosyaId } = useWorkspaceStore()
   const [selectedFile, setSelectedFile] = useState<PackageFile>('meta.json')
   const [copied, setCopied] = useState(false)
 
@@ -42,6 +55,13 @@ export default function DosyaScreen(): React.JSX.Element {
     tamamlandi: 0
   })
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
+
+  // Aktif Dosya Detay States
+  const [dosyaData, setDosyaData] = useState<any>(null)
+  const [kalemler, setKalemler] = useState<any[]>([])
+  const [firmalar, setFirmalar] = useState<any[]>([])
+  const [birimAdi, setBirimAdi] = useState<string>('')
+  const [loadingDosya, setLoadingDosya] = useState<boolean>(true)
 
   useEffect(() => {
     if (!window.electron) return
@@ -90,6 +110,74 @@ export default function DosyaScreen(): React.JSX.Element {
     }
     fetchProcessStats()
   }, [activeFilePath, refreshTrigger])
+
+  // Aktif Dosya Özet Detaylarını Yükle
+  useEffect(() => {
+    if (!window.electron || !activeDosyaId) {
+      setLoadingDosya(false)
+      return
+    }
+
+    const fetchDosyaDetails = async () => {
+      setLoadingDosya(true)
+      try {
+        const dosyaRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM DATA_TeminDosyasi WHERE id = ?',
+          [activeDosyaId]
+        )
+        if (dosyaRes.success && dosyaRes.data.length > 0) {
+          const dosya = dosyaRes.data[0]
+          setDosyaData(dosya)
+
+          // Birim adını getir
+          if (dosya.birim_id) {
+            const birimRes = await window.electron.ipcRenderer.invoke(
+              'db:query',
+              'SELECT birim_adi FROM TANIM_Birim WHERE id = ?',
+              [dosya.birim_id]
+            )
+            if (birimRes.success && birimRes.data.length > 0) {
+              setBirimAdi(birimRes.data[0].birim_adi)
+            }
+          } else {
+            setBirimAdi('')
+          }
+
+          // Kalemleri getir
+          const kalemRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
+            [activeDosyaId]
+          )
+          if (kalemRes.success) {
+            setKalemler(kalemRes.data || [])
+          }
+
+          // Firmaları getir
+          const firmaRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            `SELECT df.*, f.unvan 
+             FROM DATA_TeminFirma df 
+             JOIN TANIM_Firma f ON df.firma_id = f.id 
+             WHERE df.temin_dosya_id = ?`,
+            [activeDosyaId]
+          )
+          if (firmaRes.success) {
+            setFirmalar(firmaRes.data || [])
+          }
+        } else {
+          setDosyaData(null)
+        }
+      } catch (err) {
+        console.error('Failed to load active file details:', err)
+      } finally {
+        setLoadingDosya(false)
+      }
+    }
+
+    fetchDosyaDetails()
+  }, [activeDosyaId, refreshTrigger])
 
   // DTE Data Transfer States
   const [dteContentType, setDteContentType] = useState<'firms' | 'items' | 'all'>('firms')
@@ -319,6 +407,29 @@ export default function DosyaScreen(): React.JSX.Element {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Helpers
+  const getAsamaLabel = (asamaId: number) => {
+    switch (asamaId) {
+      case 1:
+        return '1. Hazırlık ve İhtiyaç'
+      case 2:
+        return '2. Piyasa Fiyat Araştırması'
+      case 3:
+        return '3. Sipariş & Sözleşme'
+      case 4:
+        return '4. Kabul & Ödeme İşlemleri'
+      case 5:
+        return '5. Dosya Kapatıldı'
+      default:
+        return '1. Hazırlık ve İhtiyaç'
+    }
+  }
+
+  const formatMoney = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return '0,00'
+    return val.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
   // Prettified JSON representation of activeMeta
   const rawJson = activeMeta
     ? JSON.stringify(
@@ -335,7 +446,7 @@ export default function DosyaScreen(): React.JSX.Element {
     : ''
 
   return (
-    <div className="p-4 sm:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+    <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300">
       {/* Üst Başlık Bölümü */}
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
         <div className="flex items-center gap-3">
@@ -349,11 +460,12 @@ export default function DosyaScreen(): React.JSX.Element {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <FileArchive className="w-7 h-7 text-amber-500" />
-              Aktif Çalışma Dosyası (.dtal)
+              {dosyaData ? dosyaData.konu : 'Aktif Çalışma Dosyası (.dtal)'}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
-              Uygulamanın veri alışverişi yaptığı sıkıştırılmış veritabanı arşiv paketinin
-              detayları.
+              {dosyaData
+                ? `Dosya No: ${dosyaData.temin_no || '-'} | Bütçe Yılı: ${dosyaData.butce_yili || '-'}`
+                : 'Uygulamanın veri alışverişi yaptığı arşiv paketinin detayları.'}
             </p>
           </div>
         </div>
@@ -366,7 +478,7 @@ export default function DosyaScreen(): React.JSX.Element {
             {activeMeta.warnings.map((warn, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2 text-rose-700 dark:text-rose-450 text-xs font-bold"
+                className="flex items-start gap-2 text-rose-700 dark:text-rose-455 text-xs font-bold"
               >
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">{warn}</p>
@@ -375,13 +487,251 @@ export default function DosyaScreen(): React.JSX.Element {
           </div>
         )}
 
-        {/* SÜREÇ YÖNETİMİ (İŞ AKIŞI) */}
-        <div className="lg:col-span-12 mb-2">
-          <ProcessStats processStats={processStats} />
+        {/* DOSYA ÖZETİ PANELİ (KURUMSAL YAPI TAB GİBİ ÖZET VERİLER) */}
+        <div className="lg:col-span-12">
+          {loadingDosya ? (
+            <div className="flex items-center justify-center py-12 text-slate-500 text-xs italic">
+              Dosya özeti yükleniyor...
+            </div>
+          ) : dosyaData ? (
+            <div className="space-y-6">
+              {/* İstatistik Kartları */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-955/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      Yaklaşık Maliyet
+                    </span>
+                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                      ₺{formatMoney(dosyaData.yaklasik_maliyet)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-955/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      Kalem Sayısı
+                    </span>
+                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                      {kalemler.length} adet
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-955/30 text-purple-600 dark:text-purple-400 rounded-xl">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      Teklif Sunan İstekli
+                    </span>
+                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                      {firmalar.length} firma
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                  <div className="p-3 bg-amber-50 dark:bg-amber-955/30 text-amber-600 dark:text-amber-400 rounded-xl">
+                    <ClipboardList className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                      Dosya Aşaması
+                    </span>
+                    <span className="text-xs font-extrabold text-slate-855 dark:text-slate-150 truncate block">
+                      {getAsamaLabel(dosyaData.durum_asama_id)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detay Panelleri Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Sol Taraf: İdari Bilgiler ve Adımlar */}
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                  {/* Bilgi Kartı */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      🏢 İdari Bilgiler & Bütçe
+                    </h3>
+                    <div className="space-y-3.5 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 dark:text-slate-550">
+                          Talep Eden Birim:
+                        </span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          {birimAdi || 'Belirtilmemiş'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 dark:text-slate-550">Bütçe Yılı:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          {dosyaData.butce_yili || 'Belirtilmemiş'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 dark:text-slate-550">Alım Türü:</span>
+                        <span className="font-bold uppercase text-slate-855 dark:text-slate-200">
+                          {dosyaData.tur === 'mal'
+                            ? 'Mal Alımı'
+                            : dosyaData.tur === 'hizmet'
+                              ? 'Hizmet Alımı'
+                              : 'Yapım İşi'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 dark:text-slate-550">İhale Usulü:</span>
+                        <span className="font-mono bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                          Doğrudan Temin (22/d)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Aşamalar Kısayolu */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      🚀 Süreç Adımları Kısayolları
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      <Link
+                        to="/dosya/hazirlik-ve-ihtiyac"
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                      >
+                        <span>1. Hazırlık ve İhtiyaç Aşaması</span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      </Link>
+                      <Link
+                        to="/dosya/piyasa-fiyat-arastirmasi"
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                      >
+                        <span>2. Piyasa Fiyat Araştırması Aşaması</span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      </Link>
+                      <Link
+                        to="/dosya/siparis-ve-sozlesme"
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                      >
+                        <span>3. Sipariş & Sözleşme Aşaması</span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      </Link>
+                      <Link
+                        to="/dosya/kabul-ve-odeme"
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                      >
+                        <span>4. Kabul & Ödeme Aşaması</span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sağ Taraf: Malzeme ve Tedarikçiler Tabloları */}
+                <div className="lg:col-span-7 flex flex-col gap-6">
+                  {/* Malzemeler */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      📦 Malzeme / Hizmet Kalemleri Listesi
+                    </h3>
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                      <table className="w-full border-collapse text-left text-xs">
+                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
+                          <tr>
+                            <th className="p-3">Malzeme Adı</th>
+                            <th className="p-3 text-center">Miktar</th>
+                            <th className="p-3 text-center">Birim</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
+                          {kalemler.map((item) => (
+                            <tr
+                              key={item.id}
+                              className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
+                            >
+                              <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
+                                {item.kalem_adi}
+                              </td>
+                              <td className="p-3 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                                {item.miktar}
+                              </td>
+                              <td className="p-3 text-center text-slate-500 dark:text-slate-400">
+                                {item.olcu_birimi || 'Adet'}
+                              </td>
+                            </tr>
+                          ))}
+                          {kalemler.length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="p-6 text-center text-slate-400 italic">
+                                Dosyada henüz kayıtlı malzeme/hizmet bulunmuyor.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Tedarikçiler */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      💼 Teklif Veren Tedarikçiler / Firmalar
+                    </h3>
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                      <table className="w-full border-collapse text-left text-xs">
+                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
+                          <tr>
+                            <th className="p-3">Firma Ünvanı</th>
+                            <th className="p-3 text-center">Teklif Durumu</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
+                          {firmalar.map((f) => (
+                            <tr
+                              key={f.id}
+                              className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
+                            >
+                              <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
+                                {f.unvan}
+                              </td>
+                              <td className="p-3 text-center">
+                                <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 px-2.5 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-800 font-extrabold tracking-tight">
+                                  Teklif Eklendi
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                          {firmalar.length === 0 && (
+                            <tr>
+                              <td colSpan={2} className="p-6 text-center text-slate-400 italic">
+                                Dosyada henüz kayıtlı firma teklifi bulunmuyor.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 text-center text-slate-600 dark:text-slate-400 text-xs italic">
+              Lütfen çalışmak istediğiniz dosyayı üst menüden seçin veya bir dosya yükleyin.
+            </div>
+          )}
         </div>
 
         {/* AYIRICI VE TEKNİK DETAY AÇ/KAPA */}
-        <div className="lg:col-span-12">
+        <div className="lg:col-span-12 mt-4 border-t border-slate-200 dark:border-slate-800 pt-6">
           <button
             onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
             className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl transition-colors group cursor-pointer"
@@ -391,8 +741,8 @@ export default function DosyaScreen(): React.JSX.Element {
                 <Cpu className="w-4 h-4" />
               </div>
               <div className="text-left">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                  Sistem ve Teknik Detaylar
+                <h3 className="text-sm font-bold text-slate-850 dark:text-slate-200">
+                  Sistem ve Teknik Detaylar (Yedekleme & SQLite)
                 </h3>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Arşiv yapısı, veritabanı yedeği (DTE) ve sistem güncellemeleri
