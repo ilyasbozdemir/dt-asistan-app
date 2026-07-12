@@ -6,7 +6,6 @@ import {
   normalizeForMatch,
   useDosyaAsamasiSablons,
 } from "./useDosyaAsamasiSablons";
-import { SurecBelgeleriPanel } from "./SablonPanelleri";
 import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
 import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
 import { MalzemeTablosu } from "../components/MalzemeListesi/MalzemeTablosu";
@@ -93,21 +92,13 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         stageSablons={stageSablons}
         onSablonClick={handleOpenPreviewForSablon}
         ciktiLoading={ciktiLoading}
+        activeStarredDocs={activeStarredDocs}
+        onQuickPrint={quickPrint}
+        onExport={quickExport}
+        onToggleStar={toggleStar}
+        onOpenExternal={quickOpenExternal}
+        isSablonDisabled={isSablonDisabled}
       />
-
-      <div className="mt-8">
-        <SurecBelgeleriPanel
-          stageSablons={stageSablons}
-          activeStarredDocs={activeStarredDocs}
-          ciktiLoading={ciktiLoading}
-          onSablonClick={handleOpenPreviewForSablon}
-          onQuickPrint={quickPrint}
-          onExport={quickExport}
-          onToggleStar={toggleStar}
-          onOpenExternal={quickOpenExternal}
-          isSablonDisabled={isSablonDisabled}
-        />
-      </div>
     </SubScreen>
   );
 }

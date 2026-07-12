@@ -19,7 +19,7 @@ module.exports = {
         'sidebar-text': 'var(--sidebar-text)',
         'sidebar-border': 'var(--sidebar-border)',
         'sidebar-hover-bg': 'var(--sidebar-hover-bg)',
-        'sidebar-hover-text:': 'var(--sidebar-hover-text)',
+        'sidebar-hover-text': 'var(--sidebar-hover-text)',
         'sidebar-active-bg': 'var(--sidebar-active-bg)',
         'sidebar-active-text': 'var(--sidebar-active-text)',
         'sidebar-active-border': 'var(--sidebar-active-border)'
