@@ -87,6 +87,7 @@ export function Footer(): React.JSX.Element {
                 </span>
                 <Link
                   to="/kurum"
+                  search={{ tab: 'kadro' }}
                   className="flex items-center gap-1 hover:text-blue-655 dark:hover:text-blue-400 transition-colors cursor-pointer group"
                   title="Kurum Detaylarını Gör"
                 >

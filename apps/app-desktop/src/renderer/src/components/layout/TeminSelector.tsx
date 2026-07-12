@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, FileText, FolderClosed, Plus, Search, TrendingUp, LogOut } from 'lucide-react'
+import { ChevronDown, FileText, FolderClosed, Plus, Search, TrendingUp, LogOut, X } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
 import { useNavigate } from '@tanstack/react-router'
@@ -88,9 +88,9 @@ export function TeminSelector(): React.JSX.Element {
   return (
     <div className="relative" ref={containerRef}>
       {selectedDosya ? (
-        <button
+        <div
           onClick={() => setIsOpen(!isOpen)}
-          className="group flex items-center gap-3 px-5 py-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-200 shadow-sm hover:shadow-md min-w-[500px] max-w-[1000px] w-auto"
+          className="group flex items-center gap-3 px-5 py-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-200 shadow-sm hover:shadow-md min-w-[500px] max-w-[1000px] w-auto cursor-pointer select-none"
           title="Dosya Değiştir"
         >
           <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
@@ -124,13 +124,26 @@ export function TeminSelector(): React.JSX.Element {
             </div>
           ) : null}
 
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleCloseDosya()
+            }}
+            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-650 dark:hover:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/10 rounded-lg transition-all shrink-0 active:scale-90"
+            title="Doğrudan Temin Dosyasını Kapat"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0"></span>
+
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ml-2',
+              'w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0',
               isOpen && 'rotate-180'
             )}
           />
-        </button>
+        </div>
       ) : (
         <button
           onClick={() => setIsOpen(!isOpen)}

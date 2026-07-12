@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { KurumVerisi, useKurumHooks } from "./kurum.hooks";
 import { Button } from "../../components/ui/Button";
-import { Building2, MapPin, Save, Users } from "lucide-react";
+import { Building2, MapPin, Save } from "lucide-react";
 import { InnerMenu, InnerMenuItem } from "../../components/ui/InnerMenu";
 import { IdariBilgilerTab } from "./components/IdariBilgilerTab";
 import { MaliBirimTab } from "./components/MaliBirimTab";
@@ -10,7 +10,9 @@ import { LogolarTab } from "./components/LogolarTab";
 import { KurumsalYapiTab } from "./components/KurumsalYapiTab";
 import { useSettingsStore } from "../../store/settingsStore";
 
-type TabType = "idari" | "mali" | "iletisim" | "logolar" | "kadro";
+import { Link } from "@tanstack/react-router";
+
+type TabType = "idari" | "mali" | "iletisim" | "logolar";
 
 export default function KurumScreen(): React.JSX.Element {
   const { kurumData, isLoadingKurum, fetchKurum, saveKurum } = useKurumHooks();
@@ -21,7 +23,7 @@ export default function KurumScreen(): React.JSX.Element {
     loadSettings: reloadSettingsStore,
   } = useSettingsStore();
 
-  const [activeTab, setActiveTab] = useState<TabType>('kadro')
+  const [activeTab, setActiveTab] = useState<TabType>("idari");
   const [saving, setSaving] = useState(false);
 
   const [localData, setLocalData] = useState<Partial<KurumVerisi>>({});
@@ -107,30 +109,25 @@ export default function KurumScreen(): React.JSX.Element {
 
   const menuItems: InnerMenuItem[] = [
     {
-      id: 'kadro',
-      label: 'Kurumsal Yapı & Kadro',
-      icon: <Users className="w-4 h-4 shrink-0 text-emerald-500" />
+      id: 'idari',
+      label: 'İdari Bilgiler',
+      icon: <Building2 className="w-4 h-4 shrink-0" />
     },
     {
-      id: "idari",
-      label: "İdari Bilgiler",
-      icon: <Building2 className="w-4 h-4 shrink-0" />,
+      id: 'mali',
+      label: 'Mali ve Bütçe Kodları',
+      icon: <Building2 className="w-4 h-4 shrink-0 text-amber-600" />
     },
     {
-      id: "mali",
-      label: "Mali ve Bütçe Kodları",
-      icon: <Building2 className="w-4 h-4 shrink-0 text-amber-600" />,
+      id: 'iletisim',
+      label: 'İletişim & Konum',
+      icon: <MapPin className="w-4 h-4 shrink-0" />
     },
     {
-      id: "iletisim",
-      label: "İletişim & Konum",
-      icon: <MapPin className="w-4 h-4 shrink-0" />,
-    },
-    {
-      id: "logolar",
-      label: "Kurum Logoları",
-      icon: <Building2 className="w-4 h-4 shrink-0 text-blue-500" />,
-    },
+      id: 'logolar',
+      label: 'Kurum Logoları',
+      icon: <Building2 className="w-4 h-4 shrink-0 text-blue-500" />
+    }
   ];
 
   if (isLoadingKurum) {
@@ -140,7 +137,37 @@ export default function KurumScreen(): React.JSX.Element {
       </div>
     );
   }
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const queryTab = searchParams.get("tab") || hashParams.get("tab");
 
+  if (queryTab === "kadro") {
+    return (
+      <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+        <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
+          <Link
+            to="/kurum"
+            className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all"
+            title="Kurum Bilgilerini Düzenle"
+          >
+            <Building2 className="w-6 h-6 text-blue-600" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
+              Kurumsal Yapı & Kadro
+            </h1>
+            <p className="text-slate-550 dark:text-slate-400 mt-0.5 text-xs">
+              Kuruma ait müdürlükler, harcama birimleri, DETSİS kodları ve personel kadrosu.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+          <KurumsalYapiTab />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 dark:border-slate-800 pb-4 gap-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
@@ -154,18 +181,16 @@ export default function KurumScreen(): React.JSX.Element {
             bilgilerini yönetin.
           </p>
         </div>
-        {activeTab !== "kadro" && (
-          <div className="flex items-center gap-3 shrink-0">
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 px-6 text-sm font-semibold transition-all shadow-md shadow-blue-500/20 shrink-0"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-3 shrink-0">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 px-6 text-sm font-semibold transition-all shadow-md shadow-blue-500/20 shrink-0"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -215,7 +240,7 @@ export default function KurumScreen(): React.JSX.Element {
                 setLogoRight={setLogoRight}
               />
             )}
-            {activeTab === "kadro" && <KurumsalYapiTab />}
+
           </div>
         </div>
       </div>
