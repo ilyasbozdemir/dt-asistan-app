@@ -76,6 +76,18 @@ export function useFirmalarHooks() {
         }
       }
 
+      let finalFirmaKodu = (firma.firma_kodu || '').trim()
+      if (!finalFirmaKodu) {
+        const countRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT COUNT(*) as cnt FROM TANIM_Firma'
+        )
+        const nextNum = countRes.success && countRes.data && countRes.data.length > 0
+          ? (countRes.data[0].cnt || 0) + 1
+          : 1
+        finalFirmaKodu = nextNum.toString().padStart(4, '0')
+      }
+
       const cols = [
         'firma_kodu',
         'unvan',
@@ -99,7 +111,10 @@ export function useFirmalarHooks() {
         'vergi_no'
       ]
       const placeholders = cols.map(() => '?').join(', ')
-      const values = cols.map((col) => (firma as any)[col] || '')
+      const values = cols.map((col) => {
+        if (col === 'firma_kodu') return finalFirmaKodu
+        return (firma as any)[col] || ''
+      })
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         `INSERT INTO TANIM_Firma (${cols.join(', ')}) VALUES (${placeholders})`,

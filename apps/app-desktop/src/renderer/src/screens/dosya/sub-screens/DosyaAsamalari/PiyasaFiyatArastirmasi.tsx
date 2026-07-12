@@ -10,6 +10,7 @@ import {
   FileText,
   PackageSearch,
   Printer,
+  Search,
   Trash2,
   TrendingUp,
 } from "lucide-react";
@@ -38,6 +39,9 @@ interface BiddingFirm {
 interface PoolFirm {
   id: number;
   unvan: string;
+  firma_kodu?: string;
+  istigal_konusu?: string;
+  il?: string;
   vergi_no?: string;
   telefon?: string;
   email?: string;
@@ -89,6 +93,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
 
   const [isFirmModalOpen, setIsFirmModalOpen] = React.useState(false);
   const [selectedFirmIds, setSelectedFirmIds] = React.useState<number[]>([]);
+  const [modalSearchQuery, setModalSearchQuery] = React.useState("");
 
   const [belgeMenuOpen, setBelgeMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -1001,10 +1006,10 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
           </div>
         </div>
       )}
-      {/* İSTEKLİ FİRMALARDAN SEÇ MODALI */}
+
       {isFirmModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
@@ -1016,77 +1021,120 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               </div>
               <button
                 onClick={() => setIsFirmModalOpen(false)}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Kapat
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-950/50">
-              {allPoolFirms.filter((pf) =>
+            {/* Arama Barı */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-850 flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Firma adı, kodu, vergi no, iştigal konusu veya şehir ara..."
+                  value={modalSearchQuery}
+                  onChange={(e) => setModalSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="p-5 overflow-y-auto flex-1 bg-slate-50/20 dark:bg-slate-950/20">
+              {(() => {
+                const unselectedFirms = allPoolFirms.filter((pf) =>
                   !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)
-                )
-                  .length === 0
-                ? (
-                  <div className="text-center py-8 text-sm text-slate-500">
-                    Eklenebilecek yeni tedarikçi bulunamadı.
-                  </div>
-                )
-                : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {allPoolFirms
-                      .filter((pf) =>
-                        !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)
-                      )
-                      .map((pf) => {
-                        const isSelected = selectedFirmIds.includes(pf.id);
-                        return (
-                          <div
-                            key={pf.id}
-                            onClick={() => {
-                              if (isSelected) {
-                                setSelectedFirmIds((prev) =>
-                                  prev.filter((id) => id !== pf.id)
-                                );
-                              } else {
-                                setSelectedFirmIds((prev) => [...prev, pf.id]);
-                              }
-                            }}
-                            className={`p-3 rounded-xl border cursor-pointer flex items-start gap-3 transition-all ${
-                              isSelected
-                                ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10 dark:border-blue-500/50"
-                                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
-                            }`}
-                          >
-                            <div
-                              className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                                isSelected
-                                  ? "bg-blue-500 border-blue-500 text-white"
-                                  : "border-slate-300 dark:border-slate-600 bg-transparent"
+                );
+
+                const filteredFirms = unselectedFirms.filter((pf) => {
+                  if (!modalSearchQuery.trim()) return true;
+                  const q = modalSearchQuery.toLowerCase();
+                  return (
+                    pf.unvan?.toLowerCase().includes(q) ||
+                    pf.firma_kodu?.toLowerCase().includes(q) ||
+                    pf.vergi_no?.toLowerCase().includes(q) ||
+                    pf.il?.toLowerCase().includes(q) ||
+                    pf.istigal_konusu?.toLowerCase().includes(q)
+                  );
+                });
+
+                if (filteredFirms.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-sm text-slate-550 dark:text-slate-450 italic">
+                      Arama kriterlerinize uygun veya eklenebilecek yeni tedarikçi bulunamadı.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+                    <table className="w-full border-collapse text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-slate-950 font-bold border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                          <th className="p-3 w-12 text-center">Seç</th>
+                          <th className="p-3 w-28">Firma Kodu</th>
+                          <th className="p-3">Firma Ünvanı</th>
+                          <th className="p-3">İştigal Konusu / İl</th>
+                          <th className="p-3 w-32">Vergi No</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {filteredFirms.map((pf) => {
+                          const isSelected = selectedFirmIds.includes(pf.id);
+                          return (
+                            <tr
+                              key={pf.id}
+                              onClick={() => {
+                                if (isSelected) {
+                                  setSelectedFirmIds((prev) =>
+                                    prev.filter((id) => id !== pf.id)
+                                  );
+                                } else {
+                                  setSelectedFirmIds((prev) => [...prev, pf.id]);
+                                }
+                              }}
+                              className={`hover:bg-slate-50/50 dark:hover:bg-slate-850/20 cursor-pointer transition-colors ${
+                                isSelected ? "bg-blue-50/30 dark:bg-blue-950/10 font-medium" : ""
                               }`}
                             >
-                              {isSelected && (
-                                <CheckCircle2 className="w-3 h-3" />
-                              )}
-                            </div>
-                            <div>
-                              <div
-                                className="font-semibold text-sm text-slate-800 dark:text-slate-200 line-clamp-2"
-                                title={pf.unvan}
-                              >
+                              <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedFirmIds((prev) => [...prev, pf.id]);
+                                    } else {
+                                      setSelectedFirmIds((prev) =>
+                                        prev.filter((id) => id !== pf.id)
+                                      );
+                                    }
+                                  }}
+                                  className="w-4 h-4 rounded text-blue-600 border-slate-300 dark:border-slate-700 focus:ring-blue-500 cursor-pointer"
+                                />
+                              </td>
+                              <td className="p-3 font-semibold text-slate-500 dark:text-slate-400">
+                                {pf.firma_kodu || "-"}
+                              </td>
+                              <td className="p-3 font-bold text-slate-850 dark:text-slate-200">
                                 {pf.unvan}
-                              </div>
-                              {pf.vergi_no && (
-                                <div className="text-[10px] text-slate-500 mt-1">
-                                  VN: {pf.vergi_no}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                              </td>
+                              <td className="p-3 text-slate-650 dark:text-slate-400">
+                                <div className="truncate max-w-[200px]" title={pf.istigal_konusu}>{pf.istigal_konusu || "-"}</div>
+                                <div className="text-[10px] text-slate-450 mt-0.5">{pf.il || "-"}</div>
+                              </td>
+                              <td className="p-3 text-slate-500 dark:text-slate-400 font-mono">
+                                {pf.vergi_no || "-"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                )}
+                );
+              })()}
             </div>
 
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
@@ -1096,14 +1144,14 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsFirmModalOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                 >
                   İptal
                 </button>
                 <button
                   onClick={handleBulkAddFirms}
                   disabled={selectedFirmIds.length === 0}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
                 >
                   Seçilenleri Dosyaya Ekle
                 </button>
