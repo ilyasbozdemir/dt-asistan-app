@@ -67,6 +67,48 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  const [selectedPresetId, setSelectedPresetId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('dta_selected_preset_id') || ''
+    } catch {
+      return ''
+    }
+  })
+  const [presets, setPresets] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('dta_document_presets')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    const handlePresetsChange = () => {
+      try {
+        const saved = localStorage.getItem('dta_document_presets')
+        setPresets(saved ? JSON.parse(saved) : [])
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    const handleSelectedPresetChange = () => {
+      try {
+        setSelectedPresetId(localStorage.getItem('dta_selected_preset_id') || '')
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    window.addEventListener('dta_presets_changed', handlePresetsChange)
+    window.addEventListener('dta_presets_changed', handleSelectedPresetChange)
+    window.addEventListener('storage', handleSelectedPresetChange)
+    return () => {
+      window.removeEventListener('dta_presets_changed', handlePresetsChange)
+      window.removeEventListener('dta_presets_changed', handleSelectedPresetChange)
+      window.removeEventListener('storage', handleSelectedPresetChange)
+    }
+  }, [])
+
   useEffect(() => {
     localStorage.setItem('dta_active_sidebar_collapsed', String(isCollapsed))
   }, [isCollapsed])
@@ -172,7 +214,12 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
           const kategoriler = STAGE_KATEGORI[asama.asama_sira] || []
           let stageSablons = sablons.filter((s: any) => kategoriler.includes(s.kategori))
 
-          if (activeStarredDocs && activeStarredDocs.length > 0) {
+          const activePresetId = selectedPresetId || (presets.length > 0 ? presets[0].id : '')
+          const starredDocsForFilter = activePresetId
+            ? (presets.find((p) => p.id === activePresetId)?.docs || [])
+            : (activeStarredDocs || [])
+
+          if (starredDocsForFilter && starredDocsForFilter.length > 0) {
             stageSablons = stageSablons.filter((sablon: any) => {
               const { cleanName } = parseStatusAndName(sablon.ad)
               const normalize = (str: string) =>
@@ -180,7 +227,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
                   .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g, '')
                   .toLowerCase()
                   .trim()
-              return activeStarredDocs.some(
+              return starredDocsForFilter.some(
                 (d: string) =>
                   normalize(d) === normalize(sablon.ad) || normalize(d) === normalize(cleanName)
               )
