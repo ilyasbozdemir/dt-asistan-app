@@ -87,20 +87,27 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       icon={Package}
       description="Dosyanıza malzeme, hizmet veya yapım işi ekleyebilir ve yönetebilirsiniz. Son Alım Fiyat Cetveli şablonu sayesinde, malzemelerin son alım fiyatları, kimden/hangi firmadan alındığı gibi geçmiş analiz verileri otomatik olarak listelenir."
     >
-      <SurecBelgeleriPanel
+      <MalzemeEkleModal state={state} />
+      <MalzemeTablosu
+        state={state}
         stageSablons={stageSablons}
-        activeStarredDocs={activeStarredDocs}
-        ciktiLoading={ciktiLoading}
         onSablonClick={handleOpenPreviewForSablon}
-        onQuickPrint={quickPrint}
-        onExport={quickExport}
-        onToggleStar={toggleStar}
-        onOpenExternal={quickOpenExternal}
-        isSablonDisabled={isSablonDisabled}
+        ciktiLoading={ciktiLoading}
       />
 
-      <MalzemeEkleModal state={state} />
-      <MalzemeTablosu state={state} />
+      <div className="mt-8">
+        <SurecBelgeleriPanel
+          stageSablons={stageSablons}
+          activeStarredDocs={activeStarredDocs}
+          ciktiLoading={ciktiLoading}
+          onSablonClick={handleOpenPreviewForSablon}
+          onQuickPrint={quickPrint}
+          onExport={quickExport}
+          onToggleStar={toggleStar}
+          onOpenExternal={quickOpenExternal}
+          isSablonDisabled={isSablonDisabled}
+        />
+      </div>
     </SubScreen>
   );
 }

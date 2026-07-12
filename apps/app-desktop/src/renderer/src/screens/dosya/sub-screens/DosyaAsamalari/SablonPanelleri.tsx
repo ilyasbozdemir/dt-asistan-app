@@ -499,13 +499,12 @@ function SablonCard({
           </div>
           <div className="flex flex-col flex-1 min-w-0">
             <button
-              className={`font-bold text-sm line-clamp-2 text-left leading-tight ${
+              className={`font-bold text-sm line-clamp-2 text-left leading-tight hover:text-blue-650 dark:hover:text-blue-400 cursor-pointer ${
                 isDisabled
-                  ? "text-slate-500 dark:text-slate-400"
-                  : "text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                  ? "text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  : "text-slate-800 dark:text-slate-200"
               }`}
-              onClick={() =>
-                !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
+              onClick={() => !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
               disabled={isDisabled}
               title={baseName}
             >
@@ -533,7 +532,7 @@ function SablonCard({
                   disabled={isDisabled}
                   title="Şablon Sürümü Seçin"
                   aria-label="Şablon Sürümü Seçin"
-                  className="w-full text-[10px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-medium"
+                  className="w-full text-[10px] bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer font-medium"
                 >
                   {sortedSablons.map((s) => {
                     const dosyaAdiNoExt = (s.dosya_adi as string).replace(
@@ -555,7 +554,7 @@ function SablonCard({
           </div>
         </div>
 
-        <div className="shrink-0 self-center">
+        <div className="shrink-0 self-start mt-0.5">
           <BelgeAksiyonlari
             isStarred={isStarred}
             onPreview={() => onSablonClick(activeSablon, activeSablon.ad)}

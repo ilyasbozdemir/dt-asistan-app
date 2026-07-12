@@ -1,7 +1,18 @@
-import { Check, Edit2, Package, Plus, Trash2, X } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Check, Edit2, Package, Plus, Trash2, X, ChevronDown, FileText } from 'lucide-react'
 import { cn } from '../../../../../utils/cn'
 
-export function MalzemeTablosu({ state }: { state: any }) {
+export function MalzemeTablosu({
+  state,
+  stageSablons = [],
+  onSablonClick,
+  ciktiLoading
+}: {
+  state: any
+  stageSablons?: any[]
+  onSablonClick?: (sablon: any, title: string) => void
+  ciktiLoading?: boolean
+}): React.JSX.Element {
   const {
     items,
     units,
@@ -20,6 +31,19 @@ export function MalzemeTablosu({ state }: { state: any }) {
     handleDeleteItem
   } = state
 
+  const [belgeMenuOpen, setBelgeMenuOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setBelgeMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px]">
       <div className="flex items-center justify-between mb-4">
@@ -30,7 +54,49 @@ export function MalzemeTablosu({ state }: { state: any }) {
             {items.length}
           </span>
         </h3>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 relative">
+          {stageSablons.length > 0 && onSablonClick && (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setBelgeMenuOpen((v) => !v)}
+                disabled={ciktiLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FileText className="w-3.5 h-3.5 text-blue-500" />
+                Sürecin Belgelerini Çıkart
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {belgeMenuOpen && (
+                <div className="absolute right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-60 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-3 py-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 mb-1">
+                    Bu Aşamanın Belgeleri
+                  </div>
+                  {stageSablons.map((sablon: any) => {
+                    let cleanName = sablon.ad
+                    const matchStatus = cleanName.match(/^\[(.*?)\]\s*(.*)$/)
+                    if (matchStatus) cleanName = matchStatus[2].trim()
+                    const cleanTitle = cleanName.replace(/\s*\(.*?\)\s*$/, '').trim()
+
+                    return (
+                      <button
+                        key={sablon.id || sablon.ad}
+                        onClick={() => {
+                          onSablonClick(sablon, sablon.ad)
+                          setBelgeMenuOpen(false)
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer flex items-center gap-2.5"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                        <span className="truncate">{cleanTitle}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"

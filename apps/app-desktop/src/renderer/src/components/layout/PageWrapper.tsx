@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Header } from './Header'
-import { ActiveFileToolbar } from './ActiveFileToolbar'
 import { ActiveFileSidebar } from './ActiveFileSidebar'
 import { ActiveFileShortcuts } from './ActiveFileShortcuts'
 import { Footer } from './Footer'
@@ -412,7 +411,6 @@ export function PageWrapper(): React.ReactNode {
       <FindInPage />
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
-        {activeDosyaId && <ActiveFileToolbar />}
         <TabsBar />
         <div className="flex flex-1 overflow-hidden relative">
           {activeDosyaId && <ActiveFileShortcuts />}
