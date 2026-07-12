@@ -32,9 +32,13 @@ export interface BiddingKalem {
   birim: string;
 }
 
+import { useTabStore } from "../../../../../store/tabStore";
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function usePiyasaFiyatArastirmasiLogic() {
   const sablonsContext = useDosyaAsamasiSablons();
-  const { activeDosyaId, sablons, activeStarredDocs, toggleStar } = sablonsContext;
+  const { activeDosyaId, sablons, activeStarredDocs } = sablonsContext;
+  const activeTabPath = useTabStore((s) => s.activeTabPath);
 
   const [invitedFirms, setInvitedFirms] = useState<BiddingFirm[]>([]);
   const [allPoolFirms, setAllPoolFirms] = useState<PoolFirm[]>([]);
@@ -44,6 +48,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
   const [hesaplamaEsasi, setHesaplamaEsasi] = useState<string>("Ortalama fiyat esasına göre");
   const [komisyonTakdiri, setKomisyonTakdiri] = useState<string>("Sadece araştırma fiyatları dikkate alınacak");
+  const [isEditingFirms, setIsEditingFirms] = useState<boolean>(false);
+  const [teminTarihi, setTeminTarihi] = useState<string>("");
 
   const [isFirmModalOpen, setIsFirmModalOpen] = useState(false);
   const [selectedFirmIds, setSelectedFirmIds] = useState<number[]>([]);
@@ -179,7 +185,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
       const resDosya = await window.electron.ipcRenderer.invoke(
         "db:query",
-        "SELECT hesaplama_esasi, komisyon_takdiri FROM DATA_TeminDosyasi WHERE id = ?",
+        "SELECT hesaplama_esasi, komisyon_takdiri, temin_tarihi FROM DATA_TeminDosyasi WHERE id = ?",
         [activeDosyaId],
       );
 
@@ -189,6 +195,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
       if (resDosya.success && resDosya.data && resDosya.data.length > 0) {
         setHesaplamaEsasi(resDosya.data[0].hesaplama_esasi || "Ortalama fiyat esasına göre");
         setKomisyonTakdiri(resDosya.data[0].komisyon_takdiri || "Sadece araştırma fiyatları dikkate alınacak");
+        setTeminTarihi(resDosya.data[0].temin_tarihi || "");
       }
 
       if (resBids.success && resBids.data) {
@@ -198,6 +205,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
             row.birim_fiyat || 0;
         });
         setBids(bidsMap);
+        setIsEditingFirms(resBids.data.length === 0);
       }
     } catch (err) {
       console.error("Error loading bidding data:", err);
@@ -208,7 +216,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
   useEffect(() => {
     loadData();
-  }, [activeDosyaId, loadData]);
+  }, [activeDosyaId, activeTabPath, loadData]);
 
   const handleBulkAddFirms = async (): Promise<void> => {
     if (!activeDosyaId || selectedFirmIds.length === 0) return;
@@ -344,11 +352,16 @@ export function usePiyasaFiyatArastirmasiLogic() {
   }, [invitedFirms, bids]);
 
   const getEstimatedCostTotal = useCallback((): number => {
+    const isLowestBasis = hesaplamaEsasi?.toLowerCase().includes("en düşük") ||
+      hesaplamaEsasi?.toLowerCase().includes("en dusuk");
+
     return items.reduce((sum, item) => {
-      const avg = getAverageBid(item.id);
-      return sum + (item.miktar || 0) * avg;
+      const price = isLowestBasis
+        ? getLowestBidInfo(item.id).price
+        : getAverageBid(item.id);
+      return sum + (item.miktar || 0) * price;
     }, 0);
-  }, [items, getAverageBid]);
+  }, [items, getAverageBid, getLowestBidInfo, hesaplamaEsasi]);
 
   const handleSaveToDosya = async (): Promise<void> => {
     const total = getEstimatedCostTotal();
@@ -359,8 +372,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
     try {
       const res = await window.electron.ipcRenderer.invoke(
         "db:run",
-        "UPDATE DATA_TeminDosyasi SET yaklasik_maliyet = ? WHERE id = ?",
-        [total, activeDosyaId],
+        "UPDATE DATA_TeminDosyasi SET yaklasik_maliyet = ?, temin_tarihi = ? WHERE id = ?",
+        [total, teminTarihi || null, activeDosyaId],
       );
       if (res.success) {
         alert(
@@ -429,5 +442,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
     getEstimatedCostTotal,
     handleSaveToDosya,
     lowestTotalFirmaId,
+    isEditingFirms,
+    setIsEditingFirms,
+    teminTarihi,
+    setTeminTarihi,
   };
 }

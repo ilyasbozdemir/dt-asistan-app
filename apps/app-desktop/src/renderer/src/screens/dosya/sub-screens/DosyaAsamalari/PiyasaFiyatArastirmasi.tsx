@@ -76,6 +76,10 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     getEstimatedCostTotal,
     handleSaveToDosya,
     lowestTotalFirmaId,
+    isEditingFirms,
+    setIsEditingFirms,
+    teminTarihi,
+    setTeminTarihi,
   } = logic;
 
   if (previewData && previewModalOpen) {
@@ -305,19 +309,35 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             )}
 
             <button
-              onClick={() => setIsFirmModalOpen(true)}
-              className="flex items-center gap-2 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all h-10"
+              onClick={() => setIsEditingFirms(!isEditingFirms)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 border rounded-xl text-xs font-bold transition-all h-10 cursor-pointer shadow-2xs hover:shadow-xs",
+                isEditingFirms
+                  ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50"
+                  : "bg-blue-50/50 hover:bg-blue-100/50 text-blue-750 border-blue-200 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30"
+              )}
             >
-              <Building2 className="w-4 h-4" />
-              İstekli Firmalardan Seç
+              {isEditingFirms ? "Düzenlemeyi Kapat" : "Firmaları Düzenle"}
             </button>
 
-            <Link
-              to="/firmalar"
-              className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center h-10"
-            >
-              Tedarikçi Listesini Yönet
-            </Link>
+            {isEditingFirms && (
+              <>
+                <button
+                  onClick={() => setIsFirmModalOpen(true)}
+                  className="flex items-center gap-2 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all h-10"
+                >
+                  <Building2 className="w-4 h-4" />
+                  İstekli Firmalardan Seç
+                </button>
+
+                <Link
+                  to="/firmalar"
+                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center h-10"
+                >
+                  Tedarikçi Listesini Yönet
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -325,7 +345,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         <DavetEdilenFirmalar
           invitedFirms={invitedFirms}
           lowestTotalFirmaId={lowestTotalFirmaId}
-          handleRemoveFirm={handleRemoveFirm}
+          isEditing={isEditingFirms}
+          onRemoveFirm={handleRemoveFirm}
         />
       </div>
 
@@ -342,6 +363,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             handlePriceChange={handlePriceChange}
             handleSaveToDosya={handleSaveToDosya}
             hesaplamaEsasi={hesaplamaEsasi}
+            teminTarihi={teminTarihi}
+            setTeminTarihi={setTeminTarihi}
           />
         )
         : invitedFirms.length > 0 && items.length === 0

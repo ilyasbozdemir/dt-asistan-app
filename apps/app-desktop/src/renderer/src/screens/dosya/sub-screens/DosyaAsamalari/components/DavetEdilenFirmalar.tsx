@@ -1,5 +1,5 @@
+import { AlertCircle, Building2, CheckCircle2, X } from "lucide-react";
 import React from "react";
-import { AlertCircle, Building2, CheckCircle2 } from "lucide-react";
 
 interface BiddingFirm {
   id: number;
@@ -12,11 +12,15 @@ interface BiddingFirm {
 interface DavetEdilenFirmalarProps {
   invitedFirms: BiddingFirm[];
   lowestTotalFirmaId: number | null;
+  isEditing?: boolean;
+  onRemoveFirm?: (teminFirmaId: number) => void;
 }
 
 export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
   invitedFirms,
-  lowestTotalFirmaId
+  lowestTotalFirmaId,
+  isEditing,
+  onRemoveFirm,
 }) => {
   if (invitedFirms.length === 0) {
     return (
@@ -49,6 +53,19 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
         >
           {/* Visual accent top-right */}
           <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-blue-600"></div>
+
+          {isEditing && onRemoveFirm && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveFirm(firma.id);
+              }}
+              className="absolute top-3 right-3 p-1 text-rose-500 hover:text-rose-700 dark:text-rose-450 dark:hover:text-rose-350 bg-rose-50 dark:bg-rose-950/20 rounded-md hover:bg-rose-100 transition-all cursor-pointer z-10"
+              title="Firmayı Kaldır"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           <div className="flex items-start gap-3">
             <div

@@ -68,6 +68,7 @@ export function buildDocumentContext(
 
   const fileDate =
     formatDateString(dosyaResData?.tarih) ||
+    formatDateString(dosyaResData?.temin_tarihi) ||
     formatDateString(dosyaResData?.dosya_acilis_tarihi) ||
     formatDateString(dosyaResData?.created_at) ||
     today

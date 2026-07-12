@@ -20,11 +20,19 @@ interface TeklifMatrisiProps {
   items: BiddingKalem[];
   bids: Record<string, number>;
   getEstimatedCostTotal: () => number;
-  getLowestBidInfo: (kalemId: number) => { price: number; firmaId: number | null };
+  getLowestBidInfo: (
+    kalemId: number,
+  ) => { price: number; firmaId: number | null };
   getAverageBid: (kalemId: number) => number;
-  handlePriceChange: (kalemId: number, firmaId: number, val: string) => Promise<void>;
+  handlePriceChange: (
+    kalemId: number,
+    firmaId: number,
+    val: string,
+  ) => Promise<void>;
   handleSaveToDosya: () => Promise<void>;
   hesaplamaEsasi: string;
+  teminTarihi: string;
+  setTeminTarihi: (val: string) => void;
 }
 
 export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
@@ -36,7 +44,9 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
   getAverageBid,
   handlePriceChange,
   handleSaveToDosya,
-  hesaplamaEsasi
+  hesaplamaEsasi,
+  teminTarihi,
+  setTeminTarihi,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 overflow-hidden">
@@ -47,7 +57,8 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
             Teklif Giriş Matrisi & Karşılaştırma
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Her firma için malzeme birim fiyatlarını girin. En uygun teklifler yeşil renkle vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
+            Her firma için malzeme birim fiyatlarını girin. En uygun teklifler
+            yeşil renkle vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
           </p>
         </div>
 
@@ -55,6 +66,18 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
             <span>Yöntem: {hesaplamaEsasi}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
+            <span className="font-bold text-slate-450 dark:text-slate-500">
+              Tutanak Tarihi:
+            </span>
+            <input
+              type="date"
+              value={teminTarihi}
+              onChange={(e) => setTeminTarihi(e.target.value)}
+              className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
+            />
           </div>
 
           {getEstimatedCostTotal() > 0 && (
@@ -88,7 +111,10 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   key={firma.id}
                   className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right min-w-[130px]"
                 >
-                  <div className="truncate w-32 ml-auto text-right" title={firma.unvan}>
+                  <div
+                    className="truncate w-32 ml-auto text-right"
+                    title={firma.unvan}
+                  >
                     {firma.unvan}
                   </div>
                 </th>
@@ -119,7 +145,8 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   </td>
                   {invitedFirms.map((firma) => {
                     const val = bids[`${kalem.id}_${firma.id}`] || 0;
-                    const isLowest = lowest.price > 0 && lowest.firmaId === firma.id;
+                    const isLowest = lowest.price > 0 &&
+                      lowest.firmaId === firma.id;
 
                     return (
                       <td
@@ -142,9 +169,8 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                               handlePriceChange(
                                 kalem.id,
                                 firma.id,
-                                e.target.value
-                              )
-                            }
+                                e.target.value,
+                              )}
                             className={`w-full text-right text-xs rounded-lg border ${
                               isLowest
                                 ? "border-emerald-400 dark:border-emerald-600 bg-emerald-50/30 focus:ring-emerald-500 focus:border-emerald-500 font-semibold text-emerald-700 dark:text-emerald-400"
@@ -157,10 +183,12 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   })}
                   <td className="p-3 text-right font-bold text-slate-700 dark:text-slate-300 bg-slate-100/10 dark:bg-slate-950/10">
                     {avgPrice > 0
-                      ? `${avgPrice.toLocaleString("tr-TR", {
+                      ? `${
+                        avgPrice.toLocaleString("tr-TR", {
                           minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })} ₺`
+                          maximumFractionDigits: 2,
+                        })
+                      } ₺`
                       : "-"}
                   </td>
                   <td className="p-3 text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]">
@@ -170,10 +198,12 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                       )}
                       <span>
                         {lowest.price > 0
-                          ? `${lowest.price.toLocaleString("tr-TR", {
+                          ? `${
+                            lowest.price.toLocaleString("tr-TR", {
                               minimumFractionDigits: 2,
-                              maximumFractionDigits: 2
-                            })} ₺`
+                              maximumFractionDigits: 2,
+                            })
+                          } ₺`
                           : "-"}
                       </span>
                     </div>
@@ -191,22 +221,27 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   className="p-3.5 text-right text-sm font-extrabold text-slate-900 dark:text-slate-100"
                 >
                   {firma.teklif_toplami
-                    ? `${firma.teklif_toplami.toLocaleString("tr-TR", {
+                    ? `${
+                      firma.teklif_toplami.toLocaleString("tr-TR", {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      })} ₺`
+                        maximumFractionDigits: 2,
+                      })
+                    } ₺`
                     : "0.00 ₺"}
                 </td>
               ))}
               <td className="p-3.5 bg-slate-100/10 dark:bg-slate-950/10 text-right font-extrabold text-slate-900 dark:text-slate-100">
                 {getEstimatedCostTotal() > 0
-                  ? `${getEstimatedCostTotal().toLocaleString("tr-TR", {
+                  ? `${
+                    getEstimatedCostTotal().toLocaleString("tr-TR", {
                       minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })} ₺`
+                      maximumFractionDigits: 2,
+                    })
+                  } ₺`
                   : "-"}
               </td>
-              <td className="p-3.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]"></td>
+              <td className="p-3.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]">
+              </td>
             </tr>
           </tbody>
         </table>
