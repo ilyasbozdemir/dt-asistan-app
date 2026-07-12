@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   FileJson,
   Database,
@@ -12,6 +12,9 @@ import {
   Check,
   Copy
 } from 'lucide-react'
+import { DatabaseBrowserModal } from './DatabaseBrowserModal'
+
+import { WorkspaceMeta } from '../../../store/workspaceStore'
 
 type PackageFile = 'meta.json' | 'database.sqlite' | 'attachments/'
 
@@ -25,7 +28,7 @@ interface TableStat {
 interface SelectedFileInspectorProps {
   selectedFile: PackageFile
   rawJson: string
-  activeMeta: any
+  activeMeta: WorkspaceMeta | null
   loadingStats: boolean
   statsError: string | null
   dbStats: TableStat[]
@@ -45,6 +48,8 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
   copied,
   handleCopyPath
 }) => {
+  const [dbBrowserOpen, setDbBrowserOpen] = useState(false)
+
   return (
     <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm min-h-[460px] flex flex-col justify-between animate-in fade-in duration-200">
       <div className="space-y-5 flex-1 flex flex-col">
@@ -87,14 +92,14 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
 
               {/* Meta Table info summary */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-2">
-                <div className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl">
+                <div className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl">
                   <Building className="w-5 h-5 text-blue-500 shrink-0" />
                   <div className="overflow-hidden">
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase">
                       Kurum
                     </span>
                     <span
-                      className="text-xs font-bold text-slate-700 dark:text-slate-350 truncate block"
+                      className="text-xs font-bold text-slate-700 dark:text-slate-355 truncate block"
                       title={activeMeta?.institution}
                     >
                       {activeMeta?.institution || 'Belirtilmemiş'}
@@ -105,7 +110,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 <div className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl">
                   <Cpu className="w-5 h-5 text-indigo-500 shrink-0" />
                   <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase">
                       Uygulama Sürümü
                     </span>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-350">
@@ -117,7 +122,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 <div className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl">
                   <Layers className="w-5 h-5 text-emerald-500 shrink-0" />
                   <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase">
                       DB Şema Sürümü
                     </span>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-350">
@@ -129,7 +134,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 <div className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl">
                   <Calendar className="w-5 h-5 text-amber-500 shrink-0" />
                   <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">
+                    <span className="block text-[10px] text-slate-400 dark:text-slate-550 font-bold uppercase">
                       Oluşturulma
                     </span>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-350">
@@ -177,12 +182,12 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                           {stat.tableName}
                         </div>
                         <div className="col-span-3 text-center">
-                          <span className="font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-100/40 dark:border-emerald-900/20 font-mono text-[10px]">
+                          <span className="font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-955/40 px-2 py-0.5 rounded border border-emerald-100/40 dark:border-emerald-900/20 font-mono text-[10px]">
                             {stat.count.toLocaleString('tr-TR')} satır
                           </span>
                         </div>
                         <div
-                          className="col-span-4 text-[10px] text-slate-500 dark:text-slate-455 truncate"
+                          className="col-span-4 text-[10px] text-slate-550 dark:text-slate-455 truncate"
                           title={stat.description}
                         >
                           {stat.description}
@@ -193,23 +198,31 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 )}
               </div>
 
-              <div className="p-4 bg-emerald-50/40 dark:bg-emerald-955/15 border border-emerald-250/30 dark:border-emerald-900/30 rounded-2xl flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-350">
-                <Database className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold block text-slate-800 dark:text-slate-200 mb-0.5">
-                    SQLite Veritabanı Sağlığı
-                  </span>
-                  Veritabanı yapısı en güncel şema sürümü olan{' '}
-                  <strong>v{activeMeta?.schema_version || '1'}</strong> sürümündedir. Veri bütünlüğü
-                  ve ACID işlemleri kararlı durumdadır.
+              <div className="p-4 bg-emerald-50/40 dark:bg-emerald-955/15 border border-emerald-250/30 dark:border-emerald-900/30 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs text-slate-655 dark:text-slate-350">
+                <div className="flex items-start gap-2.5">
+                  <Database className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-slate-800 dark:text-slate-200 mb-0.5">
+                      SQLite Veritabanı Sağlığı
+                    </span>
+                    Veritabanı yapısı en güncel şema sürümü olan{' '}
+                    <strong>v{activeMeta?.schema_version || '1'}</strong> sürümündedir.
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setDbBrowserOpen(true)}
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/10 cursor-pointer shrink-0 font-sans"
+                >
+                  🔍 Veritabanını İncele
+                </button>
               </div>
             </div>
           )}
 
           {selectedFile === 'attachments/' && (
             <div className="space-y-4 animate-in fade-in duration-200 mt-2">
-              <div className="border border-dashed border-slate-250 dark:border-slate-800 rounded-3xl p-8 text-center flex flex-col items-center justify-center bg-slate-50/40 dark:bg-slate-950/10">
+              <div className="border border-dashed border-slate-250 dark:border-slate-800 rounded-3xl p-8 text-center flex flex-col items-center justify-center bg-slate-50/40 dark:bg-slate-955/10">
                 <div className="w-14 h-14 bg-amber-50 dark:bg-amber-955/20 rounded-2xl flex items-center justify-center text-amber-500 mb-3 shadow-inner">
                   <FolderOpen className="w-7 h-7" />
                 </div>
@@ -222,7 +235,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 </p>
               </div>
 
-              <div className="p-4 bg-amber-50/40 dark:bg-amber-955/10 border border-amber-250/35 dark:border-amber-900/30 rounded-2xl flex gap-2.5 text-xs text-slate-650 dark:text-slate-400">
+              <div className="p-4 bg-amber-50/40 dark:bg-amber-955/10 border border-amber-250/35 dark:border-amber-900/30 rounded-2xl flex gap-2.5 text-xs text-slate-655 dark:text-slate-400">
                 <Info className="w-4 h-4 text-amber-555 shrink-0 mt-0.5" />
                 <span>
                   Ekler, dosya açıldığında geçici olarak işletim sisteminin geçici dizinine (Temp)
@@ -238,7 +251,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
       {/* Dosya Konumu ve Kopyalama Bölümü */}
       {activeFilePath && (
         <div className="border-t border-slate-100 dark:border-slate-850 pt-4 mt-6 space-y-2">
-          <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-455 uppercase tracking-wide">
+          <label className="block text-[10px] font-bold text-slate-550 dark:text-slate-455 uppercase tracking-wide">
             Disk Üzerindeki Dosya Konumu
           </label>
           <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-955/40 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-inner">
@@ -262,6 +275,10 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
             </button>
           </div>
         </div>
+      )}
+
+      {dbBrowserOpen && (
+        <DatabaseBrowserModal isOpen={dbBrowserOpen} onClose={() => setDbBrowserOpen(false)} />
       )}
     </div>
   )
