@@ -119,29 +119,12 @@ export function Header(): React.JSX.Element {
                 onClick: () => navigate({ to: '/dosya/piyasa-fiyat-arastirmasi' as any })
               },
               {
-                label: '3. Yaklaşık Maliyet',
-                onClick: () => navigate({ to: '/dosya/firmalar-maliyet/yaklasik' as any })
-              },
-              {
-                label: '4. Sipariş & Sözleşme',
+                label: '3. Sipariş & Sözleşme',
                 onClick: () => navigate({ to: '/dosya/siparis-ve-sozlesme' as any })
               },
               {
-                label: '5. Kabul & Ödeme İşlemleri',
+                label: '4. Kabul & Ödeme İşlemleri',
                 onClick: () => navigate({ to: '/dosya/kabul-ve-odeme' as any })
-              },
-              { divider: true },
-              {
-                label: '6. Fatura & İrsaliye',
-                onClick: () => navigate({ to: '/dosya/fatura-ve-irsaliye' as any })
-              },
-              {
-                label: '7. Klasör & Kapaklar',
-                onClick: () => navigate({ to: '/dosya/klasor-ve-kapaklar' as any })
-              },
-              {
-                label: '8. İmzalı Belgeler',
-                onClick: () => navigate({ to: '/dosya/imzali-belgeler' as any })
               }
             ]
           },

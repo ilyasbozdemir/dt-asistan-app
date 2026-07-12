@@ -377,18 +377,15 @@ if (!gotTheLock && !isMultiInstance) {
           if (mainWindow.isMinimized()) mainWindow.restore()
           mainWindow.focus()
         } else {
-          writeLog('INFO', 'File is different/new. Spawning multi-instance process.', {
-            execPath: process.execPath
+          writeLog('INFO', 'File is different/new. Opening in current instance.', {
+            filePath
           })
-          const { spawn } = require('child_process')
-          const args = app.isPackaged
-            ? [filePath, '--multi-instance']
-            : [app.getAppPath(), filePath, '--multi-instance']
-
-          spawn(process.execPath, args, {
-            detached: true,
-            stdio: 'ignore'
-          }).unref()
+          if (!mainWindow.isVisible()) {
+            mainWindow.show()
+          }
+          if (mainWindow.isMinimized()) mainWindow.restore()
+          mainWindow.focus()
+          mainWindow.webContents.send('open-external-file', filePath)
         }
       } else {
         writeLog('INFO', 'No supported file found in commandLine arguments.')
