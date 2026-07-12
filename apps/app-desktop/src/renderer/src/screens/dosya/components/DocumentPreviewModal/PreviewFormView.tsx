@@ -244,7 +244,7 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 </label>
                 {schemaDef?.aciklama && (
                   <span className="text-xs text-slate-500">
-                    {schemaDef.aciklama}
+                    {schemaDef.aciklama} ff
                   </span>
                 )}
               </div>
@@ -647,8 +647,7 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
                 </select>
                 {currentValue && (
                   <span className="text-[10px] text-slate-400">
-                    Seçili: {currentValue} —{" "}
-                    {overrideData[field.unvanKey] ??
+                    Seçili: {currentValue} — {overrideData[field.unvanKey] ??
                       mergedContext[field.unvanKey] ?? ""}
                   </span>
                 )}

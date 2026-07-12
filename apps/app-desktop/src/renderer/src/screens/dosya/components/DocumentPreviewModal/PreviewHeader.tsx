@@ -1,22 +1,24 @@
-import React from 'react'
-import { ArrowLeft, FileText, X } from 'lucide-react'
+import React from "react";
+import { ArrowLeft, FileText, X } from "lucide-react";
 
 interface PreviewHeaderProps {
-  isInline: boolean
-  onClose: () => void
-  title: string
-  usedVars: Set<string>
+  isInline: boolean;
+  onClose: () => void;
+  title: string;
+  usedVars: Set<string>;
 }
 
 export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   isInline,
   onClose,
   title,
-  usedVars
+  usedVars,
 }) => {
   const varsList = React.useMemo(() => {
-    return Array.from(usedVars).filter((k) => k !== 'icerik')
-  }, [usedVars])
+    return Array.from(usedVars).filter((k) => k !== "icerik");
+  }, [usedVars]);
+
+  const [isVarsExpanded, setIsVarsExpanded] = React.useState(false);
 
   if (isInline) {
     return (
@@ -25,7 +27,7 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-600 dark:text-slate-400 mr-1"
-            title="Geri Dön"
+            title={`Daha önceden açılan ${title} dosyasını aç`}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -37,24 +39,50 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
               {title} Önizleme
             </h2>
             <p className="text-xs text-slate-500">
-              Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
+              Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
+              görebilirsiniz.
             </p>
             {varsList.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
-                {varsList.map((key) => (
-                  <span
-                    key={key}
-                    className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-200/50 dark:border-slate-800"
+              <div className="mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsVarsExpanded((prev) => !prev)}
+                  className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                >
+                  <svg
+                    className={`w-3 h-3 transition-transform duration-200 ${
+                      isVarsExpanded ? "rotate-90" : "rotate-0"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {key}
-                  </span>
-                ))}
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                  Değişkenler ({varsList.length})
+                </button>
+
+                {isVarsExpanded && (
+                  <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
+                    {varsList.map((key) => (
+                      <span
+                        key={key}
+                        className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono border border-slate-200/50 dark:border-slate-800"
+                      >
+                        {key}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -64,9 +92,12 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
           <FileText className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title} Önizleme</h2>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            {title} Önizleme
+          </h2>
           <p className="text-xs text-slate-500">
-            Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
+            Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
+            görebilirsiniz.
           </p>
           {varsList.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
@@ -89,5 +120,5 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
         <X className="w-5 h-5" />
       </button>
     </div>
-  )
-}
+  );
+};
