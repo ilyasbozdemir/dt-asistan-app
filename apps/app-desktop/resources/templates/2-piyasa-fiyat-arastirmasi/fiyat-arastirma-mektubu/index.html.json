@@ -1,6 +1,9 @@
 {
-  "antetSatirlari": ["T.C.", "YILDIZTEPE BELEDİYE BAŞKANLIĞI"],
-  "solLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svgcon.png",
+  "antetSatirlari": [
+    "T.C.",
+    "YILDIZTEPE BELEDİYE BAŞKANLIĞI"
+  ],
+  "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/main/public/icon.png",
   "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "kurumAdi": "Yıldıztepe Belediye Başkanlığı",
   "isinAdi": "Hizmet Binası Reklam Panoları Yapım İşleri",
