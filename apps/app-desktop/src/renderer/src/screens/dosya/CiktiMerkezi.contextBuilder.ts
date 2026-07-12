@@ -354,8 +354,9 @@ export function buildDocumentContext(
     fiyatFarkiSartlari: dosyaResData?.fiyat_farki_dayanagi || 'Fiyat Farkı Ödenmeyecek',
     yillaraYaygin: dosyaResData?.yillara_yaygin === 1 ? 'Yıllara Yaygın Hizmet Alımı' : 'Hayır',
     sozlesmeYapilacak: dosyaResData?.sozlesme_yapilacak_mi === 1 ? 'Evet' : 'Hayır',
-    hesaplamaEsasi:
-      dosyaResData?.hesaplama_esasi || 'Ortalama fiyat esasına göre',
+    hesaplamaEsasi: dosyaResData?.hesaplama_esasi || 'Ortalama fiyat esasına göre',
+    isOrtalama: isAverageBasis,
+    isEnDusuk: isLowestBasis,
     vkomisyontakdiri:
       dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
     komisyonTakdiri:
