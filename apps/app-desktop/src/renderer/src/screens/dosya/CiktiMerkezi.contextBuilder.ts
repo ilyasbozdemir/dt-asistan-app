@@ -1,6 +1,30 @@
 import { SAYI_YAZI_MAP, sayiyiYaziyaCevir, paraYaziyaCevir } from '../../constants/sayiEslesmeleri'
 import { getInstitutionSuffixes } from '../../utils/kurumHelper'
 
+function formatDateString(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null
+  try {
+    const cleanStr = String(dateStr).trim()
+    if (/^\d{4}-\d{2}-\d{2}/.test(cleanStr)) {
+      const [y, m, d] = cleanStr.split(' ')[0].split('-')
+      return `${d}.${m}.${y}`
+    }
+    if (/^\d{2}\.\d{2}\.\d{4}/.test(cleanStr)) {
+      return cleanStr
+    }
+    const d = new Date(cleanStr)
+    if (isNaN(d.getTime())) return null
+    return new Intl.DateTimeFormat('tr-TR', {
+      timeZone: 'Europe/Istanbul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(d)
+  } catch {
+    return null
+  }
+}
+
 export function buildDocumentContext(
   dosyaResData: any,
   kalemlerData: any[],
@@ -41,6 +65,12 @@ export function buildDocumentContext(
     month: '2-digit',
     day: '2-digit'
   }).format(new Date())
+
+  const fileDate =
+    formatDateString(dosyaResData?.tarih) ||
+    formatDateString(dosyaResData?.dosya_acilis_tarihi) ||
+    formatDateString(dosyaResData?.created_at) ||
+    today
 
   const kalemSayisi = kalemlerData?.length || 0
   const kalemSayisiYazi = sayiyiYaziyaCevir(kalemSayisi)
@@ -260,12 +290,12 @@ export function buildDocumentContext(
     hasAciklamaMaddeleri: aciklamaMaddeleri.length > 0,
     dosyaYili: dosyaYili,
     kapakDetaylari,
-    tarih: today,
+    tarih: fileDate,
     alimTuru: alimTuruText,
     isMal,
     isHizmet,
     isYapim,
-    dosyaTarihi: dosyaResData?.tarih || today,
+    dosyaTarihi: fileDate,
     yukleniciFirma: dosyaResData?.yuklenici_firma_adi || null,
     yukleniciAdresi: dosyaResData?.yuklenici_firma_adresi || '',
     yukleniciIlce: dosyaResData?.yuklenici_firma_ilcesi || '',

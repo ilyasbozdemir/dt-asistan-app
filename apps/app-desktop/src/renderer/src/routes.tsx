@@ -17,7 +17,7 @@ import MalzemelerScreen from './screens/malzemeler/index.screen'
 import TasinirKodScreen from './screens/tasinirkod/index.screen'
 import KurumScreen from './screens/kurum/index.screen'
 import ProfilScreen from './screens/profil/index.screen'
-import DosyaScreen from './screens/dosya/index.screen'
+
 import SablonlarScreen from './screens/sablonlar/index.screen'
 import DegiskenlerScreen from './screens/sablonlar/degiskenler.screen'
 import RaporlarScreen from './screens/raporlar/index.screen'
@@ -216,7 +216,7 @@ const profilRoute = createRoute({
 const dosyaRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.DOSYA_DETAY,
-  component: DosyaScreen
+  component: TakipScreen
 })
 
 // Dosya Aşamaları

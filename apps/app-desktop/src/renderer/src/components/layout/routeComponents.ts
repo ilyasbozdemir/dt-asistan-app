@@ -17,7 +17,7 @@ import MalzemelerScreen from '../../screens/malzemeler/index.screen'
 import TasinirKodScreen from '../../screens/tasinirkod/index.screen'
 import KurumScreen from '../../screens/kurum/index.screen'
 import ProfilScreen from '../../screens/profil/index.screen'
-import DosyaScreen from '../../screens/dosya/index.screen'
+
 import SablonlarScreen from '../../screens/sablonlar/index.screen'
 import DegiskenlerScreen from '../../screens/sablonlar/degiskenler.screen'
 import RaporlarScreen from '../../screens/raporlar/index.screen'
@@ -69,13 +69,14 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/tasinirkod': TasinirKodScreen,
   '/kurum': KurumScreen,
   '/profil': ProfilScreen,
-  '/dosya': DosyaScreen,
+  '/dosya': TakipScreen,
   '/dosya/hazirlik-ve-ihtiyac': HazirlikVeIhtiyac,
   '/dosya/piyasa-fiyat-arastirmasi': PiyasaFiyatArastirmasi,
   '/dosya/siparis-ve-sozlesme': SiparisVeSozlesme,
   '/dosya/kabul-ve-odeme': KabulVeOdeme,
   '/dosya/klasor-ve-kapaklar': KlasorVeKapaklar,
   '/dosya/firmalar-maliyet/yaklasik': YaklasikMaliyetCetveli,
+  '/dosya/cikti-merkezi': CiktiMerkezi,
   '/cikti-merkezi': CiktiMerkeziScreen,
   '/olcubirimleri': OlcuBirimleriScreen,
   '/malzemeler/yeni': YeniMalzemeScreen,

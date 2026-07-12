@@ -119,7 +119,13 @@ export function SurecBelgeleriPanel({
   onToggleStar,
   onOpenExternal,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
-  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  const [selectedPresetId, setSelectedPresetId] = useState<string>(() => {
+    try {
+      return localStorage.getItem("dta_selected_preset_id") || "";
+    } catch {
+      return "";
+    }
+  });
   const [presets, setPresets] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem("dta_document_presets");
@@ -128,6 +134,8 @@ export function SurecBelgeleriPanel({
       return [];
     }
   });
+
+
 
   React.useEffect(() => {
     const handlePresetsChange = () => {
@@ -144,8 +152,9 @@ export function SurecBelgeleriPanel({
   }, []);
 
   const starredDocsForFilter = React.useMemo(() => {
-    if (selectedPresetId) {
-      const preset = presets.find((p) => p.id === selectedPresetId);
+    const activePresetId = selectedPresetId || (presets.length > 0 ? presets[0].id : "");
+    if (activePresetId) {
+      const preset = presets.find((p) => p.id === activePresetId);
       return preset ? preset.docs : [];
     }
     return activeStarredDocs || [];
@@ -158,11 +167,9 @@ export function SurecBelgeleriPanel({
     );
   });
 
-  const [filter, setFilter] = useState<"all" | "starred">("starred");
+  const [manualFilter, setManualFilter] = useState<"all" | "starred" | null>(null);
 
-  React.useEffect(() => {
-    setFilter(hasStarred ? "starred" : "all");
-  }, [stageSablons, hasStarred]);
+  const filter = manualFilter !== null ? manualFilter : (hasStarred ? "starred" : "all");
 
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
@@ -215,15 +222,19 @@ export function SurecBelgeleriPanel({
         <div className="flex items-center gap-2 select-none">
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-500" />
-            Süreç Belgeleri ve Otomatik Şablonlar
+            Süreç Belgeleri
           </h3>
         </div>
 
         <div className="flex flex-col md:flex-row items-end md:items-center gap-3 shrink-0">
           {filter === "starred" && presets.length > 0 && (
             <select
-              value={selectedPresetId}
-              onChange={(e) => setSelectedPresetId(e.target.value)}
+              value={selectedPresetId || (presets.length > 0 ? presets[0].id : "")}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedPresetId(val);
+                localStorage.setItem("dta_selected_preset_id", val);
+              }}
               className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg py-1 px-2.5 text-[10px] font-extrabold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer animate-in fade-in zoom-in-95 duration-200"
             >
               {presets.map((p) => (
@@ -236,7 +247,7 @@ export function SurecBelgeleriPanel({
 
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
             <button
-              onClick={() => setFilter("all")}
+              onClick={() => setManualFilter("all")}
               className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${
                 filter === "all"
                   ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
@@ -246,7 +257,7 @@ export function SurecBelgeleriPanel({
               Tümü
             </button>
             <button
-              onClick={() => setFilter("starred")}
+              onClick={() => setManualFilter("starred")}
               className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors flex items-center gap-1 ${
                 filter === "starred"
                   ? "bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm"
@@ -417,9 +428,13 @@ function SablonCard({
     return 0;
   });
 
-  const [selectedId, setSelectedId] = useState<string>(
-    String(sortedSablons[0].id || sortedSablons[0].ad),
-  );
+  const [selectedId, setSelectedId] = useState<string>(() => {
+    const saved = localStorage.getItem(`dta_selected_version_${baseName}`);
+    if (saved && sortedSablons.some((s) => String(s.id || s.ad) === saved)) {
+      return saved;
+    }
+    return String(sortedSablons[0].id || sortedSablons[0].ad);
+  });
 
   const activeSablon =
     sortedSablons.find((s) => String(s.id || s.ad) === selectedId) ||
@@ -493,7 +508,11 @@ function SablonCard({
               >
                 <select
                   value={selectedId}
-                  onChange={(e) => setSelectedId(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedId(val);
+                    localStorage.setItem(`dta_selected_version_${baseName}`, val);
+                  }}
                   disabled={isDisabled}
                   title="Şablon Sürümü Seçin"
                   aria-label="Şablon Sürümü Seçin"
