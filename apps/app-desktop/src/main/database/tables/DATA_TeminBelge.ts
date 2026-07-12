@@ -10,6 +10,7 @@ export const DATA_TeminBelge = {
     { name: 'is_signed', type: 'INTEGER', default: 0, description: 'Is Signed' },
     { name: 'imzali_dosya_yolu', type: 'TEXT', description: 'Imzali Dosya Yolu' },
     { name: 'olusturan_personel_id', type: 'INTEGER', description: 'Olusturan Personel ID' },
+    { name: 'belge_tarihi', type: 'TEXT', description: 'Belge/Tutanak Tarihi' },
     {
       name: 'created_at',
       type: 'DATETIME',

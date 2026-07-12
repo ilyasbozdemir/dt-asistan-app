@@ -33,11 +33,21 @@ export interface BiddingKalem {
 }
 
 import { useTabStore } from "../../../../../store/tabStore";
+import { formatDateString } from "../../../CiktiMerkezi.contextBuilder";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function usePiyasaFiyatArastirmasiLogic() {
   const sablonsContext = useDosyaAsamasiSablons();
-  const { activeDosyaId, sablons, activeStarredDocs } = sablonsContext;
+  const {
+    activeDosyaId,
+    sablons,
+    activeStarredDocs,
+    contextsByPath,
+    dosyaContext,
+    handleOpenPreviewForSablon,
+    quickOpenExternal,
+    quickPrint
+  } = sablonsContext;
   const activeTabPath = useTabStore((s) => s.activeTabPath);
 
   const [invitedFirms, setInvitedFirms] = useState<BiddingFirm[]>([]);
@@ -46,10 +56,14 @@ export function usePiyasaFiyatArastirmasiLogic() {
   const [bids, setBids] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
+  const [savedDocuments, setSavedDocuments] = useState<any[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+
   const [hesaplamaEsasi, setHesaplamaEsasi] = useState<string>("Ortalama fiyat esasına göre");
   const [komisyonTakdiri, setKomisyonTakdiri] = useState<string>("Sadece araştırma fiyatları dikkate alınacak");
   const [isEditingFirms, setIsEditingFirms] = useState<boolean>(false);
-  const [teminTarihi, setTeminTarihi] = useState<string>("");
+  const [maliyetCetveliTarihi, setMaliyetCetveliTarihi] = useState<string>('');
+  const [tutanakTarihi, setTutanakTarihi] = useState<string>('');
 
   const [isFirmModalOpen, setIsFirmModalOpen] = useState(false);
   const [selectedFirmIds, setSelectedFirmIds] = useState<number[]>([]);
@@ -192,11 +206,34 @@ export function usePiyasaFiyatArastirmasiLogic() {
       if (resInvited.success) setInvitedFirms(resInvited.data || []);
       if (resPool.success) setAllPoolFirms(resPool.data || []);
       if (resItems.success) setItems(resItems.data || []);
+      let defaultDate = "";
       if (resDosya.success && resDosya.data && resDosya.data.length > 0) {
         setHesaplamaEsasi(resDosya.data[0].hesaplama_esasi || "Ortalama fiyat esasına göre");
         setKomisyonTakdiri(resDosya.data[0].komisyon_takdiri || "Sadece araştırma fiyatları dikkate alınacak");
-        setTeminTarihi(resDosya.data[0].temin_tarihi || "");
+        defaultDate = resDosya.data[0].temin_tarihi || "";
       }
+
+      const resBelgeler = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
+        [activeDosyaId]
+      );
+
+      let mDate = "";
+      let tDate = "";
+      if (resBelgeler.success && resBelgeler.data) {
+        setSavedDocuments(resBelgeler.data);
+        const maliyetDoc = resBelgeler.data.find((b: any) => b.belge_adi === 'Yaklaşık Maliyet Cetveli');
+        const tutanakDoc = resBelgeler.data.find((b: any) => b.belge_adi === 'Piyasa Fiyat Araştırma Tutanağı');
+        mDate = maliyetDoc?.belge_tarihi || "";
+        tDate = tutanakDoc?.belge_tarihi || "";
+        const hasBothDocs = resBelgeler.data.length >= 2;
+        setIsFormOpen(!hasBothDocs);
+      } else {
+        setIsFormOpen(true);
+      }
+      setMaliyetCetveliTarihi(mDate || defaultDate || new Date().toISOString().split('T')[0]);
+      setTutanakTarihi(tDate || defaultDate || new Date().toISOString().split('T')[0]);
 
       if (resBids.success && resBids.data) {
         const bidsMap: Record<string, number> = {};
@@ -373,28 +410,52 @@ export function usePiyasaFiyatArastirmasiLogic() {
       const res = await window.electron.ipcRenderer.invoke(
         "db:run",
         "UPDATE DATA_TeminDosyasi SET yaklasik_maliyet = ?, temin_tarihi = ? WHERE id = ?",
-        [total, teminTarihi || null, activeDosyaId],
+        [total, tutanakTarihi || maliyetCetveliTarihi || null, activeDosyaId],
       );
       if (res.success) {
         // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
-        const documentsToLog = ["Yaklaşık Maliyet Cetveli", "Piyasa Fiyat Araştırma Tutanağı"];
-        for (const docName of documentsToLog) {
+        const documentsToLog = [
+          { name: "Yaklaşık Maliyet Cetveli", date: maliyetCetveliTarihi },
+          { name: "Piyasa Fiyat Araştırma Tutanağı", date: tutanakTarihi }
+        ];
+        for (const doc of documentsToLog) {
           const existRes = await window.electron.ipcRenderer.invoke(
             "db:query",
             "SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ?",
-            [activeDosyaId, docName],
+            [activeDosyaId, doc.name],
           );
           if (existRes.success && existRes.data && existRes.data.length > 0) {
             await window.electron.ipcRenderer.invoke(
               "db:run",
-              "UPDATE DATA_TeminBelge SET created_at = CURRENT_TIMESTAMP WHERE id = ?",
-              [existRes.data[0].id],
+              "UPDATE DATA_TeminBelge SET belge_tarihi = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?",
+              [doc.date || null, existRes.data[0].id],
             );
           } else {
             await window.electron.ipcRenderer.invoke(
               "db:run",
-              "INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, dosya_yolu) VALUES (?, ?, ?)",
-              [activeDosyaId, docName, ""],
+              "INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu) VALUES (?, ?, ?, ?)",
+              [activeDosyaId, doc.name, doc.date || null, ""],
+            );
+          }
+
+          // Ayrıca bu şablonun güncel veri snapshot'ını DATA_DosyaSablonVeri tablosuna kaydet!
+          const sablon = stageSablons.find((s: any) => {
+            const lowerAd = s.ad.toLowerCase();
+            const lowerDocName = doc.name.toLowerCase();
+            return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd);
+          });
+          if (sablon) {
+            const processPath = sablon.route_path || sablon.dosya_adi || '';
+            const baseCtx = contextsByPath[processPath] || dosyaContext;
+            const mergedCtx = {
+              ...baseCtx,
+              tarih: doc.date ? formatDateString(doc.date) : baseCtx.tarih,
+              dosyaTarihi: doc.date ? formatDateString(doc.date) : baseCtx.dosyaTarihi
+            };
+            await window.electron.ipcRenderer.invoke(
+              "db:run",
+              "INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)",
+              [activeDosyaId, sablon.id, JSON.stringify(mergedCtx)]
             );
           }
         }
@@ -406,6 +467,27 @@ export function usePiyasaFiyatArastirmasiLogic() {
             })
           }`,
         );
+
+        // Belgeleri yeniden yükle
+        const resBelgelerNew = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
+          [activeDosyaId]
+        );
+        if (resBelgelerNew.success && resBelgelerNew.data) {
+          setSavedDocuments(resBelgelerNew.data);
+        }
+        setIsFormOpen(false);
+
+        // Piyasa Fiyat Araştırma Tutanağı belgesini otomatik önizlemeye aç!
+        const tutanakSablon = stageSablons.find((s: any) =>
+          s.ad.toLowerCase().includes("piyasa fiyat araştırma tutanağı")
+        );
+        if (tutanakSablon) {
+          setTimeout(() => {
+            handleOpenPreviewForSablon(tutanakSablon, tutanakSablon.ad);
+          }, 300);
+        }
       } else {
         alert(res.error);
       }
@@ -467,7 +549,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
     lowestTotalFirmaId,
     isEditingFirms,
     setIsEditingFirms,
-    teminTarihi,
-    setTeminTarihi,
+    maliyetCetveliTarihi,
+    setMaliyetCetveliTarihi,
+    tutanakTarihi,
+    setTutanakTarihi,
+    savedDocuments,
+    setSavedDocuments,
+    isFormOpen,
+    setIsFormOpen,
   };
 }

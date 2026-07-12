@@ -6,7 +6,7 @@ import {
   ProcessMapping,
   processMappingRegistry
 } from '../../constants/mappings'
-import { buildDocumentContext } from './CiktiMerkezi.contextBuilder'
+import { buildDocumentContext, formatDateString } from './CiktiMerkezi.contextBuilder'
 import { filterContextForTemplate } from './CiktiMerkezi.mediator'
 import { defaultTemplatesByPath } from '../sablonlar/components/defaultTemplates'
 export interface UseCiktiMerkeziDataResult {
@@ -152,6 +152,12 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           'SELECT * FROM TANIM_Kurum WHERE id = 1'
         )
         const kurum = kurumRes.success && kurumRes.data?.length > 0 ? kurumRes.data[0] : null
+
+        const belgelerRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT belge_adi, belge_tarihi FROM DATA_TeminBelge WHERE temin_dosya_id = ?',
+          [activeDosyaId]
+        )
 
         // Dynamic mapping resolver (Isolated per path)
         const resolvedMappingsByPath: Record<string, Record<string, any>> = {}
@@ -343,6 +349,24 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
             pathMappings
           )
           contextForPath = { ...mJsonParsed, ...contextForPath }
+
+          if (belgelerRes.success && belgelerRes.data) {
+            const doc = (belgelerRes.data as any[]).find((b: any) => {
+              const lowerName = b.belge_adi.toLowerCase()
+              if (path.includes('yaklasik') && lowerName.includes('yaklaşık maliyet')) return true
+              if (path.includes('piyasa-fiyat-arastirmasi') && lowerName.includes('piyasa fiyat araştırma')) return true
+              if (path.includes('tutanak') && lowerName.includes('piyasa fiyat araştırma')) return true
+              return false
+            })
+            if (doc && doc.belge_tarihi) {
+              const formattedDate = formatDateString(doc.belge_tarihi)
+              if (formattedDate) {
+                contextForPath.tarih = formattedDate
+                contextForPath.dosyaTarihi = formattedDate
+              }
+            }
+          }
+
           contextForPath = filterContextForTemplate(path, contextForPath)
           pathContexts[path] = contextForPath
         }

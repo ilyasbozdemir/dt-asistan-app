@@ -1,7 +1,7 @@
 import { SAYI_YAZI_MAP, sayiyiYaziyaCevir, paraYaziyaCevir } from '../../constants/sayiEslesmeleri'
 import { getInstitutionSuffixes } from '../../utils/kurumHelper'
 
-function formatDateString(dateStr: string | null | undefined): string | null {
+export function formatDateString(dateStr: string | null | undefined): string | null {
   if (!dateStr) return null
   try {
     const cleanStr = String(dateStr).trim()

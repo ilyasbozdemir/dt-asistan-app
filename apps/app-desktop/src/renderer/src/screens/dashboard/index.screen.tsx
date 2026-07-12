@@ -13,6 +13,10 @@ import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
 import { TakipScreen } from '../system/TakipScreen'
 import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
 
+import { Link } from '@tanstack/react-router'
+import { FileText, Plus, ArrowRight } from 'lucide-react'
+import { Button } from '../../components/ui/Button'
+
 // Subcomponents
 import { HeroHeader } from './components/HeroHeader'
 import { KpiCards } from './components/KpiCards'
@@ -263,6 +267,38 @@ export default function DashboardScreen(): React.JSX.Element {
         {/* LEFT COLUMN: STATS CARDS & CHARTS */}
         {!activeDosyaId && (
           <div className="lg:col-span-9 flex flex-col gap-6">
+            {/* LÜZUM BAŞLAT / YENİ DOĞRUDAN TEMİN BANNER */}
+            <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-64 h-64 bg-white/[0.03] rounded-full -mr-16 -mt-16 pointer-events-none" />
+              <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-white/[0.02] rounded-full pointer-events-none" />
+              
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-blue-200 uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded-md">
+                    Satın Alma Başlangıcı
+                  </span>
+                  <h3 className="text-lg font-extrabold mt-1.5 leading-tight">
+                    Doğrudan Temin Süreci Başlat (Lüzum Müzekkeresi)
+                  </h3>
+                  <p className="text-xs text-blue-100/90 mt-1 max-w-xl leading-relaxed">
+                    İhtiyaç kalemlerinizi girerek doğrudan temin dosyasını saniyeler içinde başlatın. Akıllı asistan lüzum belgelerinizi otomatik dolduracaktır.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 shrink-0 z-10">
+                <Link to="/dosyalar/yeni">
+                  <Button className="bg-white hover:bg-blue-50 text-blue-700 text-xs font-bold py-2.5 px-5 rounded-xl shadow-xs transition-all cursor-pointer">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    Yeni Süreç Başlat
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
             <StatsCards isLoading={isLoading} stats={stats} formatCurrency={formatCurrency} />
             <ChartsSection
               stats={stats}

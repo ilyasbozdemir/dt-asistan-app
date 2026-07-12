@@ -31,8 +31,10 @@ interface TeklifMatrisiProps {
   ) => Promise<void>;
   handleSaveToDosya: () => Promise<void>;
   hesaplamaEsasi: string;
-  teminTarihi: string;
-  setTeminTarihi: (val: string) => void;
+  maliyetCetveliTarihi: string;
+  setMaliyetCetveliTarihi: (val: string) => void;
+  tutanakTarihi: string;
+  setTutanakTarihi: (val: string) => void;
 }
 
 export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
@@ -45,8 +47,10 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
   handlePriceChange,
   handleSaveToDosya,
   hesaplamaEsasi,
-  teminTarihi,
-  setTeminTarihi,
+  maliyetCetveliTarihi,
+  setMaliyetCetveliTarihi,
+  tutanakTarihi,
+  setTutanakTarihi,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 overflow-hidden">
@@ -70,12 +74,24 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
 
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
             <span className="font-bold text-slate-450 dark:text-slate-500">
+              Maliyet Cetveli Tarihi:
+            </span>
+            <input
+              type="date"
+              value={maliyetCetveliTarihi}
+              onChange={(e) => setMaliyetCetveliTarihi(e.target.value)}
+              className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
+            <span className="font-bold text-slate-450 dark:text-slate-500">
               Tutanak Tarihi:
             </span>
             <input
               type="date"
-              value={teminTarihi}
-              onChange={(e) => setTeminTarihi(e.target.value)}
+              value={tutanakTarihi}
+              onChange={(e) => setTutanakTarihi(e.target.value)}
               className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
             />
           </div>
