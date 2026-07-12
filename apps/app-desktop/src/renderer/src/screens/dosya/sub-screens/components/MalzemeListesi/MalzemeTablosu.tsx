@@ -1,4 +1,3 @@
-import React from 'react'
 import { Check, Edit2, Package, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '../../../../../utils/cn'
 
@@ -71,20 +70,19 @@ export function MalzemeTablosu({ state }: { state: any }) {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {items.map((item: any) => {
                 const isEditing = editingId === item.id
-
                 return (
                   <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
-                    <td>{item.tasinir_kodu}</td>
+                    <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                      {item.tasinir_kodu || '-'}
+                    </td>
 
                     <td className="p-3 pl-4">
                       <div className="font-bold text-slate-800 dark:text-slate-200">
                         {item.kalem_adi}
                       </div>
-                      {(item.tasinir_kodu || item.okas_kodu) && (
-                        <div className="text-[9px] text-slate-400 font-mono mt-0.5">
-                          {item.tasinir_kodu && `Taşınır: ${item.tasinir_kodu}`}
-                          {item.tasinir_kodu && item.okas_kodu && ' · '}
-                          {item.okas_kodu && `OKAS: ${item.okas_kodu}`}
+                      {item.okas_kodu && (
+                        <div className="text-[9px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                          OKAS: {item.okas_kodu}
                         </div>
                       )}
                     </td>
@@ -112,7 +110,7 @@ export function MalzemeTablosu({ state }: { state: any }) {
                           step="0.01"
                           value={editMiktar}
                           onChange={(e) => setEditMiktar(parseFloat(e.target.value) || 1)}
-                          className="w-16 p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 rounded text-center text-xs font-bold"
+                          className="w-16 p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-955 rounded text-center text-xs font-bold"
                         />
                       ) : (
                         <span className="font-black text-slate-750 dark:text-slate-300">
@@ -159,31 +157,31 @@ export function MalzemeTablosu({ state }: { state: any }) {
                           <>
                             <button
                               onClick={() => handleSaveEdit(item.id)}
-                              className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/30 border border-emerald-250 dark:border-emerald-900/40 hover:border-emerald-300 dark:hover:border-emerald-800 text-emerald-600 dark:text-emerald-450 rounded-lg transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center"
                               title="Değişiklikleri Kaydet"
                             >
-                              <Check className="w-4 h-4" />
+                              <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-955/15 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-955/20 dark:hover:bg-red-950/30 border border-red-250 dark:border-red-900/40 hover:border-red-300 dark:hover:border-red-800 text-red-500 dark:text-red-400 rounded-lg transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center"
                               title="İptal"
                             >
-                              <X className="w-4 h-4" />
+                              <X className="w-3.5 h-3.5" />
                             </button>
                           </>
                         ) : (
                           <>
                             <button
                               onClick={() => handleStartEdit(item)}
-                              className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 bg-slate-50 hover:bg-blue-50 dark:bg-slate-950 dark:hover:bg-blue-955/30 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-900/50 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 rounded-lg transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center"
                               title="Kalemi Düzenle"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-955/10 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 bg-slate-50 hover:bg-red-50 dark:bg-slate-950 dark:hover:bg-red-955/20 border border-slate-200 dark:border-slate-800 hover:border-red-300 dark:hover:border-red-900/50 text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 rounded-lg transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center"
                               title="Kalemi Sil"
                             >
                               <Trash2 className="w-3.5 h-3.5" />

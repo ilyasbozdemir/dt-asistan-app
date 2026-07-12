@@ -68,7 +68,7 @@ export function SubScreen({
   }, [activeDosyaId])
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1360px] mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="flex items-center gap-3">

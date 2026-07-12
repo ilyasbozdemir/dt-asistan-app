@@ -126,6 +126,7 @@ export function SurecBelgeleriPanel({
       return "";
     }
   });
+  const [isChangingPreset, setIsChangingPreset] = useState(false);
   const [presets, setPresets] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem("dta_document_presets");
@@ -228,21 +229,37 @@ export function SurecBelgeleriPanel({
 
         <div className="flex flex-col md:flex-row items-end md:items-center gap-3 shrink-0">
           {filter === "starred" && presets.length > 0 && (
-            <select
-              value={selectedPresetId || (presets.length > 0 ? presets[0].id : "")}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedPresetId(val);
-                localStorage.setItem("dta_selected_preset_id", val);
-              }}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg py-1 px-2.5 text-[10px] font-extrabold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer animate-in fade-in zoom-in-95 duration-200"
-            >
-              {presets.map((p) => (
-                <option key={p.id} value={p.id}>
-                  📦 {p.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative flex items-center">
+              {isChangingPreset ? (
+                <select
+                  value={selectedPresetId || (presets.length > 0 ? presets[0].id : "")}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedPresetId(val);
+                    localStorage.setItem("dta_selected_preset_id", val);
+                    setIsChangingPreset(false);
+                  }}
+                  onBlur={() => setIsChangingPreset(false)}
+                  autoFocus
+                  className="bg-slate-50 dark:bg-slate-800 border border-blue-500 dark:border-blue-600 rounded-full py-1 px-3 text-[10px] font-extrabold text-blue-600 dark:text-blue-400 focus:outline-none cursor-pointer shadow-sm animate-in fade-in zoom-in-95 duration-200"
+                >
+                  {presets.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      📦 {p.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <button
+                  onClick={() => setIsChangingPreset(true)}
+                  className="flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-955/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 border border-blue-100 dark:border-blue-900/40 hover:border-blue-300 dark:hover:border-blue-800 text-blue-600 dark:text-blue-400 rounded-full py-1.5 px-3 text.5 text-[10px] font-extrabold transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs"
+                  title="Belge Şablon Paketini Değiştir"
+                >
+                  <span>📦 {presets.find((p) => p.id === (selectedPresetId || (presets.length > 0 ? presets[0].id : "")))?.name || "Paket Seçilmedi"}</span>
+                  <ChevronDown className="w-3 h-3 text-blue-400" />
+                </button>
+              )}
+            </div>
           )}
 
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
