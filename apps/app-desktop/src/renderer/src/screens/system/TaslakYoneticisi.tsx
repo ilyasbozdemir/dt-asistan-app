@@ -85,6 +85,33 @@ export default function TaslakYoneticisi(): React.JSX.Element {
       })
   }, [activeDosyaId, setActiveStarredDocs])
 
+  // Listen to external preset or global starred changes (e.g. from document action dropdowns)
+  React.useEffect(() => {
+    const handlePresetsChange = (): void => {
+      try {
+        const saved = localStorage.getItem('dta_document_presets')
+        setPresets(saved ? JSON.parse(saved) : [])
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    const handleGlobalChange = (): void => {
+      try {
+        const saved = localStorage.getItem('global_starred_docs')
+        setGlobalStarred(saved ? JSON.parse(saved) : [])
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    window.addEventListener('dta_presets_changed', handlePresetsChange)
+    window.addEventListener('global_starred_changed', handleGlobalChange)
+    return () => {
+      window.removeEventListener('dta_presets_changed', handlePresetsChange)
+      window.removeEventListener('global_starred_changed', handleGlobalChange)
+    }
+  }, [])
+
   const starredList = useMemo(() => {
     if (selectedPresetId) {
       const preset = presets.find((p) => p.id === selectedPresetId)

@@ -23,6 +23,10 @@ export interface DocumentPreset {
   docs: string[];
 }
 
+function generatePresetId(): string {
+  return Date.now().toString()
+}
+
 interface BelgeAksiyonlariProps {
   isStarred: boolean;
   onPreview: () => void;
@@ -47,6 +51,7 @@ export function BelgeAksiyonlari({
   const [indirMenuOpen, setIndirMenuOpen] = useState(false);
   const [presetMenuOpen, setPresetMenuOpen] = useState(false);
   const [newPresetInput, setNewPresetInput] = useState("");
+  const [showAddInput, setShowAddInput] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null);
   const presetDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -198,21 +203,22 @@ export function BelgeAksiyonlari({
   };
 
   const handleCreatePreset = () => {
-    if (!newPresetInput.trim() || !targetName) return;
+    if (!newPresetInput.trim() || !targetName) return
     const newPreset: DocumentPreset = {
-      id: Date.now().toString(),
+      id: generatePresetId(),
       name: newPresetInput.trim(),
-      docs: [cleanTarget],
-    };
-    const updatedPresets = [...presets, newPreset];
-    setPresets(updatedPresets);
+      docs: [cleanTarget]
+    }
+    const updatedPresets = [...presets, newPreset]
+    setPresets(updatedPresets)
     localStorage.setItem(
-      "dta_document_presets",
-      JSON.stringify(updatedPresets),
-    );
-    setNewPresetInput("");
-    window.dispatchEvent(new Event("dta_presets_changed"));
-  };
+      'dta_document_presets',
+      JSON.stringify(updatedPresets)
+    )
+    setNewPresetInput('')
+    setShowAddInput(false)
+    window.dispatchEvent(new Event('dta_presets_changed'))
+  }
 
   return (
     <div
@@ -333,30 +339,56 @@ export function BelgeAksiyonlari({
               })}
             </div>
 
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex gap-1 items-center">
-              <input
-                type="text"
-                placeholder="Yeni Paket Ekle..."
-                value={newPresetInput}
-                onChange={(e) => setNewPresetInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleCreatePreset();
-                  }
-                }}
-                className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleCreatePreset}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded px-2 py-1 text-[9px] font-bold cursor-pointer whitespace-nowrap"
-              >
-                Ekle
-              </button>
-            </div>
+            {!showAddInput ? (
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAddInput(true)}
+                  className="w-full text-center py-1 border border-dashed border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 rounded text-slate-500 hover:text-blue-500 font-semibold cursor-pointer text-[10px] transition-colors"
+                >
+                  + Yeni Paket Ekle
+                </button>
+              </div>
+            ) : (
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex gap-1 items-center">
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Paket Adı..."
+                  value={newPresetInput}
+                  onChange={(e) => setNewPresetInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleCreatePreset()
+                    } else if (e.key === 'Escape') {
+                      setShowAddInput(false)
+                      setNewPresetInput('')
+                    }
+                  }}
+                  className="flex-1 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded px-2 py-1 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleCreatePreset}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded px-2 py-1 text-[9px] font-bold cursor-pointer whitespace-nowrap"
+                >
+                  Ekle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddInput(false)
+                    setNewPresetInput('')
+                  }}
+                  className="border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded px-1.5 py-1 text-[9px] font-bold cursor-pointer"
+                >
+                  X
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }
