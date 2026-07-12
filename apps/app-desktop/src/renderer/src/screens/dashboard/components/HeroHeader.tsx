@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -10,6 +10,7 @@ import {
   Mail,
   Plus,
   ShieldAlert,
+  X,
 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 
@@ -38,74 +39,133 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
   setIsActivePopoverOpen,
   formatCurrency,
 }) => {
+  const [isMailDismissed, setIsMailDismissed] = useState(false);
+  const [dismissedAlertIds, setDismissedAlertIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const handleDismissAlert = (id: string) => {
+    setDismissedAlertIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const visibleAlerts = useMemo(() => {
+    return smartAlerts.filter((alert) => !dismissedAlertIds.has(alert.id));
+  }, [smartAlerts, dismissedAlertIds]);
+
   return (
     <div className="flex flex-col gap-3">
-      {!isMailConfigured && (
-        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3 text-amber-700 dark:text-amber-500">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-sm font-bold">
-                Mail (SMTP) Ayarları Yapılandırılmamış
-              </h4>
-              <p className="text-xs mt-0.5 opacity-90">
-                Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz
-                için posta sunucunuzu ayarlamanız gerekmektedir. Şifrenizi
-                unutursanız sisteme erişiminizi kaybedebilirsiniz!
-              </p>
+      {((!isMailConfigured && !isMailDismissed) || visibleAlerts.length > 0) && (
+        <div className="flex flex-col gap-3 max-w-4xl max-h-[220px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+          {/* SMTP Warning */}
+          {!isMailConfigured && !isMailDismissed && (
+            <div className="relative p-4 rounded-2xl bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0 shadow-xs">
+              <div className="flex items-start gap-3 text-amber-750 dark:text-amber-400 pr-8 md:pr-0">
+                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
+                <div>
+                  <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                    Mail (SMTP) Ayarları Yapılandırılmamış
+                  </h4>
+                  <p className="text-xs mt-0.5 opacity-90 leading-relaxed text-amber-800 dark:text-amber-400/90">
+                    Sistem üzerinden şifre sıfırlama veya onay mailleri alabilmeniz
+                    için posta sunucunuzu ayarlamanız gerekmektedir. Şifrenizi
+                    unutursanız sisteme erişiminizi kaybedebilirsiniz!
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-stretch md:self-auto justify-end pr-8 md:pr-0 shrink-0">
+                <Link to="/ayarlar" search={{ tab: "smtp" }}>
+                  <Button className="shrink-0 text-xs py-1.5 px-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm cursor-pointer">
+                    <Mail className="w-4 h-4 mr-1.5" />
+                    Ayarları Yapılandır
+                  </Button>
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMailDismissed(true)}
+                className="absolute top-3 right-3 text-amber-500/70 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer"
+                title="Kapat"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-          </div>
-          <Link to="/ayarlar" search={{ tab: "smtp" }}>
-            <Button className="shrink-0 text-xs py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm">
-              <Mail className="w-4 h-4 mr-1.5" />
-              Ayarları Yapılandır
-            </Button>
-          </Link>
-        </div>
-      )}
+          )}
 
-      {smartAlerts.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {smartAlerts.map((alert) => (
+          {/* Smart Alerts */}
+          {visibleAlerts.map((alert) => (
             <div
               key={alert.id}
-              className={`p-4 rounded-2xl border flex flex-col justify-between gap-3 shadow-sm ${
+              className={`relative p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0 shadow-xs ${
                 alert.type === "error"
-                  ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400"
+                  ? "bg-red-50 dark:bg-red-955/20 border-red-200 dark:border-red-900/30 text-red-755 dark:text-red-400"
                   : alert.type === "warning"
-                  ? "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900/50 text-orange-700 dark:text-orange-400"
-                  : "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400"
+                  ? "bg-amber-50 dark:bg-amber-955/20 border-amber-200 dark:border-amber-900/30 text-amber-755 dark:text-amber-450"
+                  : "bg-blue-50 dark:bg-blue-955/20 border-blue-200 dark:border-blue-900/30 text-blue-755 dark:text-blue-400"
               }`}
             >
-              <div className="flex items-start gap-3">
-                {alert.type === "error"
-                  ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
-                  : alert.type === "warning"
-                  ? <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-                  : <Info className="w-5 h-5 shrink-0 mt-0.5" />}
+              <div className="flex items-start gap-3 pr-8 md:pr-0">
+                {alert.type === "error" ? (
+                  <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-red-600 dark:text-red-500" />
+                ) : alert.type === "warning" ? (
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
+                ) : (
+                  <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-500" />
+                )}
                 <div>
-                  <h4 className="text-sm font-bold">{alert.title}</h4>
-                  <p className="text-xs mt-0.5 opacity-90 leading-relaxed">
+                  <h4 className={`text-sm font-bold ${
+                    alert.type === "error"
+                      ? "text-red-950 dark:text-red-300"
+                      : alert.type === "warning"
+                      ? "text-amber-950 dark:text-amber-300"
+                      : "text-blue-950 dark:text-blue-300"
+                  }`}>
+                    {alert.title}
+                  </h4>
+                  <p className={`text-xs mt-0.5 opacity-90 leading-relaxed ${
+                    alert.type === "error"
+                      ? "text-red-800 dark:text-red-400/90"
+                      : alert.type === "warning"
+                      ? "text-amber-800 dark:text-amber-400/90"
+                      : "text-blue-800 dark:text-blue-400/90"
+                  }`}>
                     {alert.message}
                   </p>
                 </div>
               </div>
-              <div className="flex justify-end">
+              <div className="flex items-center gap-2 self-stretch md:self-auto justify-end pr-8 md:pr-0 shrink-0">
                 <Link to={alert.actionLink} search={alert.actionSearch}>
                   <Button
                     variant="outline"
-                    className={`h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-lg border-current hover:bg-white/50 dark:hover:bg-black/20 ${
+                    className={`text-xs py-1.5 px-3.5 font-bold uppercase tracking-wider rounded-xl border-current hover:bg-white/50 dark:hover:bg-black/20 cursor-pointer ${
                       alert.type === "error"
-                        ? "text-red-700 dark:text-red-400"
+                        ? "text-red-700 dark:text-red-400 hover:text-red-850"
                         : alert.type === "warning"
-                        ? "text-orange-700 dark:text-orange-400"
-                        : "text-blue-700 dark:text-blue-400"
+                        ? "text-amber-700 dark:text-amber-450 hover:text-amber-850"
+                        : "text-blue-700 dark:text-blue-450 hover:text-blue-850"
                     }`}
                   >
-                    {alert.actionText} <ChevronRight className="w-3 h-3 ml-1" />
+                    {alert.actionText} <ChevronRight className="w-3.5 h-3.5 ml-1" />
                   </Button>
                 </Link>
               </div>
+              <button
+                type="button"
+                onClick={() => handleDismissAlert(alert.id)}
+                className={`absolute top-3 right-3 opacity-70 hover:opacity-100 transition-opacity cursor-pointer ${
+                  alert.type === "error"
+                    ? "text-red-500/70 hover:text-red-800 dark:hover:text-red-300"
+                    : alert.type === "warning"
+                    ? "text-amber-500/70 hover:text-amber-800 dark:hover:text-amber-300"
+                    : "text-blue-500/70 hover:text-blue-800 dark:hover:text-blue-300"
+                }`}
+                title="Kapat"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>
