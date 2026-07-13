@@ -215,7 +215,7 @@ export default function KomisyonlarScreen(): React.JSX.Element {
                             if (window.confirm('Bu komisyonu silmek istediğinize emin misiniz?')) {
                               const res = await window.electron.ipcRenderer.invoke(
                                 'db:run',
-                                'UPDATE TANIM_Komisyon SET aktif_mi = 0 WHERE id = ?',
+                                'UPDATE TANIM_Komisyon SET aktif_mi = 0, ad = ad || \' (Silinmiş \' || id || \')\' WHERE id = ?',
                                 [komisyon.id]
                               )
                               if (res.success) {

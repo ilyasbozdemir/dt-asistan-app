@@ -392,7 +392,12 @@ export function KomisyonOlusturModal({
             },
           ],
         );
-        if (!updateRes.success) throw new Error(updateRes.error);
+        if (!updateRes.success) {
+          if (updateRes.error.includes("UNIQUE constraint failed") || updateRes.error.includes("UNIQUE constraint")) {
+            throw new Error("Bu isimde bir komisyon zaten var. Lütfen farklı bir isim belirleyiniz.");
+          }
+          throw new Error(updateRes.error);
+        }
 
         const uyeQueries = uyeler.map((u) => ({
           sql:
@@ -430,7 +435,12 @@ export function KomisyonOlusturModal({
         const res = await window.electron.ipcRenderer.invoke("db:transaction", [
           { sql: "INSERT INTO TANIM_Komisyon (ad) VALUES (?)", params: [ad] },
         ]);
-        if (!res.success) throw new Error(res.error);
+        if (!res.success) {
+          if (res.error.includes("UNIQUE constraint failed") || res.error.includes("UNIQUE constraint")) {
+            throw new Error("Bu isimde bir komisyon zaten var. Lütfen farklı bir isim belirleyiniz.");
+          }
+          throw new Error(res.error);
+        }
         const newId = res.lastInsertRowid;
 
         const uyeQueries = uyeler.map((u) => ({

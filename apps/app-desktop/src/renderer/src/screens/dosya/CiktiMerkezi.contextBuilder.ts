@@ -404,6 +404,12 @@ export function buildDocumentContext(
       unvan: c.unvan,
       gorevi: c.gorevi
     })),
+    gorevlendirilenler: commission.map((c: any, index: number, arr: any[]) => ({
+      adSoyad: c.ad_soyad,
+      unvan: c.unvan,
+      gorevi: c.gorevi,
+      hasMore: index < arr.length - 1
+    })),
     fiyatKomisyonu: commission.map((c: any) => ({
       adSoyad: c.ad_soyad,
       unvan: c.unvan,
