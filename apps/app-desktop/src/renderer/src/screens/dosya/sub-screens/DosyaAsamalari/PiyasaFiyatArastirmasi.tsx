@@ -21,6 +21,7 @@ import { DavetEdilenFirmalar } from "./components/DavetEdilenFirmalar";
 import { TeklifMatrisi } from "./components/TeklifMatrisi";
 import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
 import { usePiyasaFiyatArastirmasiLogic } from "./hooks/usePiyasaFiyatArastirmasi";
+import { SurecBelgeleriPanel } from "./SablonPanelleri";
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const logic = usePiyasaFiyatArastirmasiLogic();
@@ -38,6 +39,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       executeExportDocx,
       executeExportUdf,
       quickPrint,
+      quickExport,
       quickOpenExternal,
       toggleStar,
       refreshSnapshot,
@@ -174,10 +176,10 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {savedDocuments.map((doc: any) => {
                   const sablon = stageSablons.find((s: any) => {
-                    const lowerAd = s.ad.toLowerCase();
-                    const lowerDocName = doc.belge_adi.toLowerCase();
-                    return lowerAd.includes(lowerDocName) ||
-                      lowerDocName.includes(lowerAd);
+                    const normAd = normalizeForMatch(s.ad);
+                    const normDocName = normalizeForMatch(doc.belge_adi);
+                    return normAd.includes(normDocName) ||
+                      normDocName.includes(normAd);
                   });
 
                   return (
@@ -202,7 +204,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                         <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm mb-1">
                           {doc.belge_adi}
                         </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-450 truncate">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-455 truncate">
                           {sablon?.dosya_adi || "Şablon dosyası bağlı"}
                         </p>
                       </div>
@@ -235,7 +237,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                   : doc.belge_adi,
                               );
                             }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
@@ -252,7 +254,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                     );
                                   }
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
                               >
                                 <Eye className="w-4 h-4 text-blue-500" />
                                 Önizle ve Düzenle
@@ -265,7 +267,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                     quickOpenExternal(sablon);
                                   }
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
                               >
                                 <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 Tarayıcıda PDF Aç
@@ -278,7 +280,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                     quickPrint(sablon);
                                   }
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
                               >
                                 <Printer className="w-4 h-4 text-slate-500" />
                                 Hızlı Yazdır
@@ -292,6 +294,20 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                 })}
               </div>
             )}
+
+          {/* Süreç Belgeleri (Tüm Diğer Şablonları Görüntüle/Oluştur) */}
+          <div className="border-t border-slate-100 dark:border-slate-800/80 pt-6">
+            <SurecBelgeleriPanel
+              stageSablons={stageSablons}
+              activeStarredDocs={activeStarredDocs}
+              ciktiLoading={false}
+              onSablonClick={handleOpenPreviewForSablon}
+              onQuickPrint={quickPrint}
+              onExport={quickExport}
+              onToggleStar={toggleStar}
+              onOpenExternal={quickOpenExternal}
+            />
+          </div>
         </div>
       )}
 
