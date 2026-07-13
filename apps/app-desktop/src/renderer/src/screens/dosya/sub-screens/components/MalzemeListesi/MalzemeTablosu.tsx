@@ -89,12 +89,15 @@ export function MalzemeTablosu({
          WHERE s.aktif_mi = 1`
       );
 
-      return res.data.map((k: any) => ({
+      const allCommissions = res.data.map((k: any) => ({
         ...k,
         sablonlar: sablonlarRes.success
           ? sablonlarRes.data.filter((s: any) => s.komisyon_id === k.id)
           : []
       }));
+
+      // 1. Adım olduğu için Muayene komisyonlarını bu listede göstermiyoruz
+      return allCommissions.filter((k: any) => !k.ad.toLowerCase().includes('muayene'));
     },
     enabled: komisyonPanelOpen,
     staleTime: 30_000,
