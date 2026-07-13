@@ -54,6 +54,15 @@ export const PreviewFormView: React.FC<PreviewFormViewProps> = ({
           return null;
         }
 
+        // Personel alanları (adı ve unvanı) zaten altta özel "select" bileşeni olarak render ediliyor
+        // Bu yüzden standart text input olarak tekrar çıkmalarını engelliyoruz.
+        const isPersonnelField = Object.values(PERSONNEL_FIELDS).some(
+          (field) => field.adiKey === key || field.unvanKey === key,
+        );
+        if (isPersonnelField) {
+          return null;
+        }
+
         const originalValue = mergedContext[key];
         const value = overrideData[key] !== undefined
           ? overrideData[key]
