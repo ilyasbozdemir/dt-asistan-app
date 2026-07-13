@@ -60,12 +60,14 @@ export function MalzemeTablosu({
   } = state;
 
   const [selectedKomisyon, setSelectedKomisyon] = useState<string>('');
+  const [tempSelectedKomisyon, setTempSelectedKomisyon] = useState<string>('');
 
   useEffect(() => {
     if (activeDosyaId) {
       const saved = localStorage.getItem(`dta_selected_komisyon_${activeDosyaId}`) || '';
       const timer = setTimeout(() => {
         setSelectedKomisyon(saved);
+        setTempSelectedKomisyon(saved);
       }, 0);
       return () => clearTimeout(timer);
     }
@@ -199,7 +201,9 @@ export function MalzemeTablosu({
     if (!selectedKomisyon || !sablons) return [];
 
     const getSablonByDosyaAdi = (name: string) => {
-      return sablons.find((s: any) => s.dosya_adi === name);
+      return sablons.find(
+        (s: any) => s.dosya_adi === name || s.dosya_adi === `${name}.html`
+      );
     };
 
     const steps: { title: string; description: string; sablon: any }[] = [];
@@ -528,8 +532,8 @@ export function MalzemeTablosu({
                 Komisyon Atama:
               </span>
               <select
-                value={selectedKomisyon}
-                onChange={(e) => handleKomisyonChange(e.target.value)}
+                value={tempSelectedKomisyon}
+                onChange={(e) => setTempSelectedKomisyon(e.target.value)}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors"
               >
                 <option value="">Komisyon Seçin...</option>
@@ -540,6 +544,16 @@ export function MalzemeTablosu({
                   Fiyat Araştırma ve Muayene Komisyonu
                 </option>
               </select>
+              {tempSelectedKomisyon !== selectedKomisyon && (
+                <button
+                  type="button"
+                  onClick={() => handleKomisyonChange(tempSelectedKomisyon)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer animate-pulse shrink-0"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Komisyonu Onayla
+                </button>
+              )}
             </div>
           )}
         </div>

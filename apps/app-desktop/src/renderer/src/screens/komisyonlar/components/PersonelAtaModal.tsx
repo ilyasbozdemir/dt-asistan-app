@@ -11,6 +11,12 @@ interface PersonelAtaModalProps {
   komisyonId: number | null
 }
 
+interface PersonelInfo {
+  id: number
+  ad_soyad: string
+  unvan: string | null
+}
+
 export function PersonelAtaModal({
   isOpen,
   onClose,
@@ -20,7 +26,7 @@ export function PersonelAtaModal({
   const queryClient = useQueryClient()
   const [selectedPersonelId, setSelectedPersonelId] = useState<number | ''>('')
 
-  const { data: personeller = [] } = useQuery({
+  const { data: personeller = [] } = useQuery<PersonelInfo[]>({
     queryKey: ['personel_listesi_komisyon_ata'],
     queryFn: async () => {
       const res = await window.electron.ipcRenderer.invoke(
@@ -28,7 +34,7 @@ export function PersonelAtaModal({
         'SELECT * FROM TANIM_Personel WHERE aktif_mi = 1'
       )
       if (!res.success) throw new Error(res.error)
-      return res.data
+      return res.data as PersonelInfo[]
     },
     enabled: isOpen
   })
@@ -49,6 +55,9 @@ export function PersonelAtaModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
+      if (komisyonId) {
+        queryClient.invalidateQueries({ queryKey: ['komisyon_detay', komisyonId] })
+      }
       onClose()
       setSelectedPersonelId('')
     }
@@ -79,7 +88,7 @@ export function PersonelAtaModal({
             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none dark:text-white"
           >
             <option value="">-- Lütfen bir personel seçin --</option>
-            {personeller.map((p: any) => (
+            {personeller.map((p: PersonelInfo) => (
               <option key={p.id} value={p.id}>
                 {p.ad_soyad} ({p.unvan})
               </option>

@@ -1,10 +1,20 @@
 import React, { useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Users, Plus, UserPlus, CheckCircle } from 'lucide-react'
+import { Users, Plus, UserPlus, CheckCircle } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PersonelAtaModal } from './components/PersonelAtaModal'
 import { useTabStore } from '../../store/tabStore'
+
+interface KomisyonUyeInfo {
+  role_id: number
+  komisyon_id: number
+  personel_id: number | null
+  gorev_id: number
+  asil_mi: number
+  ad_soyad?: string | null
+  unvan?: string | null
+  gorev_adi?: string | null
+}
 
 export default function KomisyonDetayScreen(): React.JSX.Element {
   const queryClient = useQueryClient()
@@ -36,7 +46,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
     }
   })
 
-  const handleAddUye = async () => {
+  const handleAddUye = async (): Promise<void> => {
     if (!newGorevId || !komisyonId) return
     setIsSavingUye(true)
     try {
@@ -84,7 +94,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
 
       const membersRes = await window.electron.ipcRenderer.invoke(
         'db:query',
-        `SELECT u.id as role_id, u.komisyon_id, u.personel_id, u.gorev_id, u.asil_mi, p.ad_soyad, p.unvan, p.tc_no, p.iban, g.ad as gorev_adi
+        `SELECT u.id as role_id, u.komisyon_id, u.personel_id, u.gorev_id, u.asil_mi, p.ad_soyad, p.unvan, g.ad as gorev_adi
          FROM TANIM_KomisyonUye u
          LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
          LEFT JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id
@@ -244,7 +254,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {komisyon.uyeler && komisyon.uyeler.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {komisyon.uyeler.map((uye: any, idx: number) => (
+              {komisyon.uyeler.map((uye: KomisyonUyeInfo, idx: number) => (
                 <div
                   key={idx}
                   className="flex flex-col p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
