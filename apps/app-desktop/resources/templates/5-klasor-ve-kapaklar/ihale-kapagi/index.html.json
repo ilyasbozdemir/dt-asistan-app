@@ -19,37 +19,32 @@
   "tarih": "2026",
   "kapakDetaylari": [
     {
-      "label": "İŞİN ADI",
+      "label": "BÜTÇE YILI",
+      "lines": ["2026"],
+      "isBold": false
+    },
+    {
+      "label": "İŞİN TÜRÜ / ALIM USULÜ",
       "lines": [
-        "Belediyemiz Hizmet Binası Çatı Onarım İşi İçin Malzeme Alımı"
+        "Mal Alımı",
+        "4734 Sayılı Kanun 22/d (Doğrudan Temin)"
       ],
+      "isBold": false
+    },
+    {
+      "label": "DOSYA TARİHİ",
+      "lines": ["06/05/2026"],
+      "isBold": false
+    },
+    {
+      "label": "İŞİN ADI",
+      "lines": ["Belediyemiz Hizmet Binası Çatı Onarım İşi İçin Malzeme Alımı"],
       "isBold": true
     },
     {
       "label": "İŞİN AÇIKLAMASI",
       "lines": [
         "Belediyemiz Hizmet Binası Çatı Onarım İşi Kapsamında İhtiyaç Duyulan İnşaat ve Çatı Malzemelerinin Satın Alınması İşi"
-      ],
-      "isBold": false
-    },
-    {
-      "label": "İŞİN TÜRÜ",
-      "lines": [
-        "Mal Alımı"
-      ],
-      "isBold": false
-    },
-    {
-      "label": "TEMİN NUMARASI",
-      "lines": [
-        "2026/DT-1004"
-      ],
-      "isBold": false
-    },
-    {
-      "label": "YAKLAŞIK MALİYET",
-      "lines": [
-        "340.153,00 TL"
       ],
       "isBold": false
     },
@@ -62,18 +57,18 @@
       "isBold": false
     },
     {
-      "label": "İHALEYİ ALAN FİRMA",
-      "lines": [
-        "ÖRNEK YÜKLENİCİ İNŞAAT TİC. LTD. ŞTİ."
-      ],
+      "label": "YÜKLENİCİ FİRMA",
+      "lines": ["ÖRNEK YÜKLENİCİ İNŞAAT TİC. LTD. ŞTİ."],
       "isBold": true
     },
     {
-      "label": "DOSYA TARİHİ",
+      "label": "SÖZLEŞME BEDELİ",
       "lines": [
-        "06/05/2026"
+        "283.460,83 TL (KDV Hariç)",
+        "56.692,17 TL  (KDV %20)",
+        "340.153,00 TL (KDV Dahil)"
       ],
-      "isBold": false
+      "isBold": true
     }
   ]
 }

@@ -216,19 +216,46 @@ export function buildDocumentContext(
   const teminSekliText =
     dosyaResData?.ihale_sekli || "4734 sayılı Kanun'un 22/d maddesi gereğince Doğrudan Temin"
 
+  let totalKdv = 0
+  kalemlerData?.forEach((k: any) => {
+    const itemPrices = firms.map((f: any) => ({
+      price: bidsMap[`${k.id}_${f.temin_firma_id}`] || 0
+    }))
+    const validPrices = itemPrices.filter((p: any) => p.price > 0)
+    const minPrice = validPrices.length > 0 ? Math.min(...validPrices.map((p: any) => p.price)) : 0
+    const avgPrice = validPrices.length > 0 ? (validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length) : 0
+    const chosenPrice = isLowestBasis ? minPrice : avgPrice
+
+    const lineTotal = chosenPrice * (k.miktar || 0)
+    const kdvRate = k.kdv_orani || 0
+    totalKdv += lineTotal * (kdvRate / 100)
+  })
+
   const rawKapakDetaylari: any[] = []
+  if (dosyaResData?.butce_yili) {
+    rawKapakDetaylari.push({ label: 'BÜTÇE YILI', value: String(dosyaResData.butce_yili) })
+  }
+  rawKapakDetaylari.push({
+    label: 'İŞİN TÜRÜ / ALIM USULÜ',
+    value: [alimTuruText, teminSekliText]
+  })
+  if (dosyaResData?.temin_no) {
+    rawKapakDetaylari.push({ label: 'DOĞRUDAN TEMİN NUMARASI', value: dosyaResData.temin_no })
+  }
+  if (dosyaResData?.tarih) {
+    rawKapakDetaylari.push({ label: 'DOSYA TARİHİ', value: dosyaResData.tarih })
+  }
   if (dosyaResData?.konu) {
     rawKapakDetaylari.push({ label: 'İŞİN ADI', value: dosyaResData.konu, isBold: true })
   }
   if (dosyaResData?.isin_aciklamasi) {
     rawKapakDetaylari.push({ label: 'İŞİN AÇIKLAMASI', value: dosyaResData.isin_aciklamasi })
   }
-  rawKapakDetaylari.push({ label: 'İŞİN TÜRÜ', value: alimTuruText })
-  if (dosyaResData?.temin_no) {
-    rawKapakDetaylari.push({ label: 'DOĞRUDAN TEMİN NUMARASI', value: dosyaResData.temin_no })
-  }
   if (dbYaklasikMaliyet > 0) {
     rawKapakDetaylari.push({ label: 'YAKLAŞIK MALİYET', value: `${yaklasikMaliyetText} TL` })
+  }
+  if (butceTertibiArray.length > 0) {
+    rawKapakDetaylari.push({ label: 'BÜTÇE TERTİBİ', value: butceTertibiArray })
   }
   if (dosyaResData?.yuklenici_firma_adi) {
     rawKapakDetaylari.push({
@@ -238,14 +265,15 @@ export function buildDocumentContext(
     })
     if (grandTotal > 0) {
       rawKapakDetaylari.push({
-        label: 'FATURA TUTARI',
-        value: `${genelToplam} TL`,
+        label: 'SÖZLEŞME BEDELİ',
+        value: [
+          `${formatTR(grandTotal)} TL (KDV Hariç)`,
+          `${formatTR(totalKdv)} TL (KDV)`,
+          `${formatTR(grandTotal + totalKdv)} TL (KDV Dahil)`
+        ],
         isBold: true
       })
     }
-  }
-  if (dosyaResData?.tarih) {
-    rawKapakDetaylari.push({ label: 'DOSYA TARİHİ', value: dosyaResData.tarih })
   }
 
   const kapakDetaylari = rawKapakDetaylari.map((item) => ({
