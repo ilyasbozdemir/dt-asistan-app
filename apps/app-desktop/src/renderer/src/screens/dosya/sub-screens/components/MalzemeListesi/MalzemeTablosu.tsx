@@ -72,15 +72,29 @@ export function MalzemeTablosu({
   const [selectedStepIdx, setSelectedStepIdx] = useState<string>("0");
 
   // DB'deki aktif komisyonları dinamik çek
-  const { data: dbKomisyonlar = [] } = useQuery<{ id: number; ad: string }[]>({
-    queryKey: ["tanim_komisyonlar"],
+  const { data: dbKomisyonlar = [] } = useQuery<{ id: number; ad: string; sablonlar: any[] }[]>({
+    queryKey: ["tanim_komisyonlar_with_sablons"],
     queryFn: async () => {
       const res = await (window as any).electron.ipcRenderer.invoke(
         "db:query",
         "SELECT id, ad FROM TANIM_Komisyon WHERE aktif_mi = 1 ORDER BY id ASC",
       );
       if (!res.success) throw new Error(res.error);
-      return res.data as { id: number; ad: string }[];
+
+      const sablonlarRes = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        `SELECT ks.komisyon_id, s.id, s.ad, s.aciklama, s.icerik, s.dosya_adi, s.route_path, s.test_verisi, s.kategori 
+         FROM TANIM_Komisyon_Sablon ks
+         JOIN TANIM_Sablon s ON ks.sablon_id = s.id
+         WHERE s.aktif_mi = 1`
+      );
+
+      return res.data.map((k: any) => ({
+        ...k,
+        sablonlar: sablonlarRes.success
+          ? sablonlarRes.data.filter((s: any) => s.komisyon_id === k.id)
+          : []
+      }));
     },
     enabled: komisyonPanelOpen,
     staleTime: 30_000,
@@ -105,7 +119,7 @@ export function MalzemeTablosu({
 
   // Çoklu komisyon onaylama — seçilen komisyon ID'lerine göre DB'yi güncelle
   const handleKomisyonlarOnayla = async (
-    seciliTurler: string[],
+    seciliKomisyonIdleri: number[],
   ): Promise<void> => {
     if (!activeDosyaId) return;
     try {
@@ -115,15 +129,10 @@ export function MalzemeTablosu({
         [activeDosyaId],
       );
 
-      // komisyon_id eşlemesi: fiyat_arastirma = 1, muayene_kabul_tespit = 3
-      const turMap: Record<string, { id: number; tur: string }> = {
-        fiyat_arastirma: { id: 1, tur: "Fiyat Araştırma" },
-        muayene_kabul_tespit: { id: 3, tur: "Muayene Kabul" },
-      };
-
-      for (const tur of seciliTurler) {
-        const meta = turMap[tur];
-        if (!meta) continue;
+      for (const komisyonId of seciliKomisyonIdleri) {
+        const komisyonData = dbKomisyonlar.find(k => k.id === komisyonId);
+        if (!komisyonData) continue;
+        
         const res = await (window as any).electron.ipcRenderer.invoke(
           "db:query",
           `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
@@ -131,7 +140,7 @@ export function MalzemeTablosu({
            JOIN TANIM_Personel p ON u.personel_id = p.id 
            JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
            WHERE u.komisyon_id = ?`,
-          [meta.id],
+          [komisyonId],
         );
         if (res.success && res.data) {
           for (const member of res.data) {
@@ -142,13 +151,13 @@ export function MalzemeTablosu({
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 activeDosyaId,
-                meta.id,
+                komisyonId,
                 member.personel_id,
                 member.ad_soyad,
                 member.unvan || null,
                 member.gorev_adi === "Komisyon Başkanı" ? "Başkan" : "Üye",
                 member.asil_mi === 1 ? "Asil" : "Yedek",
-                meta.tur,
+                komisyonData.ad,
               ],
             );
           }
@@ -157,9 +166,9 @@ export function MalzemeTablosu({
 
       localStorage.setItem(
         `dta_selected_komisyonlar_${activeDosyaId}`,
-        JSON.stringify(seciliTurler),
+        JSON.stringify(seciliKomisyonIdleri),
       );
-      setSelectedKomisyonlar(seciliTurler);
+      setSelectedKomisyonlar(seciliKomisyonIdleri);
       setKomisyonPanelOpen(false);
       setSelectedStepIdx("0");
     } catch (e: any) {
@@ -550,16 +559,7 @@ export function MalzemeTablosu({
 
           {/* Açılan Panel */}
           {komisyonPanelOpen && (() => {
-            // Doğrudan şablondan Piyasa Fiyat Araştırma Görevlendirmesi'ni bul
-            const gorevlendirmeSablonu = sablons?.find((s: any) =>
-              s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi" ||
-              s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi.html" ||
-              s.dosya_adi === "komisyon-gorevlendirme-onayi" ||
-              s.dosya_adi === "komisyon-gorevlendirme-onayi.html"
-            );
-
             const isDisabled = ciktiLoading || selectedKomisyonlar.length === 0;
-            const isOnizleDisabled = isDisabled || !gorevlendirmeSablonu;
 
             return (
               <div className="mt-1.5 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
@@ -624,23 +624,28 @@ export function MalzemeTablosu({
                     Kapat
                   </button>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={isOnizleDisabled}
-                      onClick={async () => {
-                        await handleKomisyonlarOnayla(selectedKomisyonlar);
-                        if (gorevlendirmeSablonu && onSablonClick) {
-                          onSablonClick(
-                            gorevlendirmeSablonu,
-                            gorevlendirmeSablonu.ad,
-                          );
-                        }
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      {gorevlendirmeSablonu ? "Önizle" : "Şablon Bulunamadı"}
-                    </button>
+                    {selectedKomisyonlar.map(komisyonId => {
+                      const k = dbKomisyonlar.find(k => k.id === komisyonId);
+                      if (!k || !k.sablonlar) return null;
+                      return k.sablonlar.map((sablon: any) => (
+                        <button
+                          key={`${k.id}-${sablon.id}`}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={async () => {
+                            await handleKomisyonlarOnayla(selectedKomisyonlar);
+                            if (onSablonClick) {
+                              const foundSablon = sablons?.find((s: any) => s.dosya_adi === sablon.dosya_adi || s.id === sablon.id) || sablon;
+                              onSablonClick(foundSablon, foundSablon.ad);
+                            }
+                          }}
+                          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          {sablon.ad} Önizle
+                        </button>
+                      ));
+                    })}
                     <button
                       type="button"
                       disabled={selectedKomisyonlar.length === 0}

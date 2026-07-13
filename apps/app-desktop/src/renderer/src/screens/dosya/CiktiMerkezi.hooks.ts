@@ -137,9 +137,9 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           [activeDosyaId]
         )
         const allCommission = komsRes.success ? komsRes.data : []
-        const commission = allCommission.filter((c: any) => c.komisyon_turu === 'Fiyat Araştırma')
+        const commission = allCommission.filter((c: any) => c.komisyon_turu?.toLowerCase().includes('fiyat'))
         const muayeneKomisyonu = allCommission.filter(
-          (c: any) => c.komisyon_turu === 'Muayene Kabul'
+          (c: any) => c.komisyon_turu?.toLowerCase().includes('muayene') || c.komisyon_turu?.toLowerCase().includes('kabul')
         )
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
