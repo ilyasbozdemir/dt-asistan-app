@@ -36,6 +36,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     refreshSnapshot,
     saveSnapshot,
     isSablonDisabled,
+    activeDosya,
   } = useDosyaAsamasiSablons();
 
   const state = useMalzemeListesi(activeDosyaId);
@@ -74,11 +75,14 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     );
   }
 
-  const stageSablons = sablons.filter(
-    (s) =>
-      s.kategori === "1-ihtiyac-tespiti-ve-baslangic" ||
-      s.kategori === "1. İhtiyaç Tespiti & Başlangıç",
-  );
+  const stageSablons = sablons
+    .filter(
+      (s) =>
+        s.kategori === "1-ihtiyac-tespiti-ve-baslangic" ||
+        s.kategori === "1. İhtiyaç Tespiti & Başlangıç" ||
+        s.dosya_adi === "dogrudan-temin-onay-belgesi.html",
+    )
+    .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
 
   return (
     <SubScreen
@@ -90,6 +94,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       <MalzemeTablosu
         state={state}
         stageSablons={stageSablons}
+        sablons={sablons}
         onSablonClick={handleOpenPreviewForSablon}
         ciktiLoading={ciktiLoading}
         activeStarredDocs={activeStarredDocs}
@@ -97,6 +102,8 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onExport={quickExport}
         onOpenExternal={quickOpenExternal}
         isSablonDisabled={isSablonDisabled}
+        activeDosya={activeDosya}
+        activeDosyaId={activeDosyaId}
       />
     </SubScreen>
   );

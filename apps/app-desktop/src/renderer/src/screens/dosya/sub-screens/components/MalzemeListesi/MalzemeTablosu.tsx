@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   ChevronDown,
@@ -17,6 +17,7 @@ import { normalizeForMatch } from "../../DosyaAsamalari/useDosyaAsamasiSablons";
 export function MalzemeTablosu({
   state,
   stageSablons = [],
+  sablons = [],
   onSablonClick,
   ciktiLoading,
   activeStarredDocs = [],
@@ -24,16 +25,21 @@ export function MalzemeTablosu({
   onExport,
   onOpenExternal,
   isSablonDisabled,
+  activeDosya,
+  activeDosyaId,
 }: {
   state: any;
   stageSablons?: any[];
+  sablons?: any[];
   onSablonClick?: (sablon: any, title: string) => void;
   ciktiLoading?: boolean;
   activeStarredDocs?: string[] | null;
   onQuickPrint?: (sablon: any) => void;
-  onExport?: (sablon: any, format: "pdf" | "docx" | "udf") => void;
+  onExport?: (sablon: any, format: 'pdf' | 'docx' | 'udf') => void;
   onOpenExternal?: (sablon: any) => void;
   isSablonDisabled?: (cleanName: string) => boolean;
+  activeDosya?: any;
+  activeDosyaId?: number | null;
 }): React.JSX.Element {
   const {
     items,
@@ -52,6 +58,193 @@ export function MalzemeTablosu({
     handleSaveEdit,
     handleDeleteItem,
   } = state;
+
+  const [selectedKomisyon, setSelectedKomisyon] = useState<string>('');
+
+  useEffect(() => {
+    if (activeDosyaId) {
+      const saved = localStorage.getItem(`dta_selected_komisyon_${activeDosyaId}`) || '';
+      const timer = setTimeout(() => {
+        setSelectedKomisyon(saved);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+    return;
+  }, [activeDosyaId]);
+
+  const handleKomisyonChange = async (val: string): Promise<void> => {
+    if (!activeDosyaId) return;
+
+    try {
+      // 1. Delete existing commission members for this dossier
+      await (window as any).electron.ipcRenderer.invoke(
+        'db:run',
+        'DELETE FROM DATA_TeminKomisyon WHERE temin_dosya_id = ?',
+        [activeDosyaId]
+      );
+
+      if (val === 'muayene_kabul_tespit') {
+        // Fetch members of Muayene Kabul ve Tespit Komisyonu (id = 3)
+        const resKabul = await (window as any).electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
+           FROM TANIM_KomisyonUye u 
+           JOIN TANIM_Personel p ON u.personel_id = p.id 
+           JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
+           WHERE u.komisyon_id = 3`
+        );
+        // Fetch members of Fiyat Araştırma Komisyonu (id = 1)
+        const resFiyat = await (window as any).electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
+           FROM TANIM_KomisyonUye u 
+           JOIN TANIM_Personel p ON u.personel_id = p.id 
+           JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
+           WHERE u.komisyon_id = 1`
+        );
+
+        if (resFiyat.success && resFiyat.data) {
+          for (const member of resFiyat.data) {
+            await (window as any).electron.ipcRenderer.invoke(
+              'db:run',
+              `INSERT INTO DATA_TeminKomisyon 
+               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
+               VALUES (?, 1, ?, ?, ?, ?, ?, 'Fiyat Araştırma')`,
+              [
+                activeDosyaId,
+                member.personel_id,
+                member.ad_soyad,
+                member.unvan || null,
+                member.gorev_adi === 'Komisyon Başkanı' ? 'Başkan' : 'Üye',
+                member.asil_mi === 1 ? 'Asil' : 'Yedek'
+              ]
+            );
+          }
+        }
+
+        if (resKabul.success && resKabul.data) {
+          for (const member of resKabul.data) {
+            await (window as any).electron.ipcRenderer.invoke(
+              'db:run',
+              `INSERT INTO DATA_TeminKomisyon 
+               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
+               VALUES (?, 3, ?, ?, ?, ?, ?, 'Muayene Kabul')`,
+              [
+                activeDosyaId,
+                member.personel_id,
+                member.ad_soyad,
+                member.unvan || null,
+                member.gorev_adi === 'Komisyon Başkanı' ? 'Başkan' : 'Üye',
+                member.asil_mi === 1 ? 'Asil' : 'Yedek'
+              ]
+            );
+          }
+        }
+      } else if (val === 'fiyat_arastirma_muayene') {
+        // Fetch members of Fiyat Araştırma Komisyonu (id = 1)
+        const resFiyat = await (window as any).electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
+           FROM TANIM_KomisyonUye u 
+           JOIN TANIM_Personel p ON u.personel_id = p.id 
+           JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
+           WHERE u.komisyon_id = 1`
+        );
+
+        if (resFiyat.success && resFiyat.data) {
+          for (const member of resFiyat.data) {
+            // Insert for Fiyat Araştırma
+            await (window as any).electron.ipcRenderer.invoke(
+              'db:run',
+              `INSERT INTO DATA_TeminKomisyon 
+               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
+               VALUES (?, 1, ?, ?, ?, ?, ?, 'Fiyat Araştırma')`,
+              [
+                activeDosyaId,
+                member.personel_id,
+                member.ad_soyad,
+                member.unvan || null,
+                member.gorev_adi === 'Komisyon Başkanı' ? 'Başkan' : 'Üye',
+                member.asil_mi === 1 ? 'Asil' : 'Yedek'
+              ]
+            );
+
+            // Insert for Muayene Kabul
+            await (window as any).electron.ipcRenderer.invoke(
+              'db:run',
+              `INSERT INTO DATA_TeminKomisyon 
+               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
+               VALUES (?, 1, ?, ?, ?, ?, ?, 'Muayene Kabul')`,
+              [
+                activeDosyaId,
+                member.personel_id,
+                member.ad_soyad,
+                member.unvan || null,
+                member.gorev_adi === 'Komisyon Başkanı' ? 'Başkan' : 'Üye',
+                member.asil_mi === 1 ? 'Asil' : 'Yedek'
+              ]
+            );
+          }
+        }
+      }
+
+      localStorage.setItem(`dta_selected_komisyon_${activeDosyaId}`, val);
+      setSelectedKomisyon(val);
+    } catch (e: any) {
+      alert('Komisyon güncellenirken hata oluştu: ' + e.message);
+    }
+  };
+
+  const workflowSteps = useMemo(() => {
+    if (!selectedKomisyon || !sablons) return [];
+
+    const getSablonByDosyaAdi = (name: string) => {
+      return sablons.find((s: any) => s.dosya_adi === name);
+    };
+
+    const steps: { title: string; description: string; sablon: any }[] = [];
+
+    // Her iki komisyon seçeneğinde de görevlendirme onayı var
+    const gorevlendirmeOnayi = getSablonByDosyaAdi('komisyon-gorevlendirme-onayi');
+    if (gorevlendirmeOnayi) {
+      steps.push({
+        title: 'Komisyon Görevlendirme Onayı',
+        description: 'Komisyon üyelerinin atanması için resmi görevlendirme yazısı.',
+        sablon: gorevlendirmeOnayi,
+      });
+    }
+
+    const gorevlendirmeEki = getSablonByDosyaAdi('komisyon-gorevlendirme-onayi-eki');
+    if (gorevlendirmeEki) {
+      steps.push({
+        title: 'Görevlendirme Onay Eki',
+        description: 'Görevlendirilen komisyon üyelerinin listesini içeren onay eki.',
+        sablon: gorevlendirmeEki,
+      });
+    }
+
+    if (selectedKomisyon === 'muayene_kabul_tespit') {
+      const muayeneKabulKomisyonu = getSablonByDosyaAdi('muayene-kabul-komisyonu');
+      if (muayeneKabulKomisyonu) {
+        steps.push({
+          title: 'Muayene Kabul Komisyonu Tutanağı',
+          description: 'Muayene ve kabul komisyonu teslim alma ve inceleme belgesi.',
+          sablon: muayeneKabulKomisyonu,
+        });
+      }
+
+      const muayeneKabulTutanagi = getSablonByDosyaAdi('muayene-kabul-tutanagi');
+      if (muayeneKabulTutanagi) {
+        steps.push({
+          title: 'Muayene Kabul Tutanağı',
+          description: 'Malzemenin kabul edildiğine dair nihai komisyon tutanağı.',
+          sablon: muayeneKabulTutanagi,
+        });
+      }
+    }
+
+    return steps;
+  }, [selectedKomisyon, sablons]);
 
   const [belgeMenuOpen, setBelgeMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -328,8 +521,96 @@ export function MalzemeTablosu({
             <Plus className="w-3.5 h-3.5" />
             İhtiyaç Kalemi Ekle
           </button>
+
+          {items.length > 0 && activeDosya?.tur === "mal" && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Komisyon Atama:
+              </span>
+              <select
+                value={selectedKomisyon}
+                onChange={(e) => handleKomisyonChange(e.target.value)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors"
+              >
+                <option value="">Komisyon Seçin...</option>
+                <option value="muayene_kabul_tespit">
+                  Muayene ve Kabul ve Tespit Komisyonu
+                </option>
+                <option value="fiyat_arastirma_muayene">
+                  Fiyat Araştırma ve Muayene Komisyonu
+                </option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Komisyon Süreç Adımları */}
+      {items.length > 0 && selectedKomisyon && activeDosya?.tur === 'mal' && (
+        <div className="mx-4 mb-4 p-4 bg-slate-50/50 dark:bg-slate-800/10 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              Atanan Komisyon Belgeleri ve Süreci
+            </h4>
+            <span className="text-[9px] bg-blue-50/80 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+              {selectedKomisyon === 'muayene_kabul_tespit'
+                ? 'Muayene & Kabul & Tespit'
+                : 'Fiyat Araştırma & Muayene'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {workflowSteps.map((step, idx) => {
+              const isDisabled = ciktiLoading || (isSablonDisabled && isSablonDisabled(step.sablon.ad));
+
+              return (
+                <div
+                  key={step.sablon.id}
+                  className="flex flex-col justify-between p-3 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 rounded-xl hover:shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-750 group"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-450 text-[10px] font-bold shrink-0">
+                        {idx + 1}
+                      </span>
+                      <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-650 dark:group-hover:text-blue-400 transition-colors truncate">
+                        {step.title}
+                      </h5>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal pl-7">
+                      {step.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 mt-2.5 pt-2 pl-7 gap-2">
+                    <button
+                      disabled={isDisabled}
+                      onClick={() => onSablonClick && onSablonClick(step.sablon, step.sablon.ad)}
+                      className="text-[10px] text-slate-600 hover:text-blue-650 dark:text-slate-400 dark:hover:text-blue-400 font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Önizle
+                    </button>
+
+                    <BelgeAksiyonlari
+                      onPreview={() => onSablonClick && onSablonClick(step.sablon, step.sablon.ad)}
+                      onQuickPrint={() => onQuickPrint && onQuickPrint(step.sablon)}
+                      onExport={(fmt) => onExport && onExport(step.sablon, fmt)}
+                      onOpenExternal={() => onOpenExternal && onOpenExternal(step.sablon)}
+                      disabled={isDisabled}
+                      docName={step.sablon.ad}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {loading
         ? (
