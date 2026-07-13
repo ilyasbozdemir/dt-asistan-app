@@ -293,6 +293,15 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           setEditingKomisyonId(null)
         }}
         komisyonId={editingKomisyonId}
+        onPreviewSablon={(sablon) => {
+          if (!activeDosyaId) {
+            alert(
+              'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.'
+            )
+            return
+          }
+          handleOpenPreviewForSablon(sablon, sablon.ad)
+        }}
       />
 
       <PersonelAtaModal

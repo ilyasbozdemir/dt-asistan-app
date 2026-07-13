@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Plus, Search, Trash2, Users } from "lucide-react";
+import { AlertCircle, Plus, Search, Trash2, Users, Eye } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { Input } from "../../../components/ui/Input";
 import { Modal } from "../../../components/ui/Modal";
@@ -9,6 +9,7 @@ interface KomisyonOlusturModalProps {
   isOpen: boolean;
   onClose: () => void;
   komisyonId?: number | null;
+  onPreviewSablon?: (sablon: any) => void;
 }
 
 // Hazır komisyon şablonları (initial roller)
@@ -63,6 +64,7 @@ export function KomisyonOlusturModal({
   isOpen,
   onClose,
   komisyonId,
+  onPreviewSablon,
 }: KomisyonOlusturModalProps): React.JSX.Element | null {
   const queryClient = useQueryClient();
   const [ad, setAd] = useState("");
@@ -794,7 +796,7 @@ export function KomisyonOlusturModal({
                       onChange={() => handleSablonToggle(sablon.id)}
                     />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                       {sablon.ad}
                     </div>
@@ -802,6 +804,20 @@ export function KomisyonOlusturModal({
                       {sablon.aciklama || "Şablon"}
                     </div>
                   </div>
+                  {onPreviewSablon && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onPreviewSablon(sablon);
+                      }}
+                      className="p-1.5 shrink-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                      title="Önizle"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                  )}
                 </label>
               ))}
             {tumSablonlar.length > 0 &&
