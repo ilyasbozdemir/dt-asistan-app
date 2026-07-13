@@ -37,11 +37,9 @@ function generatePresetId(): string {
 }
 
 interface BelgeAksiyonlariProps {
-  isStarred: boolean;
   onPreview: () => void;
   onQuickPrint: () => void;
   onExport: (format: "pdf" | "docx" | "udf") => void;
-  onToggleStar: () => void;
   onOpenExternal: () => void;
   disabled?: boolean;
   docName?: string;
@@ -49,11 +47,9 @@ interface BelgeAksiyonlariProps {
 }
 
 export function BelgeAksiyonlari({
-  isStarred,
   onPreview,
   onQuickPrint,
   onExport,
-  onToggleStar,
   onOpenExternal,
   disabled,
   docName = "",

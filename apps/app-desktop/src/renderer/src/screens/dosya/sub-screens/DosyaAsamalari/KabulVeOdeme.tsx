@@ -269,11 +269,6 @@ export function KabulVeOdeme(): React.JSX.Element {
                         const cleanTitle = cleanName.replace(/\s*\(.*?\)\s*$/, '').trim()
 
                         const isDisabled = ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))
-                        const isStarred = activeStarredDocs
-                          ? activeStarredDocs.some(
-                              (d) => normalizeForMatch(d) === normalizeForMatch(cleanName)
-                            )
-                          : false
 
                         return (
                           <div
@@ -294,14 +289,12 @@ export function KabulVeOdeme(): React.JSX.Element {
 
                             <div className="shrink-0">
                               <BelgeAksiyonlari
-                                isStarred={isStarred}
                                 onPreview={() => {
                                   handleOpenPreviewForSablon(sablon, sablon.ad)
                                   setBelgeMenuOpen(false)
                                 }}
                                 onQuickPrint={() => quickPrint(sablon)}
                                 onExport={(fmt) => quickExport(sablon, fmt)}
-                                onToggleStar={() => toggleStar(cleanName)}
                                 onOpenExternal={() => quickOpenExternal(sablon)}
                                 disabled={isDisabled}
                                 docName={cleanName}

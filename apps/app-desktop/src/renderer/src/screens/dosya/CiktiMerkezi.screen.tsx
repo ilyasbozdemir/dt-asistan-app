@@ -462,9 +462,6 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
                         {items.map((sablon) => {
                           const missingMsg = getMissingRequirement(sablon)
-                          const isStarred = activeStarredDocs.some(
-                            (d) => normalizeForMatch(d) === normalizeForMatch(sablon.ad)
-                          )
 
                           return (
                             <div
@@ -507,11 +504,9 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
                               <div className="flex items-center gap-1 shrink-0">
                                 <BelgeAksiyonlari
-                                  isStarred={isStarred}
                                   onPreview={() => setPreviewSablon(sablon)}
                                   onQuickPrint={() => handleAction('print', [sablon.id])}
                                   onExport={(fmt) => handleAction(fmt, [sablon.id])}
-                                  onToggleStar={() => toggleStar(sablon.ad)}
                                   docName={sablon.ad}
                                   onOpenExternal={async () => {
                                     const processCtx =

@@ -21,7 +21,6 @@ interface SurecBelgeleriPanelProps {
   isSablonDisabled?: (cleanName: string) => boolean;
   onQuickPrint: (sablon: any) => void;
   onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
-  onToggleStar: (sablonAd: string) => void;
   onOpenExternal: (sablon: any) => void;
 }
 
@@ -116,7 +115,6 @@ export function SurecBelgeleriPanel({
   isSablonDisabled,
   onQuickPrint,
   onExport,
-  onToggleStar,
   onOpenExternal,
 }: SurecBelgeleriPanelProps): React.JSX.Element | null {
   const [selectedPresetId, setSelectedPresetId] = useState<string>(() => {
@@ -136,8 +134,6 @@ export function SurecBelgeleriPanel({
     }
   });
 
-
-
   React.useEffect(() => {
     const handlePresetsChange = () => {
       try {
@@ -153,7 +149,8 @@ export function SurecBelgeleriPanel({
   }, []);
 
   const starredDocsForFilter = React.useMemo(() => {
-    const activePresetId = selectedPresetId || (presets.length > 0 ? presets[0].id : "");
+    const activePresetId = selectedPresetId ||
+      (presets.length > 0 ? presets[0].id : "");
     if (activePresetId) {
       const preset = presets.find((p) => p.id === activePresetId);
       return preset ? preset.docs : [];
@@ -168,9 +165,13 @@ export function SurecBelgeleriPanel({
     );
   });
 
-  const [manualFilter, setManualFilter] = useState<"all" | "starred" | null>(null);
+  const [manualFilter, setManualFilter] = useState<"all" | "starred" | null>(
+    null,
+  );
 
-  const filter = manualFilter !== null ? manualFilter : (hasStarred ? "starred" : "all");
+  const filter = manualFilter !== null
+    ? manualFilter
+    : (hasStarred ? "starred" : "all");
 
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
@@ -230,35 +231,44 @@ export function SurecBelgeleriPanel({
         <div className="flex flex-col md:flex-row items-end md:items-center gap-3 shrink-0">
           {filter === "starred" && presets.length > 0 && (
             <div className="relative flex items-center">
-              {isChangingPreset ? (
-                <select
-                  value={selectedPresetId || (presets.length > 0 ? presets[0].id : "")}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setSelectedPresetId(val);
-                    localStorage.setItem("dta_selected_preset_id", val);
-                    setIsChangingPreset(false);
-                  }}
-                  onBlur={() => setIsChangingPreset(false)}
-                  autoFocus
-                  className="bg-slate-50 dark:bg-slate-800 border border-blue-500 dark:border-blue-600 rounded-full py-1 px-3 text-[10px] font-extrabold text-blue-600 dark:text-blue-400 focus:outline-none cursor-pointer shadow-sm animate-in fade-in zoom-in-95 duration-200"
-                >
-                  {presets.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      📦 {p.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <button
-                  onClick={() => setIsChangingPreset(true)}
-                  className="flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-955/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 border border-blue-100 dark:border-blue-900/40 hover:border-blue-300 dark:hover:border-blue-800 text-blue-600 dark:text-blue-400 rounded-full py-1.5 px-3 text.5 text-[10px] font-extrabold transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs"
-                  title="Belge Şablon Paketini Değiştir"
-                >
-                  <span>📦 {presets.find((p) => p.id === (selectedPresetId || (presets.length > 0 ? presets[0].id : "")))?.name || "Paket Seçilmedi"}</span>
-                  <ChevronDown className="w-3 h-3 text-blue-400" />
-                </button>
-              )}
+              {isChangingPreset
+                ? (
+                  <select
+                    value={selectedPresetId ||
+                      (presets.length > 0 ? presets[0].id : "")}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedPresetId(val);
+                      localStorage.setItem("dta_selected_preset_id", val);
+                      setIsChangingPreset(false);
+                    }}
+                    onBlur={() => setIsChangingPreset(false)}
+                    autoFocus
+                    className="bg-slate-50 dark:bg-slate-800 border border-blue-500 dark:border-blue-600 rounded-full py-1 px-3 text-[10px] font-extrabold text-blue-600 dark:text-blue-400 focus:outline-none cursor-pointer shadow-sm animate-in fade-in zoom-in-95 duration-200"
+                  >
+                    {presets.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        📦 {p.name}
+                      </option>
+                    ))}
+                  </select>
+                )
+                : (
+                  <button
+                    onClick={() => setIsChangingPreset(true)}
+                    className="flex items-center gap-1.5 bg-blue-50/50 dark:bg-blue-955/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 border border-blue-100 dark:border-blue-900/40 hover:border-blue-300 dark:hover:border-blue-800 text-blue-600 dark:text-blue-400 rounded-full py-1.5 px-3 text.5 text-[10px] font-extrabold transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs"
+                    title="Belge Şablon Paketini Değiştir"
+                  >
+                    <span>
+                      📦 {presets.find((p) =>
+                        p.id ===
+                          (selectedPresetId ||
+                            (presets.length > 0 ? presets[0].id : ""))
+                      )?.name || "Paket Seçilmedi"}
+                    </span>
+                    <ChevronDown className="w-3 h-3 text-blue-400" />
+                  </button>
+                )}
             </div>
           )}
 
@@ -393,7 +403,6 @@ export function SurecBelgeleriPanel({
                                 onSablonClick={onSablonClick}
                                 onQuickPrint={onQuickPrint}
                                 onExport={onExport}
-                                onToggleStar={onToggleStar}
                                 onOpenExternal={onOpenExternal}
                                 activeStarredDocs={activeStarredDocs || []}
                               />
@@ -421,7 +430,6 @@ function SablonCard({
   isSablonDisabled,
   onQuickPrint,
   onExport,
-  onToggleStar,
   onOpenExternal,
   activeStarredDocs,
 }: {
@@ -433,7 +441,6 @@ function SablonCard({
   isSablonDisabled?: (cleanName: string) => boolean;
   onQuickPrint: (sablon: any) => void;
   onExport: (sablon: any, format: "pdf" | "docx" | "udf") => void;
-  onToggleStar: (sablonAd: string) => void;
   onOpenExternal: (sablon: any) => void;
   activeStarredDocs: string[];
 }): React.JSX.Element {
@@ -464,10 +471,6 @@ function SablonCard({
   const description = getSablonDescription(baseName);
   const isDisabled = ciktiLoading ||
     (isSablonDisabled && isSablonDisabled(cleanName));
-
-  const isStarred = activeStarredDocs.some(
-    (d) => normalizeForMatch(d) === normalizeForMatch(cleanName),
-  );
 
   return (
     <div
@@ -504,7 +507,8 @@ function SablonCard({
                   ? "text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   : "text-slate-800 dark:text-slate-200"
               }`}
-              onClick={() => !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
+              onClick={() =>
+                !isDisabled && onSablonClick(activeSablon, activeSablon.ad)}
               disabled={isDisabled}
               title={baseName}
             >
@@ -527,7 +531,10 @@ function SablonCard({
                   onChange={(e) => {
                     const val = e.target.value;
                     setSelectedId(val);
-                    localStorage.setItem(`dta_selected_version_${baseName}`, val);
+                    localStorage.setItem(
+                      `dta_selected_version_${baseName}`,
+                      val,
+                    );
                   }}
                   disabled={isDisabled}
                   title="Şablon Sürümü Seçin"
@@ -556,11 +563,9 @@ function SablonCard({
 
         <div className="shrink-0 self-start mt-0.5">
           <BelgeAksiyonlari
-            isStarred={isStarred}
             onPreview={() => onSablonClick(activeSablon, activeSablon.ad)}
             onQuickPrint={() => onQuickPrint(activeSablon)}
             onExport={(fmt) => onExport(activeSablon, fmt)}
-            onToggleStar={() => onToggleStar(cleanName)}
             onOpenExternal={() => onOpenExternal(activeSablon)}
             disabled={isDisabled}
             docName={cleanName}

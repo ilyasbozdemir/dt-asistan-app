@@ -95,7 +95,6 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         activeStarredDocs={activeStarredDocs}
         onQuickPrint={quickPrint}
         onExport={quickExport}
-        onToggleStar={toggleStar}
         onOpenExternal={quickOpenExternal}
         isSablonDisabled={isSablonDisabled}
       />

@@ -83,7 +83,6 @@ export function KlasorVeKapaklar(): React.JSX.Element {
         onSablonClick={handleOpenPreviewForSablon}
         onQuickPrint={quickPrint}
         onExport={quickExport}
-        onToggleStar={toggleStar}
         onOpenExternal={quickOpenExternal}
         isSablonDisabled={isSablonDisabled}
       />
