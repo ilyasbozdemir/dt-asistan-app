@@ -10,10 +10,14 @@
     "sayisi": "123"
   },
   "detsisNo": "",
-  "dosyaKonusu": "Muayene ve Kabul Komisyonu Görevlendirmesi",
+  "dosyaKonusu": "Muayene ve Kabul Komisyonu",
   "dosyaTarihi": "20.06.2026",
   "kurumumuz": "Ankara İl Sağlık Müdürlüğü",
   "isinAdi": "Tıbbi Cihaz ve Laboratuvar Malzemeleri Alımı",
+  "onayBelgesiTarihi": "08.06.2026",
+  "onayBelgesiNo": "50672572",
+  "onayBelgesiYili": "2026",
+  "kanunMaddesi": "22/d",
   "solLogo": "https://raw.githubusercontent.com/ilyasbozdemir/dt-asistan-desktop-app/main/public/icon.png",
   "sagLogo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Logo_of_100th_years_of_the_Republic_of_T%C3%BCrkiye.svg",
   "gorevlendirilenler": [
@@ -30,6 +34,8 @@
   ],
   "hazirlayanPersonelAdi": "Ayşe Demir",
   "hazirlayanPersonelUnvan": "V.H.K.İ.",
+  "hazirlayanTelefon": "0312 555 44 33",
+  "hazirlayanEposta": "hazirlayan@kurum.gov.tr",
   "onaylayanPersonelAdi": "Mustafa Şen",
   "onaylayanPersonelUnvan": "Harcama Yetkilisi",
   "dagitimListesi": [
@@ -48,11 +54,5 @@
   "kurumWeb": "www.saglik.gov.tr",
   "kurumEposta": "ankara.destek@saglik.gov.tr",
   "kurumKep": "saglikbakanligi@hs01.kep.tr",
-  "kurumIci": true,
-  "hazirlayanPersonelAdi": "Ayşe Demir",
-  "hazırlayanPersonelUnvan": "V.H.K.İ.",
-  "hazirlayanTelefon": "0312 555 44 33",
-  "hazirlayanTelefon": "0312 555 44 33",
-  "hazırlayanEposta": "hazirlayan@kurum.gov.tr",
-  "hazirlayanEposta": "hazirlayan@kurum.gov.tr"
+  "kurumIci": false
 }

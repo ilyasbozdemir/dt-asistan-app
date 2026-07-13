@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   ChevronDown,
@@ -60,24 +61,41 @@ export function MalzemeTablosu({
     handleDeleteItem,
   } = state;
 
-  // Çoklu komisyon seçimi (checkbox)
-  const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<string[]>([]);
-  // Belge tipi: "tek" = Görevlendirme Onayı, "ek" = Onay + Ek
-  const [belgeTipi, setBelgeTipi] = useState<"tek" | "ek">("tek");
+  // Çoklu komisyon seçimi — değerler DB'den gelen id (number)
+  const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<number[]>([]);
   // Komisyon paneli açık/kapalı
   const [komisyonPanelOpen, setKomisyonPanelOpen] = useState(false);
   // Eski compat — workflowSteps için hâlâ gerekli
   const selectedKomisyon = selectedKomisyonlar.length > 0
-    ? (selectedKomisyonlar.includes("muayene_kabul_tespit") ? "muayene_kabul_tespit" : "fiyat_arastirma_muayene")
+    ? "muayene_kabul_tespit"
     : "";
   const [selectedStepIdx, setSelectedStepIdx] = useState<string>("0");
 
+  // DB'deki aktif komisyonları dinamik çek
+  const { data: dbKomisyonlar = [] } = useQuery<{ id: number; ad: string }[]>({
+    queryKey: ["tanim_komisyonlar"],
+    queryFn: async () => {
+      const res = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT id, ad FROM TANIM_Komisyon WHERE aktif_mi = 1 ORDER BY id ASC",
+      );
+      if (!res.success) throw new Error(res.error);
+      return res.data as { id: number; ad: string }[];
+    },
+    enabled: komisyonPanelOpen,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
     if (activeDosyaId) {
-      const saved = localStorage.getItem(`dta_selected_komisyonlar_${activeDosyaId}`);
+      const saved = localStorage.getItem(
+        `dta_selected_komisyonlar_${activeDosyaId}`,
+      );
       const timer = setTimeout(() => {
         if (saved) {
-          try { setSelectedKomisyonlar(JSON.parse(saved)); } catch { /* ignore */ }
+          try {
+            setSelectedKomisyonlar(JSON.parse(saved));
+          } catch { /* ignore */ }
         }
       }, 0);
       return () => clearTimeout(timer);
@@ -86,7 +104,9 @@ export function MalzemeTablosu({
   }, [activeDosyaId]);
 
   // Çoklu komisyon onaylama — seçilen komisyon ID'lerine göre DB'yi güncelle
-  const handleKomisyonlarOnayla = async (seciliTurler: string[]): Promise<void> => {
+  const handleKomisyonlarOnayla = async (
+    seciliTurler: string[],
+  ): Promise<void> => {
     if (!activeDosyaId) return;
     try {
       await (window as any).electron.ipcRenderer.invoke(
@@ -135,7 +155,10 @@ export function MalzemeTablosu({
         }
       }
 
-      localStorage.setItem(`dta_selected_komisyonlar_${activeDosyaId}`, JSON.stringify(seciliTurler));
+      localStorage.setItem(
+        `dta_selected_komisyonlar_${activeDosyaId}`,
+        JSON.stringify(seciliTurler),
+      );
       setSelectedKomisyonlar(seciliTurler);
       setKomisyonPanelOpen(false);
       setSelectedStepIdx("0");
@@ -517,123 +540,77 @@ export function MalzemeTablosu({
               <span className="text-[10px] text-slate-400">
                 Bu belge {items.length} ihtiyaç kalemi için düzenlenecektir
               </span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${komisyonPanelOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                  komisyonPanelOpen ? "rotate-180" : ""
+                }`}
+              />
             </div>
           </button>
 
           {/* Açılan Panel */}
           {komisyonPanelOpen && (() => {
-            const KOMISYON_SECENEKLERI = [
-              { value: "fiyat_arastirma", label: "Fiyat Araştırma ve Yaklaşık Maliyet Tespit Komisyonu" },
-              { value: "muayene_kabul_tespit", label: "Muayene Kabul ve Teslim Alma Komisyonu" },
-            ];
-
-            const autoSuggestBelge = selectedKomisyonlar.length === 2 ? "ek" : "tek";
-            const effectiveBelgeTipi = belgeTipi || autoSuggestBelge;
-
-            const gorevlendirmeOnayi = workflowSteps.find((s) =>
-              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi" ||
-              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi.html"
-            );
-            const gorevlendirmeEki = workflowSteps.find((s) =>
-              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi-eki" ||
-              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi-eki.html"
+            // Doğrudan şablondan Piyasa Fiyat Araştırma Görevlendirmesi'ni bul
+            const gorevlendirmeSablonu = sablons?.find((s: any) =>
+              s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi" ||
+              s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi.html" ||
+              s.dosya_adi === "komisyon-gorevlendirme-onayi" ||
+              s.dosya_adi === "komisyon-gorevlendirme-onayi.html"
             );
 
-            const hedefSablon = effectiveBelgeTipi === "ek"
-              ? (gorevlendirmeEki ?? gorevlendirmeOnayi)
-              : gorevlendirmeOnayi;
-            const isDisabled = ciktiLoading || !hedefSablon || selectedKomisyonlar.length === 0;
+            const isDisabled = ciktiLoading || selectedKomisyonlar.length === 0;
+            const isOnizleDisabled = isDisabled || !gorevlendirmeSablonu;
 
             return (
               <div className="mt-1.5 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
-                {/* Görevlendirilecek Komisyonlar */}
+                {/* Görevlendirilecek Komisyonlar — DB'den dinamik */}
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Görevlendirilecek Komisyonlar
                   </p>
                   <div className="space-y-2">
-                    {KOMISYON_SECENEKLERI.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
-                          selectedKomisyonlar.includes(opt.value)
-                            ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
-                            : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
-                          checked={selectedKomisyonlar.includes(opt.value)}
-                          onChange={(e) => {
-                            const next = e.target.checked
-                              ? [...selectedKomisyonlar, opt.value]
-                              : selectedKomisyonlar.filter((v) => v !== opt.value);
-                            setSelectedKomisyonlar(next);
-                            setBelgeTipi(next.length === 2 ? "ek" : "tek");
-                          }}
-                        />
-                        <span className={`text-xs font-semibold ${
-                          selectedKomisyonlar.includes(opt.value)
-                            ? "text-blue-700 dark:text-blue-400"
-                            : "text-slate-700 dark:text-slate-300"
-                        }`}>
-                          {opt.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Yazdırılacak Belge */}
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Yazdırılacak Belge
-                  </p>
-                  <div className="space-y-1.5">
-                    <label className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
-                      effectiveBelgeTipi === "tek"
-                        ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
-                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="belge_tipi"
-                        className="w-4 h-4 text-blue-600 cursor-pointer"
-                        checked={effectiveBelgeTipi === "tek"}
-                        onChange={() => setBelgeTipi("tek")}
-                      />
-                      <div>
-                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          Görevlendirme Onayı
+                    {dbKomisyonlar.length === 0
+                      ? (
+                        <div className="text-xs text-slate-400 italic px-2 py-1">
+                          Komisyon bulunamadı. "Komisyon Yönetimi" ekranından
+                          komisyon ekleyiniz.
                         </div>
-                        <div className="text-[10px] text-slate-400">
-                          Tek belge — seçili komisyonlar birlikte
-                        </div>
-                      </div>
-                    </label>
-                    <label className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
-                      effectiveBelgeTipi === "ek"
-                        ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
-                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                    }`}>
-                      <input
-                        type="radio"
-                        name="belge_tipi"
-                        className="w-4 h-4 text-blue-600 cursor-pointer"
-                        checked={effectiveBelgeTipi === "ek"}
-                        onChange={() => setBelgeTipi("ek")}
-                      />
-                      <div>
-                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          Görevlendirme Onayı + Ek
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          Ayrı komisyon tabloları{selectedKomisyonlar.length === 2 ? " — önerilen ✓" : ""}
-                        </div>
-                      </div>
-                    </label>
+                      )
+                      : (
+                        dbKomisyonlar.map((k) => (
+                          <label
+                            key={k.id}
+                            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                              selectedKomisyonlar.includes(k.id)
+                                ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
+                                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                              checked={selectedKomisyonlar.includes(k.id)}
+                              onChange={(e) => {
+                                const next = e.target.checked
+                                  ? [...selectedKomisyonlar, k.id]
+                                  : selectedKomisyonlar.filter((v) =>
+                                    v !== k.id
+                                  );
+                                setSelectedKomisyonlar(next);
+                              }}
+                            />
+                            <span
+                              className={`text-xs font-semibold ${
+                                selectedKomisyonlar.includes(k.id)
+                                  ? "text-blue-700 dark:text-blue-400"
+                                  : "text-slate-700 dark:text-slate-300"
+                              }`}
+                            >
+                              {k.ad}
+                            </span>
+                          </label>
+                        ))
+                      )}
                   </div>
                 </div>
 
@@ -647,30 +624,32 @@ export function MalzemeTablosu({
                     Kapat
                   </button>
                   <div className="flex items-center gap-2">
-                    {hedefSablon && (
-                      <button
-                        type="button"
-                        disabled={isDisabled}
-                        onClick={async () => {
-                          await handleKomisyonlarOnayla(selectedKomisyonlar);
-                          if (hedefSablon && onSablonClick) {
-                            onSablonClick(hedefSablon.sablon, hedefSablon.sablon.ad);
-                          }
-                        }}
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        Önizle
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      disabled={isOnizleDisabled}
+                      onClick={async () => {
+                        await handleKomisyonlarOnayla(selectedKomisyonlar);
+                        if (gorevlendirmeSablonu && onSablonClick) {
+                          onSablonClick(
+                            gorevlendirmeSablonu,
+                            gorevlendirmeSablonu.ad,
+                          );
+                        }
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      {gorevlendirmeSablonu ? "Önizle" : "Şablon Bulunamadı"}
+                    </button>
                     <button
                       type="button"
                       disabled={selectedKomisyonlar.length === 0}
-                      onClick={() => handleKomisyonlarOnayla(selectedKomisyonlar)}
+                      onClick={() =>
+                        handleKomisyonlarOnayla(selectedKomisyonlar)}
                       className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      Komisyonları Kaydet
+                      Görevlendirmeyi Onayla
                     </button>
                   </div>
                 </div>

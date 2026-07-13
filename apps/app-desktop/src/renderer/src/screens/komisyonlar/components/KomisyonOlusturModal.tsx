@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
@@ -12,8 +12,10 @@ interface KomisyonOlusturModalProps {
 }
 
 // Hazır komisyon şablonları (initial roller)
+// Bu veriler hem UI şablonu hem de DB seed kaynağı
 const KOMISYON_SABLONLARI = {
   fiyat_arastirma: {
+    dbId: 1, // TANIM_Komisyon.id — sabit beklenen ID
     label: "Fiyat Araştırma ve Yaklaşık Maliyet Tespit Komisyonu",
     roller: [
       "Harcama Yetkilisi",
@@ -29,7 +31,8 @@ const KOMISYON_SABLONLARI = {
     ],
   },
   muayene_kabul: {
-    label: "Muayene Kabul ve Tespit Komisyonu",
+    dbId: 3, // TANIM_Komisyon.id — sabit beklenen ID
+    label: "Muayene Kabul ve Teslim Alma Komisyonu",
     roller: [
       "Komisyon Başkanı",
       "Üye",
@@ -67,6 +70,71 @@ export function KomisyonOlusturModal({
   const [uyeler, setUyeler] = useState<UyeRow[]>([]);
   const [seciliSablonlar, setSeciliSablonlar] = useState<number[]>([]);
   const [aramaAcik, setAramaAcik] = useState<number | null>(null); // hangi satırın araması açık
+
+  // Modal açılınca default komisyonları DB'ye seed et (yoksa oluştur)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const seedKomisyonlar = async () => {
+      try {
+        const ipc = (window as any).electron.ipcRenderer;
+
+        for (const [, sablon] of Object.entries(KOMISYON_SABLONLARI)) {
+          const s = sablon as { dbId: number; label: string; roller: readonly string[] };
+
+          // Komisyon var mı kontrol et
+          const check = await ipc.invoke(
+            "db:query",
+            "SELECT id FROM TANIM_Komisyon WHERE id = ?",
+            [s.dbId],
+          );
+
+          if (check.success && check.data && check.data.length > 0) continue; // zaten var
+
+          // Yok — oluştur (INSERT OR IGNORE ile id'yi koru)
+          await ipc.invoke(
+            "db:run",
+            "INSERT OR IGNORE INTO TANIM_Komisyon (id, ad) VALUES (?, ?)",
+            [s.dbId, s.label],
+          );
+
+          // Her rol için TANIM_KomisyonGorevi bul/oluştur ve TANIM_KomisyonUye ekle
+          for (const rolAd of s.roller) {
+            // Görev var mı?
+            let gorevId: number | null = null;
+            const gorevCheck = await ipc.invoke(
+              "db:query",
+              "SELECT id FROM TANIM_KomisyonGorevi WHERE ad = ? LIMIT 1",
+              [rolAd],
+            );
+            if (gorevCheck.success && gorevCheck.data && gorevCheck.data.length > 0) {
+              gorevId = gorevCheck.data[0].id;
+            } else {
+              // Yeni gorev kaydet
+              const gorevIns = await ipc.invoke(
+                "db:run",
+                "INSERT INTO TANIM_KomisyonGorevi (ad, aktif_mi) VALUES (?, 1)",
+                [rolAd],
+              );
+              if (gorevIns.success) gorevId = gorevIns.lastInsertRowid;
+            }
+
+            if (gorevId !== null) {
+              await ipc.invoke(
+                "db:run",
+                "INSERT INTO TANIM_KomisyonUye (komisyon_id, gorev_id, personel_id, asil_mi) VALUES (?, ?, NULL, 1)",
+                [s.dbId, gorevId],
+              );
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Komisyon seed hatası:", e);
+      }
+    };
+
+    seedKomisyonlar();
+  }, [isOpen]);
 
   // DB'deki görevler (unvan eşleştirmesi için)
   const { data: gorevler = [] } = useQuery({
