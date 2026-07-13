@@ -60,141 +60,84 @@ export function MalzemeTablosu({
     handleDeleteItem,
   } = state;
 
-  const [selectedKomisyon, setSelectedKomisyon] = useState<string>("");
-  const [tempSelectedKomisyon, setTempSelectedKomisyon] = useState<string>("");
+  // Çoklu komisyon seçimi (checkbox)
+  const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<string[]>([]);
+  // Belge tipi: "tek" = Görevlendirme Onayı, "ek" = Onay + Ek
+  const [belgeTipi, setBelgeTipi] = useState<"tek" | "ek">("tek");
+  // Komisyon paneli açık/kapalı
+  const [komisyonPanelOpen, setKomisyonPanelOpen] = useState(false);
+  // Eski compat — workflowSteps için hâlâ gerekli
+  const selectedKomisyon = selectedKomisyonlar.length > 0
+    ? (selectedKomisyonlar.includes("muayene_kabul_tespit") ? "muayene_kabul_tespit" : "fiyat_arastirma_muayene")
+    : "";
   const [selectedStepIdx, setSelectedStepIdx] = useState<string>("0");
 
   useEffect(() => {
     if (activeDosyaId) {
-      const saved =
-        localStorage.getItem(`dta_selected_komisyon_${activeDosyaId}`) || "";
+      const saved = localStorage.getItem(`dta_selected_komisyonlar_${activeDosyaId}`);
       const timer = setTimeout(() => {
-        setSelectedKomisyon(saved);
-        setTempSelectedKomisyon(saved);
+        if (saved) {
+          try { setSelectedKomisyonlar(JSON.parse(saved)); } catch { /* ignore */ }
+        }
       }, 0);
       return () => clearTimeout(timer);
     }
     return;
   }, [activeDosyaId]);
 
-  const handleKomisyonChange = async (val: string): Promise<void> => {
+  // Çoklu komisyon onaylama — seçilen komisyon ID'lerine göre DB'yi güncelle
+  const handleKomisyonlarOnayla = async (seciliTurler: string[]): Promise<void> => {
     if (!activeDosyaId) return;
-
     try {
-      // 1. Delete existing commission members for this dossier
       await (window as any).electron.ipcRenderer.invoke(
         "db:run",
         "DELETE FROM DATA_TeminKomisyon WHERE temin_dosya_id = ?",
         [activeDosyaId],
       );
 
-      if (val === "muayene_kabul_tespit") {
-        // Fetch members of Muayene Kabul ve Tespit Komisyonu (id = 3)
-        const resKabul = await (window as any).electron.ipcRenderer.invoke(
+      // komisyon_id eşlemesi: fiyat_arastirma = 1, muayene_kabul_tespit = 3
+      const turMap: Record<string, { id: number; tur: string }> = {
+        fiyat_arastirma: { id: 1, tur: "Fiyat Araştırma" },
+        muayene_kabul_tespit: { id: 3, tur: "Muayene Kabul" },
+      };
+
+      for (const tur of seciliTurler) {
+        const meta = turMap[tur];
+        if (!meta) continue;
+        const res = await (window as any).electron.ipcRenderer.invoke(
           "db:query",
           `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
            FROM TANIM_KomisyonUye u 
            JOIN TANIM_Personel p ON u.personel_id = p.id 
            JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
-           WHERE u.komisyon_id = 3`,
+           WHERE u.komisyon_id = ?`,
+          [meta.id],
         );
-        // Fetch members of Fiyat Araştırma Komisyonu (id = 1)
-        const resFiyat = await (window as any).electron.ipcRenderer.invoke(
-          "db:query",
-          `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
-           FROM TANIM_KomisyonUye u 
-           JOIN TANIM_Personel p ON u.personel_id = p.id 
-           JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
-           WHERE u.komisyon_id = 1`,
-        );
-
-        if (resFiyat.success && resFiyat.data) {
-          for (const member of resFiyat.data) {
+        if (res.success && res.data) {
+          for (const member of res.data) {
             await (window as any).electron.ipcRenderer.invoke(
               "db:run",
               `INSERT INTO DATA_TeminKomisyon 
                (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
-               VALUES (?, 1, ?, ?, ?, ?, ?, 'Fiyat Araştırma')`,
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 activeDosyaId,
+                meta.id,
                 member.personel_id,
                 member.ad_soyad,
                 member.unvan || null,
                 member.gorev_adi === "Komisyon Başkanı" ? "Başkan" : "Üye",
                 member.asil_mi === 1 ? "Asil" : "Yedek",
-              ],
-            );
-          }
-        }
-
-        if (resKabul.success && resKabul.data) {
-          for (const member of resKabul.data) {
-            await (window as any).electron.ipcRenderer.invoke(
-              "db:run",
-              `INSERT INTO DATA_TeminKomisyon 
-               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
-               VALUES (?, 3, ?, ?, ?, ?, ?, 'Muayene Kabul')`,
-              [
-                activeDosyaId,
-                member.personel_id,
-                member.ad_soyad,
-                member.unvan || null,
-                member.gorev_adi === "Komisyon Başkanı" ? "Başkan" : "Üye",
-                member.asil_mi === 1 ? "Asil" : "Yedek",
-              ],
-            );
-          }
-        }
-      } else if (val === "fiyat_arastirma_muayene") {
-        // Fetch members of Fiyat Araştırma Komisyonu (id = 1)
-        const resFiyat = await (window as any).electron.ipcRenderer.invoke(
-          "db:query",
-          `SELECT u.*, p.ad_soyad, p.unvan, g.ad as gorev_adi 
-           FROM TANIM_KomisyonUye u 
-           JOIN TANIM_Personel p ON u.personel_id = p.id 
-           JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id 
-           WHERE u.komisyon_id = 1`,
-        );
-
-        if (resFiyat.success && resFiyat.data) {
-          for (const member of resFiyat.data) {
-            // Insert for Fiyat Araştırma
-            await (window as any).electron.ipcRenderer.invoke(
-              "db:run",
-              `INSERT INTO DATA_TeminKomisyon 
-               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
-               VALUES (?, 1, ?, ?, ?, ?, ?, 'Fiyat Araştırma')`,
-              [
-                activeDosyaId,
-                member.personel_id,
-                member.ad_soyad,
-                member.unvan || null,
-                member.gorev_adi === "Komisyon Başkanı" ? "Başkan" : "Üye",
-                member.asil_mi === 1 ? "Asil" : "Yedek",
-              ],
-            );
-
-            // Insert for Muayene Kabul
-            await (window as any).electron.ipcRenderer.invoke(
-              "db:run",
-              `INSERT INTO DATA_TeminKomisyon 
-               (temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol, komisyon_turu) 
-               VALUES (?, 1, ?, ?, ?, ?, ?, 'Muayene Kabul')`,
-              [
-                activeDosyaId,
-                member.personel_id,
-                member.ad_soyad,
-                member.unvan || null,
-                member.gorev_adi === "Komisyon Başkanı" ? "Başkan" : "Üye",
-                member.asil_mi === 1 ? "Asil" : "Yedek",
+                meta.tur,
               ],
             );
           }
         }
       }
 
-      localStorage.setItem(`dta_selected_komisyon_${activeDosyaId}`, val);
-      setSelectedKomisyon(val);
+      localStorage.setItem(`dta_selected_komisyonlar_${activeDosyaId}`, JSON.stringify(seciliTurler));
+      setSelectedKomisyonlar(seciliTurler);
+      setKomisyonPanelOpen(false);
       setSelectedStepIdx("0");
     } catch (e: any) {
       alert("Komisyon güncellenirken hata oluştu: " + e.message);
@@ -544,112 +487,196 @@ export function MalzemeTablosu({
         </div>
       </div>
 
-      {/* Komisyon İşlemleri Barı */}
+      {/* Komisyon Onay Belgeleri Paneli */}
       {items.length > 0 && activeDosya?.tur === "mal" && (
-        <div className="mx-4 mb-4 p-3.5 bg-slate-50/50 dark:bg-slate-800/10 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Sol Kısım: Komisyon Atama */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
-            <div className="flex items-center gap-1.5 shrink-0">
+        <div className="mx-4 mb-4">
+          {/* Panel Başlığı / Tetikleyici */}
+          <button
+            type="button"
+            onClick={() => setKomisyonPanelOpen((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-slate-50/70 dark:bg-slate-800/20 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl hover:bg-slate-100/60 dark:hover:bg-slate-800/30 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
               <Users className="w-4 h-4 text-blue-500" />
               <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                Komisyon Atama:
+                Komisyon Onay Belgeleri
               </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <select
-                value={tempSelectedKomisyon}
-                onChange={(e) => setTempSelectedKomisyon(e.target.value)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors min-w-[240px]"
-              >
-                <option value="">Komisyon Seçin...</option>
-                <option value="muayene_kabul_tespit">
-                  Muayene ve Kabul ve Tespit Komisyonu
-                </option>
-                <option value="fiyat_arastirma_muayene">
-                  Fiyat Araştırma ve Muayene Komisyonu
-                </option>
-              </select>
-
-              {tempSelectedKomisyon !== selectedKomisyon && (
-                <button
-                  type="button"
-                  onClick={() => handleKomisyonChange(tempSelectedKomisyon)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer animate-pulse shrink-0"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Komisyonu Onayla
-                </button>
+              {selectedKomisyonlar.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                    {selectedKomisyonlar.length} komisyon seçili
+                  </span>
+                </span>
               )}
             </div>
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400">
+                Bu belge {items.length} ihtiyaç kalemi için düzenlenecektir
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${komisyonPanelOpen ? "rotate-180" : ""}`} />
+            </div>
+          </button>
 
-          {/* Sağ Kısım: Seçilen Komisyon Belgeleri */}
-          {selectedKomisyon && (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 lg:justify-end lg:border-l lg:border-slate-200 dark:lg:border-slate-800 lg:pl-4">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75">
-                  </span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500">
-                  </span>
-                </span>
-                <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                  Komisyon Belgeleri:
-                </span>
-              </div>
+          {/* Açılan Panel */}
+          {komisyonPanelOpen && (() => {
+            const KOMISYON_SECENEKLERI = [
+              { value: "fiyat_arastirma", label: "Fiyat Araştırma ve Yaklaşık Maliyet Tespit Komisyonu" },
+              { value: "muayene_kabul_tespit", label: "Muayene Kabul ve Teslim Alma Komisyonu" },
+            ];
 
-              <select
-                value={selectedStepIdx}
-                onChange={(e) => setSelectedStepIdx(e.target.value)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors w-full sm:max-w-xs"
-              >
-                <option value="">-- Bir belge seçin --</option>
-                {workflowSteps.map((step, idx) => (
-                  <option key={step.sablon.id} value={String(idx)}>
-                    {idx + 1}. {step.title}
-                  </option>
-                ))}
-              </select>
+            const autoSuggestBelge = selectedKomisyonlar.length === 2 ? "ek" : "tek";
+            const effectiveBelgeTipi = belgeTipi || autoSuggestBelge;
 
-              {selectedStepIdx !== "" &&
-                workflowSteps[Number(selectedStepIdx)] && (() => {
-                  const step = workflowSteps[Number(selectedStepIdx)];
-                  const isDisabled = ciktiLoading ||
-                    (isSablonDisabled && isSablonDisabled(step.sablon.ad));
+            const gorevlendirmeOnayi = workflowSteps.find((s) =>
+              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi" ||
+              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi.html"
+            );
+            const gorevlendirmeEki = workflowSteps.find((s) =>
+              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi-eki" ||
+              s.sablon.dosya_adi === "komisyon-gorevlendirme-onayi-eki.html"
+            );
 
-                  return (
-                    <div className="flex items-center gap-2 shrink-0">
+            const hedefSablon = effectiveBelgeTipi === "ek"
+              ? (gorevlendirmeEki ?? gorevlendirmeOnayi)
+              : gorevlendirmeOnayi;
+            const isDisabled = ciktiLoading || !hedefSablon || selectedKomisyonlar.length === 0;
+
+            return (
+              <div className="mt-1.5 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
+                {/* Görevlendirilecek Komisyonlar */}
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Görevlendirilecek Komisyonlar
+                  </p>
+                  <div className="space-y-2">
+                    {KOMISYON_SECENEKLERI.map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                          selectedKomisyonlar.includes(opt.value)
+                            ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
+                            : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                          checked={selectedKomisyonlar.includes(opt.value)}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...selectedKomisyonlar, opt.value]
+                              : selectedKomisyonlar.filter((v) => v !== opt.value);
+                            setSelectedKomisyonlar(next);
+                            setBelgeTipi(next.length === 2 ? "ek" : "tek");
+                          }}
+                        />
+                        <span className={`text-xs font-semibold ${
+                          selectedKomisyonlar.includes(opt.value)
+                            ? "text-blue-700 dark:text-blue-400"
+                            : "text-slate-700 dark:text-slate-300"
+                        }`}>
+                          {opt.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Yazdırılacak Belge */}
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Yazdırılacak Belge
+                  </p>
+                  <div className="space-y-1.5">
+                    <label className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                      effectiveBelgeTipi === "tek"
+                        ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
+                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="belge_tipi"
+                        className="w-4 h-4 text-blue-600 cursor-pointer"
+                        checked={effectiveBelgeTipi === "tek"}
+                        onChange={() => setBelgeTipi("tek")}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Görevlendirme Onayı
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          Tek belge — seçili komisyonlar birlikte
+                        </div>
+                      </div>
+                    </label>
+                    <label className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
+                      effectiveBelgeTipi === "ek"
+                        ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
+                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="belge_tipi"
+                        className="w-4 h-4 text-blue-600 cursor-pointer"
+                        checked={effectiveBelgeTipi === "ek"}
+                        onChange={() => setBelgeTipi("ek")}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Görevlendirme Onayı + Ek
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          Ayrı komisyon tabloları{selectedKomisyonlar.length === 2 ? " — önerilen ✓" : ""}
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Aksiyon Butonları */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setKomisyonPanelOpen(false)}
+                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                  >
+                    Kapat
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {hedefSablon && (
                       <button
                         type="button"
                         disabled={isDisabled}
-                        onClick={() =>
-                          onSablonClick &&
-                          onSablonClick(step.sablon, step.sablon.ad)}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm shadow-blue-500/10"
+                        onClick={async () => {
+                          await handleKomisyonlarOnayla(selectedKomisyonlar);
+                          if (hedefSablon && onSablonClick) {
+                            onSablonClick(hedefSablon.sablon, hedefSablon.sablon.ad);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         Önizle
                       </button>
-
-                      <BelgeAksiyonlari
-                        onPreview={() =>
-                          onSablonClick &&
-                          onSablonClick(step.sablon, step.sablon.ad)}
-                        onQuickPrint={() =>
-                          onQuickPrint && onQuickPrint(step.sablon)}
-                        onExport={(fmt) =>
-                          onExport && onExport(step.sablon, fmt)}
-                        onOpenExternal={() =>
-                          onOpenExternal && onOpenExternal(step.sablon)}
-                        disabled={isDisabled}
-                        docName={step.sablon.ad}
-                      />
-                    </div>
-                  );
-                })()}
-            </div>
-          )}
+                    )}
+                    <button
+                      type="button"
+                      disabled={selectedKomisyonlar.length === 0}
+                      onClick={() => handleKomisyonlarOnayla(selectedKomisyonlar)}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Komisyonları Kaydet
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
