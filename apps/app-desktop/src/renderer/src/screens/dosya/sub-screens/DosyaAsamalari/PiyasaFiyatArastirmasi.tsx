@@ -21,7 +21,6 @@ import { DavetEdilenFirmalar } from "./components/DavetEdilenFirmalar";
 import { TeklifMatrisi } from "./components/TeklifMatrisi";
 import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
 import { usePiyasaFiyatArastirmasiLogic } from "./hooks/usePiyasaFiyatArastirmasi";
-import { SurecBelgeleriPanel } from "./SablonPanelleri";
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const logic = usePiyasaFiyatArastirmasiLogic();
@@ -39,7 +38,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       executeExportDocx,
       executeExportUdf,
       quickPrint,
-      quickExport,
       quickOpenExternal,
       toggleStar,
       refreshSnapshot,
@@ -294,22 +292,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                     </div>
                   );
                 })}
-              </div>
-            )}
-
-          {/* Süreç Belgeleri (Tüm Diğer Şablonları Görüntüle/Oluştur) */}
-          <div className="border-t border-slate-100 dark:border-slate-800/80 pt-6">
-            <SurecBelgeleriPanel
-              stageSablons={stageSablons}
-              activeStarredDocs={activeStarredDocs}
-              ciktiLoading={false}
-              onSablonClick={handleOpenPreviewForSablon}
-              onQuickPrint={quickPrint}
-              onExport={quickExport}
-              onToggleStar={toggleStar}
-              onOpenExternal={quickOpenExternal}
-            />
-          </div>
+            </div>
+          )}
         </div>
       )}
 
