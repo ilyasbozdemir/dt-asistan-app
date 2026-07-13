@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Users, Plus, UserPlus, CheckCircle } from 'lucide-react'
+import { Users, Plus, UserPlus, CheckCircle, Trash2 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PersonelAtaModal } from './components/PersonelAtaModal'
@@ -259,23 +259,45 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
                   key={idx}
                   className="flex flex-col p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-base text-slate-800 dark:text-slate-200">
-                      {uye.personel_id ? (
-                        uye.ad_soyad
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-base text-slate-800 dark:text-slate-200">
+                        {uye.personel_id ? (
+                          uye.ad_soyad
+                        ) : (
+                          <span className="text-slate-400 italic">Boş Kontenjan</span>
+                        )}
+                      </span>
+                      {uye.asil_mi === 1 ? (
+                        <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          Asil
+                        </span>
                       ) : (
-                        <span className="text-slate-400 italic">Boş Kontenjan</span>
+                        <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          Yedek
+                        </span>
                       )}
-                    </span>
-                    {uye.asil_mi === 1 ? (
-                      <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                        Asil
-                      </span>
-                    ) : (
-                      <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                        Yedek
-                      </span>
-                    )}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (confirm('Bu kontenjanı tamamen silmek istediğinize emin misiniz?')) {
+                          const res = await window.electron.ipcRenderer.invoke(
+                            'db:run',
+                            'DELETE FROM TANIM_KomisyonUye WHERE id = ?',
+                            [uye.role_id]
+                          )
+                          if (res.success) {
+                            queryClient.invalidateQueries({
+                              queryKey: ['komisyon_detay', komisyonId]
+                            })
+                          }
+                        }
+                      }}
+                      className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-1.5 rounded-lg transition-colors"
+                      title="Kontenjanı Sil"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-600 dark:text-slate-400 font-medium">

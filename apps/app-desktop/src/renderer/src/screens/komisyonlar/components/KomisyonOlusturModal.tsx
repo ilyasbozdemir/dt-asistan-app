@@ -53,7 +53,7 @@ type KomisyonTipi = keyof typeof KOMISYON_SABLONLARI | "";
 interface UyeRow {
   id: number;
   unvan: string; // Görev unvanı (sabit, readonly)
-  gorevId: number | ""; // DB'deki gorev_id (unvana göre eşleştirilen)
+  gorevId: number | string; // DB'deki gorev_id (unvana göre eşleştirilen)
   personelId: number | null;
   personelAdi: string; // UI'da görüntülemek için
   personelArama: string;
@@ -600,10 +600,10 @@ export function KomisyonOlusturModal({
                       const filtreliPersonel =
                         uye.personelArama.trim().length > 0
                           ? tumPersonel.filter((p) =>
-                            `${p.ad} ${p.soyad} ${p.unvan}`.toLowerCase()
-                              .includes(uye.personelArama.toLowerCase())
+                            `${p.ad} ${p.soyad} ${p.unvan || ""}`.toLocaleLowerCase('tr-TR')
+                              .includes(uye.personelArama.toLocaleLowerCase('tr-TR'))
                           ).slice(0, 8)
-                          : [];
+                          : tumPersonel.slice(0, 8);
 
                       return (
                         <tr
@@ -619,97 +619,44 @@ export function KomisyonOlusturModal({
 
                           {/* Görev Unvanı */}
                           <td className="px-4 py-2.5">
-                            <input
-                              type="text"
+                            <select
                               value={uye.unvan}
                               onChange={(e) =>
                                 handleUnvanChange(uye.id, e.target.value)}
                               onClick={(e) => e.stopPropagation()}
-                              placeholder="Görev unvanı..."
-                              className="w-full bg-transparent border-0 border-b border-dashed border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm py-0.5 focus:outline-none focus:border-blue-400 placeholder:text-slate-400"
-                            />
-                          </td>
-
-                          {/* Personel Seçimi - Arama */}
-                          <td className="px-4 py-2.5">
-                            <div
-                              className="relative"
-                              onClick={(e) => e.stopPropagation()}
+                              className="w-full bg-transparent border-0 border-b border-dashed border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm py-0.5 focus:outline-none focus:border-blue-400"
                             >
-                              {uye.personelId
-                                ? (
-                                  <div className="flex items-center gap-2">
-                                    <span className="flex-1 text-sm text-slate-800 dark:text-slate-200 font-medium">
-                                      {uye.personelAdi}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleUyeChange(
-                                          uye.id,
-                                          "personelId",
-                                          null,
-                                        )}
-                                      className="text-slate-400 hover:text-red-500 transition-colors text-xs"
-                                      title="Personeli kaldır"
-                                    >
-                                      ✕
-                                    </button>
-                                  </div>
-                                )
-                                : (
-                                  <>
-                                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5">
-                                      <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                      <input
-                                        type="text"
-                                        value={uye.personelArama}
-                                        onChange={(e) => {
-                                          handleUyeChange(
-                                            uye.id,
-                                            "personelArama",
-                                            e.target.value,
-                                          );
-                                          setAramaAcik(uye.id);
-                                        }}
-                                        onFocus={() => setAramaAcik(uye.id)}
-                                        placeholder="Personel ara..."
-                                        className="flex-1 bg-transparent text-sm text-slate-800 dark:text-slate-200 focus:outline-none placeholder:text-slate-400 min-w-0"
-                                      />
-                                    </div>
-                                    {aramaAcik === uye.id &&
-                                      filtreliPersonel.length > 0 && (
-                                      <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
-                                        {filtreliPersonel.map((p) => (
-                                          <button
-                                            key={p.id}
-                                            type="button"
-                                            onClick={() =>
-                                              handlePersonelSec(uye.id, p)}
-                                            className="w-full flex flex-col items-start px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-left transition-colors"
-                                          >
-                                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                              {p.ad} {p.soyad}
-                                            </span>
-                                            {p.unvan && (
-                                              <span className="text-xs text-slate-500">
-                                                {p.unvan}
-                                              </span>
-                                            )}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    )}
-                                    {aramaAcik === uye.id &&
-                                      uye.personelArama.trim().length > 0 &&
-                                      filtreliPersonel.length === 0 && (
-                                      <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 px-3 py-2 text-sm text-slate-400">
-                                        Personel bulunamadı.
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                            </div>
+                              <option value="" disabled>Görev seçin...</option>
+                              {gorevler.map((g) => (
+                                <option key={g.id} value={g.ad}>{g.ad}</option>
+                              ))}
+                            </select>
+                          </td>
+                          {/* Personel Seçimi */}
+                          <td className="px-4 py-2.5">
+                            <select
+                              value={uye.personelId || ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) {
+                                  // Clear selection
+                                  setUyeler(uyeler.map(u => u.id === uye.id ? { ...u, personelId: null, personelAdi: "", personelArama: "" } : u));
+                                  return;
+                                }
+                                const pId = parseInt(val);
+                                const p = tumPersonel.find(x => x.id === pId);
+                                if (p) handlePersonelSec(uye.id, p);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-full bg-transparent border-0 border-b border-dashed border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm py-0.5 focus:outline-none focus:border-blue-400"
+                            >
+                              <option value="">-- Personel Seçin --</option>
+                              {tumPersonel.map(p => (
+                                <option key={p.id} value={p.id}>
+                                  {p.ad} {p.soyad} - {p.unvan}
+                                </option>
+                              ))}
+                            </select>
                           </td>
 
                           {/* Asil/Yedek */}
