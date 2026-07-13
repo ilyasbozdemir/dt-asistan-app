@@ -176,70 +176,25 @@ export function MalzemeTablosu({
     }
   };
 
-  const workflowSteps = useMemo(() => {
-    if (!selectedKomisyon || !sablons) return [];
+  const validSelectedKomisyonlar = useMemo(() => {
+    return selectedKomisyonlar.filter(id => dbKomisyonlar.some(k => k.id === id));
+  }, [selectedKomisyonlar, dbKomisyonlar]);
 
-    const getSablonByDosyaAdi = (name: string) => {
-      return sablons.find(
-        (s: any) => s.dosya_adi === name || s.dosya_adi === `${name}.html`,
-      );
-    };
-
-    const steps: { title: string; description: string; sablon: any }[] = [];
-
-    // Her iki komisyon seçeneğinde de görevlendirme onayı var
-    const gorevlendirmeOnayi = getSablonByDosyaAdi(
-      "komisyon-gorevlendirme-onayi",
-    );
-    if (gorevlendirmeOnayi) {
-      steps.push({
-        title: "Komisyon Görevlendirme Onayı",
-        description:
-          "Komisyon üyelerinin atanması için resmi görevlendirme yazısı.",
-        sablon: gorevlendirmeOnayi,
-      });
-    }
-
-    const gorevlendirmeEki = getSablonByDosyaAdi(
-      "komisyon-gorevlendirme-onayi-eki",
-    );
-    if (gorevlendirmeEki) {
-      steps.push({
-        title: "Görevlendirme Onay Eki",
-        description:
-          "Görevlendirilen komisyon üyelerinin listesini içeren onay eki.",
-        sablon: gorevlendirmeEki,
-      });
-    }
-
-    if (selectedKomisyon === "muayene_kabul_tespit") {
-      const muayeneKabulKomisyonu = getSablonByDosyaAdi(
-        "muayene-kabul-komisyonu",
-      );
-      if (muayeneKabulKomisyonu) {
-        steps.push({
-          title: "Muayene Kabul Komisyonu Tutanağı",
-          description:
-            "Muayene ve kabul komisyonu teslim alma ve inceleme belgesi.",
-          sablon: muayeneKabulKomisyonu,
-        });
-      }
-
-      const muayeneKabulTutanagi = getSablonByDosyaAdi(
-        "muayene-kabul-tutanagi",
-      );
-      if (muayeneKabulTutanagi) {
-        steps.push({
-          title: "Muayene Kabul Tutanağı",
-          description:
-            "Malzemenin kabul edildiğine dair nihai komisyon tutanağı.",
-          sablon: muayeneKabulTutanagi,
-        });
+  const komisyonSablons = useMemo(() => {
+    const sablonsToAdd: any[] = [];
+    for (const komisyonId of validSelectedKomisyonlar) {
+      const k = dbKomisyonlar.find((k) => k.id === komisyonId);
+      if (k && k.sablonlar) {
+        for (const s of k.sablonlar) {
+          if (!sablonsToAdd.find((existing) => existing.id === s.id)) {
+            const fullSablon = sablons?.find((fullS: any) => fullS.dosya_adi === s.dosya_adi || fullS.id === s.id) || s;
+            sablonsToAdd.push(fullSablon);
+          }
+        }
       }
     }
-
-    return steps;
-  }, [selectedKomisyon, sablons]);
+    return sablonsToAdd;
+  }, [validSelectedKomisyonlar, dbKomisyonlar, sablons]);
 
   const [belgeMenuOpen, setBelgeMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -293,13 +248,19 @@ export function MalzemeTablosu({
   }, [selectedPresetId, presets, activeStarredDocs]);
 
   const hasStarred = React.useMemo(() => {
-    return stageSablons.some((sablon) => {
+    let baseSablons = [...stageSablons];
+    for (const s of komisyonSablons) {
+      if (!baseSablons.find((existing) => existing.id === s.id)) {
+        baseSablons.push(s);
+      }
+    }
+    return baseSablons.some((sablon) => {
       const cleanName = getCleanName(sablon.ad);
       return starredDocsForFilter.some((d) =>
         normalizeForMatch(d) === normalizeForMatch(cleanName)
       );
     });
-  }, [stageSablons, starredDocsForFilter]);
+  }, [stageSablons, komisyonSablons, starredDocsForFilter]);
 
   const [manualFilter, setManualFilter] = useState<"all" | "starred" | null>(
     null,
@@ -310,16 +271,23 @@ export function MalzemeTablosu({
     : (hasStarred ? "starred" : "all");
 
   const displaySablons = React.useMemo(() => {
+    let baseSablons = [...stageSablons];
+    for (const s of komisyonSablons) {
+      if (!baseSablons.find((existing) => existing.id === s.id)) {
+        baseSablons.push(s);
+      }
+    }
+
     if (filter === "starred") {
-      return stageSablons.filter((sablon) => {
+      return baseSablons.filter((sablon) => {
         const cleanName = getCleanName(sablon.ad);
         return starredDocsForFilter.some(
           (d) => normalizeForMatch(d) === normalizeForMatch(cleanName),
         );
       });
     }
-    return stageSablons;
-  }, [filter, starredDocsForFilter, stageSablons]);
+    return baseSablons;
+  }, [filter, starredDocsForFilter, stageSablons, komisyonSablons]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -533,14 +501,14 @@ export function MalzemeTablosu({
               <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
                 Komisyon Onay Belgeleri
               </span>
-              {selectedKomisyonlar.length > 0 && (
+              {validSelectedKomisyonlar.length > 0 && (
                 <span className="flex items-center gap-1">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                   </span>
                   <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
-                    {selectedKomisyonlar.length} komisyon seçili
+                    {validSelectedKomisyonlar.length} komisyon seçili
                   </span>
                 </span>
               )}
@@ -562,7 +530,7 @@ export function MalzemeTablosu({
             const isDisabled = ciktiLoading || selectedKomisyonlar.length === 0;
 
             return (
-              <div className="mt-1.5 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
+              <div className="mt-1.5 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm space-y-4 animate-in fade-in slide-in-from-top-1">
                 {/* Görevlendirilecek Komisyonlar — DB'den dinamik */}
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
@@ -582,7 +550,7 @@ export function MalzemeTablosu({
                             key={k.id}
                             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all ${
                               selectedKomisyonlar.includes(k.id)
-                                ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20"
+                                ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20 shadow-sm shadow-blue-500/10"
                                 : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
                             }`}
                           >
@@ -619,33 +587,11 @@ export function MalzemeTablosu({
                   <button
                     type="button"
                     onClick={() => setKomisyonPanelOpen(false)}
-                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer font-bold"
                   >
                     Kapat
                   </button>
                   <div className="flex items-center gap-2">
-                    {selectedKomisyonlar.map(komisyonId => {
-                      const k = dbKomisyonlar.find(k => k.id === komisyonId);
-                      if (!k || !k.sablonlar) return null;
-                      return k.sablonlar.map((sablon: any) => (
-                        <button
-                          key={`${k.id}-${sablon.id}`}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={async () => {
-                            await handleKomisyonlarOnayla(selectedKomisyonlar);
-                            if (onSablonClick) {
-                              const foundSablon = sablons?.find((s: any) => s.dosya_adi === sablon.dosya_adi || s.id === sablon.id) || sablon;
-                              onSablonClick(foundSablon, foundSablon.ad);
-                            }
-                          }}
-                          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          {sablon.ad} Önizle
-                        </button>
-                      ));
-                    })}
                     <button
                       type="button"
                       disabled={selectedKomisyonlar.length === 0}
