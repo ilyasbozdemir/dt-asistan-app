@@ -132,7 +132,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     <SubScreen
       title="Teklifler & Piyasa Fiyat Araştırması"
       icon={PackageSearch}
-      description="Piyasa araştırması yapıp birim fiyat tekliflerinizi toplayabilir, komisyon görevlendirme onay belgesi hazırlayabilir ve tüm süreç dökümanlarınızı bu panel üzerinden oluşturup çıktı alabilirsiniz."
+      description="Piyasa araştırması yapıp birim fiyat tekliflerinizi toplayabilir, komisyon görevlendirme onay belgesi hazırlayabilir, fiyat matrisini düzenleyebilir ve süreç şablonlarını listeleyebilirsiniz."
     >
       {/* 1. TUTANAK VE BELGE LİSTESİ DASHBOARD (FORM AÇIK DEĞİLKEN) */}
       {!isFormOpen && (
@@ -145,7 +145,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Fiyat araştırması sonucunda oluşturulan evraklar. Değişiklik
-                yapmak için yeni tutanak oluşturma formunu açabilirsiniz.
+                yapmak için fiyat matrisi formunu açabilir veya süreç
+                şablonlarını aşağıdan görüntüleyebilirsiniz.
               </p>
             </div>
 
@@ -154,7 +155,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               className="flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all h-10 cursor-pointer text-center whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              Yeni Tutanak / Cetvel Oluştur
+              Yeni Tutanak Ekle / Matris Düzenle
             </button>
           </div>
 
@@ -167,8 +168,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                 </div>
                 <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
                   Firmaların teklif ettiği fiyatları girip tutanağı kaydetmek
-                  için "Yeni Tutanak / Cetvel Oluştur" butonuna basarak fiyat
-                  matrisini açabilirsiniz.
+                  için "Yeni Tutanak Ekle / Matris Düzenle" butonuna basarak
+                  fiyat matrisini açabilir veya diğer süreç şablonlarını
+                  aşağıdan görüntüleyebilirsiniz.
                 </p>
               </div>
             )
