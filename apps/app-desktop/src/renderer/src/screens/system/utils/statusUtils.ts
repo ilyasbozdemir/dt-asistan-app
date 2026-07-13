@@ -78,7 +78,7 @@ export const normalizeForMatch = (str: string): string => {
 
 export const STAGES = [
   { key: '1. İhtiyaç Tespiti & Başlangıç', label: 'İhtiyaç Tespiti' },
-  { key: '2. Teklifler & Piyasa Fiyat Araştırması', label: 'Teklifler & Piyasa' },
+  { key: '2. Piyasa Fiyat Araştırması', label: 'Teklifler & Piyasa' },
   { key: '3. Sipariş & Sözleşme', label: 'Sipariş & Sözleşme' },
   { key: '4. Kabul & Ödeme İşlemleri', label: 'Kabul & Ödeme' },
   { key: '5. Klasör & Kapaklar', label: 'Klasör & Kapaklar' }

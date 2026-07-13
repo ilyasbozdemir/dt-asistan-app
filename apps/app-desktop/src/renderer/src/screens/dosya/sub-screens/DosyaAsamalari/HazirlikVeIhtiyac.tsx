@@ -80,7 +80,9 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       (s) =>
         s.kategori === "1-ihtiyac-tespiti-ve-baslangic" ||
         s.kategori === "1. İhtiyaç Tespiti & Başlangıç" ||
-        s.dosya_adi === "dogrudan-temin-onay-belgesi.html",
+        s.dosya_adi === "dogrudan-temin-onay-belgesi.html" ||
+        s.dosya_adi === "komisyon-gorevlendirme-onayi.html" ||
+        s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi.html",
     )
     .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
 
