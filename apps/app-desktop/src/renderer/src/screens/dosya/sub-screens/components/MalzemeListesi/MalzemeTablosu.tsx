@@ -8,6 +8,7 @@ import {
   Plus,
   Printer,
   Trash2,
+  Users,
   X,
 } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
@@ -540,16 +541,26 @@ export function MalzemeTablosu({
             <Plus className="w-3.5 h-3.5" />
             İhtiyaç Kalemi Ekle
           </button>
+        </div>
+      </div>
 
-          {items.length > 0 && activeDosya?.tur === "mal" && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+      {/* Komisyon İşlemleri Barı */}
+      {items.length > 0 && activeDosya?.tur === "mal" && (
+        <div className="mx-4 mb-4 p-3.5 bg-slate-50/50 dark:bg-slate-800/10 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Sol Kısım: Komisyon Atama */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Users className="w-4 h-4 text-blue-500" />
+              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
                 Komisyon Atama:
               </span>
+            </div>
+
+            <div className="flex items-center gap-2">
               <select
                 value={tempSelectedKomisyon}
                 onChange={(e) => setTempSelectedKomisyon(e.target.value)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors min-w-[240px]"
               >
                 <option value="">Komisyon Seçin...</option>
                 <option value="muayene_kabul_tespit">
@@ -559,6 +570,7 @@ export function MalzemeTablosu({
                   Fiyat Araştırma ve Muayene Komisyonu
                 </option>
               </select>
+
               {tempSelectedKomisyon !== selectedKomisyon && (
                 <button
                   type="button"
@@ -570,74 +582,74 @@ export function MalzemeTablosu({
                 </button>
               )}
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Komisyon Süreç Adımları */}
-      {items.length > 0 && selectedKomisyon && activeDosya?.tur === "mal" && (
-        <div className="mx-4 mb-4 p-3.5 bg-slate-50/50 dark:bg-slate-800/10 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75">
-                </span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500">
-                </span>
-              </span>
-              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                Komisyon Belgeleri:
-              </span>
-            </div>
-
-            <select
-              value={selectedStepIdx}
-              onChange={(e) => setSelectedStepIdx(e.target.value)}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors w-full sm:max-w-xs"
-            >
-              <option value="">-- Bir belge seçin --</option>
-              {workflowSteps.map((step, idx) => (
-                <option key={step.sablon.id} value={String(idx)}>
-                  {idx + 1}. {step.title}
-                </option>
-              ))}
-            </select>
           </div>
 
-          {selectedStepIdx !== "" && workflowSteps[Number(selectedStepIdx)] && (() => {
-            const step = workflowSteps[Number(selectedStepIdx)];
-            const isDisabled = ciktiLoading ||
-              (isSablonDisabled && isSablonDisabled(step.sablon.ad));
-
-            return (
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() =>
-                    onSablonClick &&
-                    onSablonClick(step.sablon, step.sablon.ad)}
-                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm shadow-blue-500/10"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  Önizle
-                </button>
-
-                <BelgeAksiyonlari
-                  onPreview={() =>
-                    onSablonClick &&
-                    onSablonClick(step.sablon, step.sablon.ad)}
-                  onQuickPrint={() =>
-                    onQuickPrint && onQuickPrint(step.sablon)}
-                  onExport={(fmt) => onExport && onExport(step.sablon, fmt)}
-                  onOpenExternal={() =>
-                    onOpenExternal && onOpenExternal(step.sablon)}
-                  disabled={isDisabled}
-                  docName={step.sablon.ad}
-                />
+          {/* Sağ Kısım: Seçilen Komisyon Belgeleri */}
+          {selectedKomisyon && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 lg:justify-end lg:border-l lg:border-slate-200 dark:lg:border-slate-800 lg:pl-4">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75">
+                  </span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500">
+                  </span>
+                </span>
+                <span className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
+                  Komisyon Belgeleri:
+                </span>
               </div>
-            );
-          })()}
+
+              <select
+                value={selectedStepIdx}
+                onChange={(e) => setSelectedStepIdx(e.target.value)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none cursor-pointer focus:border-blue-500 transition-colors w-full sm:max-w-xs"
+              >
+                <option value="">-- Bir belge seçin --</option>
+                {workflowSteps.map((step, idx) => (
+                  <option key={step.sablon.id} value={String(idx)}>
+                    {idx + 1}. {step.title}
+                  </option>
+                ))}
+              </select>
+
+              {selectedStepIdx !== "" &&
+                workflowSteps[Number(selectedStepIdx)] && (() => {
+                  const step = workflowSteps[Number(selectedStepIdx)];
+                  const isDisabled = ciktiLoading ||
+                    (isSablonDisabled && isSablonDisabled(step.sablon.ad));
+
+                  return (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() =>
+                          onSablonClick &&
+                          onSablonClick(step.sablon, step.sablon.ad)}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-sm shadow-blue-500/10"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        Önizle
+                      </button>
+
+                      <BelgeAksiyonlari
+                        onPreview={() =>
+                          onSablonClick &&
+                          onSablonClick(step.sablon, step.sablon.ad)}
+                        onQuickPrint={() =>
+                          onQuickPrint && onQuickPrint(step.sablon)}
+                        onExport={(fmt) =>
+                          onExport && onExport(step.sablon, fmt)}
+                        onOpenExternal={() =>
+                          onOpenExternal && onOpenExternal(step.sablon)}
+                        disabled={isDisabled}
+                        docName={step.sablon.ad}
+                      />
+                    </div>
+                  );
+                })()}
+            </div>
+          )}
         </div>
       )}
 
@@ -665,6 +677,7 @@ export function MalzemeTablosu({
             <table className="w-full border-collapse text-left text-xs">
               <thead className="sticky top-0 bg-slate-50 dark:bg-slate-950 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
                 <tr>
+                  <th className="p-3 pl-4">Sıra No</th>
                   <th className="p-3 pl-4">Kodu</th>
                   <th className="p-3 pl-4">İhtiyaç Kalemi Adı</th>
                   <th className="p-3">Tür</th>
@@ -675,13 +688,17 @@ export function MalzemeTablosu({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-                {items.map((item: any) => {
+                {items.map((item: any, index: number) => {
                   const isEditing = editingId === item.id;
                   return (
                     <tr
                       key={item.id}
                       className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10"
                     >
+                      <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                        {index + 1}
+                      </td>
+
                       <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
                         {item.tasinir_kodu || "-"}
                       </td>
