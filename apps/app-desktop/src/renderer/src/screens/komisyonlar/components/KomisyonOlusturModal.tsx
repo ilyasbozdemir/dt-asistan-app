@@ -70,6 +70,7 @@ export function KomisyonOlusturModal({
   const [uyeler, setUyeler] = useState<UyeRow[]>([]);
   const [seciliSablonlar, setSeciliSablonlar] = useState<number[]>([]);
   const [aramaAcik, setAramaAcik] = useState<number | null>(null); // hangi satırın araması açık
+  const [sablonArama, setSablonArama] = useState("");
 
   // Modal açılınca default komisyonları DB'ye seed et (yoksa oluştur)
   useEffect(() => {
@@ -80,7 +81,11 @@ export function KomisyonOlusturModal({
         const ipc = (window as any).electron.ipcRenderer;
 
         for (const [, sablon] of Object.entries(KOMISYON_SABLONLARI)) {
-          const s = sablon as { dbId: number; label: string; roller: readonly string[] };
+          const s = sablon as {
+            dbId: number;
+            label: string;
+            roller: readonly string[];
+          };
 
           // Komisyon var mı kontrol et
           const check = await ipc.invoke(
@@ -107,7 +112,10 @@ export function KomisyonOlusturModal({
               "SELECT id FROM TANIM_KomisyonGorevi WHERE ad = ? LIMIT 1",
               [rolAd],
             );
-            if (gorevCheck.success && gorevCheck.data && gorevCheck.data.length > 0) {
+            if (
+              gorevCheck.success && gorevCheck.data &&
+              gorevCheck.data.length > 0
+            ) {
               gorevId = gorevCheck.data[0].id;
             } else {
               // Yeni gorev kaydet
@@ -341,6 +349,7 @@ export function KomisyonOlusturModal({
     setUyeler([]);
     setSeciliSablonlar([]);
     setAramaAcik(null);
+    setSablonArama("");
   };
 
   const saveMutation = useMutation({
@@ -738,43 +747,76 @@ export function KomisyonOlusturModal({
 
         {/* Şablonlar */}
         <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-          <div className="mb-4">
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-              Belge ve Şablonlar
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Bu komisyonun üretebileceği belgeleri seçin.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                Belge Şablonları
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Bu komisyonun üretebileceği belgeleri seçin.
+              </p>
+            </div>
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                type="text"
+                placeholder="Şablon ara..."
+                value={sablonArama}
+                onChange={(e) => setSablonArama(e.target.value)}
+                className="pl-9 h-9 text-sm w-full"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-            {tumSablonlar.map((sablon: any) => (
-              <label
-                key={sablon.id}
-                className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-colors ${
-                  seciliSablonlar.includes(sablon.id)
-                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-500/50"
-                    : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                }`}
-              >
-                <div className="pt-0.5">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300"
-                    checked={seciliSablonlar.includes(sablon.id)}
-                    onChange={() => handleSablonToggle(sablon.id)}
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                    {sablon.ad}
+            {tumSablonlar
+              .filter((sablon: any) =>
+                sablon.ad.toLowerCase().includes(sablonArama.toLowerCase()) ||
+                (sablon.aciklama &&
+                  sablon.aciklama.toLowerCase().includes(
+                    sablonArama.toLowerCase(),
+                  ))
+              )
+              .map((sablon: any) => (
+                <label
+                  key={sablon.id}
+                  className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-colors ${
+                    seciliSablonlar.includes(sablon.id)
+                      ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-500/50"
+                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  }`}
+                >
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300"
+                      checked={seciliSablonlar.includes(sablon.id)}
+                      onChange={() => handleSablonToggle(sablon.id)}
+                    />
                   </div>
-                  <div className="text-xs text-slate-500 line-clamp-1">
-                    {sablon.aciklama || "Şablon"}
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      {sablon.ad}
+                    </div>
+                    <div className="text-xs text-slate-500 line-clamp-1">
+                      {sablon.aciklama || "Şablon"}
+                    </div>
                   </div>
+                </label>
+              ))}
+            {tumSablonlar.length > 0 &&
+              tumSablonlar.filter((sablon: any) =>
+                  sablon.ad.toLowerCase().includes(sablonArama.toLowerCase()) ||
+                  (sablon.aciklama &&
+                    sablon.aciklama.toLowerCase().includes(
+                      sablonArama.toLowerCase(),
+                    ))
+                ).length === 0 &&
+              (
+                <div className="col-span-full text-sm text-slate-500 text-center py-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 border-dashed">
+                  Aramanıza uygun şablon bulunamadı.
                 </div>
-              </label>
-            ))}
+              )}
             {tumSablonlar.length === 0 && (
               <div className="col-span-full text-sm text-slate-500 text-center py-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
                 Sistemde tanımlı şablon bulunamadı.

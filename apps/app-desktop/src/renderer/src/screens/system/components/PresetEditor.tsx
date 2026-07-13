@@ -94,7 +94,9 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
               sablon.aciklama,
             );
             const isStarred = starredList.some(
-              (d) => normalizeForMatch(d) === normalizeForMatch(cleanName),
+              (d) =>
+                d === sablon.dosya_adi ||
+                normalizeForMatch(d) === normalizeForMatch(cleanName),
             );
             return (
               <div
@@ -109,7 +111,7 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
                   <input
                     type="checkbox"
                     checked={isStarred}
-                    onChange={() => toggleStar(sablon.ad)}
+                    onChange={() => toggleStar(sablon.dosya_adi)}
                     className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-slate-800 dark:bg-slate-700 dark:border-slate-600 focus:ring-2 cursor-pointer"
                   />
 
@@ -168,7 +170,7 @@ export const PresetEditor: React.FC<PresetEditorProps> = ({
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      toggleStar(sablon.ad);
+                      toggleStar(sablon.dosya_adi);
                     }}
                     className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded shrink-0 cursor-pointer"
                     title={isStarred
