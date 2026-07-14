@@ -10,11 +10,13 @@ export function TurBadge({ tur }: { tur: string }): React.ReactElement {
     },
     hizmet: {
       label: "Hizmet",
-      cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+      cls:
+        "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
     },
     yapim_isi: {
       label: "Yapım",
-      cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      cls:
+        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
     },
     danismanlik: {
       label: "Danışmanlık",

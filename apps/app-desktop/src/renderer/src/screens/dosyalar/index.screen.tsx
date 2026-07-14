@@ -311,8 +311,8 @@ export default function DosyalarScreen(): React.ReactNode {
         totalCount={dosyalar.length}
       />
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-5 overflow-hidden">
-        <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col gap-5 overflow-hidden">
+        <div className="w-full flex flex-col h-full overflow-hidden">
           <DosyalarList
             isLoadingDosyalar={isLoadingDosyalar}
             filteredDosyalar={filteredDosyalar}
@@ -329,37 +329,23 @@ export default function DosyalarScreen(): React.ReactNode {
             getDosyaNoLabel={getDosyaNoLabel}
             formatMoney={formatMoney}
             formatDate={formatDate}
+            handleDelete={handleDelete}
+            handleHardDelete={handleHardDelete}
+            handleUpdateStatus={handleUpdateStatus}
+            handleEkapGonder={handleEkapGonder}
+            handleKilidiAc={handleKilidiAc}
+            logActivity={logActivity}
+            handleOpenAI={handleOpenAI}
+            handleOpenInNewWindow={(dosya) => {
+              window.electron?.ipcRenderer.send("window:open-secondary", {
+                path: "/dosyalar",
+                search: `?id=${dosya.id}&mode=window`,
+                title: `DT: ${dosya.konu}`,
+              });
+            }}
           />
         </div>
-
-        <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col h-full">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col h-full shadow-sm overflow-hidden">
-            <DosyaDetailPanel
-              selectedDosya={selectedDosya}
-              isMenuOpen={isMenuOpen}
-              setIsMenuOpen={setIsMenuOpen}
-              navigate={navigate}
-              isWindowMode={isWindowMode}
-              handleOpenInNewWindow={handleOpenInNewWindow}
-              handleUpdateStatus={handleUpdateStatus}
-              handleEkapGonder={handleEkapGonder}
-              handleKilidiAc={handleKilidiAc}
-              updateDosya={updateDosya}
-              logActivity={logActivity}
-              handleDelete={handleDelete}
-              handleHardDelete={handleHardDelete}
-              getDosyaNoLabel={getDosyaNoLabel}
-              formatMoney={formatMoney}
-              formatDate={formatDate}
-              setActiveDosyaId={setActiveDosyaId}
-              handleOpenAI={handleOpenAI}
-              setSelectedFileForAI={setSelectedFileForAI}
-              setShowAIModal={setShowAIModal}
-            />
-          </div>
-        </div>
-      </div>
-
+      </div>{" "}
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
           isOpen={true}

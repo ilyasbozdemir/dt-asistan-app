@@ -1,20 +1,20 @@
 import React from "react";
 import { cn } from "../../../utils/cn";
 import {
-  FileText,
-  Sparkles,
-  MoreVertical,
-  Edit,
-  ExternalLink,
+  AlertCircle,
+  BookOpen,
+  Building2,
   CheckCircle2,
   Clock,
-  Lock,
-  Unlock,
-  Trash2,
-  Building2,
-  BookOpen,
-  AlertCircle,
+  Edit,
+  ExternalLink,
+  FileText,
   FolderOpen,
+  Lock,
+  MoreVertical,
+  Sparkles,
+  Trash2,
+  Unlock,
 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { DurumBadge } from "./Badges";
@@ -73,9 +73,9 @@ export function DosyaDetailPanel({
           Dosya Seçilmedi
         </h3>
         <p className="text-[11px] text-slate-500 max-w-xs mt-1.5 mb-6">
-          İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz doğrudan
-          temin dosyasını soldaki listeden seçin. Veya genel süreçler hakkında Yapay
-          Zeka'ya danışın.
+          İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz
+          doğrudan temin dosyasını soldaki listeden seçin. Veya genel süreçler
+          hakkında Yapay Zeka'ya danışın.
         </p>
         <button
           onClick={() => {
@@ -122,19 +122,19 @@ export function DosyaDetailPanel({
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 py-1.5 flex flex-col text-xs font-semibold shadow-xl">
                   {selectedDosya.is_deleted !== 1 &&
                     selectedDosya.is_ekap_sent !== 1 && (
-                      <button
-                        onClick={() => {
-                          setIsMenuOpen(false);
-                          navigate({
-                            to: `/dosyalar/yeni?id=${selectedDosya.id}`,
-                          });
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Edit size={14} className="text-slate-400" />
-                        Düzenle
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        navigate({
+                          to: `/dosyalar/yeni?id=${selectedDosya.id}`,
+                        });
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <Edit size={14} className="text-slate-400" />
+                      Düzenle
+                    </button>
+                  )}
 
                   {!isWindowMode && (
                     <button
@@ -152,75 +152,75 @@ export function DosyaDetailPanel({
                   {selectedDosya.is_deleted !== 1 &&
                     selectedDosya.is_ekap_sent !== 1 &&
                     selectedDosya.status !== "tamamlandi" && (
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        if ((selectedDosya.durum_asama_id || 1) < 5) {
+                          alert(
+                            "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.",
+                          );
+                          return;
+                        }
+                        handleUpdateStatus(selectedDosya.id, "tamamlandi");
+                      }}
+                      disabled={(selectedDosya.durum_asama_id || 1) < 5}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <CheckCircle2 size={14} className="text-emerald-500" />
+                      Tamamlandı İşaretle
+                    </button>
+                  )}
+
+                  {selectedDosya.is_deleted !== 1 &&
+                    selectedDosya.is_ekap_sent !== 1 &&
+                    selectedDosya.status === "tamamlandi" && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          handleUpdateStatus(
+                            selectedDosya.id,
+                            "devam_ediyor",
+                          );
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Clock size={14} className="text-blue-500" />
+                        Aktife Al
+                      </button>
                       <button
                         onClick={() => {
                           setIsMenuOpen(false);
                           if ((selectedDosya.durum_asama_id || 1) < 5) {
                             alert(
-                              "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.",
+                              "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.",
                             );
                             return;
                           }
-                          handleUpdateStatus(selectedDosya.id, "tamamlandi");
+                          handleEkapGonder(selectedDosya.id);
                         }}
                         disabled={(selectedDosya.durum_asama_id || 1) < 5}
                         className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        <CheckCircle2 size={14} className="text-emerald-500" />
-                        Tamamlandı İşaretle
+                        <Lock size={14} className="text-amber-500" />
+                        Kilitle (EKAP)
                       </button>
-                    )}
-
-                  {selectedDosya.is_deleted !== 1 &&
-                    selectedDosya.is_ekap_sent !== 1 &&
-                    selectedDosya.status === "tamamlandi" && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            handleUpdateStatus(
-                              selectedDosya.id,
-                              "devam_ediyor",
-                            );
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
-                        >
-                          <Clock size={14} className="text-blue-500" />
-                          Aktife Al
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            if ((selectedDosya.durum_asama_id || 1) < 5) {
-                              alert(
-                                "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.",
-                              );
-                              return;
-                            }
-                            handleEkapGonder(selectedDosya.id);
-                          }}
-                          disabled={(selectedDosya.durum_asama_id || 1) < 5}
-                          className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                        >
-                          <Lock size={14} className="text-amber-500" />
-                          Kilitle (EKAP)
-                        </button>
-                      </>
-                    )}
+                    </>
+                  )}
 
                   {selectedDosya.is_deleted !== 1 &&
                     selectedDosya.is_ekap_sent === 1 && (
-                      <button
-                        onClick={() => {
-                          setIsMenuOpen(false);
-                          handleKilidiAc(selectedDosya.id);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Unlock size={14} className="text-amber-500" />
-                        Kilidi Aç
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        handleKilidiAc(selectedDosya.id);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <Unlock size={14} className="text-amber-500" />
+                      Kilidi Aç
+                    </button>
+                  )}
 
                   {selectedDosya.is_deleted === 1 && (
                     <button
@@ -252,20 +252,20 @@ export function DosyaDetailPanel({
 
                   {selectedDosya.is_deleted !== 1 &&
                     selectedDosya.is_ekap_sent !== 1 && (
-                      <>
-                        <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
-                        <button
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            handleDelete(selectedDosya.id);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
-                        >
-                          <Trash2 size={14} />
-                          Arşivle / Sil
-                        </button>
-                      </>
-                    )}
+                    <>
+                      <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          handleDelete(selectedDosya.id);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                        Arşivle / Sil
+                      </button>
+                    </>
+                  )}
 
                   {import.meta.env.DEV && (
                     <>
@@ -277,8 +277,26 @@ export function DosyaDetailPanel({
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
                       >
-                        <Trash2 size={14} />
+                        <AlertCircle size={14} />
                         Kalıcı Sil (Dev Mode)
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          if (
+                            confirm(
+                              "Tüm dosyaları kalıcı olarak silmek istediğinize emin misiniz? (DEV MODE TEST)",
+                            )
+                          ) {
+                            alert(
+                              "Dev mode: Toplu silme fonksiyonu tetiklendi.",
+                            );
+                          }
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                        Toplu Sil (Dev Mode)
                       </button>
                     </>
                   )}
@@ -304,11 +322,13 @@ export function DosyaDetailPanel({
           title={selectedDosya.konu}
         >
           {selectedDosya.konu}
-          {selectedDosya.tekrar_no && selectedDosya.tekrar_no > 1 ? (
-            <span className="ml-1.5 text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
-              #{selectedDosya.tekrar_no}
-            </span>
-          ) : null}
+          {selectedDosya.tekrar_no && selectedDosya.tekrar_no > 1
+            ? (
+              <span className="ml-1.5 text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
+                #{selectedDosya.tekrar_no}
+              </span>
+            )
+            : null}
         </h2>
         {selectedDosya.temin_no && (
           <span className="mt-1.5 inline-block text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -337,15 +357,13 @@ export function DosyaDetailPanel({
           <DetailField
             icon={<FileText size={11} />}
             label="Tür"
-            value={
-              selectedDosya.tur === "mal"
-                ? "Mal Alımı"
-                : selectedDosya.tur === "hizmet"
-                ? "Hizmet Alımı"
-                : selectedDosya.tur === "yapim_isi"
-                ? "Yapım İşi"
-                : "Danışmanlık"
-            }
+            value={selectedDosya.tur === "mal"
+              ? "Mal Alımı"
+              : selectedDosya.tur === "hizmet"
+              ? "Hizmet Alımı"
+              : selectedDosya.tur === "yapim_isi"
+              ? "Yapım İşi"
+              : "Danışmanlık"}
           />
           <DetailField
             icon={<BookOpen size={11} />}
