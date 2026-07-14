@@ -26,6 +26,7 @@ import {
   Trash2,
   TrendingUp,
   Unlock,
+  MoreVertical,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useWorkspaceStore } from "../../store/workspaceStore";
@@ -141,6 +142,13 @@ export default function DosyalarScreen(): React.ReactNode {
         : [...prev, baseKonu]
     );
   };
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Close menu when active file changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [activeDosyaId]);
 
   // Dinamik tab label kapatıldı - Kullanıcı isteği: farklı sekme adı verme
   useEffect(() => {
@@ -1020,18 +1028,169 @@ export default function DosyalarScreen(): React.ReactNode {
                             ? "TAMAMLANMIŞ DOSYA"
                             : "AKTİF DOĞRUDAN TEMİN DOSYASI"}
                         </span>
-                        <div className="shrink-0 mt-0.5 flex flex-wrap items-center gap-2">
-                          {selectedDosya.is_ekap_sent === 1 && (
-                            <span className="bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800 text-[9px] font-bold">
-                              EKAP İKN: {selectedDosya.ekap_no || "-"}
-                            </span>
+                        <div className="flex items-center gap-2 relative">
+                          <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          
+                          {isMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 py-1.5 flex flex-col text-xs font-semibold shadow-xl">
+                              {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && (
+                                <button
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    navigate({ to: `/dosyalar/yeni?id=${selectedDosya.id}` });
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Edit size={14} className="text-slate-400" />
+                                  Düzenle
+                                </button>
+                              )}
+                              
+                              {!isWindowMode && (
+                                <button
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    handleOpenInNewWindow();
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <ExternalLink size={14} className="text-slate-400" />
+                                  Yeni Pencerede Aç
+                                </button>
+                              )}
+
+                              {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && selectedDosya.status !== "tamamlandi" && (
+                                <button
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    if ((selectedDosya.durum_asama_id || 1) < 5) {
+                                      alert("Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.");
+                                      return;
+                                    }
+                                    handleUpdateStatus(selectedDosya.id, "tamamlandi");
+                                  }}
+                                  disabled={(selectedDosya.durum_asama_id || 1) < 5}
+                                  className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                >
+                                  <CheckCircle2 size={14} className="text-emerald-500" />
+                                  Tamamlandı İşaretle
+                                </button>
+                              )}
+
+                              {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && selectedDosya.status === "tamamlandi" && (
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      setIsMenuOpen(false);
+                                      handleUpdateStatus(selectedDosya.id, "devam_ediyor");
+                                    }}
+                                    className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <Clock size={14} className="text-blue-500" />
+                                    Aktife Al
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setIsMenuOpen(false);
+                                      if ((selectedDosya.durum_asama_id || 1) < 5) {
+                                        alert("Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.");
+                                        return;
+                                      }
+                                      handleEkapGonder(selectedDosya.id);
+                                    }}
+                                    disabled={(selectedDosya.durum_asama_id || 1) < 5}
+                                    className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                  >
+                                    <Lock size={14} className="text-amber-500" />
+                                    Kilitle (EKAP)
+                                  </button>
+                                </>
+                              )}
+
+                              {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent === 1 && (
+                                <button
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    handleKilidiAc(selectedDosya.id);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Unlock size={14} className="text-amber-500" />
+                                  Kilidi Aç
+                                </button>
+                              )}
+
+                              {selectedDosya.is_deleted === 1 && (
+                                <button
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    handleUpdateStatus(selectedDosya.id, "devam_ediyor").then(() => {
+                                      updateDosya({ id: selectedDosya.id, is_deleted: 0 });
+                                      logActivity(
+                                        "Dosya Geri Alındı",
+                                        `${selectedDosya.temin_no || "NO BELİRSİZ"} numaralı silinmiş dosya geri alındı.`,
+                                        "info"
+                                      );
+                                    });
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-blue-600 dark:text-blue-400 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Edit size={14} />
+                                  Silinmişi Geri Al
+                                </button>
+                              )}
+
+                              {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && (
+                                <>
+                                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
+                                  <button
+                                    onClick={() => {
+                                      setIsMenuOpen(false);
+                                      handleDelete(selectedDosya.id);
+                                    }}
+                                    className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <Trash2 size={14} />
+                                    Arşivle / Sil
+                                  </button>
+                                </>
+                              )}
+
+                              {import.meta.env.DEV && (
+                                <>
+                                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
+                                  <button
+                                    onClick={() => {
+                                      setIsMenuOpen(false);
+                                      handleHardDelete(selectedDosya.id);
+                                    }}
+                                    className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
+                                  >
+                                    <Trash2 size={14} />
+                                    Kalıcı Sil (Dev Mode)
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           )}
-                          <DurumBadge
-                            durumAsamaId={selectedDosya.durum_asama_id}
-                            isDeleted={selectedDosya.is_deleted}
-                            status={selectedDosya.status}
-                          />
                         </div>
+                      </div>
+                      <div className="shrink-0 mt-0.5 flex flex-wrap items-center gap-2">
+                        {selectedDosya.is_ekap_sent === 1 && (
+                          <span className="bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800 text-[9px] font-bold">
+                            EKAP İKN: {selectedDosya.ekap_no || "-"}
+                          </span>
+                        )}
+                        <DurumBadge
+                          durumAsamaId={selectedDosya.durum_asama_id}
+                          isDeleted={selectedDosya.is_deleted}
+                          status={selectedDosya.status}
+                        />
                       </div>
                     </div>
                     <h2
@@ -1210,161 +1369,6 @@ export default function DosyalarScreen(): React.ReactNode {
                         <FolderOpen size={14} />
                         Dosyayı Aç
                       </button>
-                    )}
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedDosya.is_deleted !== 1 &&
-                        selectedDosya.is_ekap_sent !== 1 && (
-                        <button
-                          onClick={() =>
-                            navigate({
-                              to: `/dosyalar/yeni?id=${selectedDosya.id}`,
-                            })}
-                          className="px-4 py-2.5 bg-bg-200 border border-bg-300 hover:bg-bg-300 text-text-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Edit size={14} />
-                          Düzenle
-                        </button>
-                      )}
-                      {selectedDosya.is_deleted !== 1 &&
-                        selectedDosya.is_ekap_sent !== 1 && (
-                        <button
-                          onClick={() => handleDelete(selectedDosya.id)}
-                          className="px-4 py-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          title="Dosyayı Arşivler (Soft Delete)"
-                        >
-                          <Trash2 size={14} />
-                          Arşivle
-                        </button>
-                      )}
-                      {/* Sadece Geliştirme Ortamında Gözüken Kalıcı Sil Butonu */}
-                      {import.meta.env.DEV && (
-                        <button
-                          onClick={() => handleHardDelete(selectedDosya.id)}
-                          className="col-span-2 px-4 py-2.5 bg-rose-100 dark:bg-rose-900/40 border border-rose-300 dark:border-rose-700/60 hover:bg-rose-200 dark:hover:bg-rose-800/60 text-rose-700 dark:text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          title="Veritabanından Kalıcı Olarak Siler"
-                        >
-                          <Trash2 size={14} />
-                          Kalıcı Sil (Dev Mode)
-                        </button>
-                      )}
-                      {selectedDosya.is_deleted !== 1 &&
-                        selectedDosya.is_ekap_sent !== 1 &&
-                        selectedDosya.status !== "tamamlandi" && (
-                        <button
-                          onClick={() => {
-                            if ((selectedDosya.durum_asama_id || 1) < 5) {
-                              alert(
-                                "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.",
-                              );
-                              return;
-                            }
-                            handleUpdateStatus(selectedDosya.id, "tamamlandi");
-                          }}
-                          disabled={(selectedDosya.durum_asama_id || 1) < 5}
-                          className="col-span-2 px-4 py-2.5 bg-primary-200 border border-primary-300 hover:bg-primary-300 text-bg-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={(selectedDosya.durum_asama_id || 1) < 5
-                            ? "Süreçler tamamlanmadan tamamlandı işaretlenemez"
-                            : ""}
-                        >
-                          <CheckCircle2 size={14} />
-                          Tamamlandı İşaretle
-                        </button>
-                      )}
-                      {selectedDosya.is_deleted !== 1 &&
-                        selectedDosya.is_ekap_sent !== 1 &&
-                        selectedDosya.status === "tamamlandi" && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleUpdateStatus(
-                                selectedDosya.id,
-                                "devam_ediyor",
-                              )}
-                            className="px-4 py-2.5 bg-primary-100 border border-primary-200 hover:bg-primary-200 text-primary-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <Clock size={14} />
-                            Aktife Al
-                          </button>
-                          <button
-                            onClick={() => {
-                              if ((selectedDosya.durum_asama_id || 1) < 5) {
-                                alert(
-                                  "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.",
-                                );
-                                return;
-                              }
-                              handleEkapGonder(selectedDosya.id);
-                            }}
-                            disabled={(selectedDosya.durum_asama_id || 1) < 5}
-                            className="px-4 py-2.5 bg-bg-200 border border-bg-300 hover:bg-bg-300 text-text-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={(selectedDosya.durum_asama_id || 1) < 5
-                              ? "Süreçler tamamlanmadan kilitleme yapılamaz"
-                              : ""}
-                          >
-                            <Lock size={14} />
-                            Kilitle (EKAP)
-                          </button>
-                        </>
-                      )}
-                      {selectedDosya.is_deleted !== 1 &&
-                        selectedDosya.is_ekap_sent === 1 && (
-                        <button
-                          onClick={() => handleKilidiAc(selectedDosya.id)}
-                          className="col-span-2 px-4 py-2.5 bg-bg-200 border border-bg-300 hover:bg-bg-300 text-text-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Unlock size={14} />
-                          Kilidi Aç
-                        </button>
-                      )}
-                      {selectedDosya.is_deleted === 1 && (
-                        <Button
-                          asChild
-                          desc={`${
-                            selectedDosya.temin_no || "Dosya"
-                          } Silinmişi Geri Al (Buton Tıklaması)`}
-                        >
-                          <button
-                            onClick={() =>
-                              handleUpdateStatus(
-                                selectedDosya.id,
-                                "devam_ediyor",
-                              ).then(() => {
-                                updateDosya({
-                                  id: selectedDosya.id,
-                                  is_deleted: 0,
-                                });
-                                logActivity(
-                                  "Dosya Geri Alındı",
-                                  `${
-                                    selectedDosya.temin_no || "NO BELİRSİZ"
-                                  } numaralı silinmiş dosya geri alındı.`,
-                                  "info",
-                                );
-                              })}
-                            className="col-span-2 px-4 py-2.5 bg-primary-100 border border-primary-200 hover:bg-primary-200 text-primary-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <Edit size={14} />
-                            Silinmişi Geri Al
-                          </button>
-                        </Button>
-                      )}
-                    </div>
-
-                    {!isWindowMode && (
-                      <Button
-                        asChild
-                        desc={`${
-                          selectedDosya.temin_no || "Dosya"
-                        } Yeni Pencerede Aç (Buton Tıklaması)`}
-                      >
-                        <button
-                          onClick={handleOpenInNewWindow}
-                          className="w-full px-4 py-2.5 bg-primary-100 border border-primary-200 hover:bg-primary-200 text-primary-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <ExternalLink size={14} />
-                          Yeni Pencerede Aç
-                        </button>
-                      </Button>
                     )}
 
                     {/* YAPAY ZEKA ASİSTANI BUTONU */}

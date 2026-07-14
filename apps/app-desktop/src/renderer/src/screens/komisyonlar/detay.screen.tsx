@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCircle, Plus, Trash2, UserPlus, Users } from "lucide-react";
+import { CheckCircle, Plus, Trash2, UserPlus, Users, Grid, List } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PersonelAtaModal } from "./components/PersonelAtaModal";
@@ -28,6 +28,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
 
   const [isAtaModalOpen, setIsAtaModalOpen] = useState(false);
   const [ataRoleId, setAtaRoleId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   const [isAddingUye, setIsAddingUye] = useState(false);
   const [newGorevId, setNewGorevId] = useState<number | null>(null);
@@ -162,6 +163,22 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
             Görevli Personeller
           </h2>
           <div className="flex items-center gap-2">
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === "grid" ? "bg-white dark:bg-slate-700 shadow-sm text-blue-600" : "text-slate-500 hover:text-slate-700 dark:text-slate-400"}`}
+                title="Grid Görünümü"
+              >
+                <Grid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === "table" ? "bg-white dark:bg-slate-700 shadow-sm text-blue-600" : "text-slate-500 hover:text-slate-700 dark:text-slate-400"}`}
+                title="Tablo Görünümü"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
             <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
               Toplam {komisyon.uyeler?.length || 0} Kontenjan
             </span>
@@ -236,137 +253,227 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {komisyon.uyeler && komisyon.uyeler.length > 0
             ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {komisyon.uyeler.map((uye: KomisyonUyeInfo, idx: number) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-base text-slate-800 dark:text-slate-200">
-                          {uye.personel_id
+              viewMode === "grid" ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {komisyon.uyeler.map((uye: KomisyonUyeInfo, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-base text-slate-800 dark:text-slate-200">
+                            {uye.personel_id
+                              ? (
+                                uye.ad_soyad
+                              )
+                              : (
+                                <span className="text-slate-400 italic">
+                                  Boş Kontenjan
+                                </span>
+                              )}
+                          </span>
+                          {uye.asil_mi === 1
                             ? (
-                              uye.ad_soyad
+                              <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                Asil
+                              </span>
                             )
                             : (
-                              <span className="text-slate-400 italic">
-                                Boş Kontenjan
+                              <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                Yedek
                               </span>
                             )}
-                        </span>
-                        {uye.asil_mi === 1
-                          ? (
-                            <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                              Asil
-                            </span>
-                          )
-                          : (
-                            <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                              Yedek
-                            </span>
-                          )}
-                      </div>
-                      <button
-                        onClick={async () => {
-                          if (
-                            confirm(
-                              "Bu kontenjanı tamamen silmek istediğinize emin misiniz?",
-                            )
-                          ) {
-                            const res = await window.electron.ipcRenderer
-                              .invoke(
-                                "db:run",
-                                "DELETE FROM TANIM_KomisyonUye WHERE id = ?",
-                                [uye.role_id],
-                              );
-                            if (res.success) {
-                              queryClient.invalidateQueries({
-                                queryKey: ["komisyon_detay", komisyonId],
-                              });
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (
+                              confirm(
+                                "Bu kontenjanı tamamen silmek istediğinize emin misiniz?",
+                              )
+                            ) {
+                              const res = await window.electron.ipcRenderer
+                                .invoke(
+                                  "db:run",
+                                  "DELETE FROM TANIM_KomisyonUye WHERE id = ?",
+                                  [uye.role_id],
+                                );
+                              if (res.success) {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["komisyon_detay", komisyonId],
+                                });
+                              }
                             }
-                          }
-                        }}
-                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-1.5 rounded-lg transition-colors"
-                        title="Kontenjanı Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                          }}
+                          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-1.5 rounded-lg transition-colors cursor-pointer"
+                          title="Kontenjanı Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
 
-                    <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
-                      {uye.personel_id && (
-                        <>
-                          <span className="bg-slate-200/50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300">
-                            {uye.unvan}
-                          </span>
-                          <span className="text-slate-300 dark:text-slate-600">
-                            •
-                          </span>
-                        </>
-                      )}
-                      <span className="text-blue-600 dark:text-blue-400">
-                        {uye.gorev_adi}
-                      </span>
-                    </div>
+                      <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        {uye.personel_id && (
+                          <>
+                            <span className="bg-slate-200/50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300">
+                              {uye.unvan}
+                            </span>
+                            <span className="text-slate-300 dark:text-slate-600">
+                              •
+                            </span>
+                          </>
+                        )}
+                        <span className="text-blue-600 dark:text-blue-400">
+                          {uye.gorev_adi}
+                        </span>
+                      </div>
 
-                    <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/50">
-                      {!uye.personel_id
-                        ? (
-                          <Button
-                            variant="outline"
-                            className="w-full text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                            onClick={() => {
-                              setAtaRoleId(uye.role_id);
-                              setIsAtaModalOpen(true);
-                            }}
-                          >
-                            Personel Ata
-                          </Button>
-                        )
-                        : (
-                          <div className="flex gap-2">
+                      <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/50">
+                        {!uye.personel_id
+                          ? (
                             <Button
                               variant="outline"
-                              className="flex-1 text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-white dark:bg-slate-900"
+                              className="w-full text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                               onClick={() => {
                                 setAtaRoleId(uye.role_id);
                                 setIsAtaModalOpen(true);
                               }}
                             >
-                              Değiştir
+                              Personel Ata
                             </Button>
-                            <Button
-                              variant="outline"
-                              className="flex-1 text-xs py-2 h-auto rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 bg-white dark:bg-slate-900"
-                              onClick={async () => {
-                                if (
-                                  confirm(
-                                    "Personeli bu görevden almak istediğinize emin misiniz?",
-                                  )
-                                ) {
-                                  const res = await window.electron.ipcRenderer
-                                    .invoke(
-                                      "db:run",
-                                      "UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?",
-                                      [uye.role_id],
-                                    );
-                                  if (res.success) {
-                                    queryClient.invalidateQueries({
-                                      queryKey: ["komisyon_detay", komisyonId],
-                                    });
+                          )
+                          : (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 text-xs py-2 h-auto rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-white dark:bg-slate-900"
+                                onClick={() => {
+                                  setAtaRoleId(uye.role_id);
+                                  setIsAtaModalOpen(true);
+                                }}
+                              >
+                                Değiştir
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="flex-1 text-xs py-2 h-auto rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 bg-white dark:bg-slate-900"
+                                onClick={async () => {
+                                  if (
+                                    confirm(
+                                      "Personeli bu görevden almak istediğinize emin misiniz?",
+                                    )
+                                  ) {
+                                    const res = await window.electron.ipcRenderer
+                                      .invoke(
+                                        "db:run",
+                                        "UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?",
+                                        [uye.role_id],
+                                      );
+                                    if (res.success) {
+                                      queryClient.invalidateQueries({
+                                        queryKey: ["komisyon_detay", komisyonId],
+                                      });
+                                    }
                                   }
-                                }
-                              }}
-                            >
-                              Kaldır
-                            </Button>
-                          </div>
-                        )}
+                                }}
+                              >
+                                Kaldır
+                              </Button>
+                            </div>
+                          )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-700">
+                      <tr>
+                        <th className="p-3 pl-4">Personel</th>
+                        <th className="p-3">Görev / Unvan</th>
+                        <th className="p-3">Durum</th>
+                        <th className="p-3 pr-4 text-right">İşlemler</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {komisyon.uyeler.map((uye: KomisyonUyeInfo, idx: number) => (
+                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                          <td className="p-3 pl-4">
+                            <span className="font-bold text-slate-800 dark:text-slate-200">
+                              {uye.personel_id ? uye.ad_soyad : <span className="text-slate-400 italic text-xs">Boş Kontenjan</span>}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex flex-col gap-0.5 text-xs">
+                              <span className="text-blue-600 dark:text-blue-400 font-medium">{uye.gorev_adi}</span>
+                              {uye.personel_id && <span className="text-slate-500 dark:text-slate-400">{uye.unvan}</span>}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            {uye.asil_mi === 1 ? (
+                              <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider inline-block">
+                                Asil
+                              </span>
+                            ) : (
+                              <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider inline-block">
+                                Yedek
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3 pr-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {!uye.personel_id ? (
+                                <Button
+                                  variant="outline"
+                                  className="text-[10px] px-2 py-1.5 h-auto rounded-lg text-blue-600 border-blue-200 hover:bg-blue-50"
+                                  onClick={() => { setAtaRoleId(uye.role_id); setIsAtaModalOpen(true); }}
+                                >
+                                  Personel Ata
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    className="text-[10px] px-2 py-1.5 h-auto rounded-lg text-blue-600 border-blue-200 bg-white dark:bg-slate-900 hover:bg-blue-50"
+                                    onClick={() => { setAtaRoleId(uye.role_id); setIsAtaModalOpen(true); }}
+                                  >
+                                    Değiştir
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    className="text-[10px] px-2 py-1.5 h-auto rounded-lg text-rose-600 border-rose-200 bg-white dark:bg-slate-900 hover:bg-rose-50"
+                                    onClick={async () => {
+                                      if (confirm("Personeli bu görevden almak istediğinize emin misiniz?")) {
+                                        const res = await window.electron.ipcRenderer.invoke("db:run", "UPDATE TANIM_KomisyonUye SET personel_id = NULL WHERE id = ?", [uye.role_id]);
+                                        if (res.success) { queryClient.invalidateQueries({ queryKey: ["komisyon_detay", komisyonId] }); }
+                                      }
+                                    }}
+                                  >
+                                    Kaldır
+                                  </Button>
+                                </>
+                              )}
+                              <button
+                                onClick={async () => {
+                                  if (confirm("Bu kontenjanı tamamen silmek istediğinize emin misiniz?")) {
+                                    const res = await window.electron.ipcRenderer.invoke("db:run", "DELETE FROM TANIM_KomisyonUye WHERE id = ?", [uye.role_id]);
+                                    if (res.success) { queryClient.invalidateQueries({ queryKey: ["komisyon_detay", komisyonId] }); }
+                                  }
+                                }}
+                                className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-1.5 rounded-lg transition-colors ml-1 cursor-pointer"
+                                title="Kontenjanı Sil"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
             )
             : !isAddingUye
             ? (
