@@ -259,11 +259,9 @@ export function KomisyonOlusturModal({
     setAd(sablon.label);
     setUyeler(
       sablon.roller.map((unvan, i) => {
-        // DB'deki görevle eşleştirmeyi dene (ad benzerliği)
+        // DB'deki görevle eşleştirmeyi dene (tam eşleşme)
         const eslesen = gorevler.find(
-          (g) =>
-            g.ad.toLowerCase().includes(unvan.toLowerCase()) ||
-            unvan.toLowerCase().includes(g.ad.toLowerCase()),
+          (g) => g.ad.toLowerCase() === unvan.toLowerCase()
         );
         return {
           id: Date.now() + i,
@@ -325,9 +323,7 @@ export function KomisyonOlusturModal({
   // Unvan değişince DB göreviyle eşleştir
   const handleUnvanChange = (id: number, unvan: string) => {
     const eslesen = gorevler.find(
-      (g) =>
-        g.ad.toLowerCase().includes(unvan.toLowerCase()) ||
-        unvan.toLowerCase().includes(g.ad.toLowerCase()),
+      (g) => g.ad.toLowerCase() === unvan.toLowerCase()
     );
     setUyeler(
       uyeler.map((u) =>
@@ -654,18 +650,21 @@ export function KomisyonOlusturModal({
 
                           {/* Görev Unvanı */}
                           <td className="px-4 py-2.5">
-                            <select
+                            <input
+                              type="text"
+                              list={`gorevler-${uye.id}`}
+                              placeholder="Görev yazın veya seçin..."
                               value={uye.unvan}
                               onChange={(e) =>
                                 handleUnvanChange(uye.id, e.target.value)}
                               onClick={(e) => e.stopPropagation()}
                               className="w-full bg-transparent border-0 border-b border-dashed border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm py-0.5 focus:outline-none focus:border-blue-400"
-                            >
-                              <option value="" disabled>Görev seçin...</option>
+                            />
+                            <datalist id={`gorevler-${uye.id}`}>
                               {gorevler.map((g) => (
                                 <option key={g.id} value={g.ad}>{g.ad}</option>
                               ))}
-                            </select>
+                            </datalist>
                           </td>
                           {/* Personel Seçimi */}
                           <td className="px-4 py-2.5">
