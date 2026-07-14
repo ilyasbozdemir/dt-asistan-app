@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Plus, Search, Trash2, Users, Eye } from "lucide-react";
+import { AlertCircle, Eye, Plus, Search, Trash2, Users } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { Input } from "../../../components/ui/Input";
 import { Modal } from "../../../components/ui/Modal";
@@ -370,6 +370,18 @@ export function KomisyonOlusturModal({
           );
           if (gRes.success) {
             u.gorevId = gRes.lastInsertRowid;
+          } else {
+            // Eğer UNIQUE constraint gibi bir nedenle eklenemediyse var olanı bul
+            const exRes = await window.electron.ipcRenderer.invoke(
+              "db:query",
+              "SELECT id FROM TANIM_KomisyonGorevi WHERE ad = ?",
+              [u.unvan],
+            );
+            if (exRes.success && exRes.data && exRes.data[0]) {
+              u.gorevId = exRes.data[0].id;
+            } else {
+              throw new Error("Görev eklenemedi: " + gRes.error);
+            }
           }
         }
       }
@@ -393,8 +405,13 @@ export function KomisyonOlusturModal({
           ],
         );
         if (!updateRes.success) {
-          if (updateRes.error.includes("UNIQUE constraint failed") || updateRes.error.includes("UNIQUE constraint")) {
-            throw new Error("Bu isimde bir komisyon zaten var. Lütfen farklı bir isim belirleyiniz.");
+          if (
+            updateRes.error.includes("UNIQUE constraint failed") ||
+            updateRes.error.includes("UNIQUE constraint")
+          ) {
+            throw new Error(
+              `"${ad}" isminde bir komisyon zaten var. Listede göremiyorsanız, daha önce silinmiş bir komisyon bu ismi kullanıyor olabilir.`,
+            );
           }
           throw new Error(updateRes.error);
         }
@@ -436,8 +453,13 @@ export function KomisyonOlusturModal({
           { sql: "INSERT INTO TANIM_Komisyon (ad) VALUES (?)", params: [ad] },
         ]);
         if (!res.success) {
-          if (res.error.includes("UNIQUE constraint failed") || res.error.includes("UNIQUE constraint")) {
-            throw new Error("Bu isimde bir komisyon zaten var. Lütfen farklı bir isim belirleyiniz.");
+          if (
+            res.error.includes("UNIQUE constraint failed") ||
+            res.error.includes("UNIQUE constraint")
+          ) {
+            throw new Error(
+              `"${ad}" isminde bir komisyon zaten var. Listede göremiyorsanız, daha önce silinmiş bir komisyon bu ismi kullanıyor olabilir.`,
+            );
           }
           throw new Error(res.error);
         }
@@ -610,8 +632,11 @@ export function KomisyonOlusturModal({
                       const filtreliPersonel =
                         uye.personelArama.trim().length > 0
                           ? tumPersonel.filter((p) =>
-                            `${p.ad} ${p.soyad} ${p.unvan || ""}`.toLocaleLowerCase('tr-TR')
-                              .includes(uye.personelArama.toLocaleLowerCase('tr-TR'))
+                            `${p.ad} ${p.soyad} ${p.unvan || ""}`
+                              .toLocaleLowerCase("tr-TR")
+                              .includes(
+                                uye.personelArama.toLocaleLowerCase("tr-TR"),
+                              )
                           ).slice(0, 8)
                           : tumPersonel.slice(0, 8);
 
@@ -650,18 +675,27 @@ export function KomisyonOlusturModal({
                                 const val = e.target.value;
                                 if (!val) {
                                   // Clear selection
-                                  setUyeler(uyeler.map(u => u.id === uye.id ? { ...u, personelId: null, personelAdi: "", personelArama: "" } : u));
+                                  setUyeler(uyeler.map((u) =>
+                                    u.id === uye.id
+                                      ? {
+                                        ...u,
+                                        personelId: null,
+                                        personelAdi: "",
+                                        personelArama: "",
+                                      }
+                                      : u
+                                  ));
                                   return;
                                 }
                                 const pId = parseInt(val);
-                                const p = tumPersonel.find(x => x.id === pId);
+                                const p = tumPersonel.find((x) => x.id === pId);
                                 if (p) handlePersonelSec(uye.id, p);
                               }}
                               onClick={(e) => e.stopPropagation()}
                               className="w-full bg-transparent border-0 border-b border-dashed border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm py-0.5 focus:outline-none focus:border-blue-400"
                             >
                               <option value="">-- Personel Seçin --</option>
-                              {tumPersonel.map(p => (
+                              {tumPersonel.map((p) => (
                                 <option key={p.id} value={p.id}>
                                   {p.ad} {p.soyad} - {p.unvan}
                                 </option>

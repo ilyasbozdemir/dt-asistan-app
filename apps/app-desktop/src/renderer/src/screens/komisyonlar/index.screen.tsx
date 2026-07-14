@@ -1,35 +1,37 @@
-import React, { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Users,
-  Search,
-  Plus,
-  Filter,
-  ShieldCheck,
   CheckCircle2,
-  FileSearch,
-  Printer,
   Edit2,
+  FileSearch,
+  FileText,
+  Filter,
+  Plus,
+  Printer,
+  Search,
+  ShieldCheck,
   Trash2,
-  FileText
-} from 'lucide-react'
-import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
-import { KomisyonOlusturModal } from './components/KomisyonOlusturModal'
-import { PersonelAtaModal } from './components/PersonelAtaModal'
-import { useTabStore } from '../../store/tabStore'
-import { useDosyaAsamasiSablons } from '../dosya/sub-screens/DosyaAsamalari/useDosyaAsamasiSablons'
-import { DocumentPreviewModal } from '../dosya/components/DocumentPreviewModal'
+  Users,
+} from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { KomisyonOlusturModal } from "./components/KomisyonOlusturModal";
+import { PersonelAtaModal } from "./components/PersonelAtaModal";
+import { useTabStore } from "../../store/tabStore";
+import { useDosyaAsamasiSablons } from "../dosya/sub-screens/DosyaAsamalari/useDosyaAsamasiSablons";
+import { DocumentPreviewModal } from "../dosya/components/DocumentPreviewModal";
 
 export default function KomisyonlarScreen(): React.JSX.Element {
-  const { addTab } = useTabStore()
-  const queryClient = useQueryClient()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingKomisyonId, setEditingKomisyonId] = useState<number | null>(null)
+  const { addTab } = useTabStore();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingKomisyonId, setEditingKomisyonId] = useState<number | null>(
+    null,
+  );
 
-  const [isAtaModalOpen, setIsAtaModalOpen] = useState(false)
-  const [ataRoleId, setAtaRoleId] = useState<number | null>(null)
+  const [isAtaModalOpen, setIsAtaModalOpen] = useState(false);
+  const [ataRoleId, setAtaRoleId] = useState<number | null>(null);
 
   // Şablon Önizleme ve Çıktı Altyapısı
   const {
@@ -46,36 +48,36 @@ export default function KomisyonlarScreen(): React.JSX.Element {
     executePrint,
     executeExportPdf,
     refreshSnapshot,
-    saveSnapshot
-  } = useDosyaAsamasiSablons()
-  const [ataKomisyonId, setAtaKomisyonId] = useState<number | null>(null)
+    saveSnapshot,
+  } = useDosyaAsamasiSablons();
+  const [ataKomisyonId, setAtaKomisyonId] = useState<number | null>(null);
 
   // Oluşturulmuş Komisyonları Çek
   const { data: komisyonlar = [], isLoading: isKomisyonLoading } = useQuery({
-    queryKey: ['komisyonlar'],
+    queryKey: ["komisyonlar"],
     queryFn: async () => {
       const res = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT * FROM TANIM_Komisyon WHERE aktif_mi = 1 ORDER BY id DESC'
-      )
-      if (!res.success) throw new Error(res.error)
+        "db:query",
+        "SELECT * FROM TANIM_Komisyon WHERE aktif_mi = 1 ORDER BY id DESC",
+      );
+      if (!res.success) throw new Error(res.error);
 
       // Get members for all active commissions
       const membersRes = await window.electron.ipcRenderer.invoke(
-        'db:query',
+        "db:query",
         `SELECT u.id as role_id, u.komisyon_id, u.asil_mi, u.personel_id, p.ad_soyad, p.unvan, g.ad as gorev_adi 
          FROM TANIM_KomisyonUye u
          LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
-         JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id`
-      )
+         JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id`,
+      );
 
       const sablonlarRes = await window.electron.ipcRenderer.invoke(
-        'db:query',
+        "db:query",
         `SELECT ks.komisyon_id, s.id, s.ad, s.aciklama, s.icerik, s.dosya_adi, s.route_path, s.test_verisi, s.kategori 
          FROM TANIM_Komisyon_Sablon ks
          JOIN TANIM_Sablon s ON ks.sablon_id = s.id
-         WHERE s.aktif_mi = 1`
-      )
+         WHERE s.aktif_mi = 1`,
+      );
 
       const komisyonlarData = res.data.map((k: any) => ({
         ...k,
@@ -84,23 +86,28 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           : [],
         sablonlar: sablonlarRes.success
           ? sablonlarRes.data.filter((s: any) => s.komisyon_id === k.id)
-          : []
-      }))
+          : [],
+      }));
 
-      return komisyonlarData
-    }
-  })
+      return komisyonlarData;
+    },
+  });
 
   const getIconForTur = (ad: string) => {
-    if (ad.toLowerCase().includes('fiyat')) return <FileSearch className="w-4 h-4 shrink-0" />
-    if (ad.toLowerCase().includes('muayene') || ad.toLowerCase().includes('kabul'))
-      return <CheckCircle2 className="w-4 h-4 shrink-0" />
-    return <ShieldCheck className="w-4 h-4 shrink-0" />
-  }
+    if (ad.toLowerCase().includes("fiyat")) {
+      return <FileSearch className="w-4 h-4 shrink-0" />;
+    }
+    if (
+      ad.toLowerCase().includes("muayene") || ad.toLowerCase().includes("kabul")
+    ) {
+      return <CheckCircle2 className="w-4 h-4 shrink-0" />;
+    }
+    return <ShieldCheck className="w-4 h-4 shrink-0" />;
+  };
 
   const filteredKomisyonlar = komisyonlar.filter((k: any) =>
     k.ad.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -111,7 +118,8 @@ export default function KomisyonlarScreen(): React.JSX.Element {
             Komisyon Yönetimi
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Kurum içi görevlendirilecek komisyon asil ve yedek üyelerini buradan yönetebilirsiniz.
+            Kurum içi görevlendirilecek komisyon asil ve yedek üyelerini buradan
+            yönetebilirsiniz.
           </p>
         </div>
 
@@ -119,8 +127,8 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           <Button
             className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
             onClick={() => {
-              setEditingKomisyonId(null)
-              setIsModalOpen(true)
+              setEditingKomisyonId(null);
+              setIsModalOpen(true);
             }}
           >
             <Plus className="w-4 h-4" /> Komisyon Oluştur
@@ -150,166 +158,187 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/30 border border-slate-100 dark:border-slate-800/50 rounded-xl flex flex-col p-6">
-            {isKomisyonLoading ? (
-              <div className="flex-1 flex items-center justify-center text-slate-500">
-                Yükleniyor...
-              </div>
-            ) : filteredKomisyonlar.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center max-w-md">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
-                    Kayıtlı Komisyon Bulunamadı
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Henüz bir komisyon tanımı bulunmuyor. Yeni bir komisyon eklemek için yukarıdaki
-                    "Komisyon Oluştur" butonunu kullanabilirsiniz.
-                  </p>
+            {isKomisyonLoading
+              ? (
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Yükleniyor...
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredKomisyonlar.map((komisyon: any) => (
-                  <div
-                    key={komisyon.id}
-                    className="group flex flex-col p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/60 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800/50 transition-all duration-300"
-                  >
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
-                          {getIconForTur(komisyon.ad)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">
-                            {komisyon.ad}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                              <Users className="w-3.5 h-3.5" />
-                              {komisyon.uyeler?.length || 0} Üye
-                            </span>
-                            {komisyon.sablonlar?.length > 0 && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                <FileText className="w-3.5 h-3.5" />
-                                {komisyon.sablonlar.length} Belge
+              )
+              : filteredKomisyonlar.length === 0
+              ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center max-w-md">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">
+                      Kayıtlı Komisyon Bulunamadı
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Henüz bir komisyon tanımı bulunmuyor. Yeni bir komisyon
+                      eklemek için yukarıdaki "Komisyon Oluştur" butonunu
+                      kullanabilirsiniz.
+                    </p>
+                  </div>
+                </div>
+              )
+              : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredKomisyonlar.map((komisyon: any) => (
+                    <div
+                      key={komisyon.id}
+                      className="group flex flex-col p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/60 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800/50 transition-all duration-300"
+                    >
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
+                            {getIconForTur(komisyon.ad)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">
+                              {komisyon.ad}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                <Users className="w-3.5 h-3.5" />
+                                {komisyon.uyeler?.length || 0} Üye
                               </span>
-                            )}
+                              {komisyon.sablonlar?.length > 0 && (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                  <FileText className="w-3.5 h-3.5" />
+                                  {komisyon.sablonlar.length} Belge
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Top Actions */}
-                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setEditingKomisyonId(komisyon.id)
-                            setIsModalOpen(true)
-                          }}
-                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                          title="Düzenle"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (window.confirm('Bu komisyonu silmek istediğinize emin misiniz?')) {
-                              const res = await window.electron.ipcRenderer.invoke(
-                                'db:run',
-                                'UPDATE TANIM_Komisyon SET aktif_mi = 0, ad = ad || \' (Silinmiş \' || id || \')\' WHERE id = ?',
-                                [komisyon.id]
-                              )
-                              if (res.success) {
-                                queryClient.invalidateQueries({ queryKey: ['komisyonlar'] })
-                              } else {
-                                alert('Silme işlemi başarısız oldu: ' + res.error)
-                              }
-                            }
-                          }}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                          title="Sil"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="mt-5 flex-1 flex flex-col">
-                      <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest px-1">
-                        Üretilebilir Belgeler
-                      </div>
-                      {komisyon.sablonlar && komisyon.sablonlar.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {komisyon.sablonlar.map((sablon: any) => (
-                            <button
-                              key={sablon.id}
-                              onClick={() => {
-                                if (!activeDosyaId) {
+                        {/* Top Actions */}
+                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              setEditingKomisyonId(komisyon.id);
+                              setIsModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                            title="Düzenle"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (
+                                window.confirm(
+                                  "Bu komisyonu silmek istediğinize emin misiniz?",
+                                )
+                              ) {
+                                const res = await window.electron.ipcRenderer
+                                  .invoke(
+                                    "db:run",
+                                    "UPDATE TANIM_Komisyon SET aktif_mi = 0 WHERE id = ?",
+                                    [komisyon.id],
+                                  );
+                                if (res.success) {
+                                  queryClient.invalidateQueries({
+                                    queryKey: ["komisyonlar"],
+                                  });
+                                } else {
                                   alert(
-                                    'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.'
-                                  )
-                                  return
+                                    "Silme işlemi başarısız oldu: " + res.error,
+                                  );
                                 }
-                                handleOpenPreviewForSablon(sablon, sablon.ad)
-                              }}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:border-emerald-300 hover:bg-emerald-50 dark:hover:border-emerald-700 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all text-left shadow-sm hover:shadow"
-                            >
-                              <Printer className="w-3.5 h-3.5 shrink-0" />
-                              <span className="line-clamp-1">{sablon.ad}</span>
-                            </button>
-                          ))}
+                              }
+                            }}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                            title="Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-                      ) : (
-                        <div className="text-xs text-slate-400 dark:text-slate-500 italic mb-4 px-1">
-                          Bu komisyona atanmış belge şablonu bulunmuyor.
-                        </div>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Footer */}
-                    <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-center gap-2 rounded-xl border-slate-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-900/20 dark:text-slate-300 dark:hover:text-blue-400 font-bold shadow-sm transition-all h-10"
-                        onClick={() => {
-                          addTab('/komisyonlar/detay?id=' + komisyon.id)
-                        }}
-                      >
-                        <Users className="w-4 h-4" />
-                        Kadro ve Üyeleri Yönet
-                      </Button>
+                      {/* Content */}
+                      <div className="mt-5 flex-1 flex flex-col">
+                        <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest px-1">
+                          Üretilebilir Belgeler
+                        </div>
+                        {komisyon.sablonlar && komisyon.sablonlar.length > 0
+                          ? (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {komisyon.sablonlar.map((sablon: any) => (
+                                <button
+                                  key={sablon.id}
+                                  onClick={() => {
+                                    if (!activeDosyaId) {
+                                      alert(
+                                        'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.',
+                                      );
+                                      return;
+                                    }
+                                    handleOpenPreviewForSablon(
+                                      sablon,
+                                      sablon.ad,
+                                    );
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:border-emerald-300 hover:bg-emerald-50 dark:hover:border-emerald-700 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all text-left shadow-sm hover:shadow"
+                                >
+                                  <Printer className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="line-clamp-1">
+                                    {sablon.ad}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )
+                          : (
+                            <div className="text-xs text-slate-400 dark:text-slate-500 italic mb-4 px-1">
+                              Bu komisyona atanmış belge şablonu bulunmuyor.
+                            </div>
+                          )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-center gap-2 rounded-xl border-slate-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-900/20 dark:text-slate-300 dark:hover:text-blue-400 font-bold shadow-sm transition-all h-10"
+                          onClick={() => {
+                            addTab("/komisyonlar/detay?id=" + komisyon.id);
+                          }}
+                        >
+                          <Users className="w-4 h-4" />
+                          Kadro ve Üyeleri Yönet
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
           </div>
         </div>
       </div>
       <KomisyonOlusturModal
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false)
-          setEditingKomisyonId(null)
+          setIsModalOpen(false);
+          setEditingKomisyonId(null);
         }}
         komisyonId={editingKomisyonId}
         onPreviewSablon={(sablon) => {
           if (!activeDosyaId) {
             alert(
-              'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.'
-            )
-            return
+              'Lütfen önce sol menüden veya "Dosyalar" altından bir dosya/proje açın. Belgeler, aktif dosya verileri kullanılarak hazırlanmaktadır.',
+            );
+            return;
           }
-          handleOpenPreviewForSablon(sablon, sablon.ad)
+          handleOpenPreviewForSablon(sablon, sablon.ad);
         }}
       />
 
       <PersonelAtaModal
         isOpen={isAtaModalOpen}
         onClose={() => {
-          setIsAtaModalOpen(false)
-          setAtaRoleId(null)
-          setAtaKomisyonId(null)
+          setIsAtaModalOpen(false);
+          setAtaRoleId(null);
+          setAtaKomisyonId(null);
         }}
         roleId={ataRoleId}
         komisyonId={ataKomisyonId}
@@ -321,10 +350,9 @@ export default function KomisyonlarScreen(): React.JSX.Element {
           onClose={() => setPreviewModalOpen(false)}
           title={previewData.title}
           templateHtml={previewData.templateHtml}
-          masterHtml={masterHtml || ''}
-          baseContext={
-            previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-          }
+          masterHtml={masterHtml || ""}
+          baseContext={previewData.snapshotContext ||
+            contextsByPath[previewData.processPath] || dosyaContext}
           placeholders={placeholders}
           personelListesi={personelListesi}
           onPrint={executePrint}
@@ -337,5 +365,5 @@ export default function KomisyonlarScreen(): React.JSX.Element {
         />
       )}
     </div>
-  )
+  );
 }
