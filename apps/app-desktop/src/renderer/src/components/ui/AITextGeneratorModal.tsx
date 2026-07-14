@@ -252,7 +252,7 @@ export function AITextGeneratorModal({
                   type="button"
                   onClick={() =>
                     setPrompt(
-                      'Bu ihale dosyası için mevzuata (4734 Sayılı Kanun) uygunluk analizi yap ve varsa riskli kısımları uyar.'
+                      'Bu doğrudan temin dosyası için mevzuata (4734 Sayılı Kanun) uygunluk analizi yap ve varsa riskli kısımları uyar.'
                     )
                   }
                   className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"

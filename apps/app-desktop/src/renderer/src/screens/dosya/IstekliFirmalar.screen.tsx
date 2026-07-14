@@ -165,7 +165,7 @@ export function IstekliFirmalar(): React.JSX.Element {
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
               <Building2 className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
               <p className="text-xs">
-                Henüz bu ihale dosyası için herhangi bir istekli firma eklenmemiş.
+                Henüz bu doğrudan temin dosyası için herhangi bir istekli firma eklenmemiş.
               </p>
             </div>
           ) : (

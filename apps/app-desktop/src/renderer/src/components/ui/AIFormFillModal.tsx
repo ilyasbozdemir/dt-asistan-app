@@ -282,7 +282,7 @@ export function AIFormFillModal({ isOpen, onClose, context, onApply }: AIFormFil
     setMode('chat')
     const welcome: ChatMessage = {
       role: 'assistant',
-      content: `Merhaba! Ben DT Asistanınızım 👋\n\n**${context.formTitle}** formunu doldurmana yardımcı olabilirim.\n\nHızlı bir şekilde doldurmak için bana şunu söyle:\n> "X malzemesi alımı için ihale dosyası aç"\n\nYa da adım adım gidelim — hangi birimin alımı bu?`,
+      content: `Merhaba! Ben DT Asistanınızım 👋\n\n**${context.formTitle}** formunu doldurmana yardımcı olabilirim.\n\nHızlı bir şekilde doldurmak için bana şunu söyle:\n> "X malzemesi alımı için doğrudan temin dosyası aç"\n\nYa da adım adım gidelim — hangi birimin alımı bu?`,
       timestamp: new Date()
     }
     setChatMessages([welcome])

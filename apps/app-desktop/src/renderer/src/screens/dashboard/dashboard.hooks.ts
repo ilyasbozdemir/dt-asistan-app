@@ -61,7 +61,7 @@ export function useDashboardStats() {
   const loadStats = useCallback(async () => {
     setIsLoading(true)
     try {
-      // 1. İhale dosya sayısı
+      // 1. Doğrudan temin dosya sayısı
       const dosyaRes = await window.electron.ipcRenderer.invoke(
         'db:query',
         'SELECT COUNT(*) as count FROM DATA_TeminDosyasi'

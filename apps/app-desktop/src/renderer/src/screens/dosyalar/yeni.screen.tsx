@@ -72,7 +72,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
 
   // Title & Tab title
   useEffect(() => {
-    document.title = isEdit ? 'İhale Dosyası Düzenle - DT' : 'Yeni İhale Dosyası Ekle - DT'
+    document.title = isEdit ? 'Doğrudan Temin Dosyası Düzenle - DT' : 'Yeni Doğrudan Temin Dosyası Ekle - DT'
     const currentHref = routerState.location.href
     updateTabLabel(currentHref, isEdit ? 'DT Dosyasını Düzenle' : 'Yeni DT Dosyası Ekle')
   }, [isEdit, routerState.location.href, updateTabLabel])
@@ -390,7 +390,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
   const getAIFormContext = () => {
     const selectedBirim = birimler.find((b) => b.id === formData.birim_id)
     return {
-      formTitle: 'Yeni Doğrudan Temin İhale Dosyası',
+      formTitle: 'Yeni Doğrudan Temin Dosyası',
       kurumBilgisi: {
         birimAdi: selectedBirim?.birim_adi,
         sunulacakMakam: formData.sunulacak_makam || selectedBirim?.sunum_makami,
@@ -620,7 +620,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       'notlar',
       'AI Form Tutarsızlık Kontrolü',
       'Form Analiz Sonucu (İsterseniz Notlara Ekleyebilirsiniz)',
-      `Sen bir Kamu İhale ve Muhasebe Uzmanısın. Kullanıcı bir Doğrudan Temin ihale dosyası oluşturuyor ancak kaydetmeden önce sana kontrol ettirmek istedi.\n\nAşağıdaki form verilerini ihale mevzuatı (özellikle 22/d vb.), muhasebe kuralları (fonksiyonel kod, ekonomik kod uyumu) ve mantıksal tutarlılık açısından incele:\n\n${dataStr}\n\nEğer KDV, bütçe, ihale şekli, teslim tarihi gibi alanlarda bir hata, eksiklik veya mevzuata aykırılık görüyorsan kullanıcıyı uyar. Her şey normalse tebrik et.`
+      `Sen bir Kamu İhale ve Muhasebe Uzmanısın. Kullanıcı bir Doğrudan Temin dosyası oluşturuyor ancak kaydetmeden önce sana kontrol ettirmek istedi.\n\nAşağıdaki form verilerini ihale mevzuatı (özellikle 22/d vb.), muhasebe kuralları (fonksiyonel kod, ekonomik kod uyumu) ve mantıksal tutarlılık açısından incele:\n\n${dataStr}\n\nEğer KDV, bütçe, ihale şekli, teslim tarihi gibi alanlarda bir hata, eksiklik veya mevzuata aykırılık görüyorsan kullanıcıyı uyar. Her şey normalse tebrik et.`
     )
   }
 
@@ -709,7 +709,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           `${payload.konu || 'İsimsiz'} isimli dosya güncellendi.`,
           'info'
         )
-        alert('İhale dosyası başarıyla güncellendi.')
+        alert('Doğrudan temin dosyası başarıyla güncellendi.')
       } else {
         await addDosya(payload)
         await logActivity(
@@ -717,7 +717,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           `${payload.konu || 'İsimsiz'} konusuyla yeni bir temin dosyası oluşturuldu.`,
           'success'
         )
-        alert('Yeni ihale dosyası başarıyla eklendi.')
+        alert('Yeni doğrudan temin dosyası başarıyla eklendi.')
       }
       navigate({ to: '/dosyalar' })
     } catch (error) {
@@ -806,7 +806,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-slate-850 dark:text-white flex items-center gap-2">
               <FileText className="text-blue-600" size={24} />
-              {isEdit ? 'İhale Dosyası Detaylarını Düzenle' : 'Yeni Doğrudan Temin İhale Dosyası'}
+              {isEdit ? 'Doğrudan Temin Dosyası Detaylarını Düzenle' : 'Yeni Doğrudan Temin Dosyası'}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Tüm idari, mali, hukuki ve komisyon alanlarını bu panel üzerinden yönetin.

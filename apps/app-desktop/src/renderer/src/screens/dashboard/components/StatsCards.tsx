@@ -10,7 +10,7 @@ interface StatsCardsProps {
 export const StatsCards: React.FC<StatsCardsProps> = ({ isLoading, stats, formatCurrency }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {/* İhale Dosya Sayısı */}
+      {/* Doğrudan Temin Dosya Sayısı */}
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-blue-500/30 transition-all duration-300">
         <div className="flex items-center justify-between mb-2">
           <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-450 flex items-center justify-center shrink-0">
@@ -19,7 +19,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ isLoading, stats, format
         </div>
         <div>
           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-            İhale Dosya Sayısı
+            Doğrudan Temin Dosya Sayısı
           </div>
           <div className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
             {isLoading ? '-' : stats.ihaleDosyaSayisi}
