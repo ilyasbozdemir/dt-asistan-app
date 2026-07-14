@@ -64,7 +64,8 @@ export function DosyalarList({
   getDosyaNoLabel: (d: any) => string;
   formatMoney: (val: number) => string;
   formatDate: (val: string | null | undefined) => string;
-  handleDelete?: (id: number) => Promise<void>;
+  handleDateChange?: (id: number, date: string) => Promise<void>;
+  handleDelete?: (id: number, skipConfirm?: boolean) => Promise<void>;
   handleHardDelete?: (id: number) => Promise<void>;
   handleUpdateStatus?: (id: number, status: string) => Promise<void>;
   handleEkapGonder?: (id: number) => void;
@@ -146,7 +147,7 @@ export function DosyalarList({
                 ) {
                   if (handleDelete) {
                     for (const id of selectedDosyaIds) {
-                      await handleDelete(id);
+                      await handleDelete(id, true);
                     }
                     setSelectedDosyaIds([]);
                   }
@@ -325,6 +326,21 @@ export function DosyalarList({
 
                                 {openMenuId === dosya.id && (
                                   <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl z-[999] py-1 flex flex-col text-xs font-semibold">
+                                    <button
+                                      onClick={() => {
+                                        setOpenMenuId(null);
+                                        handleOpenInNewWindow &&
+                                          handleOpenInNewWindow(dosya);
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                                    >
+                                      <ExternalLink
+                                        size={13}
+                                        className="text-slate-400"
+                                      />{" "}
+                                      Yeni Pencerede Aç
+                                    </button>
+
                                     {dosya.is_deleted !== 1 &&
                                       dosya.is_ekap_sent !== 1 && (
                                       <button
@@ -345,6 +361,92 @@ export function DosyalarList({
                                       </button>
                                     )}
 
+                                    {dosya.is_deleted !== 1 && (
+                                      <button
+                                        onClick={() => {
+                                          setOpenMenuId(null);
+                                          handleUpdateStatus &&
+                                            handleUpdateStatus(
+                                              dosya.id,
+                                              dosya.status === "tamamlandi"
+                                                ? "devam_ediyor"
+                                                : "tamamlandi",
+                                            );
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                                      >
+                                        {dosya.status === "tamamlandi"
+                                          ? (
+                                            <>
+                                              <Clock
+                                                size={13}
+                                                className="text-amber-500"
+                                              />{" "}
+                                              Aktife Al
+                                            </>
+                                          )
+                                          : (
+                                            <>
+                                              <CheckCircle2
+                                                size={13}
+                                                className="text-emerald-500"
+                                              />{" "}
+                                              Tamamlandı İşaretle
+                                            </>
+                                          )}
+                                      </button>
+                                    )}
+
+                                    {dosya.is_deleted !== 1 && (
+                                      <button
+                                        onClick={() => {
+                                          setOpenMenuId(null);
+                                          dosya.is_ekap_sent === 1
+                                            ? handleKilidiAc &&
+                                              handleKilidiAc(dosya.id)
+                                            : handleEkapGonder &&
+                                              handleEkapGonder(dosya.id);
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                                      >
+                                        {dosya.is_ekap_sent === 1
+                                          ? (
+                                            <>
+                                              <Unlock
+                                                size={13}
+                                                className="text-amber-500"
+                                              />{" "}
+                                              Kilidi Aç / EKAP İptal
+                                            </>
+                                          )
+                                          : (
+                                            <>
+                                              <Lock
+                                                size={13}
+                                                className="text-indigo-500"
+                                              />{" "}
+                                              Dosyayı Kilitle (EKAP)
+                                            </>
+                                          )}
+                                      </button>
+                                    )}
+
+                                    {dosya.is_deleted !== 1 && (
+                                      <button
+                                        onClick={() => {
+                                          setOpenMenuId(null);
+                                          handleOpenAI && handleOpenAI(dosya);
+                                        }}
+                                        className="w-full text-left px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 flex items-center gap-2"
+                                      >
+                                        <AlertCircle
+                                          size={13}
+                                          className="text-indigo-500"
+                                        />{" "}
+                                        Yapay Zeka Asistanı
+                                      </button>
+                                    )}
+
                                     {dosya.is_deleted !== 1 &&
                                       dosya.is_ekap_sent !== 1 && (
                                       <>
@@ -357,7 +459,7 @@ export function DosyalarList({
                                           }}
                                           className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2"
                                         >
-                                          <Trash2 size={13} /> Arşivle / Sil
+                                          <Trash2 size={13} /> İptal Et / Sil
                                         </button>
                                       </>
                                     )}
@@ -787,7 +889,7 @@ export function DosyalarList({
                                             }}
                                             className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2"
                                           >
-                                            <Trash2 size={13} /> Arşivle / Sil
+                                            <Trash2 size={13} /> İptal Et / Sil
                                           </button>
                                         </>
                                       )}

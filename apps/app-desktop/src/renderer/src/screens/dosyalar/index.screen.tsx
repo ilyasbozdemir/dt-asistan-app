@@ -82,20 +82,23 @@ export default function DosyalarScreen(): React.ReactNode {
     });
   };
 
-  const handleDelete = async (id: number): Promise<void> => {
+  const handleDelete = async (
+    id: number,
+    skipConfirm = false,
+  ): Promise<void> => {
     if (
-      confirm(
-        'Bu dosyayı Arşivlemek / Silmek istediğinize emin misiniz? Dosya listelerde "Silindi/Arşivlendi" olarak işaretlenecektir.',
+      skipConfirm || confirm(
+        'Bu dosyayı iptal etmek istediğinize emin misiniz? Dosya listelerde "İptal Edildi" olarak işaretlenecektir.',
       )
     ) {
       const dosya = dosyalar.find((d) => d.id === id);
       await deleteDosya(id);
       if (dosya) {
         await logActivity(
-          "Dosya Arşivlendi",
+          "Dosya İptal Edildi",
           `${
             dosya.temin_no || "NO BELİRSİZ"
-          } numaralı dosya arşivlendi/silindi olarak işaretlendi.`,
+          } numaralı dosya iptal edildi olarak işaretlendi.`,
           "warning",
         );
       }

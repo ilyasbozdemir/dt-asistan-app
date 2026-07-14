@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, Clock, Trash2 } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { cn } from "../../../utils/cn";
 
 export function TurBadge({ tur }: { tur: string }): React.ReactElement {
@@ -51,7 +51,7 @@ export function DurumBadge({
   if (isDeleted === 1) {
     return (
       <span className="flex items-center gap-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-        <Trash2 size={9} /> Silindi
+        <XCircle size={9} /> İptal Edildi
       </span>
     );
   }
