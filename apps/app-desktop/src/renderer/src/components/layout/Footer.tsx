@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Bug, ExternalLink, Info, Star, Wifi } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
 import packageJson from '../../../../../package.json'
+import locData from '../../generated-loc.json'
 import { NetworkSyncModal } from '../network/NetworkSyncModal'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -26,7 +26,8 @@ export function Footer(): React.JSX.Element {
     }
   }
 
-  const fetchLocalIp = () => {
+  useEffect(() => {
+    fetchVersion()
     if ((window as any).api?.getLocalIp) {
       ;(window as any).api
         .getLocalIp()
@@ -35,21 +36,17 @@ export function Footer(): React.JSX.Element {
         })
         .catch(console.error)
     }
-  }
 
-  useEffect(() => {
-    fetchVersion()
-    fetchLocalIp()
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (aboutRef.current && !aboutRef.current.contains(event.target as Node)) {
         setShowAbout(false)
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [])
 
   const openExternal = (url: string) => {
@@ -61,41 +58,20 @@ export function Footer(): React.JSX.Element {
   }
 
   return (
-    <footer className="h-8 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 text-xs text-slate-500 dark:text-slate-400 z-50">
-      <div className="flex items-center space-x-3 select-none">
-        <span>Doğrudan Temin Yönetim Sistemi</span>
-        {activeDosyaId && fileName && (
+    <footer className="h-8 shrink-0 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 px-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 select-none z-10">
+      <div className="flex items-center space-x-2">
+        {fileName && (
+          <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
+            📄 {fileName}
+          </span>
+        )}
+        {activeDosyaId && (
           <>
             <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
-            <Link
-              to="/dosya"
-              className="flex items-center gap-1 hover:text-blue-650 dark:hover:text-blue-400 transition-colors cursor-pointer group"
-              title="Aktif Çalışma Dosyası (.dtal) Detaylarını Gör"
-            >
-              <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
-                Dosya:
+            {institutionName && (
+              <span className="truncate max-w-[150px]" title={institutionName}>
+                🏢 {institutionName}
               </span>
-              <span className="font-semibold text-slate-700 dark:text-slate-305 group-hover:underline">
-                {fileName}
-              </span>
-            </Link>
-            {institutionName && institutionName !== 'Kurum Adı Bulunamadı' && (
-              <>
-                <span className="w-px h-3 bg-slate-300 dark:bg-slate-750"></span>
-                <Link
-                  to="/kurum"
-                  search={{ tab: 'kadro' }}
-                  className="flex items-center gap-1 hover:text-blue-655 dark:hover:text-blue-400 transition-colors cursor-pointer group"
-                  title="Kurum Detaylarını Gör"
-                >
-                  <span className="font-bold text-[9px] uppercase text-slate-450 dark:text-slate-500 tracking-wider">
-                    Kurum:
-                  </span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-305 group-hover:underline">
-                    {institutionName}
-                  </span>
-                </Link>
-              </>
             )}
             {eButceKodu && (
               <>
@@ -114,7 +90,7 @@ export function Footer(): React.JSX.Element {
         )}
         {!activeDosyaId && activeMeta?.updated_at && (
           <>
-            <span className="w-px h-3 bg-slate-300 dark:bg-slate-700"></span>
+            <span className="w-px h-3 bg-slate-300 dark:bg-slate-705"></span>
             <span className="text-slate-650 dark:text-slate-400">
               Son Güncelleme:{' '}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -154,7 +130,7 @@ export function Footer(): React.JSX.Element {
                   DT Asistan (Doğrudan Temin)
                 </h4>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Sürüm {packageJson.version}
+                  Sürüm {packageJson.version} • {locData.codeLines.toLocaleString('tr-TR')} Satır Kod
                 </p>
               </div>
               <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
@@ -172,6 +148,12 @@ export function Footer(): React.JSX.Element {
                 Yerel dosya mimarisi (.dtal) üzerinde tek kullanıcılı olarak sınırsızca
                 çalışmaktadır.
               </p>
+              <div className="text-[10px] text-slate-400 dark:text-slate-500 mb-1.5 border-t border-slate-100 dark:border-slate-700/50 pt-2 flex justify-between">
+                <span>Toplam Kod Satırı:</span>
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  {locData.codeLines.toLocaleString('tr-TR')} satır ({locData.totalFiles} dosya)
+                </span>
+              </div>
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-2.5 rounded-lg">
                 <p className="font-bold text-blue-900 dark:text-blue-300 mb-1 flex items-center gap-1.5 text-xs">
                   <span className="flex h-2 w-2 relative">
