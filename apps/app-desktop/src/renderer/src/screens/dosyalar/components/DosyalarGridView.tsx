@@ -107,7 +107,8 @@ export function DosyalarGridView({
                     navigate({ to: '/dosya' })
                   }}
                   className={cn(
-                    'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative overflow-hidden min-h-[180px] h-full',
+                    'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative min-h-[180px] h-full',
+                    openMenuId === dosya.id ? 'overflow-visible z-30' : 'overflow-hidden',
                     activeDosyaId === dosya.id
                       ? 'border-blue-500 dark:border-blue-700 ring-2 ring-blue-500/15 shadow-md'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'

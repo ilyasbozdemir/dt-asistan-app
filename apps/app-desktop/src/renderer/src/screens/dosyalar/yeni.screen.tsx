@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ArrowLeft,
   Bot,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   FileText,
   HelpCircle,
+  MoreVertical,
   Save,
   Sparkles,
 } from "lucide-react";
@@ -51,8 +53,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     handleCopyKonuToAciklama,
     showAIModal,
     setShowAIModal,
-    showAiMenu,
-    setShowAiMenu,
     textGenConfig,
     setTextGenConfig,
     aiKalemConfig,
@@ -71,150 +71,322 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     getNextTeminNo,
     validationError,
     setValidationError,
-  } = useYeniDosyaScreen()
+  } = useYeniDosyaScreen();
 
-  const [activeSubStep, setActiveSubStep] = useState(1)
+  const [activeSubStep, setActiveSubStep] = useState(1);
+
+  const SUB_STEP_COUNT = 4;
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showMaliyetAyarlari, setShowMaliyetAyarlari] = useState(false);
+  const moreMenuBtnRef = useRef<HTMLButtonElement>(null);
+
+  const goPrevSubStep = () => setActiveSubStep((s) => Math.max(1, s - 1));
+  const goNextSubStep = () => {
+    if (activeSubStep < SUB_STEP_COUNT) {
+      setActiveSubStep((s) => s + 1);
+    } else {
+      setValidationError(null);
+      setActiveTab("ihtiyac");
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
-      {/* HEADER */}
-      <div className="flex-none p-4 md:p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-3">
+      {/* HEADER — kompakt */}
+      <div className="flex-none px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between gap-3">
+        {/* Sol: Geri + Başlık */}
+        <div className="flex items-center gap-2 min-w-0">
           <Link
             to="/dosyalar"
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-500 transition-colors border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm shrink-0"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
           </Link>
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-850 dark:text-white flex items-center gap-2">
-              <FileText className="text-blue-600" size={24} />
-              {isEdit
-                ? "Doğrudan Temin Dosyası Detaylarını Düzenle"
-                : "Yeni Doğrudan Temin Dosyası"}
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1.5 truncate">
+              <FileText className="text-blue-600 shrink-0" size={16} />
+              {isEdit ? "Dosya Düzenle" : "Yeni Doğrudan Temin"}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Tüm idari, mali, hukuki ve komisyon alanlarını bu panel üzerinden
-              yönetin.
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 hidden md:block">
+              {isEdit ? `Dosya ID: #${editId}` : "Yeni kayıt oluşturuluyor"}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          {/* Eski Dosyadan Kopyala Butonu */}
-          {!isEdit && (
-            <button
-              type="button"
-              onClick={() => setShowKopyalaModal(true)}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20 flex items-center gap-2 cursor-pointer"
-              title="Geçmişteki bir alımı seçerek formun %80'ini otomatik doldurun"
-            >
-              <Copy size={14} />
-              Mevcut Dosyalardan Kopyala
-            </button>
+
+        {/* Sağ: Sub-step nav + Kebab menü + Kaydet */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Sub-step ileri/geri — sadece Genel Bilgiler tab'ında */}
+          {activeTab === "genel" && (
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-1 py-1">
+              <button
+                type="button"
+                onClick={goPrevSubStep}
+                disabled={activeSubStep === 1}
+                className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                title="Önceki adım"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 px-1 tabular-nums">
+                {activeSubStep}
+                <span className="text-slate-400">/4</span>
+              </span>
+              <button
+                type="button"
+                onClick={goNextSubStep}
+                className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 transition-all cursor-pointer"
+                title={activeSubStep === SUB_STEP_COUNT
+                  ? "İhtiyaç Listesine Geç"
+                  : "Sonraki adım"}
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           )}
 
-          {/* YAPAY ZEKA MENÜSÜ */}
+          {/* ⋮ Daha Fazla Menüsü */}
           <div className="relative">
             <button
+              ref={moreMenuBtnRef}
               type="button"
-              onClick={() => setShowAiMenu(!showAiMenu)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+              title="Daha fazla"
             >
-              <Sparkles size={14} />
-              Yapay Zeka
-              <ChevronDown
-                size={14}
-                className={cn(
-                  "transition-transform",
-                  showAiMenu ? "rotate-180" : "",
-                )}
-              />
-              <span className="absolute -top-2 -right-2 bg-amber-400 text-amber-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border border-white/20 shadow-sm animate-pulse">
-                BETA
-              </span>
+              <MoreVertical size={16} />
             </button>
 
-            {showAiMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-100 overflow-hidden flex flex-col py-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAiMenu(false);
-                    handleAiFormValidation();
-                  }}
-                  className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
-                >
-                  <Bot size={14} className="text-teal-500" />
-                  Hata ve Tutarsızlık Kontrolü
-                </button>
-                <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAiMenu(false);
-                    handleAiFullFormGenerate();
-                  }}
-                  className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"
-                >
-                  <Sparkles size={14} className="text-indigo-500" />
-                  Metinden Dosya Üret
-                </button>
-              </div>
+            {showMoreMenu && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-[9998]"
+                  onClick={() => setShowMoreMenu(false)}
+                />
+                {/* Dropdown — fixed, her şeyin üstünde */}
+                <div className="fixed right-4 top-[52px] w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[9999] overflow-hidden flex flex-col py-1">
+                  {/* Yaklaşık Maliyet Ayarları */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMaliyetAyarlari(true);
+                      setShowMoreMenu(false);
+                    }}
+                    className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5 text-blue-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                      />
+                    </svg>
+                    Yaklaşık Maliyet Ayarları
+                  </button>
+
+                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+
+                  {!isEdit && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowKopyalaModal(true);
+                        setShowMoreMenu(false);
+                      }}
+                      className="px-4 py-2.5 text-left text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2 cursor-pointer"
+                    >
+                      <Copy size={13} className="text-amber-500" />
+                      Mevcut Dosyalardan Kopyala
+                    </button>
+                  )}
+
+                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      handleAiFormValidation();
+                    }}
+                    className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Bot size={13} className="text-teal-500" />
+                    YZ — Hata ve Tutarsızlık Kontrolü
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      handleAiFullFormGenerate();
+                    }}
+                    className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles size={13} className="text-indigo-500" />
+                    YZ — Metinden Dosya Üret
+                  </button>
+
+                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const y = new Date().getFullYear();
+                      setFormData(
+                        getEmptyFormData(
+                          y,
+                          getNextTeminNo(y),
+                          birimler,
+                          personeller,
+                        ),
+                      );
+                      setShowMoreMenu(false);
+                    }}
+                    className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
+                  >
+                    Formu Temizle
+                  </button>
+
+                  {import.meta.env.DEV && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const y = new Date().getFullYear();
+                        setFormData(
+                          getMockFormData(
+                            y,
+                            getNextTeminNo(y),
+                            birimler,
+                            personeller,
+                          ),
+                        );
+                        setShowMoreMenu(false);
+                      }}
+                      className="px-4 py-2.5 text-left text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2 cursor-pointer"
+                    >
+                      Test Verisi Doldur
+                    </button>
+                  )}
+
+                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+
+                  <Link
+                    to="/dosyalar"
+                    className="px-4 py-2.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 cursor-pointer"
+                  >
+                    İptal
+                  </Link>
+                </div>
+              </>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              const currentYear = new Date().getFullYear();
-              setFormData(
-                getEmptyFormData(
-                  currentYear,
-                  getNextTeminNo(currentYear),
-                  birimler,
-                  personeller,
-                ),
-              );
-            }}
-            className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-          >
-            Formu Temizle
-          </button>
-
-          {import.meta.env.DEV && (
-            <button
-              type="button"
-              onClick={() => {
-                const currentYear = new Date().getFullYear();
-                setFormData(
-                  getMockFormData(
-                    currentYear,
-                    getNextTeminNo(currentYear),
-                    birimler,
-                    personeller,
-                  ),
-                );
-              }}
-              className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-            >
-              Test Verisi Doldur
-            </button>
-          )}
-          <Link
-            to="/dosyalar"
-            className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 rounded-xl text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-          >
-            İptal
-          </Link>
+          {/* Kaydet Butonu */}
           <button
             onClick={handleSave}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-1.5 cursor-pointer"
           >
-            <Save size={16} />
-            {isEdit ? "Dosyayı Güncelle" : "Dosyayı Kaydet"}
+            <Save size={14} />
+            {isEdit ? "Güncelle" : "Kaydet"}
           </button>
         </div>
       </div>
+
+      {/* Yaklaşık Maliyet Ayarları Paneli */}
+      {showMaliyetAyarlari && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/25 dark:bg-black/50 z-[9998]"
+            onClick={() => setShowMaliyetAyarlari(false)}
+          />
+          <div className="fixed right-4 top-[52px] w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-[9999] p-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <h3 className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                <svg
+                  className="w-4 h-4 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                  />
+                </svg>
+                Yaklaşık Maliyet Ayarları
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowMaliyetAyarlari(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  Yaklaşık Maliyet (₺)
+                </label>
+                <input
+                  type="number"
+                  value={formData.yaklasik_maliyet || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      yaklasik_maliyet: Number(e.target.value),
+                    })}
+                  placeholder="0.00"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  KDV Oranı (%)
+                </label>
+                <select
+                  value={formData.kdv || "20"}
+                  onChange={(e) =>
+                    setFormData({ ...formData, kdv: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+                >
+                  <option value="0">0 (KDV Muaf)</option>
+                  <option value="1">1</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  Hesaplama Yöntemi
+                </label>
+                <select
+                  value={formData.yaklasik_maliyet_hesaplamasi || "kdv_haric"}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      yaklasik_maliyet_hesaplamasi: e.target.value,
+                    })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200"
+                >
+                  <option value="kdv_haric">KDV Hariç Hesapla</option>
+                  <option value="kdv_dahil">KDV Dahil Hesapla</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* STEPPER UI */}
       <div className="flex-none bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-12 py-3">
@@ -226,50 +398,78 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
-                onClick={() => { setActiveTab('genel') }}
+                onClick={() => {
+                  setActiveTab("genel");
+                }}
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all',
-                  activeTab === 'genel' || activeTab === 'ihtiyac'
-                    ? 'bg-blue-600 border-blue-200 text-white shadow-md shadow-blue-500/20'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400',
+                  "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all",
+                  activeTab === "genel" || activeTab === "ihtiyac"
+                    ? "bg-blue-600 border-blue-200 text-white shadow-md shadow-blue-500/20"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400",
                 )}
-              >1</button>
-              <span className={cn(
-                'mt-1 text-[10px] font-bold uppercase tracking-wider',
-                activeTab === 'genel' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400',
-              )}>Genel Bilgiler</span>
+              >
+                1
+              </button>
+              <span
+                className={cn(
+                  "mt-1 text-[10px] font-bold uppercase tracking-wider",
+                  activeTab === "genel"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-500 dark:text-slate-400",
+                )}
+              >
+                Genel Bilgiler
+              </span>
             </div>
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
                 onClick={() => {
-                  if (!formData.konu?.trim()) { setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.'); return }
-                  setValidationError(null)
-                  setActiveTab('ihtiyac')
+                  if (!formData.konu?.trim()) {
+                    setValidationError(
+                      "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
+                    );
+                    return;
+                  }
+                  setValidationError(null);
+                  setActiveTab("ihtiyac");
                 }}
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all',
-                  activeTab === 'ihtiyac'
-                    ? 'bg-blue-500 border-blue-200 text-white shadow-md shadow-blue-500/20'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400',
+                  "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all",
+                  activeTab === "ihtiyac"
+                    ? "bg-blue-500 border-blue-200 text-white shadow-md shadow-blue-500/20"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400",
                 )}
-              >2</button>
-              <span className={cn(
-                'mt-1 text-[10px] font-bold uppercase tracking-wider',
-                activeTab === 'ihtiyac' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400',
-              )}>İhtiyaç Listesi</span>
+              >
+                2
+              </button>
+              <span
+                className={cn(
+                  "mt-1 text-[10px] font-bold uppercase tracking-wider",
+                  activeTab === "ihtiyac"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-500 dark:text-slate-400",
+                )}
+              >
+                İhtiyaç Listesi
+              </span>
             </div>
           </div>
 
           {/* Sub-step Indicator — sadece Genel Bilgiler tab'ında görünür */}
-          {activeTab === 'genel' && (
+          {activeTab === "genel" && (
             <div className="relative flex justify-between pt-1">
               <div className="absolute top-3 left-0 right-0 h-px bg-slate-200 dark:bg-slate-700 z-0" />
-              {(['Genel & Antet', 'Mali & Bütçe', 'İhale & Teklif', 'Yetkililer'] as const).map((label, i) => {
-                const stepId = i + 1
-                const isDone = stepId < activeSubStep
-                const isActive = stepId === activeSubStep
+              {([
+                "Genel & Antet",
+                "Mali & Bütçe",
+                "İhale & Teklif",
+                "Yetkililer",
+              ] as const).map((label, i) => {
+                const stepId = i + 1;
+                const isDone = stepId < activeSubStep;
+                const isActive = stepId === activeSubStep;
                 return (
                   <button
                     key={stepId}
@@ -277,22 +477,30 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     onClick={() => setActiveSubStep(stepId)}
                     className="relative z-10 flex flex-col items-center gap-1 cursor-pointer"
                   >
-                    <div className={cn(
-                      'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-200',
-                      isDone
-                        ? 'bg-blue-500 border-blue-500 text-white'
-                        : isActive
-                          ? 'bg-white dark:bg-slate-900 border-blue-500 text-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/30'
-                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400',
-                    )}>
-                      {isDone ? '✓' : stepId}
+                    <div
+                      className={cn(
+                        "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-200",
+                        isDone
+                          ? "bg-blue-500 border-blue-500 text-white"
+                          : isActive
+                          ? "bg-white dark:bg-slate-900 border-blue-500 text-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/30"
+                          : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400",
+                      )}
+                    >
+                      {isDone ? "✓" : stepId}
                     </div>
-                    <span className={cn(
-                      'text-[9px] font-semibold whitespace-nowrap',
-                      isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500',
-                    )}>{label}</span>
+                    <span
+                      className={cn(
+                        "text-[9px] font-semibold whitespace-nowrap",
+                        isActive
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-slate-400 dark:text-slate-500",
+                      )}
+                    >
+                      {label}
+                    </span>
                   </button>
-                )
+                );
               })}
             </div>
           )}
@@ -393,11 +601,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     filteredPersoneller={filteredPersoneller}
                     onNextMainStep={() => {
                       if (!formData.konu?.trim()) {
-                        setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
-                        return
+                        setValidationError(
+                          "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
+                        );
+                        return;
                       }
-                      setValidationError(null)
-                      setActiveTab('ihtiyac')
+                      setValidationError(null);
+                      setActiveTab("ihtiyac");
                     }}
                     activeSubStep={activeSubStep}
                     setActiveSubStep={setActiveSubStep}
