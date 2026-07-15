@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '../../../utils/cn'
-import { FileText, Grid, List, Sparkles, Plus } from 'lucide-react'
+import { FileText, Grid, List, Sparkles, Plus, ClipboardList } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 
 export function DosyalarPageHeader({
@@ -76,6 +76,19 @@ export function DosyalarPageHeader({
           <Sparkles size={16} />
           <span className="hidden md:inline">Yapay Zeka Asistanı</span>
           <span className="md:hidden">AI</span>
+        </button>
+
+        {/* EXCEL HIZLI EKLEME */}
+        <button
+          onClick={() =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            navigate({ to: '/hizli-dosya-ekle' as any })
+          }
+          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shrink-0"
+          title="Excel benzeri tablo ile toplu dosya ekleme veya güncelleme"
+        >
+          <ClipboardList size={16} />
+          <span>Toplu Hızlı Ekle</span>
         </button>
 
         {/* YENİ EKLE */}
