@@ -240,25 +240,19 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
             })
           }
         } else {
-          // Yeni dosya ise varsayılan rolleri otomatik ata
+          // Yeni dosya açılırken varsayılan personelleri set et
+          const findDefaultId = (rolKodu: string) => {
+            const found = roller.find((r: any) => r.rol_kodu === rolKodu)
+            return found?.varsayilan_personel_id || null
+          }
+          
           setFormData((prev) => ({
             ...prev,
-            irtibat_yetkilisi_id:
-              roller.find((r: any) => r.rol_kodu === 'ilgili_personel')?.varsayilan_personel_id ||
-              prev.irtibat_yetkilisi_id,
-            onay_personel_id:
-              roller.find(
-                (r: any) => r.rol_kodu === 'harcama_yetkilisi' || r.rol_kodu === 'onaylayan'
-              )?.varsayilan_personel_id || prev.onay_personel_id,
-            hazirlayan_personel_id:
-              roller.find((r: any) => r.rol_kodu === 'hazirlayan')?.varsayilan_personel_id ||
-              prev.hazirlayan_personel_id,
-            talep_eden_personel_id:
-              roller.find((r: any) => r.rol_kodu === 'talep_eden')?.varsayilan_personel_id ||
-              prev.talep_eden_personel_id,
-            sunan_personel_id:
-              roller.find((r: any) => r.rol_kodu === 'sunan_personel')?.varsayilan_personel_id ||
-              prev.sunan_personel_id
+            onay_personel_id: findDefaultId('harcama_yetkilisi') || findDefaultId('onaylayan') || prev.onay_personel_id,
+            hazirlayan_personel_id: findDefaultId('hazirlayan') || prev.hazirlayan_personel_id,
+            talep_eden_personel_id: findDefaultId('talep_eden') || prev.talep_eden_personel_id,
+            sunan_personel_id: findDefaultId('ihale_yetkilisi') || findDefaultId('talep_eden') || prev.sunan_personel_id,
+            irtibat_yetkilisi_id: findDefaultId('ilgili_personel') || findDefaultId('hazirlayan') || prev.irtibat_yetkilisi_id
           }))
         }
       } catch (err) {
