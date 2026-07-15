@@ -101,15 +101,13 @@ export function SiparisVeSozlesme(): React.JSX.Element {
   const hasStarred = React.useMemo(() => {
     return stageSablons.some((sablon) => {
       const cleanName = getCleanName(sablon.ad)
-      return starredDocsForFilter.some((d) =>
-        normalizeForMatch(d) === normalizeForMatch(cleanName)
-      )
+      return starredDocsForFilter.some((d) => normalizeForMatch(d) === normalizeForMatch(cleanName))
     })
   }, [stageSablons, starredDocsForFilter])
 
   const [manualFilter, setManualFilter] = useState<'all' | 'starred' | null>(null)
 
-  const filter = manualFilter !== null ? manualFilter : (hasStarred ? 'starred' : 'all')
+  const filter = manualFilter !== null ? manualFilter : hasStarred ? 'starred' : 'all'
 
   const displaySablons = React.useMemo(() => {
     if (filter === 'starred') {
@@ -248,7 +246,14 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                               onClick={() => setIsChangingPreset(true)}
                               className="w-full flex items-center justify-between bg-blue-50/40 dark:bg-blue-955/10 hover:bg-blue-50 dark:hover:bg-blue-900/25 border border-blue-100 dark:border-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg py-1 px-2.5 text-[10px] font-extrabold transition-all cursor-pointer shadow-2xs"
                             >
-                              <span className="truncate">📦 {presets.find((p) => p.id === (selectedPresetId || (presets.length > 0 ? presets[0].id : '')))?.name || 'Paket Seçilmedi'}</span>
+                              <span className="truncate">
+                                📦{' '}
+                                {presets.find(
+                                  (p) =>
+                                    p.id ===
+                                    (selectedPresetId || (presets.length > 0 ? presets[0].id : ''))
+                                )?.name || 'Paket Seçilmedi'}
+                              </span>
                               <ChevronDown className="w-3 h-3 text-blue-400 shrink-0 ml-1" />
                             </button>
                           )}
@@ -267,7 +272,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                         if (matchStatus) cleanName = matchStatus[2].trim()
                         const cleanTitle = cleanName.replace(/\s*\(.*?\)\s*$/, '').trim()
 
-                        const isDisabled = ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))
+                        const isDisabled =
+                          ciktiLoading || (isSablonDisabled && isSablonDisabled(cleanName))
 
                         return (
                           <div

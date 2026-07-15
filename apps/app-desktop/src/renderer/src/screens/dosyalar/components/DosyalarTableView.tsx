@@ -1,31 +1,31 @@
-import React from "react";
-import { CheckCircle2, ChevronRight, FolderOpen } from "lucide-react";
-import { cn } from "../../../utils/cn";
-import { TurBadge } from "./Badges";
-import { DosyaActionMenu } from "./DosyaActionMenu";
-import { useNavigate } from "@tanstack/react-router";
+import React from 'react'
+import { CheckCircle2, ChevronRight, FolderOpen } from 'lucide-react'
+import { cn } from '../../../utils/cn'
+import { TurBadge } from './Badges'
+import { DosyaActionMenu } from './DosyaActionMenu'
+import { useNavigate } from '@tanstack/react-router'
 
 export interface DosyalarTableViewProps {
-  groupedDosyalar: { baseKonu: string; files: any[] }[];
-  expandedGroups: string[];
-  searchQuery: string;
-  toggleGroup: (baseKonu: string) => void;
-  activeDosyaId: number | null;
-  setActiveDosyaId: (id: number | null) => void;
-  selectedDosyaIds: number[];
-  toggleSelection: (e: React.MouseEvent, id: number) => void;
-  getDosyaNoLabel: (d: any) => string;
-  formatMoney: (val: number) => string;
-  formatDate: (val: string | null | undefined) => string;
-  openMenuId: number | null;
-  setOpenMenuId: (id: number | null) => void;
-  handleOpenInNewWindow?: (dosya: any) => void;
-  handleUpdateStatus?: (id: number, status: string) => Promise<void>;
-  handleEkapGonder?: (id: number) => void;
-  handleKilidiAc?: (id: number) => Promise<void>;
-  handleOpenAI?: (dosya: any) => void;
-  handleDelete?: (id: number) => Promise<void>;
-  handleHardDelete?: (id: number) => Promise<void>;
+  groupedDosyalar: { baseKonu: string; files: any[] }[]
+  expandedGroups: string[]
+  searchQuery: string
+  toggleGroup: (baseKonu: string) => void
+  activeDosyaId: number | null
+  setActiveDosyaId: (id: number | null) => void
+  selectedDosyaIds: number[]
+  toggleSelection: (e: React.MouseEvent, id: number) => void
+  getDosyaNoLabel: (d: any) => string
+  formatMoney: (val: number) => string
+  formatDate: (val: string | null | undefined) => string
+  openMenuId: number | null
+  setOpenMenuId: (id: number | null) => void
+  handleOpenInNewWindow?: (dosya: any) => void
+  handleUpdateStatus?: (id: number, status: string) => Promise<void>
+  handleEkapGonder?: (id: number) => void
+  handleKilidiAc?: (id: number) => Promise<void>
+  handleOpenAI?: (dosya: any) => void
+  handleDelete?: (id: number) => Promise<void>
+  handleHardDelete?: (id: number) => Promise<void>
 }
 
 export function DosyalarTableView({
@@ -48,9 +48,9 @@ export function DosyalarTableView({
   handleKilidiAc,
   handleOpenAI,
   handleDelete,
-  handleHardDelete,
+  handleHardDelete
 }: DosyalarTableViewProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex flex-col">
@@ -69,10 +69,8 @@ export function DosyalarTableView({
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {groupedDosyalar.map((group) => {
-              const hasMultiple = group.files.length > 1;
-              const isExpanded =
-                expandedGroups.includes(group.baseKonu) ||
-                searchQuery.length > 0;
+              const hasMultiple = group.files.length > 1
+              const isExpanded = expandedGroups.includes(group.baseKonu) || searchQuery.length > 0
 
               return (
                 <React.Fragment key={group.baseKonu}>
@@ -86,8 +84,8 @@ export function DosyalarTableView({
                           <ChevronRight
                             size={16}
                             className={cn(
-                              "text-slate-400 transition-transform",
-                              isExpanded && "rotate-90"
+                              'text-slate-400 transition-transform',
+                              isExpanded && 'rotate-90'
                             )}
                           />
                           <FolderOpen size={16} className="text-blue-500" />
@@ -107,14 +105,13 @@ export function DosyalarTableView({
                         key={dosya.id}
                         onClick={() => setActiveDosyaId(dosya.id)}
                         onDoubleClick={() => {
-                          setActiveDosyaId(dosya.id);
-                          navigate({ to: "/dosya" });
+                          setActiveDosyaId(dosya.id)
+                          navigate({ to: '/dosya' })
                         }}
                         className={cn(
-                          "group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors",
-                          activeDosyaId === dosya.id &&
-                            "bg-blue-50/30 dark:bg-blue-900/10",
-                          dosya.is_deleted === 1 && "opacity-50 grayscale"
+                          'group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors',
+                          activeDosyaId === dosya.id && 'bg-blue-50/30 dark:bg-blue-900/10',
+                          dosya.is_deleted === 1 && 'opacity-50 grayscale'
                         )}
                       >
                         <td className="p-3.5 pl-5 font-mono font-bold text-slate-500 whitespace-nowrap">
@@ -122,19 +119,18 @@ export function DosyalarTableView({
                             <button
                               onClick={(e) => toggleSelection(e, dosya.id)}
                               className={cn(
-                                "transition-all cursor-pointer",
-                                selectedDosyaIds.includes(dosya.id) ||
-                                  selectedDosyaIds.length > 0
-                                  ? "opacity-100"
-                                  : "opacity-0 group-hover:opacity-100"
+                                'transition-all cursor-pointer',
+                                selectedDosyaIds.includes(dosya.id) || selectedDosyaIds.length > 0
+                                  ? 'opacity-100'
+                                  : 'opacity-0 group-hover:opacity-100'
                               )}
                             >
                               <CheckCircle2
                                 size={16}
                                 className={cn(
                                   selectedDosyaIds.includes(dosya.id)
-                                    ? "text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/30"
-                                    : "text-slate-300 dark:text-slate-600 hover:text-blue-400"
+                                    ? 'text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/30'
+                                    : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
                                 )}
                               />
                             </button>
@@ -153,7 +149,7 @@ export function DosyalarTableView({
                           ) : null}
                         </td>
                         <td className="p-3.5 text-slate-500 max-w-[120px] truncate text-[10px]">
-                          {dosya.birim_adi || "-"}
+                          {dosya.birim_adi || '-'}
                         </td>
                         <td className="p-3.5">
                           <TurBadge tur={dosya.tur} />
@@ -185,11 +181,11 @@ export function DosyalarTableView({
                       </tr>
                     ))}
                 </React.Fragment>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }

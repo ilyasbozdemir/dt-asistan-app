@@ -216,8 +216,8 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
 
           const activePresetId = selectedPresetId || (presets.length > 0 ? presets[0].id : '')
           const starredDocsForFilter = activePresetId
-            ? (presets.find((p) => p.id === activePresetId)?.docs || [])
-            : (activeStarredDocs || [])
+            ? presets.find((p) => p.id === activePresetId)?.docs || []
+            : activeStarredDocs || []
 
           if (starredDocsForFilter && starredDocsForFilter.length > 0) {
             stageSablons = stageSablons.filter((sablon: any) => {

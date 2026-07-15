@@ -262,7 +262,7 @@ export function useDosyaAsamasiSablons() {
 
       // Eşleşen personelleri doğrudan temin dosyası ana kaydı (DATA_TeminDosyasi) ile eşleştir
       const updates: { col: string; val: number | null }[] = []
-      
+
       const checkAndAddUpdate = (fieldName: string, colName: string) => {
         if (overrideData[fieldName] !== undefined) {
           const nameVal = overrideData[fieldName]

@@ -1,18 +1,18 @@
-import React from "react";
-import { cn } from "../../../utils/cn";
-import { FileText, Grid, List, Sparkles, Plus } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import React from 'react'
+import { cn } from '../../../utils/cn'
+import { FileText, Grid, List, Sparkles, Plus } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 export function DosyalarPageHeader({
   viewMode,
   setViewMode,
-  onOpenAI,
+  onOpenAI
 }: {
-  viewMode: "grid" | "list" | "table";
-  setViewMode: (mode: "grid" | "list" | "table") => void;
-  onOpenAI: () => void;
+  viewMode: 'grid' | 'list' | 'table'
+  setViewMode: (mode: 'grid' | 'list' | 'table') => void
+  onOpenAI: () => void
 }): React.JSX.Element {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <div className="flex-none flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -30,36 +30,36 @@ export function DosyalarPageHeader({
         {/* VIEW SWITCHER */}
         <div className="flex bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5">
           <button
-            onClick={() => setViewMode("grid")}
+            onClick={() => setViewMode('grid')}
             className={cn(
-              "p-1.5 rounded-lg transition-colors cursor-pointer",
-              viewMode === "grid"
-                ? "bg-slate-100 dark:bg-slate-800 text-blue-600"
-                : "text-slate-400 hover:text-slate-600",
+              'p-1.5 rounded-lg transition-colors cursor-pointer',
+              viewMode === 'grid'
+                ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
+                : 'text-slate-400 hover:text-slate-600'
             )}
             title="Izgara (Grid) Görünümü"
           >
             <Grid size={16} />
           </button>
           <button
-            onClick={() => setViewMode("list")}
+            onClick={() => setViewMode('list')}
             className={cn(
-              "p-1.5 rounded-lg transition-colors cursor-pointer",
-              viewMode === "list"
-                ? "bg-slate-100 dark:bg-slate-800 text-blue-600"
-                : "text-slate-400 hover:text-slate-600",
+              'p-1.5 rounded-lg transition-colors cursor-pointer',
+              viewMode === 'list'
+                ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
+                : 'text-slate-400 hover:text-slate-600'
             )}
             title="Liste Görünümü"
           >
             <List size={16} />
           </button>
           <button
-            onClick={() => setViewMode("table")}
+            onClick={() => setViewMode('table')}
             className={cn(
-              "p-1.5 rounded-lg transition-colors cursor-pointer",
-              viewMode === "table"
-                ? "bg-slate-100 dark:bg-slate-800 text-blue-600"
-                : "text-slate-400 hover:text-slate-600",
+              'p-1.5 rounded-lg transition-colors cursor-pointer',
+              viewMode === 'table'
+                ? 'bg-slate-100 dark:bg-slate-800 text-blue-600'
+                : 'text-slate-400 hover:text-slate-600'
             )}
             title="Tablo Görünümü"
           >
@@ -80,7 +80,7 @@ export function DosyalarPageHeader({
 
         {/* YENİ EKLE */}
         <button
-          onClick={() => navigate({ to: "/dosyalar/yeni" })}
+          onClick={() => navigate({ to: '/dosyalar/yeni' })}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-1.5 cursor-pointer shrink-0"
         >
           <Plus size={16} />
@@ -88,5 +88,5 @@ export function DosyalarPageHeader({
         </button>
       </div>
     </div>
-  );
+  )
 }

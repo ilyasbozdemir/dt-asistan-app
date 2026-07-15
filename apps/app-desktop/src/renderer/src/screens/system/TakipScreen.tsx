@@ -510,10 +510,7 @@ export function TakipScreen(): React.JSX.Element {
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
                       {firmalar.map((f: any) => (
-                        <tr
-                          key={f.id}
-                          className="hover:bg-slate-50/55 dark:hover:bg-slate-900/10"
-                        >
+                        <tr key={f.id} className="hover:bg-slate-50/55 dark:hover:bg-slate-900/10">
                           <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
                             {f.unvan}
                           </td>

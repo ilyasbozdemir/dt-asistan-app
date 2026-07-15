@@ -1,5 +1,5 @@
-import React from "react";
-import { cn } from "../../../utils/cn";
+import React from 'react'
+import { cn } from '../../../utils/cn'
 import {
   AlertCircle,
   BookOpen,
@@ -14,11 +14,11 @@ import {
   MoreVertical,
   Sparkles,
   Trash2,
-  Unlock,
-} from "lucide-react";
-import { Button } from "../../../components/ui/Button";
-import { DurumBadge } from "./Badges";
-import { DetailField, DetailRow } from "./DetailHelpers";
+  Unlock
+} from 'lucide-react'
+import { Button } from '../../../components/ui/Button'
+import { DurumBadge } from './Badges'
+import { DetailField, DetailRow } from './DetailHelpers'
 
 export function DosyaDetailPanel({
   selectedDosya,
@@ -40,28 +40,28 @@ export function DosyaDetailPanel({
   setActiveDosyaId,
   handleOpenAI,
   setSelectedFileForAI,
-  setShowAIModal,
+  setShowAIModal
 }: {
-  selectedDosya: any;
-  isMenuOpen: boolean;
-  setIsMenuOpen: (val: boolean) => void;
-  navigate: any;
-  isWindowMode: boolean;
-  handleOpenInNewWindow: () => void;
-  handleUpdateStatus: (id: number, status: string) => Promise<void>;
-  handleEkapGonder: (id: number) => void;
-  handleKilidiAc: (id: number) => Promise<void>;
-  updateDosya: (data: any) => Promise<void>;
-  logActivity: (title: string, desc: string, type: string) => Promise<void>;
-  handleDelete: (id: number) => Promise<void>;
-  handleHardDelete: (id: number) => Promise<void>;
-  getDosyaNoLabel: (d: any) => string;
-  formatMoney: (val: number) => string;
-  formatDate: (val: string | null | undefined) => string;
-  setActiveDosyaId: (id: number | null) => void;
-  handleOpenAI: (dosya: any) => void;
-  setSelectedFileForAI: (data: any) => void;
-  setShowAIModal: (val: boolean) => void;
+  selectedDosya: any
+  isMenuOpen: boolean
+  setIsMenuOpen: (val: boolean) => void
+  navigate: any
+  isWindowMode: boolean
+  handleOpenInNewWindow: () => void
+  handleUpdateStatus: (id: number, status: string) => Promise<void>
+  handleEkapGonder: (id: number) => void
+  handleKilidiAc: (id: number) => Promise<void>
+  updateDosya: (data: any) => Promise<void>
+  logActivity: (title: string, desc: string, type: string) => Promise<void>
+  handleDelete: (id: number) => Promise<void>
+  handleHardDelete: (id: number) => Promise<void>
+  getDosyaNoLabel: (d: any) => string
+  formatMoney: (val: number) => string
+  formatDate: (val: string | null | undefined) => string
+  setActiveDosyaId: (id: number | null) => void
+  handleOpenAI: (dosya: any) => void
+  setSelectedFileForAI: (data: any) => void
+  setShowAIModal: (val: boolean) => void
 }) {
   if (!selectedDosya) {
     return (
@@ -69,22 +69,19 @@ export function DosyaDetailPanel({
         <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800/80">
           <FileText size={28} className="text-slate-400" />
         </div>
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350">
-          Dosya Seçilmedi
-        </h3>
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350">Dosya Seçilmedi</h3>
         <p className="text-[11px] text-slate-500 max-w-xs mt-1.5 mb-6">
-          İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz
-          doğrudan temin dosyasını soldaki listeden seçin. Veya genel süreçler
-          hakkında Yapay Zeka'ya danışın.
+          İşlem yapmak, detaylarını incelemek veya düzenlemek istediğiniz doğrudan temin dosyasını
+          soldaki listeden seçin. Veya genel süreçler hakkında Yapay Zeka'ya danışın.
         </p>
         <button
           onClick={() => {
             setSelectedFileForAI({
-              konu: "Genel Mevzuat Danışmanlığı",
+              konu: 'Genel Mevzuat Danışmanlığı',
               yaklasik_maliyet: 0,
-              temin_no: "Belirtilmemiş",
-            });
-            setShowAIModal(true);
+              temin_no: 'Belirtilmemiş'
+            })
+            setShowAIModal(true)
           }}
           className="px-6 py-3 bg-linear-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-violet-500/20 flex items-center gap-2 cursor-pointer"
         >
@@ -92,7 +89,7 @@ export function DosyaDetailPanel({
           Yapay Zeka'ya Danış
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -103,12 +100,12 @@ export function DosyaDetailPanel({
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest break-words leading-tight">
               {selectedDosya.is_deleted === 1
-                ? "SİLİNMİŞ DOSYA"
+                ? 'SİLİNMİŞ DOSYA'
                 : selectedDosya.is_ekap_sent === 1
-                ? "EKAP'A GÖNDERİLDİ"
-                : selectedDosya.status === "tamamlandi"
-                ? "TAMAMLANMIŞ DOSYA"
-                : "AKTİF DOĞRUDAN TEMİN DOSYASI"}
+                  ? "EKAP'A GÖNDERİLDİ"
+                  : selectedDosya.status === 'tamamlandi'
+                    ? 'TAMAMLANMIŞ DOSYA'
+                    : 'AKTİF DOĞRUDAN TEMİN DOSYASI'}
             </span>
             <div className="flex items-center gap-2 relative">
               <button
@@ -120,14 +117,13 @@ export function DosyaDetailPanel({
 
               {isMenuOpen && (
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 py-1.5 flex flex-col text-xs font-semibold shadow-xl">
-                  {selectedDosya.is_deleted !== 1 &&
-                    selectedDosya.is_ekap_sent !== 1 && (
+                  {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && (
                     <button
                       onClick={() => {
-                        setIsMenuOpen(false);
+                        setIsMenuOpen(false)
                         navigate({
-                          to: `/dosyalar/yeni?id=${selectedDosya.id}`,
-                        });
+                          to: `/dosyalar/yeni?id=${selectedDosya.id}`
+                        })
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
                     >
@@ -139,8 +135,8 @@ export function DosyaDetailPanel({
                   {!isWindowMode && (
                     <button
                       onClick={() => {
-                        setIsMenuOpen(false);
-                        handleOpenInNewWindow();
+                        setIsMenuOpen(false)
+                        handleOpenInNewWindow()
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
                     >
@@ -151,69 +147,65 @@ export function DosyaDetailPanel({
 
                   {selectedDosya.is_deleted !== 1 &&
                     selectedDosya.is_ekap_sent !== 1 &&
-                    selectedDosya.status !== "tamamlandi" && (
-                    <button
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        if ((selectedDosya.durum_asama_id || 1) < 5) {
-                          alert(
-                            "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.",
-                          );
-                          return;
-                        }
-                        handleUpdateStatus(selectedDosya.id, "tamamlandi");
-                      }}
-                      disabled={(selectedDosya.durum_asama_id || 1) < 5}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      <CheckCircle2 size={14} className="text-emerald-500" />
-                      Tamamlandı İşaretle
-                    </button>
-                  )}
-
-                  {selectedDosya.is_deleted !== 1 &&
-                    selectedDosya.is_ekap_sent !== 1 &&
-                    selectedDosya.status === "tamamlandi" && (
-                    <>
+                    selectedDosya.status !== 'tamamlandi' && (
                       <button
                         onClick={() => {
-                          setIsMenuOpen(false);
-                          handleUpdateStatus(
-                            selectedDosya.id,
-                            "devam_ediyor",
-                          );
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Clock size={14} className="text-blue-500" />
-                        Aktife Al
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsMenuOpen(false);
+                          setIsMenuOpen(false)
                           if ((selectedDosya.durum_asama_id || 1) < 5) {
                             alert(
-                              "Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.",
-                            );
-                            return;
+                              'Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) tamamlandı olarak işaretlenemez.'
+                            )
+                            return
                           }
-                          handleEkapGonder(selectedDosya.id);
+                          handleUpdateStatus(selectedDosya.id, 'tamamlandi')
                         }}
                         disabled={(selectedDosya.durum_asama_id || 1) < 5}
                         className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        <Lock size={14} className="text-amber-500" />
-                        Kilitle (EKAP)
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                        Tamamlandı İşaretle
                       </button>
-                    </>
-                  )}
+                    )}
 
                   {selectedDosya.is_deleted !== 1 &&
-                    selectedDosya.is_ekap_sent === 1 && (
+                    selectedDosya.is_ekap_sent !== 1 &&
+                    selectedDosya.status === 'tamamlandi' && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            handleUpdateStatus(selectedDosya.id, 'devam_ediyor')
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                        >
+                          <Clock size={14} className="text-blue-500" />
+                          Aktife Al
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            if ((selectedDosya.durum_asama_id || 1) < 5) {
+                              alert(
+                                'Dosya süreçleri tamamlanmadan (5. aşamaya gelmeden) EKAP kilitlemesi yapılamaz.'
+                              )
+                              return
+                            }
+                            handleEkapGonder(selectedDosya.id)
+                          }}
+                          disabled={(selectedDosya.durum_asama_id || 1) < 5}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                          <Lock size={14} className="text-amber-500" />
+                          Kilitle (EKAP)
+                        </button>
+                      </>
+                    )}
+
+                  {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent === 1 && (
                     <button
                       onClick={() => {
-                        setIsMenuOpen(false);
-                        handleKilidiAc(selectedDosya.id);
+                        setIsMenuOpen(false)
+                        handleKilidiAc(selectedDosya.id)
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
                     >
@@ -225,23 +217,20 @@ export function DosyaDetailPanel({
                   {selectedDosya.is_deleted === 1 && (
                     <button
                       onClick={() => {
-                        setIsMenuOpen(false);
-                        handleUpdateStatus(
-                          selectedDosya.id,
-                          "devam_ediyor",
-                        ).then(() => {
+                        setIsMenuOpen(false)
+                        handleUpdateStatus(selectedDosya.id, 'devam_ediyor').then(() => {
                           updateDosya({
                             id: selectedDosya.id,
-                            is_deleted: 0,
-                          });
+                            is_deleted: 0
+                          })
                           logActivity(
-                            "Dosya Geri Alındı",
+                            'Dosya Geri Alındı',
                             `${
-                              selectedDosya.temin_no || "NO BELİRSİZ"
+                              selectedDosya.temin_no || 'NO BELİRSİZ'
                             } numaralı silinmiş dosya geri alındı.`,
-                            "info",
-                          );
-                        });
+                            'info'
+                          )
+                        })
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-blue-600 dark:text-blue-400 flex items-center gap-2 transition-colors cursor-pointer"
                     >
@@ -250,14 +239,13 @@ export function DosyaDetailPanel({
                     </button>
                   )}
 
-                  {selectedDosya.is_deleted !== 1 &&
-                    selectedDosya.is_ekap_sent !== 1 && (
+                  {selectedDosya.is_deleted !== 1 && selectedDosya.is_ekap_sent !== 1 && (
                     <>
                       <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
                       <button
                         onClick={() => {
-                          setIsMenuOpen(false);
-                          handleDelete(selectedDosya.id);
+                          setIsMenuOpen(false)
+                          handleDelete(selectedDosya.id)
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
                       >
@@ -272,8 +260,8 @@ export function DosyaDetailPanel({
                       <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
                       <button
                         onClick={() => {
-                          setIsMenuOpen(false);
-                          handleHardDelete(selectedDosya.id);
+                          setIsMenuOpen(false)
+                          handleHardDelete(selectedDosya.id)
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
                       >
@@ -282,15 +270,13 @@ export function DosyaDetailPanel({
                       </button>
                       <button
                         onClick={() => {
-                          setIsMenuOpen(false);
+                          setIsMenuOpen(false)
                           if (
                             confirm(
-                              "Tüm dosyaları kalıcı olarak silmek istediğinize emin misiniz? (DEV MODE TEST)",
+                              'Tüm dosyaları kalıcı olarak silmek istediğinize emin misiniz? (DEV MODE TEST)'
                             )
                           ) {
-                            alert(
-                              "Dev mode: Toplu silme fonksiyonu tetiklendi.",
-                            );
+                            alert('Dev mode: Toplu silme fonksiyonu tetiklendi.')
                           }
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer"
@@ -307,7 +293,7 @@ export function DosyaDetailPanel({
           <div className="shrink-0 mt-0.5 flex flex-wrap items-center gap-2">
             {selectedDosya.is_ekap_sent === 1 && (
               <span className="bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800 text-[9px] font-bold">
-                EKAP İKN: {selectedDosya.ekap_no || "-"}
+                EKAP İKN: {selectedDosya.ekap_no || '-'}
               </span>
             )}
             <DurumBadge
@@ -322,13 +308,11 @@ export function DosyaDetailPanel({
           title={selectedDosya.konu}
         >
           {selectedDosya.konu}
-          {selectedDosya.tekrar_no && selectedDosya.tekrar_no > 1
-            ? (
-              <span className="ml-1.5 text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
-                #{selectedDosya.tekrar_no}
-              </span>
-            )
-            : null}
+          {selectedDosya.tekrar_no && selectedDosya.tekrar_no > 1 ? (
+            <span className="ml-1.5 text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
+              #{selectedDosya.tekrar_no}
+            </span>
+          ) : null}
         </h2>
         {selectedDosya.temin_no && (
           <span className="mt-1.5 inline-block text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -347,7 +331,7 @@ export function DosyaDetailPanel({
               Birim / Müdürlük
             </p>
             <p className="text-[11px] font-bold text-blue-700 dark:text-blue-300 truncate">
-              {selectedDosya.birim_adi || "Birim Seçilmemiş"}
+              {selectedDosya.birim_adi || 'Birim Seçilmemiş'}
             </p>
           </div>
         </div>
@@ -357,18 +341,20 @@ export function DosyaDetailPanel({
           <DetailField
             icon={<FileText size={11} />}
             label="Tür"
-            value={selectedDosya.tur === "mal"
-              ? "Mal Alımı"
-              : selectedDosya.tur === "hizmet"
-              ? "Hizmet Alımı"
-              : selectedDosya.tur === "yapim_isi"
-              ? "Yapım İşi"
-              : "Danışmanlık"}
+            value={
+              selectedDosya.tur === 'mal'
+                ? 'Mal Alımı'
+                : selectedDosya.tur === 'hizmet'
+                  ? 'Hizmet Alımı'
+                  : selectedDosya.tur === 'yapim_isi'
+                    ? 'Yapım İşi'
+                    : 'Danışmanlık'
+            }
           />
           <DetailField
             icon={<BookOpen size={11} />}
             label="DT Maddesi"
-            value={selectedDosya.ihale_sekli || "-"}
+            value={selectedDosya.ihale_sekli || '-'}
           />
         </div>
 
@@ -393,34 +379,16 @@ export function DosyaDetailPanel({
             Bütçe & Muhasebe
           </p>
           <div className="space-y-1">
-            <DetailRow
-              label="Bütçe Tipi"
-              value={selectedDosya.butce_tipi || "-"}
-            />
-            <DetailRow
-              label="Bütçe Yılı"
-              value={selectedDosya.butce_yili?.toString() || "-"}
-            />
+            <DetailRow label="Bütçe Tipi" value={selectedDosya.butce_tipi || '-'} />
+            <DetailRow label="Bütçe Yılı" value={selectedDosya.butce_yili?.toString() || '-'} />
             {selectedDosya.butce_kodu && (
-              <DetailRow
-                label="Bütçe Kodu"
-                value={selectedDosya.butce_kodu}
-                mono
-              />
+              <DetailRow label="Bütçe Kodu" value={selectedDosya.butce_kodu} mono />
             )}
             {selectedDosya.ekonomik_kod && (
-              <DetailRow
-                label="Ekonomik Kod"
-                value={selectedDosya.ekonomik_kod}
-                mono
-              />
+              <DetailRow label="Ekonomik Kod" value={selectedDosya.ekonomik_kod} mono />
             )}
             {selectedDosya.e_butce && (
-              <DetailRow
-                label="Kurumsal Kod"
-                value={selectedDosya.e_butce}
-                mono
-              />
+              <DetailRow label="Kurumsal Kod" value={selectedDosya.e_butce} mono />
             )}
           </div>
         </div>
@@ -431,24 +399,16 @@ export function DosyaDetailPanel({
             İhale & Sözleşme
           </p>
           <div className="space-y-1">
-            <DetailRow
-              label="Sözleşme Türü"
-              value={selectedDosya.teklif_sozlesme_turu || "-"}
-            />
+            <DetailRow label="Sözleşme Türü" value={selectedDosya.teklif_sozlesme_turu || '-'} />
 
             {selectedDosya.son_teklif_verme_tarihi && (
               <DetailRow
                 label="Son Teklif Tarihi"
-                value={new Date(
-                  selectedDosya.son_teklif_verme_tarihi,
-                ).toLocaleString("tr-TR")}
+                value={new Date(selectedDosya.son_teklif_verme_tarihi).toLocaleString('tr-TR')}
               />
             )}
             {selectedDosya.teslim_tarihi && (
-              <DetailRow
-                label="Teslim Tarihi"
-                value={formatDate(selectedDosya.teslim_tarihi)}
-              />
+              <DetailRow label="Teslim Tarihi" value={formatDate(selectedDosya.teslim_tarihi)} />
             )}
           </div>
         </div>
@@ -483,8 +443,8 @@ export function DosyaDetailPanel({
         {selectedDosya.is_deleted !== 1 && (
           <button
             onClick={() => {
-              setActiveDosyaId(selectedDosya.id);
-              navigate({ to: "/dosya" });
+              setActiveDosyaId(selectedDosya.id)
+              navigate({ to: '/dosya' })
             }}
             className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md"
           >
@@ -496,9 +456,7 @@ export function DosyaDetailPanel({
         {/* YAPAY ZEKA ASİSTANI BUTONU */}
         <Button
           asChild
-          desc={`${
-            selectedDosya.temin_no || "Dosya"
-          } Yapay Zeka Asistanı (Buton Tıklaması)`}
+          desc={`${selectedDosya.temin_no || 'Dosya'} Yapay Zeka Asistanı (Buton Tıklaması)`}
         >
           <button
             onClick={() => handleOpenAI(selectedDosya)}
@@ -510,5 +468,5 @@ export function DosyaDetailPanel({
         </Button>
       </div>
     </>
-  );
+  )
 }

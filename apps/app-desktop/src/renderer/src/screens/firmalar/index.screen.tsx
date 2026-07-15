@@ -1,125 +1,116 @@
-import React, { useState } from "react";
-import { FirmaInput, useFirmalarHooks } from "./firmalar.hooks";
-import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Input";
-import { Building2, Plus, Search } from "lucide-react";
-import { DataViewMode, ViewToggle } from "../../components/ui/ViewToggle";
+import React, { useState } from 'react'
+import { FirmaInput, useFirmalarHooks } from './firmalar.hooks'
+import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
+import { Building2, Plus, Search } from 'lucide-react'
+import { DataViewMode, ViewToggle } from '../../components/ui/ViewToggle'
 
 // Sub-components
-import { FirmaDetail } from "./components/FirmaDetail";
-import { FirmaGrid } from "./components/FirmaGrid";
-import { FirmaList } from "./components/FirmaList";
-import { FirmaModal } from "./components/FirmaModal";
+import { FirmaDetail } from './components/FirmaDetail'
+import { FirmaGrid } from './components/FirmaGrid'
+import { FirmaList } from './components/FirmaList'
+import { FirmaModal } from './components/FirmaModal'
 
 const emptyFirma: FirmaInput = {
-  firma_kodu: "",
-  unvan: "",
-  ilgili_adi: "",
-  uyrugu: "T.C.",
-  istigal_konusu: "",
-  adres: "",
-  ilce: "",
-  posta_kodu: "",
-  il: "",
-  telefon: "",
-  faks: "",
-  email: "",
-  web_adresi: "",
-  banka_adi: "",
-  sube_kodu_adi: "",
-  hesap_no: "",
-  tc_kimlik_no: "",
-  dogum_tarihi: "",
-  vergi_dairesi: "",
-  vergi_no: "",
-};
+  firma_kodu: '',
+  unvan: '',
+  ilgili_adi: '',
+  uyrugu: 'T.C.',
+  istigal_konusu: '',
+  adres: '',
+  ilce: '',
+  posta_kodu: '',
+  il: '',
+  telefon: '',
+  faks: '',
+  email: '',
+  web_adresi: '',
+  banka_adi: '',
+  sube_kodu_adi: '',
+  hesap_no: '',
+  tc_kimlik_no: '',
+  dogum_tarihi: '',
+  vergi_dairesi: '',
+  vergi_no: ''
+}
 
 export default function FirmalarScreen(): React.JSX.Element {
-  const { firmalar, isLoadingFirmalar, addFirma, updateFirma, deleteFirma } =
-    useFirmalarHooks();
-  const [form, setForm] = useState<FirmaInput>({ ...emptyFirma });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showExtraFields, setShowExtraFields] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [dataViewMode, setDataViewMode] = useState<DataViewMode>("grid");
-  const [viewingFirma, setViewingFirma] = useState<any | null>(null);
+  const { firmalar, isLoadingFirmalar, addFirma, updateFirma, deleteFirma } = useFirmalarHooks()
+  const [form, setForm] = useState<FirmaInput>({ ...emptyFirma })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showExtraFields, setShowExtraFields] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [dataViewMode, setDataViewMode] = useState<DataViewMode>('grid')
+  const [viewingFirma, setViewingFirma] = useState<any | null>(null)
 
   const openAddModal = () => {
-    setForm({ ...emptyFirma });
-    setEditingId(null);
-    setShowExtraFields(false);
-    setIsModalOpen(true);
-  };
+    setForm({ ...emptyFirma })
+    setEditingId(null)
+    setShowExtraFields(false)
+    setIsModalOpen(true)
+  }
 
   const openEditModal = (e: React.MouseEvent, firma: any) => {
-    e.stopPropagation();
-    const { id, aktif_mi, created_at, ...editableData } = firma;
-    setForm(editableData);
-    setEditingId(id);
-    setShowExtraFields(false);
-    setIsModalOpen(true);
-  };
+    e.stopPropagation()
+    const { id, aktif_mi, created_at, ...editableData } = firma
+    setForm(editableData)
+    setEditingId(id)
+    setShowExtraFields(false)
+    setIsModalOpen(true)
+  }
 
   const handleViewClick = (firma: any) => {
-    setViewingFirma(firma);
-  };
+    setViewingFirma(firma)
+  }
 
   const handleChange = (key: keyof FirmaInput, value: string): void => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+    setForm((prev) => ({ ...prev, [key]: value }))
+  }
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (!form.unvan.trim()) return;
+    e.preventDefault()
+    if (!form.unvan.trim()) return
 
     try {
       if (editingId) {
-        await updateFirma({ id: editingId, data: form });
+        await updateFirma({ id: editingId, data: form })
       } else {
-        await addFirma(form);
+        await addFirma(form)
       }
-      setForm({ ...emptyFirma });
-      setEditingId(null);
-      setShowExtraFields(false);
-      setIsModalOpen(false);
+      setForm({ ...emptyFirma })
+      setEditingId(null)
+      setShowExtraFields(false)
+      setIsModalOpen(false)
     } catch (err: any) {
-      alert(err.message || "İşlem sırasında hata oluştu!");
+      alert(err.message || 'İşlem sırasında hata oluştu!')
     }
-  };
+  }
 
-  const handleDelete = async (
-    e: React.MouseEvent,
-    id: number,
-  ): Promise<void> => {
-    e.stopPropagation();
-    if (confirm("Bu firmayı silmek istediğinize emin misiniz?")) {
+  const handleDelete = async (e: React.MouseEvent, id: number): Promise<void> => {
+    e.stopPropagation()
+    if (confirm('Bu firmayı silmek istediğinize emin misiniz?')) {
       try {
-        await deleteFirma(id);
+        await deleteFirma(id)
       } catch {
-        alert("Silme sırasında hata oluştu!");
+        alert('Silme sırasında hata oluştu!')
       }
     }
-  };
+  }
 
   const filtered = firmalar.filter((f) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
+    if (!searchQuery.trim()) return true
+    const q = searchQuery.toLowerCase()
     return (
       f.unvan?.toLowerCase().includes(q) ||
       f.firma_kodu?.toLowerCase().includes(q) ||
       f.vergi_no?.toLowerCase().includes(q) ||
       f.il?.toLowerCase().includes(q)
-    );
-  });
+    )
+  })
 
   if (viewingFirma) {
-    return (
-      <FirmaDetail
-        viewingFirma={viewingFirma}
-        setViewingFirma={setViewingFirma}
-      />
-    );
+    return <FirmaDetail viewingFirma={viewingFirma} setViewingFirma={setViewingFirma} />
   }
 
   return (
@@ -132,8 +123,7 @@ export default function FirmalarScreen(): React.JSX.Element {
             İstekli Firma Yönetimi
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-            Doğrudan temin süreçlerinde kullanılacak firma ve tedarikçi havuzunu
-            yönetin.
+            Doğrudan temin süreçlerinde kullanılacak firma ve tedarikçi havuzunu yönetin.
           </p>
         </div>
         <div className="flex items-center gap-4 sm:gap-6 shrink-0">
@@ -218,5 +208,5 @@ export default function FirmalarScreen(): React.JSX.Element {
         setShowExtraFields={setShowExtraFields}
       />
     </div>
-  );
+  )
 }

@@ -1,11 +1,11 @@
-import { Trash2 } from "lucide-react";
+import { Trash2 } from 'lucide-react'
 
 export interface DosyalarBulkActionsProps {
-  selectedDosyaIds: number[];
-  dosyalar: any[];
-  handleBulkHardDelete?: (ids: number[]) => Promise<void>;
-  handleBulkDelete?: (ids: number[]) => Promise<void>;
-  setSelectedDosyaIds: React.Dispatch<React.SetStateAction<number[]>>;
+  selectedDosyaIds: number[]
+  dosyalar: any[]
+  handleBulkHardDelete?: (ids: number[]) => Promise<void>
+  handleBulkDelete?: (ids: number[]) => Promise<void>
+  setSelectedDosyaIds: React.Dispatch<React.SetStateAction<number[]>>
 }
 
 export function DosyalarBulkActions({
@@ -13,9 +13,9 @@ export function DosyalarBulkActions({
   dosyalar,
   handleBulkHardDelete,
   handleBulkDelete,
-  setSelectedDosyaIds,
+  setSelectedDosyaIds
 }: DosyalarBulkActionsProps) {
-  if (selectedDosyaIds.length === 0) return null;
+  if (selectedDosyaIds.length === 0) return null
 
   return (
     <div className="flex-none mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 p-3 rounded-2xl shadow-sm flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200">
@@ -31,9 +31,9 @@ export function DosyalarBulkActions({
         <button
           onClick={async () => {
             const hasDeletedFiles = selectedDosyaIds.some((id) => {
-              const dosya = dosyalar.find((d) => d.id === id);
-              return dosya?.is_deleted === 1;
-            });
+              const dosya = dosyalar.find((d) => d.id === id)
+              return dosya?.is_deleted === 1
+            })
 
             if (hasDeletedFiles) {
               if (import.meta.env.DEV) {
@@ -45,23 +45,21 @@ export function DosyalarBulkActions({
                   if (handleBulkHardDelete && handleBulkDelete) {
                     const hardDeleteIds = selectedDosyaIds.filter(
                       (id) => dosyalar.find((d) => d.id === id)?.is_deleted === 1
-                    );
+                    )
                     const softDeleteIds = selectedDosyaIds.filter(
                       (id) => dosyalar.find((d) => d.id === id)?.is_deleted !== 1
-                    );
+                    )
 
-                    if (hardDeleteIds.length > 0)
-                      await handleBulkHardDelete(hardDeleteIds);
-                    if (softDeleteIds.length > 0)
-                      await handleBulkDelete(softDeleteIds);
+                    if (hardDeleteIds.length > 0) await handleBulkHardDelete(hardDeleteIds)
+                    if (softDeleteIds.length > 0) await handleBulkDelete(softDeleteIds)
 
-                    setSelectedDosyaIds([]);
+                    setSelectedDosyaIds([])
                   }
                 }
               } else {
                 alert(
-                  "Seçili dosyalar arasında zaten iptal edilmiş dosyalar bulunuyor. Paketlenmiş sürümde iptal edilmiş dosyalar kalıcı olarak silinemez. Lütfen seçiminizi güncelleyip tekrar deneyiniz."
-                );
+                  'Seçili dosyalar arasında zaten iptal edilmiş dosyalar bulunuyor. Paketlenmiş sürümde iptal edilmiş dosyalar kalıcı olarak silinemez. Lütfen seçiminizi güncelleyip tekrar deneyiniz.'
+                )
               }
             } else {
               if (
@@ -70,8 +68,8 @@ export function DosyalarBulkActions({
                 )
               ) {
                 if (handleBulkDelete) {
-                  await handleBulkDelete(selectedDosyaIds);
-                  setSelectedDosyaIds([]);
+                  await handleBulkDelete(selectedDosyaIds)
+                  setSelectedDosyaIds([])
                 }
               }
             }
@@ -88,5 +86,5 @@ export function DosyalarBulkActions({
         </button>
       </div>
     </div>
-  );
+  )
 }

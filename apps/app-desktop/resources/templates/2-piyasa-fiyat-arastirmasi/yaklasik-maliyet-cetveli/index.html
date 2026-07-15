@@ -215,9 +215,11 @@
               <th style="width: 7%">Miktarı</th>
               {{#firmalar}}
               <th>{{unvan}}</th>
-              {{/firmalar}}
-              {{#isOrtalama}}<th style="width: 10%">Ortalama Birim Fiyat</th>{{/isOrtalama}}
-              {{#isEnDusuk}}<th style="width: 10%">En Düşük Birim Fiyat</th>{{/isEnDusuk}}
+              {{/firmalar}} {{#isOrtalama}}
+              <th style="width: 10%">Ortalama Birim Fiyat</th>
+              {{/isOrtalama}} {{#isEnDusuk}}
+              <th style="width: 10%">En Düşük Birim Fiyat</th>
+              {{/isEnDusuk}}
               <th style="width: 12%">Maliyet Toplam Bedeli</th>
             </tr>
           </thead>
@@ -263,8 +265,9 @@
         <div class="komisyon-section">
           <div class="komisyon-title">Piyasa Fiyat Araştırma Görevlisi/Görevlileri</div>
           <div class="komisyon-text">
-            Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu {{#isOrtalama}}ortalama{{/isOrtalama}}{{#isEnDusuk}}en düşük{{/isEnDusuk}} fiyatlar alınarak
-            maliyet KDV hariç ({{genelToplam}}) TL olarak tespit edilmiştir.
+            Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu
+            {{#isOrtalama}}ortalama{{/isOrtalama}}{{#isEnDusuk}}en düşük{{/isEnDusuk}} fiyatlar
+            alınarak maliyet KDV hariç ({{genelToplam}}) TL olarak tespit edilmiştir.
           </div>
 
           <div class="komisyon-members">

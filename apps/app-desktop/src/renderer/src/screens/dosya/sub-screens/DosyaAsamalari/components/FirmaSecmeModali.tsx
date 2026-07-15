@@ -1,27 +1,27 @@
-import React, { useState } from "react";
-import { Search, LayoutGrid, List, Table } from "lucide-react";
+import React, { useState } from 'react'
+import { Search, LayoutGrid, List, Table } from 'lucide-react'
 
 interface PoolFirm {
-  id: number;
-  unvan: string;
-  firma_kodu?: string;
-  istigal_konusu?: string;
-  il?: string;
-  vergi_no?: string;
-  telefon?: string;
-  email?: string;
+  id: number
+  unvan: string
+  firma_kodu?: string
+  istigal_konusu?: string
+  il?: string
+  vergi_no?: string
+  telefon?: string
+  email?: string
 }
 
 interface FirmaSecmeModaliProps {
-  isOpen: boolean;
-  onClose: () => void;
-  allPoolFirms: PoolFirm[];
-  invitedFirms: any[];
-  selectedFirmIds: number[];
-  setSelectedFirmIds: React.Dispatch<React.SetStateAction<number[]>>;
-  modalSearchQuery: string;
-  setModalSearchQuery: (query: string) => void;
-  onAddFirms: () => Promise<void>;
+  isOpen: boolean
+  onClose: () => void
+  allPoolFirms: PoolFirm[]
+  invitedFirms: any[]
+  selectedFirmIds: number[]
+  setSelectedFirmIds: React.Dispatch<React.SetStateAction<number[]>>
+  modalSearchQuery: string
+  setModalSearchQuery: (query: string) => void
+  onAddFirms: () => Promise<void>
 }
 
 export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
@@ -35,38 +35,37 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
   setModalSearchQuery,
   onAddFirms
 }) => {
-  const [viewType, setViewType] = useState<"table" | "grid" | "list">("table");
+  const [viewType, setViewType] = useState<'table' | 'grid' | 'list'>('table')
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
-  const unselectedFirms = allPoolFirms.filter((pf) =>
-    !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)
-  );
+  const unselectedFirms = allPoolFirms.filter(
+    (pf) => !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)
+  )
 
   const filteredFirms = unselectedFirms.filter((pf) => {
-    if (!modalSearchQuery.trim()) return true;
-    const q = modalSearchQuery.toLowerCase();
+    if (!modalSearchQuery.trim()) return true
+    const q = modalSearchQuery.toLowerCase()
     return (
       pf.unvan?.toLowerCase().includes(q) ||
       pf.firma_kodu?.toLowerCase().includes(q) ||
       pf.vergi_no?.toLowerCase().includes(q) ||
       pf.il?.toLowerCase().includes(q) ||
       pf.istigal_konusu?.toLowerCase().includes(q)
-    );
-  });
+    )
+  })
 
   const toggleFirmSelection = (id: number) => {
     if (selectedFirmIds.includes(id)) {
-      setSelectedFirmIds((prev) => prev.filter((fid) => fid !== id));
+      setSelectedFirmIds((prev) => prev.filter((fid) => fid !== id))
     } else {
-      setSelectedFirmIds((prev) => [...prev, id]);
+      setSelectedFirmIds((prev) => [...prev, id])
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-4xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-        
         {/* Header */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="text-left">
@@ -100,33 +99,33 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
 
           <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 gap-0.5 self-end sm:self-auto">
             <button
-              onClick={() => setViewType("table")}
+              onClick={() => setViewType('table')}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                viewType === "table"
-                  ? "bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                viewType === 'table'
+                  ? 'bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
               }`}
               title="Tablo Görünümü"
             >
               <Table className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setViewType("grid")}
+              onClick={() => setViewType('grid')}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                viewType === "grid"
-                  ? "bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                viewType === 'grid'
+                  ? 'bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
               }`}
               title="Kart (Grid) Görünümü"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setViewType("list")}
+              onClick={() => setViewType('list')}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                viewType === "list"
-                  ? "bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400"
+                viewType === 'list'
+                  ? 'bg-white dark:bg-slate-750 text-blue-600 dark:text-blue-400 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
               }`}
               title="Liste Görünümü"
             >
@@ -144,7 +143,7 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
           ) : (
             <>
               {/* TABLE VIEW */}
-              {viewType === "table" && (
+              {viewType === 'table' && (
                 <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead>
@@ -158,13 +157,13 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {filteredFirms.map((pf) => {
-                        const isSelected = selectedFirmIds.includes(pf.id);
+                        const isSelected = selectedFirmIds.includes(pf.id)
                         return (
                           <tr
                             key={pf.id}
                             onClick={() => toggleFirmSelection(pf.id)}
                             className={`hover:bg-slate-50/50 dark:hover:bg-slate-850/20 cursor-pointer transition-colors ${
-                              isSelected ? "bg-blue-50/30 dark:bg-blue-955/10 font-medium" : ""
+                              isSelected ? 'bg-blue-50/30 dark:bg-blue-955/10 font-medium' : ''
                             }`}
                           >
                             <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
@@ -176,20 +175,24 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
                               />
                             </td>
                             <td className="p-3 font-semibold text-slate-500 dark:text-slate-400">
-                              {pf.firma_kodu || "-"}
+                              {pf.firma_kodu || '-'}
                             </td>
                             <td className="p-3 font-bold text-slate-800 dark:text-slate-200">
                               {pf.unvan}
                             </td>
                             <td className="p-3 text-slate-600 dark:text-slate-400">
-                              <div className="truncate max-w-[200px]" title={pf.istigal_konusu}>{pf.istigal_konusu || "-"}</div>
-                              <div className="text-[10px] text-slate-450 mt-0.5">{pf.il || "-"}</div>
+                              <div className="truncate max-w-[200px]" title={pf.istigal_konusu}>
+                                {pf.istigal_konusu || '-'}
+                              </div>
+                              <div className="text-[10px] text-slate-450 mt-0.5">
+                                {pf.il || '-'}
+                              </div>
                             </td>
                             <td className="p-3 text-slate-500 dark:text-slate-400 font-mono">
-                              {pf.vergi_no || "-"}
+                              {pf.vergi_no || '-'}
                             </td>
                           </tr>
-                        );
+                        )
                       })}
                     </tbody>
                   </table>
@@ -197,18 +200,18 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
               )}
 
               {/* GRID VIEW */}
-              {viewType === "grid" && (
+              {viewType === 'grid' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {filteredFirms.map((pf) => {
-                    const isSelected = selectedFirmIds.includes(pf.id);
+                    const isSelected = selectedFirmIds.includes(pf.id)
                     return (
                       <div
                         key={pf.id}
                         onClick={() => toggleFirmSelection(pf.id)}
                         className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between gap-3 text-left transition-all ${
                           isSelected
-                            ? "border-blue-500 bg-blue-50/30 dark:bg-blue-955/10 shadow-sm"
-                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-350 dark:hover:border-slate-700 hover:shadow-2xs"
+                            ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-955/10 shadow-sm'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-350 dark:hover:border-slate-700 hover:shadow-2xs'
                         }`}
                       >
                         <div className="flex items-start gap-2.5">
@@ -220,37 +223,42 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
                             className="w-4 h-4 mt-0.5 rounded text-blue-600 border-slate-300 dark:border-slate-700 focus:ring-blue-500 cursor-pointer shrink-0"
                           />
                           <div className="overflow-hidden">
-                            <div className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate" title={pf.unvan}>
+                            <div
+                              className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate"
+                              title={pf.unvan}
+                            >
                               {pf.unvan}
                             </div>
                             <div className="text-[10px] text-slate-450 mt-1 font-semibold">
-                              Kod: {pf.firma_kodu || "-"}
+                              Kod: {pf.firma_kodu || '-'}
                             </div>
                           </div>
                         </div>
                         <div className="border-t border-slate-100 dark:border-slate-800 pt-2 text-[10px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                          <div>İl: {pf.il || "-"}</div>
-                          <div className="truncate" title={pf.istigal_konusu}>Konu: {pf.istigal_konusu || "-"}</div>
+                          <div>İl: {pf.il || '-'}</div>
+                          <div className="truncate" title={pf.istigal_konusu}>
+                            Konu: {pf.istigal_konusu || '-'}
+                          </div>
                         </div>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               )}
 
               {/* LIST VIEW */}
-              {viewType === "list" && (
+              {viewType === 'list' && (
                 <div className="flex flex-col gap-2">
                   {filteredFirms.map((pf) => {
-                    const isSelected = selectedFirmIds.includes(pf.id);
+                    const isSelected = selectedFirmIds.includes(pf.id)
                     return (
                       <div
                         key={pf.id}
                         onClick={() => toggleFirmSelection(pf.id)}
                         className={`px-4 py-3 rounded-xl border cursor-pointer flex items-center justify-between text-left transition-all ${
                           isSelected
-                            ? "border-blue-500 bg-blue-50/20 dark:bg-blue-955/10"
-                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/35"
+                            ? 'border-blue-500 bg-blue-50/20 dark:bg-blue-955/10'
+                            : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/35'
                         }`}
                       >
                         <div className="flex items-center gap-3 overflow-hidden">
@@ -261,19 +269,24 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
                             onClick={(e) => e.stopPropagation()}
                             className="w-4 h-4 rounded text-blue-600 border-slate-300 dark:border-slate-700 focus:ring-blue-500 cursor-pointer shrink-0"
                           />
-                          <span className="text-[11px] font-semibold text-slate-400 w-16 shrink-0">{pf.firma_kodu || "-"}</span>
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-sm" title={pf.unvan}>
+                          <span className="text-[11px] font-semibold text-slate-400 w-16 shrink-0">
+                            {pf.firma_kodu || '-'}
+                          </span>
+                          <span
+                            className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-sm"
+                            title={pf.unvan}
+                          >
                             {pf.unvan}
                           </span>
                           <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate ml-4 hidden md:inline">
-                            {pf.istigal_konusu ? `(${pf.istigal_konusu})` : ""}
+                            {pf.istigal_konusu ? `(${pf.istigal_konusu})` : ''}
                           </span>
                         </div>
                         <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-850 px-2 py-0.5 rounded-md text-slate-500 dark:text-slate-400">
-                          {pf.il || "-"}
+                          {pf.il || '-'}
                         </span>
                       </div>
-                    );
+                    )
                   })}
                 </div>
               )}
@@ -304,5 +317,5 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

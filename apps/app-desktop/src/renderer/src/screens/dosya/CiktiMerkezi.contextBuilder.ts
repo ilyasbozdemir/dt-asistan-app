@@ -133,8 +133,10 @@ export function buildDocumentContext(
       const minPrice =
         validPrices.length > 0 ? Math.min(...validPrices.map((p: any) => p.price)) : 0
       const avgPrice =
-        validPrices.length > 0 ? (validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length) : 0
-      
+        validPrices.length > 0
+          ? validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length
+          : 0
+
       const chosenPrice = isLowestBasis ? minPrice : avgPrice
       const toplamBedel = chosenPrice * (k.miktar || 0)
       grandTotal += toplamBedel
@@ -223,7 +225,10 @@ export function buildDocumentContext(
     }))
     const validPrices = itemPrices.filter((p: any) => p.price > 0)
     const minPrice = validPrices.length > 0 ? Math.min(...validPrices.map((p: any) => p.price)) : 0
-    const avgPrice = validPrices.length > 0 ? (validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length) : 0
+    const avgPrice =
+      validPrices.length > 0
+        ? validPrices.reduce((sum: number, p: any) => sum + p.price, 0) / validPrices.length
+        : 0
     const chosenPrice = isLowestBasis ? minPrice : avgPrice
 
     const lineTotal = chosenPrice * (k.miktar || 0)

@@ -33,7 +33,8 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
   const [personelListesi, setPersonelListesi] = useState<any[]>([])
   const [settings, setSettings] = useState<any>(null)
 
-  const loadData = useCallback(async (isBackgroundRefresh = false): Promise<void> => {
+  const loadData = useCallback(
+    async (isBackgroundRefresh = false): Promise<void> => {
       if (!activeDosyaId) return
       if (!isBackgroundRefresh) setLoading(true)
       try {
@@ -137,9 +138,13 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           [activeDosyaId]
         )
         const allCommission = komsRes.success ? komsRes.data : []
-        const commission = allCommission.filter((c: any) => c.komisyon_turu?.toLowerCase().includes('fiyat'))
+        const commission = allCommission.filter((c: any) =>
+          c.komisyon_turu?.toLowerCase().includes('fiyat')
+        )
         const muayeneKomisyonu = allCommission.filter(
-          (c: any) => c.komisyon_turu?.toLowerCase().includes('muayene') || c.komisyon_turu?.toLowerCase().includes('kabul')
+          (c: any) =>
+            c.komisyon_turu?.toLowerCase().includes('muayene') ||
+            c.komisyon_turu?.toLowerCase().includes('kabul')
         )
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
@@ -352,8 +357,13 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
             const doc = (belgelerRes.data as any[]).find((b: any) => {
               const lowerName = b.belge_adi.toLowerCase()
               if (path.includes('yaklasik') && lowerName.includes('yaklaşık maliyet')) return true
-              if (path.includes('piyasa-fiyat-arastirmasi') && lowerName.includes('piyasa fiyat araştırma')) return true
-              if (path.includes('tutanak') && lowerName.includes('piyasa fiyat araştırma')) return true
+              if (
+                path.includes('piyasa-fiyat-arastirmasi') &&
+                lowerName.includes('piyasa fiyat araştırma')
+              )
+                return true
+              if (path.includes('tutanak') && lowerName.includes('piyasa fiyat araştırma'))
+                return true
               return false
             })
             if (doc && doc.belge_tarihi) {
@@ -371,12 +381,14 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
 
         setContextsByPath(pathContexts)
         setActiveDosya(dosyaRes.data?.[0] || null)
-    } catch (err) {
-      console.error('Veri yükleme hatası:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [activeDosyaId])
+      } catch (err) {
+        console.error('Veri yükleme hatası:', err)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [activeDosyaId]
+  )
 
   useEffect(() => {
     if (!activeDosyaId) return

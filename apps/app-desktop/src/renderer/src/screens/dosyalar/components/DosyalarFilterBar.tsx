@@ -1,6 +1,6 @@
-import React from "react";
-import { cn } from "../../../utils/cn";
-import { Search } from "lucide-react";
+import React from 'react'
+import { cn } from '../../../utils/cn'
+import { Search } from 'lucide-react'
 
 export function DosyalarFilterBar({
   filterYil,
@@ -13,19 +13,19 @@ export function DosyalarFilterBar({
   searchQuery,
   setSearchQuery,
   filteredCount,
-  totalCount,
+  totalCount
 }: {
-  filterYil: string;
-  setFilterYil: (val: string) => void;
-  filterStatus: string;
-  setFilterStatus: (val: string) => void;
-  uniqueYillar: number[];
-  filterTur: string;
-  setFilterTur: (val: string) => void;
-  searchQuery: string;
-  setSearchQuery: (val: string) => void;
-  filteredCount: number;
-  totalCount: number;
+  filterYil: string
+  setFilterYil: (val: string) => void
+  filterStatus: string
+  setFilterStatus: (val: string) => void
+  uniqueYillar: number[]
+  filterTur: string
+  setFilterTur: (val: string) => void
+  searchQuery: string
+  setSearchQuery: (val: string) => void
+  filteredCount: number
+  totalCount: number
 }): React.ReactElement {
   return (
     <div className="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl shadow-sm">
@@ -52,28 +52,27 @@ export function DosyalarFilterBar({
           <option value="tamamlandi">Tamamlananlar</option>
           <option value="iptal_edildi">İptal Edilenler</option>
         </select>
-        <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block">
-        </div>
-        {["hepsi", "mal", "hizmet", "yapim_isi", "danismanlik"].map((t) => (
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
+        {['hepsi', 'mal', 'hizmet', 'yapim_isi', 'danismanlik'].map((t) => (
           <button
             key={t}
             onClick={() => setFilterTur(t)}
             className={cn(
-              "px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border",
+              'px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border',
               filterTur === t
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300",
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
             )}
           >
-            {t === "hepsi"
-              ? "Tümü"
-              : t === "mal"
-              ? "Mal"
-              : t === "hizmet"
-              ? "Hizmet"
-              : t === "yapim_isi"
-              ? "Yapım"
-              : "Danışmanlık"}
+            {t === 'hepsi'
+              ? 'Tümü'
+              : t === 'mal'
+                ? 'Mal'
+                : t === 'hizmet'
+                  ? 'Hizmet'
+                  : t === 'yapim_isi'
+                    ? 'Yapım'
+                    : 'Danışmanlık'}
           </button>
         ))}
       </div>
@@ -97,5 +96,5 @@ export function DosyalarFilterBar({
         )}
       </div>
     </div>
-  );
+  )
 }

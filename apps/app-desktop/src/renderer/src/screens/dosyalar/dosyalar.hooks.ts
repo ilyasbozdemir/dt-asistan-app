@@ -162,7 +162,7 @@ export function useDosyalarHooks() {
   const bulkDeleteDosyalarMutation = useMutation({
     mutationFn: async (ids: number[]) => {
       if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
-      if (ids.length === 0) return { success: true };
+      if (ids.length === 0) return { success: true }
       const placeholders = ids.map(() => '?').join(', ')
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
@@ -178,7 +178,7 @@ export function useDosyalarHooks() {
   const bulkHardDeleteDosyalarMutation = useMutation({
     mutationFn: async (ids: number[]) => {
       if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
-      if (ids.length === 0) return { success: true };
+      if (ids.length === 0) return { success: true }
       const placeholders = ids.map(() => '?').join(', ')
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',

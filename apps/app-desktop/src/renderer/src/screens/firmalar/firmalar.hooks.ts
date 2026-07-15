@@ -82,9 +82,10 @@ export function useFirmalarHooks() {
           'db:query',
           'SELECT COUNT(*) as cnt FROM TANIM_Firma'
         )
-        const nextNum = countRes.success && countRes.data && countRes.data.length > 0
-          ? (countRes.data[0].cnt || 0) + 1
-          : 1
+        const nextNum =
+          countRes.success && countRes.data && countRes.data.length > 0
+            ? (countRes.data[0].cnt || 0) + 1
+            : 1
         finalFirmaKodu = nextNum.toString().padStart(4, '0')
       }
 

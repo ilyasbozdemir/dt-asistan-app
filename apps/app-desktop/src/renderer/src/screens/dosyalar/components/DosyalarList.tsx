@@ -1,10 +1,10 @@
-import React from "react";
-import { LogType } from "../../../utils/logger";
-import { DosyalarEmptyState } from "./DosyalarEmptyState";
-import { DosyalarBulkActions } from "./DosyalarBulkActions";
-import { DosyalarHeader } from "./DosyalarHeader";
-import { DosyalarGridView } from "./DosyalarGridView";
-import { DosyalarTableView } from "./DosyalarTableView";
+import React from 'react'
+import { LogType } from '../../../utils/logger'
+import { DosyalarEmptyState } from './DosyalarEmptyState'
+import { DosyalarBulkActions } from './DosyalarBulkActions'
+import { DosyalarHeader } from './DosyalarHeader'
+import { DosyalarGridView } from './DosyalarGridView'
+import { DosyalarTableView } from './DosyalarTableView'
 
 export function DosyalarList({
   isLoadingDosyalar,
@@ -30,66 +30,62 @@ export function DosyalarList({
   handleEkapGonder,
   handleKilidiAc,
   handleOpenInNewWindow,
-  handleOpenAI,
+  handleOpenAI
 }: {
-  isLoadingDosyalar: boolean;
-  filteredDosyalar: any[];
-  dosyalar: any[];
-  viewMode: "grid" | "list" | "table";
-  filterYil: string;
-  filterTur: string;
-  groupedDosyalar: { baseKonu: string; files: any[] }[];
-  expandedGroups: string[];
-  searchQuery: string;
-  toggleGroup: (baseKonu: string) => void;
-  activeDosyaId: number | null;
-  setActiveDosyaId: (id: number | null) => void;
-  getDosyaNoLabel: (d: any) => string;
-  formatMoney: (val: number) => string;
-  formatDate: (val: string | null | undefined) => string;
-  handleDateChange?: (id: number, date: string) => Promise<void>;
-  handleDelete?: (id: number, skipConfirm?: boolean) => Promise<void>;
-  handleHardDelete?: (id: number) => Promise<void>;
-  handleBulkDelete?: (ids: number[]) => Promise<void>;
-  handleBulkHardDelete?: (ids: number[]) => Promise<void>;
-  handleUpdateStatus?: (id: number, status: string) => Promise<void>;
-  handleEkapGonder?: (id: number) => void;
-  handleKilidiAc?: (id: number) => Promise<void>;
-  logActivity?: (
-    title: string,
-    message: string,
-    type?: LogType,
-  ) => Promise<void>;
-  handleOpenInNewWindow?: (dosya: any) => void;
-  handleOpenAI?: (dosya: any) => void;
+  isLoadingDosyalar: boolean
+  filteredDosyalar: any[]
+  dosyalar: any[]
+  viewMode: 'grid' | 'list' | 'table'
+  filterYil: string
+  filterTur: string
+  groupedDosyalar: { baseKonu: string; files: any[] }[]
+  expandedGroups: string[]
+  searchQuery: string
+  toggleGroup: (baseKonu: string) => void
+  activeDosyaId: number | null
+  setActiveDosyaId: (id: number | null) => void
+  getDosyaNoLabel: (d: any) => string
+  formatMoney: (val: number) => string
+  formatDate: (val: string | null | undefined) => string
+  handleDateChange?: (id: number, date: string) => Promise<void>
+  handleDelete?: (id: number, skipConfirm?: boolean) => Promise<void>
+  handleHardDelete?: (id: number) => Promise<void>
+  handleBulkDelete?: (ids: number[]) => Promise<void>
+  handleBulkHardDelete?: (ids: number[]) => Promise<void>
+  handleUpdateStatus?: (id: number, status: string) => Promise<void>
+  handleEkapGonder?: (id: number) => void
+  handleKilidiAc?: (id: number) => Promise<void>
+  logActivity?: (title: string, message: string, type?: LogType) => Promise<void>
+  handleOpenInNewWindow?: (dosya: any) => void
+  handleOpenAI?: (dosya: any) => void
 }): React.JSX.Element {
-  const [openMenuId, setOpenMenuId] = React.useState<number | null>(null);
-  const [selectedDosyaIds, setSelectedDosyaIds] = React.useState<number[]>([]);
+  const [openMenuId, setOpenMenuId] = React.useState<number | null>(null)
+  const [selectedDosyaIds, setSelectedDosyaIds] = React.useState<number[]>([])
 
   const toggleSelection = (e: React.MouseEvent, id: number) => {
-    e.stopPropagation();
+    e.stopPropagation()
     setSelectedDosyaIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
+    )
+  }
 
   // Dışarı tıklanınca menüyü kapat
   React.useEffect(() => {
-    const closeMenu = () => setOpenMenuId(null);
-    document.addEventListener("click", closeMenu);
-    return () => document.removeEventListener("click", closeMenu);
-  }, []);
+    const closeMenu = () => setOpenMenuId(null)
+    document.addEventListener('click', closeMenu)
+    return () => document.removeEventListener('click', closeMenu)
+  }, [])
 
   if (isLoadingDosyalar) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-slate-500 italic">
         Dosyalar yükleniyor...
       </div>
-    );
+    )
   }
 
   if (filteredDosyalar.length === 0) {
-    return <DosyalarEmptyState />;
+    return <DosyalarEmptyState />
   }
 
   return (
@@ -101,7 +97,7 @@ export function DosyalarList({
         handleBulkDelete={handleBulkDelete}
         setSelectedDosyaIds={setSelectedDosyaIds}
       />
-      
+
       <DosyalarHeader
         filterYil={filterYil}
         filteredDosyalar={filteredDosyalar}
@@ -110,7 +106,7 @@ export function DosyalarList({
         filterTur={filterTur}
       />
 
-      {viewMode === "grid" || viewMode === "list" ? (
+      {viewMode === 'grid' || viewMode === 'list' ? (
         <DosyalarGridView
           viewMode={viewMode}
           groupedDosyalar={groupedDosyalar}
@@ -159,5 +155,5 @@ export function DosyalarList({
         />
       )}
     </div>
-  );
+  )
 }

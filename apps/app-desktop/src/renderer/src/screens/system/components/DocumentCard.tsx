@@ -158,7 +158,8 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                 ))
               ) : (
                 <div className="px-3 py-2 text-[10px] text-slate-400 dark:text-slate-500 italic text-left">
-                  Henüz paket oluşturulmamış. Kopyalamak için önce üst menüden yeni bir paket oluşturun.
+                  Henüz paket oluşturulmamış. Kopyalamak için önce üst menüden yeni bir paket
+                  oluşturun.
                 </div>
               )}
             </div>
