@@ -77,4 +77,6 @@ export interface YeniDosyaTabProps {
 
   // Sub-stepper navigation
   onNextMainStep?: () => void
+  activeSubStep?: number
+  setActiveSubStep?: React.Dispatch<React.SetStateAction<number>>
 }

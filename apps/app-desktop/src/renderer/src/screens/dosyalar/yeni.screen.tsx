@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowLeft,
   Bot,
   ChevronDown,
-  ChevronRight,
   Copy,
   FileText,
   HelpCircle,
@@ -72,7 +71,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     getNextTeminNo,
     validationError,
     setValidationError,
-  } = useYeniDosyaScreen();
+  } = useYeniDosyaScreen()
+
+  const [activeSubStep, setActiveSubStep] = useState(1)
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -216,72 +217,85 @@ export default function YeniDosyaScreen(): React.JSX.Element {
       </div>
 
       {/* STEPPER UI */}
-      <div className="flex-none bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-12 py-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="flex-none bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-12 py-3">
+        <div className="max-w-4xl mx-auto space-y-3">
+          {/* Ana Stepper */}
           <div className="relative flex justify-between">
-            {/* Connecting Line */}
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800 -translate-y-1/2 rounded-full z-0">
-            </div>
-
+            <div className="absolute top-4 left-0 w-full h-0.5 bg-slate-200 dark:bg-slate-800 z-0" />
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
-                onClick={() => setActiveTab("genel")}
+                onClick={() => { setActiveTab('genel') }}
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all",
-                  activeTab === "genel" || activeTab === "ihtiyac"
-                    ? "bg-blue-600 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400",
+                  'w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all',
+                  activeTab === 'genel' || activeTab === 'ihtiyac'
+                    ? 'bg-blue-600 border-blue-200 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400',
                 )}
-              >
-                1
-              </button>
-              <span
-                className={cn(
-                  "mt-2 text-[11px] font-bold uppercase tracking-wider",
-                  activeTab === "genel"
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-slate-500 dark:text-slate-400",
-                )}
-              >
-                Genel Bilgiler
-              </span>
+              >1</button>
+              <span className={cn(
+                'mt-1 text-[10px] font-bold uppercase tracking-wider',
+                activeTab === 'genel' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400',
+              )}>Genel Bilgiler</span>
             </div>
-
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
                 onClick={() => {
-                  if (!formData.konu?.trim()) {
-                    setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
-                    return
-                  }
+                  if (!formData.konu?.trim()) { setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.'); return }
                   setValidationError(null)
-                  setActiveTab("ihtiyac")
+                  setActiveTab('ihtiyac')
                 }}
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all",
-                  activeTab === "ihtiyac"
-                    ? "bg-blue-500 border-blue-100 dark:border-blue-900/30 text-white shadow-lg shadow-blue-500/20"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400",
+                  'w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all',
+                  activeTab === 'ihtiyac'
+                    ? 'bg-blue-500 border-blue-200 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400',
                 )}
-              >
-                2
-              </button>
-              <span
-                className={cn(
-                  "mt-2 text-[11px] font-bold uppercase tracking-wider",
-                  activeTab === "ihtiyac"
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-slate-500 dark:text-slate-400",
-                )}
-              >
-                İhtiyaç Listesi
-              </span>
+              >2</button>
+              <span className={cn(
+                'mt-1 text-[10px] font-bold uppercase tracking-wider',
+                activeTab === 'ihtiyac' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400',
+              )}>İhtiyaç Listesi</span>
             </div>
           </div>
+
+          {/* Sub-step Indicator — sadece Genel Bilgiler tab'ında görünür */}
+          {activeTab === 'genel' && (
+            <div className="relative flex justify-between pt-1">
+              <div className="absolute top-3 left-0 right-0 h-px bg-slate-200 dark:bg-slate-700 z-0" />
+              {(['Genel & Antet', 'Mali & Bütçe', 'İhale & Teklif', 'Yetkililer'] as const).map((label, i) => {
+                const stepId = i + 1
+                const isDone = stepId < activeSubStep
+                const isActive = stepId === activeSubStep
+                return (
+                  <button
+                    key={stepId}
+                    type="button"
+                    onClick={() => setActiveSubStep(stepId)}
+                    className="relative z-10 flex flex-col items-center gap-1 cursor-pointer"
+                  >
+                    <div className={cn(
+                      'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-200',
+                      isDone
+                        ? 'bg-blue-500 border-blue-500 text-white'
+                        : isActive
+                          ? 'bg-white dark:bg-slate-900 border-blue-500 text-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/30'
+                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400',
+                    )}>
+                      {isDone ? '✓' : stepId}
+                    </div>
+                    <span className={cn(
+                      'text-[9px] font-semibold whitespace-nowrap',
+                      isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500',
+                    )}>{label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -383,11 +397,12 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                         return
                       }
                       setValidationError(null)
-                      setActiveTab("ihtiyac")
+                      setActiveTab('ihtiyac')
                     }}
+                    activeSubStep={activeSubStep}
+                    setActiveSubStep={setActiveSubStep}
                   />
                 )}
-
 
                 {/* TAB 2: İHTİYAÇ LİSTESİ */}
                 {activeTab === "ihtiyac" && (
@@ -410,39 +425,15 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             </div>
 
             <div className="flex gap-3">
-              {activeTab !== "genel" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeTab === "ihtiyac") setActiveTab("genel");
-                  }}
-                  className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
-                >
-                  Geri Git
-                </button>
-              )}
-
-              {activeTab !== "ihtiyac"
-                ? (
+              {activeTab === "ihtiyac" && (
+                <>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!formData.konu?.trim()) {
-                        setValidationError(
-                          "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
-                        );
-                        return;
-                      }
-                      setValidationError(null);
-                      if (activeTab === "genel") setActiveTab("ihtiyac");
-                    }}
-                    className="px-4 py-2 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
+                    onClick={() => setActiveTab("genel")}
+                    className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
-                    Sonraki Adım
-                    <ChevronRight size={14} />
+                    Geri Git
                   </button>
-                )
-                : (
                   <button
                     onClick={handleSave}
                     className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/25 flex items-center gap-2 cursor-pointer"
@@ -450,7 +441,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     <Save size={16} />
                     {isEdit ? "Değişiklikleri Kaydet" : "Dosyayı Oluştur"}
                   </button>
-                )}
+                </>
+              )}
             </div>
           </div>
         </form>
