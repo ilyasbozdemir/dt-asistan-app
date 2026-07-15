@@ -10,6 +10,7 @@ export interface Personel {
   eposta: string | null
   aktif_mi: number
   notlar: string | null
+  avatar?: string | null
 }
 
 export interface Rol {
@@ -66,7 +67,7 @@ export function usePersonelHooks(): UsePersonelHooksReturn {
 
   const addPersonelMutation = useMutation({
     mutationFn: async (personel: PersonelWithRoles) => {
-      const sql = `INSERT INTO TANIM_Personel (ad_soyad, unvan, birim, sicil_no, telefon, eposta, aktif_mi) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      const sql = `INSERT INTO TANIM_Personel (ad_soyad, unvan, birim, sicil_no, telefon, eposta, aktif_mi, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       const params = [
         personel.ad_soyad,
         personel.unvan || null,
@@ -74,7 +75,8 @@ export function usePersonelHooks(): UsePersonelHooksReturn {
         personel.sicil_no || null,
         personel.telefon || null,
         personel.eposta || null,
-        personel.aktif_mi !== undefined ? personel.aktif_mi : 1
+        personel.aktif_mi !== undefined ? personel.aktif_mi : 1,
+        personel.avatar || null
       ]
 
       const res = await window.electron.ipcRenderer.invoke('db:run', sql, params)
@@ -107,7 +109,7 @@ export function usePersonelHooks(): UsePersonelHooksReturn {
 
   const updatePersonelMutation = useMutation({
     mutationFn: async (personel: PersonelWithRoles & { id: number }) => {
-      const sql = `UPDATE TANIM_Personel SET ad_soyad = ?, unvan = ?, birim = ?, sicil_no = ?, telefon = ?, eposta = ?, aktif_mi = ? WHERE id = ?`
+      const sql = `UPDATE TANIM_Personel SET ad_soyad = ?, unvan = ?, birim = ?, sicil_no = ?, telefon = ?, eposta = ?, aktif_mi = ?, avatar = ? WHERE id = ?`
       const params = [
         personel.ad_soyad,
         personel.unvan || null,
@@ -116,6 +118,7 @@ export function usePersonelHooks(): UsePersonelHooksReturn {
         personel.telefon || null,
         personel.eposta || null,
         personel.aktif_mi !== undefined ? personel.aktif_mi : 1,
+        personel.avatar || null,
         personel.id
       ]
 

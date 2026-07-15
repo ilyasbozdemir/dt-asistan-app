@@ -25,6 +25,7 @@ export const TANIM_Personel = {
       description: 'Aktif Personel mi?'
     },
     { name: 'notlar', type: 'TEXT', description: 'Notlar' },
+    { name: 'avatar', type: 'TEXT', description: 'Profil Resmi (Base64)' },
     {
       name: 'created_at',
       type: 'DATETIME',

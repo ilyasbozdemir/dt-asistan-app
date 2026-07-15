@@ -56,6 +56,7 @@ export default function PersonelScreen(): React.ReactNode {
     eposta: "",
     aktif_mi: 1,
     assignedRoles: [],
+    avatar: null,
   });
 
   const openForm = (e?: React.MouseEvent, personel?: Personel): void => {
@@ -77,6 +78,7 @@ export default function PersonelScreen(): React.ReactNode {
         eposta: "",
         aktif_mi: 1,
         assignedRoles: [],
+        avatar: null,
       });
     }
     setScreenState("form");
@@ -163,8 +165,20 @@ export default function PersonelScreen(): React.ReactNode {
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
           <div className="flex items-center gap-5 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 mb-8">
-            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-3xl uppercase shadow-sm shrink-0 border border-blue-200 dark:border-blue-800">
-              {viewingPersonel.ad_soyad.slice(0, 2)}
+            <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-800 shadow-sm">
+              {viewingPersonel.avatar
+                ? (
+                  <img
+                    src={viewingPersonel.avatar}
+                    alt={viewingPersonel.ad_soyad}
+                    className="w-full h-full object-cover"
+                  />
+                )
+                : (
+                  <div className="w-full h-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-3xl uppercase">
+                    {viewingPersonel.ad_soyad.slice(0, 2)}
+                  </div>
+                )}
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">
@@ -293,19 +307,78 @@ export default function PersonelScreen(): React.ReactNode {
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm space-y-8">
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Ad Soyad *
-              </label>
-              <Input
-                required
-                autoFocus
-                placeholder="Örn: Ahmet Yılmaz"
-                value={formData.ad_soyad}
-                onChange={(e) =>
-                  setFormData({ ...formData, ad_soyad: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm py-2 h-11"
-              />
+            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-slate-50/50 dark:bg-slate-950/20 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+              {/* Avatar Yükleme */}
+              <div className="flex flex-col items-center gap-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
+                  Profil Resmi
+                </label>
+                <div className="relative group w-24 h-24 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-850 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer shadow-inner hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                  {formData.avatar
+                    ? (
+                      <img
+                        src={formData.avatar}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    )
+                    : (
+                      <Users className="w-10 h-10 text-slate-400 dark:text-slate-600" />
+                    )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({
+                            ...formData,
+                            avatar: reader.result as string,
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <span className="text-[10px] text-white font-semibold">
+                      Resim Seç
+                    </span>
+                  </div>
+                </div>
+                {formData.avatar && (
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, avatar: null })}
+                    className="text-[10px] text-rose-500 hover:text-rose-600 hover:underline cursor-pointer font-semibold"
+                  >
+                    Resmi Kaldır
+                  </button>
+                )}
+              </div>
+
+              {/* Ad Soyad Girişi */}
+              <div className="flex-1 w-full space-y-2">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Ad Soyad *
+                </label>
+                <Input
+                  required
+                  autoFocus
+                  placeholder="Örn: Ahmet Yılmaz"
+                  value={formData.ad_soyad}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ad_soyad: e.target.value })}
+                  className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-sm py-2 h-11"
+                />
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Personelin adı ve soyadı resmi belgelerde bu şekilde
+                  görüntülenecektir.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -510,8 +583,20 @@ export default function PersonelScreen(): React.ReactNode {
                       </div>
 
                       <div className="flex items-center gap-3 mb-3 pr-12">
-                        <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
-                          {p.ad_soyad.slice(0, 2)}
+                        <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                          {p.avatar
+                            ? (
+                              <img
+                                src={p.avatar}
+                                alt={p.ad_soyad}
+                                className="w-full h-full object-cover"
+                              />
+                            )
+                            : (
+                              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase">
+                                {p.ad_soyad.slice(0, 2)}
+                              </div>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
@@ -575,8 +660,20 @@ export default function PersonelScreen(): React.ReactNode {
                       className="flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
                     >
                       <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
-                        <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase shadow-sm">
-                          {p.ad_soyad.slice(0, 2)}
+                        <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                          {p.avatar
+                            ? (
+                              <img
+                                src={p.avatar}
+                                alt={p.ad_soyad}
+                                className="w-full h-full object-cover"
+                              />
+                            )
+                            : (
+                              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm uppercase">
+                                {p.ad_soyad.slice(0, 2)}
+                              </div>
+                            )}
                         </div>
 
                         <div className="flex-1 min-w-[200px]">
