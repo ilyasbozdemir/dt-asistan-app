@@ -350,6 +350,7 @@ export function GenelBilgilerVeIdariAntetSection(
           </label>
           <input
             type="text"
+            list="makam-list"
             value={formData.sunulacak_makam || ""}
             onChange={(e) =>
               setFormData({
@@ -359,6 +360,15 @@ export function GenelBilgilerVeIdariAntetSection(
             placeholder="Örn: BAŞKANLIK MAKAMINA veya MÜDÜRLÜK MAKAMINA"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
+          <datalist id="makam-list">
+            {Array.from(
+              new Set(
+                birimler
+                  ? birimler.map((b) => b.sunum_makami).filter(Boolean)
+                  : [],
+              ),
+            ).map((makam) => <option key={makam} value={makam} />)}
+          </datalist>
         </div>
 
         <div>
