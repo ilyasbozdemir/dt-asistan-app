@@ -74,4 +74,7 @@ export interface YeniDosyaTabProps {
   isLimitExceeded?: boolean
   getNextTeminNo?: (year: number) => string
   getIhaleSekliExplanation?: (madde?: string) => string
+
+  // Sub-stepper navigation
+  onNextMainStep?: () => void
 }

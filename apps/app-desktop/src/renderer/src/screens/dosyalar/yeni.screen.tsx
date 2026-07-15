@@ -349,7 +349,6 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* TAB 1: GENEL BİLGİLER */}
                 {activeTab === "genel" && (
                   <GenelBilgilerTab
                     formData={formData}
@@ -378,8 +377,17 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     personelSearchQuery={personelSearchQuery}
                     setPersonelSearchQuery={setPersonelSearchQuery}
                     filteredPersoneller={filteredPersoneller}
+                    onNextMainStep={() => {
+                      if (!formData.konu?.trim()) {
+                        setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+                        return
+                      }
+                      setValidationError(null)
+                      setActiveTab("ihtiyac")
+                    }}
                   />
                 )}
+
 
                 {/* TAB 2: İHTİYAÇ LİSTESİ */}
                 {activeTab === "ihtiyac" && (
