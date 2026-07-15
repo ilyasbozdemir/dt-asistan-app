@@ -1,6 +1,6 @@
 import { AIFormContext } from '../../components/ui/AIFormFillModal'
 import { TeminDosyasi } from './dosyalar.hooks'
-import { DBBirim } from './types'
+import { DBBirim, DBPersonel } from './types'
 
 export const DOLDURULACAK_ALANLAR: AIFormContext['doldurulacakAlanlar'] = [
   {
@@ -177,5 +177,72 @@ export function buildAIFormContext(
       butce_yili: formData.butce_yili
     },
     doldurulacakAlanlar: DOLDURULACAK_ALANLAR
+  }
+}
+
+export function getEmptyFormData(
+  currentYear: number,
+  nextTeminNo: string,
+  birimler: DBBirim[],
+  personeller: DBPersonel[]
+): Partial<TeminDosyasi> {
+  return {
+    temin_no: nextTeminNo,
+    dosya_acilis_tarihi: `${currentYear}-06-03`,
+    butce_yili: currentYear,
+    butce_tipi: 'Genel Bütçe',
+    konu: '',
+    isin_aciklamasi: '',
+    birim_id: birimler[0]?.id || null,
+    antet_ek_satir: '',
+    sunulacak_makam: '',
+    ihtiyac_yeri: '',
+    e_butce: '',
+    fonksiyonel_kod: '',
+    muhasebe_birimi: '',
+    harcama_birimi: '',
+    finansman_kodu: '',
+    ekonomik_kod: '',
+    butce_kodu: '',
+    ihale_tipi: 'Doğrudan Temin',
+    tur: 'mal',
+    ihale_sekli: '22/d*',
+    teklif_sozlesme_turu: 'Birim Fiyat',
+    alt_yuklenici_olacak_mi: 0,
+    kismi_teklif_verilecek_mi: 0,
+    fiyat_farki_dayanagi: 'Fiyat Farkı Ödenmeyecek',
+    yatirim_proje_no: '',
+    avans_verilecek_mi: 0,
+    yillara_yaygin: 0,
+    sozlesme_yapilacak_mi: 0,
+    yaklasik_maliyet_hesaplamasi: 'Piyasa Fiyat Araştırması',
+    kdv: '20',
+    hesaplama_esasi: '',
+    komisyon_takdiri: 'Sadece araştırma fiyatları dikkate alınacak',
+    tibbi_cihaz_alimi_mi: 0,
+    irtibat_yetkilisi_id: personeller[0]?.id || null,
+    onay_personel_id:
+      personeller.find((p) => p.harcama_yetkilisi_mi === 1)?.id || personeller[1]?.id || null,
+    hazirlayan_personel_id: personeller[0]?.id || null,
+    son_teklif_verme_tarihi: '2026-06-10T14:00',
+    teslim_tarihi: '2026-06-30',
+    yaklasik_maliyet: 145005
+  }
+}
+
+export function getMockFormData(
+  currentYear: number,
+  nextTeminNo: string,
+  birimler: DBBirim[],
+  personeller: DBPersonel[]
+): Partial<TeminDosyasi> {
+  return {
+    ...getEmptyFormData(currentYear, nextTeminNo, birimler, personeller),
+    konu: 'Park Bahçeler Müdürlüğü Elektrik Kablosu ve Aydınlatma Armatürü Alımı',
+    isin_aciklamasi:
+      'X Belediyesi Park Bahçeler Müdürlüğü tarafından yeşil alanlar ve çocuk oyun parklarının aydınlatılmasında kullanılmak üzere elektrik kablosu ve aydınlatma armatürü alımı işi.',
+    antet_ek_satir: 'Fen İşleri Dairesi Başkanlığı',
+    sunulacak_makam: 'BAŞKANLIK MAKAMINA',
+    ihtiyac_yeri: 'X Belediyesi Merkez Şantiyesi'
   }
 }

@@ -247,7 +247,7 @@ export function MalzemeTablosu({
   }, [selectedPresetId, presets, activeStarredDocs])
 
   const hasStarred = React.useMemo(() => {
-    let baseSablons = [...stageSablons]
+    const baseSablons = [...stageSablons]
     for (const s of komisyonSablons) {
       if (!baseSablons.find((existing) => existing.id === s.id)) {
         baseSablons.push(s)
@@ -264,7 +264,7 @@ export function MalzemeTablosu({
   const filter = manualFilter !== null ? manualFilter : hasStarred ? 'starred' : 'all'
 
   const displaySablons = React.useMemo(() => {
-    let baseSablons = [...stageSablons]
+    const baseSablons = [...stageSablons]
     for (const s of komisyonSablons) {
       if (!baseSablons.find((existing) => existing.id === s.id)) {
         baseSablons.push(s)

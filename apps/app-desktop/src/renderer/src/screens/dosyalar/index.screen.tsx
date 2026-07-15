@@ -134,7 +134,7 @@ export default function DosyalarScreen(): React.ReactNode {
       await bulkHardDeleteDosyalar(ids)
       if (activeDosyaId && ids.includes(activeDosyaId)) setActiveDosyaId(null)
     } catch (error: any) {
-      let errorMsg = error?.message || 'Bilinmeyen bir hata oluştu.'
+      const errorMsg = error?.message || 'Bilinmeyen bir hata oluştu.'
       alert('Toplu Silme İşlemi Başarısız!\n\n' + errorMsg)
     }
   }

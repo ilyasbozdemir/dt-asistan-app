@@ -45,7 +45,7 @@ ${currentHtml || 'Henüz boş.'}
       })
 
       if (res.success && res.data) {
-        let cleanHtml = res.data.replace(/^```html\s*/i, '').replace(/\s*```$/i, '')
+        const cleanHtml = res.data.replace(/^```html\s*/i, '').replace(/\s*```$/i, '')
         onApply(cleanHtml)
         onClose()
         setPrompt('')

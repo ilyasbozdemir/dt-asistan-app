@@ -18,6 +18,7 @@ import { EskiDosyaKopyalaModal } from "./components/EskiDosyaKopyalaModal";
 import { GenelBilgilerTab } from "./tabs/GenelBilgilerTab";
 import { IhtiyacListesiTab } from "./tabs/IhtiyacListesiTab";
 import { useYeniDosyaScreen } from "./yeni.hooks";
+import { getEmptyFormData, getMockFormData } from "./yeni.config";
 
 export default function YeniDosyaScreen(): React.JSX.Element {
   const {
@@ -69,6 +70,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     matchedSuggestions,
     exactMatchCount,
     getNextTeminNo,
+    validationError,
+    setValidationError,
   } = useYeniDosyaScreen();
 
   return (
@@ -159,61 +162,39 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             )}
           </div>
 
+          <button
+            type="button"
+            onClick={() => {
+              const currentYear = new Date().getFullYear();
+              setFormData(
+                getEmptyFormData(
+                  currentYear,
+                  getNextTeminNo(currentYear),
+                  birimler,
+                  personeller,
+                ),
+              );
+            }}
+            className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+          >
+            Formu Temizle
+          </button>
+
           {import.meta.env.DEV && (
             <button
               type="button"
               onClick={() => {
                 const currentYear = new Date().getFullYear();
-                setFormData({
-                  temin_no: getNextTeminNo(currentYear),
-                  dosya_acilis_tarihi: `${currentYear}-06-03`,
-                  butce_yili: currentYear,
-                  butce_tipi: "Genel Bütçe",
-                  konu:
-                    "Park Bahçeler Müdürlüğü Elektrik Kablosu ve Aydınlatma Armatürü Alımı",
-                  isin_aciklamasi:
-                    "X Belediyesi Park Bahçeler Müdürlüğü tarafından yeşil alanlar ve çocuk oyun parklarının aydınlatılmasında kullanılmak üzere elektrik kablosu ve aydınlatma armatürü alımı işi.",
-                  birim_id: birimler[0]?.id || null,
-                  antet_ek_satir: "Fen İşleri Dairesi Başkanlığı",
-                  sunulacak_makam: "BAŞKANLIK MAKAMINA",
-                  ihtiyac_yeri: "X Belediyesi Merkez Şantiyesi",
-                  e_butce: "",
-                  fonksiyonel_kod: "",
-                  muhasebe_birimi: "",
-                  harcama_birimi: "",
-                  finansman_kodu: "",
-                  ekonomik_kod: "",
-                  butce_kodu: "",
-                  ihale_tipi: "Doğrudan Temin",
-                  tur: "mal",
-                  ihale_sekli: "22/d*",
-                  teklif_sozlesme_turu: "Birim Fiyat",
-                  alt_yuklenici_olacak_mi: 0,
-                  kismi_teklif_verilecek_mi: 0,
-                  fiyat_farki_dayanagi: "Fiyat Farkı Ödenmeyecek",
-                  yatirim_proje_no: "",
-                  avans_verilecek_mi: 0,
-                  yillara_yaygin: 0,
-                  sozlesme_yapilacak_mi: 0,
-                  yaklasik_maliyet_hesaplamasi: "Piyasa Fiyat Araştırması",
-                  kdv: "20",
-                  hesaplama_esasi: "",
-                  komisyon_takdiri:
-                    "Sadece araştırma fiyatları dikkate alınacak",
-                  tibbi_cihaz_alimi_mi: 0,
-                  irtibat_yetkilisi_id: personeller[0]?.id || null,
-                  onay_personel_id: personeller.find((p) =>
-                    p.harcama_yetkilisi_mi === 1
-                  )?.id ||
-                    personeller[1]?.id ||
-                    null,
-                  hazirlayan_personel_id: personeller[0]?.id || null,
-                  son_teklif_verme_tarihi: "2026-06-10T14:00",
-                  teslim_tarihi: "2026-06-30",
-                  yaklasik_maliyet: 145005,
-                });
+                setFormData(
+                  getMockFormData(
+                    currentYear,
+                    getNextTeminNo(currentYear),
+                    birimler,
+                    personeller,
+                  ),
+                );
               }}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-605 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               Test Verisi Doldur
             </button>
@@ -272,7 +253,14 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
-                onClick={() => setActiveTab("ihtiyac")}
+                onClick={() => {
+                  if (!formData.konu?.trim()) {
+                    setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+                    return
+                  }
+                  setValidationError(null)
+                  setActiveTab("ihtiyac")
+                }}
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-4 transition-all",
                   activeTab === "ihtiyac"
@@ -311,6 +299,31 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             )
             : (
               <>
+                {validationError && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-xl mb-6 shadow-sm flex justify-between items-start">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg">
+                        <HelpCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-amber-800 dark:text-amber-300">
+                          Form Kontrol Uyarısı
+                        </h3>
+                        <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                          {validationError}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setValidationError(null)}
+                      className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline px-2 py-1 cursor-pointer"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                )}
+
                 {donemTanimsizMi(formData.dosya_acilis_tarihi || undefined) && (
                   <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl mb-6 shadow-sm">
                     <div className="flex items-start gap-3">
@@ -322,9 +335,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                           Kritik Hata: 22/d Limit Dönemi Bulunamadı!
                         </h3>
                         <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                          Sistemde, seçtiğiniz "Dosya Açılış Tarihi" ({formData
-                            .dosya_acilis_tarihi}) ile eşleşen bir Doğrudan
-                          Temin Limit Dönemi bulunamadı. Lütfen{" "}
+                          Sistemde, seçtiğiniz &quot;Dosya Açılış Tarihi&quot; (
+                          {formData.dosya_acilis_tarihi}) ile eşleşen bir
+                          Doğrudan Temin Limit Dönemi bulunamadı. Lütfen{" "}
                           <strong>
                             Sistem Ayarları &gt; Mevzuat ve Parametreler
                           </strong>{" "}
@@ -406,6 +419,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
+                      if (!formData.konu?.trim()) {
+                        setValidationError(
+                          "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
+                        );
+                        return;
+                      }
+                      setValidationError(null);
                       if (activeTab === "genel") setActiveTab("ihtiyac");
                     }}
                     className="px-4 py-2 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
@@ -470,8 +490,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         expectedJsonFormat={'{ "kalemAdi": "Örn: A4 Fotokopi Kağıdı 80gr", "miktari": 50, "birimi": "Paket", "okasKodu": "Örn: 30197630-1" }'}
         systemInstruction={`Sen bir kamu ihale ve doğrudan temin uzmanısın. Kullanıcı bir mal, hizmet veya yapım işi için listeye kalem eklemek istiyor. 
 Kullanıcının girdiği genel tanıma ve alımın konusuna ([DOSYA_KONU]) bakarak:
-1. En uygun, resmi, şartnameye uygun "Kalem Adı"nı belirle.
-2. Bu kalem için EKAP sisteminde kullanılan en uygun "OKAS Kodunu" (Ortak Alımlar Sözlüğü CPV kodu) veya Taşınır/Taşınmaz mal kodunu bul. Bulamazsan uygun bir üst kategori OKAS kodu tahmin et.
+1. En uygun, resmi, şartnameye uygun 'Kalem Adı'nı belirle.
+2. Bu kalem için EKAP sisteminde kullanılan en uygun 'OKAS Kodunu' (Ortak Alımlar Sözlüğü CPV kodu) veya Taşınır/Taşınmaz mal kodunu bul. Bulamazsan uygun bir üst kategori OKAS kodu tahmin et.
 3. Uygun miktar ve ölçü birimi (Adet, Paket, Kg, Ton, Ay, Gün, m2 vb.) öner.
 Yanıtını SADECE JSON formatında ver.`}
         placeholderMappings={{

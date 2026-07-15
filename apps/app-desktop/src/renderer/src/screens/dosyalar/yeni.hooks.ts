@@ -88,6 +88,8 @@ export interface UseYeniDosyaScreenReturn {
   matchedSuggestions: string[]
   exactMatchCount: number
   getNextTeminNo: (year: number) => string
+  validationError: string | null
+  setValidationError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
@@ -98,6 +100,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const { institutionName, limitType } = useSettingsStore()
   const { donemTanimsizMi, donemler } = useKikLimitDonemleri()
 
+  const [validationError, setValidationError] = useState<string | null>(null)
   const [isDescLoading, setIsDescLoading] = useState(false)
   const [showKonuSuggestions, setShowKonuSuggestions] = useState(false)
 
@@ -457,7 +460,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
 
   const handleAiDescGenerate = async () => {
     if (!formData.konu?.trim()) {
-      alert('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+      setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
       return
     }
 
@@ -514,7 +517,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.konu?.trim()) {
-      alert('Lütfen dosya konusunu (İşin Adı) giriniz.')
+      setValidationError('Lütfen dosya konusunu (İşin Adı) giriniz.')
       return
     }
 
@@ -711,6 +714,8 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
     getIhaleSekliExplanation,
     matchedSuggestions,
     exactMatchCount,
-    getNextTeminNo
+    getNextTeminNo,
+    validationError,
+    setValidationError
   }
 }

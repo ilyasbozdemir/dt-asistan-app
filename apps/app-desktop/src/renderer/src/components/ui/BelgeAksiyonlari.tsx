@@ -131,7 +131,7 @@ export function BelgeAksiyonlari({
   const handleToggleDefaultList = async () => {
     if (!targetName) return
     const currentList = activeDosyaId ? activeStarredDocs : globalStarred
-    let newDocs = [...currentList]
+    const newDocs = [...currentList]
     const idx = newDocs.findIndex(
       (d) => normalizeForMatch(parseStatusAndName(d).cleanName) === normalizedDocName
     )

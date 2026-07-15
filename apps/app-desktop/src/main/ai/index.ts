@@ -114,7 +114,7 @@ async function callProvider(options: AIGenerateOptions): Promise<AIResult> {
 // ─── Ana üretim fonksiyonu (Agentic Loop eklendi) ──────────────────────────
 export async function generateContent(options: AIGenerateOptions): Promise<AIResult> {
   try {
-    let finalOptions = { ...options }
+    const finalOptions = { ...options }
 
     const aiIdentity =
       'Sen bir Kamu İhale ve Muhasebe Uzmanısın (Doğrudan Temin - DT). Kullanıcı sana soru sorduğunda veya form incelemesi yaptığında, muhasebe diline (ekonomik kod, bütçe türü, fonksiyonel kod, KDV hesabı vb.) ve Kamu İhale Kanununa (özellikle 22/d) hakim olduğunu göstererek profesyonelce yanıt ver. Analizlerinde tutarsızlıkları bul ve net öneriler sun.'
@@ -137,7 +137,7 @@ export async function generateContent(options: AIGenerateOptions): Promise<AIRes
     if (result.success && result.data && result.data.includes('<SQL>')) {
       const sqlMatch = result.data.match(/<SQL>([\s\S]*?)<\/SQL>/)
       if (sqlMatch) {
-        let sql = sqlMatch[1].trim()
+        const sql = sqlMatch[1].trim()
 
         // Basic Security Check
         const upperSql = sql.toUpperCase()

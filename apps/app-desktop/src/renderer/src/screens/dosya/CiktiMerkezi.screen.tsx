@@ -229,7 +229,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     const existingIdx = activeStarredDocs.findIndex(
       (d) => normalizeForMatch(d) === normalizeForMatch(sablonAd)
     )
-    let newDocs = [...activeStarredDocs]
+    const newDocs = [...activeStarredDocs]
 
     if (existingIdx >= 0) {
       newDocs.splice(existingIdx, 1)

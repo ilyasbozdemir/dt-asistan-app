@@ -15,7 +15,7 @@ export function DosyalarHeader({
   selectedDosyaIds,
   setSelectedDosyaIds,
   filterTur
-}: DosyalarHeaderProps): React.JSX.Element {
+}: DosyalarHeaderProps): React.ReactElement {
   return (
     <div className="flex-none mb-4 flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm">
       <div>

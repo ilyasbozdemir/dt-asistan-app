@@ -26,13 +26,6 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
           'SELECT kalem_adi, ozelligi, birim FROM TANIM_Kalem WHERE aktif_mi = 1 ORDER BY id DESC LIMIT 5'
         )
         if (res.success && res.data && res.data.length > 0) {
-          const mockFirms = [
-            'Örnek Medikal & Kimya',
-            'Cihan İnşaat Malzemeleri',
-            'Net Bilişim Teknolojileri',
-            'Gökkuşağı Ofis Kırtasiye',
-            'Lider Temizlik Ürünleri'
-          ]
           const items = res.data.map(
             (
               item: { kalem_adi: string; ozelligi: string | null; birim: string | null },
@@ -41,37 +34,18 @@ export function IhtiyacListesiTab(_props: YeniDosyaTabProps): React.JSX.Element 
               kalem_adi: item.kalem_adi,
               ozelligi: item.ozelligi || 'Genel Şartnameye Uygun',
               miktar: `${(idx + 1) * 15} ${item.birim || 'Adet'}`,
-              firma: mockFirms[idx % mockFirms.length],
-              fiyat: `${((idx + 2) * 195 + 45).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺`,
-              tarih: new Date(Date.now() - (idx + 1) * 8 * 24 * 60 * 60 * 1000).toLocaleDateString(
-                'tr-TR'
-              )
+              firma: '-',
+              fiyat: '-',
+              tarih: '-'
             })
           )
           setLastPurchases(items)
         } else {
-          // Veritabanında kayıt yoksa yedek örnek veriler gösterilsin
-          setLastPurchases([
-            {
-              kalem_adi: 'A4 Fotokopi Kağıdı',
-              ozelligi: "80 gr, 500'lü Paket",
-              miktar: '100 Paket',
-              firma: 'Gökkuşağı Ofis Kırtasiye',
-              fiyat: '115,00 ₺',
-              tarih: '12.05.2026'
-            },
-            {
-              kalem_adi: 'Lazer Yazıcı Toneri',
-              ozelligi: 'Siyah, Orjinal Çipli',
-              miktar: '20 Adet',
-              firma: 'Net Bilişim Teknolojileri',
-              fiyat: '1.450,00 ₺',
-              tarih: '03.04.2026'
-            }
-          ])
+          setLastPurchases([])
         }
       } catch (err) {
         console.error('Son alımlar yüklenirken hata oluştu:', err)
+        setLastPurchases([])
       } finally {
         setLoading(false)
       }
