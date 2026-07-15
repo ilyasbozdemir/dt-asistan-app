@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   BookOpen,
   Building2,
@@ -8,35 +8,36 @@ import {
   ClipboardList,
   FolderOpen,
   Hash,
-  TrendingUp
-} from 'lucide-react'
-import { cn } from '../../../utils/cn'
-import { DurumBadge, TurBadge } from './Badges'
-import { DosyaActionMenu } from './DosyaActionMenu'
-import { useNavigate } from '@tanstack/react-router'
+  TrendingUp,
+} from "lucide-react";
+import { cn } from "../../../utils/cn";
+import { DurumBadge, TurBadge } from "./Badges";
+import { DosyaActionMenu } from "./DosyaActionMenu";
+import { useNavigate } from "@tanstack/react-router";
 
 export interface DosyalarGridViewProps {
-  viewMode: 'grid' | 'list'
-  groupedDosyalar: { baseKonu: string; files: any[] }[]
-  expandedGroups: string[]
-  searchQuery: string
-  toggleGroup: (baseKonu: string) => void
-  activeDosyaId: number | null
-  setActiveDosyaId: (id: number | null) => void
-  selectedDosyaIds: number[]
-  toggleSelection: (e: React.MouseEvent, id: number) => void
-  getDosyaNoLabel: (d: any) => string
-  formatMoney: (val: number) => string
-  formatDate: (val: string | null | undefined) => string
-  openMenuId: number | null
-  setOpenMenuId: (id: number | null) => void
-  handleOpenInNewWindow?: (dosya: any) => void
-  handleUpdateStatus?: (id: number, status: string) => Promise<void>
-  handleEkapGonder?: (id: number) => void
-  handleKilidiAc?: (id: number) => Promise<void>
-  handleOpenAI?: (dosya: any) => void
-  handleDelete?: (id: number) => Promise<void>
-  handleHardDelete?: (id: number) => Promise<void>
+  viewMode: "grid" | "list";
+  groupedDosyalar: { baseKonu: string; files: any[] }[];
+  expandedGroups: string[];
+  searchQuery: string;
+  toggleGroup: (baseKonu: string) => void;
+  activeDosyaId: number | null;
+  setActiveDosyaId: (id: number | null) => void;
+  selectedDosyaIds: number[];
+  toggleSelection: (e: React.MouseEvent, id: number) => void;
+  getDosyaNoLabel: (d: any) => string;
+  formatMoney: (val: number) => string;
+  formatDate: (val: string | null | undefined) => string;
+  openMenuId: number | null;
+  setOpenMenuId: (id: number | null) => void;
+  handleOpenInNewWindow?: (dosya: any) => void;
+  handleUpdateStatus?: (id: number, status: string) => Promise<void>;
+  handleEkapGonder?: (id: number) => void;
+  handleKilidiAc?: (id: number) => Promise<void>;
+  handleOpenAI?: (dosya: any) => void;
+  handleDelete?: (id: number) => Promise<void>;
+  handleHardDelete?: (id: number) => Promise<void>;
+  handleOpenMaliyetAyarlari?: (dosya: any) => void;
 }
 
 export function DosyalarGridView({
@@ -60,20 +61,22 @@ export function DosyalarGridView({
   handleKilidiAc,
   handleOpenAI,
   handleDelete,
-  handleHardDelete
+  handleHardDelete,
+  handleOpenMaliyetAyarlari,
 }: DosyalarGridViewProps): React.JSX.Element {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div
       className={cn(
-        'flex-1 overflow-y-auto custom-scrollbar pr-1 grid gap-4 pb-4 auto-rows-max',
-        viewMode === 'grid' ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'
+        "flex-1 overflow-y-auto custom-scrollbar pr-1 grid gap-4 pb-4 auto-rows-max",
+        viewMode === "grid" ? "grid-cols-1 xl:grid-cols-2" : "grid-cols-1",
       )}
     >
       {groupedDosyalar.map((group) => {
-        const hasMultiple = group.files.length > 1
-        const isExpanded = expandedGroups.includes(group.baseKonu) || searchQuery.length > 0
+        const hasMultiple = group.files.length > 1;
+        const isExpanded = expandedGroups.includes(group.baseKonu) ||
+          searchQuery.length > 0;
 
         return (
           <div key={group.baseKonu} className="col-span-full contents">
@@ -85,7 +88,10 @@ export function DosyalarGridView({
                 <div className="flex items-center gap-3">
                   <ChevronRight
                     size={16}
-                    className={cn('text-slate-400 transition-transform', isExpanded && 'rotate-90')}
+                    className={cn(
+                      "text-slate-400 transition-transform",
+                      isExpanded && "rotate-90",
+                    )}
                   />
                   <FolderOpen size={16} className="text-blue-500" />
                   <h3 className="text-sm font-extrabold text-slate-700 dark:text-slate-300">
@@ -103,15 +109,17 @@ export function DosyalarGridView({
                   key={dosya.id}
                   onClick={() => setActiveDosyaId(dosya.id)}
                   onDoubleClick={() => {
-                    setActiveDosyaId(dosya.id)
-                    navigate({ to: '/dosya' })
+                    setActiveDosyaId(dosya.id);
+                    navigate({ to: "/dosya" });
                   }}
                   className={cn(
-                    'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative min-h-[180px] h-full',
-                    openMenuId === dosya.id ? 'overflow-visible z-30' : 'overflow-hidden',
+                    "bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative min-h-[180px] h-full",
+                    openMenuId === dosya.id
+                      ? "overflow-visible z-30"
+                      : "overflow-hidden",
                     activeDosyaId === dosya.id
-                      ? 'border-blue-500 dark:border-blue-700 ring-2 ring-blue-500/15 shadow-md'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                      ? "border-blue-500 dark:border-blue-700 ring-2 ring-blue-500/15 shadow-md"
+                      : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700",
                   )}
                 >
                   {/* Kart Başlık Bölümü */}
@@ -121,18 +129,19 @@ export function DosyalarGridView({
                         <button
                           onClick={(e) => toggleSelection(e, dosya.id)}
                           className={cn(
-                            'transition-all cursor-pointer',
-                            selectedDosyaIds.includes(dosya.id) || selectedDosyaIds.length > 0
-                              ? 'opacity-100'
-                              : 'opacity-0 group-hover:opacity-100'
+                            "transition-all cursor-pointer",
+                            selectedDosyaIds.includes(dosya.id) ||
+                              selectedDosyaIds.length > 0
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100",
                           )}
                         >
                           <CheckCircle2
                             size={16}
                             className={cn(
                               selectedDosyaIds.includes(dosya.id)
-                                ? 'text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/30'
-                                : 'text-slate-300 dark:text-slate-600 hover:text-blue-400'
+                                ? "text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/30"
+                                : "text-slate-300 dark:text-slate-600 hover:text-blue-400",
                             )}
                           />
                         </button>
@@ -159,6 +168,7 @@ export function DosyalarGridView({
                           handleOpenAI={handleOpenAI}
                           handleDelete={handleDelete}
                           handleHardDelete={handleHardDelete}
+                          handleOpenMaliyetAyarlari={handleOpenMaliyetAyarlari}
                         />
                       </div>
                     </div>
@@ -168,11 +178,13 @@ export function DosyalarGridView({
                       title={dosya.konu}
                     >
                       {dosya.konu}
-                      {dosya.tekrar_no && dosya.tekrar_no > 1 ? (
-                        <span className="ml-1 text-[9px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1 py-0.5 rounded">
-                          #{dosya.tekrar_no}
-                        </span>
-                      ) : null}
+                      {dosya.tekrar_no && dosya.tekrar_no > 1
+                        ? (
+                          <span className="ml-1 text-[9px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1 py-0.5 rounded">
+                            #{dosya.tekrar_no}
+                          </span>
+                        )
+                        : null}
                     </h3>
                   </div>
 
@@ -180,7 +192,7 @@ export function DosyalarGridView({
                   <div className="px-4 py-2 bg-blue-50/40 dark:bg-blue-950/20 border-b border-blue-100/50 dark:border-blue-900/20 flex items-center gap-1.5">
                     <Building2 size={10} className="text-blue-500 shrink-0" />
                     <span className="text-[9px] font-semibold text-blue-700 dark:blue-400 truncate">
-                      {dosya.birim_adi || 'Birim Seçilmemiş'}
+                      {dosya.birim_adi || "Birim Seçilmemiş"}
                     </span>
                   </div>
 
@@ -199,33 +211,44 @@ export function DosyalarGridView({
                   <div className="px-4 py-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[9px] border-b border-slate-100 dark:border-slate-800/60">
                     <div className="flex items-center gap-1 truncate">
                       <BookOpen size={9} className="text-slate-400 shrink-0" />
-                      <span className="text-slate-400 font-semibold shrink-0">Madde:</span>
+                      <span className="text-slate-400 font-semibold shrink-0">
+                        Madde:
+                      </span>
                       <span className="font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {dosya.ihale_sekli || '-'}
+                        {dosya.ihale_sekli || "-"}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 truncate">
                       <Calendar size={9} className="text-slate-400 shrink-0" />
-                      <span className="text-slate-400 font-semibold shrink-0">Bütçe:</span>
+                      <span className="text-slate-400 font-semibold shrink-0">
+                        Bütçe:
+                      </span>
                       <span className="font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {dosya.butce_yili || '-'}
+                        {dosya.butce_yili || "-"}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 truncate">
-                      <ClipboardList size={9} className="text-slate-400 shrink-0" />
-                      <span className="text-slate-400 font-semibold shrink-0">Sözleşme:</span>
+                      <ClipboardList
+                        size={9}
+                        className="text-slate-400 shrink-0"
+                      />
+                      <span className="text-slate-400 font-semibold shrink-0">
+                        Sözleşme:
+                      </span>
                       <span className="font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {dosya.teklif_sozlesme_turu || '-'}
+                        {dosya.teklif_sozlesme_turu || "-"}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 truncate">
                       <Hash size={9} className="text-slate-400 shrink-0" />
-                      <span className="text-slate-400 font-semibold shrink-0">Ek. Kodu:</span>
+                      <span className="text-slate-400 font-semibold shrink-0">
+                        Ek. Kodu:
+                      </span>
                       <span
                         className="font-bold text-slate-700 dark:text-slate-300 truncate font-mono"
-                        title={dosya.ekonomik_kod || ''}
+                        title={dosya.ekonomik_kod || ""}
                       >
-                        {dosya.ekonomik_kod || '-'}
+                        {dosya.ekonomik_kod || "-"}
                       </span>
                     </div>
                   </div>
@@ -258,8 +281,8 @@ export function DosyalarGridView({
                 </div>
               ))}
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

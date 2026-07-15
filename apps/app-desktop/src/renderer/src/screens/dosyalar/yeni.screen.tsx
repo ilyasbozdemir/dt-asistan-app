@@ -164,35 +164,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   className="fixed inset-0 z-[9998]"
                   onClick={() => setShowMoreMenu(false)}
                 />
-                {/* Dropdown — fixed, her şeyin üstünde */}
+                {/* Dropdown */}
                 <div className="fixed right-4 top-[52px] w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[9999] overflow-hidden flex flex-col py-1">
-                  {/* Yaklaşık Maliyet Ayarları */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowMaliyetAyarlari(true);
-                      setShowMoreMenu(false);
-                    }}
-                    className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5 text-blue-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                      />
-                    </svg>
-                    Yaklaşık Maliyet Ayarları
-                  </button>
-
-                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
-
                   {!isEdit && (
                     <button
                       type="button"

@@ -26,6 +26,7 @@ export interface DosyalarTableViewProps {
   handleOpenAI?: (dosya: any) => void
   handleDelete?: (id: number) => Promise<void>
   handleHardDelete?: (id: number) => Promise<void>
+  handleOpenMaliyetAyarlari?: (dosya: any) => void
 }
 
 export function DosyalarTableView({
@@ -48,7 +49,8 @@ export function DosyalarTableView({
   handleKilidiAc,
   handleOpenAI,
   handleDelete,
-  handleHardDelete
+  handleHardDelete,
+  handleOpenMaliyetAyarlari
 }: DosyalarTableViewProps) {
   const navigate = useNavigate()
 
@@ -176,6 +178,7 @@ export function DosyalarTableView({
                             handleOpenAI={handleOpenAI}
                             handleDelete={handleDelete}
                             handleHardDelete={handleHardDelete}
+                            handleOpenMaliyetAyarlari={handleOpenMaliyetAyarlari}
                           />
                         </td>
                       </tr>
