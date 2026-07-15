@@ -57,40 +57,6 @@ export const TANIM_Birim = {
     }
   ],
   initialData: [
-    {
-      birim_adi: 'Fen İşleri Müdürlüğü',
-      antet_ek_satir: 'FEN İŞLERİ MÜDÜRLÜĞÜ',
-      sunum_makami: 'FEN İŞLERİ MÜDÜRLÜĞÜNE',
-      ihtiyac_yeri_eki: '["Fen İşleri Şantiyesi", "Fen İşleri Deposu"]',
-      aktif_mi: 1
-    },
-    {
-      birim_adi: 'Mali Hizmetler Müdürlüğü',
-      antet_ek_satir: 'MALİ HİZMETLER MÜDÜRLÜĞÜ',
-      sunum_makami: 'MALİ HİZMETLER MÜDÜRLÜĞÜNE',
-      ihtiyac_yeri_eki: '["Mali Hizmetler Arşivi", "Müdür Odası"]',
-      aktif_mi: 1
-    },
-    {
-      birim_adi: 'Yazı İşleri Müdürlüğü',
-      antet_ek_satir: 'YAZI İŞLERİ MÜDÜRLÜĞÜ',
-      sunum_makami: 'YAZI İŞLERİ MÜDÜRLÜĞÜNE',
-      ihtiyac_yeri_eki: '["Yazı İşleri Odası", "Arşiv"]',
-      aktif_mi: 1
-    },
-    {
-      birim_adi: 'Zabıta Amirliği',
-      antet_ek_satir: 'ZABITA AMİRLİĞİ',
-      sunum_makami: 'ZABITA AMİRLİĞİNE',
-      ihtiyac_yeri_eki: '["Zabıta Karakolu", "Nöbet Kulübesi"]',
-      aktif_mi: 1
-    },
-    {
-      birim_adi: 'Destek Hizmetleri Müdürlüğü',
-      antet_ek_satir: 'DESTEK HİZMETLERİ MÜDÜRLÜĞÜ',
-      sunum_makami: 'DESTEK HİZMETLERİ MÜDÜRLÜĞÜNE',
-      ihtiyac_yeri_eki: '["Destek Hizmetleri Deposu", "Müdür Odası"]',
-      aktif_mi: 1
-    }
+   
   ]
 }

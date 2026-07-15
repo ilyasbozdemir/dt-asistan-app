@@ -53,7 +53,7 @@ export default function BirimlerScreen(): React.ReactNode {
     e.preventDefault()
     if (!form.birim_adi.trim()) return
 
-    const finalIhtiyacYeri = ihtiyacYeriList.filter((v) => v.trim() !== '').join('\n')
+    const finalIhtiyacYeri = JSON.stringify(ihtiyacYeriList.filter((v) => v.trim() !== ''))
     const submitData = { ...form, ihtiyac_yeri_eki: finalIhtiyacYeri }
 
     try {
@@ -105,7 +105,19 @@ export default function BirimlerScreen(): React.ReactNode {
       ayrintili_bilgi_personel: birim.ayrintili_bilgi_personel || '',
       ilgili_personel_id: birim.ilgili_personel_id || null
     })
-    setIhtiyacYeriList(birim.ihtiyac_yeri_eki ? birim.ihtiyac_yeri_eki.split('\n') : [''])
+    let parsedIhtiyacList = ['']
+    if (birim.ihtiyac_yeri_eki) {
+      try {
+        if (birim.ihtiyac_yeri_eki.startsWith('[')) {
+          parsedIhtiyacList = JSON.parse(birim.ihtiyac_yeri_eki)
+        } else {
+          parsedIhtiyacList = birim.ihtiyac_yeri_eki.split('\n')
+        }
+      } catch (e) {
+        parsedIhtiyacList = [birim.ihtiyac_yeri_eki]
+      }
+    }
+    setIhtiyacYeriList(parsedIhtiyacList)
     setEditingBirimId(birim.id)
     setShowExtraFields(true)
     setIsModalOpen(true)
