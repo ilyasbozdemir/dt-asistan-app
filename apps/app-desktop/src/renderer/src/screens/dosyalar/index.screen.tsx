@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDosyalarHooks } from "./dosyalar.hooks";
+import { TeminDosyasi, useDosyalarHooks } from "./dosyalar.hooks";
 import { useTabStore } from "../../store/tabStore";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useWorkspaceStore } from "../../store/workspaceStore";
@@ -28,16 +28,12 @@ export default function DosyalarScreen(): React.ReactNode {
 
   const searchParams = new URLSearchParams(window.location.search);
   const isWindowMode = searchParams.get("mode") === "window";
-  const urlId = searchParams.get("id");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
   const [filterTur, setFilterTur] = useState<string>("hepsi");
   const [filterYil, setFilterYil] = useState<string>("hepsi");
   const [filterStatus, setFilterStatus] = useState<string>("hepsi");
-
-  const fileId = urlId ? parseInt(urlId, 10) : activeDosyaId;
-  const selectedDosya = dosyalar.find((d) => d.id === fileId);
 
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const toggleGroup = (baseKonu: string) => {
@@ -65,23 +61,25 @@ export default function DosyalarScreen(): React.ReactNode {
   }, [routerState.location.href, updateTabLabel, isWindowMode]);
 
   const [showAIModal, setShowAIModal] = useState(false);
-  const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null);
+  const [selectedFileForAI, setSelectedFileForAI] = useState<
+    Partial<TeminDosyasi> | null
+  >(null);
 
   const [ekapModalOpen, setEkapModalOpen] = useState(false);
   const [ekapInputVal, setEkapInputVal] = useState("");
   const [ekapTargetId, setEkapTargetId] = useState<number | null>(null);
 
-  const handleOpenAI = (dosya: any) => {
+  const handleOpenAI = (dosya: Partial<TeminDosyasi>) => {
     setSelectedFileForAI(dosya);
     setShowAIModal(true);
   };
 
-  const handleOpenInNewWindow = () => {
-    if (!selectedDosya) return;
+  const handleOpenInNewWindow = (dosya: TeminDosyasi) => {
+    if (!dosya) return;
     window.electron?.ipcRenderer.send("window:open-secondary", {
       path: "/dosyalar",
-      search: `?id=${selectedDosya.id}&mode=window`,
-      title: `DT: ${selectedDosya.konu}`,
+      search: `?id=${dosya.id}&mode=window`,
+      title: `DT: ${dosya.konu}`,
     });
   };
 
@@ -385,13 +383,7 @@ export default function DosyalarScreen(): React.ReactNode {
             handleKilidiAc={handleKilidiAc}
             logActivity={logActivity}
             handleOpenAI={handleOpenAI}
-            handleOpenInNewWindow={(dosya) => {
-              window.electron?.ipcRenderer.send("window:open-secondary", {
-                path: "/dosyalar",
-                search: `?id=${dosya.id}&mode=window`,
-                title: `DT: ${dosya.konu}`,
-              });
-            }}
+            handleOpenInNewWindow={handleOpenInNewWindow}
           />
         </div>
       </div>
