@@ -36,13 +36,22 @@ const fetchPersonel = async (): Promise<Personel[]> => {
 const fetchRoller = async (): Promise<Rol[]> => {
   const res = await window.electron.ipcRenderer.invoke(
     'db:query',
-    'SELECT * FROM TANIM_Roller ORDER BY id ASC'
+    "SELECT * FROM TANIM_Roller WHERE rol_kodu != 'ilgili_personel' ORDER BY id ASC"
   )
   if (!res.success) throw new Error(res.error)
   return res.data
 }
 
-export function usePersonelHooks() {
+export interface UsePersonelHooksReturn {
+  personelList: Personel[]
+  rollerList: Rol[]
+  isLoading: boolean
+  addPersonel: (personel: PersonelWithRoles) => Promise<unknown>
+  updatePersonel: (personel: PersonelWithRoles & { id: number }) => Promise<unknown>
+  deletePersonel: (id: number) => Promise<unknown>
+}
+
+export function usePersonelHooks(): UsePersonelHooksReturn {
   const queryClient = useQueryClient()
 
   const { data: personelList = [], isLoading: isPersonelLoading } = useQuery({
@@ -75,7 +84,7 @@ export function usePersonelHooks() {
 
       // Rol atamaları
       if (personel.assignedRoles && personel.assignedRoles.length > 0) {
-        const transactions: any[] = []
+        const transactions: { sql: string; params: unknown[] }[] = []
         // Yeni seçilen rolleri bu personele ata
         for (const r of personel.assignedRoles) {
           transactions.push({
@@ -115,7 +124,7 @@ export function usePersonelHooks() {
 
       // Rol atamalarını güncelle
       if (personel.assignedRoles) {
-        const transactions: any[] = []
+        const transactions: { sql: string; params: unknown[] }[] = []
         // Önce bu personelin tüm rollerden çıkarılması
         transactions.push({
           sql: 'UPDATE TANIM_Roller SET varsayilan_personel_id = NULL WHERE varsayilan_personel_id = ?',

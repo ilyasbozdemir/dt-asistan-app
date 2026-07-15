@@ -67,11 +67,6 @@ export const TANIM_Roller = {
       rol_adi: 'Onaylayan Personel',
       rol_kodu: 'onaylayan',
       aciklama: 'Belgeleri onaylayan personel (Makam vb.)'
-    },
-    {
-      rol_adi: 'İlgili Personel',
-      rol_kodu: 'ilgili_personel',
-      aciklama: 'Süreçle ilgili diğer görevli personel'
     }
   ]
 }
