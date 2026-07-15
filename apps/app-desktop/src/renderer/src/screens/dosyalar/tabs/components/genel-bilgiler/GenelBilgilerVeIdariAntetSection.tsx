@@ -424,19 +424,52 @@ export function GenelBilgilerVeIdariAntetSection(
             const seciliBirim = birimler?.find((b) => b.id === formData.birim_id);
             const kurumAdi = kurum?.kurum_adi || "";
             
+            let seciliBirimYerleri: string[] = [];
+            if (seciliBirim?.ihtiyac_yeri_eki) {
+              try {
+                if (seciliBirim.ihtiyac_yeri_eki.startsWith("[")) {
+                  seciliBirimYerleri = JSON.parse(seciliBirim.ihtiyac_yeri_eki);
+                } else {
+                  seciliBirimYerleri = seciliBirim.ihtiyac_yeri_eki.split(",").map((s) => s.trim());
+                }
+              } catch (e) {
+                seciliBirimYerleri = [seciliBirim.ihtiyac_yeri_eki];
+              }
+            }
+
+            let tumBirimYerleri: string[] = [];
+            if (birimler) {
+              birimler.forEach((b) => {
+                if (b.ihtiyac_yeri_eki) {
+                  try {
+                    if (b.ihtiyac_yeri_eki.startsWith("[")) {
+                      const parsed = JSON.parse(b.ihtiyac_yeri_eki);
+                      if (Array.isArray(parsed)) {
+                        tumBirimYerleri.push(...parsed);
+                      }
+                    } else {
+                      tumBirimYerleri.push(...b.ihtiyac_yeri_eki.split(",").map((s) => s.trim()));
+                    }
+                  } catch (e) {
+                    tumBirimYerleri.push(b.ihtiyac_yeri_eki);
+                  }
+                }
+              });
+            }
+
             const dinamikSecenekler = [
-              seciliBirim?.ihtiyac_yeri_eki,
+              ...seciliBirimYerleri,
               seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Hizmet Binası` : null,
               seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Şantiyesi` : null,
               seciliBirim?.birim_adi,
               kurumAdi ? `${kurumAdi} Hizmet Binası` : null,
-            ].filter(Boolean);
+            ].filter(Boolean) as string[];
 
             const ihtiyacOptions = Array.from(
               new Set(
                 [
                   ...dinamikSecenekler,
-                  ...(birimler ? birimler.map((b) => b.ihtiyac_yeri_eki) : []),
+                  ...tumBirimYerleri,
                   ...(birimler ? birimler.map((b) => b.birim_adi ? `${b.birim_adi} Hizmet Binası` : null) : []),
                 ].filter(Boolean),
               ),
