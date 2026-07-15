@@ -159,12 +159,46 @@ export function useDosyalarHooks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
   })
 
+  const bulkDeleteDosyalarMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
+      if (ids.length === 0) return { success: true };
+      const placeholders = ids.map(() => '?').join(', ')
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `UPDATE DATA_TeminDosyasi SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id IN (${placeholders})`,
+        ids
+      )
+      if (!res.success) throw new Error(res.error)
+      return res
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+  })
+
+  const bulkHardDeleteDosyalarMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
+      if (ids.length === 0) return { success: true };
+      const placeholders = ids.map(() => '?').join(', ')
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `DELETE FROM DATA_TeminDosyasi WHERE id IN (${placeholders})`,
+        ids
+      )
+      if (!res.success) throw new Error(res.error)
+      return res
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+  })
+
   return {
     dosyalar,
     isLoadingDosyalar,
     addDosya: addDosyaMutation.mutateAsync,
     updateDosya: updateDosyaMutation.mutateAsync,
     deleteDosya: deleteDosyaMutation.mutateAsync,
-    hardDeleteDosya: hardDeleteDosyaMutation.mutateAsync
+    hardDeleteDosya: hardDeleteDosyaMutation.mutateAsync,
+    bulkDeleteDosyalar: bulkDeleteDosyalarMutation.mutateAsync,
+    bulkHardDeleteDosyalar: bulkHardDeleteDosyalarMutation.mutateAsync
   }
 }

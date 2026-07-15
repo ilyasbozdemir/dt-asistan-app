@@ -1,1 +1,0 @@
-const db = require('d:/Github/ilyas-bozdemir/dt-desktop-app/node_modules/better-sqlite3')('d:/Github/ilyas-bozdemir/dt-desktop-app/database.sqlite'); const info = db.prepare('UPDATE TANIM_Komisyon SET ad = ad || '' (Silinmiþ '' || id || '')'' WHERE aktif_mi = 0 AND ad NOT LIKE ''%(Silinmiþ%''').run(); console.log(info.changes + ' rows updated');

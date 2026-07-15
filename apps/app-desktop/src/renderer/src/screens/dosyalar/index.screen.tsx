@@ -5,7 +5,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useWorkspaceStore } from "../../store/workspaceStore";
 import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
 import { logActivity } from "../../utils/logger";
-import { DosyalarHeader } from "./components/DosyalarHeader";
+import { DosyalarPageHeader } from "./components/DosyalarPageHeader";
 import { DosyalarStats } from "./components/DosyalarStats";
 import { DosyalarFilterBar } from "./components/DosyalarFilterBar";
 import { DosyalarList } from "./components/DosyalarList";
@@ -18,6 +18,8 @@ export default function DosyalarScreen(): React.ReactNode {
     deleteDosya,
     hardDeleteDosya,
     updateDosya,
+    bulkDeleteDosyalar,
+    bulkHardDeleteDosyalar,
   } = useDosyalarHooks();
   const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore();
   const { updateTabLabel } = useTabStore();
@@ -32,6 +34,7 @@ export default function DosyalarScreen(): React.ReactNode {
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid");
   const [filterTur, setFilterTur] = useState<string>("hepsi");
   const [filterYil, setFilterYil] = useState<string>("hepsi");
+  const [filterStatus, setFilterStatus] = useState<string>("hepsi");
 
   const fileId = urlId ? parseInt(urlId, 10) : activeDosyaId;
   const selectedDosya = dosyalar.find((d) => d.id === fileId);
@@ -112,8 +115,40 @@ export default function DosyalarScreen(): React.ReactNode {
         "DİKKAT (Geliştirici Modu Özel): Bu dosyayı veritabanından KALICI OLARAK SİLMEK (Hard Delete) istediğinize emin misiniz? Bu işlem geri alınamaz!",
       )
     ) {
-      await hardDeleteDosya(id);
-      if (activeDosyaId === id) setActiveDosyaId(null);
+      try {
+        await hardDeleteDosya(id);
+        if (activeDosyaId === id) setActiveDosyaId(null);
+      } catch (error: any) {
+        let errorMsg = error?.message || "Bilinmeyen bir hata oluştu.";
+        if (
+          errorMsg.includes("FOREIGN KEY") || errorMsg.includes("CONSTRAINT")
+        ) {
+          errorMsg =
+            "Bu dosyayı silemezsiniz çünkü bu dosyaya bağlı alt kayıtlar (fatura, komisyon üyeleri, yüklenen evraklar vb.) mevcut. Dosyayı kalıcı olarak silebilmek için önce o kayıtları silmeniz gerekmektedir.\n\nTeknik Hata: " +
+            errorMsg;
+        }
+        alert("Silme İşlemi Başarısız!\n\n" + errorMsg);
+      }
+    }
+  };
+
+  const handleBulkDelete = async (ids: number[]): Promise<void> => {
+    await bulkDeleteDosyalar(ids);
+    await logActivity(
+      "Toplu Dosya İptali",
+      `${ids.length} adet dosya iptal edildi olarak işaretlendi.`,
+      "warning",
+    );
+    if (activeDosyaId && ids.includes(activeDosyaId)) setActiveDosyaId(null);
+  };
+
+  const handleBulkHardDelete = async (ids: number[]): Promise<void> => {
+    try {
+      await bulkHardDeleteDosyalar(ids);
+      if (activeDosyaId && ids.includes(activeDosyaId)) setActiveDosyaId(null);
+    } catch (error: any) {
+      let errorMsg = error?.message || "Bilinmeyen bir hata oluştu.";
+      alert("Toplu Silme İşlemi Başarısız!\n\n" + errorMsg);
     }
   };
 
@@ -218,7 +253,14 @@ export default function DosyalarScreen(): React.ReactNode {
     const matchYil = filterYil === "hepsi" ||
       dosyaYili.toString() === filterYil;
 
-    return matchSearch && matchTur && matchYil;
+    const matchStatus = filterStatus === "hepsi" ||
+      (filterStatus === "aktif" && d.is_deleted !== 1 &&
+        d.status !== "tamamlandi") ||
+      (filterStatus === "iptal_edildi" && d.is_deleted === 1) ||
+      (filterStatus === "tamamlandi" && d.status === "tamamlandi" &&
+        d.is_deleted !== 1);
+
+    return matchSearch && matchTur && matchYil && matchStatus;
   });
 
   const aktifDosyalar = dosyalar.filter((d) => d.is_deleted !== 1);
@@ -281,7 +323,7 @@ export default function DosyalarScreen(): React.ReactNode {
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 p-4 md:p-6 overflow-hidden gap-4">
-      <DosyalarHeader
+      <DosyalarPageHeader
         viewMode={viewMode}
         setViewMode={setViewMode}
         onOpenAI={() => {
@@ -305,6 +347,8 @@ export default function DosyalarScreen(): React.ReactNode {
       <DosyalarFilterBar
         filterYil={filterYil}
         setFilterYil={setFilterYil}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
         uniqueYillar={uniqueYillar}
         filterTur={filterTur}
         setFilterTur={setFilterTur}
@@ -334,6 +378,8 @@ export default function DosyalarScreen(): React.ReactNode {
             formatDate={formatDate}
             handleDelete={handleDelete}
             handleHardDelete={handleHardDelete}
+            handleBulkDelete={handleBulkDelete}
+            handleBulkHardDelete={handleBulkHardDelete}
             handleUpdateStatus={handleUpdateStatus}
             handleEkapGonder={handleEkapGonder}
             handleKilidiAc={handleKilidiAc}
@@ -348,7 +394,7 @@ export default function DosyalarScreen(): React.ReactNode {
             }}
           />
         </div>
-      </div>{" "}
+      </div>
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
           isOpen={true}
