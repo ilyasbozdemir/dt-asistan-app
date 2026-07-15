@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate, useRouterState } from '@tanstack/react-router'
 import { TeminDosyasi, useDosyalarHooks } from './dosyalar.hooks'
 import { useTabStore } from '../../store/tabStore'
@@ -109,15 +109,15 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const editIdStr = searchParams.get('id')
   const editId = editIdStr ? parseInt(editIdStr, 10) : null
   const isEdit = editId !== null && !isNaN(editId)
+  const initialHrefRef = useRef(routerState.location.href)
 
   // Title & Tab title
   useEffect(() => {
     document.title = isEdit
       ? 'Doğrudan Temin Dosyası Düzenle - DT'
       : 'Yeni Doğrudan Temin Dosyası Ekle - DT'
-    const currentHref = routerState.location.href
-    updateTabLabel(currentHref, isEdit ? 'DT Dosyasını Düzenle' : 'Yeni DT Dosyası Ekle')
-  }, [isEdit, routerState.location.href, updateTabLabel])
+    updateTabLabel(initialHrefRef.current, isEdit ? 'DT Dosyasını Düzenle' : 'Yeni DT Dosyası Ekle')
+  }, [isEdit, updateTabLabel])
 
   // DB Collections state
   const [birimler, setBirimler] = useState<DBBirim[]>([])

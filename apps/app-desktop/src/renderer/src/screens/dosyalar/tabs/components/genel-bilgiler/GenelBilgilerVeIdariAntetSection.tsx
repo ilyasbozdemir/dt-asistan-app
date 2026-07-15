@@ -41,8 +41,7 @@ export function GenelBilgilerVeIdariAntetSection(
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5">
             Bütçe Yılı *
           </label>
-          <input
-            type="number"
+          <select
             value={formData.butce_yili || new Date().getFullYear()}
             onChange={(e) => {
               const newYear = parseInt(e.target.value, 10);
@@ -67,7 +66,21 @@ export function GenelBilgilerVeIdariAntetSection(
               });
             }}
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
-          />
+          >
+            {(() => {
+              const currentYear = new Date().getFullYear();
+              const startYear = 2020;
+              const options: number[] = [];
+              for (let y = currentYear; y >= startYear; y--) {
+                options.push(y);
+              }
+              return options.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ));
+            })()}
+          </select>
         </div>
 
         <div>
