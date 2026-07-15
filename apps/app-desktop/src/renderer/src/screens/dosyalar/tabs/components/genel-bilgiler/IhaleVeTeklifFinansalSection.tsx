@@ -215,6 +215,66 @@ export function IhaleVeTeklifFinansalSection(
 
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+            Yaklaşık Maliyet
+          </label>
+          <select
+            value={formData.yaklasik_maliyet_hesaplamasi || "burada"}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                yaklasik_maliyet_hesaplamasi: e.target.value,
+                yaklasik_maliyet: e.target.value !== "onceden" ? 0 : formData.yaklasik_maliyet,
+              })}
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
+          >
+            <option value="burada">Burada Hesaplanacak (Teklifler ile)</option>
+            <option value="onceden">Önceden Hesaplandı (Tutar Girilecek)</option>
+            <option value="hesaplanmayacak">Hesaplanmayacak</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+            Yaklaşık Maliyet KDV Durumu
+          </label>
+          <select
+            value={formData.yaklasik_maliyet_kdv_dahil_mi ?? "0"}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                yaklasik_maliyet_kdv_dahil_mi: parseInt(e.target.value, 10),
+              })}
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
+          >
+            <option value="0">KDV Hariç</option>
+            <option value="1">KDV Dahil</option>
+          </select>
+        </div>
+
+        {formData.yaklasik_maliyet_hesaplamasi === "onceden" && (
+          <div className="animate-in fade-in duration-200">
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+              Hesaplanan Yaklaşık Maliyet Tutar *
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value={formData.yaklasik_maliyet || ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  yaklasik_maliyet: parseFloat(e.target.value) || 0,
+                })}
+              placeholder="0.00"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-205 font-bold"
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
             KDV Oranı (%)
           </label>
           <select
@@ -273,55 +333,6 @@ export function IhaleVeTeklifFinansalSection(
             placeholder="Örn: 2026-03-Y-12"
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
           />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Hesaplama Yöntemi / Dayanağı
-          </label>
-          <select
-            title="Hesaplama Yöntemi / Dayanağı"
-            value={formData.komisyon_takdiri ||
-              "Sadece araştırma fiyatları dikkate alınacak"}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                komisyon_takdiri: e.target.value,
-              })}
-            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          >
-            <option value="Sadece araştırma fiyatları dikkate alınacak">
-              Sadece araştırma fiyatları dikkate alınacak
-            </option>
-            <option value="Komisyon takdiri kullanılacak">
-              Komisyon takdiri kullanılacak
-            </option>
-            <option value="Son alım fiyatlarını da kullan">
-              Son alım fiyatlarını da kullan
-            </option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
-            Hesaplama Esası
-          </label>
-          <select
-            value={formData.hesaplama_esasi || "En Düşük fiyat esasına göre"}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                hesaplama_esasi: e.target.value,
-              })}
-            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          >
-            <option value="En Düşük fiyat esasına göre">
-              En Düşük fiyat esasına göre
-            </option>
-            <option value="Ortalama fiyat esasına göre">
-              Ortalama fiyat esasına göre
-            </option>
-          </select>
         </div>
       </div>
 

@@ -77,6 +77,12 @@ export const DATA_TeminDosyasi = {
       type: 'TEXT',
       description: 'Yaklasik Maliyet Hesaplamasi'
     },
+    {
+      name: 'yaklasik_maliyet_kdv_dahil_mi',
+      type: 'INTEGER',
+      default: 0,
+      description: 'Yaklasik Maliyet KDV Dahil mi?'
+    },
     { name: 'kdv', type: 'TEXT', description: 'Kdv' },
     { name: 'hesaplama_esasi', type: 'TEXT', description: 'Hesaplama Esasi' },
     { name: 'komisyon_takdiri', type: 'TEXT', description: 'Komisyon Takdiri' },

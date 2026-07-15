@@ -24,6 +24,7 @@ import v1beta31 from './1.0.0-beta.31.yaml?raw'
 import v1beta32 from './1.0.0-beta.32.yaml?raw'
 import v1beta33 from './1.0.0-beta.33.yaml?raw'
 import v1beta34 from './1.0.0-beta.34.yaml?raw'
+import v1beta52 from './1.0.0-beta.52.yaml?raw'
 
 // Sıralama schema_version'a göre ascending (küçükten büyüğe) olmalıdır. Sıra şart!
 export const manifestsRaw = [
@@ -51,7 +52,8 @@ export const manifestsRaw = [
   v1beta31,
   v1beta32,
   v1beta33,
-  v1beta34
+  v1beta34,
+  v1beta52
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

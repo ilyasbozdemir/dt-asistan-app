@@ -36,6 +36,7 @@ export interface TeminDosyasi {
   isin_aciklama_maddeleri: string | null
 
   yaklasik_maliyet_hesaplamasi: string | null
+  yaklasik_maliyet_kdv_dahil_mi: number | null
   kdv: string | null
   hesaplama_esasi: string | null
   komisyon_takdiri: string | null
