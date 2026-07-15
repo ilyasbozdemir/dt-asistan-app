@@ -250,28 +250,48 @@ export default function PersonelScreen(): React.ReactNode {
 
   if (screenState === "form") {
     return (
-      <div className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={closeForm}
-            className="w-fit text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Listeye Geri Dön
-          </Button>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            {editingPersonel
-              ? <Edit className="w-6 h-6 text-blue-500" />
-              : <Plus className="w-6 h-6 text-blue-500" />}
-            {editingPersonel ? "Personel Düzenle" : "Yeni Personel Ekle"}
-          </h2>
+      <form
+        onSubmit={handleSubmit}
+        className="p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full"
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeForm}
+              className="w-fit text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Listeye Geri Dön
+            </Button>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              {editingPersonel
+                ? <Edit className="w-6 h-6 text-blue-500" />
+                : <Plus className="w-6 h-6 text-blue-500" />}
+              {editingPersonel ? "Personel Düzenle" : "Yeni Personel Ekle"}
+            </h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="px-6 py-2 h-10 text-sm"
+              onClick={closeForm}
+            >
+              <X className="w-4 h-4 mr-2" /> İptal
+            </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 shadow-md px-8 py-2 h-10 text-sm flex items-center"
+            >
+              <Save className="w-4 h-4 mr-2" />{" "}
+              {editingPersonel ? "Değişiklikleri Kaydet" : "Personeli Ekle"}
+            </Button>
+          </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm space-y-8"
-        >
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm space-y-8">
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -405,26 +425,8 @@ export default function PersonelScreen(): React.ReactNode {
               </div>
             </div>
           </div>
-
-          <div className="flex justify-end gap-4 pt-6 border-t border-slate-100 dark:border-slate-800 mt-8">
-            <Button
-              type="button"
-              variant="outline"
-              className="px-6 py-2.5 h-11"
-              onClick={closeForm}
-            >
-              <X className="w-4 h-4 mr-2" /> İptal
-            </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 shadow-md px-8 py-2.5 h-11 text-sm"
-            >
-              <Save className="w-4 h-4 mr-2" />{" "}
-              {editingPersonel ? "Değişiklikleri Kaydet" : "Personeli Ekle"}
-            </Button>
-          </div>
-        </form>
-      </div>
+        </div>
+      </form>
     );
   }
 
