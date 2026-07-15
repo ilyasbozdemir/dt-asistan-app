@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Building2, HelpCircle, Info, Loader2, Sparkles } from "lucide-react";
-import { cn } from "../../../../../utils/cn";
 import { YeniDosyaTabProps } from "../../../types";
 
 export function IhaleVeTeklifFinansalSection(
@@ -10,8 +9,6 @@ export function IhaleVeTeklifFinansalSection(
     formData,
     setFormData,
     limitType,
-    currentLimit,
-    isLimitExceeded,
     getIhaleSekliExplanation,
   } = props;
 
@@ -150,7 +147,7 @@ export function IhaleVeTeklifFinansalSection(
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5 flex items-center gap-1">
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5 flex items-center gap-1">
             Doğrudan Temin Maddesi (İhale Şekli)
             <span
               title={getIhaleSekliExplanation?.(
@@ -195,27 +192,8 @@ export function IhaleVeTeklifFinansalSection(
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-            Teklif / Sözleşme Türü
-          </label>
-          <select
-            value={formData.teklif_sozlesme_turu || "Birim Fiyat"}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                teklif_sozlesme_turu: e.target.value,
-              })}
-            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          >
-            <option value="Birim Fiyat">Birim Fiyatlı Teklif</option>
-            <option value="Götürü Bedel">Götürü Bedel Teklif</option>
-            <option value="Sözleşmesiz">Sözleşme Yapılmayacak</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
-            Yaklaşık Maliyet
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+            Yaklaşık Maliyet Hesabı
           </label>
           <select
             value={formData.yaklasik_maliyet_hesaplamasi || "burada"}
@@ -223,37 +201,40 @@ export function IhaleVeTeklifFinansalSection(
               setFormData({
                 ...formData,
                 yaklasik_maliyet_hesaplamasi: e.target.value,
-                yaklasik_maliyet: e.target.value !== "onceden" ? 0 : formData.yaklasik_maliyet,
+                yaklasik_maliyet: e.target.value !== "onceden"
+                  ? 0
+                  : formData.yaklasik_maliyet,
               })}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           >
             <option value="burada">Burada Hesaplanacak (Teklifler ile)</option>
-            <option value="onceden">Önceden Hesaplandı (Tutar Girilecek)</option>
+            <option value="onceden">
+              Önceden Hesaplandı (Tutar Girilecek)
+            </option>
             <option value="hesaplanmayacak">Hesaplanmayacak</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             Yaklaşık Maliyet KDV Durumu
           </label>
           <select
-            value={formData.yaklasik_maliyet_kdv_dahil_mi ?? "0"}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                yaklasik_maliyet_kdv_dahil_mi: parseInt(e.target.value, 10),
-              })}
+            value={formData.yaklasik_maliyet_kdv_dahil_mi ?? 0}
+            onChange={(e) => setFormData({
+              ...formData,
+              yaklasik_maliyet_kdv_dahil_mi: parseInt(e.target.value, 10),
+            })}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           >
-            <option value="0">KDV Hariç</option>
-            <option value="1">KDV Dahil</option>
+            <option value={0}>KDV Hariç</option>
+            <option value={1}>KDV Dahil</option>
           </select>
         </div>
 
         {formData.yaklasik_maliyet_hesaplamasi === "onceden" && (
           <div className="animate-in fade-in duration-200">
-            <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+            <label className="block text-xs font-bold text-slate-650 dark:text-slate-400 mb-1.5">
               Hesaplanan Yaklaşık Maliyet Tutar *
             </label>
             <input
@@ -268,7 +249,7 @@ export function IhaleVeTeklifFinansalSection(
                   yaklasik_maliyet: parseFloat(e.target.value) || 0,
                 })}
               placeholder="0.00"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-205 font-bold"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
             />
           </div>
         )}
@@ -287,6 +268,25 @@ export function IhaleVeTeklifFinansalSection(
             <option value="10">KDV (%10)</option>
             <option value="20">KDV (%20)</option>
             <option value="Tevkifat">Tevkifatlı KDV</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 dark:text-slate-450 mb-1.5">
+            Teklif / Sözleşme Türü
+          </label>
+          <select
+            value={formData.teklif_sozlesme_turu || "Birim Fiyat"}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                teklif_sozlesme_turu: e.target.value,
+              })}
+            className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+          >
+            <option value="Birim Fiyat">Birim Fiyatlı Teklif</option>
+            <option value="Götürü Bedel">Götürü Bedel Teklif</option>
+            <option value="Sözleşmesiz">Sözleşme Yapılmayacak</option>
           </select>
         </div>
 
@@ -334,6 +334,60 @@ export function IhaleVeTeklifFinansalSection(
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
           />
         </div>
+
+        {formData.yaklasik_maliyet_hesaplamasi === "burada" && (
+          <>
+            <div className="animate-in fade-in duration-200">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+                Hesaplama Yöntemi / Dayanağı
+              </label>
+              <select
+                title="Hesaplama Yöntemi / Dayanağı"
+                value={formData.komisyon_takdiri ||
+                  "Sadece araştırma fiyatları dikkate alınacak"}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    komisyon_takdiri: e.target.value,
+                  })}
+                className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+              >
+                <option value="Sadece araştırma fiyatları dikkate alınacak">
+                  Sadece araştırma fiyatları dikkate alınacak
+                </option>
+                <option value="Komisyon takdiri kullanılacak">
+                  Komisyon takdiri kullanılacak
+                </option>
+                <option value="Son alım fiyatlarını da kullan">
+                  Son alım fiyatlarını da kullan
+                </option>
+              </select>
+            </div>
+
+            <div className="animate-in fade-in duration-200">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
+                Hesaplama Esası
+              </label>
+              <select
+                value={formData.hesaplama_esasi ||
+                  "En Düşük fiyat esasına göre"}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    hesaplama_esasi: e.target.value,
+                  })}
+                className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
+              >
+                <option value="En Düşük fiyat esasına göre">
+                  En Düşük fiyat esasına göre
+                </option>
+                <option value="Ortalama fiyat esasına göre">
+                  Ortalama fiyat esasına göre
+                </option>
+              </select>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-slate-55 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/80">
@@ -342,11 +396,10 @@ export function IhaleVeTeklifFinansalSection(
             type="checkbox"
             id="alt_yuklenici"
             checked={formData.alt_yuklenici_olacak_mi === 1}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                alt_yuklenici_olacak_mi: e.target.checked ? 1 : 0,
-              })}
+            onChange={(e) => setFormData({
+              ...formData,
+              alt_yuklenici_olacak_mi: e.target.checked ? 1 : 0,
+            })}
             className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
           />
           <label
