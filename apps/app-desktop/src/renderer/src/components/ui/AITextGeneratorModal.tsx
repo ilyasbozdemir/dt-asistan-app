@@ -16,6 +16,7 @@ interface AITextGeneratorModalProps {
   expectedJsonFormat?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onApply: (generatedData: any) => void
+  placeholderMappings?: Record<string, string>
 }
 
 export function AITextGeneratorModal({
@@ -29,7 +30,8 @@ export function AITextGeneratorModal({
   isAdvisorMode = false,
   mode = 'text',
   expectedJsonFormat = '',
-  onApply
+  onApply,
+  placeholderMappings
 }: AITextGeneratorModalProps): React.JSX.Element | null {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
@@ -84,6 +86,21 @@ export function AITextGeneratorModal({
         finalPrompt += `\n\nÖNEMLİ: Yanıtını LÜTFEN HİÇBİR MARKDOWN İŞARETİ KULLANMADAN (**, ###, \`\`\` vb.) düz metin (plain text) olarak üret.`
       }
 
+      // Automatically mask sensitive data in prompt before sending to AI
+      if (placeholderMappings) {
+        Object.entries(placeholderMappings).forEach(([placeholder, realValue]) => {
+          if (realValue !== undefined && realValue !== null) {
+            const strVal = String(realValue).trim()
+            if (strVal && strVal !== 'Belirtilmemiş') {
+              finalPrompt = finalPrompt.replaceAll(strVal, placeholder)
+            }
+          }
+        })
+
+        const placeholdersList = Object.keys(placeholderMappings).join(', ')
+        finalPrompt += `\n\nÖNEMLİ GİZLİLİK KURALI: Metin içerisindeki ${placeholdersList} yer tutucularını yanıtında aynen koru. Gerçek değerleri tahmin etmeye çalışma ve bu yer tutucuları değiştirme.`
+      }
+
       const res = await window.api.aiGenerate({
         prompt: finalPrompt,
         enableDatabaseAccess: isAdvisorMode
@@ -113,6 +130,13 @@ export function AITextGeneratorModal({
             .replace(/```[a-z]*\n/g, '')
             .replace(/```/g, '')
             .trim()
+        }
+        if (placeholderMappings) {
+          Object.entries(placeholderMappings).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              cleanData = cleanData.replaceAll(key, value)
+            }
+          })
         }
         setResult(cleanData)
       } else {

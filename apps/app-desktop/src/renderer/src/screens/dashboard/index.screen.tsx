@@ -428,6 +428,11 @@ export default function DashboardScreen(): React.JSX.Element {
               selectedFileForAI.yaklasik_maliyet || 0,
             )
           }\n\nLütfen bu dosya için bana sonraki adımlar, dikkat edilecekler ve süreç tavsiyesi ver.`}
+          placeholderMappings={{
+            "[DOSYA_NO]": selectedFileForAI.temin_no || "Belirtilmemiş",
+            "[DOSYA_KONU]": selectedFileForAI.konu || "Belirtilmemiş",
+            "[DOSYA_MALIYET]": formatCurrency(selectedFileForAI.yaklasik_maliyet || 0),
+          }}
           onClose={() => setShowAIModal(false)}
           onApply={(text) => {
             console.log("AI Response:", text);

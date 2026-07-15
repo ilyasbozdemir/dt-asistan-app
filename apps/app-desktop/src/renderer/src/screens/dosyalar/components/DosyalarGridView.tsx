@@ -61,7 +61,7 @@ export function DosyalarGridView({
   handleOpenAI,
   handleDelete,
   handleHardDelete,
-}: DosyalarGridViewProps) {
+}: DosyalarGridViewProps): React.JSX.Element {
   const navigate = useNavigate();
 
   return (

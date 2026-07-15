@@ -9,7 +9,6 @@ import { DosyalarPageHeader } from "./components/DosyalarPageHeader";
 import { DosyalarStats } from "./components/DosyalarStats";
 import { DosyalarFilterBar } from "./components/DosyalarFilterBar";
 import { DosyalarList } from "./components/DosyalarList";
-import { DosyaDetailPanel } from "./components/DosyaDetailPanel";
 
 export default function DosyalarScreen(): React.ReactNode {
   const {
@@ -21,7 +20,7 @@ export default function DosyalarScreen(): React.ReactNode {
     bulkDeleteDosyalar,
     bulkHardDeleteDosyalar,
   } = useDosyalarHooks();
-  const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore();
+  const { activeDosyaId, setActiveDosyaId, activeMeta } = useWorkspaceStore();
   const { updateTabLabel } = useTabStore();
   const routerState = useRouterState();
   const navigate = useNavigate();
@@ -397,13 +396,19 @@ export default function DosyalarScreen(): React.ReactNode {
           systemInstruction={selectedFileForAI.konu ===
               "Genel Mevzuat Danışmanlığı"
             ? "Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kullanıcıya genel mevzuat veya idari işleyiş hakkında rehberlik edeceksin.\n\nÖNEMLİ GİZLİLİK KURALI: Gerçek kurum veya kişi isimlerini maskele."
-            : `Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kullanıcı sana sistemdeki bir dosyası hakkında danışacak.\n\nŞu anki Aktif Dosya Bilgileri:\n- Dosya No: ${
-              selectedFileForAI.temin_no || "Belirtilmemiş"
-            }\n- Konu: ${selectedFileForAI.konu}\n- Maliyet: ${
-              selectedFileForAI.yaklasik_maliyet || 0
-            } TL\n- İhale Şekli (Madde): ${
-              selectedFileForAI.ihale_sekli || "Belirtilmemiş"
-            }\n\nÖNEMLİ GİZLİLİK KURALI: Gerçek kurum, şahıs isimleri veya adresleri [Kurum Adı], [İlgili Kişi] şeklinde maskele.`}
+            : `Sen profesyonel bir kamu ihale ve doğrudan temin (4734 Sayılı Kanun) asistanısın. Kullanıcı sana sistemdeki bir dosyası hakkında danışacak.\n\nŞu anki Aktif Dosya Bilgileri:\n- Dosya No: [DOSYA_NO]\n- Konu: [DOSYA_KONU]\n- Maliyet: [DOSYA_MALIYET]\n- İhale Şekli (Madde): [DOSYA_IHALE_SEKLI]\n\nÖNEMLİ GİZLİLİK KURALI: Gerçek kurum, şahıs isimleri veya adresleri [Kurum Adı], [İlgili Kişi] şeklinde maskele. Eğer dosyayla ilgili analiz veya rehberlik yaparken dosya numarası, konu, maliyet veya ihale şeklinden bahsedeceksen kesinlikle [DOSYA_NO], [DOSYA_KONU], [DOSYA_MALIYET], [DOSYA_IHALE_SEKLI] şeklinde olan bu yer tutucuları aynen koru, gerçek veriyi asla kullanma.`}
+          placeholderMappings={{
+            "[DOSYA_NO]": selectedFileForAI.temin_no || "Belirtilmemiş",
+            "[DOSYA_KONU]": selectedFileForAI.konu || "Belirtilmemiş",
+            "[DOSYA_MALIYET]":
+              (selectedFileForAI.yaklasik_maliyet || 0).toLocaleString(
+                "tr-TR",
+              ) + " TL",
+            "[DOSYA_IHALE_SEKLI]": selectedFileForAI.ihale_sekli ||
+              "Belirtilmemiş",
+            "[KURUM_ADI]": activeMeta?.institution || "Belirtilmemiş",
+            "[BIRIM_ADI]": selectedFileForAI.birim_adi || "Belirtilmemiş",
+          }}
           onClose={() => {
             setShowAIModal(false);
             setSelectedFileForAI(null);

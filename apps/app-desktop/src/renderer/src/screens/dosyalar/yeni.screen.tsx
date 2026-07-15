@@ -1148,6 +1148,11 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         fieldName={textGenConfig.fieldName}
         initialSubject={formData.konu}
         systemInstruction={textGenConfig.systemInstruction}
+        placeholderMappings={{
+          "[DOSYA_KONU]": formData.konu || "Belirtilmemiş",
+          "[DOSYA_NO]": formData.temin_no || "Belirtilmemiş",
+          "[DOSYA_MALIYET]": formData.yaklasik_maliyet ? String(formData.yaklasik_maliyet) : "Belirtilmemiş",
+        }}
         onApply={(text) => {
           setFormData((prev) => ({
             ...prev,
@@ -1168,11 +1173,14 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           '{ "kalemAdi": "Örn: A4 Fotokopi Kağıdı 80gr", "miktari": 50, "birimi": "Paket", "okasKodu": "Örn: 30197630-1" }'
         }
         systemInstruction={`Sen bir kamu ihale ve doğrudan temin uzmanısın. Kullanıcı bir mal, hizmet veya yapım işi için listeye kalem eklemek istiyor. 
-Kullanıcının girdiği genel tanıma ve alımın konusuna (${formData.konu || formData.tur}) bakarak:
+Kullanıcının girdiği genel tanıma ve alımın konusuna ([DOSYA_KONU]) bakarak:
 1. En uygun, resmi, şartnameye uygun "Kalem Adı"nı belirle.
 2. Bu kalem için EKAP sisteminde kullanılan en uygun "OKAS Kodunu" (Ortak Alımlar Sözlüğü CPV kodu) veya Taşınır/Taşınmaz mal kodunu bul. Bulamazsan uygun bir üst kategori OKAS kodu tahmin et.
 3. Uygun miktar ve ölçü birimi (Adet, Paket, Kg, Ton, Ay, Gün, m2 vb.) öner.
 Yanıtını SADECE JSON formatında ver.`}
+        placeholderMappings={{
+          "[DOSYA_KONU]": formData.konu || formData.tur || "Belirtilmemiş",
+        }}
         onApply={(data) => {
           console.log('AI Kalem Verisi:', data)
           alert(
