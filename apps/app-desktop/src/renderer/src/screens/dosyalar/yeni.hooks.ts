@@ -20,6 +20,7 @@ export interface UseYeniDosyaScreenReturn {
   isEdit: boolean
   editId: number | null
   birimler: DBBirim[]
+  kurum?: any
   personeller: DBPersonel[]
   kodSozlugu: DBKodSozlugu[]
   loadingDb: boolean
@@ -121,6 +122,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
 
   // DB Collections state
   const [birimler, setBirimler] = useState<DBBirim[]>([])
+  const [kurum, setKurum] = useState<any>(null)
   const [personeller, setPersoneller] = useState<DBPersonel[]>([])
   const [kodSozlugu, setKodSozlugu] = useState<DBKodSozlugu[]>([])
   const [loadingDb, setLoadingDb] = useState(true)
@@ -202,10 +204,15 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
           'db:query',
           'SELECT * FROM TANIM_Roller'
         )
+        const resKurum = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT * FROM TANIM_Kurum LIMIT 1'
+        )
 
         if (resBirim.success) setBirimler(resBirim.data)
         if (resPers.success) setPersoneller(resPers.data)
         if (resKod.success) setKodSozlugu(resKod.data)
+        if (resKurum.success && resKurum.data.length > 0) setKurum(resKurum.data[0])
 
         const roller = resRoller.success ? resRoller.data : []
 
@@ -716,6 +723,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
     exactMatchCount,
     getNextTeminNo,
     validationError,
-    setValidationError
+    setValidationError,
+    kurum
   }
 }

@@ -25,6 +25,7 @@ export function GenelBilgilerVeIdariAntetSection(
     filteredBirimler,
     handleSelectBirim,
     getNextTeminNo,
+    kurum,
   } = props;
 
   return (
@@ -361,44 +362,127 @@ export function GenelBilgilerVeIdariAntetSection(
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             Evrakın Sunulacağı Makam
           </label>
-          <input
-            type="text"
-            list="makam-list"
-            value={formData.sunulacak_makam || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                sunulacak_makam: e.target.value,
-              })}
-            placeholder="Örn: BAŞKANLIK MAKAMINA veya MÜDÜRLÜK MAKAMINA"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          />
-          <datalist id="makam-list">
-            {Array.from(
+          {(() => {
+            const makamOptions = Array.from(
               new Set(
-                birimler
-                  ? birimler.map((b) => b.sunum_makami).filter(Boolean)
-                  : [],
+                [
+                  kurum?.makam_adi,
+                  ...(birimler ? birimler.map((b) => b.sunum_makami) : []),
+                ].filter(Boolean),
               ),
-            ).map((makam) => <option key={makam} value={makam} />)}
-          </datalist>
+            );
+            const isCustom = formData.sunulacak_makam &&
+              !makamOptions.includes(formData.sunulacak_makam);
+
+            return (
+              <div className="space-y-2">
+                <select
+                  value={isCustom ? "custom" : (formData.sunulacak_makam || "")}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "custom") {
+                      // Custom seçildiğinde inputu boşaltıp kullanıcının yazmasını bekleyelim
+                      setFormData({ ...formData, sunulacak_makam: "" });
+                    } else {
+                      setFormData({ ...formData, sunulacak_makam: val });
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
+                >
+                  <option value="">Seçiniz veya elle yazın...</option>
+                  {makamOptions.map((makam) => (
+                    <option key={makam} value={makam}>
+                      {makam}
+                    </option>
+                  ))}
+                  <option value="custom">✍️ Elle Özel Yaz...</option>
+                </select>
+
+                {(isCustom || formData.sunulacak_makam === "" || !formData.sunulacak_makam) && (
+                  <input
+                    type="text"
+                    value={formData.sunulacak_makam || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        sunulacak_makam: e.target.value,
+                      })}
+                    placeholder="Evrakın sunulacağı makamı yazın..."
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 animate-in slide-in-from-top-1 duration-200"
+                  />
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
             İhtiyaç Yeri
           </label>
-          <input
-            type="text"
-            value={formData.ihtiyac_yeri || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                ihtiyac_yeri: e.target.value,
-              })}
-            placeholder="Örn: Fen İşleri Şantiyesi"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
-          />
+          {(() => {
+            const seciliBirim = birimler?.find((b) => b.id === formData.birim_id);
+            const kurumAdi = kurum?.kurum_adi || "";
+            
+            const dinamikSecenekler = [
+              seciliBirim?.ihtiyac_yeri_eki,
+              seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Hizmet Binası` : null,
+              seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Şantiyesi` : null,
+              seciliBirim?.birim_adi,
+              kurumAdi ? `${kurumAdi} Hizmet Binası` : null,
+            ].filter(Boolean);
+
+            const ihtiyacOptions = Array.from(
+              new Set(
+                [
+                  ...dinamikSecenekler,
+                  ...(birimler ? birimler.map((b) => b.ihtiyac_yeri_eki) : []),
+                  ...(birimler ? birimler.map((b) => b.birim_adi ? `${b.birim_adi} Hizmet Binası` : null) : []),
+                ].filter(Boolean),
+              ),
+            );
+            const isCustom = formData.ihtiyac_yeri &&
+              !ihtiyacOptions.includes(formData.ihtiyac_yeri);
+
+            return (
+              <div className="space-y-2">
+                <select
+                  value={isCustom ? "custom" : (formData.ihtiyac_yeri || "")}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "custom") {
+                      setFormData({ ...formData, ihtiyac_yeri: "" });
+                    } else {
+                      setFormData({ ...formData, ihtiyac_yeri: val });
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
+                >
+                  <option value="">Seçiniz veya elle yazın...</option>
+                  {ihtiyacOptions.map((yer) => (
+                    <option key={yer} value={yer}>
+                      {yer}
+                    </option>
+                  ))}
+                  <option value="custom">✍️ Elle Özel Yaz...</option>
+                </select>
+
+                {(isCustom || formData.ihtiyac_yeri === "" || !formData.ihtiyac_yeri) && (
+                  <input
+                    type="text"
+                    value={formData.ihtiyac_yeri || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        ihtiyac_yeri: e.target.value,
+                      })}
+                    placeholder="İhtiyaç yerini yazın..."
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 animate-in slide-in-from-top-1 duration-200"
+                  />
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

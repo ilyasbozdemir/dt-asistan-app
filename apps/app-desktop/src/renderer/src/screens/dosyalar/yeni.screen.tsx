@@ -71,6 +71,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     getNextTeminNo,
     validationError,
     setValidationError,
+    kurum,
   } = useYeniDosyaScreen();
 
   const [activeSubStep, setActiveSubStep] = useState(1);
@@ -583,6 +584,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       setFormData={setFormData}
                       isEdit={isEdit}
                       birimler={birimler}
+                      kurum={kurum}
                       personeller={personeller}
                       kodSozlugu={kodSozlugu}
                       dosyalar={dosyalar}

@@ -31,6 +31,7 @@ export interface YeniDosyaTabProps {
 
   // Shared Data
   birimler: DBBirim[]
+  kurum?: any
   personeller: DBPersonel[]
   kodSozlugu: DBKodSozlugu[]
   dosyalar: TeminDosyasi[]
