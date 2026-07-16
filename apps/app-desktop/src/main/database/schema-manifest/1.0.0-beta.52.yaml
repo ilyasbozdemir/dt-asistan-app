@@ -10,3 +10,5 @@ changes:
     columns_added:
       - table: 'DATA_TeminDosyasi'
         column: 'yaklasik_maliyet_kdv_dahil_mi'
+      - table: 'TANIM_Birim'
+        column: 'ihtiyac_yeri_eki'

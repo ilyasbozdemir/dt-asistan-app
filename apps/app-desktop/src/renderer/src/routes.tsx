@@ -4,14 +4,14 @@ import { APP_ROUTES } from './constants/routeConstants'
 import DashboardScreen from './screens/dashboard/index.screen'
 import DosyalarScreen from './screens/dosyalar/index.screen'
 import FirmalarScreen from './screens/firmalar/index.screen'
-import PersonelScreen from './screens/personel/index.screen'
+
 import { MevzuatScreen } from './screens/system/MevzuatScreen'
 import ChangelogScreen from './screens/system/ChangelogScreen'
 import ImportScreen from './screens/system/ImportScreen'
 import YardimScreen from './screens/system/YardimScreen'
 import AyarlarScreen from './screens/ayarlar/index.screen'
 import TemaScreen from './screens/ayarlar/TemaScreen'
-import BirimlerScreen from './screens/birimler/index.screen'
+
 import AmbarScreen from './screens/ambar/index.screen'
 import MalzemelerScreen from './screens/malzemeler/index.screen'
 import TasinirKodScreen from './screens/tasinirkod/index.screen'
@@ -25,9 +25,7 @@ import OkasKodScreen from './screens/okaskod/index.screen'
 import OlcuBirimleriScreen from './screens/olcubirimleri/index.screen'
 import YeniMalzemeScreen from './screens/malzemeler/yeni.screen'
 import YeniDosyaScreen from './screens/dosyalar/yeni.screen'
-import KomisyonlarScreen from './screens/komisyonlar/index.screen'
 import KomisyonDetayScreen from './screens/komisyonlar/detay.screen'
-import KomisyonGorevleriScreen from './screens/komisyon-gorevleri/index.screen'
 import HakedisScreen from './screens/system/HakedisScreen'
 
 const rootRoute = createRootRoute({
@@ -61,7 +59,7 @@ const firmalarRoute = createRoute({
 const personelRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.PERSONEL,
-  component: PersonelScreen
+  component: KurumScreen
 })
 
 const sablonlarRoute = createRoute({
@@ -79,7 +77,7 @@ const degiskenlerRoute = createRoute({
 const komisyonlarRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.KOMISYONLAR,
-  component: KomisyonlarScreen
+  component: KurumScreen
 })
 
 const komisyonDetayRoute = createRoute({
@@ -91,7 +89,7 @@ const komisyonDetayRoute = createRoute({
 const komisyonGorevleriRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.KOMISYON_GOREVLERI,
-  component: KomisyonGorevleriScreen
+  component: KurumScreen
 })
 
 import { TakipScreen } from './screens/system/TakipScreen'
@@ -168,7 +166,7 @@ const temaRoute = createRoute({
 const birimlerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.BIRIMLER,
-  component: BirimlerScreen
+  component: KurumScreen
 })
 
 const ambarRoute = createRoute({

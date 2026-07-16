@@ -7,6 +7,7 @@ export interface InnerMenuItem {
   icon: React.ReactNode
   description?: string
   isDivider?: boolean
+  isHeader?: boolean
 }
 
 interface InnerMenuProps {
@@ -34,8 +35,19 @@ export function InnerMenu({
           return (
             <div
               key={`div-${idx}`}
-              className="hidden lg:block h-px bg-slate-100 dark:bg-slate-800 my-1"
+              className="hidden lg:block h-px bg-slate-100 dark:bg-slate-800 my-1 shrink-0"
             />
+          )
+        }
+
+        if (item.isHeader) {
+          return (
+            <div
+              key={`hdr-${idx}`}
+              className="hidden lg:block text-[10px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-wider px-3 lg:px-4 mt-3 mb-1 shrink-0"
+            >
+              {item.label}
+            </div>
           )
         }
 

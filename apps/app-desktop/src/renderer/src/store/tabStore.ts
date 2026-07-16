@@ -29,7 +29,15 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/ambar')) return 'Ambar Tanımları'
   if (path.startsWith('/malzemeler/yeni')) return 'Yeni Kayıt (Mal/Hizmet/Yapım İşi)'
   if (path.startsWith('/malzemeler')) return 'Kayıtlı Mal / Hizmet / Yapım İşleri Listesi'
-  if (path.startsWith('/kurum')) return 'Kurum Bilgileri'
+  if (path.startsWith('/kurum')) {
+    const query = fullPath.split('?')[1] || ''
+    const searchParams = new URLSearchParams(query)
+    const tab = searchParams.get('tab')
+    if (tab === 'mali') return 'Mali ve Bütçe Kodları'
+    if (tab === 'iletisim') return 'İletişim & Konum'
+    if (tab === 'logolar') return 'Kurum Logoları'
+    return 'İdari Bilgiler'
+  }
   if (path.startsWith('/olcubirimleri')) return 'Ölçü Birimleri'
   if (path.startsWith('/profil')) return 'Kullanıcı Profili'
   if (path.startsWith('/dosya/hazirlik-ve-ihtiyac')) return '1. Hazırlık ve İhtiyaç'
@@ -86,6 +94,28 @@ export const useTabStore = create<TabState>((set, get) => ({
     if (!path || path.startsWith('/launcher') || path.startsWith('/lockscreen')) return
 
     const { tabs } = get()
+
+    // Check if the new path belongs to the Kurum family
+    const cleanPath = path.split('?')[0]
+    const isKurumFamily = ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(cleanPath)
+
+    if (isKurumFamily) {
+      // Find if there is already a tab in the Kurum family
+      const existingKurumIndex = tabs.findIndex((t) => {
+        const tClean = t.path.split('?')[0]
+        return ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(tClean)
+      })
+
+      if (existingKurumIndex > -1) {
+        // If it exists, replace its path and label
+        const updatedTabs = [...tabs]
+        const label = getTabLabel(path)
+        updatedTabs[existingKurumIndex] = { path, label }
+        set({ tabs: updatedTabs, activeTabPath: path })
+        return
+      }
+    }
+
     const exists = tabs.some((t) => t.path === path)
 
     if (!exists) {

@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input'
 
 import { Modal } from '../../components/ui/Modal'
 
-export default function KomisyonGorevleriScreen(): React.JSX.Element {
+export default function KomisyonGorevleriScreen({ isSubComponent = false }: { isSubComponent?: boolean }): React.JSX.Element {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -95,7 +95,7 @@ export default function KomisyonGorevleriScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6">
+    <div className={isSubComponent ? "flex flex-col h-full space-y-6 w-full animate-in fade-in duration-200" : "flex flex-col h-full space-y-6"}>
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">

@@ -1,18 +1,22 @@
 import React, { useState } from 'react'
 import { KurumVerisi, useKurumHooks } from './kurum.hooks'
 import { Button } from '../../components/ui/Button'
-import { Building2, MapPin, Save } from 'lucide-react'
+import { Building2, MapPin, Save, Users, ShieldCheck, LayoutGrid, ClipboardCheck } from 'lucide-react'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { IdariBilgilerTab } from './components/IdariBilgilerTab'
 import { MaliBirimTab } from './components/MaliBirimTab'
 import { IletisimTab } from './components/IletisimTab'
 import { LogolarTab } from './components/LogolarTab'
-import { KurumsalYapiTab } from './components/KurumsalYapiTab'
 import { useSettingsStore } from '../../store/settingsStore'
 
-import { Link } from '@tanstack/react-router'
+import { useNavigate, useRouterState } from '@tanstack/react-router'
 
-type TabType = 'idari' | 'mali' | 'iletisim' | 'logolar'
+import BirimlerScreen from '../birimler/index.screen'
+import PersonelScreen from '../personel/index.screen'
+import KomisyonlarScreen from '../komisyonlar/index.screen'
+import KomisyonGorevleriScreen from '../komisyon-gorevleri/index.screen'
+
+type TabType = 'idari' | 'mali' | 'iletisim' | 'logolar' | 'birimler' | 'personel' | 'komisyonlar' | 'komisyon-gorevleri'
 
 export default function KurumScreen(): React.JSX.Element {
   const { kurumData, isLoadingKurum, fetchKurum, saveKurum } = useKurumHooks()
@@ -23,7 +27,6 @@ export default function KurumScreen(): React.JSX.Element {
     loadSettings: reloadSettingsStore
   } = useSettingsStore()
 
-  const [activeTab, setActiveTab] = useState<TabType>('idari')
   const [saving, setSaving] = useState(false)
 
   const [localData, setLocalData] = useState<Partial<KurumVerisi>>({})
@@ -39,9 +42,11 @@ export default function KurumScreen(): React.JSX.Element {
     fetchKurum()
   }, [fetchKurum])
 
+  const initializedRef = React.useRef(false)
   // Initialize form when data loads
   React.useEffect(() => {
-    if (kurumData && Object.keys(localData).length === 0) {
+    if (kurumData && !initializedRef.current) {
+      initializedRef.current = true
       setLocalData(kurumData)
 
       let parsedLetterhead = ['']
@@ -101,7 +106,49 @@ export default function KurumScreen(): React.JSX.Element {
     }
   }
 
+  const navigate = useNavigate()
+  const routerState = useRouterState()
+  const pathname = routerState.location.pathname
+  const searchParams = new URLSearchParams(window.location.search)
+  const queryTab = searchParams.get('tab')
+
+  let activeTab: TabType = 'idari'
+  if (pathname === '/birimler') {
+    activeTab = 'birimler'
+  } else if (pathname === '/personel') {
+    activeTab = 'personel'
+  } else if (pathname === '/komisyonlar') {
+    activeTab = 'komisyonlar'
+  } else if (pathname === '/komisyon-gorevleri') {
+    activeTab = 'komisyon-gorevleri'
+  } else {
+    if (queryTab === 'mali') activeTab = 'mali'
+    else if (queryTab === 'iletisim') activeTab = 'iletisim'
+    else if (queryTab === 'logolar') activeTab = 'logolar'
+    else activeTab = 'idari'
+  }
+
+  const handleTabChange = (tabId: string): void => {
+    if (tabId === 'birimler') {
+      navigate({ to: '/birimler' as any })
+    } else if (tabId === 'personel') {
+      navigate({ to: '/personel' as any })
+    } else if (tabId === 'komisyonlar') {
+      navigate({ to: '/komisyonlar' as any })
+    } else if (tabId === 'komisyon-gorevleri') {
+      navigate({ to: '/komisyon-gorevleri' as any })
+    } else {
+      navigate({ to: `/kurum?tab=${tabId}` as any })
+    }
+  }
+
   const menuItems: InnerMenuItem[] = [
+    {
+      id: 'hdr-kurum',
+      isHeader: true,
+      label: 'Kurum Bilgileri',
+      icon: null
+    },
     {
       id: 'idari',
       label: 'İdari Bilgiler',
@@ -121,6 +168,38 @@ export default function KurumScreen(): React.JSX.Element {
       id: 'logolar',
       label: 'Kurum Logoları',
       icon: <Building2 className="w-4 h-4 shrink-0 text-blue-500" />
+    },
+    {
+      id: 'div-sep',
+      isDivider: true,
+      label: '',
+      icon: null
+    },
+    {
+      id: 'hdr-tanimlar',
+      isHeader: true,
+      label: 'Sistem Tanımları',
+      icon: null
+    },
+    {
+      id: 'birimler',
+      label: 'Birim Yönetimi',
+      icon: <LayoutGrid className="w-4 h-4 shrink-0 text-indigo-500" />
+    },
+    {
+      id: 'personel',
+      label: 'Personel Yönetimi',
+      icon: <Users className="w-4 h-4 shrink-0 text-emerald-500" />
+    },
+    {
+      id: 'komisyonlar',
+      label: 'Komisyon Yönetimi',
+      icon: <ShieldCheck className="w-4 h-4 shrink-0 text-cyan-500" />
+    },
+    {
+      id: 'komisyon-gorevleri',
+      label: 'Görev Tanımları',
+      icon: <ClipboardCheck className="w-4 h-4 shrink-0 text-pink-500" />
     }
   ]
 
@@ -131,109 +210,92 @@ export default function KurumScreen(): React.JSX.Element {
       </div>
     )
   }
-  const searchParams = new URLSearchParams(window.location.search)
-  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
-  const queryTab = searchParams.get('tab') || hashParams.get('tab')
 
-  if (queryTab === 'kadro') {
-    return (
-      <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
-        <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
-          <Link
-            to="/kurum"
-            className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all"
-            title="Kurum Bilgilerini Düzenle"
-          >
-            <Building2 className="w-6 h-6 text-blue-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100">
-              Kurumsal Yapı & Kadro
-            </h1>
-            <p className="text-slate-550 dark:text-slate-400 mt-0.5 text-xs">
-              Kuruma ait müdürlükler, harcama birimleri, DETSİS kodları ve personel kadrosu.
-            </p>
-          </div>
-        </div>
+  const isKurumTab = ['idari', 'mali', 'iletisim', 'logolar'].includes(activeTab)
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-          <KurumsalYapiTab />
-        </div>
-      </div>
-    )
-  }
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 dark:border-slate-800 pb-4 gap-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
-            <Building2 className="w-8 h-8 text-blue-600" />
-            Kurum Bilgileri
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-            Resmi evrak çıktılarında ve arayüzde gösterilecek idari ve iletişim bilgilerini yönetin.
-          </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 px-6 text-sm font-semibold transition-all shadow-md shadow-blue-500/20 shrink-0"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-4">
         {/* SOL MENÜ */}
         <InnerMenu
           className="lg:col-span-3"
           items={menuItems}
           activeId={activeTab}
-          onChange={(id) => setActiveTab(id as TabType)}
+          onChange={handleTabChange}
         />
 
         {/* SAĞ PANEL */}
-        <div className="lg:col-span-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px] flex flex-col justify-between">
-          <div className="space-y-6">
-            {activeTab === 'idari' && (
-              <IdariBilgilerTab
-                data={localData}
-                onChange={handleChange}
-                institutionLetterhead={institutionLetterhead}
-                setInstitutionLetterhead={setInstitutionLetterhead}
-              />
-            )}
-            {activeTab === 'mali' && (
-              <MaliBirimTab
-                data={localData}
-                onChange={handleChange}
-                institutionLetterhead={institutionLetterhead}
-                setInstitutionLetterhead={setInstitutionLetterhead}
-                sozlukData={sozlukData}
-              />
-            )}
-            {activeTab === 'iletisim' && (
-              <IletisimTab
-                data={localData}
-                onChange={handleChange}
-                institutionLetterhead={institutionLetterhead}
-                setInstitutionLetterhead={setInstitutionLetterhead}
-              />
-            )}
-            {activeTab === 'logolar' && (
-              <LogolarTab
-                institutionLogo={institutionLogo}
-                setInstitutionLogo={setInstitutionLogo}
-                logoLeft={logoLeft}
-                setLogoLeft={setLogoLeft}
-                logoRight={logoRight}
-                setLogoRight={setLogoRight}
-              />
-            )}
-          </div>
+        <div className="lg:col-span-9 flex flex-col gap-6">
+          {isKurumTab ? (
+            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 dark:border-slate-800 pb-4 gap-4 sticky top-0 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md z-10 pt-4 -mt-4">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
+                    <Building2 className="w-8 h-8 text-blue-600" />
+                    Kurum Bilgileri
+                  </h1>
+                  <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+                    Resmi evrak çıktılarında ve arayüzde gösterilecek idari ve iletişim bilgilerini yönetin.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 px-6 text-sm font-semibold transition-all shadow-md shadow-blue-500/20 shrink-0"
+                  >
+                    <Save className="w-4 h-4" />
+                    {saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm min-h-[450px]">
+                {activeTab === 'idari' && (
+                  <IdariBilgilerTab
+                    data={localData}
+                    onChange={handleChange}
+                    institutionLetterhead={institutionLetterhead}
+                    setInstitutionLetterhead={setInstitutionLetterhead}
+                  />
+                )}
+                {activeTab === 'mali' && (
+                  <MaliBirimTab
+                    data={localData}
+                    onChange={handleChange}
+                    institutionLetterhead={institutionLetterhead}
+                    setInstitutionLetterhead={setInstitutionLetterhead}
+                    sozlukData={sozlukData}
+                  />
+                )}
+                {activeTab === 'iletisim' && (
+                  <IletisimTab
+                    data={localData}
+                    onChange={handleChange}
+                    institutionLetterhead={institutionLetterhead}
+                    setInstitutionLetterhead={setInstitutionLetterhead}
+                  />
+                )}
+                {activeTab === 'logolar' && (
+                  <LogolarTab
+                    institutionLogo={institutionLogo}
+                    setInstitutionLogo={setInstitutionLogo}
+                    logoLeft={logoLeft}
+                    setLogoLeft={setLogoLeft}
+                    logoRight={logoRight}
+                    setLogoRight={setLogoRight}
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="-mt-8 w-full">
+              {activeTab === 'birimler' && <BirimlerScreen isSubComponent />}
+              {activeTab === 'personel' && <PersonelScreen isSubComponent />}
+              {activeTab === 'komisyonlar' && <KomisyonlarScreen isSubComponent />}
+              {activeTab === 'komisyon-gorevleri' && <KomisyonGorevleriScreen isSubComponent />}
+            </div>
+          )}
         </div>
       </div>
     </div>

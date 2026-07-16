@@ -34,7 +34,7 @@ import { DataViewMode, ViewToggle } from "../../components/ui/ViewToggle";
 
 type ScreenState = "list" | "view" | "form";
 
-export default function PersonelScreen(): React.ReactNode {
+export default function PersonelScreen({ isSubComponent = false }: { isSubComponent?: boolean }): React.ReactNode {
   const {
     personelList,
     rollerList,
@@ -653,7 +653,7 @@ export default function PersonelScreen(): React.ReactNode {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+    <div className={isSubComponent ? "flex flex-col gap-6 w-full animate-in fade-in duration-200" : "p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full"}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-855 dark:text-slate-100">

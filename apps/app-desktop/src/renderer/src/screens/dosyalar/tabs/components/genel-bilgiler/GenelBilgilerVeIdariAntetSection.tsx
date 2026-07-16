@@ -471,7 +471,7 @@ export function GenelBilgilerVeIdariAntetSection(
                   ...dinamikSecenekler,
                   ...tumBirimYerleri,
                   ...(birimler ? birimler.map((b) => b.birim_adi ? `${b.birim_adi} Hizmet Binası` : null) : []),
-                ].filter(Boolean),
+                ].filter(Boolean) as string[],
               ),
             );
             const isCustom = formData.ihtiyac_yeri &&
