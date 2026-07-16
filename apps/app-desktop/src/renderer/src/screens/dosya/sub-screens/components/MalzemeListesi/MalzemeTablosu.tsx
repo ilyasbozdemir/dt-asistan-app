@@ -9,9 +9,10 @@ import {
   Trash2,
   Users,
   X,
-} from "lucide-react";
-import { cn } from "../../../../../utils/cn";
-import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
+} from 'lucide-react'
+import { cn } from '../../../../../utils/cn'
+import { PrintDropdownButton } from '../../../components/PrintDropdownButton'
+import { MalzemeTabloPopover } from './components/MalzemeTabloPopover'
 
 export function MalzemeTablosu({
   state,
@@ -27,18 +28,18 @@ export function MalzemeTablosu({
   activeDosya,
   activeDosyaId,
 }: {
-  state: any;
-  stageSablons?: any[];
-  sablons?: any[];
-  onSablonClick?: (sablon: any, title: string) => void;
-  ciktiLoading?: boolean;
-  activeStarredDocs?: string[] | null;
-  onQuickPrint?: (sablon: any) => void;
-  onExport?: (sablon: any, format: "pdf" | "docx" | "udf") => void;
-  onOpenExternal?: (sablon: any) => void;
-  isSablonDisabled?: (cleanName: string) => boolean;
-  activeDosya?: any;
-  activeDosyaId?: number | null;
+  state: any
+  stageSablons?: any[]
+  sablons?: any[]
+  onSablonClick?: (sablon: any, title: string) => void
+  ciktiLoading?: boolean
+  activeStarredDocs?: string[] | null
+  onQuickPrint?: (sablon: any) => void
+  onExport?: (sablon: any, format: 'pdf' | 'docx' | 'udf') => void
+  onOpenExternal?: (sablon: any) => void
+  isSablonDisabled?: (cleanName: string) => boolean
+  activeDosya?: any
+  activeDosyaId?: number | null
 }): React.JSX.Element {
   const {
     items,
@@ -55,17 +56,13 @@ export function MalzemeTablosu({
     setEditKdv,
     handleStartEdit,
     handleSaveEdit,
-    handleDeleteItem,
-  } = state;
+    handleDeleteItem
+  } = state
 
   // Çoklu komisyon seçimi — değerler DB'den gelen id (number)
   const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<number[]>([]);
   // Komisyon paneli açık/kapalı
   const [komisyonPanelOpen, setKomisyonPanelOpen] = useState(false);
-  // Eski compat — workflowSteps için hâlâ gerekli
-  const selectedKomisyon = selectedKomisyonlar.length > 0
-    ? "muayene_kabul_tespit"
-    : "";
   const [selectedStepIdx, setSelectedStepIdx] = useState<string>("0");
 
   // DB'deki aktif komisyonları dinamik çek
@@ -217,6 +214,21 @@ export function MalzemeTablosu({
     return baseSablons;
   }, [stageSablons, komisyonSablons]);
 
+  const handleOpenSablonByDosyaAdi = (dosyaAdi: string) => {
+    if (!onSablonClick) return;
+    let sablon = sablons?.find((s: any) => s.dosya_adi === dosyaAdi);
+    if (!sablon) {
+      sablon = sablons?.find((s: any) =>
+        s.dosya_adi.toLowerCase().includes(dosyaAdi.toLowerCase())
+      );
+    }
+    if (sablon) {
+      onSablonClick(sablon, sablon.ad);
+    } else {
+      console.warn("Şablon bulunamadı:", dosyaAdi);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px]">
       <div className="flex items-center justify-between mb-4">
@@ -246,6 +258,20 @@ export function MalzemeTablosu({
               buttonHeightClass="py-1.5"
             />
           )}
+
+          <MalzemeTabloPopover
+            onKomisyonSettings={() => setKomisyonPanelOpen(true)}
+            onGorevlendirmeOnayi={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi')}
+            onGorevlendirmeOnayEki={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi-eki')}
+            onYaklasikMaliyetKomisyonu={() => handleOpenSablonByDosyaAdi('yaklasik-maliyet-tespit-komisyonu')}
+            onMuayeneKabulKomisyonu={() => handleOpenSablonByDosyaAdi('muayene-kabul-komisyonu')}
+            onFiyatArastirmaKomisyonu={() => handleOpenSablonByDosyaAdi('fiyat-arastirma-komisyonu')}
+            onPiyasaArastirmaGorevlendirmesi={() => handleOpenSablonByDosyaAdi('piyasa-fiyat-arastirma-gorevlendirmesi')}
+            onPiyasaArastirmaTutanagi={() => handleOpenSablonByDosyaAdi('piyasa-fiyat-arastirma-tutanagi')}
+            onYaklasikMaliyetHesapCetveli={() => handleOpenSablonByDosyaAdi('yaklasik-maliyet-cetveli')}
+            onSonAlimCetveli={() => handleOpenSablonByDosyaAdi('son-alim-fiyat-cetveli')}
+            onOnayBelgesi={() => handleOpenSablonByDosyaAdi('dogrudan-temin-onay-belgesi')}
+          />
 
           <button
             onClick={() => setIsAddModalOpen(true)}
