@@ -75,12 +75,22 @@ export default function DosyalarScreen(): React.ReactNode {
 
   const handleSaveMaliyetAyarlari = async (): Promise<void> => {
     if (!selectedDosyaForMaliyet) return;
+    
+    let finalMaliyet = Number(selectedDosyaForMaliyet.yaklasik_maliyet) || 0;
+    const kdvRate = Number(selectedDosyaForMaliyet.kdv) || 0;
+    const isKdvDahil = Number(selectedDosyaForMaliyet.yaklasik_maliyet_kdv_dahil_mi) === 1;
+    
+    if (isKdvDahil && kdvRate > 0) {
+      finalMaliyet = Number((finalMaliyet / (1 + kdvRate / 100)).toFixed(2));
+    }
+
     await updateDosya({
       id: selectedDosyaForMaliyet.id,
-      yaklasik_maliyet: Number(selectedDosyaForMaliyet.yaklasik_maliyet),
+      yaklasik_maliyet: finalMaliyet,
       kdv: selectedDosyaForMaliyet.kdv,
       yaklasik_maliyet_hesaplamasi:
         selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi,
+      yaklasik_maliyet_kdv_dahil_mi: 0, // Her zaman veritabanında KDV hariç olarak standardize ediyoruz
     });
     setSelectedDosyaForMaliyet(null);
   };
@@ -510,10 +520,66 @@ export default function DosyalarScreen(): React.ReactNode {
             <div className='space-y-4'>
               <div>
                 <label className='block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1'>
+                  Yaklaşık Maliyet Hesabı
+                </label>
+                <select
+                  value={selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi || 'burada'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedDosyaForMaliyet({
+                      ...selectedDosyaForMaliyet,
+                      yaklasik_maliyet_hesaplamasi: val,
+                      yaklasik_maliyet: val !== 'onceden' ? 0 : selectedDosyaForMaliyet.yaklasik_maliyet
+                    });
+                  }}
+                  className='w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold'
+                >
+                  <option value='burada'>Burada Hesaplanacak (Teklifler ile)</option>
+                  <option value='onceden'>Önceden Hesaplandı (Tutar Girilecek)</option>
+                  <option value='hesaplanmayacak'>Hesaplanmayacak</option>
+                </select>
+              </div>
+
+              <div>
+                <label className='block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1'>
+                  Yaklaşık Maliyet KDV Durumu
+                </label>
+                <select
+                  value={selectedDosyaForMaliyet.yaklasik_maliyet_kdv_dahil_mi ?? 0}
+                  onChange={(e) => {
+                    const newKdvDahilMi = Number(e.target.value);
+                    const oldKdvDahilMi = selectedDosyaForMaliyet.yaklasik_maliyet_kdv_dahil_mi ?? 0;
+                    const kdvRate = Number(selectedDosyaForMaliyet.kdv) || 20;
+                    let currentVal = selectedDosyaForMaliyet.yaklasik_maliyet || 0;
+                    
+                    if (newKdvDahilMi !== oldKdvDahilMi) {
+                      if (newKdvDahilMi === 1) {
+                        currentVal = currentVal * (1 + kdvRate / 100);
+                      } else {
+                        currentVal = currentVal / (1 + kdvRate / 100);
+                      }
+                    }
+                    
+                    setSelectedDosyaForMaliyet({
+                      ...selectedDosyaForMaliyet,
+                      yaklasik_maliyet_kdv_dahil_mi: newKdvDahilMi,
+                      yaklasik_maliyet: Number(currentVal.toFixed(2))
+                    });
+                  }}
+                  className='w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold'
+                >
+                  <option value={0}>KDV Hariç</option>
+                  <option value={1}>KDV Dahil</option>
+                </select>
+              </div>
+
+              <div>
+                <label className='block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1'>
                   Yaklaşık Maliyet (₺)
                 </label>
                 <input
                   type='number'
+                  disabled={selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi !== 'onceden'}
                   value={selectedDosyaForMaliyet.yaklasik_maliyet ?? ''}
                   onChange={(e) =>
                     setSelectedDosyaForMaliyet({
@@ -522,8 +588,22 @@ export default function DosyalarScreen(): React.ReactNode {
                     })
                   }
                   placeholder='0.00'
-                  className='w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200'
+                  className={`w-full px-3 py-2 border rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold ${
+                    selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi !== 'onceden'
+                      ? 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                      : 'bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200'
+                  }`}
                 />
+                {selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi === 'burada' && (
+                  <p className='text-[10px] text-blue-500 mt-1 font-medium'>
+                    💡 Bu tutar, teklifler girildiğinde otomatik olarak hesaplanacaktır.
+                  </p>
+                )}
+                {selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi === 'hesaplanmayacak' && (
+                  <p className='text-[10px] text-slate-400 mt-1 font-medium'>
+                    💡 Bu dosya için yaklaşık maliyet hesaplanmayacaktır.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -544,25 +624,6 @@ export default function DosyalarScreen(): React.ReactNode {
                   <option value='1'>1</option>
                   <option value='10'>10</option>
                   <option value='20'>20</option>
-                </select>
-              </div>
-
-              <div>
-                <label className='block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1'>
-                  Hesaplama Yöntemi
-                </label>
-                <select
-                  value={selectedDosyaForMaliyet.yaklasik_maliyet_hesaplamasi || 'kdv_haric'}
-                  onChange={(e) =>
-                    setSelectedDosyaForMaliyet({
-                      ...selectedDosyaForMaliyet,
-                      yaklasik_maliyet_hesaplamasi: e.target.value
-                    })
-                  }
-                  className='w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200'
-                >
-                  <option value='kdv_haric'>KDV Hariç Hesapla</option>
-                  <option value='kdv_dahil'>KDV Dahil Hesapla</option>
                 </select>
               </div>
 

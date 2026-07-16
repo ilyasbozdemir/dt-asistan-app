@@ -565,10 +565,20 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
       finalKonu = `${baseKonu} (${nextTekrarNo})`
     }
 
+    let finalMaliyet = Number(formData.yaklasik_maliyet) || 0;
+    const kdvRate = Number(formData.kdv) || 0;
+    const isKdvDahil = Number(formData.yaklasik_maliyet_kdv_dahil_mi) === 1;
+
+    if (isKdvDahil && kdvRate > 0) {
+      finalMaliyet = Number((finalMaliyet / (1 + kdvRate / 100)).toFixed(2));
+    }
+
     const payload = {
       ...formData,
       konu: finalKonu,
-      tekrar_no: nextTekrarNo
+      tekrar_no: nextTekrarNo,
+      yaklasik_maliyet: finalMaliyet,
+      yaklasik_maliyet_kdv_dahil_mi: 0
     }
 
     try {

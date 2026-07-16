@@ -221,10 +221,26 @@ export function IhaleVeTeklifFinansalSection(
           </label>
           <select
             value={formData.yaklasik_maliyet_kdv_dahil_mi ?? 0}
-            onChange={(e) => setFormData({
-              ...formData,
-              yaklasik_maliyet_kdv_dahil_mi: parseInt(e.target.value, 10),
-            })}
+            onChange={(e) => {
+              const newKdvDahil = parseInt(e.target.value, 10);
+              const oldKdvDahil = formData.yaklasik_maliyet_kdv_dahil_mi ?? 0;
+              const kdvRate = Number(formData.kdv) || 20;
+              let currentVal = formData.yaklasik_maliyet || 0;
+
+              if (newKdvDahil !== oldKdvDahil) {
+                if (newKdvDahil === 1) {
+                  currentVal = currentVal * (1 + kdvRate / 100);
+                } else {
+                  currentVal = currentVal / (1 + kdvRate / 100);
+                }
+              }
+
+              setFormData({
+                ...formData,
+                yaklasik_maliyet_kdv_dahil_mi: newKdvDahil,
+                yaklasik_maliyet: Number(currentVal.toFixed(2)),
+              });
+            }}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           >
             <option value={0}>KDV Hariç</option>
