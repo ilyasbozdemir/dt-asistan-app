@@ -487,6 +487,14 @@ export function MalzemeTablosu({
           </span>
         </h3>
         <div className="flex items-center gap-2 relative">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            İhtiyaç Kalemi Ekle
+          </button>
+
           {combinedSablons.length > 0 && onSablonClick && (
             <PrintDropdownButton
               kategori="1-ihtiyac-tespiti-ve-baslangic"
@@ -536,14 +544,6 @@ export function MalzemeTablosu({
             onOnayBelgesi={() =>
               handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
           />
-
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            İhtiyaç Kalemi Ekle
-          </button>
         </div>
       </div>
 
