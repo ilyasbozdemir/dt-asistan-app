@@ -1,6 +1,61 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
-export function useMalzemeListesi(activeDosyaId: number | null) {
+export interface UseMalzemeListesiReturn {
+  items: any[]
+  units: any[]
+  libraryItems: any[]
+  loading: boolean
+  kalemAdi: string
+  setKalemAdi: React.Dispatch<React.SetStateAction<string>>
+  tasinirKodu: string
+  setTasinirKodu: React.Dispatch<React.SetStateAction<string>>
+  okasKodu: string
+  setOkasKodu: React.Dispatch<React.SetStateAction<string>>
+  tipi: string
+  setTipi: React.Dispatch<React.SetStateAction<string>>
+  birim: string
+  setBirim: React.Dispatch<React.SetStateAction<string>>
+  miktar: number
+  setMiktar: React.Dispatch<React.SetStateAction<number>>
+  kdvOrani: number
+  setKdvOrani: React.Dispatch<React.SetStateAction<number>>
+  aciklama: string
+  setAciklama: React.Dispatch<React.SetStateAction<string>>
+  searchQuery: string
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>
+  showSuggestions: boolean
+  setShowSuggestions: React.Dispatch<React.SetStateAction<boolean>>
+  aiLoading: boolean
+  isAddModalOpen: boolean
+  setIsAddModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  activeTab: 'library' | 'new'
+  setActiveTab: React.Dispatch<React.SetStateAction<'library' | 'new'>>
+  selectedItemIds: Set<number>
+  setSelectedItemIds: React.Dispatch<React.SetStateAction<Set<number>>>
+  itemMiktarlar: Record<number, number>
+  setItemMiktarlar: React.Dispatch<React.SetStateAction<Record<number, number>>>
+  libSearchQuery: string
+  setLibSearchQuery: React.Dispatch<React.SetStateAction<string>>
+  editingId: number | null
+  setEditingId: React.Dispatch<React.SetStateAction<number | null>>
+  editMiktar: number
+  setEditMiktar: React.Dispatch<React.SetStateAction<number>>
+  editBirim: string
+  setEditBirim: React.Dispatch<React.SetStateAction<string>>
+  editKdv: number
+  setEditKdv: React.Dispatch<React.SetStateAction<number>>
+  handleAiAçiklama: () => Promise<void>
+  handleSelectSuggestion: (item: any) => void
+  handleAddItem: (e: React.FormEvent) => Promise<void>
+  handleDeleteItem: (id: number) => Promise<void>
+  handleStartEdit: (item: any) => void
+  handleSaveEdit: (id: number) => Promise<void>
+  handleAddSelected: () => Promise<void>
+  filteredSuggestions: any[]
+  loadData: () => Promise<void>
+}
+
+export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListesiReturn {
   const [items, setItems] = useState<any[]>([])
   const [units, setUnits] = useState<any[]>([])
   const [libraryItems, setLibraryItems] = useState<any[]>([])
@@ -61,7 +116,7 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
     loadData()
   }, [activeDosyaId])
 
-  const handleAiAçiklama = async () => {
+  const handleAiAçiklama = async (): Promise<void> => {
     const name = kalemAdi.trim() || searchQuery.trim()
     if (!name) return
     setAiLoading(true)

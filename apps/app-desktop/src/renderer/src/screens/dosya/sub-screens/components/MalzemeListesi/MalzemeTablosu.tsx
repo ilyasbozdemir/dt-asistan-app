@@ -9,10 +9,10 @@ import {
   Trash2,
   Users,
   X,
-} from 'lucide-react'
-import { cn } from '../../../../../utils/cn'
-import { PrintDropdownButton } from '../../../components/PrintDropdownButton'
-import { MalzemeTabloPopover } from './components/MalzemeTabloPopover'
+} from "lucide-react";
+import { cn } from "../../../../../utils/cn";
+import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
+import { MalzemeTabloPopover } from "./components/MalzemeTabloPopover";
 
 export function MalzemeTablosu({
   state,
@@ -28,18 +28,18 @@ export function MalzemeTablosu({
   activeDosya,
   activeDosyaId,
 }: {
-  state: any
-  stageSablons?: any[]
-  sablons?: any[]
-  onSablonClick?: (sablon: any, title: string) => void
-  ciktiLoading?: boolean
-  activeStarredDocs?: string[] | null
-  onQuickPrint?: (sablon: any) => void
-  onExport?: (sablon: any, format: 'pdf' | 'docx' | 'udf') => void
-  onOpenExternal?: (sablon: any) => void
-  isSablonDisabled?: (cleanName: string) => boolean
-  activeDosya?: any
-  activeDosyaId?: number | null
+  state: any;
+  stageSablons?: any[];
+  sablons?: any[];
+  onSablonClick?: (sablon: any, title: string) => void;
+  ciktiLoading?: boolean;
+  activeStarredDocs?: string[] | null;
+  onQuickPrint?: (sablon: any) => void;
+  onExport?: (sablon: any, format: "pdf" | "docx" | "udf") => void;
+  onOpenExternal?: (sablon: any) => void;
+  isSablonDisabled?: (cleanName: string) => boolean;
+  activeDosya?: any;
+  activeDosyaId?: number | null;
 }): React.JSX.Element {
   const {
     items,
@@ -57,8 +57,8 @@ export function MalzemeTablosu({
     handleStartEdit,
     handleSaveEdit,
     handleDeleteItem,
-    loadData
-  } = state
+    loadData,
+  } = state;
 
   // Çoklu komisyon seçimi — değerler DB'den gelen id (number)
   const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<number[]>([]);
@@ -66,191 +66,222 @@ export function MalzemeTablosu({
   const [komisyonPanelOpen, setKomisyonPanelOpen] = useState(false);
 
   // Checkbox ve toplu işlem state'leri
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const handleToggleSelectRow = (id: number) => {
     setSelectedIds((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(id)) {
-        next.delete(id)
+        next.delete(id);
       } else {
-        next.add(id)
+        next.add(id);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   const handleToggleSelectAll = () => {
     if (selectedIds.size === items.length) {
-      setSelectedIds(new Set())
+      setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(items.map((item: any) => item.id)))
+      setSelectedIds(new Set(items.map((item: any) => item.id)));
     }
-  }
+  };
 
   const handleDeleteSelected = async () => {
-    const ids = Array.from(selectedIds)
+    const ids = Array.from(selectedIds);
     if (ids.length === 0) {
-      alert('Lütfen silinecek ihtiyaç kalemlerini seçin.')
-      return
+      alert("Lütfen silinecek ihtiyaç kalemlerini seçin.");
+      return;
     }
-    if (!confirm(`Seçilen ${ids.length} kalemi silmek istediğinize emin misiniz?`)) return
-    
+    if (
+      !confirm(`Seçilen ${ids.length} kalemi silmek istediğinize emin misiniz?`)
+    ) return;
+
     try {
       for (const id of ids) {
         await (window as any).electron.ipcRenderer.invoke(
-          'db:run',
-          'DELETE FROM DATA_TeminKalem WHERE id = ?',
-          [id]
-        )
+          "db:run",
+          "DELETE FROM DATA_TeminKalem WHERE id = ?",
+          [id],
+        );
       }
-      setSelectedIds(new Set())
-      if (loadData) loadData()
+      setSelectedIds(new Set());
+      if (loadData) loadData();
     } catch (err: any) {
-      alert('Silme işleminde hata oluştu: ' + err.message)
+      alert("Silme işleminde hata oluştu: " + err.message);
     }
-  }
+  };
 
   const handleExcelImport = async () => {
-    if (!activeDosyaId) return
+    if (!activeDosyaId) return;
     try {
-      const res = await (window as any).electron.ipcRenderer.invoke('open-excel')
-      if (!res) return
-      
-      const XLSX = await import('xlsx')
-      const workbook = XLSX.read(res.buffer, { type: 'array' })
-      const sheetName = workbook.SheetNames[0]
-      const rows = XLSX.utils.sheet_to_json<any[]>(workbook.Sheets[sheetName], { header: 1 })
-      
+      const res = await (window as any).electron.ipcRenderer.invoke(
+        "open-excel",
+      );
+      if (!res) return;
+
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.read(res.buffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json<any[]>(workbook.Sheets[sheetName], {
+        header: 1,
+      });
+
       if (rows.length <= 1) {
-        alert('Seçilen Excel dosyasında veri bulunamadı veya boş.')
-        return
+        alert("Seçilen Excel dosyasında veri bulunamadı veya boş.");
+        return;
       }
 
-      let count = 0
+      let count = 0;
       for (let i = 1; i < rows.length; i++) {
-        const row = rows[i]
-        if (!row || row.length === 0) continue
-        
-        const kalemAdi = row[2] ? String(row[2]).trim() : null
-        if (!kalemAdi) continue
-        
-        const tasinirKodu = row[0] ? String(row[0]).trim() : null
-        const okasKodu = row[1] ? String(row[1]).trim() : null
-        const tipi = row[3] ? String(row[3]).trim() : 'Mal'
-        const birim = row[4] ? String(row[4]).trim() : 'Adet'
-        const miktar = row[5] !== undefined ? Number(row[5]) : 1
-        const kdvOrani = row[6] !== undefined ? Number(row[6]) : 20
-        const aciklama = row[7] ? String(row[7]).trim() : null
+        const row = rows[i];
+        if (!row || row.length === 0) continue;
+
+        const kalemAdi = row[2] ? String(row[2]).trim() : null;
+        if (!kalemAdi) continue;
+
+        const tasinirKodu = row[0] ? String(row[0]).trim() : null;
+        const okasKodu = row[1] ? String(row[1]).trim() : null;
+        const tipi = row[3] ? String(row[3]).trim() : "Mal";
+        const birim = row[4] ? String(row[4]).trim() : "Adet";
+        const miktar = row[5] !== undefined ? Number(row[5]) : 1;
+        const kdvOrani = row[6] !== undefined ? Number(row[6]) : 20;
+        const aciklama = row[7] ? String(row[7]).trim() : null;
 
         await (window as any).electron.ipcRenderer.invoke(
-          'db:run',
+          "db:run",
           `INSERT INTO DATA_TeminKalem 
            (temin_dosya_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, miktar, kdv_orani, aciklama) 
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [activeDosyaId, tasinirKodu, okasKodu, kalemAdi, tipi, birim, miktar, kdvOrani, aciklama]
-        )
-        count++
+          [
+            activeDosyaId,
+            tasinirKodu,
+            okasKodu,
+            kalemAdi,
+            tipi,
+            birim,
+            miktar,
+            kdvOrani,
+            aciklama,
+          ],
+        );
+        count++;
       }
 
       if (count > 0) {
-        alert(`${count} adet ihtiyaç kalemi başarıyla içe aktarıldı.`)
-        if (loadData) loadData()
+        alert(`${count} adet ihtiyaç kalemi başarıyla içe aktarıldı.`);
+        if (loadData) loadData();
       } else {
-        alert('İçe aktarıldı: İçe aktarılacak geçerli satır bulunamadı. Lütfen Kalem Adı kolonunun (C sütunu) dolu olduğundan emin olun.')
+        alert(
+          "İçe aktarıldı: İçe aktarılacak geçerli satır bulunamadı. Lütfen Kalem Adı kolonunun (C sütunu) dolu olduğundan emin olun.",
+        );
       }
     } catch (err: any) {
-      alert('Excel aktarımında hata: ' + err.message)
+      alert("Excel aktarımında hata: " + err.message);
     }
-  }
+  };
 
   const handleDownloadTemplate = async () => {
     try {
-      const res = await (window as any).electron.ipcRenderer.invoke('db:export-temin-kalem-template')
+      const res = await (window as any).electron.ipcRenderer.invoke(
+        "db:export-temin-kalem-template",
+      );
       if (res && res.success) {
-        alert(`Excel şablonu başarıyla indirildi:\n${res.filePath}`)
+        alert(`Excel şablonu başarıyla indirildi:\n${res.filePath}`);
       } else if (res && res.error) {
-        if (res.error !== 'İptal edildi') {
-          alert('Şablon indirilemedi: ' + res.error)
+        if (res.error !== "İptal edildi") {
+          alert("Şablon indirilemedi: " + res.error);
         }
       }
     } catch (err: any) {
-      alert('Hata oluştu: ' + err.message)
+      alert("Hata oluştu: " + err.message);
     }
-  }
+  };
 
   const handleExportToLibrary = async () => {
     if (items.length === 0) {
-      alert('Aktarılacak ihtiyaç kalemi bulunmuyor.')
-      return
+      alert("Aktarılacak ihtiyaç kalemi bulunmuyor.");
+      return;
     }
-    if (!confirm(`Tablodaki ${items.length} ihtiyaç kalemini genel malzeme kütüphanesine aktarmak istediğinize emin misiniz?`)) return
-    
+    if (
+      !confirm(
+        `Tablodaki ${items.length} ihtiyaç kalemini genel malzeme kütüphanesine aktarmak istediğinize emin misiniz?`,
+      )
+    ) return;
+
     try {
-      let addedCount = 0
-      let skippedCount = 0
-      
+      let addedCount = 0;
+      let skippedCount = 0;
+
       // Get all existing library items
       const libRes = await (window as any).electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT tasinir_kodu, okas_kodu, kalem_adi FROM TANIM_Kalem'
-      )
-      const libItems = libRes.success ? libRes.data : []
-      
+        "db:query",
+        "SELECT tasinir_kodu, okas_kodu, kalem_adi FROM TANIM_Kalem",
+      );
+      const libItems = libRes.success ? libRes.data : [];
+
       const cleanString = (str: string) => {
-        if (!str) return ''
+        if (!str) return "";
         return str
           .toLowerCase()
-          .replace(/[\s\-_.,\/\\()]/g, '') // spaces, dots, dashes, slashes, parens
-          .replace(/ı/g, 'i')
-          .replace(/ğ/g, 'g')
-          .replace(/ü/g, 'u')
-          .replace(/ş/g, 's')
-          .replace(/ö/g, 'o')
-          .replace(/ç/g, 'c')
-      }
+          .replace(/[\s\-_.,\/\\()]/g, "") // spaces, dots, dashes, slashes, parens
+          .replace(/ı/g, "i")
+          .replace(/ğ/g, "g")
+          .replace(/ü/g, "u")
+          .replace(/ş/g, "s")
+          .replace(/ö/g, "o")
+          .replace(/ç/g, "c");
+      };
 
       for (const item of items) {
-        const cleanName = cleanString(item.kalem_adi)
+        const cleanName = cleanString(item.kalem_adi);
         if (!cleanName) {
-          skippedCount++
-          continue
+          skippedCount++;
+          continue;
         }
 
         // Check if there is an almost matching item
-        let isDup = false
+        let isDup = false;
         for (const lib of libItems) {
-          const cleanLibName = cleanString(lib.kalem_adi)
-          
+          const cleanLibName = cleanString(lib.kalem_adi);
+
           // 1. Exact cleaned name match (case and spacing variations)
           if (cleanName === cleanLibName) {
-            isDup = true
-            break
+            isDup = true;
+            break;
           }
-          
+
           // 2. Same code and one name is a substring of the other (almost matching)
-          const sameTasinir = item.tasinir_kodu && lib.tasinir_kodu && item.tasinir_kodu.trim() === lib.tasinir_kodu.trim()
-          const sameOkas = item.okas_kodu && lib.okas_kodu && item.okas_kodu.trim() === lib.okas_kodu.trim()
-          
+          const sameTasinir = item.tasinir_kodu && lib.tasinir_kodu &&
+            item.tasinir_kodu.trim() === lib.tasinir_kodu.trim();
+          const sameOkas = item.okas_kodu && lib.okas_kodu &&
+            item.okas_kodu.trim() === lib.okas_kodu.trim();
+
           if (sameTasinir || sameOkas) {
-            if (cleanName.includes(cleanLibName) || cleanLibName.includes(cleanName)) {
-              isDup = true
-              break
+            if (
+              cleanName.includes(cleanLibName) ||
+              cleanLibName.includes(cleanName)
+            ) {
+              isDup = true;
+              break;
             }
           }
         }
 
         if (isDup) {
-          skippedCount++
-          continue
+          skippedCount++;
+          continue;
         }
-        
+
         // Generate a unique barkod_id/ID
-        const barkodId = `LIB-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
-        
+        const barkodId = `LIB-${Date.now()}-${
+          Math.random().toString(36).substr(2, 5)
+        }`;
+
         // Insert into global library
         const insertRes = await (window as any).electron.ipcRenderer.invoke(
-          'db:run',
+          "db:run",
           `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kdv_orani, aktif_mi)
            VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
           [
@@ -258,28 +289,29 @@ export function MalzemeTablosu({
             item.tasinir_kodu || null,
             item.okas_kodu || null,
             item.kalem_adi,
-            item.tipi || 'Mal',
-            item.birim || 'Adet',
-            item.kdv_orani ?? 20
-          ]
-        )
+            item.tipi || "Mal",
+            item.birim || "Adet",
+            item.kdv_orani ?? 20,
+          ],
+        );
         if (insertRes.success) {
-          addedCount++
+          addedCount++;
           // Push to temporary list so we don't duplicate within the same batch!
           libItems.push({
-            tasinir_kodu: item.tasinir_kodu || '',
-            okas_kodu: item.okas_kodu || '',
-            kalem_adi: item.kalem_adi
-          })
+            tasinir_kodu: item.tasinir_kodu || "",
+            okas_kodu: item.okas_kodu || "",
+            kalem_adi: item.kalem_adi,
+          });
         }
       }
-      
-      alert(`Aktarım tamamlandı.\nKütüphaneye eklenen yeni kalem: ${addedCount}\nMevcut/Benzer olduğu için atlanan kalem: ${skippedCount}`)
-    } catch (err: any) {
-      alert('Kütüphaneye aktarılırken hata oluştu: ' + err.message)
-    }
-  }
 
+      alert(
+        `Aktarım tamamlandı.\nKütüphaneye eklenen yeni kalem: ${addedCount}\nMevcut/Benzer olduğu için atlanan kalem: ${skippedCount}`,
+      );
+    } catch (err: any) {
+      alert("Kütüphaneye aktarılırken hata oluştu: " + err.message);
+    }
+  };
 
   // DB'deki aktif komisyonları dinamik çek
   const { data: dbKomisyonlar = [] } = useQuery<
@@ -481,16 +513,28 @@ export function MalzemeTablosu({
             onDownloadTemplate={handleDownloadTemplate}
             onExportToLibrary={handleExportToLibrary}
             onKomisyonSettings={() => setKomisyonPanelOpen(true)}
-            onGorevlendirmeOnayi={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi')}
-            onGorevlendirmeOnayEki={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi-eki')}
-            onYaklasikMaliyetKomisyonu={() => handleOpenSablonByDosyaAdi('yaklasik-maliyet-tespit-komisyonu')}
-            onMuayeneKabulKomisyonu={() => handleOpenSablonByDosyaAdi('muayene-kabul-komisyonu')}
-            onFiyatArastirmaKomisyonu={() => handleOpenSablonByDosyaAdi('fiyat-arastirma-komisyonu')}
-            onPiyasaArastirmaGorevlendirmesi={() => handleOpenSablonByDosyaAdi('piyasa-fiyat-arastirma-gorevlendirmesi')}
-            onPiyasaArastirmaTutanagi={() => handleOpenSablonByDosyaAdi('piyasa-fiyat-arastirma-tutanagi')}
-            onYaklasikMaliyetHesapCetveli={() => handleOpenSablonByDosyaAdi('yaklasik-maliyet-cetveli')}
-            onSonAlimCetveli={() => handleOpenSablonByDosyaAdi('son-alim-fiyat-cetveli')}
-            onOnayBelgesi={() => handleOpenSablonByDosyaAdi('dogrudan-temin-onay-belgesi')}
+            onGorevlendirmeOnayi={() =>
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
+            onGorevlendirmeOnayEki={() =>
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+            onYaklasikMaliyetKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("yaklasik-maliyet-tespit-komisyonu")}
+            onMuayeneKabulKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
+            onFiyatArastirmaKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
+            onPiyasaArastirmaGorevlendirmesi={() =>
+              handleOpenSablonByDosyaAdi(
+                "piyasa-fiyat-arastirma-gorevlendirmesi",
+              )}
+            onPiyasaArastirmaTutanagi={() =>
+              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+            onYaklasikMaliyetHesapCetveli={() =>
+              handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
+            onSonAlimCetveli={() =>
+              handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
+            onOnayBelgesi={() =>
+              handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
           />
 
           <button
@@ -655,7 +699,8 @@ export function MalzemeTablosu({
                   <th className="p-3 pl-4 w-10">
                     <input
                       type="checkbox"
-                      checked={items.length > 0 && selectedIds.size === items.length}
+                      checked={items.length > 0 &&
+                        selectedIds.size === items.length}
                       onChange={handleToggleSelectAll}
                       className="rounded border-slate-350 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
                     />
@@ -678,7 +723,8 @@ export function MalzemeTablosu({
                       key={item.id}
                       className={cn(
                         "hover:bg-slate-50/50 dark:hover:bg-slate-800/10",
-                        selectedIds.has(item.id) && "bg-blue-50/30 dark:bg-blue-955/15"
+                        selectedIds.has(item.id) &&
+                          "bg-blue-50/30 dark:bg-blue-955/15",
                       )}
                     >
                       <td className="p-3 pl-4 w-10">
