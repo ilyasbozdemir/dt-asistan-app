@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Building,
   CheckCircle2,
@@ -14,7 +14,12 @@ import {
   FileSpreadsheet,
   Coins,
   Printer,
-  FileText
+  FileText,
+  BookOpen,
+  Calendar,
+  Save,
+  Check,
+  Info
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'
@@ -25,10 +30,67 @@ import { useEffect, useState } from 'react'
 export function TakipScreen(): React.JSX.Element {
   const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
   const { dosyalar } = useDosyalarHooks()
+  const queryClient = useQueryClient()
 
   // 1. Fetch active dossier details
   const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
   const [notificationSent, setNotificationSent] = useState(false)
+
+  // Local state for dossier updates
+  const [status, setStatus] = useState('devam_ediyor')
+  const [acilisTarihi, setAcilisTarihi] = useState('')
+  const [sonTeklifTarihi, setSonTeklifTarihi] = useState('')
+  const [teminTarihi, setTeminTarihi] = useState('')
+  const [teslimTarihi, setTeslimTarihi] = useState('')
+  const [notlar, setNotlar] = useState('')
+  const [saveLoading, setSaveLoading] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
+
+  useEffect(() => {
+    if (activeDosya) {
+      setStatus(activeDosya.status || 'devam_ediyor')
+      setAcilisTarihi(activeDosya.dosya_acilis_tarihi ? activeDosya.dosya_acilis_tarihi.substring(0, 10) : '')
+      setSonTeklifTarihi(activeDosya.son_teklif_verme_tarihi ? activeDosya.son_teklif_verme_tarihi.substring(0, 10) : '')
+      setTeminTarihi(activeDosya.temin_tarihi ? activeDosya.temin_tarihi.substring(0, 10) : '')
+      setTeslimTarihi(activeDosya.teslim_tarihi ? activeDosya.teslim_tarihi.substring(0, 10) : '')
+      setNotlar(activeDosya.notlar || '')
+    }
+  }, [activeDosyaId, activeDosya])
+
+  const handleUpdateDosya = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!activeDosyaId) return
+    setSaveLoading(true)
+    setSaveMessage('')
+
+    try {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'UPDATE DATA_TeminDosyasi SET status = ?, dosya_acilis_tarihi = ?, son_teklif_verme_tarihi = ?, temin_tarihi = ?, teslim_tarihi = ?, notlar = ? WHERE id = ?',
+        [
+          status,
+          acilisTarihi || null,
+          sonTeklifTarihi || null,
+          teminTarihi || null,
+          teslimTarihi || null,
+          notlar || null,
+          activeDosyaId
+        ]
+      )
+
+      if (res.success) {
+        setSaveMessage('Dosya bilgileri başarıyla güncellendi.')
+        await queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+        setTimeout(() => setSaveMessage(''), 3000)
+      } else {
+        setSaveMessage('Güncelleme hatası: ' + res.error)
+      }
+    } catch (err: any) {
+      setSaveMessage('Sistem hatası: ' + err.message)
+    } finally {
+      setSaveLoading(false)
+    }
+  }
 
   // Fetch Documents generated for this dossier
   const { data: dbBelgeler = [], refetch: refetchBelgeler } = useQuery<any[]>({
@@ -450,6 +512,69 @@ export function TakipScreen(): React.JSX.Element {
               </div>
             </div>
 
+            {/* PROCESS GUIDE WIZARD CARD */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                  Doğrudan Temin İş Akışı & Şablon Yönergesi
+                </h3>
+                <span className="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-955/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 rounded-full font-bold uppercase tracking-wider">
+                  Dinamik Altyapı
+                </span>
+              </div>
+              
+              <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
+                <p>
+                  Sistemimizdeki tüm şablonlar, dosyaya girdiğiniz veriler ile 
+                  <strong className="text-slate-800 dark:text-slate-200"> tamamen dinamik ve otomatik </strong> 
+                  olarak doldurulur. Süreç boyunca yaptığınız her giriş anında evraklara yansır.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
+                    <span className="text-base select-none">💡</span>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Esnek & Dinamik Şablonlar</h4>
+                      <p className="text-[10.5px] text-slate-500 leading-normal">
+                        Şablonların yerleşimleri ve içerikleri mevzuata uygun şekilde dinamik olarak bağlanmıştır.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
+                    <span className="text-base select-none">🚀</span>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Süreç Nasıl Başlar? (1. Aşama)</h4>
+                      <p className="text-[10.5px] text-slate-500 leading-normal">
+                        İhtiyaç listesini girerek süreci başlatırsınız. Bu adıma göre Lüzum Müzekkeresi ve Harcama Talimatı gibi başlangıç belgeleri üretilir.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
+                    <span className="text-base select-none">📊</span>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Piyasa Fiyat Araştırması (2. Aşama)</h4>
+                      <p className="text-[10.5px] text-slate-500 leading-normal">
+                        Firma tekliflerini girdiğinizde, komisyonlar ve yaklaşık maliyet hesaplamaları otomatik olarak dolup cetvel haline getirilir.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
+                    <span className="text-base select-none">🏁</span>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Sözleşme & Süreç Sonu (3/4. Aşama)</h4>
+                      <p className="text-[10.5px] text-slate-500 leading-normal">
+                        Kazanan firmayı atar, sözleşme basar ve son aşamada Muayene Kabul Tutanağı ile süreci kapatıp imzaya çıkarırsınız.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* MALZEMELER VE FİRMALAR GRİDİ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Malzemeler */}
@@ -595,7 +720,128 @@ export function TakipScreen(): React.JSX.Element {
 
           {/* RIGHT COLUMN */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm sticky top-6">
+            {/* DOSYA GÜNCELLEME & TARİHLER PANELİ */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                    Dosya Durumu & İşlem Tarihleri
+                  </h3>
+                  <p className="text-[10px] text-slate-500">
+                    Süreç milat tarihlerini ve dosya durumunu buradan kaydedip güncelleyebilirsiniz.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={handleUpdateDosya} className="space-y-3.5">
+                {/* Durum */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                    Dosya Durumu
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                  >
+                    <option value="devam_ediyor">Devam Ediyor</option>
+                    <option value="tamamlandi">Tamamlandı</option>
+                    <option value="iptal">İptal Edildi</option>
+                  </select>
+                </div>
+
+                {/* Grid for Dates */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Dosya Açılış Tarihi */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                      Açılış Tarihi
+                    </label>
+                    <input
+                      type="date"
+                      value={acilisTarihi}
+                      onChange={(e) => setAcilisTarihi(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* Son Teklif Verme Tarihi */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                      Son Teklif Tarihi
+                    </label>
+                    <input
+                      type="date"
+                      value={sonTeklifTarihi}
+                      onChange={(e) => setSonTeklifTarihi(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* Karar / Temin Tarihi */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                      Sözleşme/Karar Tarihi
+                    </label>
+                    <input
+                      type="date"
+                      value={teminTarihi}
+                      onChange={(e) => setTeminTarihi(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* Tahmini Teslim Tarihi */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                      Teslim Tarihi
+                    </label>
+                    <input
+                      type="date"
+                      value={teslimTarihi}
+                      onChange={(e) => setTeslimTarihi(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Notlar */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                    Süreç Notları
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={notlar}
+                    onChange={(e) => setNotlar(e.target.value)}
+                    placeholder="Dosyaya özel notlar girin..."
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-150 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
+                  />
+                </div>
+
+                {/* Save button and state message */}
+                <div className="pt-2 flex items-center justify-between gap-3">
+                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                    {saveMessage}
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={saveLoading}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ml-auto"
+                  >
+                    {saveLoading ? (
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    Kaydet
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
               {/* UPLOAD SIGNED DOCUMENTS SECTION */}
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
                 <FileCheck className="w-5 h-5 text-indigo-500" />
