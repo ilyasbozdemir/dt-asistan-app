@@ -4,6 +4,7 @@ import { SubScreen } from '../../SubScreens.screen'
 import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
 import { useDosyaAsamasiSablons, normalizeForMatch } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
+import { useSettingsStore } from '../../../../store/settingsStore'
 
 export function SiparisVeSozlesme(): React.JSX.Element {
   const {
@@ -31,6 +32,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     saveSnapshot,
     isSablonDisabled
   } = useDosyaAsamasiSablons()
+
+  const { disableDocumentGuidance } = useSettingsStore()
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
@@ -83,20 +86,22 @@ export function SiparisVeSozlesme(): React.JSX.Element {
               Doğrudan temin sözleşme ve sipariş işlemlerini bu panelden takip edebilirsiniz.
             </p>
           </div>
-          <div>
-            <PrintDropdownButton
-              kategori="3-siparis-ve-sozlesme"
-              sablons={sablons}
-              activeStarredDocs={activeStarredDocs}
-              ciktiLoading={ciktiLoading}
-              handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-              quickPrint={quickPrint}
-              quickExport={quickExport}
-              quickOpenExternal={quickOpenExternal}
-              isSablonDisabled={isSablonDisabled}
-              buttonHeightClass="h-10"
-            />
-          </div>
+          {!disableDocumentGuidance && (
+            <div>
+              <PrintDropdownButton
+                kategori="3-siparis-ve-sozlesme"
+                sablons={sablons}
+                activeStarredDocs={activeStarredDocs}
+                ciktiLoading={ciktiLoading}
+                handleOpenPreviewForSablon={handleOpenPreviewForSablon}
+                quickPrint={quickPrint}
+                quickExport={quickExport}
+                quickOpenExternal={quickOpenExternal}
+                isSablonDisabled={isSablonDisabled}
+                buttonHeightClass="h-10"
+              />
+            </div>
+          )}
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400 italic">
           Bu süreç henüz tasarım aşamasındadır.

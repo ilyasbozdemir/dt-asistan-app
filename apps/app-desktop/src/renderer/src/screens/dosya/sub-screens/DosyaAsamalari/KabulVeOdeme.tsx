@@ -4,6 +4,7 @@ import { SubScreen } from '../../SubScreens.screen'
 import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
 import { useDosyaAsamasiSablons, normalizeForMatch } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
+import { useSettingsStore } from '../../../../store/settingsStore'
 
 export function KabulVeOdeme(): React.JSX.Element {
   const {
@@ -32,6 +33,7 @@ export function KabulVeOdeme(): React.JSX.Element {
     isSablonDisabled
   } = useDosyaAsamasiSablons()
 
+  const { disableDocumentGuidance } = useSettingsStore()
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
@@ -84,20 +86,22 @@ export function KabulVeOdeme(): React.JSX.Element {
               Muayene kabul ve ödeme belgesi işlemlerini bu panelden takip edebilirsiniz.
             </p>
           </div>
-          <div>
-            <PrintDropdownButton
-              kategori="4-kabul-ve-odeme-islemleri"
-              sablons={sablons}
-              activeStarredDocs={activeStarredDocs}
-              ciktiLoading={ciktiLoading}
-              handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-              quickPrint={quickPrint}
-              quickExport={quickExport}
-              quickOpenExternal={quickOpenExternal}
-              isSablonDisabled={isSablonDisabled}
-              buttonHeightClass="h-10"
-            />
-          </div>
+          {!disableDocumentGuidance && (
+            <div>
+              <PrintDropdownButton
+                kategori="4-kabul-ve-odeme-islemleri"
+                sablons={sablons}
+                activeStarredDocs={activeStarredDocs}
+                ciktiLoading={ciktiLoading}
+                handleOpenPreviewForSablon={handleOpenPreviewForSablon}
+                quickPrint={quickPrint}
+                quickExport={quickExport}
+                quickOpenExternal={quickOpenExternal}
+                isSablonDisabled={isSablonDisabled}
+                buttonHeightClass="h-10"
+              />
+            </div>
+          )}
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400 italic">
           Bu süreç henüz tasarım aşamasındadır.

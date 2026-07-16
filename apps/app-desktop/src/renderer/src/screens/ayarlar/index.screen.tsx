@@ -13,8 +13,9 @@ import { DatabaseArchiveTab } from './components/DatabaseArchiveTab'
 import { DeveloperTab } from './components/DeveloperTab'
 import { AiTab } from './components/AiTab'
 import { SyncTab } from './components/SyncTab'
+import { GenelTab } from './components/GenelTab'
 
-type TabType = 'smtp' | 'tema' | 'developer' | 'ai' | 'archive' | 'sync'
+type TabType = 'genel' | 'smtp' | 'tema' | 'developer' | 'ai' | 'archive' | 'sync'
 
 export default function AyarlarScreen(): React.ReactNode {
   const { settings, isLoadingSettings, saveSettings, importSmtp, exportSmtp } = useAyarlarHooks()
@@ -25,6 +26,7 @@ export default function AyarlarScreen(): React.ReactNode {
     const params = new URLSearchParams(location.search)
     const tabParam = params.get('tab') as TabType
     if (
+      tabParam === 'genel' ||
       tabParam === 'smtp' ||
       tabParam === 'tema' ||
       tabParam === 'developer' ||
@@ -34,13 +36,14 @@ export default function AyarlarScreen(): React.ReactNode {
     ) {
       return tabParam
     }
-    return 'smtp'
+    return 'genel'
   })
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const tabParam = params.get('tab') as TabType
     if (
+      tabParam === 'genel' ||
       tabParam === 'smtp' ||
       tabParam === 'tema' ||
       tabParam === 'developer' ||
@@ -53,6 +56,9 @@ export default function AyarlarScreen(): React.ReactNode {
   }, [location.search])
 
   const [saving, setSaving] = useState(false)
+
+  // Tab: Genel Ayarlar
+  const [disableDocumentGuidance, setDisableDocumentGuidance] = useState(false)
 
   // Tab: SMTP Ayarları
   const [smtpHost, setSmtpHost] = useState('')
@@ -131,6 +137,7 @@ export default function AyarlarScreen(): React.ReactNode {
         setSyncServerUrl(settings.sync_server_url || '')
         setSyncServerPort(settings.sync_server_port || '')
         setSyncServerToken(settings.sync_server_token || '')
+        setDisableDocumentGuidance(settings.disableDocumentGuidance === 'true')
       }, 0)
     }
   }, [settings])
@@ -291,12 +298,15 @@ export default function AyarlarScreen(): React.ReactNode {
   }
 
   const handleSaveTab = async (tab: TabType): Promise<void> => {
-    if (tab !== 'smtp' && tab !== 'developer' && tab !== 'ai' && tab !== 'sync') return
+    if (tab !== 'genel' && tab !== 'smtp' && tab !== 'developer' && tab !== 'ai' && tab !== 'sync')
+      return
     setSaving(true)
     try {
       const dataToSave: Record<string, string> = {}
 
-      if (tab === 'smtp') {
+      if (tab === 'genel') {
+        dataToSave.disableDocumentGuidance = disableDocumentGuidance ? 'true' : 'false'
+      } else if (tab === 'smtp') {
         dataToSave.smtp_host = smtpHost
         dataToSave.smtp_port = smtpPort
         dataToSave.smtp_user = smtpUser
@@ -332,6 +342,8 @@ export default function AyarlarScreen(): React.ReactNode {
   }
 
   const menuItems: InnerMenuItem[] = [
+    { id: 'genel', label: 'Genel Ayarlar', icon: <Settings className="w-4 h-4 shrink-0" /> },
+    { id: 'div0', label: '', icon: null, isDivider: true },
     { id: 'smtp', label: 'SMTP Ayarları', icon: <Mail className="w-4 h-4 shrink-0" /> },
     { id: 'div1', label: '', icon: null, isDivider: true },
     { id: 'tema', label: 'Renk & Tema', icon: <Palette className="w-4 h-4 shrink-0" /> },
@@ -387,6 +399,13 @@ export default function AyarlarScreen(): React.ReactNode {
           ) : (
             <>
               <div className="space-y-6">
+                {activeTab === 'genel' && (
+                  <GenelTab
+                    disableDocumentGuidance={disableDocumentGuidance}
+                    setDisableDocumentGuidance={setDisableDocumentGuidance}
+                  />
+                )}
+
                 {activeTab === 'smtp' && (
                   <SmtpTab
                     smtpHost={smtpHost}

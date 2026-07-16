@@ -31,6 +31,8 @@ interface SettingsState {
   setSubInstitutionType: (type: string) => void
   ekapDonemKurali: string
   isDisclaimerAccepted: boolean
+  disableDocumentGuidance: boolean
+  setDisableDocumentGuidance: (val: boolean) => void
   setInstitutionName: (name: string) => void
   setInstitutionLogo: (logo: string | null) => void
   setAdminName: (name: string) => void
@@ -86,7 +88,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   harcamaBirimAdi: '',
   ekapDonemKurali: '',
   isDisclaimerAccepted: false,
+  disableDocumentGuidance: false,
   disclaimerHistory: '[]',
+  setDisableDocumentGuidance: (val) => set({ disableDocumentGuidance: val }),
   setInstitutionName: (name) => set({ institutionName: name }),
   setInstitutionLogo: (logo) => set({ institutionLogo: logo }),
   setAdminName: (name) => set({ adminName: name }),
@@ -141,6 +145,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         harcamaBirimKodu: settings.harcamaBirimKodu || '',
         harcamaBirimAdi: settings.harcamaBirimAdi || '',
         ekapDonemKurali: settings.ekapDonemKurali || '',
+        disableDocumentGuidance: settings.disableDocumentGuidance === 'true',
         disclaimerHistory: settings.disclaimerHistory || '[]'
         // isDisclaimerAccepted is intentionally not loaded from DB to show it on every app launch
       })
@@ -175,6 +180,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         harcamaBirimKodu: '',
         harcamaBirimAdi: '',
         ekapDonemKurali: '',
+        disableDocumentGuidance: false,
         disclaimerHistory: '[]',
         isDisclaimerAccepted: false
       })

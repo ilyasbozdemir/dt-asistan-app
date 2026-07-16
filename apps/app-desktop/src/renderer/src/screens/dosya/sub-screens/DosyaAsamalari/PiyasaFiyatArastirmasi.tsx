@@ -21,6 +21,7 @@ import { DavetEdilenFirmalar } from './components/DavetEdilenFirmalar'
 import { TeklifMatrisi } from './components/TeklifMatrisi'
 import { FirmaSecmeModali } from './components/FirmaSecmeModali'
 import { usePiyasaFiyatArastirmasiLogic } from './hooks/usePiyasaFiyatArastirmasi'
+import { useSettingsStore } from '../../../../store/settingsStore'
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const logic = usePiyasaFiyatArastirmasiLogic()
@@ -48,6 +49,21 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     },
     invitedFirms,
     allPoolFirms,
+    activeActionDropdown,
+    setActiveActionDropdown,
+    stageDocs,
+    sablons,
+    isFormOpen,
+    setIsFormOpen,
+    handleAddFirms,
+    handleDeleteFirm,
+    materials,
+    handleSaveMatrix,
+    hasTax,
+    setHasTax,
+    taxRate,
+    setTaxRate,
+    matrixLoading,
     items,
     bids,
     hesaplamaEsasi,
@@ -72,12 +88,10 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setMaliyetCetveliTarihi,
     tutanakTarihi,
     setTutanakTarihi,
-    savedDocuments,
-    isFormOpen,
-    setIsFormOpen
+    savedDocuments
   } = logic
 
-  const [activeActionDropdown, setActiveActionDropdown] = useState<string | null>(null)
+  const { disableDocumentGuidance } = useSettingsStore()
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -126,13 +140,13 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
 
   return (
     <SubScreen
-      title="Teklifler & Piyasa Fiyat Araştırması"
+      title="Piyasa Fiyat Araştırması"
       icon={PackageSearch}
-      description="Piyasa araştırması yapıp birim fiyat tekliflerinizi toplayabilir, komisyon görevlendirme onay belgesi hazırlayabilir, fiyat matrisini düzenleyebilir ve süreç şablonlarını listeleyebilirsiniz."
+      description="Tedarikçi teklif mektupları hazırlayabilir, toplanan teklifleri fiyat araştırma matrisine girerek en uygun teklifleri ve yaklaşık maliyeti belirleyebilirsiniz."
     >
       {/* 1. TUTANAK VE BELGE LİSTESİ DASHBOARD (FORM AÇIK DEĞİLKEN) */}
       {!isFormOpen && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col gap-6 mb-6 animate-in fade-in duration-300">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h3 className="text-base font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
@@ -154,7 +168,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             </button>
           </div>
 
-          {savedDocuments.length === 0 ? (
+          {stageDocs.length === 0 ? (
             <div className="py-10 text-center flex flex-col items-center justify-center gap-3">
               <AlertCircle className="w-9 h-9 text-slate-300 dark:text-slate-600" />
               <div className="text-slate-700 dark:text-slate-355 text-sm font-bold">
@@ -168,8 +182,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {savedDocuments.map((doc: any) => {
-                const sablon = stageSablons.find((s: any) => {
+              {stageDocs.map((doc: any) => {
+                const sablon = sablons.find((s: any) => {
                   const normAd = normalizeForMatch(s.ad)
                   const normDocName = normalizeForMatch(doc.belge_adi)
                   return normAd.includes(normDocName) || normDocName.includes(normAd)
@@ -217,63 +231,65 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                         Önizle ve Düzenle
                       </button>
 
-                      {/* Dropdown Menu matching user request image */}
-                      <div className="relative dropdown-container">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setActiveActionDropdown(
-                              activeActionDropdown === doc.belge_adi ? null : doc.belge_adi
-                            )
-                          }}
-                          className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                      {/* Dropdown Menu */}
+                      {!disableDocumentGuidance && (
+                        <div className="relative dropdown-container">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setActiveActionDropdown(
+                                activeActionDropdown === doc.belge_adi ? null : doc.belge_adi
+                              )
+                            }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
 
-                        {activeActionDropdown === doc.belge_adi && (
-                          <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
-                            <button
-                              onClick={() => {
-                                setActiveActionDropdown(null)
-                                if (sablon) {
-                                  handleOpenPreviewForSablon(sablon, sablon.ad)
-                                }
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                            >
-                              <Eye className="w-4 h-4 text-blue-500" />
-                              Önizle ve Düzenle
-                            </button>
+                          {activeActionDropdown === doc.belge_adi && (
+                            <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
+                              <button
+                                onClick={() => {
+                                  setActiveActionDropdown(null)
+                                  if (sablon) {
+                                    handleOpenPreviewForSablon(sablon, sablon.ad)
+                                  }
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                              >
+                                <Eye className="w-4 h-4 text-blue-500" />
+                                Önizle ve Düzenle
+                              </button>
 
-                            <button
-                              onClick={() => {
-                                setActiveActionDropdown(null)
-                                if (sablon) {
-                                  quickOpenExternal(sablon)
-                                }
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                            >
-                              <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                              Tarayıcıda PDF Aç
-                            </button>
+                              <button
+                                onClick={() => {
+                                  setActiveActionDropdown(null)
+                                  if (sablon) {
+                                    quickOpenExternal(sablon)
+                                  }
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                              >
+                                <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                Tarayıcıda PDF Aç
+                              </button>
 
-                            <button
-                              onClick={() => {
-                                setActiveActionDropdown(null)
-                                if (sablon) {
-                                  quickPrint(sablon)
-                                }
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
-                            >
-                              <Printer className="w-4 h-4 text-slate-500" />
-                              Hızlı Yazdır
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                              <button
+                                onClick={() => {
+                                  setActiveActionDropdown(null)
+                                  if (sablon) {
+                                    quickPrint(sablon)
+                                  }
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
+                              >
+                                <Printer className="w-4 h-4 text-slate-500" />
+                                Hızlı Yazdır
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
