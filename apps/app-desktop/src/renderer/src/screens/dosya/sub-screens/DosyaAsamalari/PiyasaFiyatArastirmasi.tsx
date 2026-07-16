@@ -45,25 +45,13 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       saveSnapshot,
       activeStarredDocs,
       contextsByPath,
-      handleOpenPreviewForSablon
+      handleOpenPreviewForSablon,
+      sablons
     },
     invitedFirms,
     allPoolFirms,
-    activeActionDropdown,
-    setActiveActionDropdown,
-    stageDocs,
-    sablons,
     isFormOpen,
     setIsFormOpen,
-    handleAddFirms,
-    handleDeleteFirm,
-    materials,
-    handleSaveMatrix,
-    hasTax,
-    setHasTax,
-    taxRate,
-    setTaxRate,
-    matrixLoading,
     items,
     bids,
     hesaplamaEsasi,
@@ -73,7 +61,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setSelectedFirmIds,
     modalSearchQuery,
     setModalSearchQuery,
-    stageSablons,
     handleBulkAddFirms,
     handleRemoveFirm,
     handlePriceChange,
@@ -91,6 +78,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     savedDocuments
   } = logic
 
+  const [activeActionDropdown, setActiveActionDropdown] = useState<string | null>(null)
+  const stageDocs = savedDocuments
   const { disableDocumentGuidance } = useSettingsStore()
 
   // Close dropdown on click outside
