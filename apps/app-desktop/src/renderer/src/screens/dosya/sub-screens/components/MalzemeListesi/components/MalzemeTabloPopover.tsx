@@ -9,6 +9,8 @@ import {
   Trash2,
   UserCheck,
   Users,
+  Download,
+  BookOpen
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,6 +29,8 @@ export interface MalzemeTabloPopoverProps {
   onDeleteSelected?: () => void;
   onExcelImport?: () => void;
   onKomisyonSettings?: () => void;
+  onDownloadTemplate?: () => void;
+  onExportToLibrary?: () => void;
   // Komisyon İşlemleri
   onGorevlendirmeOnayi?: () => void;
   onGorevlendirmeOnayEki?: () => void;
@@ -47,6 +51,8 @@ export function MalzemeTabloPopover({
   onDeleteSelected,
   onExcelImport,
   onKomisyonSettings,
+  onDownloadTemplate,
+  onExportToLibrary,
   onGorevlendirmeOnayi,
   onGorevlendirmeOnayEki,
   onYaklasikMaliyetKomisyonu,
@@ -99,6 +105,20 @@ export function MalzemeTabloPopover({
           <FileText className="w-3.5 h-3.5 text-slate-450 dark:text-slate-500 mr-2" />
           Excel'den İçe Aktar
         </DropdownMenuItem>
+
+        {onDownloadTemplate && (
+          <DropdownMenuItem onClick={onDownloadTemplate}>
+            <Download className="w-3.5 h-3.5 text-slate-450 dark:text-slate-500 mr-2" />
+            Excel Şablonunu İndir
+          </DropdownMenuItem>
+        )}
+
+        {onExportToLibrary && (
+          <DropdownMenuItem onClick={onExportToLibrary}>
+            <BookOpen className="w-3.5 h-3.5 text-slate-450 dark:text-slate-500 mr-2" />
+            Genel Kütüphaneye Aktar
+          </DropdownMenuItem>
+        )}
 
         {onKomisyonSettings && (
           <DropdownMenuItem onClick={onKomisyonSettings}>

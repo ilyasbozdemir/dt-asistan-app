@@ -164,6 +164,123 @@ export function MalzemeTablosu({
     }
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await (window as any).electron.ipcRenderer.invoke('db:export-temin-kalem-template')
+      if (res && res.success) {
+        alert(`Excel şablonu başarıyla indirildi:\n${res.filePath}`)
+      } else if (res && res.error) {
+        if (res.error !== 'İptal edildi') {
+          alert('Şablon indirilemedi: ' + res.error)
+        }
+      }
+    } catch (err: any) {
+      alert('Hata oluştu: ' + err.message)
+    }
+  }
+
+  const handleExportToLibrary = async () => {
+    if (items.length === 0) {
+      alert('Aktarılacak ihtiyaç kalemi bulunmuyor.')
+      return
+    }
+    if (!confirm(`Tablodaki ${items.length} ihtiyaç kalemini genel malzeme kütüphanesine aktarmak istediğinize emin misiniz?`)) return
+    
+    try {
+      let addedCount = 0
+      let skippedCount = 0
+      
+      // Get all existing library items
+      const libRes = await (window as any).electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT tasinir_kodu, okas_kodu, kalem_adi FROM TANIM_Kalem'
+      )
+      const libItems = libRes.success ? libRes.data : []
+      
+      const cleanString = (str: string) => {
+        if (!str) return ''
+        return str
+          .toLowerCase()
+          .replace(/[\s\-_.,\/\\()]/g, '') // spaces, dots, dashes, slashes, parens
+          .replace(/ı/g, 'i')
+          .replace(/ğ/g, 'g')
+          .replace(/ü/g, 'u')
+          .replace(/ş/g, 's')
+          .replace(/ö/g, 'o')
+          .replace(/ç/g, 'c')
+      }
+
+      for (const item of items) {
+        const cleanName = cleanString(item.kalem_adi)
+        if (!cleanName) {
+          skippedCount++
+          continue
+        }
+
+        // Check if there is an almost matching item
+        let isDup = false
+        for (const lib of libItems) {
+          const cleanLibName = cleanString(lib.kalem_adi)
+          
+          // 1. Exact cleaned name match (case and spacing variations)
+          if (cleanName === cleanLibName) {
+            isDup = true
+            break
+          }
+          
+          // 2. Same code and one name is a substring of the other (almost matching)
+          const sameTasinir = item.tasinir_kodu && lib.tasinir_kodu && item.tasinir_kodu.trim() === lib.tasinir_kodu.trim()
+          const sameOkas = item.okas_kodu && lib.okas_kodu && item.okas_kodu.trim() === lib.okas_kodu.trim()
+          
+          if (sameTasinir || sameOkas) {
+            if (cleanName.includes(cleanLibName) || cleanLibName.includes(cleanName)) {
+              isDup = true
+              break
+            }
+          }
+        }
+
+        if (isDup) {
+          skippedCount++
+          continue
+        }
+        
+        // Generate a unique barkod_id/ID
+        const barkodId = `LIB-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+        
+        // Insert into global library
+        const insertRes = await (window as any).electron.ipcRenderer.invoke(
+          'db:run',
+          `INSERT INTO TANIM_Kalem (barkod_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, kdv_orani, aktif_mi)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+          [
+            barkodId,
+            item.tasinir_kodu || null,
+            item.okas_kodu || null,
+            item.kalem_adi,
+            item.tipi || 'Mal',
+            item.birim || 'Adet',
+            item.kdv_orani ?? 20
+          ]
+        )
+        if (insertRes.success) {
+          addedCount++
+          // Push to temporary list so we don't duplicate within the same batch!
+          libItems.push({
+            tasinir_kodu: item.tasinir_kodu || '',
+            okas_kodu: item.okas_kodu || '',
+            kalem_adi: item.kalem_adi
+          })
+        }
+      }
+      
+      alert(`Aktarım tamamlandı.\nKütüphaneye eklenen yeni kalem: ${addedCount}\nMevcut/Benzer olduğu için atlanan kalem: ${skippedCount}`)
+    } catch (err: any) {
+      alert('Kütüphaneye aktarılırken hata oluştu: ' + err.message)
+    }
+  }
+
+
   // DB'deki aktif komisyonları dinamik çek
   const { data: dbKomisyonlar = [] } = useQuery<
     { id: number; ad: string; sablonlar: any[] }[]
@@ -361,6 +478,8 @@ export function MalzemeTablosu({
             onSelectAll={handleToggleSelectAll}
             onDeleteSelected={handleDeleteSelected}
             onExcelImport={handleExcelImport}
+            onDownloadTemplate={handleDownloadTemplate}
+            onExportToLibrary={handleExportToLibrary}
             onKomisyonSettings={() => setKomisyonPanelOpen(true)}
             onGorevlendirmeOnayi={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi')}
             onGorevlendirmeOnayEki={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi-eki')}

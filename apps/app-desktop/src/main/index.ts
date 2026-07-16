@@ -2986,6 +2986,52 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
+    // ─── Temin Kalemleri Şablon İndir ──────────────────────────────────────────
+    ipcMain.handle('db:export-temin-kalem-template', async () => {
+      try {
+        const { canceled, filePath } = await dialog.showSaveDialog({
+          title: 'İhtiyaç Listesi Excel Şablonunu Kaydet',
+          defaultPath: 'ihtiyac_listesi_sablon.xlsx',
+          filters: [{ name: 'Excel Dosyası', extensions: ['xlsx'] }]
+        })
+        if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+        const xlsx = require('xlsx')
+        const headers = [
+          'Taşınır Kodu',
+          'OKAS Kodu',
+          'Kalem Adı *',
+          'Tipi (Mal/Hizmet/Yapım/Danışmanlık)',
+          'Birim (Adet/Metre/kg vb.)',
+          'Miktar',
+          'KDV Oranı (%)',
+          'Açıklama'
+        ]
+        const exampleRows = [
+          ['150.01.01.01.01.01', '30197630', 'A4 Fotokopi Kağıdı', 'Mal', 'Adet', 10, 20, '80 gr/m2 beyaz kağıt'],
+          ['', '79820000', 'Broşür Basım Hizmeti', 'Hizmet', 'Adet', 500, 20, 'Renkli A5 broşür basımı']
+        ]
+        const ws = xlsx.utils.aoa_to_sheet([headers, ...exampleRows])
+        ws['!cols'] = [
+          { wch: 20 },
+          { wch: 15 },
+          { wch: 30 },
+          { wch: 30 },
+          { wch: 22 },
+          { wch: 10 },
+          { wch: 15 },
+          { wch: 40 }
+        ]
+        const wb = xlsx.utils.book_new()
+        xlsx.utils.book_append_sheet(wb, ws, 'İhtiyaç Listesi')
+        xlsx.writeFile(wb, filePath)
+
+        return { success: true, filePath }
+      } catch (error: any) {
+        return { success: false, error: error.message }
+      }
+    })
+
     // Reset Placeholders to defaults
     ipcMain.handle('db:resetPlaceholders', async () => {
       try {
