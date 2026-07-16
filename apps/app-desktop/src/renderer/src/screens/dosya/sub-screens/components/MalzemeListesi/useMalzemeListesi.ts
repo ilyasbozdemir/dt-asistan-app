@@ -291,6 +291,7 @@ export function useMalzemeListesi(activeDosyaId: number | null) {
     handleStartEdit,
     handleSaveEdit,
     handleAddSelected,
-    filteredSuggestions
+    filteredSuggestions,
+    loadData
   }
 }

@@ -56,14 +56,113 @@ export function MalzemeTablosu({
     setEditKdv,
     handleStartEdit,
     handleSaveEdit,
-    handleDeleteItem
+    handleDeleteItem,
+    loadData
   } = state
 
   // Çoklu komisyon seçimi — değerler DB'den gelen id (number)
   const [selectedKomisyonlar, setSelectedKomisyonlar] = useState<number[]>([]);
   // Komisyon paneli açık/kapalı
   const [komisyonPanelOpen, setKomisyonPanelOpen] = useState(false);
-  const [selectedStepIdx, setSelectedStepIdx] = useState<string>("0");
+
+  // Checkbox ve toplu işlem state'leri
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
+  const handleToggleSelectRow = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(items.map((item: any) => item.id)))
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) {
+      alert('Lütfen silinecek ihtiyaç kalemlerini seçin.')
+      return
+    }
+    if (!confirm(`Seçilen ${ids.length} kalemi silmek istediğinize emin misiniz?`)) return
+    
+    try {
+      for (const id of ids) {
+        await (window as any).electron.ipcRenderer.invoke(
+          'db:run',
+          'DELETE FROM DATA_TeminKalem WHERE id = ?',
+          [id]
+        )
+      }
+      setSelectedIds(new Set())
+      if (loadData) loadData()
+    } catch (err: any) {
+      alert('Silme işleminde hata oluştu: ' + err.message)
+    }
+  }
+
+  const handleExcelImport = async () => {
+    if (!activeDosyaId) return
+    try {
+      const res = await (window as any).electron.ipcRenderer.invoke('open-excel')
+      if (!res) return
+      
+      const XLSX = await import('xlsx')
+      const workbook = XLSX.read(res.buffer, { type: 'array' })
+      const sheetName = workbook.SheetNames[0]
+      const rows = XLSX.utils.sheet_to_json<any[]>(workbook.Sheets[sheetName], { header: 1 })
+      
+      if (rows.length <= 1) {
+        alert('Seçilen Excel dosyasında veri bulunamadı veya boş.')
+        return
+      }
+
+      let count = 0
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i]
+        if (!row || row.length === 0) continue
+        
+        const kalemAdi = row[2] ? String(row[2]).trim() : null
+        if (!kalemAdi) continue
+        
+        const tasinirKodu = row[0] ? String(row[0]).trim() : null
+        const okasKodu = row[1] ? String(row[1]).trim() : null
+        const tipi = row[3] ? String(row[3]).trim() : 'Mal'
+        const birim = row[4] ? String(row[4]).trim() : 'Adet'
+        const miktar = row[5] !== undefined ? Number(row[5]) : 1
+        const kdvOrani = row[6] !== undefined ? Number(row[6]) : 20
+        const aciklama = row[7] ? String(row[7]).trim() : null
+
+        await (window as any).electron.ipcRenderer.invoke(
+          'db:run',
+          `INSERT INTO DATA_TeminKalem 
+           (temin_dosya_id, tasinir_kodu, okas_kodu, kalem_adi, tipi, birim, miktar, kdv_orani, aciklama) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [activeDosyaId, tasinirKodu, okasKodu, kalemAdi, tipi, birim, miktar, kdvOrani, aciklama]
+        )
+        count++
+      }
+
+      if (count > 0) {
+        alert(`${count} adet ihtiyaç kalemi başarıyla içe aktarıldı.`)
+        if (loadData) loadData()
+      } else {
+        alert('İçe aktarıldı: İçe aktarılacak geçerli satır bulunamadı. Lütfen Kalem Adı kolonunun (C sütunu) dolu olduğundan emin olun.')
+      }
+    } catch (err: any) {
+      alert('Excel aktarımında hata: ' + err.message)
+    }
+  }
 
   // DB'deki aktif komisyonları dinamik çek
   const { data: dbKomisyonlar = [] } = useQuery<
@@ -173,7 +272,6 @@ export function MalzemeTablosu({
       );
       setSelectedKomisyonlar(seciliKomisyonIdleri);
       setKomisyonPanelOpen(false);
-      setSelectedStepIdx("0");
     } catch (e: any) {
       alert("Komisyon güncellenirken hata oluştu: " + e.message);
     }
@@ -260,6 +358,9 @@ export function MalzemeTablosu({
           )}
 
           <MalzemeTabloPopover
+            onSelectAll={handleToggleSelectAll}
+            onDeleteSelected={handleDeleteSelected}
+            onExcelImport={handleExcelImport}
             onKomisyonSettings={() => setKomisyonPanelOpen(true)}
             onGorevlendirmeOnayi={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi')}
             onGorevlendirmeOnayEki={() => handleOpenSablonByDosyaAdi('komisyon-gorevlendirme-onayi-eki')}
@@ -432,6 +533,14 @@ export function MalzemeTablosu({
             <table className="w-full border-collapse text-left text-xs">
               <thead className="sticky top-0 bg-slate-50 dark:bg-slate-950 text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
                 <tr>
+                  <th className="p-3 pl-4 w-10">
+                    <input
+                      type="checkbox"
+                      checked={items.length > 0 && selectedIds.size === items.length}
+                      onChange={handleToggleSelectAll}
+                      className="rounded border-slate-350 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
+                    />
+                  </th>
                   <th className="p-3 pl-4">Sıra No</th>
                   <th className="p-3 pl-4">Kodu</th>
                   <th className="p-3 pl-4">İhtiyaç Kalemi Adı</th>
@@ -448,8 +557,19 @@ export function MalzemeTablosu({
                   return (
                     <tr
                       key={item.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10"
+                      className={cn(
+                        "hover:bg-slate-50/50 dark:hover:bg-slate-800/10",
+                        selectedIds.has(item.id) && "bg-blue-50/30 dark:bg-blue-955/15"
+                      )}
                     >
+                      <td className="p-3 pl-4 w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(item.id)}
+                          onChange={() => handleToggleSelectRow(item.id)}
+                          className="rounded border-slate-350 text-blue-600 focus:ring-blue-500/20 cursor-pointer"
+                        />
+                      </td>
                       <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
                         {index + 1}
                       </td>
