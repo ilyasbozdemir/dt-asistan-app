@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Building2, HelpCircle, Info, Loader2, Sparkles } from "lucide-react";
 import { YeniDosyaTabProps } from "../../../types";
+import { useWorkspaceStore } from "../../../../../store/workspaceStore";
+import { useDosyalarHooks } from "../../../../dosyalar/dosyalar.hooks";
 
 export function IhaleVeTeklifFinansalSection(
   props: YeniDosyaTabProps,
@@ -11,6 +13,11 @@ export function IhaleVeTeklifFinansalSection(
     limitType,
     getIhaleSekliExplanation,
   } = props;
+
+  const { activeDosyaId } = useWorkspaceStore();
+  const { dosyalar } = useDosyalarHooks();
+  const activeDosya = dosyalar.find(d => d.id === activeDosyaId);
+  const defaultEsas = activeDosya?.hesaplama_esasi || "Ortalama fiyat esasına göre";
 
   const [isAiChecking, setIsAiChecking] = useState(false);
 
@@ -385,8 +392,7 @@ export function IhaleVeTeklifFinansalSection(
                 Hesaplama Esası
               </label>
               <select
-                value={formData.hesaplama_esasi ||
-                  "En Düşük fiyat esasına göre"}
+                value={formData.hesaplama_esasi || defaultEsas}
                 onChange={(e) =>
                   setFormData({
                     ...formData,

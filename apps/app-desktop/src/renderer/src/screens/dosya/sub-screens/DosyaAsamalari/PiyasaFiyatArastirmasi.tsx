@@ -88,7 +88,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const [activeActionDropdown, setActiveActionDropdown] = useState<
     string | null
   >(null);
-  const [isFormFullscreen, setIsFormFullscreen] = useState<boolean>(true);
+  const [isFormFullscreen, setIsFormFullscreen] = useState<boolean>(false);
   const [activeFormTab, setActiveFormTab] = useState<"firms" | "matrix">(() => {
     return invitedFirms.length > 0 ? "matrix" : "firms";
   });
@@ -430,8 +430,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
           {/* Form Content Area */}
           <div
             className={cn(
-              "p-6 flex flex-col gap-6 w-full",
-              isFormFullscreen ? "md:p-8 max-w-7xl mx-auto flex-1" : "",
+              "p-6 flex flex-col gap-6 w-full flex-1",
+              isFormFullscreen ? "md:p-8" : "",
             )}
           >
             {activeFormTab === "firms"
