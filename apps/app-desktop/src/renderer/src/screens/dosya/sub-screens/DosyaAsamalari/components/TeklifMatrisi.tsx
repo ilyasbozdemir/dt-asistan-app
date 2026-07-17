@@ -29,7 +29,8 @@ const BidPriceInput: React.FC<{
   initialValue: number
   onChange: (val: string) => void
   isLowest: boolean
-}> = ({ initialValue, onChange, isLowest }) => {
+  isExcelStyle?: boolean
+}> = ({ initialValue, onChange, isLowest, isExcelStyle }) => {
   const [isFocused, setIsFocused] = useState(false)
   const [tempValue, setTempValue] = useState('')
 
@@ -63,6 +64,30 @@ const BidPriceInput: React.FC<{
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         })
+
+  if (isExcelStyle) {
+    return (
+      <input
+        title="Fiyat Gir"
+        type="text"
+        value={displayValue}
+        placeholder="0,00"
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onChange={(e) => {
+          const val = e.target.value
+          if (/^[0-9.,]*$/.test(val) || val === '') {
+            setTempValue(val)
+          }
+        }}
+        className={`w-full text-right text-xs font-mono bg-transparent border-0 focus:bg-blue-50/50 dark:focus:bg-blue-955/20 outline-none pl-6 pr-2.5 py-2.5 transition-all ${
+          isLowest
+            ? 'font-bold text-emerald-700 dark:text-emerald-450'
+            : 'text-slate-800 dark:text-slate-200'
+        }`}
+      />
+    )
+  }
 
   return (
     <input
@@ -127,23 +152,23 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
           <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-950 p-1 rounded-xl h-10 border border-slate-200/40 dark:border-slate-800/40 select-none">
             <button
               onClick={() => setActiveView('firm')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border-0 ${
+              className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border-0 ${
                 activeView === 'firm'
                   ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'
               }`}
             >
-              Firma Bazlı Giriş
+              Firma Bazlı
             </button>
             <button
               onClick={() => setActiveView('matrix')}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border-0 ${
+              className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border-0 ${
                 activeView === 'matrix'
                   ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-355'
               }`}
             >
-              Matris Karşılaştırma
+              Tüm Teklifler (Matris)
             </button>
           </div>
 
@@ -201,7 +226,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
               return (
                 <div
                   key={kalem.id}
-                  className="p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl flex items-center justify-between gap-4 hover:shadow-xs transition-shadow"
+                  className="p-4 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl flex items-center justify-between gap-4 hover:shadow-xs transition-shadow"
                 >
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate" title={kalem.kalem_adi}>
@@ -260,36 +285,36 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
           )}
         </div>
       ) : (
-        // MATRIX COMPARISON TABLE VIEW
-        <div className="overflow-x-auto w-full border border-slate-150 dark:border-slate-855 rounded-xl shadow-xs animate-in fade-in duration-300">
-          <table className="w-full text-left border-collapse text-xs">
+        // EXCEL SHEET COMPARISON TABLE VIEW
+        <div className="overflow-x-auto w-full border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs animate-in fade-in duration-300">
+          <table className="w-full text-left border-collapse border border-slate-200 dark:border-slate-800 text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-250 dark:border-slate-800">
-                <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 w-48">
+              <tr className="bg-slate-50 dark:bg-slate-950/60">
+                <th className="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 w-48">
                   Malzeme/Hizmet Adı
                 </th>
-                <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-center w-24">
+                <th className="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 text-center w-28">
                   Miktar / Birim
                 </th>
                 {invitedFirms.map((firma) => (
                   <th
                     key={firma.id}
-                    className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right min-w-[130px]"
+                    className="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 text-right min-w-[150px]"
                   >
-                    <div className="truncate w-32 ml-auto text-right" title={firma.unvan}>
+                    <div className="truncate w-36 ml-auto text-right" title={firma.unvan}>
                       {firma.unvan}
                     </div>
                   </th>
                 ))}
-                <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right w-32 bg-slate-100/30 dark:bg-slate-950/20">
+                <th className="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 text-right w-36 bg-slate-100/30 dark:bg-slate-950/20">
                   Ort. (Yaklaşık)
                 </th>
-                <th className="p-3.5 font-bold text-slate-700 dark:text-slate-300 text-right w-32 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
+                <th className="p-3 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 text-right w-36 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01]">
                   En Düşük
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-105 dark:divide-slate-855">
+            <tbody>
               {items.map((kalem) => {
                 const lowest = getLowestBidInfo(kalem.id)
                 const avgPrice = getAverageBid(kalem.id)
@@ -297,12 +322,12 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                 return (
                   <tr
                     key={kalem.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors"
+                    className="hover:bg-slate-50/30 dark:hover:bg-slate-950/10 transition-colors"
                   >
-                    <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
+                    <td className="p-3 border border-slate-200 dark:border-slate-805 font-semibold text-slate-800 dark:text-slate-200 bg-slate-50/20 dark:bg-slate-950/5">
                       {kalem.kalem_adi}
                     </td>
-                    <td className="p-3 text-center text-slate-500">
+                    <td className="p-3 border border-slate-200 dark:border-slate-805 text-center text-slate-500">
                       {kalem.miktar} {kalem.birim}
                     </td>
                     {invitedFirms.map((firma) => {
@@ -312,24 +337,25 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                       return (
                         <td
                           key={firma.id}
-                          className={`p-2 text-right transition-colors ${
-                            isLowest ? 'bg-emerald-500/[0.04]' : ''
+                          className={`p-0 border border-slate-200 dark:border-slate-805 text-right transition-colors ${
+                            isLowest ? 'bg-emerald-500/[0.05] dark:bg-emerald-500/[0.02]' : 'bg-white dark:bg-slate-950'
                           }`}
                         >
-                          <div className="relative flex items-center w-36 ml-auto">
-                            <span className="absolute left-2.5 text-[10px] font-bold text-slate-400 select-none">
+                          <div className="relative flex items-center w-full h-full">
+                            <span className="absolute left-2 text-[10px] font-bold text-slate-400 select-none">
                               ₺
                             </span>
                             <BidPriceInput
                               initialValue={val}
                               onChange={(newVal) => handlePriceChange(kalem.id, firma.id, newVal)}
                               isLowest={isLowest}
+                              isExcelStyle={true}
                             />
                           </div>
                         </td>
                       )
                     })}
-                    <td className="p-3 text-right font-bold text-slate-700 dark:text-slate-300 bg-slate-100/10 dark:bg-slate-950/10">
+                    <td className="p-3 border border-slate-200 dark:border-slate-805 text-right font-bold text-slate-700 dark:text-slate-300 bg-slate-100/10 dark:bg-slate-950/10 font-mono">
                       {avgPrice > 0
                         ? `${avgPrice.toLocaleString('tr-TR', {
                             minimumFractionDigits: 2,
@@ -337,7 +363,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                           })} ₺`
                         : '-'}
                     </td>
-                    <td className="p-3 text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]">
+                    <td className="p-3 border border-slate-200 dark:border-slate-805 text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005] font-mono">
                       <div className="flex items-center justify-end gap-1">
                         {lowest.price > 0 && <Award className="w-3.5 h-3.5 text-emerald-500" />}
                         <span>
@@ -354,23 +380,23 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                 )
               })}
               {/* TOPLAM TEKLİFLER SATIRI */}
-              <tr className="bg-slate-50/80 dark:bg-slate-950/40 font-bold border-t border-slate-200 dark:border-slate-800 text-slate-850 dark:text-slate-100">
-                <td className="p-3.5">Toplam Teklif Tutarı</td>
-                <td className="p-3.5"></td>
+              <tr className="bg-slate-50/80 dark:bg-slate-950/40 font-bold text-slate-850 dark:text-slate-100">
+                <td className="p-3.5 border border-slate-200 dark:border-slate-800">Toplam Teklif Tutarı</td>
+                <td className="p-3.5 border border-slate-200 dark:border-slate-800"></td>
                 {invitedFirms.map((firma) => (
                   <td
                     key={firma.id}
-                    className="p-3.5 text-right text-sm font-extrabold text-slate-900 dark:text-slate-100"
+                    className="p-3.5 border border-slate-200 dark:border-slate-800 text-right text-sm font-extrabold text-slate-900 dark:text-slate-100 font-mono"
                   >
                     {firma.teklif_toplami
                       ? `${firma.teklif_toplami.toLocaleString('tr-TR', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2
                         })} ₺`
-                      : '0.00 ₺'}
+                      : '0,00 ₺'}
                   </td>
                 ))}
-                <td className="p-3.5 bg-slate-100/10 dark:bg-slate-950/10 text-right font-extrabold text-slate-900 dark:text-slate-100">
+                <td className="p-3.5 border border-slate-200 dark:border-slate-800 bg-slate-100/10 dark:bg-slate-950/10 text-right font-extrabold text-slate-900 dark:text-slate-100 font-mono">
                   {getEstimatedCostTotal() > 0
                     ? `${getEstimatedCostTotal().toLocaleString('tr-TR', {
                         minimumFractionDigits: 2,
@@ -378,7 +404,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                     })} ₺`
                     : '-'}
                 </td>
-                <td className="p-3.5 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]"></td>
+                <td className="p-3.5 border border-slate-200 dark:border-slate-800 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]"></td>
               </tr>
             </tbody>
           </table>
