@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { APP_ROUTES } from '../../constants/routeConstants'
 import {
@@ -29,6 +29,75 @@ export default function MalzemelerScreen(): React.JSX.Element {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('Tümü') // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
   const [viewMode, setViewMode] = useState<DataViewMode>('grid')
+  const [groupMode, setGroupMode] = useState<'none' | 'tasinir' | 'okas'>('none')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredList.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredList.map((x) => x.id))
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) {
+      alert('Lütfen silinecek kalemleri seçin.')
+      return
+    }
+
+    if (!confirm(`Seçilen ${selectedIds.length} kalemi silmek istediğinize emin misiniz?`)) {
+      return
+    }
+
+    let deletedCount = 0
+    const inUseNames: string[] = []
+    const failedNames: string[] = []
+
+    for (const id of selectedIds) {
+      const item = kalemList.find((x) => x.id === id)
+      if (!item) continue
+
+      try {
+        const checkRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT COUNT(*) as sayi FROM DATA_TeminKalem WHERE barkod_id = ?`,
+          [item.barkod_id]
+        )
+        if (checkRes.success && checkRes.data?.[0]?.sayi > 0) {
+          inUseNames.push(item.kalem_adi)
+          continue
+        }
+
+        await deleteKalem(id)
+        deletedCount++
+      } catch (err: any) {
+        failedNames.push(`${item.kalem_adi} (${err.message})`)
+      }
+    }
+
+    let msg = ''
+    if (deletedCount > 0) {
+      msg += `${deletedCount} adet kalem başarıyla silindi.\n`
+    }
+    if (inUseNames.length > 0) {
+      msg += `\n⚠️ Aşağıdaki ${inUseNames.length} kalem doğrudan temin dosyalarında kullanıldığı için SİLİNEMEDİ:\n`
+      msg += inUseNames.map((n) => `- ${n}`).join('\n') + '\n'
+    }
+    if (failedNames.length > 0) {
+      msg += `\n❌ Aşağıdaki ${failedNames.length} kalemi silerken hata oluştu:\n`
+      msg += failedNames.map((n) => `- ${n}`).join('\n') + '\n'
+    }
+
+    alert(msg)
+    setSelectedIds([])
+  }
 
   const handleDelete = async (id: number, barkod_id: string, kalem_adi: string) => {
     // Önce bu malzemenin herhangi bir doğrudan temin dosyasında kullanılıp kullanılmadığını kontrol et
@@ -110,6 +179,63 @@ export default function MalzemelerScreen(): React.JSX.Element {
     return matchesSearch && matchesTab
   })
 
+  const groupedItems = useMemo(() => {
+    if (groupMode === 'none') {
+      return { 'Tümü': filteredList }
+    }
+
+    const groups: Record<string, typeof filteredList> = {}
+
+    filteredList.forEach((item) => {
+      let key = 'Diğer / Kodsuz'
+      if (groupMode === 'tasinir') {
+        if (item.tasinir_kodu) {
+          const parts = item.tasinir_kodu.split('.')
+          if (parts.length >= 2) {
+            key = `${parts[0]}.${parts[1]}`
+          } else {
+            key = parts[0]
+          }
+        } else {
+          key = 'Taşınır Kodsuz'
+        }
+      } else if (groupMode === 'okas') {
+        if (item.okas_kodu) {
+          const cleanOkas = item.okas_kodu.replace(/[^0-9]/g, '')
+          if (cleanOkas.length >= 2) {
+            key = `${cleanOkas.substring(0, 2)}xx`
+          } else if (cleanOkas.length > 0) {
+            key = `${cleanOkas}x`
+          } else {
+            key = item.okas_kodu
+          }
+        } else {
+          key = 'OKAS Kodsuz'
+        }
+      }
+
+      if (!groups[key]) {
+        groups[key] = []
+      }
+      groups[key].push(item)
+    })
+
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const isAExtra = a.includes('Kodsuz') || a.includes('Diğer')
+      const isBExtra = b.includes('Kodsuz') || b.includes('Diğer')
+      if (isAExtra && !isBExtra) return 1
+      if (!isAExtra && isBExtra) return -1
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    })
+
+    const sortedGroups: Record<string, typeof filteredList> = {}
+    sortedKeys.forEach((k) => {
+      sortedGroups[k] = groups[k]
+    })
+
+    return sortedGroups
+  }, [filteredList, groupMode])
+
   if (isKalemLoading) {
     return <div className="p-8 text-slate-500">Yükleniyor...</div>
   }
@@ -170,6 +296,16 @@ export default function MalzemelerScreen(): React.JSX.Element {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 flex-1 justify-end w-full sm:w-auto">
+            {selectedIds.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleDeleteSelected}
+                className="gap-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 flex items-center px-4 py-2 text-sm justify-center"
+              >
+                <Trash2 className="w-4 h-4 shrink-0 text-red-650" />
+                <span className="whitespace-nowrap font-bold">Seçilenleri Sil ({selectedIds.length})</span>
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={handleExportExcel}
@@ -288,6 +424,31 @@ export default function MalzemelerScreen(): React.JSX.Element {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+            <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-450 cursor-pointer hover:text-slate-850 dark:hover:text-slate-100 shrink-0">
+              <input
+                type="checkbox"
+                checked={filteredList.length > 0 && selectedIds.length === filteredList.length}
+                ref={(el) => {
+                  if (el) {
+                    el.indeterminate = selectedIds.length > 0 && selectedIds.length < filteredList.length
+                  }
+                }}
+                onChange={handleToggleSelectAll}
+                className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-905 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              Tümünü Seç ({selectedIds.length})
+            </label>
+
+            <select
+              value={groupMode}
+              onChange={(e) => setGroupMode(e.target.value as 'none' | 'tasinir' | 'okas')}
+              className="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer text-slate-700 dark:text-slate-300 w-full sm:w-auto"
+            >
+              <option value="none">Gruplama Yok</option>
+              <option value="tasinir">Taşınır Koduna Göre Grupla</option>
+              <option value="okas">OKAS Koduna Göre Grupla</option>
+            </select>
+
             <ViewToggle
               viewMode={viewMode}
               onChange={setViewMode}
@@ -320,194 +481,52 @@ export default function MalzemelerScreen(): React.JSX.Element {
               </p>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredList.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
-                >
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate({
-                          to: APP_ROUTES.YENI_MALZEME,
-                          search: { id: item.id } as any
-                        })
-                      }
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      title="Sil"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
-                      className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-col gap-1 mb-2 pr-12">
-                    <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      ID: {item.barkod_id}
-                    </span>
-                    {item.tasinir_kodu && (
-                      <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
-                        T: {item.tasinir_kodu}
+            <div className="flex flex-col gap-8">
+              {Object.entries(groupedItems).map(([groupName, items]) => (
+                <div key={groupName} className="flex flex-col gap-3">
+                  {groupMode !== 'none' && (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit border border-slate-200 dark:border-slate-750">
+                      <FolderTree className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-xs font-black text-slate-700 dark:text-slate-300">
+                        {groupMode === 'tasinir' ? `Taşınır Grubu: ${groupName}` : `OKAS Grubu: ${groupName}`}
                       </span>
-                    )}
-                    {item.okas_kodu && (
-                      <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
-                        OKAS: {item.okas_kodu}
-                      </span>
-                    )}
-                  </div>
-
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 leading-snug line-clamp-3">
-                    {item.kalem_adi}
-                  </h4>
-
-                  <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                    <span className="font-semibold text-slate-600 dark:text-slate-300">
-                      {item.tipi}
-                    </span>
-                    <span className="font-semibold text-slate-600 dark:text-slate-300">
-                      Birim: {item.birim}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : viewMode === 'list' ? (
-            <div className="flex flex-col gap-3">
-              {filteredList.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative"
-                >
-                  <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
-                    <div className="flex flex-col gap-1 min-w-[120px]">
-                      <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                        ID: {item.barkod_id}
-                      </span>
-                      <div className="flex gap-1 flex-wrap">
-                        {item.tasinir_kodu && (
-                          <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
-                            T: {item.tasinir_kodu}
-                          </span>
-                        )}
-                        {item.okas_kodu && (
-                          <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
-                            OKAS: {item.okas_kodu}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <h4 className="flex-1 text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
-                      {item.kalem_adi}
-                    </h4>
-
-                    <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 min-w-[150px] justify-end">
-                      <span className="font-semibold text-slate-600 dark:text-slate-300">
-                        {item.tipi}
-                      </span>
-                      <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-2 py-1 rounded">
-                        Birim: {item.birim}
+                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-650 dark:text-slate-400 px-1.5 py-0.5 rounded-full font-bold">
+                        {items.length} Kalem
                       </span>
                     </div>
-                  </div>
-
-                  <div className="absolute right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-slate-950/90 p-1 rounded-lg backdrop-blur-sm">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate({
-                          to: APP_ROUTES.YENI_MALZEME,
-                          search: { id: item.id } as any
-                        })
-                      }
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-blue-500"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      title="Sil"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="px-4 py-3 whitespace-nowrap">ID / Barkod</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Taşınır / OKAS</th>
-                    <th className="px-4 py-3">Kalem Adı</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Birim</th>
-                    <th className="px-4 py-3 text-right">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                  {filteredList.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group"
-                    >
-                      <td className="px-4 py-3 text-xs font-mono font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.barkod_id}
-                      </td>
-                      <td className="px-4 py-3 text-[10px] whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
-                          {item.tasinir_kodu ? (
-                            <span className="font-mono text-emerald-700 dark:text-emerald-400">
-                              T: {item.tasinir_kodu}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                          {item.okas_kodu ? (
-                            <span className="font-mono text-indigo-700 dark:text-indigo-400">
-                              O: {item.okas_kodu}
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td
-                        className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[300px] truncate"
-                        title={item.kalem_adi}
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          'flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer',
+                          selectedIds.includes(item.id)
+                            ? 'border-blue-400 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10'
+                            : 'border-slate-150 dark:border-slate-850'
+                        )}
+                        onClick={() => handleToggleSelect(item.id)}
                       >
-                        {item.kalem_adi}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.tipi}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {item.birim}
-                      </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.id)}
+                            onChange={() => handleToggleSelect(item.id)}
+                            className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer animate-in fade-in"
+                          />
+                        </div>
+
+                        <div
+                          className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() =>
                               navigate({
                                 to: APP_ROUTES.YENI_MALZEME,
-                                search: { id: item.id } as any
+                                search: { id: item.id } as Record<string, unknown>
                               })
                             }
                             className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
@@ -524,8 +543,256 @@ export default function MalzemelerScreen(): React.JSX.Element {
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+
+                        <div className="flex flex-col gap-1 mb-2 pr-12 pl-6">
+                          <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                            ID: {item.barkod_id}
+                          </span>
+                          {item.tasinir_kodu && (
+                            <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
+                              T: {item.tasinir_kodu}
+                            </span>
+                          )}
+                          {item.okas_kodu && (
+                            <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
+                              OKAS: {item.okas_kodu}
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 leading-snug line-clamp-3">
+                          {item.kalem_adi}
+                        </h4>
+
+                        <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                          <span className="font-semibold text-slate-600 dark:text-slate-300">
+                            {item.tipi}
+                          </span>
+                          <span className="font-semibold text-slate-600 dark:text-slate-300">
+                            Birim: {item.birim}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : viewMode === 'list' ? (
+            <div className="flex flex-col gap-8">
+              {Object.entries(groupedItems).map(([groupName, items]) => (
+                <div key={groupName} className="flex flex-col gap-3">
+                  {groupMode !== 'none' && (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit border border-slate-200 dark:border-slate-750">
+                      <FolderTree className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-xs font-black text-slate-700 dark:text-slate-300">
+                        {groupMode === 'tasinir' ? `Taşınır Grubu: ${groupName}` : `OKAS Grubu: ${groupName}`}
+                      </span>
+                      <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-650 dark:text-slate-400 px-1.5 py-0.5 rounded-full font-bold">
+                        {items.length} Kalem
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-3">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          'flex items-center p-3 bg-slate-50/50 dark:bg-slate-950/20 border rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer',
+                          selectedIds.includes(item.id)
+                            ? 'border-blue-400 dark:border-blue-800 bg-blue-50/20 dark:bg-blue-900/10'
+                            : 'border-slate-150 dark:border-slate-850'
+                        )}
+                        onClick={() => handleToggleSelect(item.id)}
+                      >
+                        <div className="mr-3" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.id)}
+                            onChange={() => handleToggleSelect(item.id)}
+                            className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer animate-in fade-in"
+                          />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center pr-16">
+                          <div className="flex flex-col gap-1 min-w-[120px]">
+                            <span className="font-mono font-bold text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                              ID: {item.barkod_id}
+                            </span>
+                            <div className="flex gap-1 flex-wrap">
+                              {item.tasinir_kodu && (
+                                <span className="w-fit font-mono font-bold text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100/20 dark:border-emerald-900/10 px-1.5 py-0.5 rounded">
+                                  T: {item.tasinir_kodu}
+                                </span>
+                              )}
+                              {item.okas_kodu && (
+                                <span className="w-fit font-mono font-bold text-[10px] text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100/20 dark:border-indigo-900/10 px-1.5 py-0.5 rounded">
+                                  OKAS: {item.okas_kodu}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <h4 className="flex-1 text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug line-clamp-2">
+                            {item.kalem_adi}
+                          </h4>
+
+                          <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 min-w-[150px] justify-end">
+                            <span className="font-semibold text-slate-600 dark:text-slate-300">
+                              {item.tipi}
+                            </span>
+                            <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-2 py-1 rounded">
+                              Birim: {item.birim}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div
+                          className="absolute right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-slate-950/90 p-1 rounded-lg backdrop-blur-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              navigate({
+                                to: APP_ROUTES.YENI_MALZEME,
+                                search: { id: item.id } as Record<string, unknown>
+                              })
+                            }
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-blue-500"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            title="Sil"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={filteredList.length > 0 && selectedIds.length === filteredList.length}
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate = selectedIds.length > 0 && selectedIds.length < filteredList.length
+                          }
+                        }}
+                        onChange={handleToggleSelectAll}
+                        className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
+                    <th className="px-4 py-3 whitespace-nowrap">ID / Barkod</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Taşınır / OKAS</th>
+                    <th className="px-4 py-3">Kalem Adı</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Birim</th>
+                    <th className="px-4 py-3 text-right">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {Object.entries(groupedItems).map(([groupName, items]) => (
+                    <React.Fragment key={groupName}>
+                      {groupMode !== 'none' && (
+                        <tr className="bg-slate-50/70 dark:bg-slate-900/40">
+                          <td colSpan={7} className="px-4 py-2 text-xs font-black text-slate-700 dark:text-slate-350">
+                            📁 {groupMode === 'tasinir' ? `Taşınır Grubu: ${groupName}` : `OKAS Grubu: ${groupName}`} ({items.length} Kalem)
+                          </td>
+                        </tr>
+                      )}
+                      {items.map((item) => (
+                        <tr
+                          key={item.id}
+                          className={cn(
+                            'hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group cursor-pointer',
+                            selectedIds.includes(item.id) && 'bg-blue-50/20 dark:bg-blue-900/10'
+                          )}
+                          onClick={() => handleToggleSelect(item.id)}
+                        >
+                          <td className="px-4 py-3 w-10" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(item.id)}
+                              onChange={() => handleToggleSelect(item.id)}
+                              className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-xs font-mono font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {item.barkod_id}
+                          </td>
+                          <td className="px-4 py-3 text-[10px] whitespace-nowrap">
+                            <div className="flex flex-col gap-1">
+                              {item.tasinir_kodu ? (
+                                <span className="font-mono text-emerald-700 dark:text-emerald-400">
+                                  T: {item.tasinir_kodu}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                              {item.okas_kodu ? (
+                                <span className="font-mono text-indigo-700 dark:text-indigo-400">
+                                  O: {item.okas_kodu}
+                                </span>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td
+                            className="px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 max-w-[300px] truncate"
+                            title={item.kalem_adi}
+                          >
+                            {item.kalem_adi}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {item.tipi}
+                          </td>
+                          <td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {item.birim}
+                          </td>
+                          <td className="px-4 py-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  navigate({
+                                    to: APP_ROUTES.YENI_MALZEME,
+                                    search: { id: item.id } as Record<string, unknown>
+                                  })
+                                }
+                                className="h-7 w-7 p-0 text-slate-400 hover:text-blue-500"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                title="Sil"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(item.id, item.barkod_id, item.kalem_adi)}
+                                className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

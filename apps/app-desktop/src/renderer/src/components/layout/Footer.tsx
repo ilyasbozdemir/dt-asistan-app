@@ -58,7 +58,7 @@ export function Footer(): React.JSX.Element {
   }
 
   return (
-    <footer className="h-8 shrink-0 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 px-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 select-none z-10">
+    <footer className="h-8 shrink-0 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 px-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 select-none z-40">
       <div className="flex items-center space-x-2">
         {fileName && (
           <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
