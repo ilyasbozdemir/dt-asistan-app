@@ -10,7 +10,11 @@ interface ViewToggleProps {
   className?: string
 }
 
-export function ViewToggle({ viewMode, onChange, className = '' }: ViewToggleProps) {
+export function ViewToggle({
+  viewMode,
+  onChange,
+  className = ''
+}: ViewToggleProps): React.JSX.Element {
   return (
     <div
       className={`flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-800 ${className}`}
