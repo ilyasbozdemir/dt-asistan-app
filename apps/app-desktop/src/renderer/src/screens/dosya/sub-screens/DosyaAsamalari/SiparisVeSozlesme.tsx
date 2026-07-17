@@ -1,10 +1,13 @@
-import React from 'react'
-import { FileCheck } from 'lucide-react'
-import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { useDosyaAsamasiSablons, normalizeForMatch } from './useDosyaAsamasiSablons'
-import { PrintDropdownButton } from '../../components/PrintDropdownButton'
-import { useSettingsStore } from '../../../../store/settingsStore'
+import React from "react";
+import { FileCheck } from "lucide-react";
+import { SubScreen } from "../../SubScreens.screen";
+import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import {
+  normalizeForMatch,
+  useDosyaAsamasiSablons,
+} from "./useDosyaAsamasiSablons";
+import { PrintDropdownButton } from "../../components/PrintDropdownButton";
+import { useSettingsStore } from "../../../../store/settingsStore";
 
 export function SiparisVeSozlesme(): React.JSX.Element {
   const {
@@ -30,17 +33,18 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     toggleStar,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled
-  } = useDosyaAsamasiSablons()
+    isSablonDisabled,
+  } = useDosyaAsamasiSablons();
 
-  const { disableDocumentGuidance } = useSettingsStore()
+  const { disableDocumentGuidance } = useSettingsStore();
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
+        (d) =>
+          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
+      )
+      : false;
 
     return (
       <DocumentPreviewModal
@@ -48,10 +52,9 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
+        masterHtml={masterHtml || ""}
+        baseContext={previewData.snapshotContext ||
+          contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -66,7 +69,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    )
+    );
   }
 
   return (
@@ -83,7 +86,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
               Sözleşme Süreç Yönetimi
             </h3>
             <p className="text-[11px] text-slate-500 mt-1">
-              Doğrudan temin sözleşme ve sipariş işlemlerini bu panelden takip edebilirsiniz.
+              Doğrudan temin sözleşme ve sipariş işlemlerini bu panelden takip
+              edebilirsiniz.
             </p>
           </div>
           {!disableDocumentGuidance && (
@@ -108,5 +112,5 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         </p>
       </div>
     </SubScreen>
-  )
+  );
 }
