@@ -1,5 +1,5 @@
-// Kaynak: resources/templates/4-kabul-ve-odeme-islemleri\kabul-edilen-teklif-odeme\index.html.json
-export interface KabulEdilenTeklifOdemeIhtiyacKalemleriItem {
+// Kaynak: resources/templates/3-siparis-ve-sozlesme\kabul-edilen-teklif-alternatif\index.html.json
+export interface KabulEdilenTeklifAlternatifIhtiyacKalemleriItem {
   siraNo?: number;
   kodu?: string;
   malzemeAdi?: string;
@@ -10,7 +10,7 @@ export interface KabulEdilenTeklifOdemeIhtiyacKalemleriItem {
   toplamBedel?: string;
 }
 
-export interface IKabulEdilenTeklifOdeme {
+export interface IKabulEdilenTeklifAlternatif {
   antetSatirlari?: string[];
   solLogo?: string;
   sagLogo?: string;
@@ -28,5 +28,5 @@ export interface IKabulEdilenTeklifOdeme {
   baskanAdi?: string;
   baskanUnvan?: string;
   genelToplam?: string;
-  ihtiyacKalemleri?: KabulEdilenTeklifOdemeIhtiyacKalemleriItem[];
+  ihtiyacKalemleri?: KabulEdilenTeklifAlternatifIhtiyacKalemleriItem[];
 }

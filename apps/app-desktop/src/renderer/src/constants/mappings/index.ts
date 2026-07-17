@@ -69,6 +69,7 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
   'idare-onay-belgesi': allOther.IdareOnayBelgesiMapping,
   'ihale-komisyon-karari': allOther.IhaleKomisyonKarariMapping,
   'kabul-edilen-teklif': allOther.KabulEdilenTeklifMapping,
+  'kabul-edilen-teklif-alternatif': allOther.KabulEdilenTeklifMapping,
   'sozlesmeye-davet': allOther.SozlesmeyeDavetMapping,
   'teklif-mektubu': allOther.TeklifMektubuMapping,
   'hakedis-raporu': allOther.HakedisRaporuMapping,
@@ -197,6 +198,8 @@ export function getDefaultMappingForProcess(processPath: string): ProcessMapping
     case 'ihale-komisyon-karari':
       return allOther.IhaleKomisyonKarariMapping
     case 'kabul-edilen-teklif':
+      return allOther.KabulEdilenTeklifMapping
+    case 'kabul-edilen-teklif-alternatif':
       return allOther.KabulEdilenTeklifMapping
     case 'sozlesmeye-davet':
       return allOther.SozlesmeyeDavetMapping

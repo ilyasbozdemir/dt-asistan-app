@@ -106,7 +106,15 @@ export const SABLON_GRUPLARI: Record<string, { grup: string; etiket: string; sir
 
   // ── Muayene & Kabul ailesi
   'muayene-kabul-komisyonu': { grup: 'muayene-kabul', etiket: 'Komisyon', siralama: 0 },
-  'muayene-kabul-tutanagi': { grup: 'muayene-kabul', etiket: 'Tutanak', siralama: 1 }
+  'muayene-kabul-tutanagi': { grup: 'muayene-kabul', etiket: 'Tutanak', siralama: 1 },
+
+  // ── Kabul Edilen Teklif (Sipariş Mektubu) ailesi
+  'kabul-edilen-teklif': { grup: 'kabul-edilen-teklif', etiket: 'Standart', siralama: 0 },
+  'kabul-edilen-teklif-alternatif': {
+    grup: 'kabul-edilen-teklif',
+    etiket: 'Alternatif',
+    siralama: 1
+  }
 }
 
 // -----------------------------------------------------------------------

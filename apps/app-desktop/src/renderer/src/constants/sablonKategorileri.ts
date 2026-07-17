@@ -56,6 +56,7 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
       'idare-onay-belgesi',
       'ihale-komisyon-karari',
       'kabul-edilen-teklif',
+      'kabul-edilen-teklif-alternatif',
       'sozlesmeye-davet',
       'teklif-mektubu'
     ]

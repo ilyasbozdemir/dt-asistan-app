@@ -178,6 +178,7 @@ const TEMPLATE_NAMES: Record<string, string> = {
   'idare-onay-belgesi': 'İDARE ONAY BELGESİ',
   'ihale-komisyon-karari': 'İHALE KOMİSYON KARARI',
   'kabul-edilen-teklif': 'KABUL EDİLEN TEKLİF',
+  'kabul-edilen-teklif-alternatif': 'KABUL EDİLEN TEKLİF (ALTERNATİF)',
   'sozlesmeye-davet': 'SÖZLEŞMEYE DAVET',
   'teklif-mektubu': 'TEKLİF MEKTUBU',
   'hakedis-raporu': 'HAKEDİŞ RAPORU',
@@ -274,6 +275,14 @@ const TEMPLATE_GROUPS: Array<{
       { dosya_adi: 'klasor-sirtligi-3cm', etiket: '3 cm' },
       { dosya_adi: 'klasor-sirtligi-5cm', etiket: '5 cm' },
       { dosya_adi: 'klasor-sirtligi-7-5cm', etiket: '7.5 cm' }
+    ]
+  },
+  // Kabul Edilen Teklif ailesi
+  {
+    grup: 'kabul-edilen-teklif',
+    sablonlar: [
+      { dosya_adi: 'kabul-edilen-teklif', etiket: 'Standart' },
+      { dosya_adi: 'kabul-edilen-teklif-alternatif', etiket: 'Alternatif' }
     ]
   },
   // Muayene & Kabul ailesi
@@ -379,6 +388,7 @@ function seedTemplates(db: Database.Database): void {
       'dogrudan-temin-sozlesmesi-uzun': '/dosya/cikti-merkezi',
       'ihale-komisyon-karari': '/dosya/cikti-merkezi',
       'kabul-edilen-teklif': '/dosya/cikti-merkezi',
+      'kabul-edilen-teklif-alternatif': '/dosya/cikti-merkezi',
       'sozlesmeye-davet': '/dosya/cikti-merkezi',
       'teklif-mektubu': '/dosya/cikti-merkezi'
     }
