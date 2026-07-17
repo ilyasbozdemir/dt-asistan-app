@@ -66,6 +66,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
   const [isEditingFirms, setIsEditingFirms] = useState<boolean>(false)
   const [maliyetCetveliTarihi, setMaliyetCetveliTarihi] = useState<string>('')
   const [tutanakTarihi, setTutanakTarihi] = useState<string>('')
+  const [syncTutanak, setSyncTutanak] = useState<boolean>(true)
+  const [setLowestFirmAsWinner, setSetLowestFirmAsWinner] = useState<boolean>(true)
 
   const [isFirmModalOpen, setIsFirmModalOpen] = useState(false)
   const [selectedFirmIds, setSelectedFirmIds] = useState<number[]>([])
@@ -409,11 +411,34 @@ export function usePiyasaFiyatArastirmasiLogic() {
         [total, tutanakTarihi || maliyetCetveliTarihi || null, activeDosyaId]
       )
       if (res.success) {
+        // En düşük teklif veren firmayı Yüklenici/Kazanan Firma olarak kaydet
+        if (setLowestFirmAsWinner) {
+          let lowestBidFirmMasterId: number | null = null
+          let minTotalBid = Infinity
+          invitedFirms.forEach((f) => {
+            if (f.teklif_toplami && f.teklif_toplami > 0 && f.teklif_toplami < minTotalBid) {
+              minTotalBid = f.teklif_toplami
+              lowestBidFirmMasterId = f.firma_id
+            }
+          })
+
+          if (lowestBidFirmMasterId) {
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'UPDATE DATA_TeminDosyasi SET firma_id = ? WHERE id = ?',
+              [lowestBidFirmMasterId, activeDosyaId]
+            )
+          }
+        }
+
         // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
         const documentsToLog = [
-          { name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi },
-          { name: 'Piyasa Fiyat Araştırma Tutanağı', date: tutanakTarihi }
+          { name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi }
         ]
+        if (syncTutanak) {
+          documentsToLog.push({ name: 'Piyasa Fiyat Araştırma Tutanağı', date: tutanakTarihi })
+        }
+
         for (const doc of documentsToLog) {
           const existRes = await window.electron.ipcRenderer.invoke(
             'db:query',
@@ -477,7 +502,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
         const tutanakSablon = stageSablons.find((s: any) =>
           s.ad.toLowerCase().includes('piyasa fiyat araştırma tutanağı')
         )
-        if (tutanakSablon) {
+        if (tutanakSablon && syncTutanak) {
           setTimeout(() => {
             handleOpenPreviewForSablon(tutanakSablon, tutanakSablon.ad)
           }, 300)
@@ -547,6 +572,10 @@ export function usePiyasaFiyatArastirmasiLogic() {
     savedDocuments,
     setSavedDocuments,
     isFormOpen,
-    setIsFormOpen
+    setIsFormOpen,
+    syncTutanak,
+    setSyncTutanak,
+    setLowestFirmAsWinner,
+    setSetLowestFirmAsWinner
   }
 }

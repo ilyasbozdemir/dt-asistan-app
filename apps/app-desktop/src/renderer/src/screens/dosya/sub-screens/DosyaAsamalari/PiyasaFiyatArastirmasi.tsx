@@ -6,10 +6,12 @@ import {
   Building2,
   Calendar,
   Check,
+  ClipboardList,
   Edit3,
   ExternalLink,
   Eye,
   FileCheck2,
+  FileText,
   Maximize2,
   Minimize2,
   MoreVertical,
@@ -83,6 +85,10 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setTutanakTarihi,
     savedDocuments,
     stageSablons,
+    syncTutanak,
+    setSyncTutanak,
+    setLowestFirmAsWinner,
+    setSetLowestFirmAsWinner,
   } = logic;
 
   const [activeActionDropdown, setActiveActionDropdown] = useState<
@@ -205,7 +211,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               </div>
             )
             : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {stageDocs.map((doc: any) => {
                   const sablon = sablons.find((s: any) => {
                     const normAd = normalizeForMatch(s.ad);
@@ -214,34 +220,56 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                       normDocName.includes(normAd);
                   });
 
+                  const isTutanak = doc.belge_adi.toLowerCase().includes('tutanak');
+
                   return (
                     <div
                       key={doc.id || doc.belge_adi}
-                      className="flex flex-col justify-between p-5 bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800/80 rounded-2xl hover:border-blue-300 dark:hover:border-blue-800 transition-all shadow-3xs"
+                      className="relative overflow-hidden group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between"
                     >
+                      {/* Interactive light glow on hover */}
+                      <div className="absolute -right-12 -top-12 w-28 h-28 rounded-full bg-blue-400/[0.06] dark:bg-blue-400/[0.03] blur-2xl group-hover:bg-blue-400/[0.12] dark:group-hover:bg-blue-400/[0.06] transition-all duration-500 pointer-events-none" />
+
                       <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">
-                            <FileCheck2 className="w-3.5 h-3.5" />
+                        {/* Upper row: Badges */}
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/10">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Hazır / Kaydedildi
                           </span>
 
                           {doc.belge_tarihi && (
-                            <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
-                              <Calendar className="w-3.5 h-3.5" />
+                            <span className="flex items-center gap-1 text-[10px] text-slate-550 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/10 dark:border-slate-700/30">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
                               {doc.belge_tarihi}
                             </span>
                           )}
                         </div>
-                        <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm mb-1">
-                          {doc.belge_adi}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-455 truncate">
-                          {sablon?.dosya_adi || "Şablon dosyası bağlı"}
-                        </p>
+
+                        {/* Title and Icon Area */}
+                        <div className="flex items-start gap-4">
+                          <div className={cn(
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs",
+                            isTutanak
+                              ? "from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-450 border border-blue-500/20"
+                              : "from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20"
+                          )}>
+                            {isTutanak ? <FileText className="w-6 h-6" /> : <ClipboardList className="w-6 h-6" />}
+                          </div>
+
+                          <div className="min-w-0">
+                            <h4 className="font-extrabold text-slate-800 dark:text-slate-150 text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight mb-1">
+                              {doc.belge_adi}
+                            </h4>
+                            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-450 truncate" title={sablon?.dosya_adi}>
+                              {sablon?.dosya_adi || "Bağlı şablon bulunmuyor"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/50 pt-4">
+                      {/* Footer Action buttons */}
+                      <div className="mt-6 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-4 z-10 relative">
                         <button
                           onClick={() => {
                             if (sablon) {
@@ -252,7 +280,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                               );
                             }
                           }}
-                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-50/60 hover:bg-blue-100/60 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 py-2.5 px-4 rounded-xl transition-all cursor-pointer border border-blue-100 dark:border-blue-900/20 h-10"
+                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 py-2.5 px-4 rounded-xl transition-all shadow-xs hover:shadow shadow-blue-500/10 cursor-pointer h-10 border-0"
                         >
                           <Eye className="w-4 h-4" />
                           Önizle ve Düzenle
@@ -270,7 +298,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                                     : doc.belge_adi,
                                 );
                               }}
-                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
@@ -411,6 +439,26 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                   className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
                 />
               </div>
+
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={syncTutanak}
+                  onChange={(e) => setSyncTutanak(e.target.checked)}
+                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                />
+                <span>Tutanakla Senkronize Et</span>
+              </label>
+
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={setLowestFirmAsWinner}
+                  onChange={(e) => setSetLowestFirmAsWinner(e.target.checked)}
+                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                />
+                <span>En Düşük Teklifi Kazanan Yap</span>
+              </label>
 
               {/* Fullscreen Expand Button */}
 
