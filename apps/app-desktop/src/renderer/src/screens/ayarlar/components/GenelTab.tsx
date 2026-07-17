@@ -1,13 +1,13 @@
-import React from 'react'
+import React from "react";
 
 interface GenelTabProps {
-  disableDocumentGuidance: boolean
-  setDisableDocumentGuidance: (val: boolean) => void
+  disableDocumentGuidance: boolean;
+  setDisableDocumentGuidance: (val: boolean) => void;
 }
 
 export const GenelTab: React.FC<GenelTabProps> = ({
   disableDocumentGuidance,
-  setDisableDocumentGuidance
+  setDisableDocumentGuidance,
 }) => {
   return (
     <div className="space-y-6">
@@ -17,7 +17,8 @@ export const GenelTab: React.FC<GenelTabProps> = ({
             Genel Sistem Ayarları
           </h2>
           <p className="text-xs text-slate-500">
-            Uygulamanın genel davranışını ve belge akış yönlendirmelerini düzenleyin.
+            Uygulamanın genel davranışını ve belge akış yönlendirmelerini
+            düzenleyin.
           </p>
         </div>
       </div>
@@ -28,8 +29,9 @@ export const GenelTab: React.FC<GenelTabProps> = ({
             Belge Çıkarma & Yönlendirme Modu
           </label>
           <p className="text-xs text-slate-500 mb-4">
-            Diyalog adımlarında (Hazırlık, Teklifler, Sipariş, Kabul) belgeleri yazdırma ve işlem
-            yapma butonlarının gösterilip gösterilmeyeceğini belirleyin.
+            Diyalog adımlarında (Hazırlık, Teklifler, Sipariş, Kabul) belgeleri
+            yazdırma ve işlem yapma butonlarının gösterilip gösterilmeyeceğini
+            belirleyin.
           </p>
 
           <div className="space-y-3">
@@ -46,9 +48,7 @@ export const GenelTab: React.FC<GenelTabProps> = ({
                   Yönlendirmeli Akış Modu (Varsayılan)
                 </span>
                 <span className="text-[11px] text-slate-500 block mt-1 leading-relaxed">
-                  {
-                    'Dosya adımlarında ilgili aşamanın belgelerini hazırlamanız için "Belgeleri Yazdır" butonu ve yönlendirmeleri gösterir.'
-                  }
+                  {'Dosya adımlarında ilgili aşamanın belgelerini hazırlamanız için "Belgeleri Yazdır" butonunu gösterir, "İşlemler" menüsünü gizler.'}
                 </span>
               </div>
             </label>
@@ -66,11 +66,7 @@ export const GenelTab: React.FC<GenelTabProps> = ({
                   Serbest Belge Çıkarma Modu (Kılavuzsuz)
                 </span>
                 <span className="text-[11px] text-slate-500 block mt-1 leading-relaxed">
-                  {
-                    'Dosya adımlarındaki belge hazırlama yönlendirmelerini, "Belgeleri Yazdır" ve "İşlemler" butonlarını gizler. Tüm belgeleri sadece '
-                  }
-                  <strong>Çıktı Merkezi</strong>
-                  {"'nden çıkartırsınız."}
+                  {'Dosya adımlarındaki "Belgeleri Yazdır" butonunu gizler. Bunun yerine "İşlemler" menüsünü ve seçeneklerini gösterir.'}
                 </span>
               </div>
             </label>
@@ -78,5 +74,5 @@ export const GenelTab: React.FC<GenelTabProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

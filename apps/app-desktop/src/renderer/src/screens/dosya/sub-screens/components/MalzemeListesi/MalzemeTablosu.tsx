@@ -528,37 +528,39 @@ export function MalzemeTablosu({
             />
           )}
 
-          <MalzemeTabloPopover
-            onSelectAll={handleToggleSelectAll}
-            onDeleteSelected={handleDeleteSelected}
-            onExcelImport={handleExcelImport}
-            onDownloadTemplate={handleDownloadTemplate}
-            onExportToLibrary={handleExportToLibrary}
-            onKomisyonSettings={() => setKomisyonPanelOpen(true)}
-            disableDocumentGuidance={disableDocumentGuidance}
-            onGorevlendirmeOnayi={() =>
-              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
-            onGorevlendirmeOnayEki={() =>
-              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
-            onYaklasikMaliyetKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("yaklasik-maliyet-tespit-komisyonu")}
-            onMuayeneKabulKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
-            onFiyatArastirmaKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
-            onPiyasaArastirmaGorevlendirmesi={() =>
-              handleOpenSablonByDosyaAdi(
-                "piyasa-fiyat-arastirma-gorevlendirmesi",
-              )}
-            onPiyasaArastirmaTutanagi={() =>
-              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
-            onYaklasikMaliyetHesapCetveli={() =>
-              handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
-            onSonAlimCetveli={() =>
-              handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
-            onOnayBelgesi={() =>
-              handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
-          />
+          {disableDocumentGuidance && (
+            <MalzemeTabloPopover
+              onSelectAll={handleToggleSelectAll}
+              onDeleteSelected={handleDeleteSelected}
+              onExcelImport={handleExcelImport}
+              onDownloadTemplate={handleDownloadTemplate}
+              onExportToLibrary={handleExportToLibrary}
+              onKomisyonSettings={() => setKomisyonPanelOpen(true)}
+              disableDocumentGuidance={disableDocumentGuidance}
+              onGorevlendirmeOnayi={() =>
+                handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
+              onGorevlendirmeOnayEki={() =>
+                handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+              onYaklasikMaliyetKomisyonu={() =>
+                handleOpenSablonByDosyaAdi("yaklasik-maliyet-tespit-komisyonu")}
+              onMuayeneKabulKomisyonu={() =>
+                handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
+              onFiyatArastirmaKomisyonu={() =>
+                handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
+              onPiyasaArastirmaGorevlendirmesi={() =>
+                handleOpenSablonByDosyaAdi(
+                  "piyasa-fiyat-arastirma-gorevlendirmesi",
+                )}
+              onPiyasaArastirmaTutanagi={() =>
+                handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+              onYaklasikMaliyetHesapCetveli={() =>
+                handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
+              onSonAlimCetveli={() =>
+                handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
+              onOnayBelgesi={() =>
+                handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
+            />
+          )}
         </div>
       </div>
 
