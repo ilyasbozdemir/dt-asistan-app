@@ -1,5 +1,5 @@
 import React from 'react'
-import { Award, Coins, TrendingUp } from 'lucide-react'
+import { Award, Coins } from 'lucide-react'
 
 interface BiddingFirm {
   id: number
@@ -23,12 +23,6 @@ interface TeklifMatrisiProps {
   getLowestBidInfo: (kalemId: number) => { price: number; firmaId: number | null }
   getAverageBid: (kalemId: number) => number
   handlePriceChange: (kalemId: number, firmaId: number, val: string) => Promise<void>
-  handleSaveToDosya: () => Promise<void>
-  hesaplamaEsasi: string
-  maliyetCetveliTarihi: string
-  setMaliyetCetveliTarihi: (val: string) => void
-  tutanakTarihi: string
-  setTutanakTarihi: (val: string) => void
 }
 
 export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
@@ -38,13 +32,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
   getEstimatedCostTotal,
   getLowestBidInfo,
   getAverageBid,
-  handlePriceChange,
-  handleSaveToDosya,
-  hesaplamaEsasi,
-  maliyetCetveliTarihi,
-  setMaliyetCetveliTarihi,
-  tutanakTarihi,
-  setTutanakTarihi
+  handlePriceChange
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-4 overflow-hidden">
@@ -58,50 +46,12 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
             Her firma için malzeme birim fiyatlarını girin. En uygun teklifler yeşil renkle
             vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
-            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-            <span>Yöntem: {hesaplamaEsasi}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
-            <span className="font-bold text-slate-450 dark:text-slate-500">
-              Maliyet Cetveli Tarihi:
-            </span>
-            <input
-              type="date"
-              value={maliyetCetveliTarihi}
-              onChange={(e) => setMaliyetCetveliTarihi(e.target.value)}
-              className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
-            <span className="font-bold text-slate-450 dark:text-slate-500">Tutanak Tarihi:</span>
-            <input
-              type="date"
-              value={tutanakTarihi}
-              onChange={(e) => setTutanakTarihi(e.target.value)}
-              className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
-            />
-          </div>
-
-          {getEstimatedCostTotal() > 0 && (
-            <button
-              onClick={handleSaveToDosya}
-              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer h-10"
-            >
-              <TrendingUp className="w-4 h-4" />
-              Tutanak & Maliyeti Kaydet
-            </button>
-          )}
+           <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
             <Coins className="w-4 h-4 text-emerald-500" />
             <span>Para Birimi: TL</span>
           </div>
-        </div>
+        </div>        </div>
       </div>
 
       <div className="overflow-x-auto w-full border border-slate-150 dark:border-slate-850 rounded-xl shadow-xs">

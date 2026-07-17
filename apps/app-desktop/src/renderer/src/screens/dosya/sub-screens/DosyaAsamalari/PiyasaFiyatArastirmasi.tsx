@@ -1,30 +1,34 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import React, { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   ArrowLeft,
   Building2,
   Calendar,
+  Check,
+  Edit3,
   ExternalLink,
   Eye,
   FileCheck2,
   MoreVertical,
   PackageSearch,
   Plus,
-  Printer
-} from 'lucide-react'
-import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { normalizeForMatch } from './useDosyaAsamasiSablons'
-import { cn } from '../../../../utils/cn'
-import { DavetEdilenFirmalar } from './components/DavetEdilenFirmalar'
-import { TeklifMatrisi } from './components/TeklifMatrisi'
-import { FirmaSecmeModali } from './components/FirmaSecmeModali'
-import { usePiyasaFiyatArastirmasiLogic } from './hooks/usePiyasaFiyatArastirmasi'
-import { useSettingsStore } from '../../../../store/settingsStore'
+  Printer,
+  Settings,
+  TrendingUp,
+} from "lucide-react";
+import { SubScreen } from "../../SubScreens.screen";
+import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import { normalizeForMatch } from "./useDosyaAsamasiSablons";
+import { cn } from "../../../../utils/cn";
+import { DavetEdilenFirmalar } from "./components/DavetEdilenFirmalar";
+import { TeklifMatrisi } from "./components/TeklifMatrisi";
+import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
+import { usePiyasaFiyatArastirmasiLogic } from "./hooks/usePiyasaFiyatArastirmasi";
+import { useSettingsStore } from "../../../../store/settingsStore";
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
-  const logic = usePiyasaFiyatArastirmasiLogic()
+  const logic = usePiyasaFiyatArastirmasiLogic();
   const {
     sablonsContext: {
       masterHtml,
@@ -46,7 +50,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       activeStarredDocs,
       contextsByPath,
       handleOpenPreviewForSablon,
-      sablons
+      sablons,
     },
     invitedFirms,
     allPoolFirms,
@@ -71,34 +75,36 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     lowestTotalFirmaId,
     isEditingFirms,
     setIsEditingFirms,
-    maliyetCetveliTarihi,
     setMaliyetCetveliTarihi,
     tutanakTarihi,
     setTutanakTarihi,
-    savedDocuments
-  } = logic
+    savedDocuments,
+  } = logic;
 
-  const [activeActionDropdown, setActiveActionDropdown] = useState<string | null>(null)
-  const stageDocs = savedDocuments
-  const { disableDocumentGuidance } = useSettingsStore()
+  const [activeActionDropdown, setActiveActionDropdown] = useState<
+    string | null
+  >(null);
+  const stageDocs = savedDocuments;
+  const { disableDocumentGuidance } = useSettingsStore();
 
   // Close dropdown on click outside
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest('.dropdown-container')) {
-        setActiveActionDropdown(null)
+      if (!(e.target as HTMLElement).closest(".dropdown-container")) {
+        setActiveActionDropdown(null);
       }
-    }
-    window.addEventListener('click', handleOutsideClick)
-    return () => window.removeEventListener('click', handleOutsideClick)
-  }, [])
+    };
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
+        (d) =>
+          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
+      )
+      : false;
 
     return (
       <DocumentPreviewModal
@@ -106,10 +112,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
+        masterHtml={masterHtml || ""}
+        baseContext={previewData.snapshotContext ||
+          contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -124,7 +129,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    )
+    );
   }
 
   return (
@@ -143,8 +148,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                 Oluşturulan Tutanak & Belgeler
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Fiyat araştırması sonucunda oluşturulan evraklar. Değişiklik yapmak için fiyat
-                matrisi formunu açabilir veya süreç şablonlarını aşağıdan görüntüleyebilirsiniz.
+                Fiyat araştırması sonucunda oluşturulan evraklar. Değişiklik
+                yapmak için fiyat matrisi formunu açabilir veya süreç
+                şablonlarını aşağıdan görüntüleyebilirsiniz.
               </p>
             </div>
 
@@ -157,250 +163,322 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             </button>
           </div>
 
-          {stageDocs.length === 0 ? (
-            <div className="py-10 text-center flex flex-col items-center justify-center gap-3">
-              <AlertCircle className="w-9 h-9 text-slate-300 dark:text-slate-600" />
-              <div className="text-slate-700 dark:text-slate-355 text-sm font-bold">
-                Henüz kaydedilmiş bir tutanak bulunmuyor.
+          {stageDocs.length === 0
+            ? (
+              <div className="py-10 text-center flex flex-col items-center justify-center gap-3">
+                <AlertCircle className="w-9 h-9 text-slate-300 dark:text-slate-600" />
+                <div className="text-slate-700 dark:text-slate-355 text-sm font-bold">
+                  Henüz kaydedilmiş bir tutanak bulunmuyor.
+                </div>
+                <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
+                  Firmaların teklif ettiği fiyatları girip tutanağı kaydetmek
+                  için "Yeni Tutanak Ekle / Matris Düzenle" butonuna basarak
+                  fiyat matrisini açabilir veya diğer süreç şablonlarını
+                  aşağıdan görüntüleyebilirsiniz.
+                </p>
               </div>
-              <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
-                Firmaların teklif ettiği fiyatları girip tutanağı kaydetmek için "Yeni Tutanak Ekle
-                / Matris Düzenle" butonuna basarak fiyat matrisini açabilir veya diğer süreç
-                şablonlarını aşağıdan görüntüleyebilirsiniz.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {stageDocs.map((doc: any) => {
-                const sablon = sablons.find((s: any) => {
-                  const normAd = normalizeForMatch(s.ad)
-                  const normDocName = normalizeForMatch(doc.belge_adi)
-                  return normAd.includes(normDocName) || normDocName.includes(normAd)
-                })
+            )
+            : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {stageDocs.map((doc: any) => {
+                  const sablon = sablons.find((s: any) => {
+                    const normAd = normalizeForMatch(s.ad);
+                    const normDocName = normalizeForMatch(doc.belge_adi);
+                    return normAd.includes(normDocName) ||
+                      normDocName.includes(normAd);
+                  });
 
-                return (
-                  <div
-                    key={doc.id || doc.belge_adi}
-                    className="flex flex-col justify-between p-5 bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800/80 rounded-2xl hover:border-blue-300 dark:hover:border-blue-800 transition-all shadow-3xs"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">
-                          <FileCheck2 className="w-3.5 h-3.5" />
-                          Hazır / Kaydedildi
-                        </span>
-
-                        {doc.belge_tarihi && (
-                          <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {doc.belge_tarihi}
+                  return (
+                    <div
+                      key={doc.id || doc.belge_adi}
+                      className="flex flex-col justify-between p-5 bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800/80 rounded-2xl hover:border-blue-300 dark:hover:border-blue-800 transition-all shadow-3xs"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">
+                            <FileCheck2 className="w-3.5 h-3.5" />
+                            Hazır / Kaydedildi
                           </span>
-                        )}
-                      </div>
-                      <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm mb-1">
-                        {doc.belge_adi}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-455 truncate">
-                        {sablon?.dosya_adi || 'Şablon dosyası bağlı'}
-                      </p>
-                    </div>
 
-                    <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/50 pt-4">
-                      <button
-                        onClick={() => {
-                          if (sablon) {
-                            handleOpenPreviewForSablon(sablon, sablon.ad)
-                          } else {
-                            alert('Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.')
-                          }
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-50/60 hover:bg-blue-100/60 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 py-2.5 px-4 rounded-xl transition-all cursor-pointer border border-blue-100 dark:border-blue-900/20 h-10"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Önizle ve Düzenle
-                      </button>
-
-                      {/* Dropdown Menu */}
-                      {!disableDocumentGuidance && (
-                        <div className="relative dropdown-container">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActiveActionDropdown(
-                                activeActionDropdown === doc.belge_adi ? null : doc.belge_adi
-                              )
-                            }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-
-                          {activeActionDropdown === doc.belge_adi && (
-                            <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
-                              <button
-                                onClick={() => {
-                                  setActiveActionDropdown(null)
-                                  if (sablon) {
-                                    handleOpenPreviewForSablon(sablon, sablon.ad)
-                                  }
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                              >
-                                <Eye className="w-4 h-4 text-blue-500" />
-                                Önizle ve Düzenle
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveActionDropdown(null)
-                                  if (sablon) {
-                                    quickOpenExternal(sablon)
-                                  }
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                              >
-                                <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                Tarayıcıda PDF Aç
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveActionDropdown(null)
-                                  if (sablon) {
-                                    quickPrint(sablon)
-                                  }
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
-                              >
-                                <Printer className="w-4 h-4 text-slate-500" />
-                                Hızlı Yazdır
-                              </button>
-                            </div>
+                          {doc.belge_tarihi && (
+                            <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {doc.belge_tarihi}
+                            </span>
                           )}
                         </div>
-                      )}
+                        <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm mb-1">
+                          {doc.belge_adi}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-455 truncate">
+                          {sablon?.dosya_adi || "Şablon dosyası bağlı"}
+                        </p>
+                      </div>
+
+                      <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/50 pt-4">
+                        <button
+                          onClick={() => {
+                            if (sablon) {
+                              handleOpenPreviewForSablon(sablon, sablon.ad);
+                            } else {
+                              alert(
+                                "Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.",
+                              );
+                            }
+                          }}
+                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-50/60 hover:bg-blue-100/60 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 py-2.5 px-4 rounded-xl transition-all cursor-pointer border border-blue-100 dark:border-blue-900/20 h-10"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Önizle ve Düzenle
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {!disableDocumentGuidance && (
+                          <div className="relative dropdown-container">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveActionDropdown(
+                                  activeActionDropdown === doc.belge_adi
+                                    ? null
+                                    : doc.belge_adi,
+                                );
+                              }}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+
+                            {activeActionDropdown === doc.belge_adi && (
+                              <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
+                                <button
+                                  onClick={() => {
+                                    setActiveActionDropdown(null);
+                                    if (sablon) {
+                                      handleOpenPreviewForSablon(
+                                        sablon,
+                                        sablon.ad,
+                                      );
+                                    }
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                                >
+                                  <Eye className="w-4 h-4 text-blue-500" />
+                                  Önizle ve Düzenle
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveActionDropdown(null);
+                                    if (sablon) {
+                                      quickOpenExternal(sablon);
+                                    }
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
+                                >
+                                  <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                  Tarayıcıda PDF Aç
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveActionDropdown(null);
+                                    if (sablon) {
+                                      quickPrint(sablon);
+                                    }
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
+                                >
+                                  <Printer className="w-4 h-4 text-slate-500" />
+                                  Hızlı Yazdır
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
         </div>
       )}
 
       {/* 2. FORM ALANI VE BİRİM FİYAT MATRİSİ (FORM AÇIKKEN) */}
       {isFormOpen && (
-        <div className="flex flex-col gap-4 animate-in fade-in duration-300">
-          <div className="flex justify-start">
-            <button
-              onClick={() => setIsFormOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 rounded-xl transition-all cursor-pointer shadow-3xs"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Geri / Listeye Dön
-            </button>
-          </div>
-
-          {/* İSTEKLİ FİRMALARI YÖNETME ALANI */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                  Sürece Katılan İstekli Firmalar
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col animate-in fade-in duration-300">
+          {/* Sticky Fullscreen Header */}
+          <div className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 md:px-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsFormOpen(false)}
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition-all cursor-pointer shadow-3xs border border-slate-200 dark:border-slate-700"
+                title="Geri Dön / Kapat"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="text-left">
+                <h3 className="text-lg font-black text-slate-850 dark:text-slate-100 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse">
+                  </span>
+                  Teklif Giriş Matrisi & Karşılaştırma
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Piyasa araştırması kapsamında davet edilen ve teklif formu dolduran firmaları
-                  belirleyin. (En az 3 firma önerilir)
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Her firma için birim fiyatları girin. Yaklaşık maliyet
+                  otomatik hesaplanacaktır.
                 </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setIsEditingFirms(!isEditingFirms)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-2 border rounded-xl text-xs font-bold transition-all h-10 cursor-pointer shadow-2xs hover:shadow-xs',
-                    isEditingFirms
-                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50'
-                      : 'bg-blue-50/50 hover:bg-blue-100/50 text-blue-750 border-blue-200 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30'
-                  )}
-                >
-                  {isEditingFirms ? 'Düzenlemeyi Kapat' : 'Firmaları Düzenle'}
-                </button>
-
-                {isEditingFirms && (
-                  <>
-                    <button
-                      onClick={() => setIsFirmModalOpen(true)}
-                      className="flex items-center gap-2 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all h-10 cursor-pointer"
-                    >
-                      <Building2 className="w-4 h-4" />
-                      İstekli Firmalardan Seç
-                    </button>
-
-                    <Link
-                      to="/firmalar"
-                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center h-10 cursor-pointer"
-                    >
-                      Tedarikçi Listesini Yönet
-                    </Link>
-                  </>
-                )}
               </div>
             </div>
 
-            {/* DAVET EDİLEN FİRMALARIN KART GÖRÜNÜMÜ */}
-            <DavetEdilenFirmalar
-              invitedFirms={invitedFirms}
-              lowestTotalFirmaId={lowestTotalFirmaId}
-              isEditing={isEditingFirms}
-              onRemoveFirm={handleRemoveFirm}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-650 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10">
+                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span>Yöntem: {hesaplamaEsasi}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-350 bg-slate-100 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10">
+                <span className="text-slate-400">Tutanak / Matris Tarihi:</span>
+                <input
+                  type="date"
+                  value={tutanakTarihi}
+                  onChange={(e) => {
+                    setTutanakTarihi(e.target.value);
+                    setMaliyetCetveliTarihi(e.target.value);
+                  }}
+                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
+                />
+              </div>
+
+              {getEstimatedCostTotal() > 0 && (
+                <button
+                  onClick={handleSaveToDosya}
+                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer h-10 border-0"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Tutanak & Maliyeti Kaydet
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* TEKLİF VE BİRİM FİYAT GİRİŞ MATRİSİ */}
-          {invitedFirms.length > 0 && items.length > 0 ? (
-            <TeklifMatrisi
-              invitedFirms={invitedFirms}
-              items={items}
-              bids={bids}
-              getEstimatedCostTotal={getEstimatedCostTotal}
-              getLowestBidInfo={getLowestBidInfo}
-              getAverageBid={getAverageBid}
-              handlePriceChange={handlePriceChange}
-              handleSaveToDosya={handleSaveToDosya}
-              hesaplamaEsasi={hesaplamaEsasi}
-              maliyetCetveliTarihi={maliyetCetveliTarihi}
-              setMaliyetCetveliTarihi={setMaliyetCetveliTarihi}
-              tutanakTarihi={tutanakTarihi}
-              setTutanakTarihi={setTutanakTarihi}
-            />
-          ) : invitedFirms.length > 0 && items.length === 0 ? (
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
-                  İhtiyaç Kalemi Bulunamadı
-                </h4>
-                <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
-                  Teklif fiyat giriş matrisini görüntülemek için bu dosyaya ait ihtiyaç kalemlerinin
-                  girilmiş olması gerekir. Lütfen ilgili adımda ihtiyaç listesini tanımlayın.
-                </p>
+          {/* Main Overlay Content */}
+          <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6">
+            {/* İSTEKLİ FİRMALARI YÖNETME ALANI */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600">
+                    </span>
+                    Sürece Katılan İstekli Firmalar
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Piyasa araştırması kapsamında davet edilen ve teklif formu
+                    dolduran firmaları belirleyin.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setIsEditingFirms(!isEditingFirms)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 border rounded-xl text-xs font-bold transition-all h-10 cursor-pointer shadow-sm hover:shadow-md",
+                      isEditingFirms
+                        ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50"
+                        : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-800",
+                    )}
+                  >
+                    {isEditingFirms
+                      ? (
+                        <>
+                          <Check className="w-4 h-4 text-amber-650" />
+                          <span>Düzenlemeyi Kapat</span>
+                        </>
+                      )
+                      : (
+                        <>
+                          <Edit3 className="w-4 h-4 text-slate-500" />
+                          <span>Firmaları Düzenle</span>
+                        </>
+                      )}
+                  </button>
+
+                  {isEditingFirms && (
+                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1 rounded-2xl border border-slate-100 dark:border-slate-800/80 animate-in fade-in slide-in-from-left-2 duration-300">
+                      <button
+                        onClick={() => setIsFirmModalOpen(true)}
+                        className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4.5 py-2 rounded-xl transition-all h-8 cursor-pointer shadow-xs border-0"
+                      >
+                        <Building2 className="w-3.5 h-3.5 text-blue-400" />
+                        Seç
+                      </button>
+
+                      <Link
+                        to="/firmalar"
+                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4.5 py-2 rounded-xl transition-all flex items-center justify-center h-8 cursor-pointer shadow-xs border-0"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-white/90" />
+                        Listeyi Yönet
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* DAVET EDİLEN FİRMALARIN KART GÖRÜNÜMÜ */}
+              <DavetEdilenFirmalar
+                invitedFirms={invitedFirms}
+                lowestTotalFirmaId={lowestTotalFirmaId}
+                isEditing={isEditingFirms}
+                onRemoveFirm={handleRemoveFirm}
+              />
             </div>
-          ) : (
-            <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
-                  Davet Edilen İstekli Firma Yok
-                </h4>
-                <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
-                  Lütfen yukarıdaki panelden en az 1 firma seçin veya ekleyin.
-                </p>
-              </div>
-            </div>
-          )}
+
+            {/* TEKLİF VE BİRİM FİYAT GİRİŞ MATRİSİ */}
+            {invitedFirms.length > 0 && items.length > 0
+              ? (
+                <TeklifMatrisi
+                  invitedFirms={invitedFirms}
+                  items={items}
+                  bids={bids}
+                  getEstimatedCostTotal={getEstimatedCostTotal}
+                  getLowestBidInfo={getLowestBidInfo}
+                  getAverageBid={getAverageBid}
+                  handlePriceChange={handlePriceChange}
+                />
+              )
+              : invitedFirms.length > 0 && items.length === 0
+              ? (
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
+                      İhtiyaç Kalemi Bulunamadı
+                    </h4>
+                    <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
+                      Teklif fiyat giriş matrisini görüntülemek için bu dosyaya
+                      ait ihtiyaç kalemlerinin girilmiş olması gerekir. Lütfen
+                      ilgili adımda ihtiyaç listesini tanımlayın.
+                    </p>
+                  </div>
+                </div>
+              )
+              : (
+                <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
+                      Davet Edilen İstekli Firma Yok
+                    </h4>
+                    <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
+                      Lütfen yukarıdaki panelden en az 1 firma seçin veya
+                      ekleyin.
+                    </p>
+                  </div>
+                </div>
+              )}
+          </div>
         </div>
       )}
 
@@ -417,5 +495,5 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         onAddFirms={handleBulkAddFirms}
       />
     </SubScreen>
-  )
+  );
 }
