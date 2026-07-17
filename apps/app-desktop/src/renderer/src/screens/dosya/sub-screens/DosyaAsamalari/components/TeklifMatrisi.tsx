@@ -1,5 +1,5 @@
 import React from 'react'
-import { Award, Coins } from 'lucide-react'
+import { Award, Coins, AlertCircle } from 'lucide-react'
 
 interface BiddingFirm {
   id: number
@@ -46,12 +46,19 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
             Her firma için malzeme birim fiyatlarını girin. En uygun teklifler yeşil renkle
             vurgulanır ve yaklaşık maliyet otomatik hesaplanır.
           </p>
-           <div className="flex items-center gap-2 flex-wrap">
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 dark:bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 h-10">
             <Coins className="w-4 h-4 text-emerald-500" />
             <span>Para Birimi: TL</span>
           </div>
-        </div>        </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-3.5 py-1.5 rounded-xl border border-amber-200/50 dark:border-amber-900/30 h-10">
+            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Birim Fiyatlar KDV Hariçtir</span>
+          </div>
+        </div>
       </div>
 
       <div className="overflow-x-auto w-full border border-slate-150 dark:border-slate-850 rounded-xl shadow-xs">
