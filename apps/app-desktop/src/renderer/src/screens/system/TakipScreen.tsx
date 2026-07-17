@@ -19,22 +19,29 @@ import {
   Calendar,
   Save,
   Check,
-  Info
+  Info,
+  Edit,
+  ExternalLink,
+  Trash2,
+  MoreVertical
 } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 import { Button } from '../../components/ui/Button'
 import { useEffect, useState } from 'react'
+import { logActivity } from '../../utils/logger'
 
 export function TakipScreen(): React.JSX.Element {
   const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
-  const { dosyalar } = useDosyalarHooks()
+  const { dosyalar, deleteDosya, hardDeleteDosya } = useDosyalarHooks()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // 1. Fetch active dossier details
   const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
   const [notificationSent, setNotificationSent] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // Local state for dossier updates
   const [status, setStatus] = useState('devam_ediyor')
@@ -45,6 +52,43 @@ export function TakipScreen(): React.JSX.Element {
   const [notlar, setNotlar] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.dosya-menu-container')) {
+        setIsMenuOpen(false)
+      }
+    }
+    window.addEventListener('click', handleOutsideClick)
+    return () => window.removeEventListener('click', handleOutsideClick)
+  }, [])
+
+  const handleOpenInNewWindow = () => {
+    if (!activeDosya) return
+    window.electron?.ipcRenderer.send('window:open-secondary', {
+      path: '/dosyalar',
+      search: `?id=${activeDosya.id}&mode=window`,
+      title: `DT: ${activeDosya.konu}`
+    })
+  }
+
+  const handleDelete = async () => {
+    if (!activeDosyaId || !activeDosya) return
+    if (
+      confirm(
+        'Bu dosyayı iptal etmek istediğinize emin misiniz? Dosya listelerde "İptal Edildi" olarak işaretlenecektir.'
+      )
+    ) {
+      await deleteDosya(activeDosyaId)
+      await logActivity(
+        'Dosya İptal Edildi',
+        `${activeDosya.temin_no || 'NO BELİRSİZ'} numaralı dosya takip ekranından iptal edildi olarak işaretlendi.`,
+        'warning'
+      )
+      setActiveDosyaId(null)
+    }
+  }
 
   useEffect(() => {
     if (activeDosya) {
@@ -277,10 +321,21 @@ export function TakipScreen(): React.JSX.Element {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-6">
               {/* Dossier Basic Info */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-955/40 px-2.5 py-1 rounded-full border border-blue-500/15">
-                    {activeDosya.temin_no || 'Dosya No Belirtilmedi'}
-                  </span>
+                <div className="space-y-1.5 flex-1 min-w-[260px]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-955/40 px-2.5 py-1 rounded-full border border-blue-500/15">
+                      {activeDosya.temin_no || 'Dosya No Belirtilmedi'}
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                      activeDosya.status === 'tamamlandi'
+                        ? 'bg-emerald-100/40 text-emerald-600 border-emerald-500/15'
+                        : activeDosya.status === 'iptal'
+                        ? 'bg-rose-100/40 text-rose-600 border-rose-500/15'
+                        : 'bg-amber-100/40 text-amber-600 border-amber-500/15'
+                    }`}>
+                      {activeDosya.status === 'tamamlandi' ? 'Tamamlandı' : activeDosya.status === 'iptal' ? 'İptal Edildi' : 'Devam Ediyor'}
+                    </span>
+                  </div>
                   <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
                     {activeDosya.konu}
                   </h2>
@@ -296,13 +351,69 @@ export function TakipScreen(): React.JSX.Element {
                   </p>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
-                    Yaklaşık Maliyet
-                  </span>
-                  <span className="text-xl font-mono font-extrabold text-slate-850 dark:text-slate-100">
-                    {formatCurrency(activeDosya.yaklasik_maliyet || 0)}
-                  </span>
+                <div className="flex items-center gap-3.5 select-none">
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                      Yaklaşık Maliyet
+                    </span>
+                    <span className="text-xl font-mono font-extrabold text-slate-850 dark:text-slate-100">
+                      {formatCurrency(activeDosya.yaklasik_maliyet || 0)}
+                    </span>
+                  </div>
+
+                  <div className="relative dosya-menu-container">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsMenuOpen(!isMenuOpen)
+                      }}
+                      className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-205 hover:bg-slate-55 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-slate-200 dark:border-slate-800 h-10 w-10 flex items-center justify-center"
+                      title="Dosya İşlemleri"
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+
+                    {isMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-2 flex flex-col text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-200">
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            navigate({
+                              to: `/dosyalar/yeni?id=${activeDosya.id}`
+                            })
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent font-semibold"
+                        >
+                          <Edit size={14} className="text-slate-400" />
+                          Dosyayı Düzenle
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            handleOpenInNewWindow()
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent font-semibold"
+                        >
+                          <ExternalLink size={14} className="text-slate-400" />
+                          Yeni Pencerede Aç
+                        </button>
+
+                        <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
+
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            handleDelete()
+                          }}
+                          className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent font-semibold"
+                        >
+                          <Trash2 size={14} className="text-red-400 dark:text-red-500" />
+                          Dosyayı İptal Et (Sil)
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
