@@ -349,7 +349,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                             return (
                               <tr key={item.id} className="border-b border-slate-50 dark:border-slate-900/60 hover:bg-slate-50/30 dark:hover:bg-slate-950/20 transition-colors">
                                 <td className="py-3 px-3 font-bold text-slate-800 dark:text-slate-250">
-                                  {item.tanim || item.malzeme_adi}
+                                  {item.kalem_adi}
                                 </td>
                                 <td className="py-3 px-3 text-center text-slate-500 font-semibold">
                                   {item.miktar} {item.birim}
