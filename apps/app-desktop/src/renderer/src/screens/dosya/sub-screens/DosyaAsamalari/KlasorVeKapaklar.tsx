@@ -99,6 +99,7 @@ export function KlasorVeKapaklar(): React.JSX.Element {
   ]);
 
   const [isEditMode, setIsEditMode] = useState(false);
+  const [customItemText, setCustomItemText] = useState("");
 
   const handleToggleChecklist = (id: string): void => {
     if (isEditMode) return; // Don't check off items while in edit mode
@@ -125,6 +126,19 @@ export function KlasorVeKapaklar(): React.JSX.Element {
         checked: false,
       }]);
     }
+  };
+
+  const handleAddCustomItem = (): void => {
+    if (customItemText.trim() === "") return;
+    setChecklist((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        label: customItemText.trim(),
+        checked: false,
+      },
+    ]);
+    setCustomItemText("");
   };
 
   const handleMoveUp = (index: number): void => {
@@ -351,22 +365,48 @@ export function KlasorVeKapaklar(): React.JSX.Element {
               </div>
 
               {isEditMode && (
-                <div className="mt-4 p-4 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl">
-                  <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">
-                    Genel Listeden Ekle:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {globalBelgeler.filter((g) =>
-                      !checklist.some((c) => c.label === g.label)
-                    ).map((g) => (
+                <div className="mt-4 flex flex-col gap-4">
+                  <div className="p-4 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl flex flex-col gap-3">
+                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                      Özel / Serbest Madde Ekle:
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customItemText}
+                        onChange={(e) => setCustomItemText(e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && handleAddCustomItem()}
+                        placeholder="Örn: Garanti Belgesi..."
+                        className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500"
+                      />
                       <button
-                        key={g.id}
-                        onClick={() => handleAddFromGlobal(g)}
-                        className="text-[10px] px-2 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 border border-slate-200 dark:border-slate-700 rounded-md transition-colors"
+                        onClick={handleAddCustomItem}
+                        disabled={!customItemText.trim()}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
                       >
-                        + {g.label}
+                        Ekle
                       </button>
-                    ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl">
+                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">
+                      Genel Listeden Ekle:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {globalBelgeler.filter((g) =>
+                        !checklist.some((c) => c.label === g.label)
+                      ).map((g) => (
+                        <button
+                          key={g.id}
+                          onClick={() => handleAddFromGlobal(g)}
+                          className="text-[10px] px-2 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 border border-slate-200 dark:border-slate-700 rounded-md transition-colors"
+                        >
+                          + {g.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
