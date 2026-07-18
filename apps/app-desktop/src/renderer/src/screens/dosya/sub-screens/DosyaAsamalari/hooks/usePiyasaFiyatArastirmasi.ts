@@ -68,6 +68,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
   const [tutanakTarihi, setTutanakTarihi] = useState<string>('')
   const [syncTutanak, setSyncTutanak] = useState<boolean>(true)
   const [setLowestFirmAsWinner, setSetLowestFirmAsWinner] = useState<boolean>(true)
+  const [manualWinnerFirmaId, setManualWinnerFirmaId] = useState<number | null>(null)
 
   const [isFirmModalOpen, setIsFirmModalOpen] = useState(false)
   const [selectedFirmIds, setSelectedFirmIds] = useState<number[]>([])
@@ -205,6 +206,10 @@ export function usePiyasaFiyatArastirmasiLogic() {
           resDosya.data[0].komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak'
         )
         defaultDate = resDosya.data[0].temin_tarihi || ''
+        // Mevcut kazanan firma varsa state'e yükle
+        if (resDosya.data[0].firma_id) {
+          setManualWinnerFirmaId(resDosya.data[0].firma_id)
+        }
       }
 
       const resBelgeler = await window.electron.ipcRenderer.invoke(
@@ -411,8 +416,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
         [total, tutanakTarihi || maliyetCetveliTarihi || null, activeDosyaId]
       )
       if (res.success) {
-        // En düşük teklif veren firmayı Yüklenici/Kazanan Firma olarak kaydet
+        // Kazanan firmayı belirle ve kaydet
         if (setLowestFirmAsWinner) {
+          // Otomatik: en düşük teklif sahibi kazanan
           let lowestBidFirmMasterId: number | null = null
           let minTotalBid = Infinity
           invitedFirms.forEach((f) => {
@@ -428,7 +434,15 @@ export function usePiyasaFiyatArastirmasiLogic() {
               'UPDATE DATA_TeminDosyasi SET firma_id = ? WHERE id = ?',
               [lowestBidFirmMasterId, activeDosyaId]
             )
+            setManualWinnerFirmaId(lowestBidFirmMasterId)
           }
+        } else if (manualWinnerFirmaId) {
+          // Elle seçilen kazanan firma
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            'UPDATE DATA_TeminDosyasi SET firma_id = ? WHERE id = ?',
+            [manualWinnerFirmaId, activeDosyaId]
+          )
         }
 
         // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
@@ -576,6 +590,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
     syncTutanak,
     setSyncTutanak,
     setLowestFirmAsWinner,
-    setSetLowestFirmAsWinner
+    setSetLowestFirmAsWinner,
+    manualWinnerFirmaId,
+    setManualWinnerFirmaId
   }
 }

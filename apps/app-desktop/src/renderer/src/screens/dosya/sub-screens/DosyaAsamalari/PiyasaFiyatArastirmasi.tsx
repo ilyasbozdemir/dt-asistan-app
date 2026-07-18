@@ -89,6 +89,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setSyncTutanak,
     setLowestFirmAsWinner,
     setSetLowestFirmAsWinner,
+    manualWinnerFirmaId,
+    setManualWinnerFirmaId,
   } = logic;
 
   const [activeActionDropdown, setActiveActionDropdown] = useState<
@@ -644,6 +646,25 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                 />
                 <span>En Düşük Teklifi Kazanan Yap</span>
               </label>
+
+              {/* Elle kazanan firma seçimi — checkbox kapalıyken görünür */}
+              {!setLowestFirmAsWinner && invitedFirms.length > 0 && (
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-xl border border-amber-300/60 dark:border-amber-700/50 h-10">
+                  <span className="text-amber-600 dark:text-amber-400 shrink-0">Kazanan:</span>
+                  <select
+                    value={manualWinnerFirmaId ?? ''}
+                    onChange={(e) => setManualWinnerFirmaId(e.target.value ? Number(e.target.value) : null)}
+                    className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200 max-w-[180px] truncate"
+                  >
+                    <option value="">-- Firma Seç --</option>
+                    {invitedFirms.map((f) => (
+                      <option key={f.id} value={f.firma_id}>
+                        {f.unvan}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Fullscreen Expand Button */}
 
