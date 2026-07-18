@@ -69,19 +69,21 @@ export function KlasorVeKapaklar(): React.JSX.Element {
     "Müdüriyet Odası",
   ];
 
-  // Simulated global checklist items
   const globalBelgeler = [
-    { id: "g1", label: "Onay Belgesi" },
-    { id: "g2", label: "Yaklaşık Maliyet Cetveli" },
-    { id: "g3", label: "Piyasa Fiyat Araştırma Tutanağı" },
-    { id: "g4", label: "Firma Teklif Mektupları (Kaşeli/İmzalı)" },
-    { id: "g5", label: "Sözleşme / Sipariş Formu" },
-    { id: "g6", label: "Muayene Kabul Tutanağı" },
-    { id: "g7", label: "Taşınır İşlem Fişi (TİF)" },
-    { id: "g8", label: "Ödeme Emri Belgesi (ÖEB) ve Ekleri" },
-    { id: "g9", label: "Fatura Aslı" },
-    { id: "g10", label: "Vergi Borcu Yoktur Yazısı" },
-    { id: "g11", label: "SGK Borcu Yoktur Yazısı" },
+    { id: "g1", label: "İhtiyaç Belgesi / Talep Yazısı" },
+    { id: "g2", label: "Harcama Talimatı / Onay Belgesi" },
+    { id: "g3", label: "Yaklaşık Maliyet Cetveli" },
+    { id: "g4", label: "Piyasa Fiyat Araştırması Görevlendirme Oluru" },
+    { id: "g5", label: "Piyasa Fiyat Araştırma Tutanağı" },
+    { id: "g6", label: "Firma Teklif Mektupları (Kaşeli/İmzalı)" },
+    { id: "g7", label: "Sözleşme / Sipariş Formu" },
+    { id: "g8", label: "Muayene ve Kabul Komisyonu Oluru" },
+    { id: "g9", label: "Muayene Kabul Tutanağı" },
+    { id: "g10", label: "Taşınır İşlem Fişi (TİF)" },
+    { id: "g11", label: "Fatura Aslı" },
+    { id: "g12", label: "Vergi Borcu Yoktur Yazısı" },
+    { id: "g13", label: "SGK Borcu Yoktur Yazısı" },
+    { id: "g14", label: "Ödeme Emri Belgesi (ÖEB) ve Ekleri" },
   ];
 
   const [checklist, setChecklist] = useState([
@@ -115,7 +117,13 @@ export function KlasorVeKapaklar(): React.JSX.Element {
     globalItem: { id: string; label: string },
   ): void => {
     if (!checklist.some((c) => c.label === globalItem.label)) {
-      setChecklist((prev) => [...prev, { id: crypto.randomUUID(), label: globalItem.label, checked: false }]);
+      setChecklist((
+        prev,
+      ) => [...prev, {
+        id: crypto.randomUUID(),
+        label: globalItem.label,
+        checked: false,
+      }]);
     }
   };
 

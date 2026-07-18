@@ -502,7 +502,14 @@ export function KabulVeOdeme(): React.JSX.Element {
                       )}
                     </span>
                   </div>
-                  <button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg shadow-blue-500/20 opacity-50 ">
+                  <button 
+                    disabled={!faturaNo || !faturaTarihi}
+                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg ${
+                      !faturaNo || !faturaTarihi
+                        ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-70'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                    }`}
+                  >
                     ÖEB Oluştur
                   </button>
                 </div>
