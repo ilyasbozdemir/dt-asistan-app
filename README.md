@@ -1,4 +1,4 @@
-# Doğrudan Temin & Satın Alma Yönetim Sistemi (Monorepo)
+# DT Asistan Monorepo
 
 Bu depo (repository), hem masaüstü uygulamasını hem de web sunucusu
 bileşenlerini içeren bir **pnpm monorepo** çalışma alanıdır.
