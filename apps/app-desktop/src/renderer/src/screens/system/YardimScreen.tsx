@@ -208,36 +208,48 @@ const DogrudanTeminSurecAkisi = () => {
 
   const steps = [
     {
-      title: '1- İHTİYACIN TESPİTİ',
-      desc: 'Satın alımı talep edilen mal veya hizmet için ihtiyaç duyan birim Lüzum Müzekkeresi veya Talep Formu oluşturur. Bu belge resmi süreci başlatır.'
+      title: '1- İHTİYAÇ OLUŞTU (TALEP / LÜZUM MÜZEKKERESİ)',
+      desc: 'İhtiyaç sahibi birim tarafından alımı talep edilen mal veya hizmet belirlenir ve lüzum müzekkeresi ile resmi satın alma süreci tetiklenir.'
     },
     {
-      title: '2- ONAY BELGESİ DÜZENLENMESİ',
-      desc: 'Alım konusu işin niteliği, yaklaşık maliyeti, kullanılabilir ödeneği, bütçe tertibi ve alımda görevli personeli içeren resmi Onay Belgesi hazırlanır ve Harcama Yetkilisinin imzasına sunulur.'
+      title: '2- DOĞRUDAN TEMİN ONAYI ALINDI',
+      desc: 'Harcama Yetkilisi (Birim Amiri) tarafından "Bu alım yapılsın" talimatı verilir ve resmi Onay Belgesi imzalanır.'
     },
     {
-      title: '3- GÖREVLENDİRME YAPILMASI',
-      desc: 'Piyasa fiyat araştırması yapmak üzere en az bir (tercihen iki veya daha fazla) Gerçekleştirme Görevlisi onay belgesinde veya ayrı bir yazıyla resmi olarak görevlendirilir.'
+      title: '3- PİYASA FİYAT ARAŞTIRMASI YAPILDI',
+      desc: 'Görevlendirilen gerçekleştirme görevlileri piyasadan teklifleri toplar ve resmi Piyasa Fiyat Araştırma Tutanağına işler.'
     },
     {
-      title: '4- PİYASA FİYAT ARAŞTIRMASI',
-      desc: 'Görevlendirilen personel piyasadan/istekli tedarikçilerden fiyat tekliflerini toplar. Toplanan bu teklifler resmi Piyasa Fiyat Araştırma Tutanağına işlenerek imzalanır.'
+      title: '4- YÜKLENİCİ BELİRLENDİ',
+      desc: 'Piyasa fiyat araştırması sonucunda en uygun/ekonomik teklifi sunan firma "Yüklenici" olarak belirlenir ve onaylanır.'
     },
     {
-      title: '5- FİYAT ONAYI (HARCAMA YETKİLİSİ)',
-      desc: 'Harcama Yetkilisi, piyasa fiyat araştırması sonucunda en uygun bulunan teklifi inceler ve tutanağın altındaki onay/olur alanını imzalayarak alıma onay verir.'
+      title: '5- MAL / HİZMET TESLİM EDİLDİ',
+      desc: 'Belirlenen yüklenici firma, talep edilen malı veya hizmeti kuruma/ambara fiilen teslim eder.'
     },
     {
-      title: '6- %10 LİMİT KONTROLÜ (4734 s.k. md. 62/i)',
-      desc: 'Doğrudan temin yoluyla yapılacak yıllık toplam harcamaların kanuni limit sınırları (%10 eşiği) içinde kalıp kalmadığı bütçe kontrolü kapsamında denetlenir.'
+      title: '6- TESLİM TESELLÜM TUTANAĞI',
+      desc: '✍️ "Kim teslim etti, kim teslim aldı?"\nTeslimatın yapıldığına dair malları teslim eden yüklenici ile teslim alan görevliler arasında imzalanan iki taraflı tutanaktır.'
     },
     {
-      title: '7- ALIMIN YAPILMASI & MUAYENE KABUL',
-      desc: 'Yükleniciden fatura temin edilir. Mal/hizmet teslim alındığında Muayene ve Kabul Komisyonu Tutanağı düzenlenir. Ambar girişi için Taşınır İşlem Fişi (TİF) kesilir.'
+      title: '7- MUAYENE VE KABUL TUTANAĞI',
+      desc: '🔎 "Komisyon kontrol etti, uygun buldu."\nMuayene ve kabul komisyonu üyeleri tarafından teslim edilen malların veya hizmetin teknik şartlara, lüzum müzekkeresine uygun olup olmadığı kontrol edilerek kabul edilir.'
     },
     {
-      title: '8- ÖDEME EMİR BELGESİ VE HAVALE',
-      desc: 'Gerekli tüm kanıtlayıcı belgeler eklenerek Ödeme Emri Belgesi düzenlenir. Gerçekleştirme Görevlisi ve Harcama Yetkilisi imzalarından sonra Muhasebe Yetkilisi ödemeyi hak sahibine EFT/havale yapar.'
+      title: '8- FATURA DÜZENLENDİ',
+      desc: 'Yüklenici firma, kabul işleminin ardından mal/hizmet bedeli için resmi e-faturayı/arşiv faturasını keser ve kuruma sunar.'
+    },
+    {
+      title: '9- ÖDEME TALEP DİLEKÇESİ',
+      desc: '🏦 "Bedelin şu IBAN\'a ödenmesini talep ediyorum."\nYüklenici firmanın alacak tutarının belirtilen şirket IBAN numarasına yatırılmasını talep ettiği resmi başvuru dilekçesidir.'
+    },
+    {
+      title: '10- TAŞINIR İŞLEM FİŞİ (TİF)',
+      desc: '📦 "Mal envantere girdi."\nAlınan malzeme demirbaş veya tüketim malzemesi ise ambar memuru tarafından Taşınır İşlem Fişi (TİF) düzenlenerek resmi envantere/stok kaydına alınır.'
+    },
+    {
+      title: '11- ÖDEME EMRİ (MUHASEBE ÖDEMEYİ YAPTI)',
+      desc: '💳 Tüm kanıtlayıcı belgeler (fatura, tutanaklar, dilekçe, TİF vb.) eklenerek Ödeme Emri Belgesi hazırlanır ve Muhasebe Yetkilisi bankadan fiili EFT/havale işlemini gerçekleştirir.'
     }
   ]
 
