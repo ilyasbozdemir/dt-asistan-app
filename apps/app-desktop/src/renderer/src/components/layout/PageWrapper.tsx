@@ -15,6 +15,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
 import { routeComponents } from './routeComponents'
 import { FindInPage } from './FindInPage'
+import { WorkspaceCloseModal } from './WorkspaceCloseModal'
+import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
 
 export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
@@ -59,7 +61,9 @@ export function PageWrapper(): React.ReactNode {
     isAuthenticated,
     loadActiveMeta,
     activeDosyaId,
-    setActiveDosyaId
+    setActiveDosyaId,
+    closeWorkspace,
+    fileName
   } = useWorkspaceStore()
   const { loadSettings } = useSettingsStore()
 
@@ -76,6 +80,52 @@ export function PageWrapper(): React.ReactNode {
   }, [window.location.search, setActiveDosyaId, activeDosyaId])
   const { tabs, activeTabPath, addTab, clearTabs, clearDosyaTabs } = useTabStore()
   const queryClient = useQueryClient()
+
+  const { settings } = useAyarlarHooks()
+  const isMailConfigured = !!settings.smtp_host
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+  const [isQuittingApp, setIsQuittingApp] = useState(false)
+
+  useEffect(() => {
+    const handleQuitRequest = () => {
+      setIsQuittingApp(true)
+      setIsCloseModalOpen(true)
+    }
+
+    const handleCloseRequest = () => {
+      setIsQuittingApp(false)
+      setIsCloseModalOpen(true)
+    }
+
+    const removeQuitListener = window.electron?.ipcRenderer.on('app:quit-request', handleQuitRequest)
+    window.addEventListener('workspace-close-request', handleCloseRequest)
+
+    return () => {
+      if (removeQuitListener) removeQuitListener()
+      window.removeEventListener('workspace-close-request', handleCloseRequest)
+    }
+  }, [])
+
+  const handleConfirmClose = async (type: 'none' | 'backup' | 'email'): Promise<void> => {
+    if (type === 'backup') {
+      const res = await window.electron.ipcRenderer.invoke('workspace:backup')
+      if (!res.success && res.error !== 'Yedekleme iptal edildi') {
+        throw new Error(res.error)
+      }
+    } else if (type === 'email') {
+      const res = await window.electron.ipcRenderer.invoke('workspace:backup-email')
+      if (!res.success) {
+        throw new Error(res.error)
+      }
+    }
+
+    await closeWorkspace()
+    queryClient.clear()
+
+    if (isQuittingApp) {
+      await window.electron.ipcRenderer.invoke('app:force-quit')
+    }
+  }
 
   const [lastActive, setLastActive] = useState<Record<string, number>>({})
   const [expiredPaths, setExpiredPaths] = useState<Record<string, boolean>>({})
@@ -440,6 +490,14 @@ export function PageWrapper(): React.ReactNode {
         </div>
         <Footer />
       </div>
+
+      <WorkspaceCloseModal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
+        fileName={fileName}
+        isMailConfigured={isMailConfigured}
+        onConfirm={handleConfirmClose}
+      />
     </div>
   )
 }

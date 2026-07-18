@@ -40,6 +40,8 @@ import { startExpressServer, stopExpressServer } from './network/expressServer'
 import { registerArchiveHandlers } from './archive'
 import { TANIM_Placeholder } from '@dt/database'
 
+let isForceQuitting = false
+
 // --- LOG SYSTEM & USERDATA SETUP ---
 const isMultiInstance = process.argv.includes('--multi-instance')
 const rawInitialFilePath = process.argv.find((arg) => isSupportedFile(arg)) ?? null
@@ -201,13 +203,14 @@ function createWindow(): void {
     }
   })
 
-  // Uygulama kapatıldığında direkt kapansın (arka planda çalışmasın)
-  // mainWindow.on('close', (event) => {
-  //   if (!isQuitting) {
-  //     event.preventDefault()
-  //     mainWindow.hide()
-  //   }
-  // })
+  mainWindow.on('close', (event) => {
+    if (isForceQuitting) return
+    const currentFile = workspaceManager.getCurrentFilePath()
+    if (currentFile) {
+      event.preventDefault()
+      mainWindow.webContents.send('app:quit-request')
+    }
+  })
 
   ipcMain.on('window-minimize', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
@@ -1281,6 +1284,11 @@ if (!gotTheLock && !isMultiInstance) {
         console.error('Email backup error:', error)
         return { success: false, error: error.message }
       }
+    })
+
+    ipcMain.handle('app:force-quit', () => {
+      isForceQuitting = true
+      app.quit()
     })
 
     ipcMain.handle('workspace:get-meta', async () => {

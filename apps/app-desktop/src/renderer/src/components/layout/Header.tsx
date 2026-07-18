@@ -4,41 +4,18 @@ import { DownloadCloud, Moon, Sun, ClipboardList, Printer } from 'lucide-react'
 import { useTheme } from '../providers/ThemeProvider'
 import { TeminSelector } from './TeminSelector'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { useQueryClient } from '@tanstack/react-query'
 import { WindowControls } from './header/WindowControls'
 import { NotificationPopover } from './header/NotificationPopover'
 import { SyncPopover } from './header/SyncPopover'
-import { WorkspaceCloseModal } from './WorkspaceCloseModal'
-import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
 
 export function Header(): React.JSX.Element {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
-  const { closeWorkspace, activeDosyaId, fileName } = useWorkspaceStore()
-  const { settings } = useAyarlarHooks()
-  const isMailConfigured = !!settings.smtp_host
-  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
-  const queryClient = useQueryClient()
-
+  const { activeDosyaId } = useWorkspaceStore()
+  
   const handleCloseWorkspace = async (): Promise<void> => {
-    setIsCloseModalOpen(true)
-  }
-
-  const handleConfirmClose = async (type: 'none' | 'backup' | 'email'): Promise<void> => {
-    if (type === 'backup') {
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup')
-      if (!res.success && res.error !== 'Yedekleme iptal edildi') {
-        throw new Error(res.error)
-      }
-    } else if (type === 'email') {
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup-email')
-      if (!res.success) {
-        throw new Error(res.error)
-      }
-    }
-    await closeWorkspace()
-    queryClient.clear()
+    window.dispatchEvent(new CustomEvent('workspace-close-request'))
   }
 
   const [updateStatus, setUpdateStatus] = useState<{
@@ -420,14 +397,6 @@ export function Header(): React.JSX.Element {
           <div className="w-[300px] shrink-0 hidden lg:block"></div>
         )}
       </div>
-
-      <WorkspaceCloseModal
-        isOpen={isCloseModalOpen}
-        onClose={() => setIsCloseModalOpen(false)}
-        fileName={fileName}
-        isMailConfigured={isMailConfigured}
-        onConfirm={handleConfirmClose}
-      />
     </header>
   )
 }
