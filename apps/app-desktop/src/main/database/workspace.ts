@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import { initializeDatabase, schema } from './index'
-import { runMigrations, CURRENT_SCHEMA_VERSION, getPendingMigrations } from './migrate'
+import { runMigrations, CURRENT_SCHEMA_VERSION, getPendingMigrations } from '@dt/database'
 import tasinirKodlariSeed from './seed/tasinir_kodlari.json'
 
 export interface WorkspaceMeta {
@@ -667,7 +667,7 @@ export class DtmWorkspace {
         const dbPath = path.join(this.tempDir, dbFileName)
         this.db = new Database(dbPath)
 
-        runMigrations(this.db, fromVersion)
+        runMigrations(this.db, fromVersion, schema)
         ensureSchemaIntegrity(this.db)
 
         meta.schema_version = CURRENT_SCHEMA_VERSION

@@ -22,8 +22,7 @@ const icon = app.isPackaged
   ? join(process.resourcesPath, 'icon.png')
   : join(__dirname, '../../resources/icon.png')
 import { workspaceManager } from './database/workspace'
-import { CURRENT_SCHEMA_VERSION } from './database/migrate'
-import { manifests } from './database/schema-manifest/index'
+import { CURRENT_SCHEMA_VERSION, manifests } from '@dt/database'
 import nodemailer from 'nodemailer'
 import {
   isSupportedFile,
@@ -39,7 +38,7 @@ import { renderPdfBuffer } from './pdfService'
 import { renderDocxBuffer } from './docxService'
 import { startExpressServer, stopExpressServer } from './network/expressServer'
 import { registerArchiveHandlers } from './archive'
-import { TANIM_Placeholder } from './database/tables/TANIM_Placeholder'
+import { TANIM_Placeholder } from '@dt/database'
 
 // --- LOG SYSTEM & USERDATA SETUP ---
 const isMultiInstance = process.argv.includes('--multi-instance')

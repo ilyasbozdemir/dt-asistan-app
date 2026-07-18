@@ -1,0 +1,24 @@
+{
+  "name": "@dt/database",
+  "version": "1.0.0",
+  "description": "Shared database models, schemas, and migrations for DT Asistan App",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"const fs = require('fs'); fs.mkdirSync('dist/schema-manifest', { recursive: true }); fs.readdirSync('src/schema-manifest').forEach(f => { if (f.endsWith('.yaml')) fs.copyFileSync('src/schema-manifest/' + f, 'dist/schema-manifest/' + f) })\"",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

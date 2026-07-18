@@ -1,5 +1,4 @@
-// @ts-ignore - Projeler arası (main -> renderer) import uyarısını yoksay
-import { TemplateVariablesSchema } from '../../../renderer/src/constants/templateVariables'
+import { TemplateVariablesSchema } from './templateVariables'
 
 export const TANIM_Placeholder = {
   name: 'TANIM_Placeholder',

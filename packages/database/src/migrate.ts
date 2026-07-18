@@ -1,7 +1,6 @@
+/* eslint-disable */
 import Database from 'better-sqlite3'
-import { app } from 'electron'
 import { manifests } from './schema-manifest/index'
-import { schema as dbSchemaDef } from '../database/index'
 
 export interface SchemaChange {
   schema: number
@@ -21,14 +20,26 @@ export interface AppVersionManifest {
 }
 
 export function getCurrentAppManifest(): AppVersionManifest {
-  const appVersion = app.getVersion()
-  const found = manifests.find((v) => v.app === appVersion)
-  if (found) return found
+  let appVersion = ''
+  try {
+    const { app } = require('electron')
+    if (app && typeof app.getVersion === 'function') {
+      appVersion = app.getVersion()
+    }
+  } catch (err) {
+    // Not running in Electron
+  }
+
+  if (appVersion) {
+    const found = manifests.find((v) => v.app === appVersion)
+    if (found) return found
+  }
+  
   return manifests[manifests.length - 1]
 }
 
 export const CURRENT_SCHEMA_MAX = getCurrentAppManifest().schema_max
-export const CURRENT_SCHEMA_VERSION = CURRENT_SCHEMA_MAX // legacy support for imports
+export const CURRENT_SCHEMA_VERSION = CURRENT_SCHEMA_MAX
 
 export interface PendingMigrationInfo {
   schema: number
@@ -63,7 +74,7 @@ export function getPendingMigrations(fromVersion: number): PendingMigrationInfo[
   return pending
 }
 
-export function runMigrations(db: Database.Database, fromVersion: number): void {
+export function runMigrations(db: Database.Database, fromVersion: number, dbSchemaDef: any): void {
   const MAX_SCHEMA = getCurrentAppManifest().schema_max
   if (fromVersion >= MAX_SCHEMA) return
 
@@ -93,7 +104,7 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
       try {
         if (change.tables_added && change.tables_added.length > 0) {
           for (const tableName of change.tables_added) {
-            const tableDef = dbSchemaDef.tables.find((t) => t.name === tableName)
+            const tableDef = dbSchemaDef.tables.find((t: any) => t.name === tableName)
             if (!tableDef) throw new Error(`Tablo tanımı bulunamadı: ${tableName}`)
 
             const columnsSql = tableDef.columns
@@ -134,7 +145,7 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
 
         if (change.columns_added && change.columns_added.length > 0) {
           for (const colAdd of change.columns_added) {
-            const tableDef = dbSchemaDef.tables.find((t) => t.name === colAdd.table)
+            const tableDef = dbSchemaDef.tables.find((t: any) => t.name === colAdd.table)
             if (!tableDef) throw new Error(`Tablo tanımı bulunamadı: ${colAdd.table}`)
             const colDef = tableDef.columns.find((c: any) => c.name === colAdd.column)
             if (!colDef)
