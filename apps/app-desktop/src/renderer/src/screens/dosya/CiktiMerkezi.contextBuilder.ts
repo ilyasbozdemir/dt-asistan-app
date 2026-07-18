@@ -426,12 +426,10 @@ export function buildDocumentContext(
       gorevi: c.gorevi
     })),
     hazirlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || 'Görevli Personel',
-    hazirlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
     hazirlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
     hazirlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     // Turkish characters compatibility helper
-    hazırlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
-    hazırlayanEposta: dosyaResData?.hazirlayan_eposta || '',
+    hazirlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
     talepEdenPersonelAdi: dosyaResData?.talep_eden_ad_soyad || 'Belirtilmedi',
     talepEdenPersonelUnvan: dosyaResData?.talep_eden_unvan || '',
     talepEdenTelefon: dosyaResData?.talep_eden_telefon || '',

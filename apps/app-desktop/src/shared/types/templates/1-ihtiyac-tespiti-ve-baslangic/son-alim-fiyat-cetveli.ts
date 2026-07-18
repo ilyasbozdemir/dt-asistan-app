@@ -36,8 +36,6 @@ export interface ISonAlimFiyatCetveli {
   dosyaTarihi?: string
   onaylayanPersonelAdi?: string
   onaylayanPersonelUnvan?: string
-  hazırlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
-  hazırlayanEposta?: string
   hazirlayanEposta?: string
 }

@@ -37,7 +37,7 @@ export interface IIhtiyacTalepFormu {
   hazirlayanPersonelAdi?: string
   hazirlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
-  hazırlayanEposta?: string
+  hazirlayanEposta?: string
   altNotlar?: string
   schema?: object
 }

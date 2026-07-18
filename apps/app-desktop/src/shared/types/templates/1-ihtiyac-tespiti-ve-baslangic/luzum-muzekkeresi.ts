@@ -31,10 +31,8 @@ export interface ILuzumMuzekkeresi {
   ihtiyacYeri?: string
   isinAciklamasi?: string
   ihtiyacKalemleri?: LuzumMuzekkeresiIhtiyacKalemleriItem[]
-  olurYazisi?: boolean
   dosyaTarihi?: string
   onaylayanPersonelAdi?: string
   onaylayanPersonelUnvan?: string
-  hazırlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
 }

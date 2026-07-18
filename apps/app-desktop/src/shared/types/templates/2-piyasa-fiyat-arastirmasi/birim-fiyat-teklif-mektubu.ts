@@ -33,9 +33,7 @@ export interface IBirimFiyatTeklifMektubu {
   kurumEposta?: string
   kurumKep?: string
   hazirlayanPersonelAdi?: string
-  hazırlayanPersonelUnvan?: string
   hazirlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
-  hazırlayanEposta?: string
   hazirlayanEposta?: string
 }

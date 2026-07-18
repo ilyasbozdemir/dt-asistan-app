@@ -1,5 +1,5 @@
 import React from 'react'
-import { Building2, Edit2, Trash2 } from 'lucide-react'
+import { Building2, Edit2, Trash2, Phone, User, Globe, Mail } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 
 interface FirmaGridProps {
@@ -16,20 +16,24 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
   handleDelete
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {filtered.map((firma) => (
         <div
           key={firma.id}
           onClick={() => handleViewClick(firma)}
-          className="flex flex-col p-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-colors group relative cursor-pointer"
+          className="flex flex-col p-5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group relative cursor-pointer overflow-hidden min-h-[175px]"
         >
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Accent line on top of card */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Action buttons */}
+          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Button
               title="Düzenle"
               variant="ghost"
               size="sm"
               onClick={(e) => openEditModal(e, firma)}
-              className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
+              className="h-8 w-8 p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors border-0"
             >
               <Edit2 className="w-3.5 h-3.5" />
             </Button>
@@ -38,33 +42,51 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
               variant="ghost"
               size="sm"
               onClick={(e) => handleDelete(e, firma.id)}
-              className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/15"
+              className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors border-0"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 mb-2 pr-8">
+          {/* Badges row */}
+          <div className="flex items-center gap-2 mb-3.5 pr-14">
             {firma.firma_kodu && (
-              <span className="font-mono font-bold text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-100/20 dark:border-blue-900/10 px-1.5 py-0.5 rounded">
+              <span className="font-mono font-black text-[9px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-100/50 dark:border-blue-900/30 px-2 py-0.5 rounded-lg tracking-wider">
                 {firma.firma_kodu}
               </span>
             )}
             {firma.il && (
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-200/30 dark:border-slate-700/20">
                 {firma.il}
               </span>
             )}
           </div>
 
-          <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200 line-clamp-2 mb-2 leading-tight flex-1">
+          {/* Title */}
+          <h4 className="font-black text-sm text-slate-800 dark:text-slate-100 line-clamp-2 mb-3.5 leading-snug flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             {firma.unvan}
           </h4>
 
-          <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400 mb-3">
-            {firma.vergi_no && <div className="truncate">🏢 {firma.vergi_no}</div>}
-            {firma.telefon && <div>📞 {firma.telefon}</div>}
-            {firma.ilgili_adi && <div className="truncate">👤 {firma.ilgili_adi}</div>}
+          {/* Info grid */}
+          <div className="space-y-2 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/60 pt-3">
+            {firma.vergi_no && (
+              <div className="flex items-center gap-2 truncate">
+                <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">VN: <strong className="text-slate-655 dark:text-slate-355">{firma.vergi_no}</strong> {firma.vergi_dairesi && `(${firma.vergi_dairesi})`}</span>
+              </div>
+            )}
+            {firma.ilgili_adi && (
+              <div className="flex items-center gap-2 truncate">
+                <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">{firma.ilgili_adi}</span>
+              </div>
+            )}
+            {firma.telefon && (
+              <div className="flex items-center gap-2 truncate">
+                <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>{firma.telefon}</span>
+              </div>
+            )}
           </div>
         </div>
       ))}

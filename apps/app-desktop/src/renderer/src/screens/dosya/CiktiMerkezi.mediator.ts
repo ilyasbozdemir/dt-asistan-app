@@ -28,9 +28,9 @@ export const TemplateFieldsMediator: Record<string, string[]> = {
     'dosyaTarihi',
     'onaylayanPersonelAdi',
     'onaylayanPersonelUnvan',
-    'hazırlayanPersonelUnvan',
+    'hazirlayanPersonelUnvan',
     'hazirlayanTelefon',
-    'hazırlayanEposta',
+    'hazirlayanEposta',
     'hazirlayanEposta'
   ],
   'ihtiyac-listesi': [
@@ -58,10 +58,10 @@ export const TemplateFieldsMediator: Record<string, string[]> = {
     'onaylayanPersonelAdi',
     'onaylayanPersonelUnvan',
     'hazirlayanPersonelAdi',
-    'hazırlayanPersonelUnvan',
+    'hazirlayanPersonelUnvan',
     'hazirlayanPersonelUnvan',
     'hazirlayanTelefon',
-    'hazırlayanEposta',
+    'hazirlayanEposta',
     'hazirlayanEposta'
   ],
   'harcama-talimati': [
@@ -114,10 +114,10 @@ export const TemplateFieldsMediator: Record<string, string[]> = {
     'onaylayanPersonelUnvan',
     'gerekce',
     'hazirlayanPersonelAdi',
-    'hazırlayanPersonelUnvan',
+    'hazirlayanPersonelUnvan',
     'hazirlayanPersonelUnvan',
     'hazirlayanTelefon',
-    'hazırlayanEposta',
+    'hazirlayanEposta',
     'hazirlayanEposta',
     'altNotlar',
     'schema'
@@ -170,9 +170,9 @@ export const TemplateFieldsMediator: Record<string, string[]> = {
     'dosyaTarihi',
     'onaylayanPersonelAdi',
     'onaylayanPersonelUnvan',
-    'hazırlayanPersonelUnvan',
+    'hazirlayanPersonelUnvan',
     'hazirlayanTelefon',
-    'hazırlayanEposta',
+    'hazirlayanEposta',
     'hazirlayanEposta'
   ]
 }

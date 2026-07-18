@@ -33,8 +33,6 @@ export interface IPiyasaFiyatArastirmaGorevlendirmesi {
   kurumEposta?: string
   kurumKep?: string
   kurumIci?: boolean
-  hazırlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
-  hazırlayanEposta?: string
   hazirlayanEposta?: string
 }

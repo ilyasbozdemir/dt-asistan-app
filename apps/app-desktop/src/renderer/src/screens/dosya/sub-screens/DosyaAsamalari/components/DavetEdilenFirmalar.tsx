@@ -1,4 +1,4 @@
-import { AlertCircle, Building2, CheckCircle2, X } from 'lucide-react'
+import { AlertCircle, Building2, CheckCircle2, X, Plus } from 'lucide-react'
 import React from 'react'
 
 interface BiddingFirm {
@@ -14,29 +14,40 @@ interface DavetEdilenFirmalarProps {
   lowestTotalFirmaId: number | null
   isEditing?: boolean
   onRemoveFirm?: (teminFirmaId: number) => void
+  onAddClick?: () => void
 }
 
 export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
   invitedFirms,
   lowestTotalFirmaId,
   isEditing,
-  onRemoveFirm
+  onRemoveFirm,
+  onAddClick
 }) => {
   if (invitedFirms.length === 0) {
     return (
-      <div className="p-12 text-center bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
+      <div className="p-12 text-center bg-slate-50 dark:bg-slate-955/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3">
         <div className="p-3 bg-blue-500/10 text-blue-500 rounded-full">
           <Building2 className="w-6 h-6" />
         </div>
         <div className="text-center">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-350">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-355">
             Bu dosyaya henüz teklif veren/davet edilen firma eklenmemiş.
           </p>
           <p className="text-xs text-slate-400 mt-1 max-w-md">
-            Teklif fiyat giriş tablosunu açmak için lütfen yukarıdaki menüden firma ekleyin veya
-            firma havuzunu düzenleyerek havuzu genişletin.
+            Teklif fiyat giriş tablosunu açmak için lütfen firma ekleyin veya firma havuzunu düzenleyin.
           </p>
         </div>
+        {isEditing && onAddClick && (
+          <button
+            type="button"
+            onClick={onAddClick}
+            className="mt-2 flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-0"
+          >
+            <Plus className="w-4 h-4" />
+            İstekli Firma Seç / Ekle
+          </button>
+        )}
       </div>
     )
   }
@@ -61,7 +72,7 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
                 e.stopPropagation()
                 onRemoveFirm(firma.id)
               }}
-              className="absolute top-3 right-3 p-1 text-rose-500 hover:text-rose-700 dark:text-rose-450 dark:hover:text-rose-350 bg-rose-50 dark:bg-rose-950/20 rounded-md hover:bg-rose-100 transition-all cursor-pointer z-10"
+              className="absolute top-3 right-3 p-1 text-rose-500 hover:text-rose-700 dark:text-rose-450 dark:hover:text-rose-355 bg-rose-50 dark:bg-rose-950/20 rounded-md hover:bg-rose-100 transition-all cursor-pointer z-10"
               title="Firmayı Kaldır"
             >
               <X className="w-3.5 h-3.5" />
@@ -135,6 +146,20 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
           </div>
         </div>
       ))}
+
+      {isEditing && onAddClick && (
+        <div
+          onClick={onAddClick}
+          className="p-4 bg-slate-50/40 hover:bg-slate-100/50 dark:bg-slate-900/30 dark:hover:bg-slate-900/50 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer group min-h-[140px] transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-800"
+        >
+          <div className="p-2 bg-blue-50 dark:bg-blue-955/30 text-blue-600 dark:text-blue-400 rounded-full group-hover:scale-110 transition-transform duration-300">
+            <Plus className="w-5 h-5" />
+          </div>
+          <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            İstekli Firma Seç / Ekle
+          </span>
+        </div>
+      )}
     </div>
   )
 }

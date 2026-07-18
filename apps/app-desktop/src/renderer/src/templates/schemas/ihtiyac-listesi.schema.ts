@@ -35,10 +35,8 @@ export const IhtiyacListesiSchema = z.object({
   onaylayanPersonelAdi: z.string().optional(),
   onaylayanPersonelUnvan: z.string().optional(),
   hazirlayanPersonelAdi: z.string().optional(),
-  hazırlayanPersonelUnvan: z.string().optional(),
   hazirlayanPersonelUnvan: z.string().optional(),
   hazirlayanTelefon: z.string().optional(),
-  hazırlayanEposta: z.string().optional(),
   hazirlayanEposta: z.string().optional()
 })
 

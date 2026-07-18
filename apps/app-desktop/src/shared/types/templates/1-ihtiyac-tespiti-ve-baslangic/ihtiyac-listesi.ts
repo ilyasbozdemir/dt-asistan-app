@@ -34,7 +34,7 @@ export interface IIhtiyacListesi {
   onaylayanPersonelAdi?: string
   onaylayanPersonelUnvan?: string
   hazirlayanPersonelAdi?: string
-  hazırlayanPersonelUnvan?: string
+  hazirlayanPersonelUnvan?: string
   hazirlayanTelefon?: string
   hazirlayanEposta?: string
 }
