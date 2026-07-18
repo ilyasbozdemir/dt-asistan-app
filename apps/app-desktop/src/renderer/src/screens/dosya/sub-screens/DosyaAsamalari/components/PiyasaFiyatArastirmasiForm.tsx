@@ -26,7 +26,11 @@ interface PiyasaFiyatArastirmasiFormProps {
   getEstimatedCostTotal: () => number;
   getLowestBidInfo: (itemId: number) => any;
   getAverageBid: (itemId: number) => number;
-  handlePriceChange: (kalemId: number, teminFirmaId: number, priceStr: string) => Promise<void>;
+  handlePriceChange: (
+    kalemId: number,
+    teminFirmaId: number,
+    priceStr: string,
+  ) => Promise<void>;
   handleSaveToDosya: () => void;
   maliyetCetveliTarihi: string;
   setMaliyetCetveliTarihi: (val: string) => void;
@@ -107,7 +111,8 @@ export function PiyasaFiyatArastirmasiForm({
             </button>
             <div className="text-left">
               <h3 className="text-base font-black text-slate-850 dark:text-slate-100 flex items-center gap-2 leading-none">
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse">
+                </span>
                 Piyasa Fiyat Araştırma Formu
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -225,8 +230,7 @@ export function PiyasaFiyatArastirmasiForm({
                     onChange={(e) =>
                       setManualWinnerFirmaId(
                         e.target.value ? Number(e.target.value) : null,
-                      )
-                    }
+                      )}
                     className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200 max-w-[180px] truncate"
                   >
                     <option value="">-- Firma Seç --</option>
@@ -264,125 +268,141 @@ export function PiyasaFiyatArastirmasiForm({
           isFormFullscreen ? "md:p-8" : "",
         )}
       >
-        {activeFormTab === "firms" ? (
-          /* İSTEKLİ FİRMALARI YÖNETME ALANI */
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6 animate-in fade-in duration-200">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                  Sürece Katılan İstekli Firmalar
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Piyasa araştırması kapsamında davet edilen ve teklif formu dolduran firmaları belirleyin.
-                </p>
-                <div className="mt-2.5 p-3 bg-blue-50/50 dark:bg-blue-955/20 rounded-xl border border-blue-100 dark:border-blue-900/30 text-xs text-blue-700 dark:text-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <span>
-                    ℹ️ Bu alandaki verileri bir önceki adım olan{" "}
-                    <strong>Hazırlık ve İhtiyaç</strong> aşamasında da güncelleyebilirsiniz. Orada yapılan değişiklikler otomatik olarak buraya yansır.
-                  </span>
-                  <Link
-                    to="/dosya/hazirlik-ve-ihtiyac"
-                    className="shrink-0 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition-all border-0 cursor-pointer text-center"
-                  >
-                    Hazırlık ve İhtiyaç&apos;a Git
-                  </Link>
+        {activeFormTab === "firms"
+          ? (
+            /* İSTEKLİ FİRMALARI YÖNETME ALANI */
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6 animate-in fade-in duration-200">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600">
+                    </span>
+                    Sürece Katılan İstekli Firmalar
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Piyasa araştırması kapsamında davet edilen ve teklif formu
+                    dolduran firmaları belirleyin.
+                  </p>
+                  <div className="mt-2.5 p-3 bg-blue-50/50 dark:bg-blue-955/20 rounded-xl border border-blue-100 dark:border-blue-900/30 text-xs text-blue-700 dark:text-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span>
+                      ℹ️ Bu alandaki verileri bir önceki adım olan{" "}
+                      <strong>Hazırlık ve İhtiyaç</strong>{" "}
+                      aşamasında da güncelleyebilirsiniz. Orada yapılan
+                      değişiklikler otomatik olarak buraya yansır.
+                    </span>
+                    <Link
+                      to="/dosya/hazirlik-ve-ihtiyac"
+                      className="shrink-0 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition-all border-0 cursor-pointer text-center"
+                    >
+                      Hazırlık ve İhtiyaç&apos;a Git
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {!isEditingFirms
+                    ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingFirms(true)}
+                        className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-4.5 py-2 rounded-xl transition-all h-8 cursor-pointer shadow-xs border-0"
+                        title="Firmaları ve teklif formlarını düzenlemek için düzenleme modunu açın."
+                      >
+                        <Unlock className="w-3.5 h-3.5" />
+                        Firmaları Düzenle
+                      </button>
+                    )
+                    : (
+                      <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-955 p-1 rounded-2xl border border-slate-100 dark:border-slate-800/80 animate-in fade-in slide-in-from-left-2 duration-300">
+                        <button
+                          type="button"
+                          onClick={() => setIsFirmModalOpen(true)}
+                          className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4.5 py-2 rounded-xl transition-all h-8 cursor-pointer shadow-xs border-0"
+                        >
+                          <Building2 className="w-3.5 h-3.5 text-blue-400" />
+                          Seç
+                        </button>
+
+                        <Link
+                          to="/firmalar"
+                          className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4.5 py-2 rounded-xl transition-all flex items-center justify-center h-8 cursor-pointer shadow-xs border-0"
+                        >
+                          <Settings className="w-3.5 h-3.5 text-white/90" />
+                          Listeyi Yönet
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingFirms(false)}
+                          className="flex items-center justify-center w-8 h-8 rounded-xl bg-slate-200 hover:bg-slate-350 dark:bg-slate-800 dark:hover:bg-slate-700 border-0 cursor-pointer"
+                          title="Düzenlemeyi Bitir / Kilitle"
+                        >
+                          <Lock className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                {!isEditingFirms ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingFirms(true)}
-                    className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-4.5 py-2 rounded-xl transition-all h-8 cursor-pointer shadow-xs border-0"
-                    title="Firmaları ve teklif formlarını düzenlemek için düzenleme modunu açın."
-                  >
-                    <Unlock className="w-3.5 h-3.5" />
-                    Firmaları Düzenle
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-955 p-1 rounded-2xl border border-slate-100 dark:border-slate-800/80 animate-in fade-in slide-in-from-left-2 duration-300">
-                    <button
-                      type="button"
-                      onClick={() => setIsFirmModalOpen(true)}
-                      className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-semibold px-4.5 py-2 rounded-xl transition-all h-8 cursor-pointer shadow-xs border-0"
-                    >
-                      <Building2 className="w-3.5 h-3.5 text-blue-400" />
-                      Seç
-                    </button>
-
-                    <Link
-                      to="/firmalar"
-                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4.5 py-2 rounded-xl transition-all flex items-center justify-center h-8 cursor-pointer shadow-xs border-0"
-                    >
-                      <Settings className="w-3.5 h-3.5 text-white/90" />
-                      Listeyi Yönet
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingFirms(false)}
-                      className="flex items-center justify-center w-8 h-8 rounded-xl bg-slate-200 hover:bg-slate-350 dark:bg-slate-800 dark:hover:bg-slate-700 border-0 cursor-pointer"
-                      title="Düzenlemeyi Bitir / Kilitle"
-                    >
-                      <Lock className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
-                    </button>
+              {/* DAVET EDİLEN FİRMALARIN KART GÖRÜNÜMÜ */}
+              <DavetEdilenFirmalar
+                invitedFirms={invitedFirms}
+                lowestTotalFirmaId={lowestTotalFirmaId}
+                isEditing={isEditingFirms}
+                onRemoveFirm={handleRemoveFirm}
+                onAddClick={() => setIsFirmModalOpen(true)}
+              />
+            </div>
+          )
+          : (
+            /* TEKLİF VE BİRİM FİYAT GİRİŞ MATRİSİ */
+            <div className="animate-in fade-in duration-200">
+              {invitedFirms.length > 0 && items.length > 0
+                ? (
+                  <TeklifMatrisi
+                    invitedFirms={invitedFirms}
+                    items={items}
+                    bids={bids}
+                    getEstimatedCostTotal={getEstimatedCostTotal}
+                    getLowestBidInfo={getLowestBidInfo}
+                    getAverageBid={getAverageBid}
+                    handlePriceChange={handlePriceChange}
+                  />
+                )
+                : invitedFirms.length > 0 && items.length === 0
+                ? (
+                  <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
+                        İhtiyaç Kalemi Bulunamadı
+                      </h4>
+                      <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
+                        Teklif fiyat giriş tablosunu görüntülemek için bu
+                        dosyaya ait ihtiyaç kalemlerinin girilmiş olması
+                        gerekir. Lütfen ilgili adımda ihtiyaç listesini
+                        tanımlayın.
+                      </p>
+                    </div>
+                  </div>
+                )
+                : (
+                  <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
+                        Davet Edilen İstekli Firma Yok
+                      </h4>
+                      <p className="text-xs text-amber-600 dark:text-amber-550 mt-1">
+                        Fiyat girişi yapabilmek için lütfen önce{" "}
+                        <strong>İstekli Firmalar</strong>{" "}
+                        sekmesinden en az 1 firma seçin veya ekleyin.
+                      </p>
+                    </div>
                   </div>
                 )}
-              </div>
             </div>
-
-            {/* DAVET EDİLEN FİRMALARIN KART GÖRÜNÜMÜ */}
-            <DavetEdilenFirmalar
-              invitedFirms={invitedFirms}
-              lowestTotalFirmaId={lowestTotalFirmaId}
-              isEditing={isEditingFirms}
-              onRemoveFirm={handleRemoveFirm}
-              onAddClick={() => setIsFirmModalOpen(true)}
-            />
-          </div>
-        ) : (
-          /* TEKLİF VE BİRİM FİYAT GİRİŞ MATRİSİ */
-          <div className="animate-in fade-in duration-200">
-            {invitedFirms.length > 0 && items.length > 0 ? (
-              <TeklifMatrisi
-                invitedFirms={invitedFirms}
-                items={items}
-                bids={bids}
-                getEstimatedCostTotal={getEstimatedCostTotal}
-                getLowestBidInfo={getLowestBidInfo}
-                getAverageBid={getAverageBid}
-                handlePriceChange={handlePriceChange}
-              />
-            ) : invitedFirms.length > 0 && items.length === 0 ? (
-              <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
-                    İhtiyaç Kalemi Bulunamadı
-                  </h4>
-                  <p className="text-xs text-amber-600 dark:text-amber-500/90 mt-1">
-                    Teklif fiyat giriş tablosunu görüntülemek için bu dosyaya ait ihtiyaç kalemlerinin girilmiş olması gerekir. Lütfen ilgili adımda ihtiyaç listesini tanımlayın.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 text-left flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-sm text-amber-800 dark:text-amber-400">
-                    Davet Edilen İstekli Firma Yok
-                  </h4>
-                  <p className="text-xs text-amber-600 dark:text-amber-550 mt-1">
-                    Fiyat girişi yapabilmek için lütfen önce{" "}
-                    <strong>İstekli Firmalar</strong> sekmesinden en az 1 firma seçin veya ekleyin.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
       </div>
     </div>
   );
