@@ -2,6 +2,14 @@ import React, { useEffect } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
+import { ProcessStepper } from './components/ProcessStepper'
+
+const STEPPER_ROUTES = [
+  'hazirlik-ve-ihtiyac',
+  'piyasa-fiyat-arastirmasi',
+  'siparis-ve-sozlesme',
+  'kabul-ve-odeme'
+]
 
 interface SubScreenProps {
   title: string
@@ -43,6 +51,10 @@ export function SubScreen({
       })
   }, [activeDosyaId, title, setActiveStarredDocs])
 
+  // Mevcut sayfanın stepper'a dahil olup olmadığını belirle
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+  const showStepper = STEPPER_ROUTES.some((r) => currentPath.includes(r))
+
   return (
     <div className="p-6 md:p-8 w-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* HEADER */}
@@ -65,6 +77,11 @@ export function SubScreen({
         </div>
       </div>
 
+      {/* PROCESS STEPPER */}
+      {showStepper && activeDosyaId && (
+        <ProcessStepper currentRoute={currentPath} />
+      )}
+
       {/* ACTIVE DOSYA CONTEXT */}
       {!activeDosyaId && (
         <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm print:hidden">
@@ -85,3 +102,4 @@ export function SubScreen({
     </div>
   )
 }
+

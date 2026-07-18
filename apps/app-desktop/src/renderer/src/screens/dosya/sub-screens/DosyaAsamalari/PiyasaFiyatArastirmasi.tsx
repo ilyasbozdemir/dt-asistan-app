@@ -199,19 +199,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
               onClick={() => setIsFormOpen(true)}
               className="flex items-center gap-2 text-xs bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/10 hover:shadow-lg transition-all h-10 cursor-pointer border-0 shrink-0 self-start sm:self-center"
             >
-              {stageDocs.length > 0
-                ? (
-                  <>
-                    <Edit3 className="w-4.5 h-4.5" />
-                    Tutanak & Fiyat Tablosunu Düzenle
-                  </>
-                )
-                : (
-                  <>
-                    <Plus className="w-4.5 h-4.5" />
-                    Yeni Tutanak Ekle / Teklif Girişi
-                  </>
-                )}
+              <Plus className="w-4.5 h-4.5" />
+              Yeni Tutanak Ekle / Teklif Girişi
             </button>
           </div>
 
