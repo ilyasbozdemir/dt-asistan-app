@@ -1,21 +1,32 @@
 import type { ReactElement } from "react";
-
-import { ChevronDown, FileCheck, Files, FileText } from "lucide-react";
+import {
+    ChevronDown,
+    FileCheck,
+    Files,
+    FileText,
+    Shield,
+    ShieldCheck,
+} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@renderer/components/ui/DropdownMenu";
 
 interface WinnerDocumentsMenuProps {
     onPrintResultApproval: () => void;
     onPrintAcceptanceLetter: () => void;
+    onEkapBlacklistQuery: () => void;
+    onEdevletBlacklistQuery: () => void;
 }
 
 export function WinnerDocumentsMenu({
     onPrintResultApproval,
     onPrintAcceptanceLetter,
+    onEkapBlacklistQuery,
+    onEdevletBlacklistQuery,
 }: WinnerDocumentsMenuProps): ReactElement {
     return (
         <DropdownMenu>
@@ -36,6 +47,18 @@ export function WinnerDocumentsMenu({
                 <DropdownMenuItem onClick={onPrintAcceptanceLetter}>
                     <FileText className="mr-2 h-4 w-4 text-blue-600" />
                     Kabul Yazısını Yazdır
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={onEkapBlacklistQuery}>
+                    <ShieldCheck className="mr-2 h-4 w-4 text-orange-600" />
+                    EKAP Yasaklı Sorgula
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={onEdevletBlacklistQuery}>
+                    <Shield className="mr-2 h-4 w-4 text-indigo-600" />
+                    e-Devlet Yasaklı Sorgula
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
