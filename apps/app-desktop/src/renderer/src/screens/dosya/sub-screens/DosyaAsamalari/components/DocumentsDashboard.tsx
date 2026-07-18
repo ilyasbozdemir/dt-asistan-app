@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   AlertCircle,
   Calendar,
@@ -7,22 +7,30 @@ import {
   Eye,
   FileText,
   MoreVertical,
-  Printer
-} from 'lucide-react'
-import { cn } from '../../../../../utils/cn'
-import { normalizeForMatch } from '../useDosyaAsamasiSablons'
+  Printer,
+} from "lucide-react";
+import { cn } from "../../../../../utils/cn";
+import { normalizeForMatch } from "../useDosyaAsamasiSablons";
 
 interface DocumentsDashboardProps {
-  stageDocs: any[]
-  docViewMode: 'grid' | 'list' | 'table'
-  sablons: any[]
-  disableDocumentGuidance: boolean
-  activeActionDropdown: string | null
-  setActiveActionDropdown: (val: string | null) => void
-  handleOpenPreviewForSablon: (sablon: any, title: string) => void
-  quickOpenExternal: (sablon: any) => void
-  quickPrint: (sablon: any) => void
-  handleUpdateDocumentDate: (docId: number, dateStr: string, docName: string) => void
+  stageDocs: any[];
+  docViewMode: "grid" | "list" | "table";
+  sablons: any[];
+  disableDocumentGuidance: boolean;
+  activeActionDropdown: string | null;
+  setActiveActionDropdown: (val: string | null) => void;
+  handleOpenPreviewForSablon: (
+    sablon: any,
+    title: string,
+    overrideCtx?: any,
+  ) => void;
+  quickOpenExternal: (sablon: any) => void;
+  quickPrint: (sablon: any) => void;
+  handleUpdateDocumentDate: (
+    docId: number,
+    dateStr: string,
+    docName: string,
+  ) => void;
 }
 
 export function DocumentsDashboard({
@@ -35,7 +43,7 @@ export function DocumentsDashboard({
   handleOpenPreviewForSablon,
   quickOpenExternal,
   quickPrint,
-  handleUpdateDocumentDate
+  handleUpdateDocumentDate,
 }: DocumentsDashboardProps): React.JSX.Element {
   if (stageDocs.length === 0) {
     return (
@@ -45,15 +53,15 @@ export function DocumentsDashboard({
           Henüz kaydedilmiş bir tutanak bulunmuyor.
         </div>
         <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
-          Firmaların teklif ettiği fiyatları girip tutanağı kaydetmek için "Yeni Tutanak Ekle /
-          Teklif Girişi" butonuna basarak fiyat tablosunu açabilir veya diğer süreç şablonlarını
-          aşağıdan görüntüleyebilirsiniz.
+          Firmaların teklif ettiği fiyatları girip tutanağı kaydetmek için "Yeni
+          Tutanak Ekle / Teklif Girişi" butonuna basarak fiyat tablosunu
+          açabilir veya diğer süreç şablonlarını aşağıdan görüntüleyebilirsiniz.
         </p>
       </div>
-    )
+    );
   }
 
-  if (docViewMode === 'table') {
+  if (docViewMode === "table") {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
@@ -77,12 +85,15 @@ export function DocumentsDashboard({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {stageDocs.map((doc: any) => {
                 const sablon = sablons.find((s: any) => {
-                  const normAd = normalizeForMatch(s.ad)
-                  const normDocName = normalizeForMatch(doc.belge_adi)
-                  return normAd.includes(normDocName) || normDocName.includes(normAd)
-                })
+                  const normAd = normalizeForMatch(s.ad);
+                  const normDocName = normalizeForMatch(doc.belge_adi);
+                  return normAd.includes(normDocName) ||
+                    normDocName.includes(normAd);
+                });
 
-                const isTutanak = doc.belge_adi.toLowerCase().includes('tutanak')
+                const isTutanak = doc.belge_adi.toLowerCase().includes(
+                  "tutanak",
+                );
 
                 return (
                   <tr
@@ -93,17 +104,15 @@ export function DocumentsDashboard({
                       <div className="flex items-center gap-3">
                         <div
                           className={cn(
-                            'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
                             isTutanak
-                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-455'
-                              : 'bg-violet-500/10 text-violet-600 dark:text-violet-455'
+                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-455"
+                              : "bg-violet-500/10 text-violet-600 dark:text-violet-455",
                           )}
                         >
-                          {isTutanak ? (
-                            <FileText className="w-4.5 h-4.5" />
-                          ) : (
-                            <ClipboardList className="w-4.5 h-4.5" />
-                          )}
+                          {isTutanak
+                            ? <FileText className="w-4.5 h-4.5" />
+                            : <ClipboardList className="w-4.5 h-4.5" />}
                         </div>
                         <span className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">
                           {doc.belge_adi}
@@ -115,7 +124,7 @@ export function DocumentsDashboard({
                         className="text-xs font-bold text-slate-600 dark:text-slate-400 truncate max-w-xs block"
                         title={sablon?.dosya_adi}
                       >
-                        {sablon?.dosya_adi || 'Bağlı şablon bulunmuyor'}
+                        {sablon?.dosya_adi || "Bağlı şablon bulunmuyor"}
                       </span>
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap">
@@ -123,9 +132,13 @@ export function DocumentsDashboard({
                         <Calendar className="w-3.5 h-3.5 text-slate-455" />
                         <input
                           type="date"
-                          value={doc.belge_tarihi || ''}
+                          value={doc.belge_tarihi || ""}
                           onChange={(e) => {
-                            handleUpdateDocumentDate(doc.id, e.target.value, doc.belge_adi)
+                            handleUpdateDocumentDate(
+                              doc.id,
+                              e.target.value,
+                              doc.belge_adi,
+                            );
                           }}
                           className="bg-transparent border-none text-xs p-0 font-bold focus:outline-none cursor-pointer text-slate-700 dark:text-slate-300 w-32"
                         />
@@ -142,7 +155,17 @@ export function DocumentsDashboard({
                         <button
                           onClick={() => {
                             if (sablon) {
-                              handleOpenPreviewForSablon(sablon, sablon.ad)
+                              let overrideCtx = undefined;
+                              if (doc.veri_json) {
+                                try {
+                                  overrideCtx = JSON.parse(doc.veri_json);
+                                } catch (e) {}
+                              }
+                              handleOpenPreviewForSablon(
+                                sablon,
+                                sablon.ad,
+                                overrideCtx,
+                              );
                             }
                           }}
                           className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-455 hover:bg-blue-50 dark:hover:bg-blue-950/30 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer border-0 bg-transparent"
@@ -171,49 +194,47 @@ export function DocumentsDashboard({
                       </div>
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         </div>
       </div>
-    )
+    );
   }
 
-  if (docViewMode === 'list') {
+  if (docViewMode === "list") {
     return (
       <div className="flex flex-col gap-3">
         {stageDocs.map((doc: any) => {
           const sablon = sablons.find((s: any) => {
-            const normAd = normalizeForMatch(s.ad)
-            const normDocName = normalizeForMatch(doc.belge_adi)
-            return normAd.includes(normDocName) || normDocName.includes(normAd)
-          })
+            const normAd = normalizeForMatch(s.ad);
+            const normDocName = normalizeForMatch(doc.belge_adi);
+            return normAd.includes(normDocName) || normDocName.includes(normAd);
+          });
 
-          const isTutanak = doc.belge_adi.toLowerCase().includes('tutanak')
+          const isTutanak = doc.belge_adi.toLowerCase().includes("tutanak");
 
           return (
             <div
               key={doc.id || doc.belge_adi}
               className={cn(
-                'relative group bg-gradient-to-r from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-xl p-4 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4',
-                activeActionDropdown === doc.belge_adi ? 'z-30' : 'z-10'
+                "relative group bg-gradient-to-r from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-xl p-4 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+                activeActionDropdown === doc.belge_adi ? "z-30" : "z-10",
               )}
             >
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 <div
                   className={cn(
-                    'w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs',
+                    "w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs",
                     isTutanak
-                      ? 'from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-455 border border-blue-500/20'
-                      : 'from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20'
+                      ? "from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-455 border border-blue-500/20"
+                      : "from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20",
                   )}
                 >
-                  {isTutanak ? (
-                    <FileText className="w-5 h-5" />
-                  ) : (
-                    <ClipboardList className="w-5 h-5" />
-                  )}
+                  {isTutanak
+                    ? <FileText className="w-5 h-5" />
+                    : <ClipboardList className="w-5 h-5" />}
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -224,7 +245,7 @@ export function DocumentsDashboard({
                     className="text-[10px] font-semibold text-slate-500 dark:text-slate-450 truncate"
                     title={sablon?.dosya_adi}
                   >
-                    {sablon?.dosya_adi || 'Bağlı şablon bulunmuyor'}
+                    {sablon?.dosya_adi || "Bağlı şablon bulunmuyor"}
                   </p>
                 </div>
               </div>
@@ -239,9 +260,13 @@ export function DocumentsDashboard({
                   <Calendar className="w-3.5 h-3.5 text-slate-455" />
                   <input
                     type="date"
-                    value={doc.belge_tarihi || ''}
+                    value={doc.belge_tarihi || ""}
                     onChange={(e) => {
-                      handleUpdateDocumentDate(doc.id, e.target.value, doc.belge_adi)
+                      handleUpdateDocumentDate(
+                        doc.id,
+                        e.target.value,
+                        doc.belge_adi,
+                      );
                     }}
                     className="bg-transparent border-none text-[10px] p-0 font-bold focus:outline-none cursor-pointer text-slate-700 dark:text-slate-300 w-32"
                   />
@@ -251,9 +276,21 @@ export function DocumentsDashboard({
                   <button
                     onClick={() => {
                       if (sablon) {
-                        handleOpenPreviewForSablon(sablon, sablon.ad)
+                        let overrideCtx = undefined;
+                        if (doc.veri_json) {
+                          try {
+                            overrideCtx = JSON.parse(doc.veri_json);
+                          } catch (e) {}
+                        }
+                        handleOpenPreviewForSablon(
+                          sablon,
+                          sablon.ad,
+                          overrideCtx,
+                        );
                       } else {
-                        alert('Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.')
+                        alert(
+                          "Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.",
+                        );
                       }
                     }}
                     className="flex items-center justify-center gap-1 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded-lg transition-all cursor-pointer h-7 border-0"
@@ -266,10 +303,12 @@ export function DocumentsDashboard({
                     <div className="relative dropdown-container">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation()
+                          e.stopPropagation();
                           setActiveActionDropdown(
-                            activeActionDropdown === doc.belge_adi ? null : doc.belge_adi
-                          )
+                            activeActionDropdown === doc.belge_adi
+                              ? null
+                              : doc.belge_adi,
+                          );
                         }}
                         className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
                       >
@@ -280,9 +319,9 @@ export function DocumentsDashboard({
                         <div className="absolute right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 text-left">
                           <button
                             onClick={() => {
-                              setActiveActionDropdown(null)
+                              setActiveActionDropdown(null);
                               if (sablon) {
-                                handleOpenPreviewForSablon(sablon, sablon.ad)
+                                handleOpenPreviewForSablon(sablon, sablon.ad);
                               }
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
@@ -292,9 +331,9 @@ export function DocumentsDashboard({
                           </button>
                           <button
                             onClick={() => {
-                              setActiveActionDropdown(null)
+                              setActiveActionDropdown(null);
                               if (sablon) {
-                                quickOpenExternal(sablon)
+                                quickOpenExternal(sablon);
                               }
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
@@ -304,8 +343,8 @@ export function DocumentsDashboard({
                           </button>
                           <button
                             onClick={() => {
-                              setActiveActionDropdown(null)
-                              if (sablon) quickPrint(sablon)
+                              setActiveActionDropdown(null);
+                              if (sablon) quickPrint(sablon);
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-1.5 transition-colors"
                           >
@@ -319,10 +358,10 @@ export function DocumentsDashboard({
                 </div>
               </div>
             </div>
-          )
+          );
         })}
       </div>
-    )
+    );
   }
 
   /* DOCUMENTS GRID VIEW (DEFAULT) */
@@ -330,19 +369,19 @@ export function DocumentsDashboard({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       {stageDocs.map((doc: any) => {
         const sablon = sablons.find((s: any) => {
-          const normAd = normalizeForMatch(s.ad)
-          const normDocName = normalizeForMatch(doc.belge_adi)
-          return normAd.includes(normDocName) || normDocName.includes(normAd)
-        })
+          const normAd = normalizeForMatch(s.ad);
+          const normDocName = normalizeForMatch(doc.belge_adi);
+          return normAd.includes(normDocName) || normDocName.includes(normAd);
+        });
 
-        const isTutanak = doc.belge_adi.toLowerCase().includes('tutanak')
+        const isTutanak = doc.belge_adi.toLowerCase().includes("tutanak");
 
         return (
           <div
             key={doc.id || doc.belge_adi}
             className={cn(
-              'relative group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between',
-              activeActionDropdown === doc.belge_adi ? 'z-30' : 'z-10'
+              "relative group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between",
+              activeActionDropdown === doc.belge_adi ? "z-30" : "z-10",
             )}
           >
             <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
@@ -360,9 +399,13 @@ export function DocumentsDashboard({
                   <Calendar className="w-3.5 h-3.5 text-slate-455" />
                   <input
                     type="date"
-                    value={doc.belge_tarihi || ''}
+                    value={doc.belge_tarihi || ""}
                     onChange={(e) => {
-                      handleUpdateDocumentDate(doc.id, e.target.value, doc.belge_adi)
+                      handleUpdateDocumentDate(
+                        doc.id,
+                        e.target.value,
+                        doc.belge_adi,
+                      );
                     }}
                     className="bg-transparent border-none text-[10px] p-0 font-bold focus:outline-none cursor-pointer text-slate-700 dark:text-slate-300 w-32"
                   />
@@ -372,17 +415,15 @@ export function DocumentsDashboard({
               <div className="flex items-start gap-4">
                 <div
                   className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs',
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs",
                     isTutanak
-                      ? 'from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-455 border border-blue-500/20'
-                      : 'from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20'
+                      ? "from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-455 border border-blue-500/20"
+                      : "from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20",
                   )}
                 >
-                  {isTutanak ? (
-                    <FileText className="w-6 h-6" />
-                  ) : (
-                    <ClipboardList className="w-6 h-6" />
-                  )}
+                  {isTutanak
+                    ? <FileText className="w-6 h-6" />
+                    : <ClipboardList className="w-6 h-6" />}
                 </div>
 
                 <div className="min-w-0">
@@ -393,7 +434,7 @@ export function DocumentsDashboard({
                     className="text-[11px] font-semibold text-slate-500 dark:text-slate-450 truncate"
                     title={sablon?.dosya_adi}
                   >
-                    {sablon?.dosya_adi || 'Bağlı şablon bulunmuyor'}
+                    {sablon?.dosya_adi || "Bağlı şablon bulunmuyor"}
                   </p>
                 </div>
               </div>
@@ -403,9 +444,17 @@ export function DocumentsDashboard({
               <button
                 onClick={() => {
                   if (sablon) {
-                    handleOpenPreviewForSablon(sablon, sablon.ad)
+                    let overrideCtx = undefined
+                    if (doc.veri_json) {
+                      try {
+                        overrideCtx = JSON.parse(doc.veri_json)
+                      } catch (e) {}
+                    }
+                    handleOpenPreviewForSablon(sablon, sablon.ad, overrideCtx);
                   } else {
-                    alert('Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.')
+                    alert(
+                      "Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.",
+                    );
                   }
                 }}
                 className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 py-2.5 px-4 rounded-xl transition-all shadow-xs hover:shadow shadow-blue-500/10 cursor-pointer h-10 border-0"
@@ -418,10 +467,12 @@ export function DocumentsDashboard({
                 <div className="relative dropdown-container">
                   <button
                     onClick={(e) => {
-                      e.stopPropagation()
+                      e.stopPropagation();
                       setActiveActionDropdown(
-                        activeActionDropdown === doc.belge_adi ? null : doc.belge_adi
-                      )
+                        activeActionDropdown === doc.belge_adi
+                          ? null
+                          : doc.belge_adi,
+                      );
                     }}
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-655 dark:text-slate-355 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
                   >
@@ -432,9 +483,9 @@ export function DocumentsDashboard({
                     <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 text-left">
                       <button
                         onClick={() => {
-                          setActiveActionDropdown(null)
+                          setActiveActionDropdown(null);
                           if (sablon) {
-                            handleOpenPreviewForSablon(sablon, sablon.ad)
+                            handleOpenPreviewForSablon(sablon, sablon.ad);
                           }
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
@@ -445,9 +496,9 @@ export function DocumentsDashboard({
 
                       <button
                         onClick={() => {
-                          setActiveActionDropdown(null)
+                          setActiveActionDropdown(null);
                           if (sablon) {
-                            quickOpenExternal(sablon)
+                            quickOpenExternal(sablon);
                           }
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
@@ -458,9 +509,9 @@ export function DocumentsDashboard({
 
                       <button
                         onClick={() => {
-                          setActiveActionDropdown(null)
+                          setActiveActionDropdown(null);
                           if (sablon) {
-                            quickPrint(sablon)
+                            quickPrint(sablon);
                           }
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
@@ -474,8 +525,8 @@ export function DocumentsDashboard({
               )}
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

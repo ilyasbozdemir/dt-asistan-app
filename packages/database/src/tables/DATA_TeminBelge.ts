@@ -11,6 +11,7 @@ export const DATA_TeminBelge = {
     { name: 'imzali_dosya_yolu', type: 'TEXT', description: 'Imzali Dosya Yolu' },
     { name: 'olusturan_personel_id', type: 'INTEGER', description: 'Olusturan Personel ID' },
     { name: 'belge_tarihi', type: 'TEXT', description: 'Belge/Tutanak Tarihi' },
+    { name: 'veri_json', type: 'TEXT', description: 'Belgeye ait dondurulmus JSON taslagi' },
     {
       name: 'created_at',
       type: 'DATETIME',

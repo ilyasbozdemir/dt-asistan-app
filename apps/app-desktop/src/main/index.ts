@@ -3304,7 +3304,9 @@ if (!gotTheLock && !isMultiInstance) {
       console.log(`Yeni sürüm bulundu! Sürüm: ${info.version}`)
 
       try {
-        const versionsPath = join(__dirname, '../../versions.json')
+        const versionsPath = app.isPackaged 
+          ? join(process.resourcesPath, 'versions.json') 
+          : join(app.getAppPath(), '../../packages/database/versions.json')
         if (fs.existsSync(versionsPath)) {
           const versionsList: string[] = JSON.parse(fs.readFileSync(versionsPath, 'utf8'))
           const currentV =

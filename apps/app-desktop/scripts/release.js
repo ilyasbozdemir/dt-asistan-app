@@ -165,7 +165,7 @@ function main() {
 
   // 3. versions.json güncelle
   if (!flags.skipVersions) {
-    const versionsPath = 'versions.json'
+    const versionsPath = '../../packages/database/versions.json'
     let versions = []
     try {
       versions = readJSON(versionsPath)

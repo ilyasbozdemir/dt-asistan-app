@@ -454,31 +454,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
           }
 
           for (const doc of documentsToLog) {
-            const existRes = await window.electron.ipcRenderer.invoke(
-              'db:query',
-              'SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ?',
-              [activeDosyaId, doc.name]
-            )
-            if (existRes.success && existRes.data && existRes.data.length > 0) {
-              await window.electron.ipcRenderer.invoke(
-                'db:run',
-                'UPDATE DATA_TeminBelge SET belge_tarihi = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?',
-                [doc.date || null, existRes.data[0].id]
-              )
-            } else {
-              await window.electron.ipcRenderer.invoke(
-                'db:run',
-                'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu) VALUES (?, ?, ?, ?)',
-                [activeDosyaId, doc.name, doc.date || null, '']
-              )
-            }
-
-            // Ayrıca bu şablonun güncel veri snapshot'ını DATA_DosyaSablonVeri tablosuna kaydet!
             const sablon = stageSablons.find((s: any) => {
               const lowerAd = s.ad.toLowerCase()
               const lowerDocName = doc.name.toLowerCase()
               return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd)
             })
+
+            let mergedCtxStr: string | null = null
             if (sablon) {
               const processPath = sablon.route_path || sablon.dosya_adi || ''
               const baseCtx = contextsByPath[processPath] || dosyaContext
@@ -487,12 +469,22 @@ export function usePiyasaFiyatArastirmasiLogic() {
                 tarih: doc.date ? formatDateString(doc.date) : baseCtx.tarih,
                 dosyaTarihi: doc.date ? formatDateString(doc.date) : baseCtx.dosyaTarihi
               }
+              mergedCtxStr = JSON.stringify(mergedCtx)
+
+              // Aktif şablon verisini güncelle (en son durum)
               await window.electron.ipcRenderer.invoke(
                 'db:run',
                 'INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)',
-                [activeDosyaId, sablon.id, JSON.stringify(mergedCtx)]
+                [activeDosyaId, sablon.id, mergedCtxStr]
               )
             }
+
+            // Yeni bir versiyon (tarihçeli belge) olarak ekle
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu, veri_json) VALUES (?, ?, ?, ?, ?)',
+              [activeDosyaId, doc.name, doc.date || null, '', mergedCtxStr]
+            )
           }
 
           alert(

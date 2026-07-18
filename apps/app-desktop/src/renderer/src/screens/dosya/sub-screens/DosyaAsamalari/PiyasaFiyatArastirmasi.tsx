@@ -80,16 +80,22 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const [activeFormTab, setActiveFormTab] = useState<"firms" | "matrix">(() => {
     return invitedFirms.length > 0 ? "matrix" : "firms";
   });
-  const [activeActionDropdown, setActiveActionDropdown] = useState<string | null>(null);
+  const [activeActionDropdown, setActiveActionDropdown] = useState<
+    string | null
+  >(null);
   const [isFormFullscreen, setIsFormFullscreen] = useState<boolean>(false);
-  const [dashboardViewMode, setDashboardViewMode] = useState<"documents" | "prices">("documents");
-  const [docViewMode, setDocViewMode] = useState<"grid" | "list" | "table">(() => {
-    try {
-      return (localStorage.getItem("dta_doc_view_mode") as any) || "grid";
-    } catch {
-      return "grid";
-    }
-  });
+  const [dashboardViewMode, setDashboardViewMode] = useState<
+    "documents" | "prices"
+  >("documents");
+  const [docViewMode, setDocViewMode] = useState<"grid" | "list" | "table">(
+    () => {
+      try {
+        return (localStorage.getItem("dta_doc_view_mode") as any) || "grid";
+      } catch {
+        return "grid";
+      }
+    },
+  );
 
   const changeDocViewMode = (mode: "grid" | "list" | "table") => {
     setDocViewMode(mode);

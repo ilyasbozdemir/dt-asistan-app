@@ -35,7 +35,11 @@ interface PiyasaFiyatArastirmasiDashboardProps {
   setActiveFormTab: (tab: "firms" | "matrix") => void;
   activeActionDropdown: string | null;
   setActiveActionDropdown: (val: string | null) => void;
-  handleUpdateDocumentDate: (docId: number, newDate: string, docName: string) => void;
+  handleUpdateDocumentDate: (
+    docId: number,
+    newDate: string,
+    docName: string,
+  ) => void;
 }
 
 export function PiyasaFiyatArastirmasiDashboard({

@@ -212,7 +212,7 @@ export function useDosyaAsamasiSablons() {
     loadFromUrl()
   }, [sablonAd, sablons, masterHtml, activeDosyaId, dosyaContext])
 
-  const handleOpenPreviewForSablon = async (sablon: any, title: string) => {
+  const handleOpenPreviewForSablon = async (sablon: any, title: string, overrideCtx?: any) => {
     if (!masterHtml) {
       alert('Master şablon yüklenemedi, veriler bekleniyor.')
       return
@@ -220,7 +220,7 @@ export function useDosyaAsamasiSablons() {
 
     const processPath = sablon.route_path || sablon.dosya_adi || ''
     const currentCtx = contextsByPath[processPath] || dosyaContext
-    const snapshotCtx = await loadOrCreateSnapshot(sablon.id, currentCtx)
+    const snapshotCtx = overrideCtx ? overrideCtx : await loadOrCreateSnapshot(sablon.id, currentCtx)
 
     setPreviewData({
       sablonId: sablon.id,
