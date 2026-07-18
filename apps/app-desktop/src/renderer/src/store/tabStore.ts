@@ -97,13 +97,21 @@ export const useTabStore = create<TabState>((set, get) => ({
 
     // Check if the new path belongs to the Kurum family
     const cleanPath = path.split('?')[0]
-    const isKurumFamily = ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(cleanPath)
+    const isKurumFamily = [
+      '/birimler',
+      '/personel',
+      '/komisyonlar',
+      '/komisyon-gorevleri',
+      '/kurum'
+    ].includes(cleanPath)
 
     if (isKurumFamily) {
       // Find if there is already a tab in the Kurum family
       const existingKurumIndex = tabs.findIndex((t) => {
         const tClean = t.path.split('?')[0]
-        return ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(tClean)
+        return ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(
+          tClean
+        )
       })
 
       if (existingKurumIndex > -1) {

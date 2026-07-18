@@ -245,10 +245,7 @@ export const FirmaDetail: React.FC<FirmaDetailProps> = ({ viewingFirma, setViewi
           </div>
         ) : (
           /* GEÇMİŞ DOĞRUDAN TEMİNLER TAB */
-          <FirmaGecmisTeminler
-            firmaId={viewingFirma.id}
-            firmaUnvan={viewingFirma.unvan}
-          />
+          <FirmaGecmisTeminler firmaId={viewingFirma.id} firmaUnvan={viewingFirma.unvan} />
         )}
       </div>
     </div>

@@ -83,7 +83,9 @@ export function TakipScreen(): React.JSX.Element {
       await deleteDosya(activeDosyaId)
       await logActivity(
         'Dosya İptal Edildi',
-        `${activeDosya.temin_no || 'NO BELİRSİZ'} numaralı dosya takip ekranından iptal edildi olarak işaretlendi.`,
+        `${
+          activeDosya.temin_no || 'NO BELİRSİZ'
+        } numaralı dosya takip ekranından iptal edildi olarak işaretlendi.`,
         'warning'
       )
       setActiveDosyaId(null)
@@ -93,8 +95,14 @@ export function TakipScreen(): React.JSX.Element {
   useEffect(() => {
     if (activeDosya) {
       setStatus(activeDosya.status || 'devam_ediyor')
-      setAcilisTarihi(activeDosya.dosya_acilis_tarihi ? activeDosya.dosya_acilis_tarihi.substring(0, 10) : '')
-      setSonTeklifTarihi(activeDosya.son_teklif_verme_tarihi ? activeDosya.son_teklif_verme_tarihi.substring(0, 10) : '')
+      setAcilisTarihi(
+        activeDosya.dosya_acilis_tarihi ? activeDosya.dosya_acilis_tarihi.substring(0, 10) : ''
+      )
+      setSonTeklifTarihi(
+        activeDosya.son_teklif_verme_tarihi
+          ? activeDosya.son_teklif_verme_tarihi.substring(0, 10)
+          : ''
+      )
       setTeminTarihi(activeDosya.temin_tarihi ? activeDosya.temin_tarihi.substring(0, 10) : '')
       setTeslimTarihi(activeDosya.teslim_tarihi ? activeDosya.teslim_tarihi.substring(0, 10) : '')
       setNotlar(activeDosya.notlar || '')
@@ -326,14 +334,20 @@ export function TakipScreen(): React.JSX.Element {
                     <span className="text-[10px] font-bold text-blue-600 dark:text-blue-450 uppercase tracking-widest bg-blue-100/40 dark:bg-blue-955/40 px-2.5 py-1 rounded-full border border-blue-500/15">
                       {activeDosya.temin_no || 'Dosya No Belirtilmedi'}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                      activeDosya.status === 'tamamlandi'
-                        ? 'bg-emerald-100/40 text-emerald-600 border-emerald-500/15'
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                        activeDosya.status === 'tamamlandi'
+                          ? 'bg-emerald-100/40 text-emerald-600 border-emerald-500/15'
+                          : activeDosya.status === 'iptal'
+                            ? 'bg-rose-100/40 text-rose-600 border-rose-500/15'
+                            : 'bg-amber-100/40 text-amber-600 border-amber-500/15'
+                      }`}
+                    >
+                      {activeDosya.status === 'tamamlandi'
+                        ? 'Tamamlandı'
                         : activeDosya.status === 'iptal'
-                        ? 'bg-rose-100/40 text-rose-600 border-rose-500/15'
-                        : 'bg-amber-100/40 text-amber-600 border-amber-500/15'
-                    }`}>
-                      {activeDosya.status === 'tamamlandi' ? 'Tamamlandı' : activeDosya.status === 'iptal' ? 'İptal Edildi' : 'Devam Ediyor'}
+                          ? 'İptal Edildi'
+                          : 'Devam Ediyor'}
                     </span>
                   </div>
                   <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100">
@@ -634,11 +648,14 @@ export function TakipScreen(): React.JSX.Element {
                   Dinamik Altyapı
                 </span>
               </div>
-              
+
               <div className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
                 <p>
-                  Sistemimizdeki tüm şablonlar, dosyaya girdiğiniz veriler ile 
-                  <strong className="text-slate-800 dark:text-slate-200"> tamamen dinamik ve otomatik </strong> 
+                  Sistemimizdeki tüm şablonlar, dosyaya girdiğiniz veriler ile
+                  <strong className="text-slate-800 dark:text-slate-200">
+                    {' '}
+                    tamamen dinamik ve otomatik{' '}
+                  </strong>
                   olarak doldurulur. Süreç boyunca yaptığınız her giriş anında evraklara yansır.
                 </p>
 
@@ -646,9 +663,12 @@ export function TakipScreen(): React.JSX.Element {
                   <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
                     <span className="text-base select-none">💡</span>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Esnek & Dinamik Şablonlar</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Esnek & Dinamik Şablonlar
+                      </h4>
                       <p className="text-[10.5px] text-slate-500 leading-normal">
-                        Şablonların yerleşimleri ve içerikleri mevzuata uygun şekilde dinamik olarak bağlanmıştır.
+                        Şablonların yerleşimleri ve içerikleri mevzuata uygun şekilde dinamik olarak
+                        bağlanmıştır.
                       </p>
                     </div>
                   </div>
@@ -656,9 +676,12 @@ export function TakipScreen(): React.JSX.Element {
                   <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
                     <span className="text-base select-none">🚀</span>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Süreç Nasıl Başlar? (1. Aşama)</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Süreç Nasıl Başlar? (1. Aşama)
+                      </h4>
                       <p className="text-[10.5px] text-slate-500 leading-normal">
-                        İhtiyaç listesini girerek süreci başlatırsınız. Bu adıma göre Lüzum Müzekkeresi ve Harcama Talimatı gibi başlangıç belgeleri üretilir.
+                        İhtiyaç listesini girerek süreci başlatırsınız. Bu adıma göre Lüzum
+                        Müzekkeresi ve Harcama Talimatı gibi başlangıç belgeleri üretilir.
                       </p>
                     </div>
                   </div>
@@ -666,9 +689,12 @@ export function TakipScreen(): React.JSX.Element {
                   <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
                     <span className="text-base select-none">📊</span>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Piyasa Fiyat Araştırması (2. Aşama)</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Piyasa Fiyat Araştırması (2. Aşama)
+                      </h4>
                       <p className="text-[10.5px] text-slate-500 leading-normal">
-                        Firma tekliflerini girdiğinizde, komisyonlar ve yaklaşık maliyet hesaplamaları otomatik olarak dolup cetvel haline getirilir.
+                        Firma tekliflerini girdiğinizde, komisyonlar ve yaklaşık maliyet
+                        hesaplamaları otomatik olarak dolup cetvel haline getirilir.
                       </p>
                     </div>
                   </div>
@@ -676,9 +702,12 @@ export function TakipScreen(): React.JSX.Element {
                   <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl flex gap-3">
                     <span className="text-base select-none">🏁</span>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Sözleşme & Süreç Sonu (3/4. Aşama)</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Sözleşme & Süreç Sonu (3/4. Aşama)
+                      </h4>
                       <p className="text-[10.5px] text-slate-500 leading-normal">
-                        Kazanan firmayı atar, sözleşme basar ve son aşamada Muayene Kabul Tutanağı ile süreci kapatıp imzaya çıkarırsınız.
+                        Kazanan firmayı atar, sözleşme basar ve son aşamada Muayene Kabul Tutanağı
+                        ile süreci kapatıp imzaya çıkarırsınız.
                       </p>
                     </div>
                   </div>

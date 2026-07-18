@@ -78,9 +78,7 @@ export function SubScreen({
       </div>
 
       {/* PROCESS STEPPER */}
-      {showStepper && activeDosyaId && (
-        <ProcessStepper currentRoute={currentPath} />
-      )}
+      {showStepper && activeDosyaId && <ProcessStepper currentRoute={currentPath} />}
 
       {/* ACTIVE DOSYA CONTEXT */}
       {!activeDosyaId && (
@@ -102,4 +100,3 @@ export function SubScreen({
     </div>
   )
 }
-

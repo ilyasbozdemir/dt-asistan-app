@@ -539,7 +539,9 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                         .join('\n')
                                       const fazla =
                                         eksikAlanlar.length > maxGoster
-                                          ? `\n  ... ve ${eksikAlanlar.length - maxGoster} alan daha`
+                                          ? `\n  ... ve ${
+                                              eksikAlanlar.length - maxGoster
+                                            } alan daha`
                                           : ''
                                       const devam = confirm(
                                         `⚠️ ${eksikAlanlar.length} alan eksik / belirtilmemiş:\n\n${eksikListesi}${fazla}\n\n✅ ${doluAlanlar.length} alan dolu.\n\nYine de PDF olarak açmak istiyor musunuz?`

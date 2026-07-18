@@ -1,7 +1,15 @@
 import React, { useState } from 'react'
 import { KurumVerisi, useKurumHooks } from './kurum.hooks'
 import { Button } from '../../components/ui/Button'
-import { Building2, MapPin, Save, Users, ShieldCheck, LayoutGrid, ClipboardCheck } from 'lucide-react'
+import {
+  Building2,
+  MapPin,
+  Save,
+  Users,
+  ShieldCheck,
+  LayoutGrid,
+  ClipboardCheck
+} from 'lucide-react'
 import { InnerMenu, InnerMenuItem } from '../../components/ui/InnerMenu'
 import { IdariBilgilerTab } from './components/IdariBilgilerTab'
 import { MaliBirimTab } from './components/MaliBirimTab'
@@ -16,7 +24,15 @@ import PersonelScreen from '../personel/index.screen'
 import KomisyonlarScreen from '../komisyonlar/index.screen'
 import KomisyonGorevleriScreen from '../komisyon-gorevleri/index.screen'
 
-type TabType = 'idari' | 'mali' | 'iletisim' | 'logolar' | 'birimler' | 'personel' | 'komisyonlar' | 'komisyon-gorevleri'
+type TabType =
+  | 'idari'
+  | 'mali'
+  | 'iletisim'
+  | 'logolar'
+  | 'birimler'
+  | 'personel'
+  | 'komisyonlar'
+  | 'komisyon-gorevleri'
 
 export default function KurumScreen(): React.JSX.Element {
   const { kurumData, isLoadingKurum, fetchKurum, saveKurum } = useKurumHooks()
@@ -235,7 +251,8 @@ export default function KurumScreen(): React.JSX.Element {
                     Kurum Bilgileri
                   </h1>
                   <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-                    Resmi evrak çıktılarında ve arayüzde gösterilecek idari ve iletişim bilgilerini yönetin.
+                    Resmi evrak çıktılarında ve arayüzde gösterilecek idari ve iletişim bilgilerini
+                    yönetin.
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">

@@ -44,7 +44,9 @@ export const PackageStructure: React.FC<PackageStructureProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-slate-400">├──</span>
               <FileJson
-                className={`w-4 h-4 ${selectedFile === 'meta.json' ? 'text-blue-600' : 'text-slate-500'}`}
+                className={`w-4 h-4 ${
+                  selectedFile === 'meta.json' ? 'text-blue-600' : 'text-slate-500'
+                }`}
               />
               <span>meta.json</span>
             </div>
@@ -65,7 +67,9 @@ export const PackageStructure: React.FC<PackageStructureProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-slate-400">├──</span>
               <Database
-                className={`w-4 h-4 ${selectedFile === 'database.sqlite' ? 'text-emerald-600' : 'text-slate-500'}`}
+                className={`w-4 h-4 ${
+                  selectedFile === 'database.sqlite' ? 'text-emerald-600' : 'text-slate-500'
+                }`}
               />
               <span>database.sqlite</span>
             </div>
@@ -86,7 +90,9 @@ export const PackageStructure: React.FC<PackageStructureProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-slate-400">└──</span>
               <FolderOpen
-                className={`w-4 h-4 ${selectedFile === 'attachments/' ? 'text-amber-500' : 'text-slate-500'}`}
+                className={`w-4 h-4 ${
+                  selectedFile === 'attachments/' ? 'text-amber-500' : 'text-slate-500'
+                }`}
               />
               <span>attachments/</span>
             </div>

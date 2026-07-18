@@ -138,8 +138,8 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           [activeDosyaId]
         )
         const allCommission = komsRes.success ? komsRes.data : []
-        const commission = allCommission.filter((c: any) =>
-          c.komisyon_turu?.toLowerCase().includes('fiyat')
+        const commission = allCommission.filter(
+          (c: any) => c.komisyon_turu?.toLowerCase().includes('fiyat')
         )
         const muayeneKomisyonu = allCommission.filter(
           (c: any) =>

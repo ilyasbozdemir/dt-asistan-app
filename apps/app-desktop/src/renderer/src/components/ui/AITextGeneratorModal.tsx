@@ -79,7 +79,9 @@ export function AITextGeneratorModal({
         : prompt
 
       if (mode === 'json') {
-        finalPrompt += `\n\nÖNEMLİ: Yanıtını SADECE geçerli bir JSON formatında dön. Başka hiçbir açıklama, markdown veya text ekleme. Sadece süslü parantezlerle başlayan ham JSON dön.\nBeklenen Format (örnek):\n${expectedJsonFormat || '{ "sonuc": "..." }'}`
+        finalPrompt += `\n\nÖNEMLİ: Yanıtını SADECE geçerli bir JSON formatında dön. Başka hiçbir açıklama, markdown veya text ekleme. Sadece süslü parantezlerle başlayan ham JSON dön.\nBeklenen Format (örnek):\n${
+          expectedJsonFormat || '{ "sonuc": "..." }'
+        }`
       } else if (isAdvisorMode) {
         finalPrompt += `\n\nÖNEMLİ: Yanıtını LÜTFEN MARKDOWN FORMATINDA (**, ###, listeler vb. kullanarak) okunabilir ve yapılandırılmış olarak üret.`
       } else {
@@ -312,7 +314,9 @@ export function AITextGeneratorModal({
                   type="button"
                   onClick={() =>
                     setPrompt(
-                      `"${initialSubject || 'Mal Alımı'}" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
+                      `"${
+                        initialSubject || 'Mal Alımı'
+                      }" ihalesi için resmi teknik/idari açıklama hazırlığı yap.`
                     )
                   }
                   className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
@@ -323,7 +327,9 @@ export function AITextGeneratorModal({
                   type="button"
                   onClick={() =>
                     setPrompt(
-                      `"${initialSubject || 'Hizmet Alımı'}" işinin kapsamını maddeler halinde listele.`
+                      `"${
+                        initialSubject || 'Hizmet Alımı'
+                      }" işinin kapsamını maddeler halinde listele.`
                     )
                   }
                   className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"
@@ -334,7 +340,9 @@ export function AITextGeneratorModal({
                   type="button"
                   onClick={() =>
                     setPrompt(
-                      `"${initialSubject || 'Yapım İşi'}" için ihale teknik şartnamesine uygun özet metin oluştur.`
+                      `"${
+                        initialSubject || 'Yapım İşi'
+                      }" için ihale teknik şartnamesine uygun özet metin oluştur.`
                     )
                   }
                   className="text-[10px] px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-350 rounded-lg transition-colors font-medium border-none"

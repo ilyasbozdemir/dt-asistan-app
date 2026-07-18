@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { YeniDosyaTabProps } from '../types'
 import { GenelBilgilerVeIdariAntetSection } from './components/genel-bilgiler/GenelBilgilerVeIdariAntetSection'

@@ -20,20 +20,26 @@ fs.mkdirSync(screenDir, { recursive: true })
 fs.mkdirSync(componentsDir, { recursive: true })
 
 const indexContent = `import React from 'react'
-import { use${screenName.charAt(0).toUpperCase() + screenName.slice(1)}Hooks } from './${screenName}.hooks'
+import { use${
+  screenName.charAt(0).toUpperCase() + screenName.slice(1)
+}Hooks } from './${screenName}.hooks'
 
 export default function ${screenName.charAt(0).toUpperCase() + screenName.slice(1)}Screen() {
   const {} = use${screenName.charAt(0).toUpperCase() + screenName.slice(1)}Hooks()
   
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">${screenName.charAt(0).toUpperCase() + screenName.slice(1)} Ekranı</h1>
+      <h1 className="text-2xl font-bold">${
+        screenName.charAt(0).toUpperCase() + screenName.slice(1)
+      } Ekranı</h1>
     </div>
   )
 }
 `
 
-const hooksContent = `export function use${screenName.charAt(0).toUpperCase() + screenName.slice(1)}Hooks() {
+const hooksContent = `export function use${
+  screenName.charAt(0).toUpperCase() + screenName.slice(1)
+}Hooks() {
   return {}
 }
 `

@@ -62,9 +62,7 @@ export function MalzemeListCard({
         </h4>
 
         <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 min-w-[150px] justify-end">
-          <span className="font-semibold text-slate-600 dark:text-slate-300">
-            {item.tipi}
-          </span>
+          <span className="font-semibold text-slate-600 dark:text-slate-300">{item.tipi}</span>
           <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-2 py-1 rounded">
             Birim: {item.birim}
           </span>

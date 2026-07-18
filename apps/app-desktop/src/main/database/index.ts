@@ -104,7 +104,10 @@ export function initializeDatabase(db: Database.Database, institutionName: strin
       version INTEGER PRIMARY KEY,
       applied_at TEXT NOT NULL
     );
-    INSERT OR REPLACE INTO settings (key, value) VALUES ('institutionName', '${institutionName.replace(/'/g, "''")}');
+    INSERT OR REPLACE INTO settings (key, value) VALUES ('institutionName', '${institutionName.replace(
+      /'/g,
+      "''"
+    )}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '${currentAppVersion}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', '${CURRENT_SCHEMA_VERSION}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('appTitle', '${schema.app_title}');

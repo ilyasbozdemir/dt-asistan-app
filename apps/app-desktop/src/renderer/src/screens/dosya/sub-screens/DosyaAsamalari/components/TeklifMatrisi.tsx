@@ -46,7 +46,7 @@ const BidPriceInput: React.FC<{
     // Convert Turkish format (comma for decimal, remove dots) to standard float string
     const cleanValue = tempValue
       .replace(/\./g, '') // remove thousands separators if any
-      .replace(',', '.')  // replace decimal comma with dot
+      .replace(',', '.') // replace decimal comma with dot
     onChange(cleanValue)
   }
 
@@ -126,7 +126,10 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
 
   // Initialize and synchronize selectedFirmId
   useEffect(() => {
-    if (invitedFirms.length > 0 && (selectedFirmId === null || !invitedFirms.some((f) => f.id === selectedFirmId))) {
+    if (
+      invitedFirms.length > 0 &&
+      (selectedFirmId === null || !invitedFirms.some((f) => f.id === selectedFirmId))
+    ) {
       setSelectedFirmId(invitedFirms[0].id)
     }
   }, [invitedFirms, selectedFirmId])
@@ -200,10 +203,17 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${selectedFirmId === f.id ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'}`}></span>
-                  <span className="truncate max-w-[160px]" title={f.unvan}>{f.unvan}</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      selectedFirmId === f.id ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'
+                    }`}
+                  ></span>
+                  <span className="truncate max-w-[160px]" title={f.unvan}>
+                    {f.unvan}
+                  </span>
                   <span className="text-[10px] font-mono opacity-90">
-                    ({f.teklif_toplami
+                    (
+                    {f.teklif_toplami
                       ? f.teklif_toplami.toLocaleString('tr-TR', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2
@@ -229,7 +239,10 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   className="p-4 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-150 dark:border-slate-850 rounded-2xl flex items-center justify-between gap-4 hover:shadow-xs transition-shadow"
                 >
                   <div className="flex-1 min-w-0">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate" title={kalem.kalem_adi}>
+                    <span
+                      className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate"
+                      title={kalem.kalem_adi}
+                    >
                       {kalem.kalem_adi}
                     </span>
                     <span className="text-[10px] text-slate-450 dark:text-slate-400 block mt-0.5 font-semibold">
@@ -338,7 +351,9 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                         <td
                           key={firma.id}
                           className={`p-0 border border-slate-200 dark:border-slate-805 text-right transition-colors ${
-                            isLowest ? 'bg-emerald-500/[0.05] dark:bg-emerald-500/[0.02]' : 'bg-white dark:bg-slate-950'
+                            isLowest
+                              ? 'bg-emerald-500/[0.05] dark:bg-emerald-500/[0.02]'
+                              : 'bg-white dark:bg-slate-950'
                           }`}
                         >
                           <div className="relative flex items-center w-full h-full">
@@ -381,7 +396,9 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
               })}
               {/* TOPLAM TEKLİFLER SATIRI */}
               <tr className="bg-slate-50/80 dark:bg-slate-950/40 font-bold text-slate-850 dark:text-slate-100">
-                <td className="p-3.5 border border-slate-200 dark:border-slate-800">Toplam Teklif Tutarı</td>
+                <td className="p-3.5 border border-slate-200 dark:border-slate-800">
+                  Toplam Teklif Tutarı
+                </td>
                 <td className="p-3.5 border border-slate-200 dark:border-slate-800"></td>
                 {invitedFirms.map((firma) => (
                   <td
@@ -401,7 +418,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                     ? `${getEstimatedCostTotal().toLocaleString('tr-TR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                    })} ₺`
+                      })} ₺`
                     : '-'}
                 </td>
                 <td className="p-3.5 border border-slate-200 dark:border-slate-800 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.005]"></td>

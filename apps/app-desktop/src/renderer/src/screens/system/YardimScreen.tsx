@@ -948,16 +948,26 @@ export default function YardimScreen(): React.JSX.Element {
                     <div className="flex items-start gap-3">
                       {isExcel ? (
                         <FileSpreadsheet
-                          className={`w-5 h-5 shrink-0 mt-0.5 ${activeDoc.id === doc.id ? 'text-green-600 dark:text-green-500' : 'text-slate-400'}`}
+                          className={`w-5 h-5 shrink-0 mt-0.5 ${
+                            activeDoc.id === doc.id
+                              ? 'text-green-600 dark:text-green-500'
+                              : 'text-slate-400'
+                          }`}
                         />
                       ) : (
                         <FileText
-                          className={`w-5 h-5 shrink-0 mt-0.5 ${activeDoc.id === doc.id ? 'text-blue-600' : 'text-slate-400'}`}
+                          className={`w-5 h-5 shrink-0 mt-0.5 ${
+                            activeDoc.id === doc.id ? 'text-blue-600' : 'text-slate-400'
+                          }`}
                         />
                       )}
                       <div>
                         <h3
-                          className={`text-sm font-semibold mb-1 leading-tight ${activeDoc.id === doc.id ? 'text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}
+                          className={`text-sm font-semibold mb-1 leading-tight ${
+                            activeDoc.id === doc.id
+                              ? 'text-blue-700 dark:text-blue-400'
+                              : 'text-slate-700 dark:text-slate-300'
+                          }`}
                         >
                           {doc.title}
                         </h3>

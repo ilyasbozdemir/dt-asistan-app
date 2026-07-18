@@ -33,9 +33,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
   const [selectedIds, setSelectedIds] = useState<number[]>([])
 
   const handleToggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
   }
 
   const handleEdit = (item: Kalem) => {
@@ -192,7 +190,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
   const groupedItems = useMemo(() => {
     if (groupMode === 'none') {
-      return { 'Tümü': filteredList }
+      return { Tümü: filteredList }
     }
 
     const groups: Record<string, typeof filteredList> = {}
@@ -314,7 +312,9 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 className="gap-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 flex items-center px-4 py-2 text-sm justify-center"
               >
                 <Trash2 className="w-4 h-4 shrink-0 text-red-650" />
-                <span className="whitespace-nowrap font-bold">Seçilenleri Sil ({selectedIds.length})</span>
+                <span className="whitespace-nowrap font-bold">
+                  Seçilenleri Sil ({selectedIds.length})
+                </span>
               </Button>
             )}
             <Button
@@ -441,7 +441,8 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 checked={filteredList.length > 0 && selectedIds.length === filteredList.length}
                 ref={(el) => {
                   if (el) {
-                    el.indeterminate = selectedIds.length > 0 && selectedIds.length < filteredList.length
+                    el.indeterminate =
+                      selectedIds.length > 0 && selectedIds.length < filteredList.length
                   }
                 }}
                 onChange={handleToggleSelectAll}
@@ -547,10 +548,13 @@ export default function MalzemelerScreen(): React.JSX.Element {
                     <th className="px-4 py-3 w-10">
                       <input
                         type="checkbox"
-                        checked={filteredList.length > 0 && selectedIds.length === filteredList.length}
+                        checked={
+                          filteredList.length > 0 && selectedIds.length === filteredList.length
+                        }
                         ref={(el) => {
                           if (el) {
-                            el.indeterminate = selectedIds.length > 0 && selectedIds.length < filteredList.length
+                            el.indeterminate =
+                              selectedIds.length > 0 && selectedIds.length < filteredList.length
                           }
                         }}
                         onChange={handleToggleSelectAll}

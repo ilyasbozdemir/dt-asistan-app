@@ -82,7 +82,9 @@ Kurum/Birim Bilgileri:
   const alanlarStr = doldurulacakAlanlar
     .map(
       (a) =>
-        `- ${a.alan} (${a.etiket})${a.zorunlu ? ' [ZORUNLU]' : ''}${a.ornekDeger ? ` [Örnek: ${a.ornekDeger}]` : ''}`
+        `- ${a.alan} (${a.etiket})${a.zorunlu ? ' [ZORUNLU]' : ''}${
+          a.ornekDeger ? ` [Örnek: ${a.ornekDeger}]` : ''
+        }`
     )
     .join('\n')
 

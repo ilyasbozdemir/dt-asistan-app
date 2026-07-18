@@ -1,6 +1,13 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Package, Search, FileSignature, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Package,
+  Search,
+  FileSignature,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
 interface StepConfig {
@@ -112,11 +119,7 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'
                   )}
                 >
-                  {isPast ? (
-                    <StepIcon className="w-3 h-3" />
-                  ) : (
-                    step.id
-                  )}
+                  {isPast ? <StepIcon className="w-3 h-3" /> : step.id}
                 </div>
                 <span className="hidden lg:inline">{step.shortLabel}</span>
               </button>

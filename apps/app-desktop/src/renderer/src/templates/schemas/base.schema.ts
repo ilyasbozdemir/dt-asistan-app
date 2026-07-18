@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const MetaSchema = z.object({
   templateId: z.string(),
   templateVersion: z.string(),
   documentNumber: z.string().optional(),
-  date: z.string().optional(),
-});
+  date: z.string().optional()
+})
 
 export const InstitutionSchema = z.object({
   name: z.string(),
@@ -15,20 +15,22 @@ export const InstitutionSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   website: z.string().optional().or(z.literal('')),
   kep: z.string().optional().or(z.literal('')),
-  logo: z.object({
-    left: z.string().optional(),
-    right: z.string().optional(),
-  }).optional(),
-});
+  logo: z
+    .object({
+      left: z.string().optional(),
+      right: z.string().optional()
+    })
+    .optional()
+})
 
 export const HeaderSchema = z.object({
   title: z.string(),
-  lines: z.array(z.string()).optional(),
-});
+  lines: z.array(z.string()).optional()
+})
 
 export const ApprovalSchema = z.object({
   required: z.boolean().default(false),
   personName: z.string().optional(),
   personTitle: z.string().optional(),
-  date: z.string().optional(),
-});
+  date: z.string().optional()
+})

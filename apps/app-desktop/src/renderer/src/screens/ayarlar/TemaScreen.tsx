@@ -363,11 +363,15 @@ export default function TemaScreen({
     const variablesExplanation = themeVariablesMeta
       .map(
         (v) =>
-          `- ${v.key}: ${v.description} (Örnek: ${designerMode === 'light' ? v.defaultLight : v.defaultDark})`
+          `- ${v.key}: ${v.description} (Örnek: ${
+            designerMode === 'light' ? v.defaultLight : v.defaultDark
+          })`
       )
       .join('\n')
 
-    const promptText = `Evraktron adlı Electron/React uygulamamız için ${designerMode === 'light' ? 'Açık (Light)' : 'Karanlık (Dark)'} tema rengi tasarlamanı istiyorum.
+    const promptText = `Evraktron adlı Electron/React uygulamamız için ${
+      designerMode === 'light' ? 'Açık (Light)' : 'Karanlık (Dark)'
+    } tema rengi tasarlamanı istiyorum.
 İstediğim tema stili / renk paleti açıklaması: "${styleDescription}".
 
 Lütfen aşağıdaki CSS değişkenlerine uygun HEX (veya rgba) değerlerini belirle ve bana SADECE aşağıdaki JSON yapısında bir çıktı ver. Ekstra açıklama veya kod bloğu dışı metin ekleme, doğrudan kopyalayabileceğim bir JSON döndür.

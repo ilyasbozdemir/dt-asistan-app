@@ -1,11 +1,9 @@
-import React from "react";
-import { Copy, FileText, Loader2, Search, Sparkles } from "lucide-react";
-import { cn } from "../../../../../utils/cn";
-import { YeniDosyaTabProps } from "../../../types";
+import React from 'react'
+import { Copy, FileText, Loader2, Search, Sparkles } from 'lucide-react'
+import { cn } from '../../../../../utils/cn'
+import { YeniDosyaTabProps } from '../../../types'
 
-export function GenelBilgilerVeIdariAntetSection(
-  props: YeniDosyaTabProps,
-): React.JSX.Element {
+export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): React.JSX.Element {
   const {
     formData,
     setFormData,
@@ -25,8 +23,8 @@ export function GenelBilgilerVeIdariAntetSection(
     filteredBirimler,
     handleSelectBirim,
     getNextTeminNo,
-    kurum,
-  } = props;
+    kurum
+  } = props
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -45,41 +43,42 @@ export function GenelBilgilerVeIdariAntetSection(
           <select
             value={formData.butce_yili || new Date().getFullYear()}
             onChange={(e) => {
-              const newYear = parseInt(e.target.value, 10);
-              const oldYear = formData.butce_yili;
-              let updatedTeminNo = formData.temin_no;
+              const newYear = parseInt(e.target.value, 10)
+              const oldYear = formData.butce_yili
+              let updatedTeminNo = formData.temin_no
 
               if (newYear && newYear !== oldYear) {
-                const oldYearStr = oldYear ? oldYear.toString() : "";
-                const isOldPattern = !formData.temin_no ||
+                const oldYearStr = oldYear ? oldYear.toString() : ''
+                const isOldPattern =
+                  !formData.temin_no ||
                   formData.temin_no.startsWith(`${oldYearStr}/`) ||
-                  formData.temin_no.startsWith(`DT${oldYearStr}/`);
+                  formData.temin_no.startsWith(`DT${oldYearStr}/`)
 
                 if (isOldPattern && getNextTeminNo) {
-                  updatedTeminNo = getNextTeminNo(newYear);
+                  updatedTeminNo = getNextTeminNo(newYear)
                 }
               }
 
               setFormData({
                 ...formData,
                 butce_yili: newYear,
-                temin_no: updatedTeminNo,
-              });
+                temin_no: updatedTeminNo
+              })
             }}
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
           >
             {(() => {
-              const currentYear = new Date().getFullYear();
-              const startYear = 2020;
-              const options: number[] = [];
+              const currentYear = new Date().getFullYear()
+              const startYear = 2020
+              const options: number[] = []
               for (let y = currentYear; y >= startYear; y--) {
-                options.push(y);
+                options.push(y)
               }
               return options.map((y) => (
                 <option key={y} value={y}>
                   {y}
                 </option>
-              ));
+              ))
             })()}
           </select>
         </div>
@@ -89,12 +88,13 @@ export function GenelBilgilerVeIdariAntetSection(
             Bütçe Tipi *
           </label>
           <select
-            value={formData.butce_tipi || "Genel Bütçe"}
+            value={formData.butce_tipi || 'Genel Bütçe'}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                butce_tipi: e.target.value,
-              })}
+                butce_tipi: e.target.value
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
           >
             <option value="Genel Bütçe">Genel Bütçe</option>
@@ -115,12 +115,13 @@ export function GenelBilgilerVeIdariAntetSection(
           </label>
           <input
             type="text"
-            value={formData.temin_no || ""}
+            value={formData.temin_no || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                temin_no: e.target.value,
-              })}
+                temin_no: e.target.value
+              })
+            }
             placeholder="Örn: 2026/5"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
           />
@@ -137,11 +138,12 @@ export function GenelBilgilerVeIdariAntetSection(
               type="button"
               onClick={() =>
                 openTextGenerator?.(
-                  "konu",
-                  "Konuyu AI ile Üret",
-                  "İhale Konusu",
-                  'Verilen metin veya alım işlemine göre en uygun, resmi ve kısa ihale konusunu (İşin Adı) üret. Başka hiçbir açıklama yazma. KESİNLİKLE metnin içerisine veya sonuna "Doğrudan Temin", "Doğrudan Temini" veya "Doğrudan Temin İşi" gibi ifadeler EKLEME. (Örn: "Bez Bayrak ve Sopalı Bayrak Alımı", "Kırtasiye Malzemesi Alımı" şeklinde bitir).',
-                )}
+                  'konu',
+                  'Konuyu AI ile Üret',
+                  'İhale Konusu',
+                  'Verilen metin veya alım işlemine göre en uygun, resmi ve kısa ihale konusunu (İşin Adı) üret. Başka hiçbir açıklama yazma. KESİNLİKLE metnin içerisine veya sonuna "Doğrudan Temin", "Doğrudan Temini" veya "Doğrudan Temin İşi" gibi ifadeler EKLEME. (Örn: "Bez Bayrak ve Sopalı Bayrak Alımı", "Kırtasiye Malzemesi Alımı" şeklinde bitir).'
+                )
+              }
               className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded border-none"
             >
               <Sparkles size={11} /> AI ile Üret
@@ -150,31 +152,28 @@ export function GenelBilgilerVeIdariAntetSection(
           <input
             type="text"
             required
-            value={formData.konu || ""}
+            value={formData.konu || ''}
             onChange={(e) => {
-              setFormData({ ...formData, konu: e.target.value });
-              setShowKonuSuggestions?.(true);
+              setFormData({ ...formData, konu: e.target.value })
+              setShowKonuSuggestions?.(true)
             }}
             onFocus={() => setShowKonuSuggestions?.(true)}
             onBlur={() => {
-              setTimeout(() => setShowKonuSuggestions?.(false), 200);
+              setTimeout(() => setShowKonuSuggestions?.(false), 200)
             }}
             placeholder="Alımın konusunu resmi dilde açıklayıcı şekilde girin (Örn: Fen İşleri Kırtasiye Malzemesi Alımı)"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200 font-semibold"
           />
           {(exactMatchCount ?? 0) > 0 && (
             <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1.5 flex items-center gap-1 animate-in fade-in duration-200">
-              ⚠️ Bu isimde daha önce {exactMatchCount}{" "}
-              adet dosya açılmış. Kaydedildiğinde otomatik olarak
-              "({(exactMatchCount ?? 0) + 1})" son eki eklenecektir.
+              ⚠️ Bu isimde daha önce {exactMatchCount} adet dosya açılmış. Kaydedildiğinde otomatik
+              olarak "({(exactMatchCount ?? 0) + 1})" son eki eklenecektir.
             </p>
           )}
           {showKonuSuggestions && (matchedSuggestions ?? []).length > 0 && (
             <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-955/50 text-[10px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                {formData.konu
-                  ? "Önceki İhale Konuları"
-                  : "Sık Kullanılan İhale Konuları"}
+                {formData.konu ? 'Önceki İhale Konuları' : 'Sık Kullanılan İhale Konuları'}
               </div>
               <ul className="max-h-48 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/50">
                 {(matchedSuggestions ?? []).map((suggestion, index) => (
@@ -184,9 +183,9 @@ export function GenelBilgilerVeIdariAntetSection(
                       onClick={() => {
                         setFormData((prev) => ({
                           ...prev,
-                          konu: suggestion,
-                        }));
-                        setShowKonuSuggestions?.(false);
+                          konu: suggestion
+                        }))
+                        setShowKonuSuggestions?.(false)
                       }}
                       className="w-full text-left px-3.5 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/10 text-xs text-slate-700 dark:text-slate-300 font-semibold transition-colors flex items-center gap-2 cursor-pointer border-none bg-transparent"
                     >
@@ -203,7 +202,7 @@ export function GenelBilgilerVeIdariAntetSection(
         <div className="md:col-span-2">
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-xs font-bold text-slate-600 dark:text-slate-455">
-              İşin Açıklaması / Kapsamı{" "}
+              İşin Açıklaması / Kapsamı{' '}
               <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">
                 (Markdown Desteklenir)
               </span>
@@ -216,10 +215,12 @@ export function GenelBilgilerVeIdariAntetSection(
                 title="İşin adına göre yapay zeka ile profesyonel açıklama metni oluştur"
                 className="text-[10px] text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded disabled:opacity-50"
               >
-                {isDescLoading
-                  ? <Loader2 size={11} className="animate-spin" />
-                  : <Sparkles size={11} />}
-                {isDescLoading ? "Üretiliyor..." : "AI ile Üret"}
+                {isDescLoading ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <Sparkles size={11} />
+                )}
+                {isDescLoading ? 'Üretiliyor...' : 'AI ile Üret'}
               </button>
               <button
                 type="button"
@@ -233,12 +234,13 @@ export function GenelBilgilerVeIdariAntetSection(
           </div>
           <textarea
             rows={3}
-            value={formData.isin_aciklamasi || ""}
+            value={formData.isin_aciklamasi || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                isin_aciklamasi: e.target.value,
-              })}
+                isin_aciklamasi: e.target.value
+              })
+            }
             placeholder="İşin detaylı açıklaması veya şartnamedeki kapsam açıklaması..."
             className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 dark:text-white leading-normal resize-none"
           />
@@ -250,22 +252,23 @@ export function GenelBilgilerVeIdariAntetSection(
           </label>
           <input
             type="date"
-            value={formData.dosya_acilis_tarihi || ""}
+            value={formData.dosya_acilis_tarihi || ''}
             onChange={(e) => {
-              const newDate = e.target.value;
-              const oldDate = formData.dosya_acilis_tarihi;
-              const newYear = newDate ? new Date(newDate).getFullYear() : null;
-              const oldYear = oldDate ? new Date(oldDate).getFullYear() : null;
+              const newDate = e.target.value
+              const oldDate = formData.dosya_acilis_tarihi
+              const newYear = newDate ? new Date(newDate).getFullYear() : null
+              const oldYear = oldDate ? new Date(oldDate).getFullYear() : null
 
-              let updatedTeminNo = formData.temin_no;
+              let updatedTeminNo = formData.temin_no
               if (newYear && newYear !== oldYear) {
-                const oldYearStr = oldYear ? oldYear.toString() : "";
-                const isOldPattern = !formData.temin_no ||
+                const oldYearStr = oldYear ? oldYear.toString() : ''
+                const isOldPattern =
+                  !formData.temin_no ||
                   formData.temin_no.startsWith(`${oldYearStr}/`) ||
-                  formData.temin_no.startsWith(`DT${oldYearStr}/`);
+                  formData.temin_no.startsWith(`DT${oldYearStr}/`)
 
                 if (isOldPattern && getNextTeminNo) {
-                  updatedTeminNo = getNextTeminNo(newYear);
+                  updatedTeminNo = getNextTeminNo(newYear)
                 }
               }
 
@@ -273,8 +276,8 @@ export function GenelBilgilerVeIdariAntetSection(
                 ...formData,
                 dosya_acilis_tarihi: newDate,
                 butce_yili: newYear || formData.butce_yili,
-                temin_no: updatedTeminNo,
-              });
+                temin_no: updatedTeminNo
+              })
             }}
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           />
@@ -293,7 +296,7 @@ export function GenelBilgilerVeIdariAntetSection(
               <span>
                 {formData.birim_id
                   ? birimler.find((b) => b.id === formData.birim_id)?.birim_adi
-                  : "Birim Seçiniz..."}
+                  : 'Birim Seçiniz...'}
               </span>
               <Search size={14} className="text-slate-400" />
             </button>
@@ -309,35 +312,30 @@ export function GenelBilgilerVeIdariAntetSection(
                   autoFocus
                 />
                 <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
-                  {(filteredBirimler ?? []).length === 0
-                    ? (
-                      <div className="p-3 text-center text-xs text-slate-450">
-                        Birim bulunamadı.
-                      </div>
-                    )
-                    : (
-                      (filteredBirimler ?? []).map((b) => (
-                        <button
-                          key={b.id}
-                          type="button"
-                          onClick={() => handleSelectBirim?.(b)}
-                          className={cn(
-                            "w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-colors",
-                            formData.birim_id === b.id &&
-                              "bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 font-bold",
-                          )}
-                        >
-                          {b.birim_adi}
-                        </button>
-                      ))
-                    )}
+                  {(filteredBirimler ?? []).length === 0 ? (
+                    <div className="p-3 text-center text-xs text-slate-450">Birim bulunamadı.</div>
+                  ) : (
+                    (filteredBirimler ?? []).map((b) => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => handleSelectBirim?.(b)}
+                        className={cn(
+                          'w-full text-left p-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-colors',
+                          formData.birim_id === b.id &&
+                            'bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 font-bold'
+                        )}
+                      >
+                        {b.birim_adi}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
           </div>
           <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-            Birim seçildiğinde antet, sunum makamı ve bütçe kodları otomatik
-            doldurulur.
+            Birim seçildiğinde antet, sunum makamı ve bütçe kodları otomatik doldurulur.
           </p>
         </div>
 
@@ -347,12 +345,13 @@ export function GenelBilgilerVeIdariAntetSection(
           </label>
           <input
             type="text"
-            value={formData.antet_ek_satir || ""}
+            value={formData.antet_ek_satir || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                antet_ek_satir: e.target.value,
-              })}
+                antet_ek_satir: e.target.value
+              })
+            }
             placeholder="Örn: Fen İşleri Dairesi Başkanlığı"
             className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           />
@@ -365,26 +364,25 @@ export function GenelBilgilerVeIdariAntetSection(
           {(() => {
             const makamOptions = Array.from(
               new Set(
-                [
-                  kurum?.makam_adi,
-                  ...(birimler ? birimler.map((b) => b.sunum_makami) : []),
-                ].filter(Boolean),
-              ),
-            );
-            const isCustom = formData.sunulacak_makam &&
-              !makamOptions.includes(formData.sunulacak_makam);
+                [kurum?.makam_adi, ...(birimler ? birimler.map((b) => b.sunum_makami) : [])].filter(
+                  Boolean
+                )
+              )
+            )
+            const isCustom =
+              formData.sunulacak_makam && !makamOptions.includes(formData.sunulacak_makam)
 
             return (
               <div className="space-y-2">
                 <select
-                  value={isCustom ? "custom" : (formData.sunulacak_makam || "")}
+                  value={isCustom ? 'custom' : formData.sunulacak_makam || ''}
                   onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "custom") {
+                    const val = e.target.value
+                    if (val === 'custom') {
                       // Custom seçildiğinde inputu boşaltıp kullanıcının yazmasını bekleyelim
-                      setFormData({ ...formData, sunulacak_makam: "" });
+                      setFormData({ ...formData, sunulacak_makam: '' })
                     } else {
-                      setFormData({ ...formData, sunulacak_makam: val });
+                      setFormData({ ...formData, sunulacak_makam: val })
                     }
                   }}
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
@@ -398,21 +396,22 @@ export function GenelBilgilerVeIdariAntetSection(
                   <option value="custom">✍️ Elle Özel Yaz...</option>
                 </select>
 
-                {(isCustom || formData.sunulacak_makam === "" || !formData.sunulacak_makam) && (
+                {(isCustom || formData.sunulacak_makam === '' || !formData.sunulacak_makam) && (
                   <input
                     type="text"
-                    value={formData.sunulacak_makam || ""}
+                    value={formData.sunulacak_makam || ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        sunulacak_makam: e.target.value,
-                      })}
+                        sunulacak_makam: e.target.value
+                      })
+                    }
                     placeholder="Evrakın sunulacağı makamı yazın..."
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 animate-in slide-in-from-top-1 duration-200"
                   />
                 )}
               </div>
-            );
+            )
           })()}
         </div>
 
@@ -421,40 +420,40 @@ export function GenelBilgilerVeIdariAntetSection(
             İhtiyaç Yeri
           </label>
           {(() => {
-            const seciliBirim = birimler?.find((b) => b.id === formData.birim_id);
-            const kurumAdi = kurum?.kurum_adi || "";
-            
-            let seciliBirimYerleri: string[] = [];
+            const seciliBirim = birimler?.find((b) => b.id === formData.birim_id)
+            const kurumAdi = kurum?.kurum_adi || ''
+
+            let seciliBirimYerleri: string[] = []
             if (seciliBirim?.ihtiyac_yeri_eki) {
               try {
-                if (seciliBirim.ihtiyac_yeri_eki.startsWith("[")) {
-                  seciliBirimYerleri = JSON.parse(seciliBirim.ihtiyac_yeri_eki);
+                if (seciliBirim.ihtiyac_yeri_eki.startsWith('[')) {
+                  seciliBirimYerleri = JSON.parse(seciliBirim.ihtiyac_yeri_eki)
                 } else {
-                  seciliBirimYerleri = seciliBirim.ihtiyac_yeri_eki.split(",").map((s) => s.trim());
+                  seciliBirimYerleri = seciliBirim.ihtiyac_yeri_eki.split(',').map((s) => s.trim())
                 }
               } catch (e) {
-                seciliBirimYerleri = [seciliBirim.ihtiyac_yeri_eki];
+                seciliBirimYerleri = [seciliBirim.ihtiyac_yeri_eki]
               }
             }
 
-            let tumBirimYerleri: string[] = [];
+            let tumBirimYerleri: string[] = []
             if (birimler) {
               birimler.forEach((b) => {
                 if (b.ihtiyac_yeri_eki) {
                   try {
-                    if (b.ihtiyac_yeri_eki.startsWith("[")) {
-                      const parsed = JSON.parse(b.ihtiyac_yeri_eki);
+                    if (b.ihtiyac_yeri_eki.startsWith('[')) {
+                      const parsed = JSON.parse(b.ihtiyac_yeri_eki)
                       if (Array.isArray(parsed)) {
-                        tumBirimYerleri.push(...parsed);
+                        tumBirimYerleri.push(...parsed)
                       }
                     } else {
-                      tumBirimYerleri.push(...b.ihtiyac_yeri_eki.split(",").map((s) => s.trim()));
+                      tumBirimYerleri.push(...b.ihtiyac_yeri_eki.split(',').map((s) => s.trim()))
                     }
                   } catch (e) {
-                    tumBirimYerleri.push(b.ihtiyac_yeri_eki);
+                    tumBirimYerleri.push(b.ihtiyac_yeri_eki)
                   }
                 }
-              });
+              })
             }
 
             const dinamikSecenekler = [
@@ -462,31 +461,33 @@ export function GenelBilgilerVeIdariAntetSection(
               seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Hizmet Binası` : null,
               seciliBirim?.birim_adi ? `${seciliBirim.birim_adi} Şantiyesi` : null,
               seciliBirim?.birim_adi,
-              kurumAdi ? `${kurumAdi} Hizmet Binası` : null,
-            ].filter(Boolean) as string[];
+              kurumAdi ? `${kurumAdi} Hizmet Binası` : null
+            ].filter(Boolean) as string[]
 
             const ihtiyacOptions = Array.from(
               new Set(
                 [
                   ...dinamikSecenekler,
                   ...tumBirimYerleri,
-                  ...(birimler ? birimler.map((b) => b.birim_adi ? `${b.birim_adi} Hizmet Binası` : null) : []),
-                ].filter(Boolean) as string[],
-              ),
-            );
-            const isCustom = formData.ihtiyac_yeri &&
-              !ihtiyacOptions.includes(formData.ihtiyac_yeri);
+                  ...(birimler
+                    ? birimler.map((b) => (b.birim_adi ? `${b.birim_adi} Hizmet Binası` : null))
+                    : [])
+                ].filter(Boolean) as string[]
+              )
+            )
+            const isCustom =
+              formData.ihtiyac_yeri && !ihtiyacOptions.includes(formData.ihtiyac_yeri)
 
             return (
               <div className="space-y-2">
                 <select
-                  value={isCustom ? "custom" : (formData.ihtiyac_yeri || "")}
+                  value={isCustom ? 'custom' : formData.ihtiyac_yeri || ''}
                   onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "custom") {
-                      setFormData({ ...formData, ihtiyac_yeri: "" });
+                    const val = e.target.value
+                    if (val === 'custom') {
+                      setFormData({ ...formData, ihtiyac_yeri: '' })
                     } else {
-                      setFormData({ ...formData, ihtiyac_yeri: val });
+                      setFormData({ ...formData, ihtiyac_yeri: val })
                     }
                   }}
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
@@ -500,24 +501,25 @@ export function GenelBilgilerVeIdariAntetSection(
                   <option value="custom">✍️ Elle Özel Yaz...</option>
                 </select>
 
-                {(isCustom || formData.ihtiyac_yeri === "" || !formData.ihtiyac_yeri) && (
+                {(isCustom || formData.ihtiyac_yeri === '' || !formData.ihtiyac_yeri) && (
                   <input
                     type="text"
-                    value={formData.ihtiyac_yeri || ""}
+                    value={formData.ihtiyac_yeri || ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        ihtiyac_yeri: e.target.value,
-                      })}
+                        ihtiyac_yeri: e.target.value
+                      })
+                    }
                     placeholder="İhtiyaç yerini yazın..."
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 animate-in slide-in-from-top-1 duration-200"
                   />
                 )}
               </div>
-            );
+            )
           })()}
         </div>
       </div>
     </div>
-  );
+  )
 }

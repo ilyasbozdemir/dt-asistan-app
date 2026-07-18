@@ -36,7 +36,8 @@ export function KabulVeOdeme(): React.JSX.Element {
   const { disableDocumentGuidance } = useSettingsStore()
 
   const stageSablons = sablons.filter(
-    (s) => s.kategori === '4-kabul-ve-odeme-islemleri' || s.kategori === '4. Kabul & Ödeme İşlemleri'
+    (s) =>
+      s.kategori === '4-kabul-ve-odeme-islemleri' || s.kategori === '4. Kabul & Ödeme İşlemleri'
   )
 
   if (previewData && previewModalOpen) {
@@ -113,8 +114,6 @@ export function KabulVeOdeme(): React.JSX.Element {
           Bu süreç henüz tasarım aşamasındadır.
         </p>
       </div>
-
-
     </SubScreen>
   )
 }

@@ -130,7 +130,8 @@ export function Footer(): React.JSX.Element {
                   DT Asistan (Doğrudan Temin)
                 </h4>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Sürüm {packageJson.version} • {locData.codeLines.toLocaleString('tr-TR')} Satır Kod
+                  Sürüm {packageJson.version} • {locData.codeLines.toLocaleString('tr-TR')} Satır
+                  Kod
                 </p>
               </div>
               <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">

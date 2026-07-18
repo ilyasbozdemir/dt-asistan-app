@@ -175,7 +175,9 @@ export function DatabaseBrowserModal({
               >
                 <div className="flex items-center gap-2 truncate">
                   <Database
-                    className={`w-3.5 h-3.5 ${selectedTable === t.name ? 'text-white' : 'text-slate-400'}`}
+                    className={`w-3.5 h-3.5 ${
+                      selectedTable === t.name ? 'text-white' : 'text-slate-400'
+                    }`}
                   />
                   <span className="truncate font-mono">{t.name}</span>
                 </div>

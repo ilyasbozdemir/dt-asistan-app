@@ -58,9 +58,9 @@ export function registerArchiveHandlers() {
           .prepare(`SELECT * FROM DATA_TeminDosyasi WHERE id IN (${inClause})`)
           .all(...dosyaIds)
         const insertDosya = archiveDb.prepare(
-          `INSERT INTO DATA_TeminDosyasi (${Object.keys(dosyaRows[0]).join(', ')}) VALUES (${Object.keys(
-            dosyaRows[0]
-          )
+          `INSERT INTO DATA_TeminDosyasi (${Object.keys(dosyaRows[0]).join(
+            ', '
+          )}) VALUES (${Object.keys(dosyaRows[0])
             .map(() => '?')
             .join(', ')})`
         )

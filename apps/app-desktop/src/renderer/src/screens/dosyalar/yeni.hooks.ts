@@ -245,14 +245,23 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
             const found = roller.find((r: any) => r.rol_kodu === rolKodu)
             return found?.varsayilan_personel_id || null
           }
-          
+
           setFormData((prev) => ({
             ...prev,
-            onay_personel_id: findDefaultId('harcama_yetkilisi') || findDefaultId('onaylayan') || prev.onay_personel_id,
+            onay_personel_id:
+              findDefaultId('harcama_yetkilisi') ||
+              findDefaultId('onaylayan') ||
+              prev.onay_personel_id,
             hazirlayan_personel_id: findDefaultId('hazirlayan') || prev.hazirlayan_personel_id,
             talep_eden_personel_id: findDefaultId('talep_eden') || prev.talep_eden_personel_id,
-            sunan_personel_id: findDefaultId('ihale_yetkilisi') || findDefaultId('talep_eden') || prev.sunan_personel_id,
-            irtibat_yetkilisi_id: findDefaultId('ilgili_personel') || findDefaultId('hazirlayan') || prev.irtibat_yetkilisi_id
+            sunan_personel_id:
+              findDefaultId('ihale_yetkilisi') ||
+              findDefaultId('talep_eden') ||
+              prev.sunan_personel_id,
+            irtibat_yetkilisi_id:
+              findDefaultId('ilgili_personel') ||
+              findDefaultId('hazirlayan') ||
+              prev.irtibat_yetkilisi_id
           }))
         }
       } catch (err) {
@@ -565,12 +574,12 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
       finalKonu = `${baseKonu} (${nextTekrarNo})`
     }
 
-    let finalMaliyet = Number(formData.yaklasik_maliyet) || 0;
-    const kdvRate = Number(formData.kdv) || 0;
-    const isKdvDahil = Number(formData.yaklasik_maliyet_kdv_dahil_mi) === 1;
+    let finalMaliyet = Number(formData.yaklasik_maliyet) || 0
+    const kdvRate = Number(formData.kdv) || 0
+    const isKdvDahil = Number(formData.yaklasik_maliyet_kdv_dahil_mi) === 1
 
     if (isKdvDahil && kdvRate > 0) {
-      finalMaliyet = Number((finalMaliyet / (1 + kdvRate / 100)).toFixed(2));
+      finalMaliyet = Number((finalMaliyet / (1 + kdvRate / 100)).toFixed(2))
     }
 
     const payload = {

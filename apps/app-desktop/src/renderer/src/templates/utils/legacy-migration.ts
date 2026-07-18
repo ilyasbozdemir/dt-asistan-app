@@ -1,4 +1,4 @@
-import { TemplateManager } from './TemplateManager';
+import { TemplateManager } from './TemplateManager'
 
 export function registerLegacyMappings(manager: TemplateManager): void {
   // Map legacy route paths and files to specific V2 template IDs
@@ -15,10 +15,10 @@ export function registerLegacyMappings(manager: TemplateManager): void {
     'luzum-muzekkeresi-onay-eki': 'luzum-muzekkeresi',
     'luzum-onay-eki': 'luzum-muzekkeresi',
 
-    'harcama-talimati': 'harcama-talimati',
-  };
+    'harcama-talimati': 'harcama-talimati'
+  }
 
   for (const [path, templateId] of Object.entries(legacyRoutesMap)) {
-    manager.registerLegacyPath(path, templateId);
+    manager.registerLegacyPath(path, templateId)
   }
 }

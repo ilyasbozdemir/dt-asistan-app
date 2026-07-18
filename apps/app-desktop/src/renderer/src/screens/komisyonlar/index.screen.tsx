@@ -21,7 +21,11 @@ import { useTabStore } from '../../store/tabStore'
 import { useDosyaAsamasiSablons } from '../dosya/sub-screens/DosyaAsamalari/useDosyaAsamasiSablons'
 import { DocumentPreviewModal } from '../dosya/components/DocumentPreviewModal'
 
-export default function KomisyonlarScreen({ isSubComponent = false }: { isSubComponent?: boolean }): React.JSX.Element {
+export default function KomisyonlarScreen({
+  isSubComponent = false
+}: {
+  isSubComponent?: boolean
+}): React.JSX.Element {
   const { addTab } = useTabStore()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
@@ -106,7 +110,13 @@ export default function KomisyonlarScreen({ isSubComponent = false }: { isSubCom
   )
 
   return (
-    <div className={isSubComponent ? "flex flex-col h-full space-y-6 w-full animate-in fade-in duration-200" : "flex flex-col h-full space-y-6"}>
+    <div
+      className={
+        isSubComponent
+          ? 'flex flex-col h-full space-y-6 w-full animate-in fade-in duration-200'
+          : 'flex flex-col h-full space-y-6'
+      }
+    >
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">

@@ -98,7 +98,9 @@ function ensureSchemaIntegrity(db: Database.Database): void {
             typeof v === 'string' ? "'" + (v as string).replace(/'/g, "''") + "'" : v
           )
           db.exec(
-            `INSERT OR IGNORE INTO ${table.name} (${keys.join(', ')}) VALUES (${values.join(', ')});`
+            `INSERT OR IGNORE INTO ${table.name} (${keys.join(', ')}) VALUES (${values.join(
+              ', '
+            )});`
           )
         })
       }
@@ -185,7 +187,6 @@ const TEMPLATE_NAMES: Record<string, string> = {
   'harcama-pusulasi': 'HARCAMA PUSULASI',
   'hizmet-isleri-kabul-teklif-belgesi': 'HİZMET İŞLERİ KABUL TEKLİF BELGESİ',
   'hizmet-isleri-kabul-tutanagi': 'HİZMET İŞLERİ KABUL TUTANAĞI',
-  'kabul-edilen-teklif-odeme': 'KABUL EDİLEN TEKLİF (ÖDEME AŞAMASI)',
   'muayene-kabul-komisyonu': 'MUAYENE VE KABUL KOMİSYONU',
   'muayene-kabul-tutanagi': 'MUAYENE VE KABUL TUTANAĞI',
   'odeme-emri-belgesi': 'ÖDEME EMRİ BELGESİ',
@@ -361,7 +362,6 @@ function seedTemplates(db: Database.Database): void {
       'hakedis-raporu': '/dosya/cikti-merkezi',
       'hizmet-isleri-kabul-teklif-belgesi': '/dosya/cikti-merkezi',
       'hizmet-isleri-kabul-tutanagi': '/dosya/cikti-merkezi',
-      'kabul-edilen-teklif-odeme': '/dosya/cikti-merkezi',
       'odeme-emri-belgesi': '/dosya/cikti-merkezi',
       'odeme-yazisi': '/dosya/cikti-merkezi',
       'tasinir-islem-fisi': '/dosya/cikti-merkezi',

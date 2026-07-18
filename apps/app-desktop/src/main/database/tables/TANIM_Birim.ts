@@ -56,7 +56,5 @@ export const TANIM_Birim = {
       description: 'Created At'
     }
   ],
-  initialData: [
-   
-  ]
+  initialData: []
 }

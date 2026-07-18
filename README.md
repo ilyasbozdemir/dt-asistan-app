@@ -49,6 +49,7 @@ Projeleri yerelde çalıştırmak için kök dizinden aşağıdaki komutları
 kullanabilirsiniz:
 
 - **Masaüstü Uygulaması (Electron):**
+
   ```bash
   pnpm dev:desktop
   ```

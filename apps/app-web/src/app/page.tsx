@@ -130,8 +130,8 @@ export default function Home(): React.JSX.Element {
 
   // Initialize theme & load remember me credentials
   useEffect(() => {
-    const savedTheme = (localStorage.getItem("theme") as "dark" | "light") ||
-      "dark";
+    const savedTheme =
+      (localStorage.getItem("theme") as "dark" | "light") || "dark";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
@@ -157,10 +157,10 @@ export default function Home(): React.JSX.Element {
       .then((data) => {
         if (data && data.tag_name) {
           const exeAsset = data.assets?.find((a: any) =>
-            a.name.endsWith(".exe")
+            a.name.endsWith(".exe"),
           );
           const dmgAsset = data.assets?.find((a: any) =>
-            a.name.endsWith(".dmg")
+            a.name.endsWith(".dmg"),
           );
           const mainAsset = exeAsset || dmgAsset || data.assets?.[0];
           const sizeMb = mainAsset
@@ -173,11 +173,16 @@ export default function Home(): React.JSX.Element {
             tag: data.tag_name,
             size: sizeMb,
             date: dateStr,
-            url: data.html_url ||
+            url:
+              data.html_url ||
               "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
-            downloadUrlExe: exeAsset?.browser_download_url || data.html_url ||
+            downloadUrlExe:
+              exeAsset?.browser_download_url ||
+              data.html_url ||
               "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
-            downloadUrlDmg: dmgAsset?.browser_download_url || data.html_url ||
+            downloadUrlDmg:
+              dmgAsset?.browser_download_url ||
+              data.html_url ||
               "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
           });
         }
@@ -340,7 +345,7 @@ export default function Home(): React.JSX.Element {
         method: ep.method,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer dta_token_9f83a2bcde7582506e",
+          Authorization: "Bearer dta_token_9f83a2bcde7582506e",
         },
       };
       if (ep.method === "POST" && ep.requestBody) {
@@ -382,9 +387,11 @@ export default function Home(): React.JSX.Element {
             onClick={toggleTheme}
             className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-855 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all cursor-pointer shadow-sm"
           >
-            {theme === "dark"
-              ? <Sun className="w-4 h-4" />
-              : <Moon className="w-4 h-4" />}
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
           </button>
         </div>
 
@@ -454,9 +461,11 @@ export default function Home(): React.JSX.Element {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 >
-                  {showPassword
-                    ? <EyeOff className="w-4 h-4" />
-                    : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -491,8 +500,7 @@ export default function Home(): React.JSX.Element {
           <div className="text-center pt-2">
             <span className="text-[10px] text-slate-455 dark:text-slate-500 font-medium">
               Varsayılan Test Girişi:{" "}
-              <code className="text-slate-600 dark:text-slate-400">admin</code>
-              {" "}
+              <code className="text-slate-600 dark:text-slate-400">admin</code>{" "}
               /{" "}
               <code className="text-slate-600 dark:text-slate-400">
                 admin123
@@ -515,9 +523,11 @@ export default function Home(): React.JSX.Element {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all cursor-pointer"
           >
-            {isMobileMenuOpen
-              ? <X className="w-4 h-4" />
-              : <Menu className="w-4 h-4" />}
+            {isMobileMenuOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
           </button>
 
           <div className="p-0.5 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border border-blue-500/10 dark:border-blue-500/20">
@@ -535,8 +545,7 @@ export default function Home(): React.JSX.Element {
               </span>
             </h1>
             <p className="text-[9px] md:text-[10px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-              <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-500 animate-pulse">
-              </span>
+              <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Servis Aktif: mock_database_v1
             </p>
           </div>
@@ -549,9 +558,11 @@ export default function Home(): React.JSX.Element {
             className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all cursor-pointer"
             title={theme === "dark" ? "Açık Mod" : "Karanlık Mod"}
           >
-            {theme === "dark"
-              ? <Sun className="w-4 h-4" />
-              : <Moon className="w-4 h-4" />}
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
           </button>
 
           <button
@@ -584,9 +595,11 @@ export default function Home(): React.JSX.Element {
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all cursor-pointer border border-slate-200 dark:border-slate-800"
               title={isSidebarCollapsed ? "Menüyü Genişlet" : "Menüyü Daralt"}
             >
-              {isSidebarCollapsed
-                ? <ChevronRight className="w-4 h-4" />
-                : <ChevronLeft className="w-4 h-4" />}
+              {isSidebarCollapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <ChevronLeft className="w-4 h-4" />
+              )}
             </button>
           </div>
 
@@ -777,44 +790,47 @@ export default function Home(): React.JSX.Element {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-850/50">
-                      {logs.slice(-10).reverse().map((l) => (
-                        <tr
-                          key={l.id}
-                          className="text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-900/20"
-                        >
-                          <td className="py-2.5 font-medium text-slate-450 dark:text-slate-550">
-                            {l.time}
-                          </td>
-                          <td className="py-2.5">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                                l.method === "POST"
-                                  ? "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
-                                  : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
-                              }`}
-                            >
-                              {l.method}
-                            </span>
-                          </td>
-                          <td className="py-2.5 font-mono text-slate-800 dark:text-slate-355">
-                            {l.path}
-                          </td>
-                          <td className="py-2.5">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                                l.status === 200 || l.status === 201
-                                  ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                  : "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
-                              }`}
-                            >
-                              {l.status}
-                            </span>
-                          </td>
-                          <td className="py-2.5 text-right font-mono text-slate-650 dark:text-slate-455">
-                            {l.duration}ms
-                          </td>
-                        </tr>
-                      ))}
+                      {logs
+                        .slice(-10)
+                        .reverse()
+                        .map((l) => (
+                          <tr
+                            key={l.id}
+                            className="text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-900/20"
+                          >
+                            <td className="py-2.5 font-medium text-slate-450 dark:text-slate-550">
+                              {l.time}
+                            </td>
+                            <td className="py-2.5">
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                                  l.method === "POST"
+                                    ? "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
+                                    : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
+                                }`}
+                              >
+                                {l.method}
+                              </span>
+                            </td>
+                            <td className="py-2.5 font-mono text-slate-800 dark:text-slate-355">
+                              {l.path}
+                            </td>
+                            <td className="py-2.5">
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                                  l.status === 200 || l.status === 201
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                                    : "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
+                                }`}
+                              >
+                                {l.status}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-right font-mono text-slate-650 dark:text-slate-455">
+                              {l.duration}ms
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -888,9 +904,11 @@ export default function Home(): React.JSX.Element {
                       disabled={testingEndpoint}
                       className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer transition-all shadow-md shadow-blue-500/10"
                     >
-                      {testingEndpoint
-                        ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        : <Play className="w-3.5 h-3.5" />}
+                      {testingEndpoint ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Play className="w-3.5 h-3.5" />
+                      )}
                       İstek Gönder
                     </button>
                   </div>
@@ -924,11 +942,15 @@ export default function Home(): React.JSX.Element {
                     </span>
                     <pre className="flex-1 bg-slate-900 border border-slate-800 rounded-lg p-3 font-mono text-[10px] text-emerald-400 overflow-auto max-h-60">
                       {testingEndpoint ? (
-                        <span className="text-slate-550 italic">İstek işleniyor...</span>
+                        <span className="text-slate-550 italic">
+                          İstek işleniyor...
+                        </span>
                       ) : apiResponseText ? (
                         apiResponseText
                       ) : (
-                        <span className="text-slate-500 italic">Cevabı tetiklemek için sağ üstteki butona tıklayın.</span>
+                        <span className="text-slate-500 italic">
+                          Cevabı tetiklemek için sağ üstteki butona tıklayın.
+                        </span>
                       )}
                     </pre>
                   </div>
@@ -952,8 +974,7 @@ export default function Home(): React.JSX.Element {
 
               <div className="flex-1 bg-slate-900 dark:bg-slate-955 border border-slate-800 dark:border-slate-855 rounded-2xl p-4 font-mono text-xs text-slate-350 flex flex-col overflow-hidden min-h-[400px]">
                 <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 text-slate-500">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping">
-                  </div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></div>
                   <span className="text-[10px] font-bold uppercase tracking-wider">
                     gateway_terminal_stream.log
                   </span>
@@ -1084,8 +1105,7 @@ export default function Home(): React.JSX.Element {
                         <div
                           className="bg-blue-500 h-1.5 rounded-full transition-all duration-100"
                           style={{ width: `${syncProgress}%` }}
-                        >
-                        </div>
+                        ></div>
                       </div>
                       <span className="text-[9px] font-mono text-slate-500 block text-right">
                         Progress: {syncProgress}%
@@ -1110,26 +1130,22 @@ export default function Home(): React.JSX.Element {
                       {
                         name: "DATA_TeminDosyasi",
                         records: 48,
-                        desc:
-                          "İhale/Doğrudan Temin dosyaları genel ayarları ve meta verileri.",
+                        desc: "İhale/Doğrudan Temin dosyaları genel ayarları ve meta verileri.",
                       },
                       {
                         name: "DATA_DosyaSablonVeri",
                         records: 120,
-                        desc:
-                          "Dosyalara özel oluşturulmuş dondurulmuş (snapshot) şablon girdi verileri.",
+                        desc: "Dosyalara özel oluşturulmuş dondurulmuş (snapshot) şablon girdi verileri.",
                       },
                       {
                         name: "DATA_Malzeme",
                         records: 342,
-                        desc:
-                          "Yaklaşık maliyet hesaplamaları için girilen malzeme kalem bilgileri.",
+                        desc: "Yaklaşık maliyet hesaplamaları için girilen malzeme kalem bilgileri.",
                       },
                       {
                         name: "DATA_Firma",
                         records: 86,
-                        desc:
-                          "Piyasa fiyat teklifi alınan davetli veya yüklenici firmaların listesi.",
+                        desc: "Piyasa fiyat teklifi alınan davetli veya yüklenici firmaların listesi.",
                       },
                     ].map((tbl, idx) => (
                       <div
@@ -1138,8 +1154,7 @@ export default function Home(): React.JSX.Element {
                       >
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0">
-                            </span>
+                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                             <span className="text-xs font-bold text-slate-800 dark:text-white truncate">
                               {tbl.name}
                             </span>
@@ -1187,26 +1202,22 @@ export default function Home(): React.JSX.Element {
                         {
                           step: "1",
                           title: "Masaüstü Uygulamasını İndirin",
-                          desc:
-                            "Sağ tarafta bulunan indirme bağlantılarından bilgisayarınıza uygun olan versiyonu (.exe veya .dmg) indirin ve kurun.",
+                          desc: "Sağ tarafta bulunan indirme bağlantılarından bilgisayarınıza uygun olan versiyonu (.exe veya .dmg) indirin ve kurun.",
                         },
                         {
                           step: "2",
                           title: "Bulut Entegrasyonunu Aktifleştirin",
-                          desc:
-                            'Masaüstü uygulamasında **Ayarlar > Entegrasyon** sekmesine gidin ve "Bulut Veri Eşitleme" seçeneğini aktif konuma getirin.',
+                          desc: 'Masaüstü uygulamasında **Ayarlar > Entegrasyon** sekmesine gidin ve "Bulut Veri Eşitleme" seçeneğini aktif konuma getirin.',
                         },
                         {
                           step: "3",
                           title: "Gateway Sunucu Bilgilerini Tanımlayın",
-                          desc:
-                            "Masaüstü uygulamasındaki Bulut Popover'ına Next.js sunucunuzun IP/alan adını ve yetkilendirme anahtarınızı girin.",
+                          desc: "Masaüstü uygulamasındaki Bulut Popover'ına Next.js sunucunuzun IP/alan adını ve yetkilendirme anahtarınızı girin.",
                         },
                         {
                           step: "4",
                           title: "Eşitlemeyi Başlatın",
-                          desc:
-                            "Masaüstündeki yerel veritabanınız anında Next.js API Gateway sunucunuz ile senkronize olacak ve verileri buluta aktaracaktır.",
+                          desc: "Masaüstündeki yerel veritabanınız anında Next.js API Gateway sunucunuz ile senkronize olacak ve verileri buluta aktaracaktır.",
                         },
                       ].map((s, idx) => (
                         <div key={idx} className="flex gap-4">

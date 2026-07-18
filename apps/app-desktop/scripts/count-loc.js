@@ -53,4 +53,6 @@ if (!fs.existsSync(outputDir)) {
 }
 
 fs.writeFileSync(outputFile, JSON.stringify(result, null, 2))
-console.log(`[LOC Counter] Counted ${codeLines} code lines (${totalLines} total lines) across ${totalFiles} files.`)
+console.log(
+  `[LOC Counter] Counted ${codeLines} code lines (${totalLines} total lines) across ${totalFiles} files.`
+)

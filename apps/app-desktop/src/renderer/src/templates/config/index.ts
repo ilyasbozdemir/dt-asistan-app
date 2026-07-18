@@ -1,6 +1,6 @@
 /**
  * TEMPLATES/CONFIG/INDEX.TS
- * 
+ *
  * Merkezi şablon kaydı ve başlatma
  * Tüm şablonlar burada TemplateManager'a kaydedilir
  */
@@ -82,11 +82,11 @@ const HarcamaTalimatiConfig: TemplateConfig = {
 
 /**
  * Tüm şablonları TemplateManager'a kayıt et
- * 
+ *
  * KULLANIM: App başlangıcında (main.tsx veya App.tsx):
  * ```typescript
  * import { initializeTemplates } from './templates/config'
- * 
+ *
  * initializeTemplates()
  * ```
  */
@@ -111,9 +111,9 @@ export function initializeTemplates(): void {
   const info = templateManager.info()
   console.log(
     `TEMPLATE ENGINE BAŞLATILDI\n` +
-    `Toplam Şablon: ${info.totalTemplates}\n` +
-    `Kategoriler: ${info.categories.join(', ')}\n` +
-    `Legacy Paths: ${info.legacyPaths}`
+      `Toplam Şablon: ${info.totalTemplates}\n` +
+      `Kategoriler: ${info.categories.join(', ')}\n` +
+      `Legacy Paths: ${info.legacyPaths}`
   )
 }
 

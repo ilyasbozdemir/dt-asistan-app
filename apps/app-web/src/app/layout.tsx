@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "DT Asistan - API Gateway & Entegrasyon Paneli",
-  description: "DT Asistan masaüstü uygulaması için veri senkronizasyonu ve API entegrasyon yönetim arayüzü.",
+  description:
+    "DT Asistan masaüstü uygulaması için veri senkronizasyonu ve API entegrasyon yönetim arayüzü.",
 };
 
 export default function RootLayout({

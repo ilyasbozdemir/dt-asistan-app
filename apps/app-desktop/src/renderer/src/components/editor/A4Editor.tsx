@@ -100,7 +100,11 @@ export function A4Editor({
         <div className="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-2 flex flex-wrap gap-1 relative z-20">
           <button
             onClick={() => setIsRawMode(!isRawMode)}
-            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${isRawMode ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600' : 'text-slate-600 dark:text-slate-300'} font-semibold text-xs flex items-center gap-1 mr-2`}
+            className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+              isRawMode
+                ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600'
+                : 'text-slate-600 dark:text-slate-300'
+            } font-semibold text-xs flex items-center gap-1 mr-2`}
             title="Ham HTML Kodu"
           >
             <Code className="w-4 h-4" /> HTML
@@ -111,14 +115,22 @@ export function A4Editor({
               <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1 self-center" />
               <button
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('bold') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('bold')
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Kalın"
               >
                 <Bold className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('italic') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('italic')
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="İtalik"
               >
                 <Italic className="w-4 h-4" />
@@ -128,21 +140,33 @@ export function A4Editor({
 
               <button
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('heading', { level: 1 })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Başlık 1"
               >
                 <Heading1 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('heading', { level: 2 })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Başlık 2"
               >
                 <Heading2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('heading', { level: 3 }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('heading', { level: 3 })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Başlık 3"
               >
                 <Heading3 className="w-4 h-4" />
@@ -152,14 +176,22 @@ export function A4Editor({
 
               <button
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('bulletList') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('bulletList')
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Sırasız Liste"
               >
                 <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive('orderedList') ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive('orderedList')
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Sıralı Liste"
               >
                 <ListOrdered className="w-4 h-4" />
@@ -169,21 +201,33 @@ export function A4Editor({
 
               <button
                 onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'left' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive({ textAlign: 'left' })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Sola Hizala"
               >
                 <AlignLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'center' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive({ textAlign: 'center' })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Ortala"
               >
                 <AlignCenter className="w-4 h-4" />
               </button>
               <button
                 onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${editor.isActive({ textAlign: 'right' }) ? 'bg-slate-200 dark:bg-slate-700 text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}
+                className={`p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                  editor.isActive({ textAlign: 'right' })
+                    ? 'bg-slate-200 dark:bg-slate-700 text-blue-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
                 title="Sağa Hizala"
               >
                 <AlignRight className="w-4 h-4" />
@@ -211,7 +255,9 @@ export function A4Editor({
 
       {/* EDITOR CANVAS */}
       <div
-        className={`flex-1 overflow-y-auto p-4 md:p-8 bg-slate-200 dark:bg-slate-800 custom-scrollbar flex justify-center w-full relative z-10 ${isRawMode ? 'p-0 md:p-0 bg-transparent dark:bg-transparent' : ''}`}
+        className={`flex-1 overflow-y-auto p-4 md:p-8 bg-slate-200 dark:bg-slate-800 custom-scrollbar flex justify-center w-full relative z-10 ${
+          isRawMode ? 'p-0 md:p-0 bg-transparent dark:bg-transparent' : ''
+        }`}
       >
         {isRawMode ? (
           <textarea

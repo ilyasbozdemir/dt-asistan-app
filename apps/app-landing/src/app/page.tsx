@@ -14,11 +14,13 @@ import {
   Lock,
   Code,
   Sun,
-  Moon
+  Moon,
 } from "lucide-react";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"features" | "architecture" | "docker">("features");
+  const [activeTab, setActiveTab] = useState<
+    "features" | "architecture" | "docker"
+  >("features");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -32,23 +34,31 @@ export default function Home() {
     tag: "v1.0.0-beta.38",
     size: "68.4 MB",
     date: "10.07.2026",
-    url: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases"
+    url: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
   });
 
   // Fetch GitHub Release info on mount
   useEffect(() => {
-    fetch("https://api.github.com/repos/ilyasbozdemir/dt-asistan-desktop-app/releases/latest")
+    fetch(
+      "https://api.github.com/repos/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data && data.tag_name) {
           const mainAsset = data.assets?.[0];
-          const sizeMb = mainAsset ? `${(mainAsset.size / (1024 * 1024)).toFixed(1)} MB` : "68.4 MB";
-          const dateStr = data.published_at ? new Date(data.published_at).toLocaleDateString("tr-TR") : "10.07.2026";
+          const sizeMb = mainAsset
+            ? `${(mainAsset.size / (1024 * 1024)).toFixed(1)} MB`
+            : "68.4 MB";
+          const dateStr = data.published_at
+            ? new Date(data.published_at).toLocaleDateString("tr-TR")
+            : "10.07.2026";
           setLatestRelease({
             tag: data.tag_name,
             size: sizeMb,
             date: dateStr,
-            url: data.html_url || "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases"
+            url:
+              data.html_url ||
+              "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
           });
         }
       })
@@ -59,7 +69,8 @@ export default function Home() {
 
   // Initialize theme from localStorage & set up scroll listener
   useEffect(() => {
-    const savedTheme = (localStorage.getItem("theme") as "dark" | "light") || "dark";
+    const savedTheme =
+      (localStorage.getItem("theme") as "dark" | "light") || "dark";
     if (savedTheme !== "dark") {
       setTimeout(() => {
         setTheme(savedTheme);
@@ -94,19 +105,21 @@ export default function Home() {
       <div className="absolute bottom-[20%] left-10 w-[600px] h-[600px] bg-violet-650/5 dark:bg-violet-600/5 rounded-full blur-[150px] pointer-events-none -z-10" />
 
       {/* HEADER / NAVIGATION */}
-      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "bg-white/80 dark:bg-slate-955/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-900 py-3" 
-          : "bg-transparent py-5"
-      }`}>
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/80 dark:bg-slate-955/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-900 py-3"
+            : "bg-transparent py-5"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
-              <Image 
-                src="/icon.png" 
-                alt="DT Asistan Logo" 
-                width={36} 
-                height={36} 
+              <Image
+                src="/icon.png"
+                alt="DT Asistan Logo"
+                width={36}
+                height={36}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -118,10 +131,30 @@ export default function Home() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-500 dark:text-slate-400">
-            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">Özellikler</a>
-            <a href="#how-it-works" className="hover:text-slate-900 dark:hover:text-white transition-colors">Nasıl Çalışır?</a>
-            <a href="#install" className="hover:text-slate-900 dark:hover:text-white transition-colors">Kurulum & Docker</a>
-            <a href="#downloads" className="hover:text-slate-900 dark:hover:text-white transition-colors">Yüklemeler</a>
+            <a
+              href="#features"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Özellikler
+            </a>
+            <a
+              href="#how-it-works"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Nasıl Çalışır?
+            </a>
+            <a
+              href="#install"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Kurulum & Docker
+            </a>
+            <a
+              href="#downloads"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Yüklemeler
+            </a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -131,10 +164,14 @@ export default function Home() {
               className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 cursor-pointer"
               title="Tema Değiştir"
             >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
             </button>
 
-            <a 
+            <a
               href="#downloads"
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-1.5 cursor-pointer"
             >
@@ -160,8 +197,10 @@ export default function Home() {
         </h1>
 
         <p className="max-w-2xl mx-auto text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed font-medium">
-          DT Asistan, kamu ve özel sektör projelerinizde lokal bilgisayarınızın performansından ödün vermeden, 
-          merkezi sunucuyla çift yönlü eşleşebilen gelişmiş bir iş asistanıdır. Çevrimdışı çalışın, tek tıkla buluta aktarın.
+          DT Asistan, kamu ve özel sektör projelerinizde lokal bilgisayarınızın
+          performansından ödün vermeden, merkezi sunucuyla çift yönlü
+          eşleşebilen gelişmiş bir iş asistanıdır. Çevrimdışı çalışın, tek tıkla
+          buluta aktarın.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -185,27 +224,27 @@ export default function Home() {
           <span>✓ Windows 10/11 & macOS Desteği</span>
           <span className="hidden sm:inline w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
-            <a 
+            <a
               href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
-              <img 
-                src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-desktop-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm" 
-                alt="Latest Release" 
+              <img
+                src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-desktop-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm"
+                alt="Latest Release"
                 className="h-5 rounded"
               />
             </a>
-            <a 
+            <a
               href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
-              <img 
-                src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-desktop-app/total?style=flat-square&logo=github&color=blue" 
-                alt="Downloads" 
+              <img
+                src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-desktop-app/total?style=flat-square&logo=github&color=blue"
+                alt="Downloads"
                 className="h-5 rounded"
               />
             </a>
@@ -270,15 +309,19 @@ export default function Home() {
       </section>
 
       {/* CORE CAPABILITIES / TABS SECTION */}
-      <section id="features" className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-150 dark:border-slate-900">
+      <section
+        id="features"
+        className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-150 dark:border-slate-900"
+      >
         <div className="max-w-7xl mx-auto px-6 space-y-12">
           <div className="text-center max-w-xl mx-auto space-y-3">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Neden DT Asistan?
             </h2>
             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-              Geleneksel bulut tabanlı yavaş sistemleri ve hantal yerel yazılımları bir kenara bırakın. 
-              Hibrit mimarimiz ile iki dünyanın da en iyi özelliklerine sahip olun.
+              Geleneksel bulut tabanlı yavaş sistemleri ve hantal yerel
+              yazılımları bir kenara bırakın. Hibrit mimarimiz ile iki dünyanın
+              da en iyi özelliklerine sahip olun.
             </p>
           </div>
 
@@ -287,8 +330,8 @@ export default function Home() {
             <button
               onClick={() => setActiveTab("features")}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                activeTab === "features" 
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5" 
+                activeTab === "features"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5"
                   : "text-slate-550 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
@@ -297,8 +340,8 @@ export default function Home() {
             <button
               onClick={() => setActiveTab("architecture")}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                activeTab === "architecture" 
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5" 
+                activeTab === "architecture"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5"
                   : "text-slate-550 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
@@ -307,8 +350,8 @@ export default function Home() {
             <button
               onClick={() => setActiveTab("docker")}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                activeTab === "docker" 
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5" 
+                activeTab === "docker"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/5"
                   : "text-slate-550 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
@@ -321,42 +364,59 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
               {[
                 {
-                  icon: <Wifi className="w-5 h-5 text-blue-550 dark:text-blue-550" />,
+                  icon: (
+                    <Wifi className="w-5 h-5 text-blue-550 dark:text-blue-550" />
+                  ),
                   title: "Akıllı Çevrimdışı Çalışma",
-                  desc: "İnternet bağlantınız kopsa veya şantiyede olsanız bile işiniz durmaz. Tüm işlemler yerel veritabanında gerçekleştirilir."
+                  desc: "İnternet bağlantınız kopsa veya şantiyede olsanız bile işiniz durmaz. Tüm işlemler yerel veritabanında gerçekleştirilir.",
                 },
                 {
                   icon: <Activity className="w-5 h-5 text-indigo-500" />,
                   title: "Çift Yönlü Eşitleme (Sync)",
-                  desc: "Ofis moduna geçtiğinizde veya internet sağlandığında yereldeki verilerinizi tek tuşla merkezi bulut API sunucunuza aktarın."
+                  desc: "Ofis moduna geçtiğinizde veya internet sağlandığında yereldeki verilerinizi tek tuşla merkezi bulut API sunucunuza aktarın.",
                 },
                 {
-                  icon: <Lock className="w-5 h-5 text-emerald-550 dark:text-emerald-500" />,
+                  icon: (
+                    <Lock className="w-5 h-5 text-emerald-550 dark:text-emerald-500" />
+                  ),
                   title: "Yerel Veri Güvenliği (.dtal)",
-                  desc: "Proje dosyalarınız şifrelenmiş .dtal formatında bilgisayarınızda saklanır. Verilerinizin kontrolü tamamen sizdedir."
+                  desc: "Proje dosyalarınız şifrelenmiş .dtal formatında bilgisayarınızda saklanır. Verilerinizin kontrolü tamamen sizdedir.",
                 },
                 {
-                  icon: <FileText className="w-5 h-5 text-amber-550 dark:text-amber-500" />,
+                  icon: (
+                    <FileText className="w-5 h-5 text-amber-550 dark:text-amber-500" />
+                  ),
                   title: "Gelişmiş Çıktı Merkezi",
-                  desc: "Rapor, dilekçe ve hakedişlerinizi anında Word (docx), Excel (xlsx), PDF veya UYAP (.udf) formatlarında ihraç edin."
+                  desc: "Rapor, dilekçe ve hakedişlerinizi anında Word (docx), Excel (xlsx), PDF veya UYAP (.udf) formatlarında ihraç edin.",
                 },
                 {
-                  icon: <Laptop className="w-5 h-5 text-violet-550 dark:text-violet-500" />,
+                  icon: (
+                    <Laptop className="w-5 h-5 text-violet-550 dark:text-violet-500" />
+                  ),
                   title: "Masaüstü Performansı",
-                  desc: "Electron tabanlı güçlü yapısıyla bilgisayarınızın RAM ve işlemci gücünü verimli kullanır, tarayıcı kasmaları yaşanmaz."
+                  desc: "Electron tabanlı güçlü yapısıyla bilgisayarınızın RAM ve işlemci gücünü verimli kullanır, tarayıcı kasmaları yaşanmaz.",
                 },
                 {
-                  icon: <Smartphone className="w-5 h-5 text-rose-550 dark:text-rose-500" />,
+                  icon: (
+                    <Smartphone className="w-5 h-5 text-rose-550 dark:text-rose-500" />
+                  ),
                   title: "Mobil Entegrasyon",
-                  desc: "Android ve iOS mobil cihazlarınızdan merkezi sunucuya bağlanarak sahadan anlık veri akışı sağlayın."
-                }
+                  desc: "Android ve iOS mobil cihazlarınızdan merkezi sunucuya bağlanarak sahadan anlık veri akışı sağlayın.",
+                },
               ].map((f, idx) => (
-                <div key={idx} className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 hover:border-slate-350 dark:hover:border-slate-800 transition-all text-left space-y-3 shadow-sm dark:shadow-none">
+                <div
+                  key={idx}
+                  className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 hover:border-slate-350 dark:hover:border-slate-800 transition-all text-left space-y-3 shadow-sm dark:shadow-none"
+                >
                   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center">
                     {f.icon}
                   </div>
-                  <h4 className="text-sm font-bold text-slate-850 dark:text-white">{f.title}</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">{f.desc}</p>
+                  <h4 className="text-sm font-bold text-slate-850 dark:text-white">
+                    {f.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
+                    {f.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -366,27 +426,42 @@ export default function Home() {
           {activeTab === "architecture" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
               <div className="bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl p-6 text-left space-y-4 shadow-sm dark:shadow-none">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-550 flex items-center justify-center font-bold">1</div>
-                <h4 className="text-sm font-bold text-slate-850 dark:text-white">İstemci Katmanı (Desktop App)</h4>
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-550 flex items-center justify-center font-bold">
+                  1
+                </div>
+                <h4 className="text-sm font-bold text-slate-850 dark:text-white">
+                  İstemci Katmanı (Desktop App)
+                </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                  Kullanıcının bilgisayarında çalışan yerel istemcidir. SQLite tabanlı veritabanı sayesinde 
-                  sıfır ağ gecikmesi ile çalışır. İnternet bağımsızdır.
+                  Kullanıcının bilgisayarında çalışan yerel istemcidir. SQLite
+                  tabanlı veritabanı sayesinde sıfır ağ gecikmesi ile çalışır.
+                  İnternet bağımsızdır.
                 </p>
               </div>
               <div className="bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl p-6 text-left space-y-4 shadow-sm dark:shadow-none">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-500 flex items-center justify-center font-bold">2</div>
-                <h4 className="text-sm font-bold text-slate-850 dark:text-white">API Gateway (Next.js Server)</h4>
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-500 flex items-center justify-center font-bold">
+                  2
+                </div>
+                <h4 className="text-sm font-bold text-slate-850 dark:text-white">
+                  API Gateway (Next.js Server)
+                </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                  Merkezi veri tabanını ve yetkilendirmeleri (Auth) yöneten sunucudur. Docker container olarak yerel ağda 
-                  veya bulutta güvenle yayınlanır.
+                  Merkezi veri tabanını ve yetkilendirmeleri (Auth) yöneten
+                  sunucudur. Docker container olarak yerel ağda veya bulutta
+                  güvenle yayınlanır.
                 </p>
               </div>
               <div className="bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl p-6 text-left space-y-4 shadow-sm dark:shadow-none">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center font-bold">3</div>
-                <h4 className="text-sm font-bold text-slate-850 dark:text-white">Eşitleme Modları (Ofis / Ev)</h4>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center font-bold">
+                  3
+                </div>
+                <h4 className="text-sm font-bold text-slate-850 dark:text-white">
+                  Eşitleme Modları (Ofis / Ev)
+                </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                  Ofisteyken sunucuyla doğrudan, evde/sahadayken ise çevrimdışı çalışarak verileri lokalde biriktirir, 
-                  ardından tek komutla buluta aktarır.
+                  Ofisteyken sunucuyla doğrudan, evde/sahadayken ise çevrimdışı
+                  çalışarak verileri lokalde biriktirir, ardından tek komutla
+                  buluta aktarır.
                 </p>
               </div>
             </div>
@@ -397,22 +472,49 @@ export default function Home() {
             <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl p-6 text-left space-y-4 shadow-sm dark:shadow-none">
               <div className="flex items-center gap-2">
                 <Terminal className="w-5 h-5 text-blue-600 dark:text-blue-500" />
-                <h4 className="text-sm font-bold text-slate-850 dark:text-white">Docker ile API Gateway Kurulumu</h4>
+                <h4 className="text-sm font-bold text-slate-850 dark:text-white">
+                  Docker ile API Gateway Kurulumu
+                </h4>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                Sunucunuzu Docker yardımıyla yerel ağınızda (LAN) veya dış ip adresinizde saniyeler içinde ayağa kaldırabilirsiniz. 
-                Masaüstü uygulamalarınız bu adrese bağlanarak ortak veritabanını eşitleyecektir.
+                Sunucunuzu Docker yardımıyla yerel ağınızda (LAN) veya dış ip
+                adresinizde saniyeler içinde ayağa kaldırabilirsiniz. Masaüstü
+                uygulamalarınız bu adrese bağlanarak ortak veritabanını
+                eşitleyecektir.
               </p>
 
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-xl p-4 space-y-2.5 font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                <div className="text-slate-400 dark:text-slate-550">{"# 1. Proje ana dizinindeyken web klasörünü docker imajı olarak derleyin"}</div>
-                <div className="text-blue-600 dark:text-blue-400">docker build -t dt-asistan-server ./web</div>
-                
-                <div className="text-slate-400 dark:text-slate-550 mt-2">{"# 2. İmajı 3000 portu üzerinden arka planda çalıştırın"}</div>
-                <div className="text-blue-600 dark:text-blue-400">docker run -p 3000:3000 --name dt-server -d dt-asistan-server</div>
-                
-                <div className="text-slate-400 dark:text-slate-550 mt-2">{"# 3. Masaüstü uygulamasındaki Sunucu Adresi alanına girilecek IP"}</div>
-                <div>URL: <span className="text-emerald-600 dark:text-emerald-400 font-bold">http://localhost:3000</span> veya <span className="text-emerald-600 dark:text-emerald-400 font-bold">http://[LAN_IP]:3000</span></div>
+                <div className="text-slate-400 dark:text-slate-550">
+                  {
+                    "# 1. Proje ana dizinindeyken web klasörünü docker imajı olarak derleyin"
+                  }
+                </div>
+                <div className="text-blue-600 dark:text-blue-400">
+                  docker build -t dt-asistan-server ./web
+                </div>
+
+                <div className="text-slate-400 dark:text-slate-550 mt-2">
+                  {"# 2. İmajı 3000 portu üzerinden arka planda çalıştırın"}
+                </div>
+                <div className="text-blue-600 dark:text-blue-400">
+                  docker run -p 3000:3000 --name dt-server -d dt-asistan-server
+                </div>
+
+                <div className="text-slate-400 dark:text-slate-550 mt-2">
+                  {
+                    "# 3. Masaüstü uygulamasındaki Sunucu Adresi alanına girilecek IP"
+                  }
+                </div>
+                <div>
+                  URL:{" "}
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                    http://localhost:3000
+                  </span>{" "}
+                  veya{" "}
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                    http://[LAN_IP]:3000
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -420,16 +522,22 @@ export default function Home() {
       </section>
 
       {/* DOWNLOADS SECTION */}
-      <section id="downloads" className="py-20 bg-slate-50/50 dark:bg-slate-950/40 relative border-t border-slate-100 dark:border-slate-900">
+      <section
+        id="downloads"
+        className="py-20 bg-slate-50/50 dark:bg-slate-950/40 relative border-t border-slate-100 dark:border-slate-900"
+      >
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-left space-y-4">
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-850 dark:text-white leading-tight">
               DT Asistan Uygulamalarını <br />
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">Hemen İndirin</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
+                Hemen İndirin
+              </span>
             </h2>
             <p className="text-xs md:text-sm text-slate-550 dark:text-slate-400 leading-relaxed font-medium max-w-md">
-              Bilgisayarınıza uygun istemciyi indirin, kurun ve gateway sunucunuza kolayca bağlayın. 
-              Mobil uygulamalarımız yakında Google Play Store ve Apple App Store mağazalarında yayında olacaktır.
+              Bilgisayarınıza uygun istemciyi indirin, kurun ve gateway
+              sunucunuza kolayca bağlayın. Mobil uygulamalarımız yakında Google
+              Play Store ve Apple App Store mağazalarında yayında olacaktır.
             </p>
             <div className="pt-2 flex items-center gap-4 text-xs font-bold text-slate-500">
               <div className="flex items-center gap-1.5">
@@ -444,7 +552,9 @@ export default function Home() {
           </div>
 
           <div className="bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 md:p-8 space-y-6 text-left shadow-sm dark:shadow-none">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Platformlar</h4>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Platformlar
+            </h4>
 
             <div className="space-y-4">
               <a
@@ -456,8 +566,12 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <Laptop className="w-5 h-5 text-white" />
                   <div>
-                    <p className="font-bold text-white">Windows Installer (.exe)</p>
-                    <p className="text-[10px] text-blue-200 mt-0.5">Windows 10 / 11 64-bit | Boyut: {latestRelease.size}</p>
+                    <p className="font-bold text-white">
+                      Windows Installer (.exe)
+                    </p>
+                    <p className="text-[10px] text-blue-200 mt-0.5">
+                      Windows 10 / 11 64-bit | Boyut: {latestRelease.size}
+                    </p>
                   </div>
                 </div>
                 <Download className="w-4 h-4" />
@@ -473,7 +587,9 @@ export default function Home() {
                   <Laptop className="w-5 h-5 text-slate-400" />
                   <div>
                     <p className="font-bold">macOS Installer (.dmg)</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Intel & Apple Silicon (M1/M2/M3)</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      Intel & Apple Silicon (M1/M2/M3)
+                    </p>
                   </div>
                 </div>
                 <Download className="w-4 h-4" />
@@ -484,8 +600,12 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <Smartphone className="w-5 h-5 text-slate-400" />
                   <div className="text-left">
-                    <p className="text-xs font-bold text-slate-400 dark:text-slate-500">Android & iOS Mobil</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-655 mt-0.5">Google Play & App Store</p>
+                    <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                      Android & iOS Mobil
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-655 mt-0.5">
+                      Google Play & App Store
+                    </p>
                   </div>
                 </div>
                 <span className="text-[9px] font-black bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -502,11 +622,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden">
-              <Image 
-                src="/icon.png" 
-                alt="DT Asistan Footer Logo" 
-                width={24} 
-                height={24} 
+              <Image
+                src="/icon.png"
+                alt="DT Asistan Footer Logo"
+                width={24}
+                height={24}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -514,13 +634,28 @@ export default function Home() {
           </div>
 
           <div className="flex gap-6">
-            <a href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+            <a
+              href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
               GitHub Repository
             </a>
             <span className="text-slate-300 dark:text-slate-850">|</span>
-            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Kullanım Koşulları</a>
+            <a
+              href="#"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Kullanım Koşulları
+            </a>
             <span className="text-slate-300 dark:text-slate-850">|</span>
-            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Gizlilik Politikası</a>
+            <a
+              href="#"
+              className="hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Gizlilik Politikası
+            </a>
           </div>
         </div>
       </footer>

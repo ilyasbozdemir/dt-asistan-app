@@ -291,7 +291,11 @@ export function NetworkSyncModal({ onClose }: NetworkSyncModalProps): React.JSX.
           {/* Status Message */}
           {message && status !== 'idle' && (
             <div
-              className={`p-3 rounded-lg text-sm flex items-center gap-2 ${status === 'error' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' : 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'}`}
+              className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+                status === 'error'
+                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
+                  : 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+              }`}
             >
               {status === 'error' ? (
                 <AlertTriangle className="w-4 h-4 shrink-0" />

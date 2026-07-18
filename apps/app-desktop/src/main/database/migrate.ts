@@ -123,7 +123,9 @@ export function runMigrations(db: Database.Database, fromVersion: number): void 
                   typeof v === 'string' ? "'" + v.replace(/'/g, "''") + "'" : v
                 )
                 db.exec(
-                  `INSERT OR IGNORE INTO ${tableName} (${keys.join(', ')}) VALUES (${values.join(', ')});`
+                  `INSERT OR IGNORE INTO ${tableName} (${keys.join(', ')}) VALUES (${values.join(
+                    ', '
+                  )});`
                 )
               })
             }

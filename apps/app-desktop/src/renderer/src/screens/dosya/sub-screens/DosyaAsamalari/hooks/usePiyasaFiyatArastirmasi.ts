@@ -448,9 +448,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
         if (belgeleriKaydet) {
           // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
-          const documentsToLog = [
-            { name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi }
-          ]
+          const documentsToLog = [{ name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi }]
           if (syncTutanak) {
             documentsToLog.push({ name: 'Piyasa Fiyat Araştırma Tutanağı', date: tutanakTarihi })
           }
@@ -498,9 +496,12 @@ export function usePiyasaFiyatArastirmasiLogic() {
           }
 
           alert(
-            `Yaklaşık maliyet ve süreç belgeleri başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
-              minimumFractionDigits: 2
-            })}`
+            `Yaklaşık maliyet ve süreç belgeleri başarıyla kaydedildi: ₺ ${total.toLocaleString(
+              'tr-TR',
+              {
+                minimumFractionDigits: 2
+              }
+            )}`
           )
 
           // Belgeleri yeniden yükle
@@ -524,9 +525,12 @@ export function usePiyasaFiyatArastirmasiLogic() {
           }
         } else {
           alert(
-            `Teklif fiyatları ve yaklaşık maliyet başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
-              minimumFractionDigits: 2
-            })}`
+            `Teklif fiyatları ve yaklaşık maliyet başarıyla kaydedildi: ₺ ${total.toLocaleString(
+              'tr-TR',
+              {
+                minimumFractionDigits: 2
+              }
+            )}`
           )
         }
 
@@ -562,13 +566,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
       if (sablon) {
         const processPath = sablon.route_path || sablon.dosya_adi || ''
         const baseCtx = contextsByPath[processPath] || dosyaContext
-        
+
         const snapshotRes = await window.electron.ipcRenderer.invoke(
           'db:query',
           'SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = ?',
           [activeDosyaId, sablon.id]
         )
-        
+
         let currentVeri: any = { ...baseCtx }
         if (snapshotRes.success && snapshotRes.data.length > 0) {
           try {

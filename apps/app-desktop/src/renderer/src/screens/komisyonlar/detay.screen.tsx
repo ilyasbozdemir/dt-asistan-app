@@ -166,14 +166,22 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
             <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                }`}
                 title="Grid Görünümü"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                }`}
                 title="Tablo Görünümü"
               >
                 <List className="w-4 h-4" />

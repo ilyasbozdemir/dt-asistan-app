@@ -117,7 +117,9 @@ export const BirimModal: React.FC<BirimModalProps> = ({
                     handleChange('e_butce', val)
                   }}
                   placeholder="Birim Kodu (Örn: 03)"
-                  className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                  className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'
+                  }`}
                 />
               </div>
             </div>
@@ -139,7 +141,9 @@ export const BirimModal: React.FC<BirimModalProps> = ({
                   value={(form.say2000i as string) || ''}
                   onChange={(e) => handleChange('say2000i', e.target.value)}
                   placeholder="Birim Kodu (Örn: 01)"
-                  className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                  className={`flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'
+                  }`}
                 />
               </div>
             </div>
@@ -255,7 +259,9 @@ export const BirimModal: React.FC<BirimModalProps> = ({
                         handleChange('e_butce', val)
                       }}
                       placeholder="Birim Kodu (Örn: 03)"
-                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                        settings?.eButceKodu ? 'rounded-r-xl' : 'rounded-xl'
+                      }`}
                     />
                   </div>
                 </div>
@@ -277,7 +283,9 @@ export const BirimModal: React.FC<BirimModalProps> = ({
                       value={(form.say2000i as string) || ''}
                       onChange={(e) => handleChange('say2000i', e.target.value)}
                       placeholder="Birim Kodu (Örn: 01)"
-                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'}`}
+                      className={`flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 px-3 text-slate-805 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                        settings?.say2000iKodu ? 'rounded-r-xl' : 'rounded-xl'
+                      }`}
                     />
                   </div>
                 </div>
@@ -375,7 +383,9 @@ export const BirimModal: React.FC<BirimModalProps> = ({
                     <a
                       href={
                         form.dtvt_kodu
-                          ? `https://detsis.gov.tr/birim/${form.dtvt_kodu}/${form.dtvt_kodu}/${new Date().toISOString().split('T')[0]}`
+                          ? `https://detsis.gov.tr/birim/${form.dtvt_kodu}/${form.dtvt_kodu}/${
+                              new Date().toISOString().split('T')[0]
+                            }`
                           : 'https://detsis.gov.tr/'
                       }
                       target="_blank"

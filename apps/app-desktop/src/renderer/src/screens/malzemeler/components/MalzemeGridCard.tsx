@@ -82,9 +82,7 @@ export function MalzemeGridCard({
       </h4>
 
       <div className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-        <span className="font-semibold text-slate-600 dark:text-slate-300">
-          {item.tipi}
-        </span>
+        <span className="font-semibold text-slate-600 dark:text-slate-300">{item.tipi}</span>
         <span className="font-semibold text-slate-600 dark:text-slate-300">
           Birim: {item.birim}
         </span>

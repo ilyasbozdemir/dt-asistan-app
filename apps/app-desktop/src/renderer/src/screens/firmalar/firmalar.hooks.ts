@@ -148,7 +148,9 @@ export function useFirmalarHooks() {
       }
 
       if (conditions.length > 0) {
-        const checkQuery = `SELECT unvan FROM TANIM_Firma WHERE id != ? AND (${conditions.join(' OR ')}) LIMIT 1`
+        const checkQuery = `SELECT unvan FROM TANIM_Firma WHERE id != ? AND (${conditions.join(
+          ' OR '
+        )}) LIMIT 1`
         const existing = await window.electron.ipcRenderer.invoke('db:query', checkQuery, [
           id,
           ...params

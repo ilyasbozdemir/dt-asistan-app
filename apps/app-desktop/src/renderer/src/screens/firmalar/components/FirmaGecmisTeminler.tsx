@@ -147,9 +147,7 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       items = items.filter(
-        (r) =>
-          r.konu?.toLowerCase().includes(q) ||
-          r.temin_no?.toLowerCase().includes(q)
+        (r) => r.konu?.toLowerCase().includes(q) || r.temin_no?.toLowerCase().includes(q)
       )
     }
     if (filterStatus === 'kazanan') {
@@ -270,7 +268,9 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
           <span className="text-lg font-extrabold text-blue-700 dark:text-blue-400 font-mono">
             {formatCurrency(stats.toplamTeklif)}
           </span>
-          <span className="text-[10px] text-blue-600/70 dark:text-blue-500/70 font-semibold">TL</span>
+          <span className="text-[10px] text-blue-600/70 dark:text-blue-500/70 font-semibold">
+            TL
+          </span>
         </div>
 
         <div className="bg-violet-50/40 dark:bg-violet-950/10 border border-violet-200/60 dark:border-violet-800 rounded-2xl p-4 flex flex-col gap-1">
@@ -281,7 +281,9 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
           <span className="text-lg font-extrabold text-violet-700 dark:text-violet-400 font-mono">
             {formatCurrency(stats.kazananTeklif)}
           </span>
-          <span className="text-[10px] text-violet-600/70 dark:text-violet-500/70 font-semibold">TL</span>
+          <span className="text-[10px] text-violet-600/70 dark:text-violet-500/70 font-semibold">
+            TL
+          </span>
         </div>
       </div>
 
@@ -384,7 +386,9 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
                   {/* Price & Date */}
                   <div className="flex items-center gap-6 shrink-0">
                     <div className="text-right hidden sm:block">
-                      <span className="text-[10px] text-slate-400 block font-bold">Teklif Tutarı</span>
+                      <span className="text-[10px] text-slate-400 block font-bold">
+                        Teklif Tutarı
+                      </span>
                       <span
                         className={cn(
                           'text-sm font-extrabold font-mono',
@@ -395,7 +399,9 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
                             : 'text-slate-400 italic text-xs'
                         )}
                       >
-                        {rec.teklif_toplami > 0 ? `${formatCurrency(rec.teklif_toplami)} TL` : 'Girilmedi'}
+                        {rec.teklif_toplami > 0
+                          ? `${formatCurrency(rec.teklif_toplami)} TL`
+                          : 'Girilmedi'}
                       </span>
                     </div>
 
@@ -422,25 +428,35 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
                   <div className="border-t border-slate-100 dark:border-slate-800 p-5 bg-slate-50/50 dark:bg-slate-950/30 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold block">Yaklaşık Maliyet</span>
+                        <span className="text-[10px] text-slate-400 font-bold block">
+                          Yaklaşık Maliyet
+                        </span>
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300 font-mono">
-                          {rec.yaklasik_maliyet > 0 ? `${formatCurrency(rec.yaklasik_maliyet)} TL` : '-'}
+                          {rec.yaklasik_maliyet > 0
+                            ? `${formatCurrency(rec.yaklasik_maliyet)} TL`
+                            : '-'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold block">Teklif Durumu</span>
+                        <span className="text-[10px] text-slate-400 font-bold block">
+                          Teklif Durumu
+                        </span>
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
                           {rec.teklif_durumu || '-'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold block">Kazanan Firma</span>
+                        <span className="text-[10px] text-slate-400 font-bold block">
+                          Kazanan Firma
+                        </span>
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
                           {rec.firma_unvan_kazanan || 'Belirlenmedi'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold block">Davet Tarihi</span>
+                        <span className="text-[10px] text-slate-400 font-bold block">
+                          Davet Tarihi
+                        </span>
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
                           {rec.davet_tarihi || '-'}
                         </span>
@@ -478,9 +494,7 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
                                   {k.miktar} {k.birim}
                                 </td>
                                 <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
-                                  {k.birim_fiyat > 0
-                                    ? `${formatCurrency(k.birim_fiyat)} TL`
-                                    : '-'}
+                                  {k.birim_fiyat > 0 ? `${formatCurrency(k.birim_fiyat)} TL` : '-'}
                                 </td>
                                 <td className="py-2.5 px-4 text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                                   {k.birim_fiyat > 0
@@ -499,7 +513,9 @@ export const FirmaGecmisTeminler: React.FC<FirmaGecmisTeminlerProps> = ({
                     ) : (
                       <div className="flex items-center justify-center py-4 gap-2">
                         <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-                        <span className="text-xs text-slate-500 font-semibold">Kalemler yükleniyor...</span>
+                        <span className="text-xs text-slate-500 font-semibold">
+                          Kalemler yükleniyor...
+                        </span>
                       </div>
                     )}
                   </div>

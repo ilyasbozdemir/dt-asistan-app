@@ -1266,7 +1266,9 @@ if (!gotTheLock && !isMultiInstance) {
 
             // For TANIM_Kurum, we usually update id=1 or insert if not exists
             const stmtUpdate = db.prepare(
-              `UPDATE TANIM_Kurum SET ${uniqueColumns.map((c) => `${c} = ?`).join(', ')} WHERE id = 1`
+              `UPDATE TANIM_Kurum SET ${uniqueColumns
+                .map((c) => `${c} = ?`)
+                .join(', ')} WHERE id = 1`
             )
             const stmtInsert = db.prepare(
               `INSERT OR IGNORE INTO TANIM_Kurum (id, ${keys}) VALUES (1, ${placeholders})`
@@ -1862,9 +1864,18 @@ if (!gotTheLock && !isMultiInstance) {
       try {
         const db = workspaceManager.getDb()
         db.exec(`
-          INSERT OR REPLACE INTO settings (key, value) VALUES ('eButceKodu', '${code.replace(/'/g, "''")}');
-          INSERT OR REPLACE INTO settings (key, value) VALUES ('adminUsername', '${user.replace(/'/g, "''")}');
-          INSERT OR REPLACE INTO settings (key, value) VALUES ('adminPassword', '${pass.replace(/'/g, "''")}');
+          INSERT OR REPLACE INTO settings (key, value) VALUES ('eButceKodu', '${code.replace(
+            /'/g,
+            "''"
+          )}');
+          INSERT OR REPLACE INTO settings (key, value) VALUES ('adminUsername', '${user.replace(
+            /'/g,
+            "''"
+          )}');
+          INSERT OR REPLACE INTO settings (key, value) VALUES ('adminPassword', '${pass.replace(
+            /'/g,
+            "''"
+          )}');
         `)
         workspaceManager.save()
         broadcastDbChange()
@@ -2336,7 +2347,9 @@ if (!gotTheLock && !isMultiInstance) {
 
         const { filePath, canceled } = await dialog.showSaveDialog({
           title: 'Doğrudan Temin Verilerini Dışa Aktar (.dte)',
-          defaultPath: `dt_veri_aktarimi_${contentType}_${new Date().toISOString().split('T')[0]}.dte`,
+          defaultPath: `dt_veri_aktarimi_${contentType}_${
+            new Date().toISOString().split('T')[0]
+          }.dte`,
           filters: [{ name: 'DTE Files', extensions: ['dte', 'json'] }]
         })
 
@@ -3008,8 +3021,26 @@ if (!gotTheLock && !isMultiInstance) {
           'Açıklama'
         ]
         const exampleRows = [
-          ['150.01.01.01.01.01', '30197630', 'A4 Fotokopi Kağıdı', 'Mal', 'Adet', 10, 20, '80 gr/m2 beyaz kağıt'],
-          ['', '79820000', 'Broşür Basım Hizmeti', 'Hizmet', 'Adet', 500, 20, 'Renkli A5 broşür basımı']
+          [
+            '150.01.01.01.01.01',
+            '30197630',
+            'A4 Fotokopi Kağıdı',
+            'Mal',
+            'Adet',
+            10,
+            20,
+            '80 gr/m2 beyaz kağıt'
+          ],
+          [
+            '',
+            '79820000',
+            'Broşür Basım Hizmeti',
+            'Hizmet',
+            'Adet',
+            500,
+            20,
+            'Renkli A5 broşür basımı'
+          ]
         ]
         const ws = xlsx.utils.aoa_to_sheet([headers, ...exampleRows])
         ws['!cols'] = [

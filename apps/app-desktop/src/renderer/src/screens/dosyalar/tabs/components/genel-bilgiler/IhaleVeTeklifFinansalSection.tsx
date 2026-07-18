@@ -1,104 +1,78 @@
-import React, { useState } from "react";
-import { Building2, HelpCircle, Info, Loader2, Sparkles } from "lucide-react";
-import { YeniDosyaTabProps } from "../../../types";
-import { useWorkspaceStore } from "../../../../../store/workspaceStore";
-import { useDosyalarHooks } from "../../../../dosyalar/dosyalar.hooks";
+import React, { useState } from 'react'
+import { Building2, HelpCircle, Info, Loader2, Sparkles } from 'lucide-react'
+import { YeniDosyaTabProps } from '../../../types'
+import { useWorkspaceStore } from '../../../../../store/workspaceStore'
+import { useDosyalarHooks } from '../../../../dosyalar/dosyalar.hooks'
 
-export function IhaleVeTeklifFinansalSection(
-  props: YeniDosyaTabProps,
-): React.JSX.Element {
-  const {
-    formData,
-    setFormData,
-    limitType,
-    getIhaleSekliExplanation,
-  } = props;
+export function IhaleVeTeklifFinansalSection(props: YeniDosyaTabProps): React.JSX.Element {
+  const { formData, setFormData, limitType, getIhaleSekliExplanation } = props
 
-  const { activeDosyaId } = useWorkspaceStore();
-  const { dosyalar } = useDosyalarHooks();
-  const activeDosya = dosyalar.find(d => d.id === activeDosyaId);
-  const defaultEsas = activeDosya?.hesaplama_esasi || "Ortalama fiyat esasına göre";
+  const { activeDosyaId } = useWorkspaceStore()
+  const { dosyalar } = useDosyalarHooks()
+  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
+  const defaultEsas = activeDosya?.hesaplama_esasi || 'Ortalama fiyat esasına göre'
 
-  const [isAiChecking, setIsAiChecking] = useState(false);
+  const [isAiChecking, setIsAiChecking] = useState(false)
 
   const handleAiCheckType = async () => {
     if (!formData.konu) {
-      alert(
-        "Lütfen önce Genel Bilgiler sekmesinden 'İşin Konusu / İhale Adı' alanını doldurun.",
-      );
-      return;
+      alert("Lütfen önce Genel Bilgiler sekmesinden 'İşin Konusu / İhale Adı' alanını doldurun.")
+      return
     }
 
-    setIsAiChecking(true);
+    setIsAiChecking(true)
     try {
-      const prompt =
-        `Kullanıcı "${formData.konu}" konusuyla bir Doğrudan Temin dosyası açmak istiyor. Sence bu alım türü hangisi olmalıdır? Seçenekler: "mal", "hizmet", "yapim_isi", "danismanlik". Lütfen sadece bu dört değerden birini döndür. Açıklama veya cümle yazma. C25 beton atımı, tamirat tadilat gibi işler "yapim_isi" olur.`;
+      const prompt = `Kullanıcı "${formData.konu}" konusuyla bir Doğrudan Temin dosyası açmak istiyor. Sence bu alım türü hangisi olmalıdır? Seçenekler: "mal", "hizmet", "yapim_isi", "danismanlik". Lütfen sadece bu dört değerden birini döndür. Açıklama veya cümle yazma. C25 beton atımı, tamirat tadilat gibi işler "yapim_isi" olur.`
 
-      const res = await (window as any).electron.ipcRenderer.invoke(
-        "ai:generate",
-        {
-          prompt,
-          systemInstruction:
-            "Sen kamu ihale mevzuatı uzmanısın. Kullanıcının iş tanımını analiz edip SADECE 'mal', 'hizmet', 'yapim_isi' veya 'danismanlik' kelimesini döndürmelisin.",
-        },
-      );
+      const res = await (window as any).electron.ipcRenderer.invoke('ai:generate', {
+        prompt,
+        systemInstruction:
+          "Sen kamu ihale mevzuatı uzmanısın. Kullanıcının iş tanımını analiz edip SADECE 'mal', 'hizmet', 'yapim_isi' veya 'danismanlik' kelimesini döndürmelisin."
+      })
 
       if (res.success && res.data) {
-        const suggestion = res.data.trim().toLowerCase();
-        let matchedType = "";
+        const suggestion = res.data.trim().toLowerCase()
+        let matchedType = ''
 
-        if (suggestion.includes("yapim") || suggestion.includes("yapım")) {
-          matchedType = "yapim_isi";
-        } else if (suggestion.includes("hizmet")) matchedType = "hizmet";
-        else if (suggestion.includes("danis") || suggestion.includes("danış")) {
-          matchedType = "danismanlik";
-        } else if (suggestion.includes("mal")) matchedType = "mal";
+        if (suggestion.includes('yapim') || suggestion.includes('yapım')) {
+          matchedType = 'yapim_isi'
+        } else if (suggestion.includes('hizmet')) matchedType = 'hizmet'
+        else if (suggestion.includes('danis') || suggestion.includes('danış')) {
+          matchedType = 'danismanlik'
+        } else if (suggestion.includes('mal')) matchedType = 'mal'
 
         const typeNames: Record<string, string> = {
-          mal: "Mal Alımı",
-          hizmet: "Hizmet Alımı",
-          yapim_isi: "Yapım İşi",
-          danismanlik: "Danışmanlık Alımı",
-        };
+          mal: 'Mal Alımı',
+          hizmet: 'Hizmet Alımı',
+          yapim_isi: 'Yapım İşi',
+          danismanlik: 'Danışmanlık Alımı'
+        }
 
         if (matchedType && matchedType !== formData.tur) {
-          const currentType = formData.tur || "mal";
+          const currentType = formData.tur || 'mal'
           const userConfirm = window.confirm(
-            `Yapay Zeka bu işin "${
-              typeNames[matchedType]
-            }" olması gerektiğini düşünüyor. Şu an "${
-              typeNames[currentType]
-            }" seçili.\n\nTürü "${
-              typeNames[matchedType]
-            }" olarak değiştirmek ister misiniz?`,
-          );
+            `Yapay Zeka bu işin "${typeNames[matchedType]}" olması gerektiğini düşünüyor. Şu an "${typeNames[currentType]}" seçili.\n\nTürü "${typeNames[matchedType]}" olarak değiştirmek ister misiniz?`
+          )
           if (userConfirm) {
-            setFormData({ ...formData, tur: matchedType });
+            setFormData({ ...formData, tur: matchedType })
           }
         } else if (matchedType === formData.tur) {
-          alert(
-            `Yapay Zeka da sizinle aynı fikirde. Doğru tür seçilmiş: ${
-              typeNames[matchedType]
-            }`,
-          );
+          alert(`Yapay Zeka da sizinle aynı fikirde. Doğru tür seçilmiş: ${typeNames[matchedType]}`)
         } else {
-          alert(
-            `Yapay Zeka öneride bulunamadı veya anlaşılamayan bir sonuç döndü: ${res.data}`,
-          );
+          alert(`Yapay Zeka öneride bulunamadı veya anlaşılamayan bir sonuç döndü: ${res.data}`)
         }
       } else {
         alert(
-          "Yapay Zeka isteği başarısız oldu: " +
-            (res.error ||
-              "Bilinmeyen hata (Ayarlardan API anahtarını kontrol edin)"),
-        );
+          'Yapay Zeka isteği başarısız oldu: ' +
+            (res.error || 'Bilinmeyen hata (Ayarlardan API anahtarını kontrol edin)')
+        )
       }
     } catch (err: any) {
-      alert("Hata oluştu: " + err.message);
+      alert('Hata oluştu: ' + err.message)
     } finally {
-      setIsAiChecking(false);
+      setIsAiChecking(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -117,7 +91,7 @@ export function IhaleVeTeklifFinansalSection(
           <input
             type="text"
             disabled
-            value={formData.ihale_tipi || "Doğrudan Temin"}
+            value={formData.ihale_tipi || 'Doğrudan Temin'}
             className="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-500"
           />
         </div>
@@ -134,14 +108,16 @@ export function IhaleVeTeklifFinansalSection(
               title="Yapay Zeka ile tür önerisi al"
               className="text-[10px] flex items-center gap-1 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 dark:text-purple-400 px-2 py-0.5 rounded-md transition-colors font-medium border border-purple-200 dark:border-purple-800"
             >
-              {isAiChecking
-                ? <Loader2 className="w-3 h-3 animate-spin" />
-                : <Sparkles className="w-3 h-3" />}
-              {isAiChecking ? "Kontrol ediliyor..." : "AI Önerisi"}
+              {isAiChecking ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Sparkles className="w-3 h-3" />
+              )}
+              {isAiChecking ? 'Kontrol ediliyor...' : 'AI Önerisi'}
             </button>
           </div>
           <select
-            value={formData.tur || "mal"}
+            value={formData.tur || 'mal'}
             onChange={(e) => setFormData({ ...formData, tur: e.target.value })}
             title="Alım / İhale Türü"
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
@@ -156,42 +132,39 @@ export function IhaleVeTeklifFinansalSection(
         <div>
           <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5 flex items-center gap-1">
             Doğrudan Temin Maddesi (İhale Şekli)
-            <span
-              title={getIhaleSekliExplanation?.(
-                formData.ihale_sekli ?? undefined,
-              ) || ""}
-            >
+            <span title={getIhaleSekliExplanation?.(formData.ihale_sekli ?? undefined) || ''}>
               <HelpCircle size={13} className="text-slate-450 cursor-help" />
             </span>
           </label>
           <select
             title="Doğrudan Temin Maddesi Seçin"
-            value={formData.ihale_sekli ||
-              (limitType === "buyuksehir" ? "22/d*" : "22/d**")}
+            value={formData.ihale_sekli || (limitType === 'buyuksehir' ? '22/d*' : '22/d**')}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                ihale_sekli: e.target.value,
-              })}
+                ihale_sekli: e.target.value
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
-            {limitType === "buyuksehir"
-              ? <option value="22/d*">22/d* (Büyükşehir)</option>
-              : <option value="22/d**">22/d** (Diğer İdareler)</option>}
+            {limitType === 'buyuksehir' ? (
+              <option value="22/d*">22/d* (Büyükşehir)</option>
+            ) : (
+              <option value="22/d**">22/d** (Diğer İdareler)</option>
+            )}
             <option value="22/a">22/a (Tek Yetkili)</option>
             <option value="22/b">22/b (Özel Hak)</option>
             <option value="22/c">22/c (Uyum Alımı)</option>
           </select>
-          {formData.ihale_sekli?.startsWith("22/d") && (
+          {formData.ihale_sekli?.startsWith('22/d') && (
             <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium bg-blue-50 dark:bg-blue-900/20 p-1.5 rounded-lg border border-blue-100 dark:border-blue-800/50">
               <Info className="w-3 h-3 inline-block mr-1 mb-0.5" />
-              22/d limiti, kurum ayarlarındaki "Kamu İhale Mevzuatı Limit Tipi"
-              (
-              {limitType === "buyuksehir" ? "Büyükşehir" : "Diğer İdareler"})
-              ayarına göre otomatik seçilmiştir.
+              22/d limiti, kurum ayarlarındaki "Kamu İhale Mevzuatı Limit Tipi" (
+              {limitType === 'buyuksehir' ? 'Büyükşehir' : 'Diğer İdareler'}) ayarına göre otomatik
+              seçilmiştir.
             </p>
           )}
-          {!formData.ihale_sekli?.startsWith("22/d") && (
+          {!formData.ihale_sekli?.startsWith('22/d') && (
             <p className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 leading-normal">
               {getIhaleSekliExplanation?.(formData.ihale_sekli ?? undefined)}
             </p>
@@ -203,21 +176,18 @@ export function IhaleVeTeklifFinansalSection(
             Yaklaşık Maliyet Hesabı
           </label>
           <select
-            value={formData.yaklasik_maliyet_hesaplamasi || "burada"}
+            value={formData.yaklasik_maliyet_hesaplamasi || 'burada'}
             onChange={(e) =>
               setFormData({
                 ...formData,
                 yaklasik_maliyet_hesaplamasi: e.target.value,
-                yaklasik_maliyet: e.target.value !== "onceden"
-                  ? 0
-                  : formData.yaklasik_maliyet,
-              })}
+                yaklasik_maliyet: e.target.value !== 'onceden' ? 0 : formData.yaklasik_maliyet
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           >
             <option value="burada">Burada Hesaplanacak (Teklifler ile)</option>
-            <option value="onceden">
-              Önceden Hesaplandı (Tutar Girilecek)
-            </option>
+            <option value="onceden">Önceden Hesaplandı (Tutar Girilecek)</option>
             <option value="hesaplanmayacak">Hesaplanmayacak</option>
           </select>
         </div>
@@ -229,24 +199,24 @@ export function IhaleVeTeklifFinansalSection(
           <select
             value={formData.yaklasik_maliyet_kdv_dahil_mi ?? 0}
             onChange={(e) => {
-              const newKdvDahil = parseInt(e.target.value, 10);
-              const oldKdvDahil = formData.yaklasik_maliyet_kdv_dahil_mi ?? 0;
-              const kdvRate = Number(formData.kdv) || 20;
-              let currentVal = formData.yaklasik_maliyet || 0;
+              const newKdvDahil = parseInt(e.target.value, 10)
+              const oldKdvDahil = formData.yaklasik_maliyet_kdv_dahil_mi ?? 0
+              const kdvRate = Number(formData.kdv) || 20
+              let currentVal = formData.yaklasik_maliyet || 0
 
               if (newKdvDahil !== oldKdvDahil) {
                 if (newKdvDahil === 1) {
-                  currentVal = currentVal * (1 + kdvRate / 100);
+                  currentVal = currentVal * (1 + kdvRate / 100)
                 } else {
-                  currentVal = currentVal / (1 + kdvRate / 100);
+                  currentVal = currentVal / (1 + kdvRate / 100)
                 }
               }
 
               setFormData({
                 ...formData,
                 yaklasik_maliyet_kdv_dahil_mi: newKdvDahil,
-                yaklasik_maliyet: Number(currentVal.toFixed(2)),
-              });
+                yaklasik_maliyet: Number(currentVal.toFixed(2))
+              })
             }}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-semibold"
           >
@@ -255,7 +225,7 @@ export function IhaleVeTeklifFinansalSection(
           </select>
         </div>
 
-        {formData.yaklasik_maliyet_hesaplamasi === "onceden" && (
+        {formData.yaklasik_maliyet_hesaplamasi === 'onceden' && (
           <div className="animate-in fade-in duration-200">
             <label className="block text-xs font-bold text-slate-650 dark:text-slate-400 mb-1.5">
               Hesaplanan Yaklaşık Maliyet Tutar *
@@ -265,12 +235,13 @@ export function IhaleVeTeklifFinansalSection(
               min="0"
               step="0.01"
               required
-              value={formData.yaklasik_maliyet || ""}
+              value={formData.yaklasik_maliyet || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  yaklasik_maliyet: parseFloat(e.target.value) || 0,
-                })}
+                  yaklasik_maliyet: parseFloat(e.target.value) || 0
+                })
+              }
               placeholder="0.00"
               className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
             />
@@ -282,7 +253,7 @@ export function IhaleVeTeklifFinansalSection(
             KDV Oranı (%)
           </label>
           <select
-            value={formData.kdv || "20"}
+            value={formData.kdv || '20'}
             onChange={(e) => setFormData({ ...formData, kdv: e.target.value })}
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
@@ -299,12 +270,13 @@ export function IhaleVeTeklifFinansalSection(
             Teklif / Sözleşme Türü
           </label>
           <select
-            value={formData.teklif_sozlesme_turu || "Birim Fiyat"}
+            value={formData.teklif_sozlesme_turu || 'Birim Fiyat'}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                teklif_sozlesme_turu: e.target.value,
-              })}
+                teklif_sozlesme_turu: e.target.value
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
             <option value="Birim Fiyat">Birim Fiyatlı Teklif</option>
@@ -319,24 +291,21 @@ export function IhaleVeTeklifFinansalSection(
           </label>
           <select
             title="Fiyat Farkı Dayanağı"
-            value={formData.fiyat_farki_dayanagi || "Fiyat Farkı Ödenmeyecek"}
+            value={formData.fiyat_farki_dayanagi || 'Fiyat Farkı Ödenmeyecek'}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                fiyat_farki_dayanagi: e.target.value,
-              })}
+                fiyat_farki_dayanagi: e.target.value
+              })
+            }
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
           >
-            <option value="Fiyat Farkı Ödenmeyecek">
-              Fiyat Farkı Ödenmeyecek
-            </option>
+            <option value="Fiyat Farkı Ödenmeyecek">Fiyat Farkı Ödenmeyecek</option>
             <option value="31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre">
-              31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu
-              Kararına Göre
+              31.08.2013 Tarih ve 2013/5216 Sayılı Mal Alımı Bakanlar Kurulu Kararına Göre
             </option>
             <option value="31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre">
-              31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu
-              Kararına Göre
+              31.08.2013 Tarih ve 2013/5215 Sayılı Hizmet Alımı Bakanlar Kurulu Kararına Göre
             </option>
           </select>
         </div>
@@ -347,18 +316,19 @@ export function IhaleVeTeklifFinansalSection(
           </label>
           <input
             type="text"
-            value={formData.yatirim_proje_no || ""}
+            value={formData.yatirim_proje_no || ''}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                yatirim_proje_no: e.target.value,
-              })}
+                yatirim_proje_no: e.target.value
+              })
+            }
             placeholder="Örn: 2026-03-Y-12"
             className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-mono"
           />
         </div>
 
-        {formData.yaklasik_maliyet_hesaplamasi === "burada" && (
+        {formData.yaklasik_maliyet_hesaplamasi === 'burada' && (
           <>
             <div className="animate-in fade-in duration-200">
               <label className="block text-xs font-bold text-slate-600 dark:text-slate-455 mb-1.5">
@@ -366,21 +336,19 @@ export function IhaleVeTeklifFinansalSection(
               </label>
               <select
                 title="Hesaplama Yöntemi / Dayanağı"
-                value={formData.komisyon_takdiri ||
-                  "Sadece araştırma fiyatları dikkate alınacak"}
+                value={formData.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak'}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    komisyon_takdiri: e.target.value,
-                  })}
+                    komisyon_takdiri: e.target.value
+                  })
+                }
                 className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
               >
                 <option value="Sadece araştırma fiyatları dikkate alınacak">
                   Sadece araştırma fiyatları dikkate alınacak
                 </option>
-                <option value="Komisyon takdiri kullanılacak">
-                  Komisyon takdiri kullanılacak
-                </option>
+                <option value="Komisyon takdiri kullanılacak">Komisyon takdiri kullanılacak</option>
                 <option value="Son alım fiyatlarını da kullan">
                   Son alım fiyatlarını da kullan
                 </option>
@@ -396,16 +364,13 @@ export function IhaleVeTeklifFinansalSection(
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    hesaplama_esasi: e.target.value,
-                  })}
+                    hesaplama_esasi: e.target.value
+                  })
+                }
                 className="w-full px-3.5 py-2.5 bg-slate-55 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
               >
-                <option value="En Düşük fiyat esasına göre">
-                  En Düşük fiyat esasına göre
-                </option>
-                <option value="Ortalama fiyat esasına göre">
-                  Ortalama fiyat esasına göre
-                </option>
+                <option value="En Düşük fiyat esasına göre">En Düşük fiyat esasına göre</option>
+                <option value="Ortalama fiyat esasına göre">Ortalama fiyat esasına göre</option>
               </select>
             </div>
           </>
@@ -418,10 +383,12 @@ export function IhaleVeTeklifFinansalSection(
             type="checkbox"
             id="alt_yuklenici"
             checked={formData.alt_yuklenici_olacak_mi === 1}
-            onChange={(e) => setFormData({
-              ...formData,
-              alt_yuklenici_olacak_mi: e.target.checked ? 1 : 0,
-            })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                alt_yuklenici_olacak_mi: e.target.checked ? 1 : 0
+              })
+            }
             className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
           />
           <label
@@ -440,8 +407,9 @@ export function IhaleVeTeklifFinansalSection(
             onChange={(e) =>
               setFormData({
                 ...formData,
-                kismi_teklif_verilecek_mi: e.target.checked ? 1 : 0,
-              })}
+                kismi_teklif_verilecek_mi: e.target.checked ? 1 : 0
+              })
+            }
             className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
           />
           <label
@@ -460,8 +428,9 @@ export function IhaleVeTeklifFinansalSection(
             onChange={(e) =>
               setFormData({
                 ...formData,
-                avans_verilecek_mi: e.target.checked ? 1 : 0,
-              })}
+                avans_verilecek_mi: e.target.checked ? 1 : 0
+              })
+            }
             className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
           />
           <label
@@ -480,8 +449,9 @@ export function IhaleVeTeklifFinansalSection(
             onChange={(e) =>
               setFormData({
                 ...formData,
-                tibbi_cihaz_alimi_mi: e.target.checked ? 1 : 0,
-              })}
+                tibbi_cihaz_alimi_mi: e.target.checked ? 1 : 0
+              })
+            }
             className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
           />
           <label
@@ -492,7 +462,7 @@ export function IhaleVeTeklifFinansalSection(
           </label>
         </div>
 
-        {formData.tur === "hizmet" && (
+        {formData.tur === 'hizmet' && (
           <>
             <div className="flex items-center gap-2">
               <input
@@ -502,8 +472,9 @@ export function IhaleVeTeklifFinansalSection(
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    yillara_yaygin: e.target.checked ? 1 : 0,
-                  })}
+                    yillara_yaygin: e.target.checked ? 1 : 0
+                  })
+                }
                 className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
               />
               <label
@@ -522,8 +493,9 @@ export function IhaleVeTeklifFinansalSection(
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    sozlesme_yapilacak_mi: e.target.checked ? 1 : 0,
-                  })}
+                    sozlesme_yapilacak_mi: e.target.checked ? 1 : 0
+                  })
+                }
                 className="w-4 h-4 text-blue-600 border-slate-350 dark:border-slate-800 rounded focus:ring-blue-500"
               />
               <label
@@ -537,5 +509,5 @@ export function IhaleVeTeklifFinansalSection(
         )}
       </div>
     </div>
-  );
+  )
 }

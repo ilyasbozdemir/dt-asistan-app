@@ -88,7 +88,9 @@ export const DteTransfer: React.FC<DteTransferProps> = ({
         >
           <div className="flex items-start gap-2">
             <Info
-              className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${dteStatus.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}
+              className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
+                dteStatus.type === 'success' ? 'text-emerald-600' : 'text-rose-600'
+              }`}
             />
             <span>{dteStatus.message}</span>
           </div>

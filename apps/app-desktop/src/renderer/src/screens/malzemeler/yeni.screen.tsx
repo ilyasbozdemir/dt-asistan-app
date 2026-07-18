@@ -211,7 +211,11 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
                       title="Değiştirmek için tıklayın"
                     >
                       <span
-                        className={`font-mono text-lg tracking-wider ${barkodError ? 'text-red-600 font-bold' : 'text-slate-700 dark:text-slate-300 font-semibold'}`}
+                        className={`font-mono text-lg tracking-wider ${
+                          barkodError
+                            ? 'text-red-600 font-bold'
+                            : 'text-slate-700 dark:text-slate-300 font-semibold'
+                        }`}
                       >
                         {formData.barkod_id}
                       </span>
@@ -233,7 +237,9 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
                         setIsEditingBarkod(false)
                         checkBarkod(e.target.value)
                       }}
-                      className={`w-full px-3 py-2 bg-white border ${barkodError ? 'border-red-500' : 'border-slate-300'} rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-lg tracking-wider font-semibold shadow-inner`}
+                      className={`w-full px-3 py-2 bg-white border ${
+                        barkodError ? 'border-red-500' : 'border-slate-300'
+                      } rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-lg tracking-wider font-semibold shadow-inner`}
                     />
                   )}
                   {barkodError ? (

@@ -113,7 +113,11 @@ export function PrintManagerModal({
 
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm font-bold truncate ${missingMsg ? 'text-rose-700 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}`}
+                        className={`text-sm font-bold truncate ${
+                          missingMsg
+                            ? 'text-rose-700 dark:text-rose-400'
+                            : 'text-slate-700 dark:text-slate-300'
+                        }`}
                       >
                         {sablon.ad}
                       </p>

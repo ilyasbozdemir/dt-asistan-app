@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from 'react'
 import {
   ArrowLeft,
   Bot,
@@ -9,17 +9,17 @@ import {
   HelpCircle,
   MoreVertical,
   Save,
-  Sparkles,
-} from "lucide-react";
-import { Link } from "@tanstack/react-router";
-import { cn } from "../../utils/cn";
-import { AIFormFillModal } from "../../components/ui/AIFormFillModal";
-import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
-import { EskiDosyaKopyalaModal } from "./components/EskiDosyaKopyalaModal";
-import { GenelBilgilerTab } from "./tabs/GenelBilgilerTab";
-import { IhtiyacListesiTab } from "./tabs/IhtiyacListesiTab";
-import { useYeniDosyaScreen } from "./yeni.hooks";
-import { getEmptyFormData, getMockFormData } from "./yeni.config";
+  Sparkles
+} from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { cn } from '../../utils/cn'
+import { AIFormFillModal } from '../../components/ui/AIFormFillModal'
+import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
+import { EskiDosyaKopyalaModal } from './components/EskiDosyaKopyalaModal'
+import { GenelBilgilerTab } from './tabs/GenelBilgilerTab'
+import { IhtiyacListesiTab } from './tabs/IhtiyacListesiTab'
+import { useYeniDosyaScreen } from './yeni.hooks'
+import { getEmptyFormData, getMockFormData } from './yeni.config'
 
 export default function YeniDosyaScreen(): React.JSX.Element {
   const {
@@ -71,25 +71,25 @@ export default function YeniDosyaScreen(): React.JSX.Element {
     getNextTeminNo,
     validationError,
     setValidationError,
-    kurum,
-  } = useYeniDosyaScreen();
+    kurum
+  } = useYeniDosyaScreen()
 
-  const [activeSubStep, setActiveSubStep] = useState(1);
+  const [activeSubStep, setActiveSubStep] = useState(1)
 
-  const SUB_STEP_COUNT = 4;
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [showMaliyetAyarlari, setShowMaliyetAyarlari] = useState(false);
-  const moreMenuBtnRef = useRef<HTMLButtonElement>(null);
+  const SUB_STEP_COUNT = 4
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [showMaliyetAyarlari, setShowMaliyetAyarlari] = useState(false)
+  const moreMenuBtnRef = useRef<HTMLButtonElement>(null)
 
-  const goPrevSubStep = () => setActiveSubStep((s) => Math.max(1, s - 1));
+  const goPrevSubStep = () => setActiveSubStep((s) => Math.max(1, s - 1))
   const goNextSubStep = () => {
     if (activeSubStep < SUB_STEP_COUNT) {
-      setActiveSubStep((s) => s + 1);
+      setActiveSubStep((s) => s + 1)
     } else {
-      setValidationError(null);
-      setActiveTab("ihtiyac");
+      setValidationError(null)
+      setActiveTab('ihtiyac')
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -106,10 +106,10 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1.5 truncate">
               <FileText className="text-blue-600 shrink-0" size={16} />
-              {isEdit ? "Dosya Düzenle" : "Yeni Doğrudan Temin"}
+              {isEdit ? 'Dosya Düzenle' : 'Yeni Doğrudan Temin'}
             </h1>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 hidden md:block">
-              {isEdit ? `Dosya ID: #${editId}` : "Yeni kayıt oluşturuluyor"}
+              {isEdit ? `Dosya ID: #${editId}` : 'Yeni kayıt oluşturuluyor'}
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         {/* Sağ: Sub-step nav + Kebab menü + Kaydet */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Sub-step ileri/geri — sadece Genel Bilgiler tab'ında */}
-          {activeTab === "genel" && (
+          {activeTab === 'genel' && (
             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-1 py-1">
               <button
                 type="button"
@@ -136,9 +136,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 type="button"
                 onClick={goNextSubStep}
                 className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 transition-all cursor-pointer"
-                title={activeSubStep === SUB_STEP_COUNT
-                  ? "İhtiyaç Listesine Geç"
-                  : "Sonraki adım"}
+                title={activeSubStep === SUB_STEP_COUNT ? 'İhtiyaç Listesine Geç' : 'Sonraki adım'}
               >
                 <ChevronRight size={14} />
               </button>
@@ -160,18 +158,15 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             {showMoreMenu && (
               <>
                 {/* Backdrop */}
-                <div
-                  className="fixed inset-0 z-[9998]"
-                  onClick={() => setShowMoreMenu(false)}
-                />
+                <div className="fixed inset-0 z-[9998]" onClick={() => setShowMoreMenu(false)} />
                 {/* Dropdown */}
                 <div className="fixed right-4 top-[52px] w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-[9999] overflow-hidden flex flex-col py-1">
                   {!isEdit && (
                     <button
                       type="button"
                       onClick={() => {
-                        setShowKopyalaModal(true);
-                        setShowMoreMenu(false);
+                        setShowKopyalaModal(true)
+                        setShowMoreMenu(false)
                       }}
                       className="px-4 py-2.5 text-left text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2 cursor-pointer"
                     >
@@ -185,8 +180,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowMoreMenu(false);
-                      handleAiFormValidation();
+                      setShowMoreMenu(false)
+                      handleAiFormValidation()
                     }}
                     className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
                   >
@@ -196,8 +191,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowMoreMenu(false);
-                      handleAiFullFormGenerate();
+                      setShowMoreMenu(false)
+                      handleAiFullFormGenerate()
                     }}
                     className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
                   >
@@ -210,16 +205,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
-                      const y = new Date().getFullYear();
-                      setFormData(
-                        getEmptyFormData(
-                          y,
-                          getNextTeminNo(y),
-                          birimler,
-                          personeller,
-                        ),
-                      );
-                      setShowMoreMenu(false);
+                      const y = new Date().getFullYear()
+                      setFormData(getEmptyFormData(y, getNextTeminNo(y), birimler, personeller))
+                      setShowMoreMenu(false)
                     }}
                     className="px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 cursor-pointer"
                   >
@@ -230,16 +218,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     <button
                       type="button"
                       onClick={() => {
-                        const y = new Date().getFullYear();
-                        setFormData(
-                          getMockFormData(
-                            y,
-                            getNextTeminNo(y),
-                            birimler,
-                            personeller,
-                          ),
-                        );
-                        setShowMoreMenu(false);
+                        const y = new Date().getFullYear()
+                        setFormData(getMockFormData(y, getNextTeminNo(y), birimler, personeller))
+                        setShowMoreMenu(false)
                       }}
                       className="px-4 py-2.5 text-left text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2 cursor-pointer"
                     >
@@ -266,7 +247,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-1.5 cursor-pointer"
           >
             <Save size={14} />
-            {isEdit ? "Güncelle" : "Kaydet"}
+            {isEdit ? 'Güncelle' : 'Kaydet'}
           </button>
         </div>
       </div>
@@ -312,12 +293,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </label>
                 <input
                   type="number"
-                  value={formData.yaklasik_maliyet || ""}
+                  value={formData.yaklasik_maliyet || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      yaklasik_maliyet: Number(e.target.value),
-                    })}
+                      yaklasik_maliyet: Number(e.target.value)
+                    })
+                  }
                   placeholder="0.00"
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                 />
@@ -328,9 +310,8 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   KDV Oranı (%)
                 </label>
                 <select
-                  value={formData.kdv || "20"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, kdv: e.target.value })}
+                  value={formData.kdv || '20'}
+                  onChange={(e) => setFormData({ ...formData, kdv: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200"
                 >
                   <option value="0">0 (KDV Muaf)</option>
@@ -345,12 +326,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                   Hesaplama Yöntemi
                 </label>
                 <select
-                  value={formData.yaklasik_maliyet_hesaplamasi || "kdv_haric"}
+                  value={formData.yaklasik_maliyet_hesaplamasi || 'kdv_haric'}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      yaklasik_maliyet_hesaplamasi: e.target.value,
-                    })}
+                      yaklasik_maliyet_hesaplamasi: e.target.value
+                    })
+                  }
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-850 dark:text-slate-200"
                 >
                   <option value="kdv_haric">KDV Hariç Hesapla</option>
@@ -375,20 +357,20 @@ export default function YeniDosyaScreen(): React.JSX.Element {
               <div className="space-y-2">
                 <button
                   type="button"
-                  onClick={() => setActiveTab("genel")}
+                  onClick={() => setActiveTab('genel')}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left",
-                    activeTab === "genel"
-                      ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50",
+                    'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left',
+                    activeTab === 'genel'
+                      ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   )}
                 >
                   <span
                     className={cn(
-                      "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors",
-                      activeTab === "genel"
-                        ? "bg-blue-600 border-blue-600 text-white"
-                        : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700",
+                      'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors',
+                      activeTab === 'genel'
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'
                     )}
                   >
                     1
@@ -397,35 +379,30 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 </button>
 
                 {/* Genel Bilgiler Alt Adımları */}
-                {activeTab === "genel" && (
+                {activeTab === 'genel' && (
                   <div className="pl-8 space-y-1 border-l border-slate-200 dark:border-slate-800 ml-5.5">
-                    {([
-                      "Genel & Antet",
-                      "Mali & Bütçe",
-                      "İhale & Teklif",
-                      "Yetkililer",
-                    ] as const).map((label, i) => {
-                      const stepId = i + 1;
-                      const isDone = stepId < activeSubStep;
-                      const isActive = stepId === activeSubStep;
+                    {(
+                      ['Genel & Antet', 'Mali & Bütçe', 'İhale & Teklif', 'Yetkililer'] as const
+                    ).map((label, i) => {
+                      const stepId = i + 1
+                      const isDone = stepId < activeSubStep
+                      const isActive = stepId === activeSubStep
                       return (
                         <button
                           key={stepId}
                           type="button"
                           onClick={() => setActiveSubStep(stepId)}
                           className={cn(
-                            "w-full text-left py-1 px-2 rounded-lg text-[11px] font-semibold flex items-center justify-between transition-colors",
+                            'w-full text-left py-1 px-2 rounded-lg text-[11px] font-semibold flex items-center justify-between transition-colors',
                             isActive
-                              ? "text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20"
-                              : "text-slate-550 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300",
+                              ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20'
+                              : 'text-slate-550 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
                           )}
                         >
                           <span>{label}</span>
-                          {isDone && (
-                            <span className="text-blue-500 text-[10px]">✓</span>
-                          )}
+                          {isDone && <span className="text-blue-500 text-[10px]">✓</span>}
                         </button>
-                      );
+                      )
                     })}
                   </div>
                 )}
@@ -436,27 +413,25 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 type="button"
                 onClick={() => {
                   if (!formData.konu?.trim()) {
-                    setValidationError(
-                      "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
-                    );
-                    return;
+                    setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+                    return
                   }
-                  setValidationError(null);
-                  setActiveTab("ihtiyac");
+                  setValidationError(null)
+                  setActiveTab('ihtiyac')
                 }}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left",
-                  activeTab === "ihtiyac"
-                    ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50",
+                  'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left',
+                  activeTab === 'ihtiyac'
+                    ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                 )}
               >
                 <span
                   className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors",
-                    activeTab === "ihtiyac"
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700",
+                    'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors',
+                    activeTab === 'ihtiyac'
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'
                   )}
                 >
                   2
@@ -476,8 +451,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                 Limit ve Mevzuat:
               </span>
               <p className="text-[10px] text-slate-500 leading-relaxed">
-                22/d limiti KDV hariç tutar üzerinden yıl bazlı sistem
-                ayarlarından kontrol edilir.
+                22/d limiti KDV hariç tutar üzerinden yıl bazlı sistem ayarlarından kontrol edilir.
               </p>
             </div>
           </div>
@@ -489,138 +463,128 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             onSubmit={handleSave}
             className="max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6"
           >
-            {loadingDb
-              ? (
-                <div className="p-8 text-center text-sm text-slate-500 italic">
-                  Bilgiler yükleniyor...
-                </div>
-              )
-              : (
-                <>
-                  {validationError && (
-                    <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-xl mb-6 shadow-sm flex justify-between items-start">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg">
-                          <HelpCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-amber-800 dark:text-amber-300">
-                            Form Kontrol Uyarısı
-                          </h3>
-                          <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                            {validationError}
-                          </p>
-                        </div>
+            {loadingDb ? (
+              <div className="p-8 text-center text-sm text-slate-500 italic">
+                Bilgiler yükleniyor...
+              </div>
+            ) : (
+              <>
+                {validationError && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-xl mb-6 shadow-sm flex justify-between items-start">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg">
+                        <HelpCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setValidationError(null)}
-                        className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline px-2 py-1 cursor-pointer"
-                      >
-                        Kapat
-                      </button>
+                      <div>
+                        <h3 className="font-bold text-amber-800 dark:text-amber-300">
+                          Form Kontrol Uyarısı
+                        </h3>
+                        <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                          {validationError}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => setValidationError(null)}
+                      className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline px-2 py-1 cursor-pointer"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                )}
 
-                  {donemTanimsizMi(formData.dosya_acilis_tarihi || undefined) &&
-                    (
-                      <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl mb-6 shadow-sm">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-lg">
-                            <HelpCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-red-800 dark:text-red-300">
-                              Kritik Hata: 22/d Limit Dönemi Bulunamadı!
-                            </h3>
-                            <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                              Sistemde, seçtiğiniz &quot;Dosya Açılış
-                              Tarihi&quot; (
-                              {formData.dosya_acilis_tarihi}) ile eşleşen bir
-                              Doğrudan Temin Limit Dönemi bulunamadı. Lütfen
-                              {" "}
-                              <strong>
-                                Sistem Ayarları &gt; Mevzuat ve Parametreler
-                              </strong>{" "}
-                              bölümünden ilgili tarihe ait limiti ekleyiniz.
-                              Limit olmadan bu dosyaya tahmini bedel kontrolü
-                              yapılamaz.
-                            </p>
-                          </div>
-                        </div>
+                {donemTanimsizMi(formData.dosya_acilis_tarihi || undefined) && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl mb-6 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-lg">
+                        <HelpCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                       </div>
-                    )}
+                      <div>
+                        <h3 className="font-bold text-red-800 dark:text-red-300">
+                          Kritik Hata: 22/d Limit Dönemi Bulunamadı!
+                        </h3>
+                        <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                          Sistemde, seçtiğiniz &quot;Dosya Açılış Tarihi&quot; (
+                          {formData.dosya_acilis_tarihi}) ile eşleşen bir Doğrudan Temin Limit
+                          Dönemi bulunamadı. Lütfen{' '}
+                          <strong>Sistem Ayarları &gt; Mevzuat ve Parametreler</strong> bölümünden
+                          ilgili tarihe ait limiti ekleyiniz. Limit olmadan bu dosyaya tahmini bedel
+                          kontrolü yapılamaz.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-                  {activeTab === "genel" && (
-                    <GenelBilgilerTab
-                      formData={formData}
-                      setFormData={setFormData}
-                      isEdit={isEdit}
-                      birimler={birimler}
-                      kurum={kurum}
-                      personeller={personeller}
-                      kodSozlugu={kodSozlugu}
-                      dosyalar={dosyalar}
-                      isDescLoading={isDescLoading}
-                      showKonuSuggestions={showKonuSuggestions}
-                      setShowKonuSuggestions={setShowKonuSuggestions}
-                      exactMatchCount={exactMatchCount}
-                      matchedSuggestions={matchedSuggestions}
-                      handleAiDescGenerate={handleAiDescGenerate}
-                      handleCopyKonuToAciklama={handleCopyKonuToAciklama}
-                      openTextGenerator={openTextGenerator}
-                      showBirimSearch={showBirimSearch}
-                      setShowBirimSearch={setShowBirimSearch}
-                      birimSearchQuery={birimSearchQuery}
-                      setBirimSearchQuery={setBirimSearchQuery}
-                      filteredBirimler={filteredBirimler}
-                      handleSelectBirim={handleSelectBirim}
-                      showPersonelSearch={showPersonelSearch}
-                      setShowPersonelSearch={setShowPersonelSearch}
-                      personelSearchQuery={personelSearchQuery}
-                      setPersonelSearchQuery={setPersonelSearchQuery}
-                      filteredPersoneller={filteredPersoneller}
-                      onNextMainStep={() => {
-                        if (!formData.konu?.trim()) {
-                          setValidationError(
-                            "Lütfen önce dosya konusunu (İşin Adı) giriniz.",
-                          );
-                          return;
-                        }
-                        setValidationError(null);
-                        setActiveTab("ihtiyac");
-                      }}
-                      activeSubStep={activeSubStep}
-                      setActiveSubStep={setActiveSubStep}
-                    />
-                  )}
+                {activeTab === 'genel' && (
+                  <GenelBilgilerTab
+                    formData={formData}
+                    setFormData={setFormData}
+                    isEdit={isEdit}
+                    birimler={birimler}
+                    kurum={kurum}
+                    personeller={personeller}
+                    kodSozlugu={kodSozlugu}
+                    dosyalar={dosyalar}
+                    isDescLoading={isDescLoading}
+                    showKonuSuggestions={showKonuSuggestions}
+                    setShowKonuSuggestions={setShowKonuSuggestions}
+                    exactMatchCount={exactMatchCount}
+                    matchedSuggestions={matchedSuggestions}
+                    handleAiDescGenerate={handleAiDescGenerate}
+                    handleCopyKonuToAciklama={handleCopyKonuToAciklama}
+                    openTextGenerator={openTextGenerator}
+                    showBirimSearch={showBirimSearch}
+                    setShowBirimSearch={setShowBirimSearch}
+                    birimSearchQuery={birimSearchQuery}
+                    setBirimSearchQuery={setBirimSearchQuery}
+                    filteredBirimler={filteredBirimler}
+                    handleSelectBirim={handleSelectBirim}
+                    showPersonelSearch={showPersonelSearch}
+                    setShowPersonelSearch={setShowPersonelSearch}
+                    personelSearchQuery={personelSearchQuery}
+                    setPersonelSearchQuery={setPersonelSearchQuery}
+                    filteredPersoneller={filteredPersoneller}
+                    onNextMainStep={() => {
+                      if (!formData.konu?.trim()) {
+                        setValidationError('Lütfen önce dosya konusunu (İşin Adı) giriniz.')
+                        return
+                      }
+                      setValidationError(null)
+                      setActiveTab('ihtiyac')
+                    }}
+                    activeSubStep={activeSubStep}
+                    setActiveSubStep={setActiveSubStep}
+                  />
+                )}
 
-                  {/* TAB 2: İHTİYAÇ LİSTESİ */}
-                  {activeTab === "ihtiyac" && (
-                    <IhtiyacListesiTab
-                      formData={formData}
-                      setFormData={setFormData}
-                      isEdit={isEdit}
-                      birimler={birimler}
-                      personeller={personeller}
-                      kodSozlugu={kodSozlugu}
-                      dosyalar={dosyalar}
-                    />
-                  )}
-                </>
-              )}
+                {/* TAB 2: İHTİYAÇ LİSTESİ */}
+                {activeTab === 'ihtiyac' && (
+                  <IhtiyacListesiTab
+                    formData={formData}
+                    setFormData={setFormData}
+                    isEdit={isEdit}
+                    birimler={birimler}
+                    personeller={personeller}
+                    kodSozlugu={kodSozlugu}
+                    dosyalar={dosyalar}
+                  />
+                )}
+              </>
+            )}
             {/* TAB CONTINUATION ACTION BUTTONS */}
             <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-5 mt-6">
               <div className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold uppercase tracking-wider">
-                {isEdit ? `Dosya ID: #${editId}` : "Yeni Kayıt Yapılıyor"}
+                {isEdit ? `Dosya ID: #${editId}` : 'Yeni Kayıt Yapılıyor'}
               </div>
 
               <div className="flex gap-3">
-                {activeTab === "ihtiyac" && (
+                {activeTab === 'ihtiyac' && (
                   <>
                     <button
                       type="button"
-                      onClick={() => setActiveTab("genel")}
+                      onClick={() => setActiveTab('genel')}
                       className="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-transparent rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                     >
                       Geri Git
@@ -630,7 +594,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                       className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/25 flex items-center gap-2 cursor-pointer"
                     >
                       <Save size={16} />
-                      {isEdit ? "Değişiklikleri Kaydet" : "Dosyayı Oluştur"}
+                      {isEdit ? 'Değişiklikleri Kaydet' : 'Dosyayı Oluştur'}
                     </button>
                   </>
                 )}
@@ -650,24 +614,23 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         {/* AI Text Generator Modal */}
         <AITextGeneratorModal
           isOpen={textGenConfig.isOpen}
-          onClose={() =>
-            setTextGenConfig((prev) => ({ ...prev, isOpen: false }))}
+          onClose={() => setTextGenConfig((prev) => ({ ...prev, isOpen: false }))}
           title={textGenConfig.title}
           fieldName={textGenConfig.fieldName}
           initialSubject={formData.konu}
           systemInstruction={textGenConfig.systemInstruction}
           placeholderMappings={{
-            "[DOSYA_KONU]": formData.konu || "Belirtilmemiş",
-            "[DOSYA_NO]": formData.temin_no || "Belirtilmemiş",
-            "[DOSYA_MALIYET]": formData.yaklasik_maliyet
+            '[DOSYA_KONU]': formData.konu || 'Belirtilmemiş',
+            '[DOSYA_NO]': formData.temin_no || 'Belirtilmemiş',
+            '[DOSYA_MALIYET]': formData.yaklasik_maliyet
               ? String(formData.yaklasik_maliyet)
-              : "Belirtilmemiş",
+              : 'Belirtilmemiş'
           }}
           onApply={(text) => {
             setFormData((prev) => ({
               ...prev,
-              [textGenConfig.targetField]: text,
-            }));
+              [textGenConfig.targetField]: text
+            }))
           }}
         />
 
@@ -679,7 +642,9 @@ export default function YeniDosyaScreen(): React.JSX.Element {
           fieldName="Kalem (OKAS ve Ortak Alımlar Sözlüğü)"
           initialSubject={formData.konu}
           mode="json"
-          expectedJsonFormat={'{ "kalemAdi": "Örn: A4 Fotokopi Kağıdı 80gr", "miktari": 50, "birimi": "Paket", "okasKodu": "Örn: 30197630-1" }'}
+          expectedJsonFormat={
+            '{ "kalemAdi": "Örn: A4 Fotokopi Kağıdı 80gr", "miktari": 50, "birimi": "Paket", "okasKodu": "Örn: 30197630-1" }'
+          }
           systemInstruction={`Sen bir kamu ihale ve doğrudan temin uzmanısın. Kullanıcı bir mal, hizmet veya yapım işi için listeye kalem eklemek istiyor. 
 Kullanıcının girdiği genel tanıma ve alımın konusuna ([DOSYA_KONU]) bakarak:
 1. En uygun, resmi, şartnameye uygun 'Kalem Adı'nı belirle.
@@ -687,13 +652,13 @@ Kullanıcının girdiği genel tanıma ve alımın konusuna ([DOSYA_KONU]) bakar
 3. Uygun miktar ve ölçü birimi (Adet, Paket, Kg, Ton, Ay, Gün, m2 vb.) öner.
 Yanıtını SADECE JSON formatında ver.`}
           placeholderMappings={{
-            "[DOSYA_KONU]": formData.konu || formData.tur || "Belirtilmemiş",
+            '[DOSYA_KONU]': formData.konu || formData.tur || 'Belirtilmemiş'
           }}
           onApply={(data) => {
-            console.log("AI Kalem Verisi:", data);
+            console.log('AI Kalem Verisi:', data)
             alert(
-              `Yapay Zeka şu kalemi buldu:\n\nAdı: ${data.kalemAdi}\nOKAS Kodu: ${data.okasKodu}\nMiktar: ${data.miktari} ${data.birimi}\n\nNot: Kalem listesi altyapısı tamamlandığında bu kalem otomatik olarak listeye eklenecektir.`,
-            );
+              `Yapay Zeka şu kalemi buldu:\n\nAdı: ${data.kalemAdi}\nOKAS Kodu: ${data.okasKodu}\nMiktar: ${data.miktari} ${data.birimi}\n\nNot: Kalem listesi altyapısı tamamlandığında bu kalem otomatik olarak listeye eklenecektir.`
+            )
           }}
         />
 
@@ -706,5 +671,5 @@ Yanıtını SADECE JSON formatında ver.`}
         />
       </div>
     </div>
-  );
+  )
 }

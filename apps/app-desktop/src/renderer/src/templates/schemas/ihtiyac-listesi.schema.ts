@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const IhtiyacKalemiSchema = z.object({
   siraNo: z.number().or(z.string()),
@@ -7,8 +7,8 @@ export const IhtiyacKalemiSchema = z.object({
   ozelligi: z.string().optional().or(z.null()),
   birimi: z.string().optional().or(z.null()),
   kdvOrani: z.number().or(z.string()).optional().or(z.null()),
-  miktar: z.number().or(z.string()),
-});
+  miktar: z.number().or(z.string())
+})
 
 export const IhtiyacListesiSchema = z.object({
   antetSatirlari: z.array(z.string()).optional(),
@@ -39,8 +39,8 @@ export const IhtiyacListesiSchema = z.object({
   hazirlayanPersonelUnvan: z.string().optional(),
   hazirlayanTelefon: z.string().optional(),
   hazırlayanEposta: z.string().optional(),
-  hazirlayanEposta: z.string().optional(),
-});
+  hazirlayanEposta: z.string().optional()
+})
 
-export type IhtiyacListesi = z.infer<typeof IhtiyacListesiSchema>;
-export type IhtiyacKalemi = z.infer<typeof IhtiyacKalemiSchema>;
+export type IhtiyacListesi = z.infer<typeof IhtiyacListesiSchema>
+export type IhtiyacKalemi = z.infer<typeof IhtiyacKalemiSchema>
