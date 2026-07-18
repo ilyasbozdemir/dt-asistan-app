@@ -46,8 +46,6 @@ export function KlasorVeKapaklar(): React.JSX.Element {
     isSablonDisabled,
   } = useDosyaAsamasiSablons();
 
-  const { disableDocumentGuidance } = useSettingsStore();
-
   const stageSablons = sablons.filter(
     (s) =>
       s.kategori === "5-klasor-ve-kapaklar" ||
@@ -501,9 +499,7 @@ export function KlasorVeKapaklar(): React.JSX.Element {
                     quickOpenExternal={quickOpenExternal}
                     isSablonDisabled={isSablonDisabled}
                     buttonHeightClass="h-9"
-                    label={disableDocumentGuidance
-                      ? "İşlemler"
-                      : "Kapakları Yazdır"}
+                    label="Kapakları Yazdır"
                   />
                 )}
               </div>
