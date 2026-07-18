@@ -476,10 +476,15 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                       return (
                         <div
                           key={doc.id || doc.belge_adi}
-                          className="relative overflow-hidden group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between"
+                          className={cn(
+                            "relative group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between",
+                            activeActionDropdown === doc.belge_adi ? "z-30" : "z-10"
+                          )}
                         >
                           {/* Interactive light glow on hover */}
-                          <div className="absolute -right-12 -top-12 w-28 h-28 rounded-full bg-blue-400/[0.06] dark:bg-blue-400/[0.03] blur-2xl group-hover:bg-blue-400/[0.12] dark:group-hover:bg-blue-400/[0.06] transition-all duration-500 pointer-events-none" />
+                          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                            <div className="absolute -right-12 -top-12 w-28 h-28 rounded-full bg-blue-400/[0.06] dark:bg-blue-400/[0.03] blur-2xl group-hover:bg-blue-400/[0.12] dark:group-hover:bg-blue-400/[0.06] transition-all duration-500" />
+                          </div>
 
                           <div>
                             {/* Upper row: Badges */}
