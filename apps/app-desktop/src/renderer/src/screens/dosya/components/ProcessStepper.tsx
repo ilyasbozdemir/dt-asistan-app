@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Package, Search, FileSignature, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
@@ -52,25 +52,32 @@ interface ProcessStepperProps {
 }
 
 export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX.Element {
+  const navigate = useNavigate()
   const currentIndex = findCurrentStepIndex(currentRoute)
   const prevStep = currentIndex > 0 ? STEPS[currentIndex - 1] : null
   const nextStep = currentIndex < STEPS.length - 1 ? STEPS[currentIndex + 1] : null
 
+  const goTo = (route: string): void => {
+    navigate({ to: route as any })
+  }
+
   return (
     <div className="flex items-center justify-between gap-2 print:hidden">
       {/* Önceki Adım Butonu */}
-      <Link
-        to={prevStep?.route as any ?? '#'}
+      <button
+        type="button"
+        onClick={() => prevStep && goTo(prevStep.route)}
+        disabled={!prevStep}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all border',
           prevStep
             ? 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer shadow-sm'
-            : 'text-slate-300 dark:text-slate-700 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 cursor-not-allowed pointer-events-none'
+            : 'text-slate-300 dark:text-slate-700 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 cursor-not-allowed'
         )}
       >
         <ChevronLeft className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">{prevStep?.shortLabel ?? 'Önceki'}</span>
-      </Link>
+      </button>
 
       {/* Stepper Orta Bölge */}
       <div className="flex items-center gap-0 flex-1 justify-center">
@@ -82,10 +89,11 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
 
           return (
             <React.Fragment key={step.id}>
-              <Link
-                to={step.route as any}
+              <button
+                type="button"
+                onClick={() => goTo(step.route)}
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-[11px] font-bold cursor-pointer group relative',
+                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-[11px] font-bold cursor-pointer group relative border-0 bg-transparent',
                   isCurrent
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                     : isPast
@@ -111,7 +119,7 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
                   )}
                 </div>
                 <span className="hidden lg:inline">{step.shortLabel}</span>
-              </Link>
+              </button>
 
               {/* Bağlantı Çizgisi */}
               {!isLast && (
@@ -130,18 +138,20 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
       </div>
 
       {/* Sonraki Adım Butonu */}
-      <Link
-        to={nextStep?.route as any ?? '#'}
+      <button
+        type="button"
+        onClick={() => nextStep && goTo(nextStep.route)}
+        disabled={!nextStep}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all border',
           nextStep
             ? 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer shadow-sm'
-            : 'text-slate-300 dark:text-slate-700 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 cursor-not-allowed pointer-events-none'
+            : 'text-slate-300 dark:text-slate-700 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 cursor-not-allowed'
         )}
       >
         <span className="hidden sm:inline">{nextStep?.shortLabel ?? 'Sonraki'}</span>
         <ChevronRight className="w-3.5 h-3.5" />
-      </Link>
+      </button>
     </div>
   )
 }
