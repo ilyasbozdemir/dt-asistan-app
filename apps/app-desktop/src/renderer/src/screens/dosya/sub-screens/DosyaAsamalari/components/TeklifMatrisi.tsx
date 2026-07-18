@@ -139,7 +139,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
         <div className="text-left">
           <h3 className="text-lg font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-            Teklif Giriş Matrisi & Karşılaştırma
+            Teklif Giriş Tablosu & Karşılaştırma
           </h3>
           <p className="text-xs text-slate-500 mt-1">
             Her firma için malzeme birim fiyatlarını girin. En uygun teklifler yeşil renkle
@@ -168,7 +168,7 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
                   : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-355'
               }`}
             >
-              Tüm Teklifler (Matris)
+              Tüm Teklifler (Tablo)
             </button>
           </div>
 

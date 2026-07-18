@@ -178,8 +178,8 @@ export function YaklasikMaliyetCetveli(): React.JSX.Element {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-850 pb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-850 dark:text-slate-150">
-              Teklif Girişleri & Maliyet Matrisi
+            <h3 className="text-base font-bold text-slate-855 dark:text-slate-150">
+              Teklif Girişleri & Maliyet Tablosu
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Fiyat girdikten sonra kaydetmek için alandan çıkın (onBlur).
