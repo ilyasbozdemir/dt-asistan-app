@@ -35,6 +35,10 @@ export function KabulVeOdeme(): React.JSX.Element {
 
   const { disableDocumentGuidance } = useSettingsStore()
 
+  const stageSablons = sablons.filter(
+    (s) => s.kategori === '4-kabul-ve-odeme-islemleri' || s.kategori === '4. Kabul & Ödeme İşlemleri'
+  )
+
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
@@ -86,11 +90,12 @@ export function KabulVeOdeme(): React.JSX.Element {
               Muayene kabul ve ödeme belgesi işlemlerini bu panelden takip edebilirsiniz.
             </p>
           </div>
-          {!disableDocumentGuidance && (
+          {stageSablons.length > 0 && (
             <div>
               <PrintDropdownButton
                 kategori="4-kabul-ve-odeme-islemleri"
                 sablons={sablons}
+                overrideSablons={stageSablons}
                 activeStarredDocs={activeStarredDocs}
                 ciktiLoading={ciktiLoading}
                 handleOpenPreviewForSablon={handleOpenPreviewForSablon}
@@ -99,6 +104,7 @@ export function KabulVeOdeme(): React.JSX.Element {
                 quickOpenExternal={quickOpenExternal}
                 isSablonDisabled={isSablonDisabled}
                 buttonHeightClass="h-10"
+                label={disableDocumentGuidance ? 'İşlemler' : 'Belgeleri Yazdır'}
               />
             </div>
           )}
@@ -107,6 +113,8 @@ export function KabulVeOdeme(): React.JSX.Element {
           Bu süreç henüz tasarım aşamasındadır.
         </p>
       </div>
+
+
     </SubScreen>
   )
 }

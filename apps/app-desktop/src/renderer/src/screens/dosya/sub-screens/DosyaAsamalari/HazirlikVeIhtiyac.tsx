@@ -107,6 +107,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         activeDosya={activeDosya}
         activeDosyaId={activeDosyaId}
       />
+
     </SubScreen>
   );
 }

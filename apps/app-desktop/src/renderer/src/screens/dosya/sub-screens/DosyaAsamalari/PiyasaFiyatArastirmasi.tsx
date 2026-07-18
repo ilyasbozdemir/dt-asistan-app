@@ -4,21 +4,14 @@ import {
   AlertCircle,
   ArrowLeft,
   Building2,
-  Calendar,
   Check,
-  ClipboardList,
-  Edit3,
-  ExternalLink,
-  Eye,
   FileCheck2,
-  FileText,
-  Maximize2,
-  Minimize2,
-  MoreVertical,
+  LayoutGrid,
+  List,
   PackageSearch,
   Plus,
-  Printer,
   Settings,
+  Table,
   TrendingUp,
 } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
@@ -28,10 +21,11 @@ import { cn } from "../../../../utils/cn";
 import { DavetEdilenFirmalar } from "./components/DavetEdilenFirmalar";
 import { TeklifMatrisi } from "./components/TeklifMatrisi";
 import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
+import { DocumentsDashboard } from "./components/DocumentsDashboard";
+import { PricesSummaryDashboard } from "./components/PricesSummaryDashboard";
 import { usePiyasaFiyatArastirmasiLogic } from "./hooks/usePiyasaFiyatArastirmasi";
 import { useSettingsStore } from "../../../../store/settingsStore";
 import { PrintDropdownButton } from "../../components/PrintDropdownButton";
-import { SurecBelgeleriPanel } from "./SablonPanelleri";
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const logic = usePiyasaFiyatArastirmasiLogic();
@@ -94,6 +88,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setSetLowestFirmAsWinner,
     manualWinnerFirmaId,
     setManualWinnerFirmaId,
+    maliyetCetveliTarihi,
+    handleUpdateDocumentDate,
   } = logic;
 
   const [activeActionDropdown, setActiveActionDropdown] = useState<
@@ -106,6 +102,24 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const [dashboardViewMode, setDashboardViewMode] = useState<
     "documents" | "prices"
   >("documents");
+  const [docViewMode, setDocViewMode] = useState<"grid" | "list" | "table">(
+    () => {
+      try {
+        return (localStorage.getItem("dta_doc_view_mode") as any) || "grid";
+      } catch {
+        return "grid";
+      }
+    },
+  );
+
+  const changeDocViewMode = (mode: "grid" | "list" | "table") => {
+    setDocViewMode(mode);
+    try {
+      localStorage.setItem("dta_doc_view_mode", mode);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const stageDocs = savedDocuments;
   const { disableDocumentGuidance } = useSettingsStore();
@@ -216,423 +230,91 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                 Yeni Tutanak Ekle / Teklif Girişi
               </button>
 
-              {!disableDocumentGuidance && stageSablons.length > 0 && (
+              {dashboardViewMode === "documents" && stageDocs.length > 0 && (
+                <div className="flex items-center bg-slate-100 dark:bg-slate-955 p-1 rounded-xl border border-slate-200/60 dark:border-slate-800/80 shrink-0 h-10">
+                  <button
+                    type="button"
+                    title="Izgara Görünümü"
+                    onClick={() => changeDocViewMode("grid")}
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
+                      docViewMode === "grid"
+                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
+                    )}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Liste Görünümü"
+                    onClick={() => changeDocViewMode("list")}
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
+                      docViewMode === "list"
+                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
+                    )}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Tablo Görünümü"
+                    onClick={() => changeDocViewMode("table")}
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
+                      docViewMode === "table"
+                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
+                    )}
+                  >
+                    <Table className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {stageSablons.length > 0 && (
                 <PrintDropdownButton
                   kategori="2-piyasa-fiyat-arastirmasi"
                   sablons={sablons}
                   overrideSablons={stageSablons}
                   activeStarredDocs={activeStarredDocs || []}
-                  ciktiLoading={false}
+                  ciktiLoading={ciktiLoading}
                   handleOpenPreviewForSablon={handleOpenPreviewForSablon}
                   quickPrint={quickPrint}
                   quickExport={quickExport}
                   quickOpenExternal={quickOpenExternal}
                   isSablonDisabled={isSablonDisabled}
                   buttonHeightClass="h-10"
+                  label={disableDocumentGuidance
+                    ? "İşlemler"
+                    : "Belgeleri Yazdır"}
                 />
               )}
             </div>
           </div>
 
-          {dashboardViewMode === "prices"
-            ? (
-              /* DYNAMIC PRICES & BIDS SUMMARY TAB */
-              (() => {
-                if (invitedFirms.length === 0) {
-                  return (
-                    <div className="py-10 text-center flex flex-col items-center justify-center gap-3">
-                      <AlertCircle className="w-9 h-9 text-slate-350 dark:text-slate-655" />
-                      <div className="text-slate-700 dark:text-slate-300 text-sm font-bold">
-                        Teklif bilgisi bulunamadı.
-                      </div>
-                      <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
-                        Fiyat tekliflerini görmek için lütfen "Yeni Tutanak Ekle
-                        / Teklif Girişi" butonuna tıklayarak firmaları davet
-                        edin ve teklifleri girin.
-                      </p>
-                    </div>
-                  );
-                }
-
-                // Calculate totals
-                const firmTotals = invitedFirms.map((firm: any) => {
-                  let total = 0;
-                  items.forEach((item: any) => {
-                    const key = `${item.id}_${firm.id}`;
-                    const bidVal = bids[key];
-                    if (bidVal && bidVal > 0) {
-                      total += bidVal * (item.miktar || 0);
-                    }
-                  });
-                  return { firm, total };
-                });
-
-                const nonZeroTotals = firmTotals.filter((t) => t.total > 0);
-                const lowestTotal = nonZeroTotals.length > 0
-                  ? Math.min(...nonZeroTotals.map((t) => t.total))
-                  : 0;
-
-                return (
-                  <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-                    {/* Firm totals summary card grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {firmTotals.map(({ firm, total }) => {
-                        const isWinner = total > 0 && total === lowestTotal;
-                        return (
-                          <div
-                            key={firm.id}
-                            className={cn(
-                              "p-5 rounded-2xl border transition-all flex flex-col justify-between relative overflow-hidden",
-                              isWinner
-                                ? "bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-300 dark:border-emerald-800 shadow-sm"
-                                : "bg-slate-50/50 dark:bg-slate-900/10 border-slate-200/60 dark:border-slate-800/80",
-                            )}
-                          >
-                            {isWinner && (
-                              <div className="absolute -right-6 -top-6 w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center rotate-45">
-                                <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-450 mt-8" />
-                              </div>
-                            )}
-                            <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <Building2
-                                  className={cn(
-                                    "w-4 h-4 shrink-0",
-                                    isWinner
-                                      ? "text-emerald-500"
-                                      : "text-slate-400",
-                                  )}
-                                />
-                                <span
-                                  className="font-extrabold text-xs text-slate-800 dark:text-slate-250 truncate block max-w-[180px]"
-                                  title={firm.unvan}
-                                >
-                                  {firm.unvan}
-                                </span>
-                              </div>
-
-                              {isWinner && (
-                                <span className="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md mb-3 border border-emerald-500/15">
-                                  En Düşük Teklif
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="mt-4">
-                              <span className="text-[10px] text-slate-400 block font-bold">
-                                Toplam Teklif
-                              </span>
-                              <span
-                                className={cn(
-                                  "text-base font-extrabold font-mono",
-                                  total > 0
-                                    ? isWinner
-                                      ? "text-emerald-650 dark:text-emerald-400"
-                                      : "text-slate-800 dark:text-slate-200"
-                                    : "text-slate-400 italic text-xs font-semibold",
-                                )}
-                              >
-                                {total > 0
-                                  ? `${
-                                    total.toLocaleString("tr-TR", {
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2,
-                                    })
-                                  } TL`
-                                  : "Fiyat girilmedi"}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Needs comparison breakdown */}
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-                      <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-                        <ClipboardList className="w-4 h-4 text-blue-500" />
-                        Kalem Bazlı Fiyat Karşılaştırması
-                      </h4>
-
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-450 font-extrabold">
-                              <th className="py-2.5 px-3">İhtiyaç Kalemi</th>
-                              <th className="py-2.5 px-3 text-center">
-                                Miktar
-                              </th>
-                              {invitedFirms.map((firm: any) => (
-                                <th
-                                  key={firm.id}
-                                  className="py-2.5 px-3 text-right max-w-[150px] truncate"
-                                  title={firm.unvan}
-                                >
-                                  {firm.unvan}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {items.map((item: any) => {
-                              // Find lowest bid for this item
-                              const itemBids = invitedFirms.map((f: any) => {
-                                const key = `${item.id}_${f.id}`;
-                                return {
-                                  firmId: f.id,
-                                  price: bids[key] || 0,
-                                };
-                              }).filter((b) => b.price > 0);
-
-                              const minItemPrice = itemBids.length > 0
-                                ? Math.min(...itemBids.map((b) => b.price))
-                                : 0;
-
-                              return (
-                                <tr
-                                  key={item.id}
-                                  className="border-b border-slate-50 dark:border-slate-900/60 hover:bg-slate-50/30 dark:hover:bg-slate-950/20 transition-colors"
-                                >
-                                  <td className="py-3 px-3 font-bold text-slate-800 dark:text-slate-250">
-                                    {item.kalem_adi}
-                                  </td>
-                                  <td className="py-3 px-3 text-center text-slate-500 font-semibold">
-                                    {item.miktar} {item.birim}
-                                  </td>
-                                  {invitedFirms.map((firm: any) => {
-                                    const key = `${item.id}_${firm.id}`;
-                                    const bidVal = bids[key] || 0;
-                                    const isItemWinner = bidVal > 0 &&
-                                      bidVal === minItemPrice;
-
-                                    return (
-                                      <td
-                                        key={firm.id}
-                                        className="py-3 px-3 text-right font-mono font-bold"
-                                      >
-                                        {bidVal > 0
-                                          ? (
-                                            <span
-                                              className={isItemWinner
-                                                ? "text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-lg border border-emerald-500/10"
-                                                : "text-slate-700 dark:text-slate-300"}
-                                            >
-                                              {bidVal.toLocaleString("tr-TR", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                              })} TL
-                                            </span>
-                                          )
-                                          : (
-                                            <span className="text-slate-350 italic text-[11px] font-semibold">
-                                              -
-                                            </span>
-                                          )}
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()
-            )
-            : (
-              /* DOCUMENTS GRID VIEW */
-              stageDocs.length === 0
-                ? (
-                  <div className="py-10 text-center flex flex-col items-center justify-center gap-3">
-                    <AlertCircle className="w-9 h-9 text-slate-300 dark:text-slate-600" />
-                    <div className="text-slate-700 dark:text-slate-355 text-sm font-bold">
-                      Henüz kaydedilmiş bir tutanak bulunmuyor.
-                    </div>
-                    <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
-                      Firmaların teklif ettiği fiyatları girip tutanağı
-                      kaydetmek için "Yeni Tutanak Ekle / Teklif Girişi"
-                      butonuna basarak fiyat tablosunu açabilir veya diğer süreç
-                      şablonlarını aşağıdan görüntüleyebilirsiniz.
-                    </p>
-                  </div>
-                )
-                : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {stageDocs.map((doc: any) => {
-                      const sablon = sablons.find((s: any) => {
-                        const normAd = normalizeForMatch(s.ad);
-                        const normDocName = normalizeForMatch(doc.belge_adi);
-                        return normAd.includes(normDocName) ||
-                          normDocName.includes(normAd);
-                      });
-
-                      const isTutanak = doc.belge_adi.toLowerCase().includes(
-                        "tutanak",
-                      );
-
-                      return (
-                        <div
-                          key={doc.id || doc.belge_adi}
-                          className={cn(
-                            "relative group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between",
-                            activeActionDropdown === doc.belge_adi ? "z-30" : "z-10"
-                          )}
-                        >
-                          {/* Interactive light glow on hover */}
-                          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                            <div className="absolute -right-12 -top-12 w-28 h-28 rounded-full bg-blue-400/[0.06] dark:bg-blue-400/[0.03] blur-2xl group-hover:bg-blue-400/[0.12] dark:group-hover:bg-blue-400/[0.06] transition-all duration-500" />
-                          </div>
-
-                          <div>
-                            {/* Upper row: Badges */}
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/10">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                Hazır / Kaydedildi
-                              </span>
-
-                              {doc.belge_tarihi && (
-                                <span className="flex items-center gap-1 text-[10px] text-slate-550 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/10 dark:border-slate-700/30">
-                                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                                  {doc.belge_tarihi}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Title and Icon Area */}
-                            <div className="flex items-start gap-4">
-                              <div
-                                className={cn(
-                                  "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br shadow-3xs",
-                                  isTutanak
-                                    ? "from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 text-blue-600 dark:text-blue-450 border border-blue-500/20"
-                                    : "from-violet-500/10 to-fuchsia-500/10 dark:from-violet-500/5 dark:to-fuchsia-500/5 text-violet-600 dark:text-violet-455 border border-violet-500/20",
-                                )}
-                              >
-                                {isTutanak
-                                  ? <FileText className="w-6 h-6" />
-                                  : <ClipboardList className="w-6 h-6" />}
-                              </div>
-
-                              <div className="min-w-0">
-                                <h4 className="font-extrabold text-slate-800 dark:text-slate-150 text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight mb-1">
-                                  {doc.belge_adi}
-                                </h4>
-                                <p
-                                  className="text-[11px] font-semibold text-slate-500 dark:text-slate-450 truncate"
-                                  title={sablon?.dosya_adi}
-                                >
-                                  {sablon?.dosya_adi ||
-                                    "Bağlı şablon bulunmuyor"}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Footer Action buttons */}
-                          <div className="mt-6 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 pt-4 z-10 relative">
-                            <button
-                              onClick={() => {
-                                if (sablon) {
-                                  handleOpenPreviewForSablon(sablon, sablon.ad);
-                                } else {
-                                  alert(
-                                    "Şablon bulunamadı. Lütfen Şablon Yönetimi alanını kontrol edin.",
-                                  );
-                                }
-                              }}
-                              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700 py-2.5 px-4 rounded-xl transition-all shadow-xs hover:shadow shadow-blue-500/10 cursor-pointer h-10 border-0"
-                            >
-                              <Eye className="w-4 h-4" />
-                              Önizle ve Düzenle
-                            </button>
-
-                            {/* Dropdown Menu */}
-                            {!disableDocumentGuidance && (
-                              <div className="relative dropdown-container">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveActionDropdown(
-                                      activeActionDropdown === doc.belge_adi
-                                        ? null
-                                        : doc.belge_adi,
-                                    );
-                                  }}
-                                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-all cursor-pointer border border-slate-200 dark:border-slate-700/60"
-                                >
-                                  <MoreVertical className="w-4 h-4" />
-                                </button>
-
-                                {activeActionDropdown === doc.belge_adi && (
-                                  <div className="absolute right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-50 w-52 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
-                                    <button
-                                      onClick={() => {
-                                        setActiveActionDropdown(null);
-                                        if (sablon) {
-                                          handleOpenPreviewForSablon(
-                                            sablon,
-                                            sablon.ad,
-                                          );
-                                        }
-                                      }}
-                                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                                    >
-                                      <Eye className="w-4 h-4 text-blue-500" />
-                                      Önizle ve Düzenle
-                                    </button>
-
-                                    <button
-                                      onClick={() => {
-                                        setActiveActionDropdown(null);
-                                        if (sablon) {
-                                          quickOpenExternal(sablon);
-                                        }
-                                      }}
-                                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer transition-colors"
-                                    >
-                                      <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                      Tarayıcıda PDF Aç
-                                    </button>
-
-                                    <button
-                                      onClick={() => {
-                                        setActiveActionDropdown(null);
-                                        if (sablon) {
-                                          quickPrint(sablon);
-                                        }
-                                      }}
-                                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-355 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold cursor-pointer border-t border-slate-100 dark:border-slate-800/80 mt-1 pt-2 transition-colors"
-                                    >
-                                      <Printer className="w-4 h-4 text-slate-500" />
-                                      Hızlı Yazdır
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )
-            )}
-
-          {/* Süreç Şablonları Paneli — 2. adıma ait belgeler */}
-          <SurecBelgeleriPanel
-            stageSablons={stageSablons}
-            activeStarredDocs={activeStarredDocs}
-            ciktiLoading={ciktiLoading}
-            onSablonClick={handleOpenPreviewForSablon}
-            onQuickPrint={quickPrint}
-            onExport={quickExport}
-            onOpenExternal={quickOpenExternal}
-            isSablonDisabled={isSablonDisabled}
-          />
+          {dashboardViewMode === "prices" ? (
+            <PricesSummaryDashboard
+              invitedFirms={invitedFirms}
+              items={items}
+              bids={bids}
+            />
+          ) : (
+            <DocumentsDashboard
+              stageDocs={stageDocs}
+              docViewMode={docViewMode}
+              sablons={sablons}
+              disableDocumentGuidance={disableDocumentGuidance}
+              activeActionDropdown={activeActionDropdown}
+              setActiveActionDropdown={setActiveActionDropdown}
+              handleOpenPreviewForSablon={handleOpenPreviewForSablon}
+              quickOpenExternal={quickOpenExternal}
+              quickPrint={quickPrint}
+              handleUpdateDocumentDate={handleUpdateDocumentDate}
+            />
+          )}
         </div>
       )}
 
@@ -705,15 +387,28 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
 
             <div className="flex flex-wrap items-center gap-3 justify-end">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-slate-100 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10">
-                <span className="text-slate-400">Tutanak / Teklif Tarihi:</span>
+                <span className="text-slate-400">Yaklaşık Maliyet Tarihi:</span>
+                <input
+                  type="date"
+                  value={maliyetCetveliTarihi}
+                  onChange={(e) => {
+                    setMaliyetCetveliTarihi(e.target.value);
+                    if (syncTutanak) {
+                      setTutanakTarihi(e.target.value);
+                    }
+                  }}
+                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 w-28"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-slate-100 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-10">
+                <span className="text-slate-400">Tutanak Tarihi:</span>
                 <input
                   type="date"
                   value={tutanakTarihi}
-                  onChange={(e) => {
-                    setTutanakTarihi(e.target.value);
-                    setMaliyetCetveliTarihi(e.target.value);
-                  }}
-                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200"
+                  disabled={syncTutanak}
+                  onChange={(e) => setTutanakTarihi(e.target.value)}
+                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 disabled:opacity-60 w-28"
                 />
               </div>
 

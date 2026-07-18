@@ -17,6 +17,7 @@ export interface PrintDropdownButtonProps {
   isSablonDisabled?: (name: string) => boolean;
   className?: string;
   buttonHeightClass?: string; // Optional button height class, e.g. "h-10"
+  label?: string;
 }
 
 export function PrintDropdownButton({
@@ -32,6 +33,7 @@ export function PrintDropdownButton({
   isSablonDisabled,
   className = "",
   buttonHeightClass = "",
+  label,
 }: PrintDropdownButtonProps): React.JSX.Element | null {
   const [belgeMenuOpen, setBelgeMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -181,7 +183,7 @@ export function PrintDropdownButton({
         )}
       >
         <Printer className="w-3.5 h-3.5 text-blue-500" />
-        Belgeleri Yazdır
+        {label || "Belgeleri Yazdır"}
         <ChevronDown className="w-3 h-3 text-slate-400" />
       </button>
 

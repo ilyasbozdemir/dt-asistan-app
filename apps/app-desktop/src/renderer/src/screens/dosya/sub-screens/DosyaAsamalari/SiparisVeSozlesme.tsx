@@ -48,6 +48,10 @@ export function SiparisVeSozlesme(): React.JSX.Element {
   const { disableDocumentGuidance } = useSettingsStore();
   const { activeDosyaId } = useWorkspaceStore();
 
+  const stageSablons = sablons.filter(
+    (s) => s.kategori === "3-siparis-ve-sozlesme" || s.kategori === "3. Sipariş & Sözleşme"
+  );
+
   // Kazanan firma guard state
   const [kazananFirmaId, setKazananFirmaId] = useState<number | null | undefined>(undefined); // undefined = yükleniyor
   const [kazananFirmaUnvan, setKazananFirmaUnvan] = useState<string>("");
@@ -245,11 +249,12 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                   edebilirsiniz.
                 </p>
               </div>
-              {!disableDocumentGuidance && (
+              {stageSablons.length > 0 && (
                 <div>
                   <PrintDropdownButton
                     kategori="3-siparis-ve-sozlesme"
                     sablons={sablons}
+                    overrideSablons={stageSablons}
                     activeStarredDocs={activeStarredDocs}
                     ciktiLoading={ciktiLoading}
                     handleOpenPreviewForSablon={handleOpenPreviewForSablon}
@@ -258,6 +263,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                     quickOpenExternal={quickOpenExternal}
                     isSablonDisabled={isSablonDisabled}
                     buttonHeightClass="h-10"
+                    label={disableDocumentGuidance ? "İşlemler" : "Belgeleri Yazdır"}
                   />
                 </div>
               )}
@@ -266,6 +272,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
               Bu süreç henüz tasarım aşamasındadır.
             </p>
           </div>
+
+
         </div>
       )}
     </SubScreen>

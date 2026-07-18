@@ -529,6 +529,71 @@ export function usePiyasaFiyatArastirmasiLogic() {
     }
   }
 
+  const handleUpdateDocumentDate = async (docId: number, newDate: string, docName: string) => {
+    try {
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'UPDATE DATA_TeminBelge SET belge_tarihi = ? WHERE id = ?',
+        [newDate || null, docId]
+      )
+
+      if (docName === 'Yaklaşık Maliyet Cetveli') {
+        setMaliyetCetveliTarihi(newDate)
+      } else if (docName === 'Piyasa Fiyat Araştırma Tutanağı') {
+        setTutanakTarihi(newDate)
+      }
+
+      const sablon = stageSablons.find((s: any) => {
+        const lowerAd = s.ad.toLowerCase()
+        const lowerDocName = docName.toLowerCase()
+        return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd)
+      })
+
+      if (sablon) {
+        const processPath = sablon.route_path || sablon.dosya_adi || ''
+        const baseCtx = contextsByPath[processPath] || dosyaContext
+        
+        const snapshotRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = ?',
+          [activeDosyaId, sablon.id]
+        )
+        
+        let currentVeri: any = { ...baseCtx }
+        if (snapshotRes.success && snapshotRes.data.length > 0) {
+          try {
+            currentVeri = { ...currentVeri, ...JSON.parse(snapshotRes.data[0].veri_json) }
+          } catch (e) {
+            console.error(e)
+          }
+        }
+
+        const mergedCtx = {
+          ...currentVeri,
+          tarih: newDate ? formatDateString(newDate) : currentVeri.tarih,
+          dosyaTarihi: newDate ? formatDateString(newDate) : currentVeri.dosyaTarihi
+        }
+
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)',
+          [activeDosyaId, sablon.id, JSON.stringify(mergedCtx)]
+        )
+      }
+
+      const resBelgelerNew = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
+        [activeDosyaId]
+      )
+      if (resBelgelerNew.success && resBelgelerNew.data) {
+        setSavedDocuments(resBelgelerNew.data)
+      }
+    } catch (err) {
+      console.error('Error updating document date:', err)
+    }
+  }
+
   const lowestTotalFirmaId = useMemo(() => {
     let minTotal = Infinity
     let minId: number | null = null
@@ -592,6 +657,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
     setLowestFirmAsWinner,
     setSetLowestFirmAsWinner,
     manualWinnerFirmaId,
-    setManualWinnerFirmaId
+    setManualWinnerFirmaId,
+    handleUpdateDocumentDate
   }
 }

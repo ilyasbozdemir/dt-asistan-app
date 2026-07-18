@@ -3,7 +3,7 @@
   <head>
       <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yaklaşık Maliyet Hesap Cetveli</title>
+    <title>Yaklaşık Maliyet Hesap Cetveli - Güneyyurt Belediyesi</title>
     <style>
       @page {
         size: A4 landscape;
@@ -47,6 +47,17 @@
       .paged-header {
         display: block;
         width: 100%;
+        margin-bottom: 20px;
+      }
+      .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        line-height: 1.3;
+      }
+      .header-table td {
+        vertical-align: middle;
+        padding: 5px;
       }
       .title {
         text-align: center;
@@ -81,7 +92,7 @@
       }
       .content-table th {
         font-weight: bold;
-        background-color: #e6e6e6;
+        background-color: #cccccc;
         text-align: center;
       }
       .text-center {
@@ -130,31 +141,15 @@
         font-size: 9.5pt;
         line-height: 1.4;
       }
-      .olur-section {
-        margin-top: 25px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        page-break-inside: avoid;
-        break-inside: avoid;
-      }
-      .olur-title {
-        font-weight: bold;
-        font-size: 11pt;
-        margin-bottom: 5px;
-      }
     </style>
   </head>
   <body>
     <div class="page-container">
       <!-- ANTET (HEADER) -->
-      <div class="paged-header" data-behavior="first-page-only" data-slot="top-center">
-        <table
-          style="width: 100%; border-collapse: collapse; margin-bottom: 15px; min-height: 80px"
-        >
+      <div class="paged-header">
+        <table class="header-table">
           <tr>
-            <td style="width: 90px; text-align: left; vertical-align: top; padding-top: 0">
+            <td style="width: 90px; text-align: left; vertical-align: top">
               {{#solLogo}}
               <img
                 src="{{solLogo}}"
@@ -164,17 +159,15 @@
               {{/solLogo}}
             </td>
 
-            <td style="text-align: center; vertical-align: top; padding-top: 0; line-height: 1.3">
-              {{#antetSatirlari}}
-              <div style="font-weight: bold; font-size: 12pt">{{.}}</div>
-              {{/antetSatirlari}} {{^antetSatirlari}}
-              <div style="font-weight: bold; font-size: 12pt">{{kurumUst}}</div>
-              <div style="font-weight: bold; font-size: 12pt">{{kurumAdi}}</div>
-              <div style="font-weight: bold; font-size: 12pt">{{mudurluk}}</div>
-              {{/antetSatirlari}}
+            <td style="text-align: center; vertical-align: top; line-height: 1.3; flex-grow: 1">
+              <div style="font-weight: bold; font-size: 12pt">T.C.</div>
+              <div style="font-weight: bold; font-size: 12pt">GÜNEYYURT BELEDİYE BAŞKANLIĞI</div>
+              {{#mudurluk}}
+              <div style="font-weight: bold; font-size: 11pt">{{mudurluk}}</div>
+              {{/mudurluk}}
             </td>
 
-            <td style="width: 90px; text-align: right; vertical-align: top; padding-top: 0">
+            <td style="width: 90px; text-align: right; vertical-align: top">
               {{#sagLogo}}
               <img
                 src="{{sagLogo}}"
@@ -194,7 +187,7 @@
         <table class="meta-table">
           <tr>
             <td class="text-left" style="width: 70%">
-              <strong>İşin Adı:</strong> {{isAdi}}{{^isAdi}}{{dosyaKonusu}}{{/isAdi}}
+              <strong>İşin Adı:</strong> {{isAdi}}
             </td>
             <td class="text-right" style="width: 30%">
               <strong>Düzenleme Tarihi :</strong> {{tarih}}
@@ -211,17 +204,14 @@
             <tr>
               <th style="width: 4%">Sıra No</th>
               <th style="width: 25%">Mal / Hizmet Adı</th>
-              <th style="width: 25%">Özelliği</th>
+              <th style="width: 15%">Özelliği</th>
               <th style="width: 7%">Birim</th>
               <th style="width: 7%">Miktarı</th>
               {{#firmalar}}
               <th>{{unvan}}</th>
-              {{/firmalar}} {{#isOrtalama}}
-              <th style="width: 10%">Ortalama Birim Fiyat</th>
-              {{/isOrtalama}} {{#isEnDusuk}}
-              <th style="width: 10%">En Düşük Birim Fiyat</th>
-              {{/isEnDusuk}}
-              <th style="width: 12%">Maliyet Toplam Bedeli</th>
+              {{/firmalar}}
+              <th style="width: 10%">En Düşük<br>Birim Fiyat</th>
+              <th style="width: 12%">Toplam Maliyet</th>
             </tr>
           </thead>
           <tbody>
@@ -238,17 +228,11 @@
               <td class="currency-cell">{{enDusukFiyat}}</td>
               <td class="currency-cell">{{toplamBedel}}</td>
             </tr>
-            {{/ihtiyacKalemleri}} {{^ihtiyacKalemleri}}
-            <tr>
-              <td colspan="7" class="text-center italic" style="height: 60px">
-                Kalem bilgisi bulunmamaktadır.
-              </td>
-            </tr>
             {{/ihtiyacKalemleri}}
 
             <!-- TOPLAM SATIRI -->
-            {{#ihtiyacKalemleri.length}}
-            <tr style="font-weight: bold; background-color: #fafafa">
+            {{#ihtiyacKalemleri.0}}
+            <tr style="font-weight: bold">
               <td colspan="5" class="text-right">Toplam Tutar :</td>
               {{#firmaToplamlari}}
               <td class="currency-cell">{{toplam}}</td>
@@ -256,7 +240,7 @@
               <td></td>
               <td class="currency-cell">{{genelToplam}}</td>
             </tr>
-            {{/ihtiyacKalemleri.length}}
+            {{/ihtiyacKalemleri.0}}
           </tbody>
         </table>
 
@@ -266,32 +250,20 @@
         <div class="komisyon-section">
           <div class="komisyon-title">Piyasa Fiyat Araştırma Görevlisi/Görevlileri</div>
           <div class="komisyon-text">
-            Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu
-            {{#isOrtalama}}ortalama{{/isOrtalama}}{{#isEnDusuk}}en düşük{{/isEnDusuk}} fiyatlar
-            alınarak maliyet KDV hariç ({{genelToplam}}) TL olarak tespit edilmiştir.
+            Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu en düşük fiyatlar alınarak maliyet KDV hariç ({{genelToplam}}) TL olarak tespit edilmiştir.
           </div>
 
           <div class="komisyon-members">
             {{#komisyon}}
             <div class="komisyon-member">
-              <span style="font-weight: bold; text-transform: uppercase">{{adSoyad}}</span><br />
-              <span>{{unvan}}</span><br />
-              <span style="font-size: 8.5pt; color: #555">{{gorevi}}</span>
+              <div style="font-weight: bold">{{adSoyad}}</div>
+              <div>{{unvan}}</div>
+              {{#gorevi}}
+              <div style="font-size: 8.5pt; color: #555">{{gorevi}}</div>
+              {{/gorevi}}
             </div>
             {{/komisyon}}
           </div>
-        </div>
-
-        <!-- OLUR BÖLÜMÜ -->
-        <div class="olur-section">
-          <div class="olur-title">OLUR</div>
-          <div style="font-size: 9pt; margin-bottom: 5px">{{dosyaTarihi}}</div>
-          <div
-            style="font-weight: bold; text-transform: uppercase; font-size: 10.5pt; margin-top: 5px"
-          >
-            {{baskanAdi}}
-          </div>
-          <div style="font-size: 10pt">{{baskanUnvan}}</div>
         </div>
       </div>
     </div>
