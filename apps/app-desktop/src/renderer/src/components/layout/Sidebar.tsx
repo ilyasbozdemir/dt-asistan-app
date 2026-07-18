@@ -35,6 +35,8 @@ import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
 import { subPagesMapping } from '../../constants/surecler'
+import { WorkspaceCloseModal } from './WorkspaceCloseModal'
+import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
 
 interface SubItem {
   name: string
@@ -144,9 +146,27 @@ export function Sidebar(): React.JSX.Element {
   const { institutionName, institutionLogo, adminUsername, eButceKodu, loadSettings } =
     useSettingsStore()
   const { closeWorkspace, fileName, activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
+  const { settings } = useAyarlarHooks()
+  const isMailConfigured = !!settings.smtp_host
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const handleCloseWorkspace = async (): Promise<void> => {
+    setIsCloseModalOpen(true)
+  }
+
+  const handleConfirmClose = async (type: 'none' | 'backup' | 'email'): Promise<void> => {
+    if (type === 'backup') {
+      const res = await window.electron.ipcRenderer.invoke('workspace:backup')
+      if (!res.success && res.error !== 'Yedekleme iptal edildi') {
+        throw new Error(res.error)
+      }
+    } else if (type === 'email') {
+      const res = await window.electron.ipcRenderer.invoke('workspace:backup-email')
+      if (!res.success) {
+        throw new Error(res.error)
+      }
+    }
     await closeWorkspace()
     queryClient.clear()
   }
@@ -450,6 +470,14 @@ export function Sidebar(): React.JSX.Element {
           </Link>
         )}
       </div>
+
+      <WorkspaceCloseModal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
+        fileName={fileName}
+        isMailConfigured={isMailConfigured}
+        onConfirm={handleConfirmClose}
+      />
     </div>
   )
 }
