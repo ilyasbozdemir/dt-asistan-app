@@ -434,9 +434,95 @@ export function useAnnouncements() {
         console.warn('Failed to fetch system logs:', logErr)
       }
 
+      // Fetch recent files to generate smart notifications
+      let fileNotifications: Announcement[] = []
+      try {
+        const filesRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          `SELECT d.id, d.temin_no, d.konu, d.yaklasik_maliyet, d.durum_asama_id, d.created_at, d.status,
+                  f.unvan as firma_adi, b.birim_adi
+           FROM DATA_TeminDosyasi d
+           LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
+           LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
+           WHERE d.is_deleted = 0
+           ORDER BY d.created_at DESC LIMIT 15`
+        )
+        if (filesRes.success && filesRes.data) {
+          fileNotifications = filesRes.data.map((row: any) => {
+            const dateObj = new Date(row.created_at)
+            const dateStr = dateObj.toLocaleDateString('tr-TR', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            })
+            const formattedMaliyet = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(row.yaklasik_maliyet || 0)
+            
+            let title = 'Temin Dosyası Güncellemesi'
+            let content = `"${row.konu || 'Konu Belirtilmedi'}" (${row.temin_no || 'No Yok'}) dosyası işlem görüyor.`
+            let type: 'info' | 'success' | 'warning' | 'error' = 'info'
+            
+            if (row.status === 'iptal') {
+              title = 'Dosya İptal Edildi'
+              content = `"${row.konu}" (${row.temin_no}) dosyası iptal edildi.`
+              type = 'error'
+            } else if (row.status === 'tamamlandi') {
+              title = 'Dosya Tamamlandı'
+              content = `"${row.konu}" (${row.temin_no}) dosyası başarıyla sonuçlandırıldı.`
+              type = 'success'
+            } else {
+              switch (row.durum_asama_id) {
+                case 1:
+                  title = 'Yeni Dosya Açıldı'
+                  content = `"${row.konu}" (${row.temin_no}) dosyası İhtiyaç Tespiti aşamasında oluşturuldu. Maliyet: ${formattedMaliyet}.`
+                  type = 'info'
+                  break
+                case 2:
+                  title = 'Piyasa Fiyat Araştırması'
+                  if (row.firma_adi) {
+                    title = 'Firma Belirlendi'
+                    content = `"${row.konu}" (${row.temin_no}) dosyası için piyasa fiyat araştırması tamamlandı. Firma: ${row.firma_adi}.`
+                    type = 'success'
+                  } else {
+                    content = `"${row.konu}" (${row.temin_no}) dosyası için teklif toplama/fiyat araştırması yapılıyor.`
+                    type = 'info'
+                  }
+                  break
+                case 3:
+                  title = 'Sipariş & Sözleşme'
+                  content = `"${row.konu}" (${row.temin_no}) dosyası Sipariş & Sözleşme aşamasında onay bekliyor.`
+                  type = 'warning'
+                  break
+                case 4:
+                  title = 'Kabul & Ödeme İşlemleri'
+                  content = `"${row.konu}" (${row.temin_no}) dosyası teslim ve faturalandırma aşamasına sevk edildi.`
+                  type = 'success'
+                  break
+                default:
+                  if (row.yaklasik_maliyet > 500000) {
+                    title = 'Yüksek Limitli Doğrudan Temin'
+                    content = `"${row.konu}" (${row.temin_no}) dosyası yüksek maliyet limitine sahip: ${formattedMaliyet}.`
+                    type = 'warning'
+                  }
+                  break
+              }
+            }
+
+            return {
+              id: `file_${row.id}_${row.durum_asama_id || 0}_${row.status}`,
+              title,
+              content,
+              date: dateStr,
+              _rawDate: dateObj.getTime(),
+              type
+            }
+          })
+        }
+      } catch (fileErr) {
+        console.warn('Failed to fetch file notifications:', fileErr)
+      }
+
       // Merge and sort
-      const merged = [...remoteData, ...localLogs].sort((a: any, b: any) => {
-        // Sort by _rawDate for local logs if available, else parse date string or put remote items logically
+      const merged = [...remoteData, ...localLogs, ...fileNotifications].sort((a: any, b: any) => {
         const timeA = a._rawDate || new Date(a.date.split('.').reverse().join('-')).getTime() || 0
         const timeB = b._rawDate || new Date(b.date.split('.').reverse().join('-')).getTime() || 0
         return timeB - timeA

@@ -1,24 +1,24 @@
-import React from 'react'
-import { ArrowLeft, FileText, X } from 'lucide-react'
+import React from "react";
+import { ArrowLeft, FileText, X } from "lucide-react";
 
 interface PreviewHeaderProps {
-  isInline: boolean
-  onClose: () => void
-  title: string
-  usedVars: Set<string>
+  isInline: boolean;
+  onClose: () => void;
+  title: string;
+  usedVars: Set<string>;
 }
 
 export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   isInline,
   onClose,
   title,
-  usedVars
+  usedVars,
 }) => {
   const varsList = React.useMemo(() => {
-    return Array.from(usedVars).filter((k) => k !== 'icerik')
-  }, [usedVars])
+    return Array.from(usedVars).filter((k) => k !== "icerik");
+  }, [usedVars]);
 
-  const [isVarsExpanded, setIsVarsExpanded] = React.useState(false)
+  const [isVarsExpanded, setIsVarsExpanded] = React.useState(false);
 
   if (isInline) {
     return (
@@ -39,7 +39,8 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
               {title} Önizleme
             </h2>
             <p className="text-xs text-slate-500">
-              Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
+              Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
+              görebilirsiniz.
             </p>
             {varsList.length > 0 && (
               <div className="mt-1.5">
@@ -50,7 +51,7 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
                 >
                   <svg
                     className={`w-3 h-3 transition-transform duration-200 ${
-                      isVarsExpanded ? 'rotate-90' : 'rotate-0'
+                      isVarsExpanded ? "rotate-90" : "rotate-0"
                     }`}
                     viewBox="0 0 24 24"
                     fill="none"
@@ -81,7 +82,7 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -91,9 +92,12 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
           <FileText className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title} Önizleme</h2>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+            {title} Önizleme
+          </h2>
           <p className="text-xs text-slate-500">
-            Form veya JSON üzerinden değişkenleri ezerek sonucu canlı görebilirsiniz.
+            Form veya JSON üzerinden değişkenleri ezerek sonucu canlı
+            görebilirsiniz.
           </p>
           {varsList.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1.5 max-h-16 overflow-y-auto custom-scrollbar">
@@ -116,5 +120,5 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
         <X className="w-5 h-5" />
       </button>
     </div>
-  )
-}
+  );
+};
