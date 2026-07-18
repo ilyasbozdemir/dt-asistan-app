@@ -91,9 +91,10 @@
         vertical-align: middle;
       }
       .content-table th {
-        font-weight: bold;
-        background-color: #cccccc;
+        font-weight: normal;
+        background-color: #ffffff;
         text-align: center;
+        border: 1px solid #000;
       }
       .text-center {
         text-align: center;
@@ -140,6 +141,29 @@
         box-sizing: border-box;
         font-size: 9.5pt;
         line-height: 1.4;
+      }
+      .firm-col {
+        background-color: #ffffff;
+      }
+      .content-table th.firm-col-header {
+        background-color: #ffffff;
+        font-weight: normal;
+      }
+      .highlight-lowest {
+        background-color: #f0f0f0;
+        font-weight: bold;
+      }
+      .content-table th.highlight-lowest-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .highlight-total {
+        background-color: #e6e6e6;
+        font-weight: bold;
+      }
+      .content-table th.highlight-total-header {
+        background-color: #d6d6d6;
+        font-weight: bold;
       }
     </style>
   </head>
@@ -208,10 +232,10 @@
               <th style="width: 7%">Birim</th>
               <th style="width: 7%">Miktarı</th>
               {{#firmalar}}
-              <th>{{unvan}}</th>
+              <th class="firm-col-header">{{unvan}}</th>
               {{/firmalar}}
-              <th style="width: 10%">En Düşük<br>Birim Fiyat</th>
-              <th style="width: 12%">Toplam Maliyet</th>
+              <th style="width: 10%" class="highlight-lowest-header">En Düşük<br>Birim Fiyat</th>
+              <th style="width: 12%" class="highlight-total-header">Toplam Maliyet</th>
             </tr>
           </thead>
           <tbody>
@@ -223,10 +247,10 @@
               <td class="text-center">{{birimi}}</td>
               <td class="text-center">{{miktar}}</td>
               {{#firmaTeklifleri}}
-              <td class="currency-cell">{{fiyat}}</td>
+              <td class="currency-cell firm-col">{{fiyat}}</td>
               {{/firmaTeklifleri}}
-              <td class="currency-cell">{{enDusukFiyat}}</td>
-              <td class="currency-cell">{{toplamBedel}}</td>
+              <td class="currency-cell highlight-lowest">{{enDusukFiyat}}</td>
+              <td class="currency-cell highlight-total">{{toplamBedel}}</td>
             </tr>
             {{/ihtiyacKalemleri}}
 
@@ -235,10 +259,10 @@
             <tr style="font-weight: bold">
               <td colspan="5" class="text-right">Toplam Tutar :</td>
               {{#firmaToplamlari}}
-              <td class="currency-cell">{{toplam}}</td>
+              <td class="currency-cell firm-col">{{toplam}}</td>
               {{/firmaToplamlari}}
-              <td></td>
-              <td class="currency-cell">{{genelToplam}}</td>
+              <td class="highlight-lowest"></td>
+              <td class="currency-cell highlight-total">{{genelToplam}}</td>
             </tr>
             {{/ihtiyacKalemleri.0}}
           </tbody>
