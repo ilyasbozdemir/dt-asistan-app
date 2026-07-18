@@ -33,6 +33,8 @@ interface SettingsState {
   isDisclaimerAccepted: boolean
   disableDocumentGuidance: boolean
   setDisableDocumentGuidance: (val: boolean) => void
+  unifiedStepperMode: boolean
+  setUnifiedStepperMode: (val: boolean) => void
   setInstitutionName: (name: string) => void
   setInstitutionLogo: (logo: string | null) => void
   setAdminName: (name: string) => void
@@ -89,8 +91,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   ekapDonemKurali: '',
   isDisclaimerAccepted: false,
   disableDocumentGuidance: false,
+  unifiedStepperMode: true,
   disclaimerHistory: '[]',
   setDisableDocumentGuidance: (val) => set({ disableDocumentGuidance: val }),
+  setUnifiedStepperMode: (val) => set({ unifiedStepperMode: val }),
   setInstitutionName: (name) => set({ institutionName: name }),
   setInstitutionLogo: (logo) => set({ institutionLogo: logo }),
   setAdminName: (name) => set({ adminName: name }),

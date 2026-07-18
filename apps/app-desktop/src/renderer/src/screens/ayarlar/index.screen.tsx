@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAyarlarHooks } from "./ayarlar.hooks";
+import { menuItems } from "./ayarlar.constants";
 import { Button } from "../../components/ui/Button";
 import { useSettingsStore } from "../../store/settingsStore";
 import {
-  Archive,
-  Bot,
-  Code,
-  Mail,
-  Palette,
-  RefreshCw,
   Save,
-  Settings,
+  Settings
 } from "lucide-react";
 import { InnerMenu, InnerMenuItem } from "../../components/ui/InnerMenu";
 import TemaScreen from "./TemaScreen";
@@ -73,9 +68,6 @@ export default function AyarlarScreen(): React.ReactNode {
   }, [location.search]);
 
   const [saving, setSaving] = useState(false);
-
-  // Tab: Genel Ayarlar
-  const [disableDocumentGuidance, setDisableDocumentGuidance] = useState(false);
 
   // Tab: SMTP Ayarları
   const [smtpHost, setSmtpHost] = useState("");
@@ -382,53 +374,7 @@ export default function AyarlarScreen(): React.ReactNode {
     }
   };
 
-  const menuItems: InnerMenuItem[] = [
-    {
-      id: "genel",
-      label: "Genel Ayarlar",
-      icon: <Settings className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div0", label: "", icon: null, isDivider: true },
-    {
-      id: "smtp",
-      label: "SMTP Ayarları",
-      icon: <Mail className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div1", label: "", icon: null, isDivider: true },
-    {
-      id: "tema",
-      label: "Renk & Tema",
-      icon: <Palette className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div2", label: "", icon: null, isDivider: true },
-    {
-      id: "ai",
-      label: "Yapay Zeka",
-      icon: <Bot className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div3", label: "", icon: null, isDivider: true },
-    {
-      id: "archive",
-      label: "Veri & Arşiv",
-      icon: <Archive className="w-4 h-4 shrink-0" />,
-    },
-    { id: "div4", label: "", icon: null, isDivider: true },
-    {
-      id: "sync",
-      label: "Web Senkronizasyon",
-      icon: <RefreshCw className="w-4 h-4 shrink-0" />,
-    },
-    ...(import.meta.env.DEV
-      ? [
-        { id: "div5", label: "", icon: null, isDivider: true },
-        {
-          id: "developer",
-          label: "Geliştirici & Test",
-          icon: <Code className="w-4 h-4 shrink-0" />,
-        },
-      ]
-      : []),
-  ] as InnerMenuItem[];
+
 
   return (
     <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
@@ -470,6 +416,8 @@ export default function AyarlarScreen(): React.ReactNode {
                     <GenelTab
                       disableDocumentGuidance={disableDocumentGuidance}
                       setDisableDocumentGuidance={setDisableDocumentGuidance}
+                      unifiedStepperMode={unifiedStepperMode}
+                      setUnifiedStepperMode={setUnifiedStepperMode}
                     />
                   )}
 

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import {
   AlertCircle,
   ArrowLeft,
@@ -29,6 +29,8 @@ import {
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { Modal } from '../../components/ui/Modal'
+import { VerticalStepper } from './components/VerticalStepper'
+import { useSettingsStore } from '../../store/settingsStore'
 
 interface SubScreenProps {
   title: string
@@ -46,8 +48,20 @@ export function SubScreen({
   children
 }: SubScreenProps): React.JSX.Element {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
+  const { unifiedStepperMode } = useSettingsStore()
+  const location = useLocation()
   const [activeDosya, setActiveDosya] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+
+  const isDosyaAsamasi = [
+    '/dosya/hazirlik-ve-ihtiyac',
+    '/dosya/piyasa-fiyat-arastirmasi',
+    '/dosya/siparis-ve-sozlesme',
+    '/dosya/kabul-ve-odeme',
+    '/dosya/klasor-ve-kapaklar'
+  ].some((path) => location.pathname.includes(path))
+
+  const showVerticalStepper = unifiedStepperMode && isDosyaAsamasi
 
   useEffect(() => {
     document.title = `${title} - Doğrudan Temin`
@@ -76,11 +90,16 @@ export function SubScreen({
       })
   }, [activeDosyaId, title, setActiveStarredDocs])
 
-  return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* HEADER */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex items-center gap-3">
+    <div className={cn(
+      "p-6 md:p-8 max-w-6xl mx-auto flex gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
+      !showVerticalStepper && "flex-col gap-6"
+    )}>
+      {showVerticalStepper && <VerticalStepper />}
+
+      <div className="flex-1 flex flex-col gap-6 min-w-0">
+        {/* HEADER */}
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <Icon className="w-7 h-7 text-blue-600" />
@@ -107,7 +126,8 @@ export function SubScreen({
       )}
 
       {/* CHILDREN VIEW */}
-      {activeDosyaId && children}
+        {activeDosyaId && children}
+      </div>
     </div>
   )
 }
