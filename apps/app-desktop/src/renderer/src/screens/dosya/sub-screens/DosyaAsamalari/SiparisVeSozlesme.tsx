@@ -303,6 +303,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                   current: true,
                 },
                 { step: "3", label: "Sipariş & Sözleşme", done: false },
+                { step: "4", label: "Kabul & Ödeme İşlemleri", done: false },
+                { step: "5", label: "Klasör & Kapaklar", done: false },
               ].map((item) => (
                 <li
                   key={item.step}

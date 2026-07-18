@@ -125,6 +125,10 @@ export function Header(): React.JSX.Element {
               {
                 label: '4. Kabul & Ödeme İşlemleri',
                 onClick: () => navigate({ to: '/dosya/kabul-ve-odeme' as any })
+              },
+              {
+                label: '5. Klasör & Kapaklar',
+                onClick: () => navigate({ to: '/dosya/klasor-ve-kapaklar' as any })
               }
             ]
           },
