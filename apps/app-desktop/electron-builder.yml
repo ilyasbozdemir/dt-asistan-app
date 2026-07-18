@@ -28,19 +28,19 @@ directories:
 files:
   - out/**/*
   - package.json
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,README.md}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 asarUnpack:
   - resources/**
 extraResources:
   - from: resources/
     to: .
     filter:
-      - '**/*'
+      - "**/*"
 
 win:
   executableName: DTAsistan
@@ -78,5 +78,5 @@ npmRebuild: true
 publish:
   provider: github
   owner: ilyasbozdemir
-  repo: dt-asistan-desktop-app
-  updaterCacheDirName: dt-asistan-desktop-app-updater
+  repo: dt-asistan-app
+  updaterCacheDirName: dt-asistan-app-updater

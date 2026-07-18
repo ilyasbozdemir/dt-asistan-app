@@ -9,7 +9,7 @@ DT Asistan Lite uygulamasının en güncel sürümlerini doğrudan GitHub Releas
 sayfası üzerinden indirebilirsiniz:
 
 👉
-**[DT Asistan Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases)**
+**[DT Asistan Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-app/releases)**
 
 _Not: Windows için `.exe` kurulum sihirbazını indirip doğrudan
 çalıştırabilirsiniz._

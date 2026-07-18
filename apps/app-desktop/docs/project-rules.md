@@ -1,4 +1,4 @@
-# Doğrudan Temin Masaüstü Uygulaması (dt-asistan-desktop-app) Geliştirme Kuralları
+# Doğrudan Temin Masaüstü Uygulaması (dt-asistan-app) Geliştirme Kuralları
 
 Bu dosya, uygulamanın baştan yazılma sürecinde uyulması gereken mimari ve teknik
 kuralları içerir. Antigravity (AI) olarak, verilen her yeni görevde bu kuralları
@@ -26,9 +26,9 @@ göz önünde bulunduracağım.
 
 - **Çevrimdışı (Offline) Çalışma:** Uygulama tamamen çevrimdışı çalışmalıdır.
   Hiçbir veri buluta veya dış sunucuya gönderilmeyecektir.
-- **.dtal Dosya Formatı:** Veriler ZIP tabanlı `.dtal` dosyalarında tutulacaktır.
-  Bu dosya içinde `database.sqlite` (ana veri) ve `attachments/` (ekler)
-  bulunacaktır.
+- **.dtal Dosya Formatı:** Veriler ZIP tabanlı `.dtal` dosyalarında
+  tutulacaktır. Bu dosya içinde `database.sqlite` (ana veri) ve `attachments/`
+  (ekler) bulunacaktır.
 - **Mevzuata Uygunluk:** 4734 Sayılı Kamu İhale Kanunu Madde 22 kapsamında
   doğrudan temin süreçlerine uygun adım adım rehberli iş akışı sağlanacaktır.
 - **Modülerlik:** Sınırsız dosya ve kalem eklenebilecek, kurumsal şablonlar
@@ -41,12 +41,13 @@ göz önünde bulunduracağım.
   tanımlı, tipli API'leri kullanır.
 - `preload/index.ts` örneği:
   ```typescript
-  contextBridge.exposeInMainWorld('api', {
+  contextBridge.exposeInMainWorld("api", {
     dosya: {
-      create: (input: CreateDosyaInput) => ipcRenderer.invoke('dosya:create', input),
-      list: (filter: DosyaFilter) => ipcRenderer.invoke('dosya:list', filter)
-    }
-  })
+      create: (input: CreateDosyaInput) =>
+        ipcRenderer.invoke("dosya:create", input),
+      list: (filter: DosyaFilter) => ipcRenderer.invoke("dosya:list", filter),
+    },
+  });
   ```
 - Her IPC kanalı isimlendirmesi `<modül>:<eylem>` formatında olacaktır (örn.
   `dosya:create`, `komisyon:list`).

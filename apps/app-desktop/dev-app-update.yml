@@ -1,6 +1,6 @@
 provider: github
 owner: ilyasbozdemir
-repo: dt-asistan-desktop-app
+repo: dt-asistan-app
 # İleride gizli (private) repo'ya geçilirse aşağıdaki ayarları açabilirsiniz:
 # private: true
 # token: "YOUR_GITHUB_TOKEN" # veya sistem ortam değişkenlerinden (GH_TOKEN) otomatik alınır.

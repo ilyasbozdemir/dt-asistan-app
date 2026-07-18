@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Activity,
-  Terminal,
-  Download,
   CheckCircle,
-  Wifi,
-  Laptop,
-  Smartphone,
-  FileText,
-  Lock,
   Code,
-  Sun,
+  Download,
+  FileText,
+  Laptop,
+  Lock,
   Moon,
+  Smartphone,
+  Sun,
+  Terminal,
+  Wifi,
 } from "lucide-react";
 
 export default function Home() {
@@ -34,13 +34,13 @@ export default function Home() {
     tag: "v1.0.0-beta.38",
     size: "68.4 MB",
     date: "10.07.2026",
-    url: "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
+    url: "https://github.com/ilyasbozdemir/dt-asistan-app/releases",
   });
 
   // Fetch GitHub Release info on mount
   useEffect(() => {
     fetch(
-      "https://api.github.com/repos/ilyasbozdemir/dt-asistan-desktop-app/releases/latest",
+      "https://api.github.com/repos/ilyasbozdemir/dt-asistan-app/releases/latest",
     )
       .then((res) => res.json())
       .then((data) => {
@@ -56,9 +56,8 @@ export default function Home() {
             tag: data.tag_name,
             size: sizeMb,
             date: dateStr,
-            url:
-              data.html_url ||
-              "https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases",
+            url: data.html_url ||
+              "https://github.com/ilyasbozdemir/dt-asistan-app/releases",
           });
         }
       })
@@ -69,8 +68,8 @@ export default function Home() {
 
   // Initialize theme from localStorage & set up scroll listener
   useEffect(() => {
-    const savedTheme =
-      (localStorage.getItem("theme") as "dark" | "light") || "dark";
+    const savedTheme = (localStorage.getItem("theme") as "dark" | "light") ||
+      "dark";
     if (savedTheme !== "dark") {
       setTimeout(() => {
         setTheme(savedTheme);
@@ -164,11 +163,9 @@ export default function Home() {
               className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 cursor-pointer"
               title="Tema Değiştir"
             >
-              {theme === "dark" ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
+              {theme === "dark"
+                ? <Sun className="w-4 h-4" />
+                : <Moon className="w-4 h-4" />}
             </button>
 
             <a
@@ -225,25 +222,25 @@ export default function Home() {
           <span className="hidden sm:inline w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
             <a
-              href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest"
+              href="https://github.com/ilyasbozdemir/dt-asistan-app/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
               <img
-                src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-desktop-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm"
+                src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm"
                 alt="Latest Release"
                 className="h-5 rounded"
               />
             </a>
             <a
-              href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases"
+              href="https://github.com/ilyasbozdemir/dt-asistan-app/releases"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
               <img
-                src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-desktop-app/total?style=flat-square&logo=github&color=blue"
+                src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-app/total?style=flat-square&logo=github&color=blue"
                 alt="Downloads"
                 className="h-5 rounded"
               />
@@ -368,40 +365,46 @@ export default function Home() {
                     <Wifi className="w-5 h-5 text-blue-550 dark:text-blue-550" />
                   ),
                   title: "Akıllı Çevrimdışı Çalışma",
-                  desc: "İnternet bağlantınız kopsa veya şantiyede olsanız bile işiniz durmaz. Tüm işlemler yerel veritabanında gerçekleştirilir.",
+                  desc:
+                    "İnternet bağlantınız kopsa veya şantiyede olsanız bile işiniz durmaz. Tüm işlemler yerel veritabanında gerçekleştirilir.",
                 },
                 {
                   icon: <Activity className="w-5 h-5 text-indigo-500" />,
                   title: "Çift Yönlü Eşitleme (Sync)",
-                  desc: "Ofis moduna geçtiğinizde veya internet sağlandığında yereldeki verilerinizi tek tuşla merkezi bulut API sunucunuza aktarın.",
+                  desc:
+                    "Ofis moduna geçtiğinizde veya internet sağlandığında yereldeki verilerinizi tek tuşla merkezi bulut API sunucunuza aktarın.",
                 },
                 {
                   icon: (
                     <Lock className="w-5 h-5 text-emerald-550 dark:text-emerald-500" />
                   ),
                   title: "Yerel Veri Güvenliği (.dtal)",
-                  desc: "Proje dosyalarınız şifrelenmiş .dtal formatında bilgisayarınızda saklanır. Verilerinizin kontrolü tamamen sizdedir.",
+                  desc:
+                    "Proje dosyalarınız şifrelenmiş .dtal formatında bilgisayarınızda saklanır. Verilerinizin kontrolü tamamen sizdedir.",
                 },
                 {
                   icon: (
                     <FileText className="w-5 h-5 text-amber-550 dark:text-amber-500" />
                   ),
                   title: "Gelişmiş Çıktı Merkezi",
-                  desc: "Rapor, dilekçe ve hakedişlerinizi anında Word (docx), Excel (xlsx), PDF veya UYAP (.udf) formatlarında ihraç edin.",
+                  desc:
+                    "Rapor, dilekçe ve hakedişlerinizi anında Word (docx), Excel (xlsx), PDF veya UYAP (.udf) formatlarında ihraç edin.",
                 },
                 {
                   icon: (
                     <Laptop className="w-5 h-5 text-violet-550 dark:text-violet-500" />
                   ),
                   title: "Masaüstü Performansı",
-                  desc: "Electron tabanlı güçlü yapısıyla bilgisayarınızın RAM ve işlemci gücünü verimli kullanır, tarayıcı kasmaları yaşanmaz.",
+                  desc:
+                    "Electron tabanlı güçlü yapısıyla bilgisayarınızın RAM ve işlemci gücünü verimli kullanır, tarayıcı kasmaları yaşanmaz.",
                 },
                 {
                   icon: (
                     <Smartphone className="w-5 h-5 text-rose-550 dark:text-rose-500" />
                   ),
                   title: "Mobil Entegrasyon",
-                  desc: "Android ve iOS mobil cihazlarınızdan merkezi sunucuya bağlanarak sahadan anlık veri akışı sağlayın.",
+                  desc:
+                    "Android ve iOS mobil cihazlarınızdan merkezi sunucuya bağlanarak sahadan anlık veri akışı sağlayın.",
                 },
               ].map((f, idx) => (
                 <div
@@ -485,9 +488,7 @@ export default function Home() {
 
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-xl p-4 space-y-2.5 font-mono text-[11px] text-slate-600 dark:text-slate-400">
                 <div className="text-slate-400 dark:text-slate-550">
-                  {
-                    "# 1. Proje ana dizinindeyken web klasörünü docker imajı olarak derleyin"
-                  }
+                  {"# 1. Proje ana dizinindeyken web klasörünü docker imajı olarak derleyin"}
                 </div>
                 <div className="text-blue-600 dark:text-blue-400">
                   docker build -t dt-asistan-server ./web
@@ -501,9 +502,7 @@ export default function Home() {
                 </div>
 
                 <div className="text-slate-400 dark:text-slate-550 mt-2">
-                  {
-                    "# 3. Masaüstü uygulamasındaki Sunucu Adresi alanına girilecek IP"
-                  }
+                  {"# 3. Masaüstü uygulamasındaki Sunucu Adresi alanına girilecek IP"}
                 </div>
                 <div>
                   URL:{" "}
@@ -635,7 +634,7 @@ export default function Home() {
 
           <div className="flex gap-6">
             <a
-              href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app"
+              href="https://github.com/ilyasbozdemir/dt-asistan-app"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-slate-900 dark:hover:text-white transition-colors"

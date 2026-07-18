@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyasbozdemir/dt-asistan-desktop-app/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
-  <a href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest"><img src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-desktop-app?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
-  <a href="https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases"><img src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-desktop-app/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
+  <a href="https://github.com/ilyasbozdemir/dt-asistan-app/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyasbozdemir/dt-asistan-app/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
+  <a href="https://github.com/ilyasbozdemir/dt-asistan-app/releases/latest"><img src="https://img.shields.io/github/v/release/ilyasbozdemir/dt-asistan-app?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
+  <a href="https://github.com/ilyasbozdemir/dt-asistan-app/releases"><img src="https://img.shields.io/github/downloads/ilyasbozdemir/dt-asistan-app/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
 </p>
 
 **4734 Sayılı Kamu İhale Kanunu Madde 22 kapsamında doğrudan temin yoluyla
@@ -15,12 +15,17 @@ yapılan alımları yönetmek için geliştirilmiş masaüstü uygulama.**
 
 ## 📥 Masaüstü Uygulamasını İndirin (Download Desktop App)
 
-Uygulamanın en güncel sürümünü (Windows `.exe` yükleyicisi, güncelleme yansımaları vb.) aşağıdaki resmi kaynaklardan indirebilirsiniz:
+Uygulamanın en güncel sürümünü (Windows `.exe` yükleyicisi, güncelleme
+yansımaları vb.) aşağıdaki resmi kaynaklardan indirebilirsiniz:
 
-👉 **[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases/latest)**
-👉 **[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/dt-asistan-desktop-app/releases)**
+👉
+**[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/dt-asistan-app/releases/latest)**
+👉
+**[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/dt-asistan-app/releases)**
 
-_Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni sürümler arka planda otomatik olarak denetlenip güncellenir._
+_Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu
+tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni
+sürümler arka planda otomatik olarak denetlenip güncellenir._
 
 ---
 
@@ -197,7 +202,7 @@ Bu proje [GNU Affero General Public License v3.0](./LICENSE) lisansı ile
 lisanslanmıştır.
 
 ```
-dt-asistan-desktop-app - Doğrudan Temin Masaüstü Yönetim uygulaması
+dt-asistan-app - Doğrudan Temin Masaüstü Yönetim uygulaması
 Copyright (C) 2026  İlyas Bozdemir
 ```
 

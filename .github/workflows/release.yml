@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.ref_name }}" == *"beta"* || "${{ github.ref_name }}" == *"alpha"* ]]; then
-            echo "RELEASE_NAME=dt-asistan-desktop-app ${{ github.ref_name }} (Erken Erişim)" >> $GITHUB_ENV
+            echo "RELEASE_NAME=dt-asistan-app ${{ github.ref_name }} (Erken Erişim)" >> $GITHUB_ENV
             echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
             echo "Doğrudan Temin Masaüstü Yönetim uygulaması sürümü. 🚀" >> $GITHUB_ENV
             echo "" >> $GITHUB_ENV
@@ -69,7 +69,7 @@ jobs:
             echo "Bu sürüm erken erişim aşamasında olup tüm temel fonksiyonları içermektedir." >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
           else
-            echo "RELEASE_NAME=dt-asistan-desktop-app ${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "RELEASE_NAME=dt-asistan-app ${{ github.ref_name }}" >> $GITHUB_ENV
             echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
             echo "Doğrudan Temin Masaüstü Yönetim uygulaması sürümü." >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
