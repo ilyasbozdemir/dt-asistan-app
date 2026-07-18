@@ -535,6 +535,20 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
                         Piyasa araştırması kapsamında davet edilen ve teklif
                         formu dolduran firmaları belirleyin.
                       </p>
+                      <div className="mt-2.5 p-3 bg-blue-50/50 dark:bg-blue-955/20 rounded-xl border border-blue-100 dark:border-blue-900/30 text-xs text-blue-700 dark:text-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <span>
+                          ℹ️ Bu alandaki verileri bir önceki adım olan{" "}
+                          <strong>Hazırlık ve İhtiyaç</strong>{" "}
+                          aşamasında da güncelleyebilirsiniz. Orada yapılan
+                          değişiklikler otomatik olarak buraya yansır.
+                        </span>
+                        <Link
+                          to="/dosya/hazirlik-ve-ihtiyac"
+                          className="shrink-0 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition-all border-0 cursor-pointer text-center"
+                        >
+                          Hazırlık ve İhtiyaç&apos;a Git
+                        </Link>
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
