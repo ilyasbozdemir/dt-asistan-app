@@ -69,6 +69,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
   const [syncTutanak, setSyncTutanak] = useState<boolean>(true)
   const [setLowestFirmAsWinner, setSetLowestFirmAsWinner] = useState<boolean>(true)
   const [manualWinnerFirmaId, setManualWinnerFirmaId] = useState<number | null>(null)
+  const [belgeleriKaydet, setBelgeleriKaydet] = useState<boolean>(true)
 
   const [isFirmModalOpen, setIsFirmModalOpen] = useState(false)
   const [selectedFirmIds, setSelectedFirmIds] = useState<number[]>([])
@@ -445,82 +446,91 @@ export function usePiyasaFiyatArastirmasiLogic() {
           )
         }
 
-        // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
-        const documentsToLog = [
-          { name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi }
-        ]
-        if (syncTutanak) {
-          documentsToLog.push({ name: 'Piyasa Fiyat Araştırma Tutanağı', date: tutanakTarihi })
-        }
-
-        for (const doc of documentsToLog) {
-          const existRes = await window.electron.ipcRenderer.invoke(
-            'db:query',
-            'SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ?',
-            [activeDosyaId, doc.name]
-          )
-          if (existRes.success && existRes.data && existRes.data.length > 0) {
-            await window.electron.ipcRenderer.invoke(
-              'db:run',
-              'UPDATE DATA_TeminBelge SET belge_tarihi = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?',
-              [doc.date || null, existRes.data[0].id]
-            )
-          } else {
-            await window.electron.ipcRenderer.invoke(
-              'db:run',
-              'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu) VALUES (?, ?, ?, ?)',
-              [activeDosyaId, doc.name, doc.date || null, '']
-            )
+        if (belgeleriKaydet) {
+          // Tutanak ve Maliyet Cetveli belgelerini DATA_TeminBelge tablosuna ekle/güncelle
+          const documentsToLog = [
+            { name: 'Yaklaşık Maliyet Cetveli', date: maliyetCetveliTarihi }
+          ]
+          if (syncTutanak) {
+            documentsToLog.push({ name: 'Piyasa Fiyat Araştırma Tutanağı', date: tutanakTarihi })
           }
 
-          // Ayrıca bu şablonun güncel veri snapshot'ını DATA_DosyaSablonVeri tablosuna kaydet!
-          const sablon = stageSablons.find((s: any) => {
-            const lowerAd = s.ad.toLowerCase()
-            const lowerDocName = doc.name.toLowerCase()
-            return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd)
-          })
-          if (sablon) {
-            const processPath = sablon.route_path || sablon.dosya_adi || ''
-            const baseCtx = contextsByPath[processPath] || dosyaContext
-            const mergedCtx = {
-              ...baseCtx,
-              tarih: doc.date ? formatDateString(doc.date) : baseCtx.tarih,
-              dosyaTarihi: doc.date ? formatDateString(doc.date) : baseCtx.dosyaTarihi
+          for (const doc of documentsToLog) {
+            const existRes = await window.electron.ipcRenderer.invoke(
+              'db:query',
+              'SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ?',
+              [activeDosyaId, doc.name]
+            )
+            if (existRes.success && existRes.data && existRes.data.length > 0) {
+              await window.electron.ipcRenderer.invoke(
+                'db:run',
+                'UPDATE DATA_TeminBelge SET belge_tarihi = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?',
+                [doc.date || null, existRes.data[0].id]
+              )
+            } else {
+              await window.electron.ipcRenderer.invoke(
+                'db:run',
+                'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu) VALUES (?, ?, ?, ?)',
+                [activeDosyaId, doc.name, doc.date || null, '']
+              )
             }
-            await window.electron.ipcRenderer.invoke(
-              'db:run',
-              'INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)',
-              [activeDosyaId, sablon.id, JSON.stringify(mergedCtx)]
-            )
+
+            // Ayrıca bu şablonun güncel veri snapshot'ını DATA_DosyaSablonVeri tablosuna kaydet!
+            const sablon = stageSablons.find((s: any) => {
+              const lowerAd = s.ad.toLowerCase()
+              const lowerDocName = doc.name.toLowerCase()
+              return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd)
+            })
+            if (sablon) {
+              const processPath = sablon.route_path || sablon.dosya_adi || ''
+              const baseCtx = contextsByPath[processPath] || dosyaContext
+              const mergedCtx = {
+                ...baseCtx,
+                tarih: doc.date ? formatDateString(doc.date) : baseCtx.tarih,
+                dosyaTarihi: doc.date ? formatDateString(doc.date) : baseCtx.dosyaTarihi
+              }
+              await window.electron.ipcRenderer.invoke(
+                'db:run',
+                'INSERT OR REPLACE INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json) VALUES (?, ?, ?)',
+                [activeDosyaId, sablon.id, JSON.stringify(mergedCtx)]
+              )
+            }
           }
+
+          alert(
+            `Yaklaşık maliyet ve süreç belgeleri başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2
+            })}`
+          )
+
+          // Belgeleri yeniden yükle
+          const resBelgelerNew = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
+            [activeDosyaId]
+          )
+          if (resBelgelerNew.success && resBelgelerNew.data) {
+            setSavedDocuments(resBelgelerNew.data)
+          }
+
+          // Piyasa Fiyat Araştırma Tutanağı belgesini otomatik önizlemeye aç!
+          const tutanakSablon = stageSablons.find((s: any) =>
+            s.ad.toLowerCase().includes('piyasa fiyat araştırma tutanağı')
+          )
+          if (tutanakSablon && syncTutanak) {
+            setTimeout(() => {
+              handleOpenPreviewForSablon(tutanakSablon, tutanakSablon.ad)
+            }, 300)
+          }
+        } else {
+          alert(
+            `Teklif fiyatları ve yaklaşık maliyet başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2
+            })}`
+          )
         }
 
-        alert(
-          `Yaklaşık maliyet ve tutanak başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
-            minimumFractionDigits: 2
-          })}`
-        )
-
-        // Belgeleri yeniden yükle
-        const resBelgelerNew = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
-          [activeDosyaId]
-        )
-        if (resBelgelerNew.success && resBelgelerNew.data) {
-          setSavedDocuments(resBelgelerNew.data)
-        }
         setIsFormOpen(false)
-
-        // Piyasa Fiyat Araştırma Tutanağı belgesini otomatik önizlemeye aç!
-        const tutanakSablon = stageSablons.find((s: any) =>
-          s.ad.toLowerCase().includes('piyasa fiyat araştırma tutanağı')
-        )
-        if (tutanakSablon && syncTutanak) {
-          setTimeout(() => {
-            handleOpenPreviewForSablon(tutanakSablon, tutanakSablon.ad)
-          }, 300)
-        }
       } else {
         alert(res.error)
       }
@@ -658,6 +668,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
     setSetLowestFirmAsWinner,
     manualWinnerFirmaId,
     setManualWinnerFirmaId,
+    belgeleriKaydet,
+    setBelgeleriKaydet,
     handleUpdateDocumentDate
   }
 }
