@@ -9,6 +9,7 @@ import { useSettingsStore } from '../../../../../store/settingsStore'
 export function MalzemeTablosu({
   state,
   stageSablons = [],
+  dagitimSablons = [],
   sablons = [],
   onSablonClick,
   ciktiLoading,
@@ -22,6 +23,7 @@ export function MalzemeTablosu({
 }: {
   state: any
   stageSablons?: any[]
+  dagitimSablons?: any[]
   sablons?: any[]
   onSablonClick?: (sablon: any, title: string) => void
   ciktiLoading?: boolean
@@ -471,6 +473,23 @@ export function MalzemeTablosu({
               kategori="1-ihtiyac-tespiti-ve-baslangic"
               sablons={sablons}
               overrideSablons={combinedSablons}
+              activeStarredDocs={activeStarredDocs || []}
+              ciktiLoading={ciktiLoading || false}
+              handleOpenPreviewForSablon={onSablonClick}
+              quickPrint={async (sablon) => onQuickPrint && onQuickPrint(sablon)}
+              quickExport={async (sablon, format) => onExport && onExport(sablon, format)}
+              quickOpenExternal={async (sablon) => onOpenExternal && onOpenExternal(sablon)}
+              isSablonDisabled={isSablonDisabled}
+              buttonHeightClass="py-1.5"
+            />
+          )}
+
+          {!disableDocumentGuidance && dagitimSablons.length > 0 && onSablonClick && (
+            <PrintDropdownButton
+              kategori="2-piyasa-fiyat-arastirmasi"
+              label="Teklif Formu Dağıtım"
+              sablons={sablons}
+              overrideSablons={dagitimSablons}
               activeStarredDocs={activeStarredDocs || []}
               ciktiLoading={ciktiLoading || false}
               handleOpenPreviewForSablon={onSablonClick}

@@ -83,6 +83,16 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     )
     .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
 
+  const dagitimSablons = sablons
+    .filter(
+      (s) =>
+        s.dosya_adi === 'birim-fiyat-teklif-mektubu.html' ||
+        s.dosya_adi === 'fiyat-arastirma-mektubu.html' ||
+        s.dosya_adi === 'teklif-mektubu-dagitim-cizelgesi.html' ||
+        s.dosya_adi === 'dagitim-cizelgesi-karma.html'
+    )
+    .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
+
   return (
     <SubScreen
       title="Hazırlık ve İhtiyaç"
@@ -93,6 +103,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       <MalzemeTablosu
         state={state}
         stageSablons={stageSablons}
+        dagitimSablons={dagitimSablons}
         sablons={sablons}
         onSablonClick={handleOpenPreviewForSablon}
         ciktiLoading={ciktiLoading}
