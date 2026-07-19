@@ -1,31 +1,36 @@
-import React, { useEffect, useState, useRef } from "react";
-import { renderToString } from "react-dom/server";
+import React, { useEffect, useState, useRef } from 'react';
+import { renderToString } from 'react-dom/server';
 import {
   X,
   Printer,
   Download,
-  Database,
   Eye,
-  Settings,
-  User,
   Plus,
-  Trash2,
   FileText,
   Save,
   RefreshCw
-} from "lucide-react";
-import { useWorkspaceStore } from "../../../../store/workspaceStore";
+} from 'lucide-react';
+import { useWorkspaceStore } from '../../../../store/workspaceStore';
 import {
   TemplateResolver,
-  TEMPLATE_REGISTRY
-} from "@dt-asistan/document-templates";
-import * as Templates from "@dt-asistan/document-templates";
-import { IhtiyacListesiMapping } from "../../../../constants/mappings/ihtiyac-listesi.mapping";
+  TEMPLATE_REGISTRY,
+  IhtiyacListesiType
+} from '@dt-asistan/document-templates';
+import * as Templates from '@dt-asistan/document-templates';
+import { IhtiyacListesiMapping } from '../../../../constants/mappings/ihtiyac-listesi.mapping';
 
 interface DocumentPreviewModalV2Props {
   isOpen: boolean;
   documentId: string | null;
   onClose: () => void;
+}
+
+interface Personel {
+  id: number;
+  ad_soyad: string;
+  unvan?: string;
+  telefon?: string;
+  eposta?: string;
 }
 
 export function DocumentPreviewModalV2({
@@ -34,13 +39,10 @@ export function DocumentPreviewModalV2({
   onClose,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const { activeDosyaId } = useWorkspaceStore();
-  const [formData, setFormData] = useState<any>({});
-  const [personelListesi, setPersonelListesi] = useState<any[]>([]);
+  const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
+  const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
   const [previewScale, setPreviewScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"form" | "json">("form");
-  const [jsonError, setJsonError] = useState<string | null>(null);
-  const [jsonValue, setJsonValue] = useState("");
 
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +50,8 @@ export function DocumentPreviewModalV2({
   const activeTemplateConf = TEMPLATE_REGISTRY.find(
     (t) => t.id === documentId
   );
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ActiveComponent = activeTemplateConf
     ? (Templates as any)[activeTemplateConf.name]
     : null;
@@ -56,20 +60,21 @@ export function DocumentPreviewModalV2({
   useEffect(() => {
     if (!isOpen || !activeDosyaId) return;
 
-    const loadInitialData = async () => {
+    const loadInitialData = async (): Promise<void> => {
       try {
         // Fetch personnel list for signature dropdowns
         const personelRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC"
+          'db:query',
+          'SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC'
         );
         if (personelRes.success) {
           setPersonelListesi(personelRes.data);
         }
 
         // Setup TemplateResolver
-        const queryExecutor = async (sql: string, params: any[]) => {
-          const res = await window.electron.ipcRenderer.invoke("db:query", sql, params);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const queryExecutor = async (sql: string, params: any[]): Promise<any[]> => {
+          const res = await window.electron.ipcRenderer.invoke('db:query', sql, params);
           if (res && res.success) {
             return res.data;
           }
@@ -83,7 +88,7 @@ export function DocumentPreviewModalV2({
 
         // Fetch or load saved snapshot values if exists
         const snapshotRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
+          'db:query',
           "SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = (SELECT id FROM TANIM_Sablon WHERE dosya_adi = 'ihtiyac-listesi.html' LIMIT 1)",
           [activeDosyaId]
         );
@@ -94,14 +99,13 @@ export function DocumentPreviewModalV2({
             const savedData = JSON.parse(snapshotRes.data[0].veri_json);
             finalData = { ...finalData, ...savedData };
           } catch (e) {
-            console.error("Failed to parse saved snapshot JSON", e);
+            console.error('Failed to parse saved snapshot JSON', e);
           }
         }
 
         setFormData(finalData);
-        setJsonValue(JSON.stringify(finalData, null, 2));
       } catch (err) {
-        console.error("Error loading V2 template data:", err);
+        console.error('Error loading V2 template data:', err);
       }
     };
 
@@ -132,42 +136,29 @@ export function DocumentPreviewModalV2({
   if (!isOpen) return null;
 
   // 4. Form inputs helpers
-  const handleInputChange = (key: string, value: any) => {
-    const updated = {
-      ...formData,
+  const handleInputChange = (key: string, value: unknown): void => {
+    setFormData((prev) => ({
+      ...prev,
       [key]: value,
-    };
-    setFormData(updated);
-    setJsonValue(JSON.stringify(updated, null, 2));
-  };
-
-  const handleJsonChange = (val: string) => {
-    setJsonValue(val);
-    try {
-      const parsed = JSON.parse(val);
-      setFormData(parsed);
-      setJsonError(null);
-    } catch (e: any) {
-      setJsonError(e.message || "Geçersiz JSON formatı");
-    }
+    }));
   };
 
   // 5. Generate compiled HTML string containing current CSS stylesheets
   const getCompiledHtml = (): string => {
-    if (!ActiveComponent) return "";
+    if (!ActiveComponent) return '';
     const bodyHtml = renderToString(<ActiveComponent data={formData} />);
     const styles = Array.from(
       document.querySelectorAll("style, link[rel='stylesheet']")
     )
       .map((el) => el.outerHTML)
-      .join("\n");
+      .join('\n');
 
     return `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>${activeTemplateConf?.name || "Belge"}</title>
+          <title>${activeTemplateConf?.name || 'Belge'}</title>
           ${styles}
           <style>
             body {
@@ -191,56 +182,56 @@ export function DocumentPreviewModalV2({
   };
 
   // 6. Action handlers
-  const handlePrint = async () => {
+  const handlePrint = async (): Promise<void> => {
     setIsPrinting(true);
     try {
       const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("print-html", html, {
+      await window.electron.ipcRenderer.invoke('print-html', html, {
         silent: false,
       });
     } catch (error) {
-      console.error("Yazdırma hatası:", error);
+      console.error('Yazdırma hatası:', error);
     } finally {
       setIsPrinting(false);
     }
   };
 
-  const handlePdf = async () => {
+  const handlePdf = async (): Promise<void> => {
     setIsPrinting(true);
     try {
       const html = getCompiledHtml();
-      const titleForFile = activeTemplateConf?.name || "Belge";
+      const titleForFile = activeTemplateConf?.name || 'Belge';
       await window.electron.ipcRenderer.invoke(
-        "export-pdf",
+        'export-pdf',
         html,
         null,
         titleForFile
       );
     } catch (error) {
-      console.error("PDF kaydetme hatası:", error);
+      console.error('PDF kaydetme hatası:', error);
     } finally {
       setIsPrinting(false);
     }
   };
 
-  const handleOpenPdfInNewTab = async () => {
+  const handleOpenPdfInNewTab = async (): Promise<void> => {
     setIsPrinting(true);
     try {
       const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("open-pdf-external", html);
+      await window.electron.ipcRenderer.invoke('open-pdf-external', html);
     } catch (error) {
-      console.error("PDF önizleme hatası:", error);
+      console.error('PDF önizleme hatası:', error);
     } finally {
       setIsPrinting(false);
     }
   };
 
-  const handleSaveSnapshot = async () => {
+  const handleSaveSnapshot = async (): Promise<void> => {
     if (!activeDosyaId) return;
     try {
       // Find sablon ID
       const sablonRes = await window.electron.ipcRenderer.invoke(
-        "db:query",
+        'db:query',
         "SELECT id FROM TANIM_Sablon WHERE dosya_adi = 'ihtiyac-listesi.html' LIMIT 1"
       );
       if (sablonRes.success && sablonRes.data.length > 0) {
@@ -248,7 +239,7 @@ export function DocumentPreviewModalV2({
         const serialized = JSON.stringify(formData);
         
         await window.electron.ipcRenderer.invoke(
-          "db:run",
+          'db:run',
           `INSERT INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json, guncelleme_tarihi)
            VALUES (?, ?, ?, datetime('now', 'localtime'))
            ON CONFLICT(temin_dosya_id, sablon_id) DO UPDATE SET
@@ -256,23 +247,24 @@ export function DocumentPreviewModalV2({
            guncelleme_tarihi = excluded.guncelleme_tarihi`,
           [activeDosyaId, sablonId, serialized]
         );
-        alert("Şablon verileri başarıyla dosyaya kaydedildi!");
+        alert('Şablon verileri başarıyla dosyaya kaydedildi!');
       }
     } catch (e) {
-      console.error("Failed to save snapshot:", e);
-      alert("Kaydetme işlemi sırasında bir hata oluştu.");
+      console.error('Failed to save snapshot:', e);
+      alert('Kaydetme işlemi sırasında bir hata oluştu.');
     }
   };
 
-  const handleRefreshFromDb = async () => {
+  const handleRefreshFromDb = async (): Promise<void> => {
     const isConfirmed = window.confirm(
-      "Şablonu veritabanındaki güncel verilerle yenilemek istediğinize emin misiniz? Yaptığınız manuel değişiklikler silinecektir."
+      'Şablonu veritabanındaki güncel verilerle yenilemek istediğinize emin misiniz? Yaptığınız manuel değişiklikler silinecektir.'
     );
     if (!isConfirmed || !activeDosyaId) return;
 
     try {
-      const queryExecutor = async (sql: string, params: any[]) => {
-        const res = await window.electron.ipcRenderer.invoke("db:query", sql, params);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const queryExecutor = async (sql: string, params: any[]): Promise<any[]> => {
+        const res = await window.electron.ipcRenderer.invoke('db:query', sql, params);
         if (res && res.success) {
           return res.data;
         }
@@ -283,16 +275,15 @@ export function DocumentPreviewModalV2({
       const resolved = await resolver.resolve(IhtiyacListesiMapping, activeDosyaId);
 
       setFormData(resolved);
-      setJsonValue(JSON.stringify(resolved, null, 2));
     } catch (e) {
-      console.error("Failed to refresh template resolution:", e);
+      console.error('Failed to refresh template resolution:', e);
     }
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
-      style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       <div
         className="bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
@@ -306,8 +297,8 @@ export function DocumentPreviewModalV2({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
-                {activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim() || "Belge Düzenleyici"}
-                <span className="text-[9px] px-2 py-0.5 rounded bg-blue-55 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider">
+                {activeTemplateConf?.name.replace(/([A-Z])/g, ' $1').trim() || 'Belge Düzenleyici'}
+                <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-655 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider">
                   Akıllı Belge
                 </span>
               </h2>
@@ -342,9 +333,9 @@ export function DocumentPreviewModalV2({
                       type="text"
                       value={line}
                       onChange={(e) => {
-                        const newAntet = [...formData.antetSatirlari];
+                        const newAntet = [...(formData.antetSatirlari || [])];
                         newAntet[idx] = e.target.value;
-                        handleInputChange("antetSatirlari", newAntet);
+                        handleInputChange('antetSatirlari', newAntet);
                       }}
                       className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -356,49 +347,49 @@ export function DocumentPreviewModalV2({
               {Object.keys(formData)
                 .filter((key) => {
                   const EXCLUDED_KEYS = new Set([
-                    "antetSatirlari",
-                    "ihtiyacKalemleri",
-                    "hazirlayanPersonelAdi",
-                    "hazirlayanPersonelUnvan",
-                    "onaylayanPersonelAdi",
-                    "onaylayanPersonelUnvan",
-                    "solLogo",
-                    "sagLogo",
+                    'antetSatirlari',
+                    'ihtiyacKalemleri',
+                    'hazirlayanPersonelAdi',
+                    'hazirlayanPersonelUnvan',
+                    'onaylayanPersonelAdi',
+                    'onaylayanPersonelUnvan',
+                    'solLogo',
+                    'sagLogo',
                   ]);
                   return !EXCLUDED_KEYS.has(key);
                 })
                 .map((key) => {
                   const val = formData[key];
                   const label = {
-                    evrakSayisi: "Sayı / Evrak Numarası",
-                    dosyaKonusu: "Dosya Konusu / Başlık",
-                    maddeNo: "Kanun Maddesi",
-                    tarih: "Belge Tarihi",
-                    sunulacakMakamAdi: "Sunulacak Makam",
-                    ihtiyacYeri: "İhtiyacın Yapılacağı Yer",
-                    isinAciklamasi: "İşin Açıklaması",
-                    kurumAdres: "Kurum Adresi",
-                    kurumTelefon: "Kurum Telefonu",
-                    kurumWeb: "Kurum Web Adresi",
-                    kurumEposta: "Kurum E-Posta Adresi",
-                    kurumKep: "Kurum KEP Adresi",
-                    olurBaslik: "Onay Başlığı",
-                    olurYazisi: "Olur Yazısı Eklensin mi?",
-                    kurumIci: "Kurum İçi Belge mi?",
-                    firstPageLimit: "1. Sayfa Satır Sayısı",
-                    middlePageLimit: "Ara Sayfa Satır Sayısı",
-                    lastPageLimit: "Son Sayfa Satır Sayısı",
-                  }[key] || key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+                    evrakSayisi: 'Sayı / Evrak Numarası',
+                    dosyaKonusu: 'Dosya Konusu / Başlık',
+                    maddeNo: 'Kanun Maddesi',
+                    tarih: 'Belge Tarihi',
+                    sunulacakMakamAdi: 'Sunulacak Makam',
+                    ihtiyacYeri: 'İhtiyacın Yapılacağı Yer',
+                    isinAciklamasi: 'İşin Açıklaması',
+                    kurumAdres: 'Kurum Adresi',
+                    kurumTelefon: 'Kurum Telefonu',
+                    kurumWeb: 'Kurum Web Adresi',
+                    kurumEposta: 'Kurum E-Posta Adresi',
+                    kurumKep: 'Kurum KEP Adresi',
+                    olurBaslik: 'Onay Başlığı',
+                    olurYazisi: 'Olur Yazısı Eklensin mi?',
+                    kurumIci: 'Kurum İçi Belge mi?',
+                    firstPageLimit: '1. Sayfa Satır Sayısı',
+                    middlePageLimit: 'Ara Sayfa Satır Sayısı',
+                    lastPageLimit: 'Son Sayfa Satır Sayısı',
+                  }[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 
-                  if (typeof val === "boolean") {
+                  if (typeof val === 'boolean') {
                     return (
                       <div key={key} className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                           {label}
                         </label>
                         <select
-                          value={val ? "true" : "false"}
-                          onChange={(e) => handleInputChange(key, e.target.value === "true")}
+                          value={val ? 'true' : 'false'}
+                          onChange={(e) => handleInputChange(key, e.target.value === 'true')}
                           className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                         >
                           <option value="true">Evet / Aktif</option>
@@ -408,7 +399,7 @@ export function DocumentPreviewModalV2({
                     );
                   }
 
-                  if (typeof val === "number") {
+                  if (typeof val === 'number') {
                     return (
                       <div key={key} className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -424,7 +415,7 @@ export function DocumentPreviewModalV2({
                     );
                   }
 
-                  if (typeof val === "string") {
+                  if (typeof val === 'string') {
                     return (
                       <div key={key} className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -432,7 +423,7 @@ export function DocumentPreviewModalV2({
                         </label>
                         <input
                           type="text"
-                          value={val || ""}
+                          value={val || ''}
                           onChange={(e) => handleInputChange(key, e.target.value)}
                           className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-700 dark:text-slate-200"
                         />
@@ -459,8 +450,8 @@ export function DocumentPreviewModalV2({
                           <span>Kalem #{idx + 1}</span>
                           <button
                             onClick={() => {
-                              const list = formData.ihtiyacKalemleri.filter((_: any, i: number) => i !== idx);
-                              handleInputChange("ihtiyacKalemleri", list);
+                              const list = (formData.ihtiyacKalemleri || []).filter((_: any, i: number) => i !== idx);
+                              handleInputChange('ihtiyacKalemleri', list);
                             }}
                             className="text-red-500 hover:text-red-650 cursor-pointer text-[10px]"
                           >
@@ -472,11 +463,11 @@ export function DocumentPreviewModalV2({
                             <span className="text-[9px] text-slate-400 font-semibold">Kalem Adı</span>
                             <input
                               type="text"
-                              value={item.malzemeAdi || ""}
+                              value={item.malzemeAdi || ''}
                               onChange={(e) => {
-                                const list = [...formData.ihtiyacKalemleri];
+                                const list = [...(formData.ihtiyacKalemleri || [])];
                                 list[idx] = { ...list[idx], malzemeAdi: e.target.value };
-                                handleInputChange("ihtiyacKalemleri", list);
+                                handleInputChange('ihtiyacKalemleri', list);
                               }}
                               className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
                             />
@@ -485,11 +476,11 @@ export function DocumentPreviewModalV2({
                             <span className="text-[9px] text-slate-400 font-semibold">Tasinir Kodu</span>
                             <input
                               type="text"
-                              value={item.kodu || ""}
+                              value={item.kodu || ''}
                               onChange={(e) => {
-                                const list = [...formData.ihtiyacKalemleri];
+                                const list = [...(formData.ihtiyacKalemleri || [])];
                                 list[idx] = { ...list[idx], kodu: e.target.value };
-                                handleInputChange("ihtiyacKalemleri", list);
+                                handleInputChange('ihtiyacKalemleri', list);
                               }}
                               className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
                             />
@@ -500,9 +491,9 @@ export function DocumentPreviewModalV2({
                               type="number"
                               value={item.miktar ?? 0}
                               onChange={(e) => {
-                                const list = [...formData.ihtiyacKalemleri];
+                                const list = [...(formData.ihtiyacKalemleri || [])];
                                 list[idx] = { ...list[idx], miktar: Number(e.target.value) };
-                                handleInputChange("ihtiyacKalemleri", list);
+                                handleInputChange('ihtiyacKalemleri', list);
                               }}
                               className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
                             />
@@ -511,11 +502,11 @@ export function DocumentPreviewModalV2({
                             <span className="text-[9px] text-slate-400 font-semibold">Birim</span>
                             <input
                               type="text"
-                              value={item.birimi || ""}
+                              value={item.birimi || ''}
                               onChange={(e) => {
-                                const list = [...formData.ihtiyacKalemleri];
+                                const list = [...(formData.ihtiyacKalemleri || [])];
                                 list[idx] = { ...list[idx], birimi: e.target.value };
-                                handleInputChange("ihtiyacKalemleri", list);
+                                handleInputChange('ihtiyacKalemleri', list);
                               }}
                               className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs outline-none focus:ring-1 focus:ring-blue-500"
                             />
@@ -527,14 +518,14 @@ export function DocumentPreviewModalV2({
                       onClick={() => {
                         const newKalem = {
                           siraNo: (formData.ihtiyacKalemleri?.length || 0) + 1,
-                          kodu: "",
-                          malzemeAdi: "",
-                          ozelligi: "",
-                          birimi: "Adet",
-                          kdvOrani: "20",
+                          kodu: '',
+                          malzemeAdi: '',
+                          ozelligi: '',
+                          birimi: 'Adet',
+                          kdvOrani: '20',
                           miktar: 1,
                         };
-                        handleInputChange("ihtiyacKalemleri", [
+                        handleInputChange('ihtiyacKalemleri', [
                           ...(formData.ihtiyacKalemleri || []),
                           newKalem,
                         ]);
@@ -558,12 +549,12 @@ export function DocumentPreviewModalV2({
                 <div className="space-y-1.5">
                   <span className="text-[10px] text-slate-400 font-semibold">Hazırlayan Personel</span>
                   <select
-                    value={personelListesi.find((p) => p.ad_soyad === formData.hazirlayanPersonelAdi)?.ad_soyad || ""}
+                    value={personelListesi.find((p) => p.ad_soyad === formData.hazirlayanPersonelAdi)?.ad_soyad || ''}
                     onChange={(e) => {
-                      const p = personelListesi.find((p) => p.ad_soyad === e.target.value);
+                      const p = personelListesi.find((pers) => pers.ad_soyad === e.target.value);
                       if (p) {
-                        handleInputChange("hazirlayanPersonelAdi", p.ad_soyad);
-                        handleInputChange("hazirlayanPersonelUnvan", p.unvan || "");
+                        handleInputChange('hazirlayanPersonelAdi', p.ad_soyad);
+                        handleInputChange('hazirlayanPersonelUnvan', p.unvan || '');
                       }
                     }}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -571,7 +562,7 @@ export function DocumentPreviewModalV2({
                     <option value="">Seçilmedi</option>
                     {personelListesi.map((p) => (
                       <option key={p.id} value={p.ad_soyad}>
-                        {p.ad_soyad} ({p.unvan || "Görevi Yok"})
+                        {p.ad_soyad} ({p.unvan || 'Görevi Yok'})
                       </option>
                     ))}
                   </select>
@@ -581,12 +572,12 @@ export function DocumentPreviewModalV2({
                 <div className="space-y-1.5">
                   <span className="text-[10px] text-slate-400 font-semibold">Harcama Yetkilisi (En Üst Amir)</span>
                   <select
-                    value={personelListesi.find((p) => p.ad_soyad === formData.onaylayanPersonelAdi)?.ad_soyad || ""}
+                    value={personelListesi.find((p) => p.ad_soyad === formData.onaylayanPersonelAdi)?.ad_soyad || ''}
                     onChange={(e) => {
-                      const p = personelListesi.find((p) => p.ad_soyad === e.target.value);
+                      const p = personelListesi.find((pers) => pers.ad_soyad === e.target.value);
                       if (p) {
-                        handleInputChange("onaylayanPersonelAdi", p.ad_soyad);
-                        handleInputChange("onaylayanPersonelUnvan", p.unvan || "");
+                        handleInputChange('onaylayanPersonelAdi', p.ad_soyad);
+                        handleInputChange('onaylayanPersonelUnvan', p.unvan || '');
                       }
                     }}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -594,14 +585,14 @@ export function DocumentPreviewModalV2({
                     <option value="">Seçilmedi</option>
                     {personelListesi.map((p) => (
                       <option key={p.id} value={p.ad_soyad}>
-                        {p.ad_soyad} ({p.unvan || "Görevi Yok"})
+                        {p.ad_soyad} ({p.unvan || 'Görevi Yok'})
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
-            
+
             {/* Save snapshot buttons */}
             <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-2.5">
               <button
@@ -632,8 +623,8 @@ export function DocumentPreviewModalV2({
               className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out"
               style={{
                 transform: `scale(${previewScale})`,
-                width: "800px",
-                minHeight: "1131px",
+                width: '800px',
+                minHeight: '1131px',
               }}
             >
               {ActiveComponent ? (
