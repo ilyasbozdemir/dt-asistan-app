@@ -95,8 +95,14 @@ const komisyonGorevleriRoute = createRoute({
 import { TakipScreen } from './screens/system/TakipScreen'
 import { CiktiMerkeziScreen } from './screens/dosya/CiktiMerkezi.screen'
 import TaslakYoneticisi from './screens/system/TaslakYoneticisi'
+import SurecAkisiScreen from './screens/system/SurecAkisiScreen'
 
 // Dynamic routes
+const surecAkisiRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: APP_ROUTES.SUREC_AKISI,
+  component: SurecAkisiScreen
+})
 const takipRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.TAKIP,
@@ -331,6 +337,7 @@ const routeTree = rootRoute.addChildren([
   faturaVeIrsaliyeRoute,
   imzaliBelgelerRoute,
   hakedisRoute,
+  surecAkisiRoute,
   yardimRoute
 ])
 

@@ -104,6 +104,10 @@ export function Header(): React.JSX.Element {
               onClick: () => navigate({ to: "/cikti-merkezi" as any }),
             },
             {
+              label: "Süreç Akış Haritası (Beta)",
+              onClick: () => navigate({ to: "/surec-akisi" as any }),
+            },
+            {
               label: "Hızlı Dosya Ekle / Güncelle",
               onClick: () => navigate({ to: "/hizli-dosya-ekle" as any }),
             },

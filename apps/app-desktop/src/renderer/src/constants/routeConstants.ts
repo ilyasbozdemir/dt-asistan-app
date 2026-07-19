@@ -48,7 +48,8 @@ export const APP_ROUTES = {
   YAKLASIK_MALIYET: '/dosya/firmalar-maliyet/yaklasik',
   DOSYA_CIKTI_MERKEZI: '/dosya/cikti-merkezi',
   FATURA_VE_IRSALIYE: '/dosya/fatura-ve-irsaliye',
-  IMZALI_BELGELER: '/dosya/imzali-belgeler'
+  IMZALI_BELGELER: '/dosya/imzali-belgeler',
+  SUREC_AKISI: '/surec-akisi'
 } as const
 
 export type AppRoute = (typeof APP_ROUTES)[keyof typeof APP_ROUTES]
