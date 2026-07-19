@@ -338,59 +338,94 @@ export function KabulVeOdeme(): React.JSX.Element {
                   <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700/50 -z-10">
                   </div>
 
+                  {/* 1. Mal/Hizmet Teslimi */}
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
+                    {firmaStats.teslimTarihi ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      </div>
+                    )}
                     <div>
-                      <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <h5 className={`text-xs font-bold ${firmaStats.teslimTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
                         1. Mal/Hizmet Teslimi
                       </h5>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        Tedarikçi malzemeleri/hizmeti teslim etti.
+                        {firmaStats.teslimTarihi ? `Teslim Edildi (${new Date(firmaStats.teslimTarihi).toLocaleDateString('tr-TR')})` : 'Tedarikçi teslimatı bekleniyor.'}
                       </p>
                     </div>
                   </div>
 
+                  {/* 2. Muayene & Kabul İşlemi */}
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
-                      <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400">
+                    {!firmaStats.teslimTarihi ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <Clock className="w-3.5 h-3.5" />
                       </div>
-                    </div>
+                    ) : faturaNo ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      </div>
+                    )}
                     <div>
-                      <h5 className="text-xs font-bold text-blue-700 dark:text-blue-400">
+                      <h5 className={`text-xs font-bold ${!firmaStats.teslimTarihi ? 'text-slate-500 dark:text-slate-400' : faturaNo ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
                         2. Muayene & Kabul İşlemi
                       </h5>
-                      <p className="text-[10px] text-blue-600/70 dark:text-blue-300/70 mt-0.5">
-                        Komisyon tarafından ürünler inceleniyor.
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        {!firmaStats.teslimTarihi ? 'Kabul işlemleri beklemede.' : faturaNo ? 'Kabul Edildi (Komisyon Onaylı)' : 'Komisyon tarafından ürünler inceleniyor.'}
                       </p>
                     </div>
                   </div>
 
+                  {/* 3. TİF & Fatura Kaydı */}
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="w-3.5 h-3.5" />
-                    </div>
+                    {!faturaNo ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <FileText className="w-3.5 h-3.5" />
+                      </div>
+                    ) : faturaTarihi ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      </div>
+                    )}
                     <div>
-                      <h5 className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      <h5 className={`text-xs font-bold ${!faturaNo ? 'text-slate-500 dark:text-slate-400' : faturaTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
                         3. TİF & Fatura Kaydı
                       </h5>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Kabul sonrası fatura ve taşınır işlemi.
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        {!faturaNo ? 'Kabul sonrası fatura ve taşınır işlemi.' : `Fatura No: ${faturaNo}`}
                       </p>
                     </div>
                   </div>
 
+                  {/* 4. Ödeme Emri Belgesi (ÖEB) */}
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                      <CreditCard className="w-3.5 h-3.5" />
-                    </div>
+                    {!faturaTarihi ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <CreditCard className="w-3.5 h-3.5" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      </div>
+                    )}
                     <div>
-                      <h5 className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      <h5 className={`text-xs font-bold ${!faturaTarihi ? 'text-slate-500 dark:text-slate-400' : 'text-blue-700 dark:text-blue-400'}`}>
                         4. Ödeme Emri Belgesi (ÖEB)
                       </h5>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Harcama birimi tarafından ödeme emri düzenlenmesi.
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        {!faturaTarihi ? 'Harcama birimi tarafından ödeme emri düzenlenmesi.' : 'ÖEB MYS sistemine gönderilmeye hazır.'}
                       </p>
                     </div>
                   </div>

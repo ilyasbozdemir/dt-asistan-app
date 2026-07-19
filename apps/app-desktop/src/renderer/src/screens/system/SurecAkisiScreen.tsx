@@ -191,13 +191,13 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center gap-2">
-                Doğrudan Temin Süreç Akış Haritası
+                Dosya Yönetim Paneli
                 <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">
-                  Beta / Yenilikçi UI
+                  Beta
                 </span>
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
-                İhtiyaç tespitiyle başlayan, evrak süreçleriyle devam eden ve ödemeyle sonlanan 11 aşamalı yasal zincir.
+                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme gibi tüm işlemlerini tek ekrandan yönetin.
               </p>
             </div>
           </div>
