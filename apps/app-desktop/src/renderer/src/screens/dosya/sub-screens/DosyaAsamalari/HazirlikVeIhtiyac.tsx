@@ -104,9 +104,6 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     >
       <MalzemeEkleModal state={state} />
 
-      <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
-        {"BUTONLARIN KATEGORİLERİ DAHA İYİ DENEİYM İÇİN SU AN HEPSİ ACIKTIR TEST EDİLMEKTEDİR."}
-      </p>
       <MalzemeTablosu
         state={state}
         stageSablons={stageSablons}
