@@ -58,7 +58,7 @@ export function KabulVeOdeme(): React.JSX.Element {
   const stageSablons = sablons.filter(
     (s) =>
       s.kategori === "4-kabul-ve-odeme-islemleri" ||
-      s.kategori === "4. Kabul & Ödeme İşlemleri",
+      s.kategori === "4. Muayene & Kabul & Ödeme İşlemleri",
   );
 
   // Kazanan firma guard state
@@ -199,7 +199,7 @@ export function KabulVeOdeme(): React.JSX.Element {
 
   return (
     <SubScreen
-      title="Kabul & Ödeme İşlemleri"
+      title="Muayene & Kabul & Ödeme İşlemleri"
       icon={CreditCard}
       description="Muayene kabul tutanağı, hakediş raporu, taşınır işlem fişi (TİF) ve ödeme emri belgesi gibi evrakları düzenleyebilir, kabul ve ödeme süreçlerinizi tamamlayabilirsiniz."
     >
@@ -224,7 +224,8 @@ export function KabulVeOdeme(): React.JSX.Element {
                   Kazanan Firma Belirlenmedi
                 </h3>
                 <p className="text-xs text-amber-700 dark:text-amber-400/90 leading-relaxed max-w-xl">
-                  Kabul & Ödeme belgelerini oluşturabilmek için önce{" "}
+                  Muayene & Kabul & Ödeme belgelerini oluşturabilmek için önce
+                  {" "}
                   <strong>Piyasa Fiyat Araştırması</strong>{" "}
                   adımında kazanan firmayı belirlemeniz gerekir. Tutanağı
                   kaydederken <em>"En Düşük Teklifi Kazanan Yap"</em>{" "}
@@ -262,7 +263,7 @@ export function KabulVeOdeme(): React.JSX.Element {
               <h3 className="text-base font-black text-slate-855 dark:text-slate-100 flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse">
                 </span>
-                Kabul & Ödeme Yönetimi
+                Muayene & Kabul & Ödeme Yönetimi
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
                 Muayene kabul ve ödeme belgesi (ÖEB) işlemlerini, kesintileri ve
@@ -341,7 +342,7 @@ export function KabulVeOdeme(): React.JSX.Element {
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
                 <h4 className="text-xs font-black text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-slate-400" />
-                  Kabul & Ödeme Aşamaları
+                  Muayene & Kabul & Ödeme Aşamaları
                 </h4>
 
                 <div className="flex flex-col gap-4 relative">
@@ -502,12 +503,12 @@ export function KabulVeOdeme(): React.JSX.Element {
                       )}
                     </span>
                   </div>
-                  <button 
+                  <button
                     disabled={!faturaNo || !faturaTarihi}
                     className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg ${
                       !faturaNo || !faturaTarihi
-                        ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-70'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                        ? "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-70"
+                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
                     }`}
                   >
                     ÖEB Oluştur

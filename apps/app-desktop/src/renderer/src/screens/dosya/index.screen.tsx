@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { useWorkspaceStore } from '../../store/workspaceStore'
-import { Link } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import React, { useEffect, useState } from "react";
+import { useWorkspaceStore } from "../../store/workspaceStore";
+import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -13,396 +13,411 @@ import {
   FileArchive,
   Layers,
   TrendingUp,
-  Users
-} from 'lucide-react'
+  Users,
+} from "lucide-react";
 
-import { DteTransfer } from './components/DteTransfer'
-import { PackageStructure } from './components/PackageStructure'
-import { SelectedFileInspector } from './components/SelectedFileInspector'
-import { UpdaterWidget } from './components/UpdaterWidget'
-import { ChangelogWidget } from './components/ChangelogWidget'
+import { DteTransfer } from "./components/DteTransfer";
+import { PackageStructure } from "./components/PackageStructure";
+import { SelectedFileInspector } from "./components/SelectedFileInspector";
+import { UpdaterWidget } from "./components/UpdaterWidget";
+import { ChangelogWidget } from "./components/ChangelogWidget";
 
 interface TableStat {
-  tableName: string
-  label: string
-  count: number
-  description: string
+  tableName: string;
+  label: string;
+  count: number;
+  description: string;
 }
 
-type PackageFile = 'meta.json' | 'database.sqlite' | 'attachments/'
+type PackageFile = "meta.json" | "database.sqlite" | "attachments/";
 
 export default function DosyaScreen(): React.JSX.Element {
-  const { activeMeta, activeFilePath, fileName, activeDosyaId } = useWorkspaceStore()
-  const [selectedFile, setSelectedFile] = useState<PackageFile>('meta.json')
-  const [copied, setCopied] = useState(false)
+  const { activeMeta, activeFilePath, fileName, activeDosyaId } =
+    useWorkspaceStore();
+  const [selectedFile, setSelectedFile] = useState<PackageFile>("meta.json");
+  const [copied, setCopied] = useState(false);
 
-  const queryClient = useQueryClient()
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const queryClient = useQueryClient();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [changelog, setChangelog] = useState<
     { version: string; notes: string; schema_max: number }[]
-  >([])
-  const [backlog, setBacklog] = useState<{ title: string; items: string[] }[]>([])
-  const [activeHistoryTab, setActiveHistoryTab] = useState<'releases' | 'backlog'>('releases')
+  >([]);
+  const [backlog, setBacklog] = useState<{ title: string; items: string[] }[]>(
+    [],
+  );
+  const [activeHistoryTab, setActiveHistoryTab] = useState<
+    "releases" | "backlog"
+  >("releases");
 
-  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
 
   // Aktif Dosya Detay States
-  const [dosyaData, setDosyaData] = useState<any>(null)
-  const [kalemler, setKalemler] = useState<any[]>([])
-  const [firmalar, setFirmalar] = useState<any[]>([])
-  const [birimAdi, setBirimAdi] = useState<string>('')
-  const [loadingDosya, setLoadingDosya] = useState<boolean>(!!activeDosyaId)
+  const [dosyaData, setDosyaData] = useState<any>(null);
+  const [kalemler, setKalemler] = useState<any[]>([]);
+  const [firmalar, setFirmalar] = useState<any[]>([]);
+  const [birimAdi, setBirimAdi] = useState<string>("");
+  const [loadingDosya, setLoadingDosya] = useState<boolean>(!!activeDosyaId);
 
   useEffect(() => {
-    if (!window.electron) return
+    if (!window.electron) return;
     window.electron.ipcRenderer
-      .invoke('get-changelog')
+      .invoke("get-changelog")
       .then((res) => {
         if (res && res.success) {
-          setChangelog(res.changelog || [])
-          setBacklog(res.backlog || [])
+          setChangelog(res.changelog || []);
+          setBacklog(res.backlog || []);
         } else if (Array.isArray(res)) {
-          setChangelog(res)
+          setChangelog(res);
         }
       })
-      .catch(console.error)
-  }, [])
+      .catch(console.error);
+  }, []);
 
   // Aktif Dosya Özet Detaylarını Yükle
   useEffect(() => {
     if (!window.electron || !activeDosyaId) {
-      return
+      return;
     }
 
     const fetchDosyaDetails = async () => {
-      setLoadingDosya(true)
+      setLoadingDosya(true);
       try {
         const dosyaRes = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          'SELECT * FROM DATA_TeminDosyasi WHERE id = ?',
-          [activeDosyaId]
-        )
+          "db:query",
+          "SELECT * FROM DATA_TeminDosyasi WHERE id = ?",
+          [activeDosyaId],
+        );
         if (dosyaRes.success && dosyaRes.data.length > 0) {
-          const dosya = dosyaRes.data[0]
-          setDosyaData(dosya)
+          const dosya = dosyaRes.data[0];
+          setDosyaData(dosya);
 
           // Birim adını getir
           if (dosya.birim_id) {
             const birimRes = await window.electron.ipcRenderer.invoke(
-              'db:query',
-              'SELECT birim_adi FROM TANIM_Birim WHERE id = ?',
-              [dosya.birim_id]
-            )
+              "db:query",
+              "SELECT birim_adi FROM TANIM_Birim WHERE id = ?",
+              [dosya.birim_id],
+            );
             if (birimRes.success && birimRes.data.length > 0) {
-              setBirimAdi(birimRes.data[0].birim_adi)
+              setBirimAdi(birimRes.data[0].birim_adi);
             }
           } else {
-            setBirimAdi('')
+            setBirimAdi("");
           }
 
           // Kalemleri getir
           const kalemRes = await window.electron.ipcRenderer.invoke(
-            'db:query',
-            'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
-            [activeDosyaId]
-          )
+            "db:query",
+            "SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC",
+            [activeDosyaId],
+          );
           if (kalemRes.success) {
-            setKalemler(kalemRes.data || [])
+            setKalemler(kalemRes.data || []);
           }
 
           // Firmaları getir
           const firmaRes = await window.electron.ipcRenderer.invoke(
-            'db:query',
+            "db:query",
             `SELECT df.*, f.unvan 
              FROM DATA_TeminFirma df 
              JOIN TANIM_Firma f ON df.firma_id = f.id 
              WHERE df.temin_dosya_id = ?`,
-            [activeDosyaId]
-          )
+            [activeDosyaId],
+          );
           if (firmaRes.success) {
-            setFirmalar(firmaRes.data || [])
+            setFirmalar(firmaRes.data || []);
           }
         } else {
-          setDosyaData(null)
+          setDosyaData(null);
         }
       } catch (err) {
-        console.error('Failed to load active file details:', err)
+        console.error("Failed to load active file details:", err);
       } finally {
-        setLoadingDosya(false)
+        setLoadingDosya(false);
       }
-    }
+    };
 
-    fetchDosyaDetails()
-  }, [activeDosyaId, refreshTrigger])
+    fetchDosyaDetails();
+  }, [activeDosyaId, refreshTrigger]);
 
   // DTE Data Transfer States
-  const [dteContentType, setDteContentType] = useState<'firms' | 'items' | 'all'>('firms')
-  const [dteStatus, setDteStatus] = useState<{
-    type: 'success' | 'error' | 'info'
-    message: string
-  } | null>(null)
-  const [dteLoading, setDteLoading] = useState(false)
+  const [dteContentType, setDteContentType] = useState<
+    "firms" | "items" | "all"
+  >("firms");
+  const [dteStatus, setDteStatus] = useState<
+    {
+      type: "success" | "error" | "info";
+      message: string;
+    } | null
+  >(null);
+  const [dteLoading, setDteLoading] = useState(false);
 
   const handleExportDte = async (): Promise<void> => {
-    setDteLoading(true)
-    setDteStatus(null)
+    setDteLoading(true);
+    setDteStatus(null);
     try {
-      const res = await window.electron.ipcRenderer.invoke('db:export-dte', dteContentType)
+      const res = await window.electron.ipcRenderer.invoke(
+        "db:export-dte",
+        dteContentType,
+      );
       if (res.success) {
         setDteStatus({
-          type: 'success',
-          message: `Veriler başarıyla dışa aktarıldı. (${res.recordCount} kayıt)`
-        })
+          type: "success",
+          message:
+            `Veriler başarıyla dışa aktarıldı. (${res.recordCount} kayıt)`,
+        });
       } else {
-        if (res.error !== 'İptal edildi') {
+        if (res.error !== "İptal edildi") {
           setDteStatus({
-            type: 'error',
-            message: `Dışa aktarma hatası: ${res.error}`
-          })
+            type: "error",
+            message: `Dışa aktarma hatası: ${res.error}`,
+          });
         }
       }
     } catch (err: any) {
       setDteStatus({
-        type: 'error',
-        message: err.message || 'Dışa aktarım sırasında beklenmedik hata.'
-      })
+        type: "error",
+        message: err.message || "Dışa aktarım sırasında beklenmedik hata.",
+      });
     } finally {
-      setDteLoading(false)
+      setDteLoading(false);
     }
-  }
+  };
 
   const handleImportDte = async (): Promise<void> => {
-    setDteLoading(true)
-    setDteStatus(null)
+    setDteLoading(true);
+    setDteStatus(null);
     try {
-      const res = await window.electron.ipcRenderer.invoke('db:import-dte')
+      const res = await window.electron.ipcRenderer.invoke("db:import-dte");
       if (res.success) {
-        let msg = ''
+        let msg = "";
         if (res.importedFirmsCount > 0) {
-          msg += `${res.importedFirmsCount} adet firma `
+          msg += `${res.importedFirmsCount} adet firma `;
         }
         if (res.importedItemsCount > 0) {
-          msg += `${msg ? 've ' : ''}${res.importedItemsCount} adet malzeme/hizmet kalemi `
+          msg += `${
+            msg ? "ve " : ""
+          }${res.importedItemsCount} adet malzeme/hizmet kalemi `;
         }
 
         if (res.totalImportedCount > 0 && !msg) {
-          msg = `Toplam ${res.totalImportedCount} adet kayıt `
+          msg = `Toplam ${res.totalImportedCount} adet kayıt `;
         }
 
         if (!msg && res.totalImportedCount === 0) {
-          msg = 'Aktarılacak yeni kayıt bulunamadı veya atlandı.'
+          msg = "Aktarılacak yeni kayıt bulunamadı veya atlandı.";
         } else {
-          msg += 'başarıyla içe aktarıldı.'
+          msg += "başarıyla içe aktarıldı.";
         }
 
         if (res.warnings && res.warnings.length > 0) {
-          msg += ` (Uyarı: ${res.warnings.join(', ')})`
+          msg += ` (Uyarı: ${res.warnings.join(", ")})`;
         }
 
         setDteStatus({
-          type: 'success',
-          message: msg
-        })
+          type: "success",
+          message: msg,
+        });
 
         // Invalidate react-query cache
-        queryClient.invalidateQueries()
+        queryClient.invalidateQueries();
         // Refresh local stats
-        setRefreshTrigger((prev) => prev + 1)
+        setRefreshTrigger((prev) => prev + 1);
       } else {
-        if (res.error !== 'İptal edildi') {
+        if (res.error !== "İptal edildi") {
           setDteStatus({
-            type: 'error',
-            message: `İçe aktarma hatası: ${res.error}`
-          })
+            type: "error",
+            message: `İçe aktarma hatası: ${res.error}`,
+          });
         }
       }
     } catch (err: any) {
       setDteStatus({
-        type: 'error',
-        message: err.message || 'İçe aktarım sırasında beklenmedik hata.'
-      })
+        type: "error",
+        message: err.message || "İçe aktarım sırasında beklenmedik hata.",
+      });
     } finally {
-      setDteLoading(false)
+      setDteLoading(false);
     }
-  }
+  };
 
   // Database stats state
-  const [dbStats, setDbStats] = useState<TableStat[]>([])
-  const [loadingStats, setLoadingStats] = useState(false)
-  const [statsError, setStatsError] = useState<string | null>(null)
+  const [dbStats, setDbStats] = useState<TableStat[]>([]);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   // Auto-Updater States
-  const [updaterStatus, setUpdaterStatus] = useState<string>('idle') // idle, checking, available, not-available, downloaded, error
-  const [updateVersion, setUpdateVersion] = useState<string>('')
-  const [updaterError, setUpdaterError] = useState<string>('')
+  const [updaterStatus, setUpdaterStatus] = useState<string>("idle"); // idle, checking, available, not-available, downloaded, error
+  const [updateVersion, setUpdateVersion] = useState<string>("");
+  const [updaterError, setUpdaterError] = useState<string>("");
 
   useEffect(() => {
-    if (!window.electron) return
+    if (!window.electron) return;
 
     const removeListener = window.electron.ipcRenderer.on(
-      'updater:status',
+      "updater:status",
       (_, data: { status: string; version?: string; error?: string }) => {
-        setUpdaterStatus(data.status)
-        if (data.version) setUpdateVersion(data.version)
-        if (data.error) setUpdaterError(data.error)
-      }
-    )
+        setUpdaterStatus(data.status);
+        if (data.version) setUpdateVersion(data.version);
+        if (data.error) setUpdaterError(data.error);
+      },
+    );
 
     return () => {
-      if (removeListener) removeListener()
-    }
-  }, [])
+      if (removeListener) removeListener();
+    };
+  }, []);
 
   const handleCheckUpdates = async (): Promise<void> => {
-    setUpdaterStatus('checking')
-    setUpdaterError('')
+    setUpdaterStatus("checking");
+    setUpdaterError("");
     try {
-      const res = await window.electron.ipcRenderer.invoke('updater:check')
+      const res = await window.electron.ipcRenderer.invoke("updater:check");
       if (!res.success) {
-        setUpdaterStatus('error')
-        setUpdaterError(res.error || 'Güncelleme kontrolü başarısız.')
+        setUpdaterStatus("error");
+        setUpdaterError(res.error || "Güncelleme kontrolü başarısız.");
       }
     } catch (err: any) {
-      setUpdaterStatus('error')
-      setUpdaterError(err.message || 'Hata oluştu.')
+      setUpdaterStatus("error");
+      setUpdaterError(err.message || "Hata oluştu.");
     }
-  }
+  };
 
   const handleQuitAndInstall = async (): Promise<void> => {
     try {
-      await window.electron.ipcRenderer.invoke('updater:quit-and-install')
+      await window.electron.ipcRenderer.invoke("updater:quit-and-install");
     } catch (err: any) {
-      alert('Güncelleme yüklenirken hata oluştu: ' + err.message)
+      alert("Güncelleme yüklenirken hata oluştu: " + err.message);
     }
-  }
+  };
 
   // Fetch SQLite stats when workspace changes or database.sqlite is selected
   useEffect(() => {
-    if (!window.electron || !activeFilePath) return
+    if (!window.electron || !activeFilePath) return;
 
     const fetchStats = async (): Promise<void> => {
-      setLoadingStats(true)
-      setStatsError(null)
+      setLoadingStats(true);
+      setStatsError(null);
       try {
         const tables = [
           {
-            name: 'DATA_TeminDosyasi',
-            label: 'Doğrudan Temin Dosyaları',
-            desc: 'Süreçteki doğrudan temin dosyaları ve ihale teklifleri'
+            name: "DATA_TeminDosyasi",
+            label: "Doğrudan Temin Dosyaları",
+            desc: "Süreçteki doğrudan temin dosyaları ve ihale teklifleri",
           },
           {
-            name: 'TANIM_Birim',
-            label: 'Kurum Birimleri',
-            desc: 'Bütçe harcaması yapan belediye müdürlükleri/birimleri'
+            name: "TANIM_Birim",
+            label: "Kurum Birimleri",
+            desc: "Bütçe harcaması yapan belediye müdürlükleri/birimleri",
           },
           {
-            name: 'TANIM_Personel',
-            label: 'Personel Havuzu',
-            desc: 'Evraklarda imza yetkilisi olan kurum çalışanları'
+            name: "TANIM_Personel",
+            label: "Personel Havuzu",
+            desc: "Evraklarda imza yetkilisi olan kurum çalışanları",
           },
           {
-            name: 'TANIM_Mevzuat',
-            label: 'Mevzuat ve Limitler',
-            desc: 'Yıllara göre doğrudan temin bütçe ve KDV limitleri'
+            name: "TANIM_Mevzuat",
+            label: "Mevzuat ve Limitler",
+            desc: "Yıllara göre doğrudan temin bütçe ve KDV limitleri",
           },
           {
-            name: 'TANIM_Firma',
-            label: 'Kayıtlı Firmalar',
-            desc: 'Sistemde kayıtlı tedarikçiler ve firmalar havuzu'
+            name: "TANIM_Firma",
+            label: "Kayıtlı Firmalar",
+            desc: "Sistemde kayıtlı tedarikçiler ve firmalar havuzu",
           },
           {
-            name: 'TANIM_Kalem',
-            label: 'Malzeme/Hizmet Kütüphanesi',
-            desc: 'Yaklaşık maliyet kalem kütüphanesi'
+            name: "TANIM_Kalem",
+            label: "Malzeme/Hizmet Kütüphanesi",
+            desc: "Yaklaşık maliyet kalem kütüphanesi",
           },
           {
-            name: 'settings',
-            label: 'Sistem Ayarları',
-            desc: 'Uygulamanın yerel yapılandırma anahtar-değer çiftleri'
-          }
-        ]
+            name: "settings",
+            label: "Sistem Ayarları",
+            desc: "Uygulamanın yerel yapılandırma anahtar-değer çiftleri",
+          },
+        ];
 
         const statsPromises = tables.map(async (table) => {
           const res = await window.electron.ipcRenderer.invoke(
-            'db:query',
-            `SELECT COUNT(*) as row_count FROM ${table.name}`
-          )
+            "db:query",
+            `SELECT COUNT(*) as row_count FROM ${table.name}`,
+          );
           if (res.success && res.data && res.data.length > 0) {
             return {
               tableName: table.name,
               label: table.label,
               count: res.data[0].row_count,
-              description: table.desc
-            }
+              description: table.desc,
+            };
           }
           return {
             tableName: table.name,
             label: table.label,
             count: 0,
-            description: table.desc
-          }
-        })
+            description: table.desc,
+          };
+        });
 
-        const results = await Promise.all(statsPromises)
-        setDbStats(results)
+        const results = await Promise.all(statsPromises);
+        setDbStats(results);
       } catch (err: any) {
-        console.error('Veritabanı istatistikleri alınamadı:', err)
-        setStatsError(err.message || 'İstatistikler okunamadı.')
+        console.error("Veritabanı istatistikleri alınamadı:", err);
+        setStatsError(err.message || "İstatistikler okunamadı.");
       } finally {
-        setLoadingStats(false)
+        setLoadingStats(false);
       }
-    }
+    };
 
-    fetchStats()
-  }, [activeFilePath, refreshTrigger])
+    fetchStats();
+  }, [activeFilePath, refreshTrigger]);
 
   const handleCopyPath = (): void => {
-    if (!activeFilePath) return
-    navigator.clipboard.writeText(activeFilePath)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    if (!activeFilePath) return;
+    navigator.clipboard.writeText(activeFilePath);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Helpers
   const getAsamaLabel = (asamaId: number) => {
     switch (asamaId) {
       case 1:
-        return '1. Hazırlık ve İhtiyaç'
+        return "1. Hazırlık ve İhtiyaç";
       case 2:
-        return '2. Piyasa Fiyat Araştırması'
+        return "2. Piyasa Fiyat Araştırması";
       case 3:
-        return '3. Sipariş & Sözleşme'
+        return "3. Sipariş & Sözleşme";
       case 4:
-        return '4. Kabul & Ödeme İşlemleri'
+        return "4. Muayene & Kabul & Ödeme İşlemleri";
       case 5:
-        return '5. Dosya Kapatıldı'
+        return "5. Dosya Kapatıldı";
       default:
-        return '1. Hazırlık ve İhtiyaç'
+        return "1. Hazırlık ve İhtiyaç";
     }
-  }
+  };
 
   const formatMoney = (val: number | null | undefined) => {
-    if (val === null || val === undefined) return '0,00'
-    return val.toLocaleString('tr-TR', {
+    if (val === null || val === undefined) return "0,00";
+    return val.toLocaleString("tr-TR", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })
-  }
+      maximumFractionDigits: 2,
+    });
+  };
 
   // Prettified JSON representation of activeMeta
   const rawJson = activeMeta
     ? JSON.stringify(
-        {
-          dtal_version: activeMeta.dtal_version,
-          app_version: activeMeta.app_version,
-          created_at: activeMeta.created_at,
-          institution: activeMeta.institution,
-          schema_version: activeMeta.schema_version
-        },
-        null,
-        2
-      )
-    : ''
+      {
+        dtal_version: activeMeta.dtal_version,
+        app_version: activeMeta.app_version,
+        created_at: activeMeta.created_at,
+        institution: activeMeta.institution,
+        schema_version: activeMeta.schema_version,
+      },
+      null,
+      2,
+    )
+    : "";
 
   return (
     <div className="max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300">
@@ -419,14 +434,14 @@ export default function DosyaScreen(): React.JSX.Element {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
               <FileArchive className="w-7 h-7 text-amber-500" />
-              {dosyaData ? dosyaData.konu : 'Aktif Çalışma Dosyası (.dtal)'}
+              {dosyaData ? dosyaData.konu : "Aktif Çalışma Dosyası (.dtal)"}
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
               {dosyaData
-                ? `Dosya No: ${dosyaData.temin_no || '-'} | Bütçe Yılı: ${
-                    dosyaData.butce_yili || '-'
-                  }`
-                : 'Uygulamanın veri alışverişi yaptığı arşiv paketinin detayları.'}
+                ? `Dosya No: ${dosyaData.temin_no || "-"} | Bütçe Yılı: ${
+                  dosyaData.butce_yili || "-"
+                }`
+                : "Uygulamanın veri alışverişi yaptığı arşiv paketinin detayları."}
             </p>
           </div>
         </div>
@@ -450,245 +465,264 @@ export default function DosyaScreen(): React.JSX.Element {
 
         {/* DOSYA ÖZETİ PANELİ (KURUMSAL YAPI TAB GİBİ ÖZET VERİLER) */}
         <div className="lg:col-span-12">
-          {loadingDosya ? (
-            <div className="flex items-center justify-center py-12 text-slate-500 text-xs italic">
-              Dosya özeti yükleniyor...
-            </div>
-          ) : dosyaData ? (
-            <div className="space-y-6">
-              {/* İstatistik Kartları */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="p-3 bg-blue-50 dark:bg-blue-955/30 text-blue-600 dark:text-blue-400 rounded-xl">
-                    <TrendingUp className="w-5 h-5" />
+          {loadingDosya
+            ? (
+              <div className="flex items-center justify-center py-12 text-slate-500 text-xs italic">
+                Dosya özeti yükleniyor...
+              </div>
+            )
+            : dosyaData
+            ? (
+              <div className="space-y-6">
+                {/* İstatistik Kartları */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-955/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                      <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                        Yaklaşık Maliyet
+                      </span>
+                      <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                        ₺{formatMoney(dosyaData.yaklasik_maliyet)}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                      Yaklaşık Maliyet
-                    </span>
-                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
-                      ₺{formatMoney(dosyaData.yaklasik_maliyet)}
-                    </span>
+
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-955/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                        Kalem Sayısı
+                      </span>
+                      <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                        {kalemler.length} adet
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-955/30 text-purple-600 dark:text-purple-400 rounded-xl">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                        Teklif Sunan İsteklix
+                      </span>
+                      <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
+                        {firmalar.length} firma
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-955/30 text-amber-600 dark:text-amber-400 rounded-xl">
+                      <ClipboardList className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                        Dosya Aşaması
+                      </span>
+                      <span className="text-xs font-extrabold text-slate-855 dark:text-slate-150 truncate block">
+                        {getAsamaLabel(dosyaData.durum_asama_id)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-955/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                    <Layers className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                      Kalem Sayısı
-                    </span>
-                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
-                      {kalemler.length} adet
-                    </span>
-                  </div>
-                </div>
+                {/* Detay Panelleri Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Sol Taraf: İdari Bilgiler ve Adımlar */}
+                  <div className="lg:col-span-5 flex flex-col gap-6">
+                    {/* Bilgi Kartı */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                      <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                        🏢 İdari Bilgiler & Bütçe
+                      </h3>
+                      <div className="space-y-3.5 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 dark:text-slate-550">
+                            Talep Eden Birim:
+                          </span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">
+                            {birimAdi || "Belirtilmemiş"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 dark:text-slate-550">
+                            Bütçe Yılı:
+                          </span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">
+                            {dosyaData.butce_yili || "Belirtilmemiş"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 dark:text-slate-550">
+                            Alım Türü:
+                          </span>
+                          <span className="font-bold uppercase text-slate-855 dark:text-slate-200">
+                            {dosyaData.tur === "mal"
+                              ? "Mal Alımı"
+                              : dosyaData.tur === "hizmet"
+                              ? "Hizmet Alımı"
+                              : "Yapım İşi"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 dark:text-slate-550">
+                            İhale Usulü:
+                          </span>
+                          <span className="font-mono bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+                            Doğrudan Temin (22/d)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="p-3 bg-purple-50 dark:bg-purple-955/30 text-purple-600 dark:text-purple-400 rounded-xl">
-                    <Users className="w-5 h-5" />
+                    {/* Aşamalar Kısayolu */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                      <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                        🚀 Süreç Adımları Kısayolları
+                      </h3>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          to="/dosya/hazirlik-ve-ihtiyac"
+                          className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                        >
+                          <span>1. Hazırlık ve İhtiyaç Aşaması</span>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                        </Link>
+                        <Link
+                          to="/dosya/piyasa-fiyat-arastirmasi"
+                          className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                        >
+                          <span>2. Piyasa Fiyat Araştırması Aşaması</span>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                        </Link>
+                        <Link
+                          to="/dosya/siparis-ve-sozlesme"
+                          className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                        >
+                          <span>3. Sipariş & Sözleşme Aşaması</span>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                        </Link>
+                        <Link
+                          to="/dosya/kabul-ve-odeme"
+                          className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
+                        >
+                          <span>4. Muayene & Kabul & Ödeme Aşaması</span>
+                          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                      Teklif Sunan İsteklix
-                    </span>
-                    <span className="text-lg font-black text-slate-855 dark:text-slate-100 font-mono">
-                      {firmalar.length} firma
-                    </span>
-                  </div>
-                </div>
 
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4 shadow-sm">
-                  <div className="p-3 bg-amber-50 dark:bg-amber-955/30 text-amber-600 dark:text-amber-400 rounded-xl">
-                    <ClipboardList className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
-                      Dosya Aşaması
-                    </span>
-                    <span className="text-xs font-extrabold text-slate-855 dark:text-slate-150 truncate block">
-                      {getAsamaLabel(dosyaData.durum_asama_id)}
-                    </span>
+                  {/* Sağ Taraf: Malzeme ve Tedarikçiler Tabloları */}
+                  <div className="lg:col-span-7 flex flex-col gap-6">
+                    {/* Malzemeler */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                      <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                        📦 Malzeme / Hizmet Kalemleri Listesi
+                      </h3>
+                      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                        <table className="w-full border-collapse text-left text-xs">
+                          <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
+                            <tr>
+                              <th className="p-3">Malzeme Adı</th>
+                              <th className="p-3 text-center">Miktar</th>
+                              <th className="p-3 text-center">Birim</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
+                            {kalemler.map((item) => (
+                              <tr
+                                key={item.id}
+                                className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
+                              >
+                                <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
+                                  {item.kalem_adi}
+                                </td>
+                                <td className="p-3 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                                  {item.miktar}
+                                </td>
+                                <td className="p-3 text-center text-slate-500 dark:text-slate-400">
+                                  {item.olcu_birimi || "Adet"}
+                                </td>
+                              </tr>
+                            ))}
+                            {kalemler.length === 0 && (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="p-6 text-center text-slate-400 italic"
+                                >
+                                  Dosyada henüz kayıtlı malzeme/hizmet
+                                  bulunmuyor.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Tedarikçiler */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                      <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                        💼 Teklif Veren Tedarikçiler / Firmalar
+                      </h3>
+                      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                        <table className="w-full border-collapse text-left text-xs">
+                          <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
+                            <tr>
+                              <th className="p-3">Firma Ünvanı</th>
+                              <th className="p-3 text-center">Teklif Durumu</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
+                            {firmalar.map((f) => (
+                              <tr
+                                key={f.id}
+                                className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
+                              >
+                                <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
+                                  {f.unvan}
+                                </td>
+                                <td className="p-3 text-center">
+                                  <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 px-2.5 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-800 font-extrabold tracking-tight">
+                                    Teklif Eklendi
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                            {firmalar.length === 0 && (
+                              <tr>
+                                <td
+                                  colSpan={2}
+                                  className="p-6 text-center text-slate-400 italic"
+                                >
+                                  Dosyada henüz kayıtlı firma teklifi
+                                  bulunmuyor.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Detay Panelleri Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Sol Taraf: İdari Bilgiler ve Adımlar */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
-                  {/* Bilgi Kartı */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      🏢 İdari Bilgiler & Bütçe
-                    </h3>
-                    <div className="space-y-3.5 text-xs">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 dark:text-slate-550">
-                          Talep Eden Birim:
-                        </span>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
-                          {birimAdi || 'Belirtilmemiş'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 dark:text-slate-550">Bütçe Yılı:</span>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
-                          {dosyaData.butce_yili || 'Belirtilmemiş'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 dark:text-slate-550">Alım Türü:</span>
-                        <span className="font-bold uppercase text-slate-855 dark:text-slate-200">
-                          {dosyaData.tur === 'mal'
-                            ? 'Mal Alımı'
-                            : dosyaData.tur === 'hizmet'
-                              ? 'Hizmet Alımı'
-                              : 'Yapım İşi'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-400 dark:text-slate-550">İhale Usulü:</span>
-                        <span className="font-mono bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
-                          Doğrudan Temin (22/d)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Aşamalar Kısayolu */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      🚀 Süreç Adımları Kısayolları
-                    </h3>
-                    <div className="flex flex-col gap-2">
-                      <Link
-                        to="/dosya/hazirlik-ve-ihtiyac"
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
-                      >
-                        <span>1. Hazırlık ve İhtiyaç Aşaması</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                      </Link>
-                      <Link
-                        to="/dosya/piyasa-fiyat-arastirmasi"
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
-                      >
-                        <span>2. Piyasa Fiyat Araştırması Aşaması</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                      </Link>
-                      <Link
-                        to="/dosya/siparis-ve-sozlesme"
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
-                      >
-                        <span>3. Sipariş & Sözleşme Aşaması</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                      </Link>
-                      <Link
-                        to="/dosya/kabul-ve-odeme"
-                        className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
-                      >
-                        <span>4. Kabul & Ödeme Aşaması</span>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sağ Taraf: Malzeme ve Tedarikçiler Tabloları */}
-                <div className="lg:col-span-7 flex flex-col gap-6">
-                  {/* Malzemeler */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      📦 Malzeme / Hizmet Kalemleri Listesi
-                    </h3>
-                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
-                      <table className="w-full border-collapse text-left text-xs">
-                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
-                          <tr>
-                            <th className="p-3">Malzeme Adı</th>
-                            <th className="p-3 text-center">Miktar</th>
-                            <th className="p-3 text-center">Birim</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
-                          {kalemler.map((item) => (
-                            <tr
-                              key={item.id}
-                              className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
-                            >
-                              <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
-                                {item.kalem_adi}
-                              </td>
-                              <td className="p-3 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
-                                {item.miktar}
-                              </td>
-                              <td className="p-3 text-center text-slate-500 dark:text-slate-400">
-                                {item.olcu_birimi || 'Adet'}
-                              </td>
-                            </tr>
-                          ))}
-                          {kalemler.length === 0 && (
-                            <tr>
-                              <td colSpan={3} className="p-6 text-center text-slate-400 italic">
-                                Dosyada henüz kayıtlı malzeme/hizmet bulunmuyor.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Tedarikçiler */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-455 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      💼 Teklif Veren Tedarikçiler / Firmalar
-                    </h3>
-                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
-                      <table className="w-full border-collapse text-left text-xs">
-                        <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
-                          <tr>
-                            <th className="p-3">Firma Ünvanı</th>
-                            <th className="p-3 text-center">Teklif Durumu</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-600 dark:text-slate-450">
-                          {firmalar.map((f) => (
-                            <tr
-                              key={f.id}
-                              className="hover:bg-slate-50/50 dark:hover:bg-slate-900/10"
-                            >
-                              <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">
-                                {f.unvan}
-                              </td>
-                              <td className="p-3 text-center">
-                                <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 px-2.5 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-800 font-extrabold tracking-tight">
-                                  Teklif Eklendi
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                          {firmalar.length === 0 && (
-                            <tr>
-                              <td colSpan={2} className="p-6 text-center text-slate-400 italic">
-                                Dosyada henüz kayıtlı firma teklifi bulunmuyor.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+            )
+            : (
+              <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 text-center text-slate-600 dark:text-slate-400 text-xs italic">
+                Lütfen çalışmak istediğiniz dosyayı üst menüden seçin veya bir
+                dosya yükleyin.
               </div>
-            </div>
-          ) : (
-            <div className="bg-amber-50 dark:bg-amber-955/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 text-center text-slate-600 dark:text-slate-400 text-xs italic">
-              Lütfen çalışmak istediğiniz dosyayı üst menüden seçin veya bir dosya yükleyin.
-            </div>
-          )}
+            )}
         </div>
 
         {/* AYIRICI VE TEKNİK DETAY AÇ/KAPA */}
@@ -710,11 +744,13 @@ export default function DosyaScreen(): React.JSX.Element {
                 </p>
               </div>
             </div>
-            {showTechnicalDetails ? (
-              <ChevronUp className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
-            )}
+            {showTechnicalDetails
+              ? (
+                <ChevronUp className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+              )
+              : (
+                <ChevronDown className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+              )}
           </button>
         </div>
 
@@ -724,7 +760,7 @@ export default function DosyaScreen(): React.JSX.Element {
             <div className="lg:col-span-5 flex flex-col gap-6">
               {/* Paket Yapısı Kartı */}
               <PackageStructure
-                fileName={fileName || ''}
+                fileName={fileName || ""}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
               />
@@ -745,10 +781,11 @@ export default function DosyaScreen(): React.JSX.Element {
                   Dosya Değişiklik Davranışı
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal font-medium font-sans">
-                  Uygulama çalışırken SQLite veritabanında yaptığınız tüm işlemler anlık kaydedilir.
-                  Uygulamadan çıkış yaparken veya dosya kapatılırken tüm veriler ve ekler otomatik
-                  olarak tekrar sıkıştırılıp tek bir <strong>.dtal</strong> arşiv dosyası olarak
-                  paketlenir.
+                  Uygulama çalışırken SQLite veritabanında yaptığınız tüm
+                  işlemler anlık kaydedilir. Uygulamadan çıkış yaparken veya
+                  dosya kapatılırken tüm veriler ve ekler otomatik olarak tekrar
+                  sıkıştırılıp tek bir <strong>.dtal</strong>{" "}
+                  arşiv dosyası olarak paketlenir.
                 </p>
               </div>
             </div>
@@ -788,6 +825,5 @@ export default function DosyaScreen(): React.JSX.Element {
         handleQuitAndInstall={handleQuitAndInstall}
       />
     </div>
-  )
+  );
 }
-

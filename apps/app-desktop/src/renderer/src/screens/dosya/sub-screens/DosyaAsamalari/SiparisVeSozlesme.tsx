@@ -163,12 +163,11 @@ export function SiparisVeSozlesme(): React.JSX.Element {
   }, [activeDosyaId]);
 
   // Hesaplamalar
-  const tasarrufOrani =
-    firmaStats.yaklasikMaliyet && firmaStats.teklifToplami
-      ? (((firmaStats.yaklasikMaliyet - firmaStats.teklifToplami) /
-          firmaStats.yaklasikMaliyet) *
-          100)
-      : null;
+  const tasarrufOrani = firmaStats.yaklasikMaliyet && firmaStats.teklifToplami
+    ? (((firmaStats.yaklasikMaliyet - firmaStats.teklifToplami) /
+      firmaStats.yaklasikMaliyet) *
+      100)
+    : null;
 
   const formatCurrency = (val: number | null): string => {
     if (val === null || val === undefined) return "—";
@@ -303,7 +302,11 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                   current: true,
                 },
                 { step: "3", label: "Sipariş & Sözleşme", done: false },
-                { step: "4", label: "Kabul & Ödeme İşlemleri", done: false },
+                {
+                  step: "4",
+                  label: "Muayene & Kabul & Ödeme İşlemleri",
+                  done: false,
+                },
                 { step: "5", label: "Klasör & Kapaklar", done: false },
               ].map((item) => (
                 <li
@@ -493,7 +496,8 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                   }}
                   onEkapBlacklistQuery={() => {
                     window.electron?.ipcRenderer.send("window:open-external", {
-                      url: "https://ekapv2.kik.gov.tr/sorgulamalar/yasak-sorgulama",
+                      url:
+                        "https://ekapv2.kik.gov.tr/sorgulamalar/yasak-sorgulama",
                       title: "EKAP Kamu İhale Yasaklı Sorgulama",
                     });
                   }}
@@ -534,13 +538,15 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                 {
                   icon: FileCheck,
                   label: "Sonuç Onay Belgesi",
-                  desc: "Piyasa fiyat araştırması sonuç onay belgesini hazırlayın",
+                  desc:
+                    "Piyasa fiyat araştırması sonuç onay belgesini hazırlayın",
                   color: "emerald" as const,
                 },
                 {
                   icon: ShieldCheck,
                   label: "Yasaklılık Sorgulaması",
-                  desc: "Kazanan firmanın EKAP ve e-Devlet yasaklılık kontrolünü yapın",
+                  desc:
+                    "Kazanan firmanın EKAP ve e-Devlet yasaklılık kontrolünü yapın",
                   color: "orange" as const,
                 },
                 {

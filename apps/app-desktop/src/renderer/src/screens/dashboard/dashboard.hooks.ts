@@ -493,7 +493,7 @@ export function useAnnouncements() {
                   type = 'warning'
                   break
                 case 4:
-                  title = 'Kabul & Ödeme İşlemleri'
+                  title = 'Muayene & Kabul & Ödeme İşlemleri'
                   content = `"${row.konu}" (${row.temin_no}) dosyası teslim ve faturalandırma aşamasına sevk edildi.`
                   type = 'success'
                   break

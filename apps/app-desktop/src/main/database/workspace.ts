@@ -311,7 +311,7 @@ const TEMPLATE_CATEGORIES: Record<string, string> = {
   '1-ihtiyac-tespiti-ve-baslangic': '1. İhtiyaç Tespiti & Başlangıç',
   '2-piyasa-fiyat-arastirmasi': '2. Piyasa Fiyat Araştırması',
   '3-siparis-ve-sozlesme': '3. Sipariş & Sözleşme',
-  '4-kabul-ve-odeme-islemleri': '4. Kabul & Ödeme İşlemleri',
+  '4-kabul-ve-odeme-islemleri': '4. Muayene & Kabul & Ödeme İşlemleri',
   '5-klasor-ve-kapaklar': '5. Klasör & Kapaklar'
 }
 

@@ -1,23 +1,23 @@
-import React from 'react'
-import { Link } from '@tanstack/react-router'
+import React from "react";
+import { Link } from "@tanstack/react-router";
 import {
-  Target,
-  PlusCircle,
-  ListTodo,
-  FileText,
-  ShoppingCart,
   CheckCircle,
-  FolderOpen
-} from 'lucide-react'
+  FileText,
+  FolderOpen,
+  ListTodo,
+  PlusCircle,
+  ShoppingCart,
+  Target,
+} from "lucide-react";
 
 interface ProcessStatsProps {
   processStats: {
-    asama1: number
-    asama2: number
-    asama3: number
-    asama4: number
-    tamamlandi: number
-  }
+    asama1: number;
+    asama2: number;
+    asama3: number;
+    asama4: number;
+    tamamlandi: number;
+  };
 }
 
 export const ProcessStats: React.FC<ProcessStatsProps> = ({ processStats }) => {
@@ -30,7 +30,8 @@ export const ProcessStats: React.FC<ProcessStatsProps> = ({ processStats }) => {
             Süreç Yönetim Panosu
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">
-            Aktif çalışma dosyasındaki mevcut ihale/temin dosyalarının süreç bazlı dağılımı.
+            Aktif çalışma dosyasındaki mevcut ihale/temin dosyalarının süreç
+            bazlı dağılımı.
           </p>
         </div>
         <div className="flex gap-2">
@@ -121,7 +122,7 @@ export const ProcessStats: React.FC<ProcessStatsProps> = ({ processStats }) => {
           </div>
           <div>
             <h3 className="font-bold text-xs text-emerald-900 dark:text-emerald-400">
-              4. Kabul & Ödeme
+              4. Muayene & Kabul & Ödeme
             </h3>
             <p className="text-[10px] text-emerald-700/70 dark:text-emerald-500/70 mt-1 line-clamp-2">
               Muayene kabul ve ödeme emri belgelerinin kesimi.
@@ -149,5 +150,5 @@ export const ProcessStats: React.FC<ProcessStatsProps> = ({ processStats }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

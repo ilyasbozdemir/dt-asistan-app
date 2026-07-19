@@ -249,7 +249,7 @@ export function TakipScreen(): React.JSX.Element {
     },
     {
       asama_sira: 4,
-      asama_adi: "Kabul & Ödeme İşlemleri",
+      asama_adi: "Muayene & Kabul & Ödeme İşlemleri",
       aciklama: "Mal/hizmet teslimatı, muayene kabulü ve fatura ödeme adımı.",
     },
   ];
@@ -1181,7 +1181,9 @@ export function TakipScreen(): React.JSX.Element {
                       </div>
                     </div>
                     <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">
-                      {allBelgeler.filter((b) => b.is_signed).length}
+                      {allBelgeler.filter((b) =>
+                        b.is_signed
+                      ).length}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-0.5">
                       İmzalanan Belge
@@ -1327,4 +1329,3 @@ export function TakipScreen(): React.JSX.Element {
     </div>
   );
 }
-

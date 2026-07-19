@@ -25,7 +25,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   '1-ihtiyac-tespiti-ve-baslangic': 'Hazırlık & İhtiyaç',
   '2-piyasa-fiyat-arastirmasi': 'Teklifler & Piyasa',
   '3-siparis-ve-sozlesme': 'Sipariş & Sözleşme',
-  '4-kabul-ve-odeme-islemleri': 'Kabul & Ödeme',
+  '4-kabul-ve-odeme-islemleri': 'Muayene & Kabul & Ödeme',
   '5-klasor-ve-kapaklar': 'Klasör & Kapak'
 }
 

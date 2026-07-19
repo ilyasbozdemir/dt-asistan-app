@@ -46,7 +46,7 @@ export const TANIM_Asama = {
     },
     {
       asama_sira: 4,
-      asama_adi: 'Kabul & Ödeme İşlemleri',
+      asama_adi: 'Muayene & Kabul & Ödeme İşlemleri',
       aciklama:
         'Mal veya hizmetin teslim alındığı, kabul komisyonunca onaylandığı ve ödeme evraklarının (ÖEB) Mali Hizmetlere sevk edildiği son aşamadır.',
       rozet_rengi: 'emerald'
