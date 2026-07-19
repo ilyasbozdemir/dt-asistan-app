@@ -135,7 +135,20 @@ export function DocumentPreviewModalV2({
         if (snapshotRes.success && snapshotRes.data.length > 0) {
           try {
             const savedData = JSON.parse(snapshotRes.data[0].veri_json);
-            finalData = { ...finalData, ...savedData };
+            // Smart merge inspired by V1: do not let stale placeholders or ACME values overwrite fresh resolved data
+            for (const [key, val] of Object.entries(savedData)) {
+              if (val !== undefined && val !== null && val !== '') {
+                const isSavedPlaceholder = typeof val === 'string' && val.includes('[Belirtilmedi');
+                const isSavedAcme = typeof val === 'string' && val.toUpperCase().includes('ACME');
+                const isSavedAntetPlaceholder = Array.isArray(val) && val.some((s: any) => String(s).includes('[Belirtilmedi'));
+                const hasFreshRealValue = resolved[key] && !String(resolved[key]).includes('[Belirtilmedi');
+
+                if ((isSavedPlaceholder || isSavedAcme || isSavedAntetPlaceholder) && hasFreshRealValue) {
+                  continue;
+                }
+                finalData[key] = val;
+              }
+            }
           } catch (e) {
             console.error("Failed to parse saved snapshot JSON", e);
           }

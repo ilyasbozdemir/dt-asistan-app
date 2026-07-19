@@ -36,7 +36,7 @@ export function IhtiyacListesi({
     { key: "malzemeAdi", label: "Malzeme Adı", width: "25%", align: "left" },
     { key: "ozelligi", label: "Özelliği", width: "20%", align: "left" },
     { key: "birimi", label: "Birimi", width: "10%", align: "center" },
-    { key: "kdvOrani", label: "KDV %", width: "8%", align: "center" },
+    { key: "kdvOrani", label: "KDV  Oranı %", width: "8%", align: "center" },
     { key: "miktar", label: "Miktar", width: "12%", align: "right" },
   ];
 
@@ -85,7 +85,8 @@ export function IhtiyacListesi({
               <>
                 <MetadataBlock
                   evrakSayisi={data.evrakSayisi}
-                  tarih={data.tarih}
+                  tarih={data.onayaSunulanTarih || data.tarih ||
+                    data.dosyaTarihi}
                   dosyaKonusu={data.dosyaKonusu}
                   showBorder={false}
                 />
@@ -132,8 +133,8 @@ export function IhtiyacListesi({
                 </div>
 
                 <PersonelCard
-                  adSoyad={data.talepEdenPersonelAdi}
-                  unvan={data.talepEdenPersonelUnvan}
+                  adSoyad={data.hazirlayanPersonelAdi}
+                  unvan={data.hazirlayanPersonelUnvan}
                   align="right"
                   marginTop={20}
                   marginBottom={30}
@@ -152,7 +153,8 @@ export function IhtiyacListesi({
               <div style={{ marginTop: "auto" }}>
                 <ApprovalSignature
                   title={(data as any).olurBaslik || "OLUR"}
-                  date={data.dosyaTarihi}
+                  date={data.onayTarihi || data.dosyaTarihi || data.tarih ||
+                    data.onayaSunulanTarih}
                   adSoyad={data.onaylayanPersonelAdi}
                   unvan={data.onaylayanPersonelUnvan}
                   showSpace={true}

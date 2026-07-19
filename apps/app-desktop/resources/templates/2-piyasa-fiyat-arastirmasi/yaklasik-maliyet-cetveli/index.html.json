@@ -1,7 +1,10 @@
 {
-  "antetSatirlari": ["T.C.", "GÜNEYYURT BELEDİYE BAŞKANLIĞI"],
+  "antetSatirlari": [
+    "T.C.",
+    "GÜNEYYURT BELEDİYE BAŞKANLIĞI"
+  ],
   "kurumUst": "T.C.",
-  "kurumAdi": "GÜNEYYURT BELEDİYE BAŞKANLIĞI",
+  "kurumAdi": "X  BELEDİYE BAŞKANLIĞI",
   "mudurluk": "Destek Hizmetleri Müdürlüğü",
   "isAdi": "Bilgi İşlem Altyapı ve Kablolama Malzemeleri Alımı İşi",
   "tarih": "06/05/2026",

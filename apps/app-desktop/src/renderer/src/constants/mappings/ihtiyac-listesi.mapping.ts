@@ -17,6 +17,18 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     varsayilan: new Date().toLocaleDateString('tr-TR'),
     aciklama: 'Belge tarihi'
   },
+  onayaSunulanTarih: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'temin_tarihi',
+    varsayilan: new Date().toLocaleDateString('tr-TR'),
+    aciklama: 'Onaya sunulma tarihi'
+  },
+  onayTarihi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'temin_tarihi',
+    varsayilan: new Date().toLocaleDateString('tr-TR'),
+    aciklama: 'OLUR / Onay tarihi'
+  },
 
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
@@ -41,7 +53,7 @@ export const IhtiyacListesiMapping: ProcessMapping = {
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'harcama_birimi',
+    sutun: 'ihtiyac_yeri',
     varsayilan: 'Müdürlüğümüzün',
     aciklama: 'İhtiyaç listesi yerleri'
   },
@@ -111,6 +123,20 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     iliskiliTablo: 'TANIM_Personel',
     iliskiliSutun: 'unvan',
     aciklama: 'Hazırlayan Personel Unvanı'
+  },
+  talepEdenPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Talep Eden Personel Adı Soyadı'
+  },
+  talepEdenPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Talep Eden Personel Unvanı'
   },
   onaylayanPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
