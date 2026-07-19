@@ -109,15 +109,15 @@ export const DocumentLayout = React.forwardRef<
         )}
 
         {/* İÇERİK */}
-        <div style={{ marginTop: "20px" }} className="document-content">
+        <div style={{ marginTop: "20px", paddingBottom: "2.5cm" }} className="document-content">
           {children}
         </div>
 
         {/* FOOTER */}
         {!hideFooter && !data?.kurumIci && <DocumentFooter data={data} />}
 
-        {/* DİNAMİK SAYFA NUMARASI */}
-        {pageNumber !== undefined && totalPages !== undefined && (
+        {/* DİNAMİK SAYFA NUMARASI (Yalnızca 1 sayfadan fazla ise gösterilir) */}
+        {pageNumber !== undefined && totalPages !== undefined && totalPages > 1 && (
           <div
             style={{
               position: "absolute",
@@ -125,9 +125,9 @@ export const DocumentLayout = React.forwardRef<
               left: "0",
               right: "0",
               textAlign: "center",
-              fontSize: "10pt",
-              fontWeight: "bold",
-              color: "#000",
+              fontSize: "9pt",
+              fontWeight: "500",
+              color: "#333",
             }}
           >
             {pageNumber} / {totalPages}

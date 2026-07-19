@@ -79,10 +79,27 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setActiveDosyaId: (id) => {
     if (id !== null) {
       sessionStorage.setItem('workspace_dosya_id', id.toString())
+      window.electron.ipcRenderer
+        .invoke('db:query', 'SELECT starred_docs FROM DATA_TeminDosyasi WHERE id = ?', [id])
+        .then((res: { success: boolean; data?: Array<{ starred_docs?: string }> }) => {
+          if (res.success && res.data && res.data.length > 0) {
+            try {
+              const docs = res.data[0].starred_docs ? JSON.parse(res.data[0].starred_docs) : []
+              set({ activeDosyaId: id, activeStarredDocs: docs })
+              return
+            } catch {
+              // noop
+            }
+          }
+          set({ activeDosyaId: id, activeStarredDocs: [] })
+        })
+        .catch(() => {
+          set({ activeDosyaId: id, activeStarredDocs: [] })
+        })
     } else {
       sessionStorage.removeItem('workspace_dosya_id')
+      set({ activeDosyaId: null, activeStarredDocs: [] })
     }
-    set({ activeDosyaId: id })
   },
   openWorkspace: async (filePath: string, allowMigration: boolean = false) => {
     try {

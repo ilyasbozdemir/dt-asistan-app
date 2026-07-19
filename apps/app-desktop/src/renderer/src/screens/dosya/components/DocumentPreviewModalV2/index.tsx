@@ -135,9 +135,13 @@ export function DocumentPreviewModalV2({
         if (snapshotRes.success && snapshotRes.data.length > 0) {
           try {
             const savedData = JSON.parse(snapshotRes.data[0].veri_json);
-            // Smart merge inspired by V1: do not let stale placeholders or ACME values overwrite fresh resolved data
+            // Smart merge inspired by V1: do not let stale placeholders or old hardcoded antets overwrite fresh resolved data
             for (const [key, val] of Object.entries(savedData)) {
               if (val !== undefined && val !== null && val !== '') {
+                if (key === 'antetSatirlari' && resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) && resolved.antetSatirlari.length > 0) {
+                  finalData.antetSatirlari = resolved.antetSatirlari;
+                  continue;
+                }
                 const isSavedPlaceholder = typeof val === 'string' && val.includes('[Belirtilmedi');
                 const isSavedAcme = typeof val === 'string' && val.toUpperCase().includes('ACME');
                 const isSavedAntetPlaceholder = Array.isArray(val) && val.some((s: any) => String(s).includes('[Belirtilmedi'));
@@ -152,6 +156,10 @@ export function DocumentPreviewModalV2({
           } catch (e) {
             console.error("Failed to parse saved snapshot JSON", e);
           }
+        }
+
+        if (resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) && resolved.antetSatirlari.length > 0) {
+          finalData.antetSatirlari = resolved.antetSatirlari;
         }
 
         setFormData(finalData);
@@ -401,7 +409,45 @@ export function DocumentPreviewModalV2({
 
         {/* Footer controls */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 flex items-center justify-between">
-          <div></div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                Belge Tarihi:
+              </label>
+              <input
+                type="text"
+                value={formData.tarih || formData.onayaSunulanTarih || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    tarih: e.target.value,
+                    onayaSunulanTarih: e.target.value
+                  }))
+                }
+                placeholder="GG.AA.YYYY"
+                className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                Onay Tarihi (OLUR):
+              </label>
+              <input
+                type="text"
+                value={formData.onayTarihi || formData.dosyaTarihi || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    onayTarihi: e.target.value,
+                    dosyaTarihi: e.target.value
+                  }))
+                }
+                placeholder="GG.AA.YYYY"
+                className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
+              />
+            </div>
+          </div>
 
           <div className="flex items-center gap-2.5">
             {/* Options Dropdown (3-Dots Menu) */}

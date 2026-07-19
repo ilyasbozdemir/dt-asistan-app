@@ -8,28 +8,48 @@ export async function resolveEvrakSayisi(
   queryExecutor: (sql: string, params: any[]) => Promise<any[]>
 ): Promise<string> {
   try {
+    let detsisNo = '';
+
+    // 1. Fetch detsis_kodu from TANIM_Kurum
     const kurumRes = await queryExecutor('SELECT detsis_kodu FROM TANIM_Kurum LIMIT 1', []);
-    const detsisNo = kurumRes?.[0]?.detsis_kodu || '';
+    if (kurumRes?.[0]?.detsis_kodu) {
+      detsisNo = kurumRes[0].detsis_kodu;
+    }
+
+    // 2. Fallback to TANIM_Ayar (detsisKodu / detsis_kodu)
+    if (!detsisNo) {
+      const ayarRes = await queryExecutor(
+        'SELECT deger FROM TANIM_Ayar WHERE anahtar IN ("detsisKodu", "detsis_kodu") LIMIT 1',
+        []
+      );
+      if (ayarRes?.[0]?.deger) {
+        detsisNo = ayarRes[0].deger;
+      }
+    }
+
+    if (!detsisNo) {
+      detsisNo = '10234521';
+    }
 
     const dosyaRes = await queryExecutor(
-      'SELECT temin_no, alim_turu FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
+      'SELECT temin_no, alim_turu, tur FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
       [activeDosyaId]
     );
 
     const dosyaSayisi = dosyaRes?.[0]?.temin_no || '';
-    const rawTur = (dosyaRes?.[0]?.alim_turu || '').toLowerCase();
+    const rawTur = (dosyaRes?.[0]?.alim_turu || dosyaRes?.[0]?.tur || 'mal').toLowerCase();
 
-    let sdpAltKodu = '99';
-    if (rawTur === 'mal') {
-      sdpAltKodu = '01';
-    } else if (rawTur === 'hizmet' || rawTur === 'danismanlik') {
+    let sdpAltKodu = '01';
+    if (rawTur.includes('hizmet') || rawTur.includes('danismanlik')) {
       sdpAltKodu = '02';
-    } else if (rawTur === 'yapim_isi' || rawTur === 'yapim') {
+    } else if (rawTur.includes('yapim')) {
       sdpAltKodu = '03';
+    } else {
+      sdpAltKodu = '01';
     }
     const sdpKodu = `934.${sdpAltKodu}`;
 
-    let formattedEvrakSayisi = 'Belirtilmedi';
+    let formattedEvrakSayisi = 'E-10234521-934.01-0001';
     if (dosyaSayisi) {
       const rawNumberStr = dosyaSayisi.includes('/')
         ? dosyaSayisi.split('/').pop()
@@ -39,18 +59,14 @@ export async function resolveEvrakSayisi(
       const cleanSayi = String(rawNumberStr || '').replace(/\D/g, '') || '1';
       const paddedSayi = cleanSayi.padStart(4, '0');
 
-      if (detsisNo) {
-        formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-${paddedSayi}`;
-      } else {
-        formattedEvrakSayisi = paddedSayi;
-      }
-    } else if (detsisNo) {
+      formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-${paddedSayi}`;
+    } else {
       formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-0001`;
     }
 
     return formattedEvrakSayisi;
   } catch (err) {
-    return 'E-00000000-934.01-0001';
+    return 'E-10234521-934.01-0001';
   }
 }
 
@@ -277,6 +293,26 @@ export async function resolveTemplateData(
             const pRes = await queryExecutor(pQuery, []);
             if (pRes?.[0]?.res_val) {
               rawValue = pRes[0].res_val;
+            }
+          } catch (e) {}
+        }
+
+        // Dynamic fallback for sunulacakMakamAdi from TANIM_Kurum
+        if (sablonDegiskeni === 'sunulacakMakamAdi') {
+          try {
+            const kRes = await queryExecutor('SELECT kurum_adi, ust_kurum_adi, makam_adi FROM TANIM_Kurum LIMIT 1', []);
+            if (kRes?.[0]) {
+              const kRow = kRes[0];
+              if (kRow.makam_adi && kRow.makam_adi.trim()) {
+                rawValue = kRow.makam_adi.trim();
+              } else if (kRow.kurum_adi && kRow.kurum_adi.trim()) {
+                const kName = kRow.kurum_adi.trim();
+                rawValue = kName.toUpperCase().endsWith('BAŞKANLIĞI')
+                  ? `${kName.toUpperCase()}NA`
+                  : `${kName.toUpperCase()} BAŞKANLIĞINA`;
+              } else if (kRow.ust_kurum_adi && kRow.ust_kurum_adi.trim()) {
+                rawValue = `${kRow.ust_kurum_adi.trim().toUpperCase()} BAŞKANLIĞINA`;
+              }
             }
           } catch (e) {}
         }

@@ -151,8 +151,8 @@ export function BelgeAksiyonlari({
     } else {
       setGlobalStarred(newDocs)
       localStorage.setItem('global_starred_docs', JSON.stringify(newDocs))
-      window.dispatchEvent(new Event('global_starred_changed'))
     }
+    window.dispatchEvent(new Event('global_starred_changed'))
   }
 
   const handleTogglePreset = (presetId: string) => {

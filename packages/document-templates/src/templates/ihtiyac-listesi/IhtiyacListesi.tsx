@@ -108,14 +108,14 @@ export function IhtiyacListesi({
                   style={{
                     textAlign: "justify",
                     textIndent: "40px",
-                    marginBottom: "15px",
+                    marginBottom: "12px",
                     fontSize: "12pt",
                     lineHeight: 1.5,
                   }}
                 >
-                  {data.ihtiyacYeri}{" "}
+                  {data.ihtiyacYeri || "Müdürlüğümüzün"}{" "}
                   ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin
-                  edilmesi gerekmektedir.
+                  edilmesi gerekmektedir;
                 </div>
 
                 <div
@@ -127,8 +127,8 @@ export function IhtiyacListesi({
                     lineHeight: 1.5,
                   }}
                 >
-                  Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanunun{" "}
-                  {data.maddeNo}{" "}
+                  Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanununun{" "}
+                  {data.maddeNo || "22/d"}{" "}
                   maddesine göre temini için gereğini olurlarınıza arz ederim.
                 </div>
 
