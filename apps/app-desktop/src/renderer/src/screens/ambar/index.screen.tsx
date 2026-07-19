@@ -122,7 +122,7 @@ export default function AmbarScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
+    <div className="p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">
       {/* BAŞLIK */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
@@ -373,3 +373,4 @@ export default function AmbarScreen(): React.JSX.Element {
     </div>
   )
 }
+

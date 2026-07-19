@@ -320,7 +320,7 @@ export function TakipScreen(): React.JSX.Element {
   }, [activeDosya, dbBelgeler, notificationSent]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col gap-6 w-full max-w-[1600px] mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
         <div>
@@ -1116,7 +1116,7 @@ export function TakipScreen(): React.JSX.Element {
         )
         : (
           /* NO ACTIVE DOSSIER SELECTED STATE - GENEL METRİK PANELİ */
-          <div className="flex flex-col gap-6 max-w-5xl mx-auto my-6 w-full">
+          <div className="flex flex-col gap-6 max-w-[1600px] mx-auto my-6 w-full">
             <div className="p-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 text-center flex flex-col items-center justify-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-955/50 text-blue-600 dark:text-blue-450 flex items-center justify-center">
                 <ClipboardList className="w-8 h-8" />
@@ -1327,3 +1327,4 @@ export function TakipScreen(): React.JSX.Element {
     </div>
   );
 }
+

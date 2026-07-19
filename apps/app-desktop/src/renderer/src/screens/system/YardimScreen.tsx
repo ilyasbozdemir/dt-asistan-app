@@ -367,7 +367,7 @@ const DogrudanTeminSurecAkisi = () => {
 const UygulamaRehberi = () => {
   return (
     <div className="p-6 overflow-y-auto h-full max-h-full custom-scrollbar bg-slate-50 dark:bg-slate-900/40">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         <div className="text-center pb-4 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
             <Cpu className="w-5 h-5 text-blue-600" />
@@ -506,7 +506,7 @@ const UygulamaRehberi = () => {
 const EkonomikVeFonksiyonelKodlarRehberi = () => {
   return (
     <div className="p-6 overflow-y-auto h-full max-h-full custom-scrollbar bg-slate-50 dark:bg-slate-900/40">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         <div className="text-center pb-4 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
             <Layers className="w-5 h-5 text-indigo-650" />
@@ -636,7 +636,7 @@ const EkonomikVeFonksiyonelKodlarRehberi = () => {
 const DogrudanTeminMuhasebeRehberi = () => {
   return (
     <div className="p-6 overflow-y-auto h-full max-h-full custom-scrollbar bg-slate-50 dark:bg-slate-900/40">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         <div className="text-center pb-4 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
             <BookOpen className="w-5 h-5 text-emerald-600" />
@@ -1072,3 +1072,4 @@ export default function YardimScreen(): React.JSX.Element {
     </div>
   )
 }
+

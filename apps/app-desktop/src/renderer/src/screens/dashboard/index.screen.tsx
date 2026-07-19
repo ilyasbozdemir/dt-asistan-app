@@ -284,7 +284,7 @@ export default function DashboardScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col gap-6 w-full max-w-[1600px] mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* 1. HERO HEADER & SMART ALERTS */}
       <HeroHeader
         isMailConfigured={isMailConfigured}
@@ -426,3 +426,4 @@ export default function DashboardScreen(): React.JSX.Element {
     </div>
   )
 }
+

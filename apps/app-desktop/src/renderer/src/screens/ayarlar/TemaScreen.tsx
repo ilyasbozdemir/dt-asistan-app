@@ -604,7 +604,7 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
       className={
         isEmbedded
           ? 'space-y-6 flex flex-col justify-between w-full'
-          : 'p-8 max-w-5xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300 overflow-y-auto max-h-full'
+          : 'p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300 overflow-y-auto max-h-full'
       }
     >
       {isEmbedded ? (
@@ -1492,3 +1492,4 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
     </div>
   )
 }
+

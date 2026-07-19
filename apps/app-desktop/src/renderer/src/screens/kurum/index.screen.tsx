@@ -230,7 +230,7 @@ export default function KurumScreen(): React.JSX.Element {
   const isKurumTab = ['idari', 'mali', 'iletisim', 'logolar'].includes(activeTab)
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
+    <div className="max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-200">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-4">
         {/* SOL MENÜ */}
         <InnerMenu
@@ -318,3 +318,4 @@ export default function KurumScreen(): React.JSX.Element {
     </div>
   )
 }
+

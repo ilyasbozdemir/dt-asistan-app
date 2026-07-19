@@ -188,7 +188,7 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-[1600px] mx-auto space-y-6">
           {/* Kimlik Bilgileri */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
@@ -591,3 +591,4 @@ export default function YeniMalzemeScreen(): React.JSX.Element {
     </div>
   )
 }
+

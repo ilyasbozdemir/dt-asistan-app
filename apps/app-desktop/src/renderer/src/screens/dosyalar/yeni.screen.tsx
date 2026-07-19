@@ -461,7 +461,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
         <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-slate-50 dark:bg-slate-900/40">
           <form
             onSubmit={handleSave}
-            className="max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6"
+            className="max-w-[1600px] mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6"
           >
             {loadingDb ? (
               <div className="p-8 text-center text-sm text-slate-500 italic">
@@ -673,3 +673,4 @@ Yanıtını SADECE JSON formatında ver.`}
     </div>
   )
 }
+

@@ -115,7 +115,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
 
   if (!komisyonId) {
     return (
-      <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500">
+      <div className="p-6 md:p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500">
         Geçersiz komisyon kimliği. Lütfen listeye geri dönün.
       </div>
     )
@@ -123,7 +123,7 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500">
+      <div className="p-6 md:p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500">
         <div className="flex items-center gap-2 text-slate-500">
           <div className="w-5 h-5 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
           Yükleniyor...
@@ -134,14 +134,14 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
 
   if (error || !komisyon) {
     return (
-      <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500 text-rose-500">
+      <div className="p-6 md:p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-500 text-rose-500">
         Bir hata oluştu: {(error as Error)?.message || 'Komisyon yüklenemedi'}
       </div>
     )
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
+    <div className="p-6 md:p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="flex items-center gap-3">
@@ -535,3 +535,4 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
     </div>
   )
 }
+

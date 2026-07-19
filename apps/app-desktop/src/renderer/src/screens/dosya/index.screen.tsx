@@ -405,7 +405,7 @@ export default function DosyaScreen(): React.JSX.Element {
     : ''
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300">
+    <div className="max-w-[1600px] mx-auto flex flex-col gap-6 w-full animate-in fade-in duration-300">
       {/* Üst Başlık Bölümü */}
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
         <div className="flex items-center gap-3">
@@ -790,3 +790,4 @@ export default function DosyaScreen(): React.JSX.Element {
     </div>
   )
 }
+

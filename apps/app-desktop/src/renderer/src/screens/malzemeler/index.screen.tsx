@@ -271,7 +271,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6 w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-8 max-w-[1600px] mx-auto flex flex-col gap-6 w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-6 border-b border-slate-200 dark:border-slate-800 pb-6 shrink-0">
         <div className="w-full">
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-850 dark:text-slate-100">
@@ -638,3 +638,4 @@ export default function MalzemelerScreen(): React.JSX.Element {
     </div>
   );
 }
+

@@ -159,7 +159,7 @@ export default function BirimlerScreen({
       className={
         isSubComponent
           ? 'flex flex-col h-full space-y-6 w-full animate-in fade-in duration-200'
-          : 'p-8 max-w-5xl mx-auto flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full'
+          : 'p-8 max-w-[1600px] mx-auto flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full'
       }
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -235,3 +235,4 @@ export default function BirimlerScreen({
     </div>
   )
 }
+
