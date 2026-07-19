@@ -50,10 +50,7 @@ export default function AyarlarScreen(): React.ReactNode {
 
   const params = new URLSearchParams(location.search as any);
   const currentTabParam = params.get("tab") as TabType;
-  const [prevTabParam, setPrevTabParam] = useState(currentTabParam);
-
-  if (currentTabParam !== prevTabParam) {
-    setPrevTabParam(currentTabParam);
+  useEffect(() => {
     if (
       currentTabParam === "genel" ||
       currentTabParam === "smtp" ||
@@ -65,7 +62,7 @@ export default function AyarlarScreen(): React.ReactNode {
     ) {
       setActiveTab(currentTabParam);
     }
-  }
+  }, [currentTabParam]);
 
   const [saving, setSaving] = useState(false);
 
@@ -525,4 +522,3 @@ export default function AyarlarScreen(): React.ReactNode {
     </div>
   );
 }
-
