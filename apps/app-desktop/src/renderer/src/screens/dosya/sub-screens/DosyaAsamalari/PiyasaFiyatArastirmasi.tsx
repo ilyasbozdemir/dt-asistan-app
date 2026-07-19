@@ -57,7 +57,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     getAverageBid,
     getEstimatedCostTotal,
     handleSaveToDosya,
-    handleNewPfat,
+    handleNewDocument,
     lowestTotalFirmaId,
     isEditingFirms,
     setIsEditingFirms,
@@ -66,6 +66,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setTutanakTarihi,
     savedDocuments,
     stageSablons,
+    formMode,
+    setFormMode,
     syncTutanak,
     setSyncTutanak,
     setLowestFirmAsWinner,
@@ -153,7 +155,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       {!isFormOpen && (
         <PiyasaFiyatArastirmasiDashboard
           setIsFormOpen={setIsFormOpen}
-          handleNewPfat={handleNewPfat}
+          handleNewDocument={handleNewDocument}
           setActiveFormTab={setActiveFormTab}
           dashboardViewMode={dashboardViewMode}
           setDashboardViewMode={setDashboardViewMode}
@@ -181,6 +183,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
 
       {isFormOpen && (
         <PiyasaFiyatArastirmasiForm
+          formMode={formMode}
           setIsFormOpen={setIsFormOpen}
           activeFormTab={activeFormTab}
           setActiveFormTab={setActiveFormTab}

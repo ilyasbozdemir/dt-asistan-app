@@ -44,6 +44,7 @@ interface PiyasaFiyatArastirmasiFormProps {
   setManualWinnerFirmaId: (id: number | null) => void;
   belgeleriKaydet: boolean;
   setBelgeleriKaydet: (val: boolean) => void;
+  formMode: 'maliyet' | 'tutanak';
   isEditingFirms: boolean;
   setIsEditingFirms: (val: boolean) => void;
   setIsFirmModalOpen: (val: boolean) => void;
@@ -52,6 +53,7 @@ interface PiyasaFiyatArastirmasiFormProps {
 }
 
 export function PiyasaFiyatArastirmasiForm({
+  formMode,
   isFormFullscreen,
   setIsFormOpen,
   activeFormTab,
@@ -110,10 +112,10 @@ export function PiyasaFiyatArastirmasiForm({
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-left">
-              <h3 className="text-base font-black text-slate-850 dark:text-slate-100 flex items-center gap-2 leading-none">
+              <h3 className="text-base font-black text-slate-855 dark:text-slate-100 flex items-center gap-2 leading-none">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse">
                 </span>
-                Piyasa Fiyat Araştırma Formu
+                {formMode === "maliyet" ? "Yaklaşık Maliyet Cetveli Formu" : "Piyasa Fiyat Araştırma Tutanağı (PFAT) Formu"}
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                 Yöntem: {hesaplamaEsasi}
@@ -170,83 +172,73 @@ export function PiyasaFiyatArastirmasiForm({
           <div className="bg-slate-50/50 dark:bg-slate-900/30 p-3 px-6 md:px-8 flex flex-wrap items-center justify-between gap-4 text-xs border-b border-slate-100 dark:border-slate-800/40 animate-in slide-in-from-top-1 duration-200">
             {/* Dates Group */}
             <div className="flex flex-wrap items-center gap-2.5">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9">
-                <span className="text-slate-400">Maliyet Cetveli Tarihi:</span>
-                <input
-                  type="date"
-                  value={maliyetCetveliTarihi}
-                  onChange={(e) => {
-                    setMaliyetCetveliTarihi(e.target.value);
-                    if (syncTutanak) {
-                      setTutanakTarihi(e.target.value);
-                    }
-                  }}
-                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 w-28"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9">
-                <span className="text-slate-400">Tutanak Tarihi:</span>
-                <input
-                  type="date"
-                  value={tutanakTarihi}
-                  disabled={syncTutanak}
-                  onChange={(e) => setTutanakTarihi(e.target.value)}
-                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 disabled:opacity-60 w-28"
-                />
-              </div>
-
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={syncTutanak}
-                  onChange={(e) => setSyncTutanak(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-                />
-                <span>Tarihleri Senkronize Et</span>
-              </label>
+              {formMode === "maliyet" ? (
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9">
+                  <span className="text-slate-400">Maliyet Cetveli Tarihi:</span>
+                  <input
+                    type="date"
+                    value={maliyetCetveliTarihi}
+                    onChange={(e) => setMaliyetCetveliTarihi(e.target.value)}
+                    className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 w-28"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-355 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9">
+                  <span className="text-slate-400">Tutanak Tarihi:</span>
+                  <input
+                    type="date"
+                    value={tutanakTarihi}
+                    onChange={(e) => setTutanakTarihi(e.target.value)}
+                    className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-250 w-28"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Winner Selection & Doc Generation Group */}
             <div className="flex flex-wrap items-center gap-2.5">
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={setLowestFirmAsWinner}
-                  onChange={(e) => setSetLowestFirmAsWinner(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-                />
-                <span>En Düşük Teklifi Kazanan Yap</span>
-              </label>
+              {formMode === "tutanak" && (
+                <>
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-800 h-9 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={setLowestFirmAsWinner}
+                      onChange={(e) => setSetLowestFirmAsWinner(e.target.checked)}
+                      className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                    />
+                    <span>En Düşük Teklifi Kazanan Yap</span>
+                  </label>
 
-              {/* Manual winner selector */}
-              {!setLowestFirmAsWinner && invitedFirms.length > 0 && (
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-amber-955/20 px-3 py-1.5 rounded-xl border border-amber-300/40 dark:border-amber-900/40 h-9">
-                  <span className="text-amber-600 dark:text-amber-400 shrink-0">
-                    Kazanan:
-                  </span>
-                  <select
-                    value={manualWinnerFirmaId ?? ""}
-                    onChange={(e) =>
-                      setManualWinnerFirmaId(
-                        e.target.value ? Number(e.target.value) : null,
-                      )}
-                    className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200 max-w-[180px] truncate"
-                  >
-                    <option value="">-- Firma Seç --</option>
-                    {invitedFirms.map((f) => (
-                      <option key={f.id} value={f.firma_id}>
-                        {f.unvan}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  {/* Manual winner selector */}
+                  {!setLowestFirmAsWinner && invitedFirms.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-amber-955/20 px-3 py-1.5 rounded-xl border border-amber-300/40 dark:border-amber-900/40 h-9">
+                      <span className="text-amber-600 dark:text-amber-400 shrink-0">
+                        Kazanan:
+                      </span>
+                      <select
+                        value={manualWinnerFirmaId ?? ""}
+                        onChange={(e) =>
+                          setManualWinnerFirmaId(
+                            e.target.value ? Number(e.target.value) : null,
+                          )}
+                        className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200 max-w-[180px] truncate"
+                      >
+                        <option value="">-- Firma Seç --</option>
+                        {invitedFirms.map((f) => (
+                          <option key={f.id} value={f.firma_id}>
+                            {f.unvan}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Resmi Belgeleri Oluştur Checkbox */}
               <label
                 className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-blue-50/50 dark:bg-blue-955/10 px-3 py-1.5 rounded-xl border border-blue-200/60 dark:border-blue-900/40 h-9 cursor-pointer select-none"
-                title="Eğer işaretlenirse Yaklaşık Maliyet Cetveli ve Fiyat Araştırma Tutanağı dökümanları oluşturulur. İşaretlenmezse sadece girilen teklif verileri kaydedilir."
+                title={formMode === "maliyet" ? "Eğer işaretlenirse Yaklaşık Maliyet Cetveli dökümanı oluşturulur." : "Eğer işaretlenirse Fiyat Araştırma Tutanağı dökümanı oluşturulur."}
               >
                 <input
                   type="checkbox"
@@ -254,7 +246,7 @@ export function PiyasaFiyatArastirmasiForm({
                   onChange={(e) => setBelgeleriKaydet(e.target.checked)}
                   className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
                 />
-                <span>Resmi Belgeleri Oluştur (Tutanak & Cetvel)</span>
+                <span>Resmi Belgeyi Oluştur ({formMode === "maliyet" ? "Yaklaşık Maliyet" : "Tutanak"})</span>
               </label>
             </div>
           </div>

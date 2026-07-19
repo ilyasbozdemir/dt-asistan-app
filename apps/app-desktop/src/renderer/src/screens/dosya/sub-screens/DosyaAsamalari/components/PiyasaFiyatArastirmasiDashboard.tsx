@@ -14,7 +14,7 @@ import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
-  handleNewPfat: () => void;
+  handleNewDocument: (mode: 'maliyet' | 'tutanak') => void;
   dashboardViewMode: "documents" | "prices";
   setDashboardViewMode: (val: "documents" | "prices") => void;
   stageDocs: any[];
@@ -45,7 +45,7 @@ interface PiyasaFiyatArastirmasiDashboardProps {
 
 export function PiyasaFiyatArastirmasiDashboard({
   setIsFormOpen,
-  handleNewPfat,
+  handleNewDocument,
   dashboardViewMode,
   setDashboardViewMode,
   stageDocs,
@@ -105,11 +105,20 @@ export function PiyasaFiyatArastirmasiDashboard({
 
         {/* Right side: Primary CTA and layout controls */}
         <div className="flex flex-wrap items-center justify-end gap-3 w-fit">
-          {/* Primary Action Button */}
+          {/* Separate Actions */}
           <button
-            onClick={handleNewPfat}
-            className="group flex items-center gap-2 text-xs font-semibold px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 h-10 cursor-pointer border border-blue-500/30 shrink-0"
-            title="İstekli Teklif Formları Girişi & Piyasa Fiyat Araştırma Tutanağı / Yaklaşık Maliyet Oluşturma Alanı"
+            onClick={() => handleNewDocument("maliyet")}
+            className="group flex items-center gap-2 text-xs font-semibold px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 rounded-xl transition-all duration-300 h-10 cursor-pointer border border-slate-250 dark:border-slate-750/80 shrink-0 shadow-3xs"
+            title="Yeni Yaklaşık Maliyet Hesap Cetveli oluşturma ve teklif/proforma giriş alanı"
+          >
+            <Plus className="w-4.5 h-4.5 transition-transform group-hover:scale-110 group-hover:rotate-90 duration-300 text-blue-500" />
+            <span>Yeni Yaklaşık Maliyet Oluştur</span>
+          </button>
+
+          <button
+            onClick={() => handleNewDocument("tutanak")}
+            className="group flex items-center gap-2 text-xs font-semibold px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 h-10 cursor-pointer border border-blue-500/30 shrink-0"
+            title="Yeni teklif formları girişi ve kazanan firma belirleme alanı"
           >
             <Plus className="w-4.5 h-4.5 transition-transform group-hover:scale-110 group-hover:rotate-90 duration-300" />
             <span>Yeni Piyasa Fiyat Araştırma Tutanağı (PFAT) Oluştur</span>
