@@ -121,6 +121,19 @@ export function PrintDropdownButton({
     return clean
   }
 
+  function isSablonMatch(docStr: string, sablon: any): boolean {
+    if (!docStr || !sablon) return false
+    const cleanDocStr = docStr.replace(/\.html$/i, '')
+    const cleanAd = (sablon.ad || '').replace(/^\[(.*?)\]\s*/, '').replace(/\.html$/i, '')
+    const cleanDosya = (sablon.dosya_adi || '').replace(/\.html$/i, '')
+
+    const normDoc = normalizeForMatch(cleanDocStr)
+    const normAd = normalizeForMatch(cleanAd)
+    const normDosya = normalizeForMatch(cleanDosya)
+
+    return normDoc === normAd || normDoc === normDosya
+  }
+
   const starredDocsForFilter = useMemo(() => {
     const activePresetId = selectedPresetId || (presets.length > 0 ? presets[0].id : '')
     if (activePresetId) {
@@ -132,8 +145,7 @@ export function PrintDropdownButton({
 
   const hasStarred = useMemo(() => {
     return stageSablons.some((sablon) => {
-      const cleanName = getCleanName(sablon.ad)
-      return starredDocsForFilter.some((d) => normalizeForMatch(d) === normalizeForMatch(cleanName))
+      return starredDocsForFilter.some((d) => isSablonMatch(d, sablon))
     })
   }, [stageSablons, starredDocsForFilter])
 
@@ -144,10 +156,7 @@ export function PrintDropdownButton({
   const displaySablons = useMemo(() => {
     if (filter === 'starred') {
       return stageSablons.filter((sablon) => {
-        const cleanName = getCleanName(sablon.ad)
-        return starredDocsForFilter.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(cleanName)
-        )
+        return starredDocsForFilter.some((d) => isSablonMatch(d, sablon))
       })
     }
     return stageSablons
