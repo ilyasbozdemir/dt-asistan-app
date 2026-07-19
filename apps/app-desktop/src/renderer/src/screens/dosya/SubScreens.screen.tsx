@@ -90,6 +90,7 @@ export function SubScreen({
       })
   }, [activeDosyaId, title, setActiveStarredDocs])
 
+  return (
     <div className={cn(
       "p-6 md:p-8 max-w-6xl mx-auto flex gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
       !showVerticalStepper && "flex-col gap-6"

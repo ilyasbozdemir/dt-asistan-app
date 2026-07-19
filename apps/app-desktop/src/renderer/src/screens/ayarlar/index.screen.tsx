@@ -3,10 +3,7 @@ import { useAyarlarHooks } from "./ayarlar.hooks";
 import { menuItems } from "./ayarlar.constants";
 import { Button } from "../../components/ui/Button";
 import { useSettingsStore } from "../../store/settingsStore";
-import {
-  Save,
-  Settings
-} from "lucide-react";
+import { Save, Settings } from "lucide-react";
 import { InnerMenu, InnerMenuItem } from "../../components/ui/InnerMenu";
 import TemaScreen from "./TemaScreen";
 import { useLocation } from "@tanstack/react-router";
@@ -51,21 +48,24 @@ export default function AyarlarScreen(): React.ReactNode {
     return "genel";
   });
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tabParam = params.get("tab") as TabType;
+  const params = new URLSearchParams(location.search as any);
+  const currentTabParam = params.get("tab") as TabType;
+  const [prevTabParam, setPrevTabParam] = useState(currentTabParam);
+
+  if (currentTabParam !== prevTabParam) {
+    setPrevTabParam(currentTabParam);
     if (
-      tabParam === "genel" ||
-      tabParam === "smtp" ||
-      tabParam === "tema" ||
-      tabParam === "developer" ||
-      tabParam === "ai" ||
-      tabParam === "archive" ||
-      tabParam === "sync"
+      currentTabParam === "genel" ||
+      currentTabParam === "smtp" ||
+      currentTabParam === "tema" ||
+      currentTabParam === "developer" ||
+      currentTabParam === "ai" ||
+      currentTabParam === "archive" ||
+      currentTabParam === "sync"
     ) {
-      setActiveTab(tabParam);
+      setActiveTab(currentTabParam);
     }
-  }, [location.search]);
+  }
 
   const [saving, setSaving] = useState(false);
 
@@ -76,6 +76,10 @@ export default function AyarlarScreen(): React.ReactNode {
   const [smtpPass, setSmtpPass] = useState("");
   const [showSmtpPass, setShowSmtpPass] = useState(false);
   const [smtpSecure, setSmtpSecure] = useState(false);
+
+  // Tab: Genel
+  const [disableDocumentGuidance, setDisableDocumentGuidance] = useState(false);
+  const [unifiedStepperMode, setUnifiedStepperMode] = useState(true);
 
   // Tab: Geliştirici Ayarları
   const [devUpdateTestMode, setDevUpdateTestMode] = useState(false);
@@ -155,6 +159,7 @@ export default function AyarlarScreen(): React.ReactNode {
         setSyncServerPort(settings.sync_server_port || "");
         setSyncServerToken(settings.sync_server_token || "");
         setDisableDocumentGuidance(settings.disableDocumentGuidance === "true");
+        setUnifiedStepperMode(settings.unifiedStepperMode !== "false");
       }, 0);
     }
   }, [settings]);
@@ -336,6 +341,7 @@ export default function AyarlarScreen(): React.ReactNode {
         dataToSave.disableDocumentGuidance = disableDocumentGuidance
           ? "true"
           : "false";
+        dataToSave.unifiedStepperMode = unifiedStepperMode ? "true" : "false";
       } else if (tab === "smtp") {
         dataToSave.smtp_host = smtpHost;
         dataToSave.smtp_port = smtpPort;
@@ -373,8 +379,6 @@ export default function AyarlarScreen(): React.ReactNode {
       setSaving(false);
     }
   };
-
-
 
   return (
     <div className="p-8 max-w-6xl mx-auto flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-full">

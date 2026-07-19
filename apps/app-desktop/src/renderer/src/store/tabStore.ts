@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useSettingsStore } from './settingsStore'
 
 export interface TabItem {
   path: string
@@ -119,6 +120,36 @@ export const useTabStore = create<TabState>((set, get) => ({
         const updatedTabs = [...tabs]
         const label = getTabLabel(path)
         updatedTabs[existingKurumIndex] = { path, label }
+        set({ tabs: updatedTabs, activeTabPath: path })
+        return
+      }
+    }
+
+    const { unifiedStepperMode } = useSettingsStore.getState()
+    const isDosyaAsamasiPath = [
+      '/dosya/hazirlik-ve-ihtiyac',
+      '/dosya/piyasa-fiyat-arastirmasi',
+      '/dosya/siparis-ve-sozlesme',
+      '/dosya/kabul-ve-odeme',
+      '/dosya/klasor-ve-kapaklar'
+    ].some((p) => cleanPath.startsWith(p))
+
+    if (unifiedStepperMode && isDosyaAsamasiPath) {
+      const existingDosyaIndex = tabs.findIndex((t) => {
+        const tClean = t.path.split('?')[0]
+        return [
+          '/dosya/hazirlik-ve-ihtiyac',
+          '/dosya/piyasa-fiyat-arastirmasi',
+          '/dosya/siparis-ve-sozlesme',
+          '/dosya/kabul-ve-odeme',
+          '/dosya/klasor-ve-kapaklar'
+        ].some((p) => tClean.startsWith(p))
+      })
+
+      if (existingDosyaIndex > -1) {
+        const updatedTabs = [...tabs]
+        const label = getTabLabel(path)
+        updatedTabs[existingDosyaIndex] = { path, label }
         set({ tabs: updatedTabs, activeTabPath: path })
         return
       }
