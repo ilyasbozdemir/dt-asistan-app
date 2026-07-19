@@ -404,6 +404,22 @@ export function usePiyasaFiyatArastirmasiLogic() {
     }, 0)
   }, [items, getAverageBid, getLowestBidInfo, hesaplamaEsasi])
 
+  /**
+   * "Yeni PFAT Oluştur" butonuna tıklandığında çağrılır.
+   * Bir önceki oturumdan kalan tarih / teklif / seçim verilerini temizleyip
+   * formu boş olarak açar.
+   */
+  const handleNewPfat = () => {
+    setMaliyetCetveliTarihi('')
+    setTutanakTarihi('')
+    setBids({})
+    setManualWinnerFirmaId(null)
+    setSetLowestFirmAsWinner(true)
+    setSyncTutanak(true)
+    setBelgeleriKaydet(true)
+    setIsFormOpen(true)
+  }
+
   const handleSaveToDosya = async (): Promise<void> => {
     const total = getEstimatedCostTotal()
     if (total === 0) {
@@ -646,6 +662,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
     getLowestBidInfo,
     getAverageBid,
     getEstimatedCostTotal,
+    handleNewPfat,
     handleSaveToDosya,
     lowestTotalFirmaId,
     isEditingFirms,

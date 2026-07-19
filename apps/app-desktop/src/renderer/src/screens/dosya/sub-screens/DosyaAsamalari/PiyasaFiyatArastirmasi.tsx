@@ -57,6 +57,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     getAverageBid,
     getEstimatedCostTotal,
     handleSaveToDosya,
+    handleNewPfat,
     lowestTotalFirmaId,
     isEditingFirms,
     setIsEditingFirms,
@@ -152,6 +153,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       {!isFormOpen && (
         <PiyasaFiyatArastirmasiDashboard
           setIsFormOpen={setIsFormOpen}
+          handleNewPfat={handleNewPfat}
           setActiveFormTab={setActiveFormTab}
           dashboardViewMode={dashboardViewMode}
           setDashboardViewMode={setDashboardViewMode}

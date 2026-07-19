@@ -14,6 +14,7 @@ import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
+  handleNewPfat: () => void;
   dashboardViewMode: "documents" | "prices";
   setDashboardViewMode: (val: "documents" | "prices") => void;
   stageDocs: any[];
@@ -44,6 +45,7 @@ interface PiyasaFiyatArastirmasiDashboardProps {
 
 export function PiyasaFiyatArastirmasiDashboard({
   setIsFormOpen,
+  handleNewPfat,
   dashboardViewMode,
   setDashboardViewMode,
   stageDocs,
@@ -105,7 +107,7 @@ export function PiyasaFiyatArastirmasiDashboard({
         <div className="flex flex-wrap items-center justify-end gap-3 w-fit">
           {/* Primary Action Button */}
           <button
-            onClick={() => setIsFormOpen(true)}
+            onClick={handleNewPfat}
             className="group flex items-center gap-2 text-xs font-semibold px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 h-10 cursor-pointer border border-blue-500/30 shrink-0"
             title="İstekli Teklif Formları Girişi & Piyasa Fiyat Araştırma Tutanağı / Yaklaşık Maliyet Oluşturma Alanı"
           >
