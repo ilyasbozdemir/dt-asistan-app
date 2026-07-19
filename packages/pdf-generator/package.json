@@ -1,0 +1,13 @@
+{
+  "name": "@dt-asistan/pdf-generator",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "dependencies": {
+    "puppeteer": "^25.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  }
+}
