@@ -287,27 +287,40 @@ export function buildDocumentContext(
     isBold: item.isBold || false
   }))
 
-  // evrakSayisi formatting: detsisno-yil-sayisi
+  // evrakSayisi formatting: E-DETSIS-SDP-NO (e.g. E-10234521-934.01-0001)
   const detsisNo = kurum?.detsis_kodu || ''
+  const dosyaSayisi = dosyaResData?.temin_no || ''
   const dosyaYili =
     dosyaResData?.butce_yili ||
     (dosyaResData?.tarih ? dosyaResData.tarih.split('.')[2] : new Date().getFullYear())
-  const dosyaSayisi = dosyaResData?.temin_no || ''
+
+  let sdpAltKodu = '99'
+  if (rawTur === 'mal') {
+    sdpAltKodu = '01'
+  } else if (rawTur === 'hizmet' || rawTur === 'danismanlik') {
+    sdpAltKodu = '02'
+  } else if (rawTur === 'yapim_isi' || rawTur === 'yapim') {
+    sdpAltKodu = '03'
+  }
+  const sdpKodu = `934.${sdpAltKodu}`
 
   let formattedEvrakSayisi = 'Belirtilmedi'
-  if (detsisNo) {
-    if (dosyaYili && dosyaSayisi) {
-      const cleanSayi = dosyaSayisi.includes('/')
-        ? dosyaSayisi.split('/').pop()
-        : dosyaSayisi.includes('-')
-          ? dosyaSayisi.split('-').pop()
-          : dosyaSayisi
-      formattedEvrakSayisi = `${detsisNo}-${dosyaYili}/${cleanSayi}`
+  if (dosyaSayisi) {
+    const rawNumberStr = dosyaSayisi.includes('/')
+      ? dosyaSayisi.split('/').pop()
+      : dosyaSayisi.includes('-')
+        ? dosyaSayisi.split('-').pop()
+        : dosyaSayisi
+    const cleanSayi = String(rawNumberStr || '').replace(/\D/g, '') || '1'
+    const paddedSayi = cleanSayi.padStart(4, '0')
+
+    if (detsisNo) {
+      formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-${paddedSayi}`
     } else {
-      formattedEvrakSayisi = detsisNo
+      formattedEvrakSayisi = paddedSayi
     }
-  } else if (dosyaSayisi) {
-    formattedEvrakSayisi = dosyaSayisi
+  } else if (detsisNo) {
+    formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-0001`
   }
 
   const rawMaddeler = dosyaResData?.isin_aciklama_maddeleri
