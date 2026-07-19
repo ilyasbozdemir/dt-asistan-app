@@ -2,6 +2,8 @@ export interface TableColumnMapping {
   tablo?: string
   sutun?: string
   iliskili_id?: string // Aktif dosya ID'sine (activeDosyaId) göre filtreleme yapılacak kolon adı (örn: 'temin_dosya_id' veya 'id')
+  iliskiliTablo?: string // Foreign key ilişki kurulacak tablo (örn: 'TANIM_Personel')
+  iliskiliSutun?: string // İlişkili tablodaki çekilecek kolon (örn: 'ad_soyad')
   deger?: any // Tablodan çekmek yerine doğrudan kullanılacak sabit değer
   varsayilan?: any // Tablodaki değer boş/null ise kullanılacak varsayılan değer
   altEslestirme?: Record<string, string> // Liste/tablo verilerinde satır sütunlarını şablon değişkenleriyle eşleştirmek için (örn: { malzemeAdi: 'kalem_adi' })

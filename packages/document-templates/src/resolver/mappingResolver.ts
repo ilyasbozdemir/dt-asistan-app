@@ -1,6 +1,60 @@
 import { ProcessMapping, TableColumnMapping } from './types';
 
 /**
+ * Resolves official E-DETSIS formatted document number e.g. E-10234521-934.01-0001
+ */
+export async function resolveEvrakSayisi(
+  activeDosyaId: number,
+  queryExecutor: (sql: string, params: any[]) => Promise<any[]>
+): Promise<string> {
+  try {
+    const kurumRes = await queryExecutor('SELECT detsis_kodu FROM TANIM_Kurum LIMIT 1', []);
+    const detsisNo = kurumRes?.[0]?.detsis_kodu || '';
+
+    const dosyaRes = await queryExecutor(
+      'SELECT temin_no, alim_turu FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
+      [activeDosyaId]
+    );
+
+    const dosyaSayisi = dosyaRes?.[0]?.temin_no || '';
+    const rawTur = (dosyaRes?.[0]?.alim_turu || '').toLowerCase();
+
+    let sdpAltKodu = '99';
+    if (rawTur === 'mal') {
+      sdpAltKodu = '01';
+    } else if (rawTur === 'hizmet' || rawTur === 'danismanlik') {
+      sdpAltKodu = '02';
+    } else if (rawTur === 'yapim_isi' || rawTur === 'yapim') {
+      sdpAltKodu = '03';
+    }
+    const sdpKodu = `934.${sdpAltKodu}`;
+
+    let formattedEvrakSayisi = 'Belirtilmedi';
+    if (dosyaSayisi) {
+      const rawNumberStr = dosyaSayisi.includes('/')
+        ? dosyaSayisi.split('/').pop()
+        : dosyaSayisi.includes('-')
+        ? dosyaSayisi.split('-').pop()
+        : dosyaSayisi;
+      const cleanSayi = String(rawNumberStr || '').replace(/\D/g, '') || '1';
+      const paddedSayi = cleanSayi.padStart(4, '0');
+
+      if (detsisNo) {
+        formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-${paddedSayi}`;
+      } else {
+        formattedEvrakSayisi = paddedSayi;
+      }
+    } else if (detsisNo) {
+      formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-0001`;
+    }
+
+    return formattedEvrakSayisi;
+  } catch (err) {
+    return 'E-00000000-934.01-0001';
+  }
+}
+
+/**
  * Resolves all variables in a ProcessMapping using database query execution.
  */
 export async function resolveTemplateData(
@@ -11,6 +65,11 @@ export async function resolveTemplateData(
   const resolvedPayload: Record<string, any> = {};
 
   for (const [sablonDegiskeni, rule] of Object.entries(mapping)) {
+    // 0. Automatic official evrakSayisi formatting
+    if (sablonDegiskeni === 'evrakSayisi' && !rule.formul && rule.deger === undefined) {
+      resolvedPayload['evrakSayisi'] = await resolveEvrakSayisi(activeDosyaId, queryExecutor);
+      continue;
+    }
     // 1. Static value
     if (rule.deger !== undefined) {
       resolvedPayload[sablonDegiskeni] = rule.deger;
@@ -48,15 +107,21 @@ export async function resolveTemplateData(
         let query = '';
         let params: any[] = [];
         
-        if (rule.iliskili_id) {
-          query = `SELECT ${rule.sutun} FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ? LIMIT 1`;
+        if (rule.iliskiliTablo && rule.iliskiliSutun) {
+          query = `SELECT p.${rule.iliskiliSutun} AS res_val FROM ${rule.tablo} d LEFT JOIN ${rule.iliskiliTablo} p ON d.${rule.sutun} = p.id WHERE d.id = ? LIMIT 1`;
+          params = [activeDosyaId];
+        } else if (rule.iliskili_id) {
+          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ? LIMIT 1`;
+          params = [activeDosyaId];
+        } else if (rule.tablo.toLowerCase().startsWith('data_')) {
+          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} WHERE id = ? LIMIT 1`;
           params = [activeDosyaId];
         } else {
-          query = `SELECT ${rule.sutun} FROM ${rule.tablo} LIMIT 1`;
+          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} LIMIT 1`;
         }
 
         const res = await queryExecutor(query, params);
-        const rawValue = res?.[0]?.[rule.sutun];
+        const rawValue = res?.[0]?.res_val;
         
         // Handle stringified JSON arrays (like antetSatirlari)
         if (typeof rawValue === 'string' && (rawValue.trim().startsWith('[') || rawValue.trim().startsWith('{'))) {

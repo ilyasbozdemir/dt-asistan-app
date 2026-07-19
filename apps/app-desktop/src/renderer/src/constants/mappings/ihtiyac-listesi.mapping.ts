@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const IhtiyacListesiMapping: ProcessMapping = {
   antetSatirlari: {
@@ -8,9 +8,7 @@ export const IhtiyacListesiMapping: ProcessMapping = {
   },
   dosyaKonusu: { deger: 'İhtiyaç Listesi', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
-    formul:
-      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
+    aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı (örn: E-10234521-934.01-0001)'
   },
 
   sunulacakMakamAdi: {
@@ -87,5 +85,35 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     sutun: 'kep_adresi',
     varsayilan: '[Kep Adresi Belirtilmedi]',
     aciklama: 'Kurum kep adresi'
+  },
+
+  // Personnel signature auto-resolutions
+  hazirlayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Hazırlayan Personel Adı Soyadı'
+  },
+  hazirlayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Hazırlayan Personel Unvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Harcama Yetkilisi / Onaylayan Adı Soyadı'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Harcama Yetkilisi / Onaylayan Unvanı'
   }
 }
