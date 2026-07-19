@@ -61,7 +61,8 @@ export const DocumentLayout = React.forwardRef<
       }
     `;
 
-    const isLastPage = pageNumber !== undefined && totalPages !== undefined && pageNumber === totalPages;
+    const isLastPage = pageNumber !== undefined && totalPages !== undefined &&
+      pageNumber === totalPages;
 
     return (
       <div

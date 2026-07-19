@@ -137,7 +137,7 @@ export const checkIsSablonDisabled = (cleanName: string, dosyaContext: any): boo
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function useDosyaAsamasiSablons() {
+export function useDosyaAsamasiSablonsV2() {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } = useWorkspaceStore()
   const {
     sablons,

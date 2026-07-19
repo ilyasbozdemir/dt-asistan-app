@@ -4,11 +4,14 @@ import { SubScreen } from "../../SubScreens.screen";
 import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
 import {
   normalizeForMatch,
-  useDosyaAsamasiSablons,
 } from "./useDosyaAsamasiSablons";
+import {
+  useDosyaAsamasiSablonsV2,
+} from "./useDosyaAsamasiSablonsV2";
 import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
 import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
 import { MalzemeTablosu } from "../components/MalzemeListesi/MalzemeTablosu";
+import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
 
 export function HazirlikVeIhtiyac(): React.JSX.Element {
   const {
@@ -37,7 +40,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     saveSnapshot,
     isSablonDisabled,
     activeDosya,
-  } = useDosyaAsamasiSablons();
+  } = useDosyaAsamasiSablonsV2();
 
   const state = useMalzemeListesi(activeDosyaId);
 
@@ -48,6 +51,21 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
           normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
       )
       : false;
+
+    const isV2 = previewData?.dosyaAdi &&
+      previewData.dosyaAdi.replace(".html", "") === "ihtiyac-listesi";
+
+    if (isV2) {
+      return (
+        <DocumentPreviewModalV2
+          isOpen={previewModalOpen}
+          documentId={previewData.dosyaAdi
+            ? previewData.dosyaAdi.replace(".html", "")
+            : ""}
+          onClose={() => setPreviewModalOpen(false)}
+        />
+      );
+    }
 
     return (
       <DocumentPreviewModal
@@ -68,7 +86,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
         isInline={true}
         templateTestVerisi={previewData.templateTestVerisi}
-        dosyaAdi={previewData.dosyaAdi}
+        dosyaAdi={previewData.dosyaAdi || undefined}
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />

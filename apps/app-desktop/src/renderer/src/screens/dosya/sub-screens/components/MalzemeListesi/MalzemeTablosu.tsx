@@ -1,19 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Check,
-  ChevronDown,
-  Edit2,
-  Package,
-  Plus,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react";
+import { Check, Edit2, Package, Plus, Trash2, Users, X } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
-import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
 import { MalzemeTabloPopover } from "./components/MalzemeTabloPopover";
 import { useSettingsStore } from "../../../../../store/settingsStore";
+import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
 
 export function MalzemeTablosu({
   state,
@@ -506,7 +497,7 @@ export function MalzemeTablosu({
           {combinedSablons.length > 0 &&
             onSablonClick && (
             <>
-              <PrintDropdownButton
+              <PrintDropdownButtonV2
                 kategori="1-ihtiyac-tespiti-ve-baslangic"
                 sablons={sablons}
                 overrideSablons={combinedSablons}
