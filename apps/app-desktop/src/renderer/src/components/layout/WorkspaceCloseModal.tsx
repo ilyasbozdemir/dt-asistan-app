@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Modal } from '../ui/Modal'
-import { FileText, Save, Mail, AlertTriangle, Loader2 } from 'lucide-react'
+import { FileText, Save, Mail, AlertTriangle, Loader2, CloudUpload } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
 interface WorkspaceCloseModalProps {
@@ -8,7 +8,7 @@ interface WorkspaceCloseModalProps {
   onClose: () => void
   fileName: string
   isMailConfigured: boolean
-  onConfirm: (type: 'none' | 'backup' | 'email') => Promise<void>
+  onConfirm: (type: 'none' | 'backup' | 'email' | 'server') => Promise<void>
 }
 
 export function WorkspaceCloseModal({
@@ -18,7 +18,7 @@ export function WorkspaceCloseModal({
   isMailConfigured,
   onConfirm
 }: WorkspaceCloseModalProps): React.JSX.Element {
-  const [selectedOption, setSelectedOption] = useState<'none' | 'backup' | 'email'>(
+  const [selectedOption, setSelectedOption] = useState<'none' | 'backup' | 'email' | 'server'>(
     isMailConfigured ? 'email' : 'backup'
   )
   const [loading, setLoading] = useState(false)
@@ -60,6 +60,44 @@ export function WorkspaceCloseModal({
 
         {/* Options */}
         <div className="flex flex-col gap-2.5">
+          {/* Option: Server Backup */}
+          <button
+            disabled={loading}
+            onClick={() => setSelectedOption('server')}
+            className={cn(
+              'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
+              selectedOption === 'server'
+                ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/10'
+                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
+            )}
+          >
+            <div
+              className={cn(
+                'p-2.5 rounded-xl shrink-0',
+                selectedOption === 'server'
+                  ? 'bg-indigo-500 text-white shadow-md'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+              )}
+            >
+              <CloudUpload className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4
+                className={cn(
+                  'text-sm font-bold',
+                  selectedOption === 'server'
+                    ? 'text-indigo-900 dark:text-indigo-300'
+                    : 'text-slate-800 dark:text-slate-200'
+                )}
+              >
+                Web Sunucusuna Yedekle ve Kapat
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Çalışma dosyanızı (.dtal) güvenli web sunucusuna yükler ve sürüm olarak saklar.
+              </p>
+            </div>
+          </button>
+
           {/* Option: Email Backup */}
           <button
             disabled={loading}

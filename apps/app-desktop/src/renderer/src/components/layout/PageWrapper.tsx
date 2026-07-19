@@ -124,7 +124,7 @@ export function PageWrapper(): React.ReactNode {
   }, []);
 
   const handleConfirmClose = async (
-    type: "none" | "backup" | "email",
+    type: "none" | "backup" | "email" | "server",
   ): Promise<void> => {
     if (type === "backup") {
       const res = await window.electron.ipcRenderer.invoke("workspace:backup");
@@ -137,6 +137,14 @@ export function PageWrapper(): React.ReactNode {
       );
       if (!res.success) {
         throw new Error(res.error);
+      }
+    } else if (type === "server") {
+      // IPC call to handle server backup
+      const res = await window.electron.ipcRenderer.invoke(
+        "workspace:backup-server",
+      );
+      if (!res?.success) {
+        throw new Error(res?.error || "Sunucuya yedekleme işlemi başarısız oldu.");
       }
     }
 

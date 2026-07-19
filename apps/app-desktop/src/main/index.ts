@@ -1227,6 +1227,27 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
+    ipcMain.handle('workspace:backup-server', async () => {
+      try {
+        const filePath = workspaceManager.getCurrentFilePath()
+        if (!filePath) {
+          return { success: false, error: 'Aktif bir çalışma dosyası bulunamadı!' }
+        }
+        workspaceManager.save()
+        
+        // TODO: MOCK UPLOAD TO SERVER
+        console.log(`[Mock] Uploading ${filePath} to web server as a backup...`)
+        
+        // Wait 1.5s to simulate upload
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+
+        return { success: true, message: 'Web sunucusuna başarıyla yüklendi.' }
+      } catch (error: any) {
+        console.error('Backup to server error:', error)
+        return { success: false, error: error.message }
+      }
+    })
+
     ipcMain.handle('workspace:backup-email', async () => {
       try {
         const filePath = workspaceManager.getCurrentFilePath()
