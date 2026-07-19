@@ -103,6 +103,10 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       description="Dosyanıza malzeme, hizmet veya yapım işi ekleyebilir ve yönetebilirsiniz. Son Alım Fiyat Cetveli şablonu sayesinde, malzemelerin son alım fiyatları, kimden/hangi firmadan alındığı gibi geçmiş analiz verileri otomatik olarak listelenir."
     >
       <MalzemeEkleModal state={state} />
+
+      <p className="text-slate-500 dark:text-slate-400 mt-1 text-xs">
+        {"BUTONLARIN KATEGORİLERİ DAHA İYİ DENEİYM İÇİN SU AN HEPSİ ACIKTIR TEST EDİLMEKTEDİR."}
+      </p>
       <MalzemeTablosu
         state={state}
         stageSablons={stageSablons}
