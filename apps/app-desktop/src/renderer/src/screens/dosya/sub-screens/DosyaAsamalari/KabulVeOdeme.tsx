@@ -258,18 +258,7 @@ export function KabulVeOdeme(): React.JSX.Element {
       {kazananFirmaId && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-300">
           {/* Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5">
-            <div>
-              <h3 className="text-base font-black text-slate-855 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse">
-                </span>
-                Muayene & Kabul & Ödeme Yönetimi
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                Muayene kabul ve ödeme belgesi (ÖEB) işlemlerini, kesintileri ve
-                TİF süreçlerini bu panelden yürütebilirsiniz.
-              </p>
-            </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5">
 
             {stageSablons.length > 0 && (
               <div className="shrink-0 self-start md:self-center">

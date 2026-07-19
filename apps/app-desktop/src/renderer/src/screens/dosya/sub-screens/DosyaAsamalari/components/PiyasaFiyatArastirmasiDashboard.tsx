@@ -70,18 +70,7 @@ export function PiyasaFiyatArastirmasiDashboard({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Row 1: Title and Primary CTA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5">
-        <div>
-          <h3 className="text-base font-black text-slate-855 dark:text-slate-100 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse">
-            </span>
-            Piyasa Fiyat Araştırma Süreci
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-            Tedarikçi tekliflerini girip karşılaştırabilir, en uygun teklifleri
-            ve yaklaşık maliyet cetvelini hazırlayabilirsiniz.
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5">
 
         <button
           onClick={() => setIsFormOpen(true)}

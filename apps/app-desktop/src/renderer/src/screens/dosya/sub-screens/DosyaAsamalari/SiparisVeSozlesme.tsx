@@ -474,17 +474,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
 
           {/* ═══ Ana İçerik Kartı ═══ */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <FileCheck className="w-4 h-4 text-blue-600" />
-                  Sözleşme Süreç Yönetimi
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Doğrudan temin sözleşme ve sipariş işlemlerini bu panelden
-                  takip edebilirsiniz.
-                </p>
-              </div>
+            <div className="flex items-center justify-end border-b border-slate-100 dark:border-slate-800 pb-4">
 
               <div className="flex items-center gap-2 relative">
                 <WinnerDocumentsMenu
