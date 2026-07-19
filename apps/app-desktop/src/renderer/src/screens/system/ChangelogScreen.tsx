@@ -196,4 +196,3 @@ export default function ChangelogScreen(): React.JSX.Element {
     </div>
   )
 }
-

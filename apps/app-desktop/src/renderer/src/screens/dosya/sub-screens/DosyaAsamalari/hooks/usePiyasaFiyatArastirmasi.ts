@@ -473,7 +473,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
         if (belgeleriKaydet) {
           // Seçilen moda göre ilgili belgeyi DATA_TeminBelge tablosuna ekle
-          const docName = formMode === 'maliyet' ? 'Yaklaşık Maliyet Cetveli' : 'Piyasa Fiyat Araştırma Tutanağı'
+          const docName =
+            formMode === 'maliyet' ? 'Yaklaşık Maliyet Cetveli' : 'Piyasa Fiyat Araştırma Tutanağı'
           const docDate = formMode === 'maliyet' ? maliyetCetveliTarihi : tutanakTarihi
 
           const sablon = stageSablons.find((s: any) => {
@@ -509,12 +510,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
           )
 
           alert(
-            `${docName} başarıyla kaydedildi: ₺ ${total.toLocaleString(
-              'tr-TR',
-              {
-                minimumFractionDigits: 2
-              }
-            )}`
+            `${docName} başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2
+            })}`
           )
 
           // Belgeleri yeniden yükle
@@ -535,12 +533,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
           }
         } else {
           alert(
-            `Teklif fiyatları başarıyla kaydedildi: ₺ ${total.toLocaleString(
-              'tr-TR',
-              {
-                minimumFractionDigits: 2
-              }
-            )}`
+            `Teklif fiyatları başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2
+            })}`
           )
         }
 

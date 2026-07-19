@@ -318,4 +318,3 @@ export default function KurumScreen(): React.JSX.Element {
     </div>
   )
 }
-

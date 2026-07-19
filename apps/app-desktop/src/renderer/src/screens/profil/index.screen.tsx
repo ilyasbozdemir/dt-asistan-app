@@ -272,4 +272,3 @@ export default function ProfilScreen(): React.JSX.Element {
     </div>
   )
 }
-

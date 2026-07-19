@@ -645,4 +645,3 @@ export default function ImportScreen(): React.JSX.Element {
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import {  useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import { useWorkspaceStore } from '../../../../store/workspaceStore'
 import { useCiktiMerkeziData } from '../../CiktiMerkezi.hooks'
 import { useDocumentLogger } from '../../../../hooks/useDocumentLogger'
@@ -156,7 +156,6 @@ export function useDosyaAsamasiSablonsV2() {
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
   const [previewData, setPreviewData] = useState<PreviewData | null>(null)
 
-
   // Tanstack Router'dan arama parametresini reaktif olarak al
   const searchParams: any = useSearch({ strict: false })
   const sablonAd = searchParams?.sablonAd
@@ -220,7 +219,9 @@ export function useDosyaAsamasiSablonsV2() {
 
     const processPath = sablon.route_path || sablon.dosya_adi || ''
     const currentCtx = contextsByPath[processPath] || dosyaContext
-    const snapshotCtx = overrideCtx ? overrideCtx : await loadOrCreateSnapshot(sablon.id, currentCtx)
+    const snapshotCtx = overrideCtx
+      ? overrideCtx
+      : await loadOrCreateSnapshot(sablon.id, currentCtx)
 
     setPreviewData({
       sablonId: sablon.id,

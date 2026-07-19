@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { APP_ROUTES } from "../../constants/routeConstants";
+import React, { useMemo, useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { APP_ROUTES } from '../../constants/routeConstants'
 import {
   Download,
   FileText,
@@ -11,263 +11,245 @@ import {
   Search,
   Tag,
   Trash2,
-  Upload,
-} from "lucide-react";
-import { Button } from "../../components/ui/Button";
-import { Kalem, useMalzemelerHooks } from "./malzemeler.hooks";
-import { cn } from "../../utils/cn";
-import { DataViewMode, ViewToggle } from "../../components/ui/ViewToggle";
-import { MalzemeGroupHeader } from "./components/MalzemeGroupHeader";
-import { MalzemeGridCard } from "./components/MalzemeGridCard";
-import { MalzemeListCard } from "./components/MalzemeListCard";
-import { MalzemeTableRow } from "./components/MalzemeTableRow";
+  Upload
+} from 'lucide-react'
+import { Button } from '../../components/ui/Button'
+import { Kalem, useMalzemelerHooks } from './malzemeler.hooks'
+import { cn } from '../../utils/cn'
+import { DataViewMode, ViewToggle } from '../../components/ui/ViewToggle'
+import { MalzemeGroupHeader } from './components/MalzemeGroupHeader'
+import { MalzemeGridCard } from './components/MalzemeGridCard'
+import { MalzemeListCard } from './components/MalzemeListCard'
+import { MalzemeTableRow } from './components/MalzemeTableRow'
 
 export default function MalzemelerScreen(): React.JSX.Element {
-  const navigate = useNavigate();
-  const { kalemList, isLoading: isKalemLoading, deleteKalem } =
-    useMalzemelerHooks();
+  const navigate = useNavigate()
+  const { kalemList, isLoading: isKalemLoading, deleteKalem } = useMalzemelerHooks()
 
-  const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState("Tümü"); // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
-  const [viewMode, setViewMode] = useState<DataViewMode>("list");
-  const [groupMode, setGroupMode] = useState<"none" | "tasinir" | "okas">(
-    "none",
-  );
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [search, setSearch] = useState('')
+  const [activeTab, setActiveTab] = useState('Tümü') // Tümü, Mal, Hizmet, Personel, Hizmet, Diğer, Yapım
+  const [viewMode, setViewMode] = useState<DataViewMode>('list')
+  const [groupMode, setGroupMode] = useState<'none' | 'tasinir' | 'okas'>('none')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
 
   const handleToggleSelect = (id: number) => {
-    setSelectedIds((
-      prev,
-    ) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
 
   const handleEdit = (item: Kalem) => {
     navigate({
       to: APP_ROUTES.YENI_MALZEME,
-      search: { id: item.id } as Record<string, unknown>,
-    });
-  };
+      search: { id: item.id } as Record<string, unknown>
+    })
+  }
 
   const handleDeleteKalem = (item: Kalem) => {
-    handleDelete(item.id, item.barkod_id, item.kalem_adi);
-  };
+    handleDelete(item.id, item.barkod_id, item.kalem_adi)
+  }
 
   const handleToggleSelectAll = () => {
     if (selectedIds.length === filteredList.length) {
-      setSelectedIds([]);
+      setSelectedIds([])
     } else {
-      setSelectedIds(filteredList.map((x) => x.id));
+      setSelectedIds(filteredList.map((x) => x.id))
     }
-  };
+  }
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) {
-      alert("Lütfen silinecek kalemleri seçin.");
-      return;
+      alert('Lütfen silinecek kalemleri seçin.')
+      return
     }
 
-    if (
-      !confirm(
-        `Seçilen ${selectedIds.length} kalemi silmek istediğinize emin misiniz?`,
-      )
-    ) {
-      return;
+    if (!confirm(`Seçilen ${selectedIds.length} kalemi silmek istediğinize emin misiniz?`)) {
+      return
     }
 
-    let deletedCount = 0;
-    const inUseNames: string[] = [];
-    const failedNames: string[] = [];
+    let deletedCount = 0
+    const inUseNames: string[] = []
+    const failedNames: string[] = []
 
     for (const id of selectedIds) {
-      const item = kalemList.find((x) => x.id === id);
-      if (!item) continue;
+      const item = kalemList.find((x) => x.id === id)
+      if (!item) continue
 
       try {
         const checkRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
+          'db:query',
           `SELECT COUNT(*) as sayi FROM DATA_TeminKalem WHERE barkod_id = ?`,
-          [item.barkod_id],
-        );
+          [item.barkod_id]
+        )
         if (checkRes.success && checkRes.data?.[0]?.sayi > 0) {
-          inUseNames.push(item.kalem_adi);
-          continue;
+          inUseNames.push(item.kalem_adi)
+          continue
         }
 
-        await deleteKalem(id);
-        deletedCount++;
+        await deleteKalem(id)
+        deletedCount++
       } catch (err: any) {
-        failedNames.push(`${item.kalem_adi} (${err.message})`);
+        failedNames.push(`${item.kalem_adi} (${err.message})`)
       }
     }
 
-    let msg = "";
+    let msg = ''
     if (deletedCount > 0) {
-      msg += `${deletedCount} adet kalem başarıyla silindi.\n`;
+      msg += `${deletedCount} adet kalem başarıyla silindi.\n`
     }
     if (inUseNames.length > 0) {
-      msg +=
-        `\n⚠️ Aşağıdaki ${inUseNames.length} kalem doğrudan temin dosyalarında kullanıldığı için SİLİNEMEDİ:\n`;
-      msg += inUseNames.map((n) => `- ${n}`).join("\n") + "\n";
+      msg += `\n⚠️ Aşağıdaki ${inUseNames.length} kalem doğrudan temin dosyalarında kullanıldığı için SİLİNEMEDİ:\n`
+      msg += inUseNames.map((n) => `- ${n}`).join('\n') + '\n'
     }
     if (failedNames.length > 0) {
-      msg +=
-        `\n❌ Aşağıdaki ${failedNames.length} kalemi silerken hata oluştu:\n`;
-      msg += failedNames.map((n) => `- ${n}`).join("\n") + "\n";
+      msg += `\n❌ Aşağıdaki ${failedNames.length} kalemi silerken hata oluştu:\n`
+      msg += failedNames.map((n) => `- ${n}`).join('\n') + '\n'
     }
 
-    alert(msg);
-    setSelectedIds([]);
-  };
+    alert(msg)
+    setSelectedIds([])
+  }
 
-  const handleDelete = async (
-    id: number,
-    barkod_id: string,
-    kalem_adi: string,
-  ) => {
+  const handleDelete = async (id: number, barkod_id: string, kalem_adi: string) => {
     // Önce bu malzemenin herhangi bir doğrudan temin dosyasında kullanılıp kullanılmadığını kontrol et
     try {
       const checkRes = await window.electron.ipcRenderer.invoke(
-        "db:query",
+        'db:query',
         `SELECT COUNT(*) as sayi FROM DATA_TeminKalem WHERE barkod_id = ?`,
-        [barkod_id],
-      );
+        [barkod_id]
+      )
       if (checkRes.success && checkRes.data?.[0]?.sayi > 0) {
-        const kullanimSayisi = checkRes.data[0].sayi;
+        const kullanimSayisi = checkRes.data[0].sayi
         alert(
           `"${kalem_adi}" kalemi silinemez!\n\n` +
             `Bu malzeme/hizmet, ${kullanimSayisi} doğrudan temin dosyasında (kalem olarak) kullanılmaktadır.\n\n` +
-            `Silmek istiyorsanız önce ilgili temin dosyalarından bu kalemi kaldırmanız gerekmektedir.`,
-        );
-        return;
+            `Silmek istiyorsanız önce ilgili temin dosyalarından bu kalemi kaldırmanız gerekmektedir.`
+        )
+        return
       }
     } catch {
       // Kontrol başarısız olursa yine de silmeye izin vermiyoruz
-      alert("Kullanım kontrolü yapılamadı. Lütfen tekrar deneyin.");
-      return;
+      alert('Kullanım kontrolü yapılamadı. Lütfen tekrar deneyin.')
+      return
     }
 
     if (confirm(`"${kalem_adi}" kaydını silmek istediğinize emin misiniz?`)) {
       try {
-        await deleteKalem(id);
+        await deleteKalem(id)
       } catch (error: any) {
-        alert("Silinirken hata oluştu: " + error.message);
+        alert('Silinirken hata oluştu: ' + error.message)
       }
     }
-  };
+  }
 
   const handleImport = async () => {
     if (
       !window.confirm(
-        'ÖNERİ: Ürünlerin ID ve Barkod çakışması yaşamaması için, manuel malzeme girişlerinden ÖNCE Excel aktarımını yapmanız tavsiye edilir.\n\nExcel\'deki "Barkod_ID" mevcut ise mevcut kayıtlar güncellenir, yoksa yeni olarak eklenir.\n\nAktarıma devam edilsin mi?',
+        'ÖNERİ: Ürünlerin ID ve Barkod çakışması yaşamaması için, manuel malzeme girişlerinden ÖNCE Excel aktarımını yapmanız tavsiye edilir.\n\nExcel\'deki "Barkod_ID" mevcut ise mevcut kayıtlar güncellenir, yoksa yeni olarak eklenir.\n\nAktarıma devam edilsin mi?'
       )
     ) {
-      return;
+      return
     }
 
     try {
-      const res = await window.electron.ipcRenderer.invoke(
-        "db:import-kalem-excel",
-      );
+      const res = await window.electron.ipcRenderer.invoke('db:import-kalem-excel')
       if (res.success) {
-        alert(`İçe aktarma başarılı. ${res.count} kalem güncellendi/eklendi.`);
-        window.location.reload();
-      } else if (res.error !== "İptal edildi") {
-        alert("İçe aktarma hatası: " + res.error);
+        alert(`İçe aktarma başarılı. ${res.count} kalem güncellendi/eklendi.`)
+        window.location.reload()
+      } else if (res.error !== 'İptal edildi') {
+        alert('İçe aktarma hatası: ' + res.error)
       }
     } catch (e: any) {
-      alert("Hata: " + e.message);
+      alert('Hata: ' + e.message)
     }
-  };
+  }
 
   const handleExportExcel = async () => {
     try {
-      const res = await window.electron.ipcRenderer.invoke(
-        "db:export-kalem-excel",
-      );
-      if (res.error && res.error !== "İptal edildi") {
-        alert("Excel dışa aktarma hatası: " + res.error);
+      const res = await window.electron.ipcRenderer.invoke('db:export-kalem-excel')
+      if (res.error && res.error !== 'İptal edildi') {
+        alert('Excel dışa aktarma hatası: ' + res.error)
       }
     } catch (e: any) {
-      alert("Hata: " + e.message);
+      alert('Hata: ' + e.message)
     }
-  };
+  }
 
   const filteredList = kalemList.filter((m) => {
     const matchesSearch =
       m.kalem_adi.toLowerCase().includes(search.toLowerCase()) ||
-      (m.tasinir_kodu || "").toLowerCase().includes(search.toLowerCase()) ||
-      (m.okas_kodu || "").toLowerCase().includes(search.toLowerCase()) ||
-      m.barkod_id.toLowerCase().includes(search.toLowerCase());
+      (m.tasinir_kodu || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.okas_kodu || '').toLowerCase().includes(search.toLowerCase()) ||
+      m.barkod_id.toLowerCase().includes(search.toLowerCase())
 
-    const matchesTab = activeTab === "Tümü" ||
+    const matchesTab =
+      activeTab === 'Tümü' ||
       m.tipi === activeTab ||
-      (activeTab === "Hizmet" && m.tipi?.startsWith("Hizmet"));
+      (activeTab === 'Hizmet' && m.tipi?.startsWith('Hizmet'))
 
-    return matchesSearch && matchesTab;
-  });
+    return matchesSearch && matchesTab
+  })
 
   const groupedItems = useMemo(() => {
-    if (groupMode === "none") {
-      return { Tümü: filteredList };
+    if (groupMode === 'none') {
+      return { Tümü: filteredList }
     }
 
-    const groups: Record<string, typeof filteredList> = {};
+    const groups: Record<string, typeof filteredList> = {}
 
     filteredList.forEach((item) => {
-      let key = "Diğer / Kodsuz";
-      if (groupMode === "tasinir") {
+      let key = 'Diğer / Kodsuz'
+      if (groupMode === 'tasinir') {
         if (item.tasinir_kodu) {
-          const parts = item.tasinir_kodu.split(".");
+          const parts = item.tasinir_kodu.split('.')
           if (parts.length >= 2) {
-            key = `${parts[0]}.${parts[1]}`;
+            key = `${parts[0]}.${parts[1]}`
           } else {
-            key = parts[0];
+            key = parts[0]
           }
         } else {
-          key = "Taşınır Kodsuz";
+          key = 'Taşınır Kodsuz'
         }
-      } else if (groupMode === "okas") {
+      } else if (groupMode === 'okas') {
         if (item.okas_kodu) {
-          const cleanOkas = item.okas_kodu.replace(/[^0-9]/g, "");
+          const cleanOkas = item.okas_kodu.replace(/[^0-9]/g, '')
           if (cleanOkas.length >= 2) {
-            key = `${cleanOkas.substring(0, 2)}xx`;
+            key = `${cleanOkas.substring(0, 2)}xx`
           } else if (cleanOkas.length > 0) {
-            key = `${cleanOkas}x`;
+            key = `${cleanOkas}x`
           } else {
-            key = item.okas_kodu;
+            key = item.okas_kodu
           }
         } else {
-          key = "OKAS Kodsuz";
+          key = 'OKAS Kodsuz'
         }
       }
 
       if (!groups[key]) {
-        groups[key] = [];
+        groups[key] = []
       }
-      groups[key].push(item);
-    });
+      groups[key].push(item)
+    })
 
     const sortedKeys = Object.keys(groups).sort((a, b) => {
-      const isAExtra = a.includes("Kodsuz") || a.includes("Diğer");
-      const isBExtra = b.includes("Kodsuz") || b.includes("Diğer");
-      if (isAExtra && !isBExtra) return 1;
-      if (!isAExtra && isBExtra) return -1;
+      const isAExtra = a.includes('Kodsuz') || a.includes('Diğer')
+      const isBExtra = b.includes('Kodsuz') || b.includes('Diğer')
+      if (isAExtra && !isBExtra) return 1
+      if (!isAExtra && isBExtra) return -1
       return a.localeCompare(b, undefined, {
         numeric: true,
-        sensitivity: "base",
-      });
-    });
+        sensitivity: 'base'
+      })
+    })
 
-    const sortedGroups: Record<string, typeof filteredList> = {};
+    const sortedGroups: Record<string, typeof filteredList> = {}
     sortedKeys.forEach((k) => {
-      sortedGroups[k] = groups[k];
-    });
+      sortedGroups[k] = groups[k]
+    })
 
-    return sortedGroups;
-  }, [filteredList, groupMode]);
+    return sortedGroups
+  }, [filteredList, groupMode])
 
   if (isKalemLoading) {
-    return <div className="p-8 text-slate-500">Yükleniyor...</div>;
+    return <div className="p-8 text-slate-500">Yükleniyor...</div>
   }
 
   return (
@@ -279,14 +261,13 @@ export default function MalzemelerScreen(): React.JSX.Element {
             Kayıtlı Mal / Hizmet / Yapım İşleri Listesi
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-4xl">
-            Yaklaşık maliyet hesaplarında ve teklif mektuplarında kullanılacak
-            malzeme, hizmet ve yapım kalemlerini yönetin.
+            Yaklaşık maliyet hesaplarında ve teklif mektuplarında kullanılacak malzeme, hizmet ve
+            yapım kalemlerini yönetin.
           </p>
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <div className="flex-1">
               <p className="mb-1">
-                💡 <strong>İpucu:</strong>{" "}
-                Güncel Taşınır Kodları listesine ulaşmak için{" "}
+                💡 <strong>İpucu:</strong> Güncel Taşınır Kodları listesine ulaşmak için{' '}
                 <a
                   href="https://muhasebat.hmb.gov.tr/tasinir-kod-listesi"
                   target="_blank"
@@ -294,13 +275,12 @@ export default function MalzemelerScreen(): React.JSX.Element {
                   className="underline font-semibold hover:text-blue-800 dark:hover:text-blue-200"
                 >
                   Muhasebat Genel Müdürlüğü
-                </a>{" "}
+                </a>{' '}
                 sayfasını ziyaret edebilirsiniz.
               </p>
               <p>
-                📣 Uygulama altyapımız bu kodları tamamen desteklemektedir.
-                Hazır malzeme listesi ve kodlarının varsayılan olarak eklenmesi
-                için{" "}
+                📣 Uygulama altyapımız bu kodları tamamen desteklemektedir. Hazır malzeme listesi ve
+                kodlarının varsayılan olarak eklenmesi için{' '}
                 <a
                   href="https://github.com/ilyasbozdemir/dt-asistan-app"
                   target="_blank"
@@ -308,7 +288,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
                   className="underline font-semibold hover:text-blue-800 dark:hover:text-blue-200"
                 >
                   GitHub sayfamızdan Issue açarak
-                </a>{" "}
+                </a>{' '}
                 bize veritabanı taleplerinizi iletebilirsiniz.
               </p>
             </div>
@@ -346,7 +326,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
               className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
               title="Tüm verileri Excel olarak indir"
             >
-              <Download className="w-4 h-4 text-blue-600 shrink-0" />{" "}
+              <Download className="w-4 h-4 text-blue-600 shrink-0" />{' '}
               <span className="whitespace-nowrap">Excel Dışa Aktar</span>
             </Button>
             <Button
@@ -355,7 +335,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
               className="gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
               title="Excel'den toplu kalem yükle"
             >
-              <Upload className="w-4 h-4 text-orange-600 shrink-0" />{" "}
+              <Upload className="w-4 h-4 text-orange-600 shrink-0" />{' '}
               <span className="whitespace-nowrap">Excel İçe Aktar</span>
             </Button>
             <Link to="/tasinirkod" className="shrink-0">
@@ -363,8 +343,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 variant="outline"
                 className="w-full gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
               >
-                <FolderTree className="w-4 h-4 text-emerald-600 shrink-0" />
-                {" "}
+                <FolderTree className="w-4 h-4 text-emerald-600 shrink-0" />{' '}
                 <span className="whitespace-nowrap">Taşınır Kodları</span>
               </Button>
             </Link>
@@ -373,16 +352,14 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 variant="outline"
                 className="w-full gap-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 flex items-center px-4 py-2 text-sm justify-center"
               >
-                <Tag className="w-4 h-4 text-indigo-600 shrink-0" />{" "}
+                <Tag className="w-4 h-4 text-indigo-600 shrink-0" />{' '}
                 <span className="whitespace-nowrap">OKAS Kodları</span>
               </Button>
             </Link>
             <Link to="/malzemeler/yeni" className="shrink-0">
               <Button className="w-full gap-2 bg-blue-600 hover:bg-blue-700 shadow-md flex items-center px-5 py-2 text-sm justify-center text-white">
-                <Plus className="w-4 h-4 shrink-0" />{" "}
-                <span className="whitespace-nowrap font-semibold">
-                  Mal/Hizmet/Yapım İşi Ekle
-                </span>
+                <Plus className="w-4 h-4 shrink-0" />{' '}
+                <span className="whitespace-nowrap font-semibold">Mal/Hizmet/Yapım İşi Ekle</span>
               </Button>
             </Link>
           </div>
@@ -400,7 +377,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
               Mal Alımı (Malzeme)
             </div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter((m) => m.tipi === "Mal").length} Kalem
+              {kalemList.filter((m) => m.tipi === 'Mal').length} Kalem
             </div>
           </div>
         </div>
@@ -414,9 +391,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
               Hizmet Alımı
             </div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter((m) => m.tipi?.startsWith("Hizmet")).length}
-              {" "}
-              Kalem
+              {kalemList.filter((m) => m.tipi?.startsWith('Hizmet')).length} Kalem
             </div>
           </div>
         </div>
@@ -430,7 +405,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
               Yapım İşi
             </div>
             <div className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              {kalemList.filter((m) => m.tipi === "Yapım").length} Kalem
+              {kalemList.filter((m) => m.tipi === 'Yapım').length} Kalem
             </div>
           </div>
         </div>
@@ -440,24 +415,24 @@ export default function MalzemelerScreen(): React.JSX.Element {
         {/* TABS, VIEW MODE & SEARCH */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg overflow-x-auto max-w-full">
-            {["Tümü", "Mal", "Hizmet", "Yapım"].map((tab) => (
+            {['Tümü', 'Mal', 'Hizmet', 'Yapım'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "px-4 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap",
+                  'px-4 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap',
                   activeTab === tab
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 )}
               >
-                {tab === "Mal"
-                  ? "Mal Alımı"
-                  : tab === "Hizmet"
-                  ? "Hizmet Alımı"
-                  : tab === "Yapım"
-                  ? "Yapım İşi"
-                  : tab}
+                {tab === 'Mal'
+                  ? 'Mal Alımı'
+                  : tab === 'Hizmet'
+                    ? 'Hizmet Alımı'
+                    : tab === 'Yapım'
+                      ? 'Yapım İşi'
+                      : tab}
               </button>
             ))}
           </div>
@@ -466,12 +441,11 @@ export default function MalzemelerScreen(): React.JSX.Element {
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-450 cursor-pointer hover:text-slate-850 dark:hover:text-slate-100 shrink-0">
               <input
                 type="checkbox"
-                checked={filteredList.length > 0 &&
-                  selectedIds.length === filteredList.length}
+                checked={filteredList.length > 0 && selectedIds.length === filteredList.length}
                 ref={(el) => {
                   if (el) {
-                    el.indeterminate = selectedIds.length > 0 &&
-                      selectedIds.length < filteredList.length;
+                    el.indeterminate =
+                      selectedIds.length > 0 && selectedIds.length < filteredList.length
                   }
                 }}
                 onChange={handleToggleSelectAll}
@@ -482,8 +456,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
             <select
               value={groupMode}
-              onChange={(e) =>
-                setGroupMode(e.target.value as "none" | "tasinir" | "okas")}
+              onChange={(e) => setGroupMode(e.target.value as 'none' | 'tasinir' | 'okas')}
               className="pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer text-slate-700 dark:text-slate-300 w-full sm:w-auto"
             >
               <option value="none">Gruplama Yok</option>
@@ -512,130 +485,120 @@ export default function MalzemelerScreen(): React.JSX.Element {
 
         {/* LIST / GRID / TABLE */}
         <div className="flex-1 overflow-auto p-4">
-          {filteredList.length === 0
-            ? (
-              <div className="p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                <ListFilter className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-700" />
-                <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
-                  Kayıt Bulunamadı
-                </h3>
-                <p className="text-xs mt-1 text-slate-500">
-                  Arama veya filtreleme kriterlerine uygun kayıt bulunmuyor.
-                </p>
-              </div>
-            )
-            : viewMode === "grid"
-            ? (
-              <div className="flex flex-col gap-8">
-                {Object.entries(groupedItems).map(([groupName, items]) => (
-                  <div key={groupName} className="flex flex-col gap-3">
-                    <MalzemeGroupHeader
-                      groupMode={groupMode}
-                      groupName={groupName}
-                      itemCount={items.length}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {items.map((item) => (
-                        <MalzemeGridCard
-                          key={item.id}
-                          item={item}
-                          isSelected={selectedIds.includes(item.id)}
-                          onToggleSelect={handleToggleSelect}
-                          onEdit={handleEdit}
-                          onDelete={handleDeleteKalem}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-            : viewMode === "list"
-            ? (
-              <div className="flex flex-col gap-8">
-                {Object.entries(groupedItems).map(([groupName, items]) => (
-                  <div key={groupName} className="flex flex-col gap-3">
-                    <MalzemeGroupHeader
-                      groupMode={groupMode}
-                      groupName={groupName}
-                      itemCount={items.length}
-                    />
-                    <div className="flex flex-col gap-3">
-                      {items.map((item) => (
-                        <MalzemeListCard
-                          key={item.id}
-                          item={item}
-                          isSelected={selectedIds.includes(item.id)}
-                          onToggleSelect={handleToggleSelect}
-                          onEdit={handleEdit}
-                          onDelete={handleDeleteKalem}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-            : (
-              <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
-                <table className="w-full text-left border-collapse min-w-[800px]">
-                  <thead>
-                    <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      <th className="px-4 py-3 w-10">
-                        <input
-                          type="checkbox"
-                          checked={filteredList.length > 0 &&
-                            selectedIds.length === filteredList.length}
-                          ref={(el) => {
-                            if (el) {
-                              el.indeterminate = selectedIds.length > 0 &&
-                                selectedIds.length < filteredList.length;
-                            }
-                          }}
-                          onChange={handleToggleSelectAll}
-                          className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                      </th>
-                      <th className="px-4 py-3 whitespace-nowrap">
-                        ID / Barkod
-                      </th>
-                      <th className="px-4 py-3 whitespace-nowrap">
-                        Taşınır / OKAS
-                      </th>
-                      <th className="px-4 py-3">Kalem Adı</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Birim</th>
-                      <th className="px-4 py-3 text-right">İşlemler</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                    {Object.entries(groupedItems).map(([groupName, items]) => (
-                      <React.Fragment key={groupName}>
-                        <MalzemeGroupHeader
-                          groupMode={groupMode}
-                          groupName={groupName}
-                          itemCount={items.length}
-                          isTableRow
-                        />
-                        {items.map((item) => (
-                          <MalzemeTableRow
-                            key={item.id}
-                            item={item}
-                            isSelected={selectedIds.includes(item.id)}
-                            onToggleSelect={handleToggleSelect}
-                            onEdit={handleEdit}
-                            onDelete={handleDeleteKalem}
-                          />
-                        ))}
-                      </React.Fragment>
+          {filteredList.length === 0 ? (
+            <div className="p-16 flex flex-col items-center justify-center text-slate-450 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+              <ListFilter className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-700" />
+              <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300">
+                Kayıt Bulunamadı
+              </h3>
+              <p className="text-xs mt-1 text-slate-500">
+                Arama veya filtreleme kriterlerine uygun kayıt bulunmuyor.
+              </p>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="flex flex-col gap-8">
+              {Object.entries(groupedItems).map(([groupName, items]) => (
+                <div key={groupName} className="flex flex-col gap-3">
+                  <MalzemeGroupHeader
+                    groupMode={groupMode}
+                    groupName={groupName}
+                    itemCount={items.length}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {items.map((item) => (
+                      <MalzemeGridCard
+                        key={item.id}
+                        item={item}
+                        isSelected={selectedIds.includes(item.id)}
+                        onToggleSelect={handleToggleSelect}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteKalem}
+                      />
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : viewMode === 'list' ? (
+            <div className="flex flex-col gap-8">
+              {Object.entries(groupedItems).map(([groupName, items]) => (
+                <div key={groupName} className="flex flex-col gap-3">
+                  <MalzemeGroupHeader
+                    groupMode={groupMode}
+                    groupName={groupName}
+                    itemCount={items.length}
+                  />
+                  <div className="flex flex-col gap-3">
+                    {items.map((item) => (
+                      <MalzemeListCard
+                        key={item.id}
+                        item={item}
+                        isSelected={selectedIds.includes(item.id)}
+                        onToggleSelect={handleToggleSelect}
+                        onEdit={handleEdit}
+                        onDelete={handleDeleteKalem}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-lg">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredList.length > 0 && selectedIds.length === filteredList.length
+                        }
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate =
+                              selectedIds.length > 0 && selectedIds.length < filteredList.length
+                          }
+                        }}
+                        onChange={handleToggleSelectAll}
+                        className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
+                    <th className="px-4 py-3 whitespace-nowrap">ID / Barkod</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Taşınır / OKAS</th>
+                    <th className="px-4 py-3">Kalem Adı</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Tipi</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Birim</th>
+                    <th className="px-4 py-3 text-right">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {Object.entries(groupedItems).map(([groupName, items]) => (
+                    <React.Fragment key={groupName}>
+                      <MalzemeGroupHeader
+                        groupMode={groupMode}
+                        groupName={groupName}
+                        itemCount={items.length}
+                        isTableRow
+                      />
+                      {items.map((item) => (
+                        <MalzemeTableRow
+                          key={item.id}
+                          item={item}
+                          isSelected={selectedIds.includes(item.id)}
+                          onToggleSelect={handleToggleSelect}
+                          onEdit={handleEdit}
+                          onDelete={handleDeleteKalem}
+                        />
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
+  )
 }
-

@@ -331,4 +331,3 @@ export default function TasinirKodScreen(): React.JSX.Element {
     </div>
   )
 }
-

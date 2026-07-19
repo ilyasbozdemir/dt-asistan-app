@@ -35,7 +35,8 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
             Bu dosyaya henüz teklif veren/davet edilen firma eklenmemiş.
           </p>
           <p className="text-xs text-slate-400 mt-1 max-w-md">
-            Teklif fiyat giriş tablosunu açmak için lütfen firma ekleyin veya firma havuzunu düzenleyin.
+            Teklif fiyat giriş tablosunu açmak için lütfen firma ekleyin veya firma havuzunu
+            düzenleyin.
           </p>
         </div>
         {isEditing && onAddClick && (

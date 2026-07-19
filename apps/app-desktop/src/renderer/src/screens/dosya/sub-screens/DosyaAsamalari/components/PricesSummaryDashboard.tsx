@@ -1,26 +1,19 @@
-import React from "react";
-import {
-  AlertCircle,
-  Building2,
-  Check,
-  ClipboardList,
-  Plus,
-  Settings,
-} from "lucide-react";
-import { cn } from "../../../../../utils/cn";
+import React from 'react'
+import { AlertCircle, Building2, Check, ClipboardList, Plus, Settings } from 'lucide-react'
+import { cn } from '../../../../../utils/cn'
 
 interface PricesSummaryDashboardProps {
-  invitedFirms: any[];
-  items: any[];
-  bids: Record<string, number>;
-  onManageFirmsClick?: () => void;
+  invitedFirms: any[]
+  items: any[]
+  bids: Record<string, number>
+  onManageFirmsClick?: () => void
 }
 
 export function PricesSummaryDashboard({
   invitedFirms,
   items,
   bids,
-  onManageFirmsClick,
+  onManageFirmsClick
 }: PricesSummaryDashboardProps): React.JSX.Element {
   if (invitedFirms.length === 0) {
     return (
@@ -30,9 +23,8 @@ export function PricesSummaryDashboard({
           Teklif bilgisi bulunamadı.
         </div>
         <p className="text-xs text-slate-450 dark:text-slate-500 max-w-md">
-          Fiyat tekliflerini görmek için lütfen &quot;Yeni Tutanak Ekle / Teklif
-          Girişi&quot; butonuna tıklayarak firmaları davet edin ve teklifleri
-          girin.
+          Fiyat tekliflerini görmek için lütfen &quot;Yeni Tutanak Ekle / Teklif Girişi&quot;
+          butonuna tıklayarak firmaları davet edin ve teklifleri girin.
         </p>
         {onManageFirmsClick && (
           <button
@@ -45,41 +37,39 @@ export function PricesSummaryDashboard({
           </button>
         )}
       </div>
-    );
+    )
   }
 
   // Calculate totals
   const firmTotals = invitedFirms.map((firm: any) => {
-    let total = 0;
+    let total = 0
     items.forEach((item: any) => {
-      const key = `${item.id}_${firm.id}`;
-      const bidVal = bids[key];
+      const key = `${item.id}_${firm.id}`
+      const bidVal = bids[key]
       if (bidVal && bidVal > 0) {
-        total += bidVal * (item.miktar || 0);
+        total += bidVal * (item.miktar || 0)
       }
-    });
-    return { firm, total };
-  });
+    })
+    return { firm, total }
+  })
 
-  const nonZeroTotals = firmTotals.filter((t) => t.total > 0);
-  const lowestTotal = nonZeroTotals.length > 0
-    ? Math.min(...nonZeroTotals.map((t) => t.total))
-    : 0;
+  const nonZeroTotals = firmTotals.filter((t) => t.total > 0)
+  const lowestTotal = nonZeroTotals.length > 0 ? Math.min(...nonZeroTotals.map((t) => t.total)) : 0
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Firm totals summary card grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {firmTotals.map(({ firm, total }) => {
-          const isWinner = total > 0 && total === lowestTotal;
+          const isWinner = total > 0 && total === lowestTotal
           return (
             <div
               key={firm.id}
               className={cn(
-                "p-5 rounded-2xl border transition-all flex flex-col justify-between relative overflow-hidden",
+                'p-5 rounded-2xl border transition-all flex flex-col justify-between relative overflow-hidden',
                 isWinner
-                  ? "bg-emerald-50/40 dark:bg-emerald-955/10 border-emerald-300 dark:border-emerald-800 shadow-sm"
-                  : "bg-slate-50/50 dark:bg-slate-900/10 border-slate-200/60 dark:border-slate-800/80",
+                  ? 'bg-emerald-50/40 dark:bg-emerald-955/10 border-emerald-300 dark:border-emerald-800 shadow-sm'
+                  : 'bg-slate-50/50 dark:bg-slate-900/10 border-slate-200/60 dark:border-slate-800/80'
               )}
             >
               {isWinner && (
@@ -91,8 +81,8 @@ export function PricesSummaryDashboard({
                 <div className="flex items-center gap-2 mb-2">
                   <Building2
                     className={cn(
-                      "w-4 h-4 shrink-0",
-                      isWinner ? "text-emerald-500" : "text-slate-400",
+                      'w-4 h-4 shrink-0',
+                      isWinner ? 'text-emerald-500' : 'text-slate-400'
                     )}
                   />
                   <span
@@ -111,31 +101,27 @@ export function PricesSummaryDashboard({
               </div>
 
               <div className="mt-4">
-                <span className="text-[10px] text-slate-400 block font-bold">
-                  Toplam Teklif
-                </span>
+                <span className="text-[10px] text-slate-400 block font-bold">Toplam Teklif</span>
                 <span
                   className={cn(
-                    "text-base font-extrabold font-mono",
+                    'text-base font-extrabold font-mono',
                     total > 0
                       ? isWinner
-                        ? "text-emerald-650 dark:text-emerald-455"
-                        : "text-slate-800 dark:text-slate-200"
-                      : "text-slate-400 italic text-xs font-semibold",
+                        ? 'text-emerald-650 dark:text-emerald-455'
+                        : 'text-slate-800 dark:text-slate-200'
+                      : 'text-slate-400 italic text-xs font-semibold'
                   )}
                 >
                   {total > 0
-                    ? `${
-                      total.toLocaleString("tr-TR", {
+                    ? `${total.toLocaleString('tr-TR', {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
-                    } TL`
-                    : "Fiyat girilmedi"}
+                        maximumFractionDigits: 2
+                      })} TL`
+                    : 'Fiyat girilmedi'}
                 </span>
               </div>
             </div>
-          );
+          )
         })}
 
         {onManageFirmsClick && (
@@ -182,17 +168,16 @@ export function PricesSummaryDashboard({
                 // Find lowest bid for this item
                 const itemBids = invitedFirms
                   .map((f: any) => {
-                    const key = `${item.id}_${f.id}`;
+                    const key = `${item.id}_${f.id}`
                     return {
                       firmId: f.id,
-                      price: bids[key] || 0,
-                    };
+                      price: bids[key] || 0
+                    }
                   })
-                  .filter((b) => b.price > 0);
+                  .filter((b) => b.price > 0)
 
-                const minItemPrice = itemBids.length > 0
-                  ? Math.min(...itemBids.map((b) => b.price))
-                  : 0;
+                const minItemPrice =
+                  itemBids.length > 0 ? Math.min(...itemBids.map((b) => b.price)) : 0
 
                 return (
                   <tr
@@ -206,44 +191,41 @@ export function PricesSummaryDashboard({
                       {item.miktar} {item.birim}
                     </td>
                     {invitedFirms.map((firm: any) => {
-                      const key = `${item.id}_${firm.id}`;
-                      const bidVal = bids[key] || 0;
-                      const isItemWinner = bidVal > 0 &&
-                        bidVal === minItemPrice;
+                      const key = `${item.id}_${firm.id}`
+                      const bidVal = bids[key] || 0
+                      const isItemWinner = bidVal > 0 && bidVal === minItemPrice
 
                       return (
-                        <td
-                          key={firm.id}
-                          className="py-3 px-3 text-right font-mono font-bold"
-                        >
-                          {bidVal > 0
-                            ? (
-                              <span
-                                className={isItemWinner
-                                  ? "text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-lg border border-emerald-500/10"
-                                  : "text-slate-700 dark:text-slate-300"}
-                              >
-                                {bidVal.toLocaleString("tr-TR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })} TL
-                              </span>
-                            )
-                            : (
-                              <span className="text-slate-350 italic text-[11px] font-semibold">
-                                -
-                              </span>
-                            )}
+                        <td key={firm.id} className="py-3 px-3 text-right font-mono font-bold">
+                          {bidVal > 0 ? (
+                            <span
+                              className={
+                                isItemWinner
+                                  ? 'text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-lg border border-emerald-500/10'
+                                  : 'text-slate-700 dark:text-slate-300'
+                              }
+                            >
+                              {bidVal.toLocaleString('tr-TR', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                              })}{' '}
+                              TL
+                            </span>
+                          ) : (
+                            <span className="text-slate-350 italic text-[11px] font-semibold">
+                              -
+                            </span>
+                          )}
                         </td>
-                      );
+                      )
                     })}
                   </tr>
-                );
+                )
               })}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  );
+  )
 }

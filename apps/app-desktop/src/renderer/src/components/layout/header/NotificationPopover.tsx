@@ -54,13 +54,15 @@ export function NotificationPopover({
 
   const formatDate = (dateVal: string) => {
     const d = new Date(dateVal)
-    return isNaN(d.getTime()) ? dateVal : d.toLocaleString('tr-TR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    return isNaN(d.getTime())
+      ? dateVal
+      : d.toLocaleString('tr-TR', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
   }
 
   return (

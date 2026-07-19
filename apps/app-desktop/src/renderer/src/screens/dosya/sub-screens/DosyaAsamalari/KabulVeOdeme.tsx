@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
 import {
   AlertTriangle,
   ArrowLeft,
@@ -11,19 +11,16 @@ import {
   FileText,
   PackageSearch,
   TrendingDown,
-  Trophy,
-} from "lucide-react";
-import { Link } from "@tanstack/react-router";
-import { SubScreen } from "../../SubScreens.screen";
-import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
-import {
-  normalizeForMatch,
-  useDosyaAsamasiSablons,
-} from "./useDosyaAsamasiSablons";
-import { PrintDropdownButton } from "../../components/PrintDropdownButton";
-import { useSettingsStore } from "../../../../store/settingsStore";
-import { useWorkspaceStore } from "../../../../store/workspaceStore";
-import { APP_ROUTES } from "../../../../constants/routeConstants";
+  Trophy
+} from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { SubScreen } from '../../SubScreens.screen'
+import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
+import { normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
+import { PrintDropdownButton } from '../../components/PrintDropdownButton'
+import { useSettingsStore } from '../../../../store/settingsStore'
+import { useWorkspaceStore } from '../../../../store/workspaceStore'
+import { APP_ROUTES } from '../../../../constants/routeConstants'
 
 export function KabulVeOdeme(): React.JSX.Element {
   const {
@@ -49,76 +46,74 @@ export function KabulVeOdeme(): React.JSX.Element {
     toggleStar,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled,
-  } = useDosyaAsamasiSablons();
+    isSablonDisabled
+  } = useDosyaAsamasiSablons()
 
-  const { disableDocumentGuidance } = useSettingsStore();
-  const { activeDosyaId } = useWorkspaceStore();
+  const { disableDocumentGuidance } = useSettingsStore()
+  const { activeDosyaId } = useWorkspaceStore()
 
   const stageSablons = sablons.filter(
     (s) =>
-      s.kategori === "4-kabul-ve-odeme-islemleri" ||
-      s.kategori === "4. Muayene & Kabul & Ödeme İşlemleri",
-  );
+      s.kategori === '4-kabul-ve-odeme-islemleri' ||
+      s.kategori === '4. Muayene & Kabul & Ödeme İşlemleri'
+  )
 
   // Kazanan firma guard state
-  const [kazananFirmaId, setKazananFirmaId] = useState<
-    number | null | undefined
-  >(undefined);
-  const [kazananFirmaUnvan, setKazananFirmaUnvan] = useState<string>("");
+  const [kazananFirmaId, setKazananFirmaId] = useState<number | null | undefined>(undefined)
+  const [kazananFirmaUnvan, setKazananFirmaUnvan] = useState<string>('')
 
   // İstatistik verileri
   const [firmaStats, setFirmaStats] = useState<{
-    teklifToplami: number | null;
-    yaklasikMaliyet: number | null;
-    teslimTarihi: string | null;
-    yasaklilikDurumu: string | null;
-    vergiNo: string | null;
+    teklifToplami: number | null
+    yaklasikMaliyet: number | null
+    teslimTarihi: string | null
+    yasaklilikDurumu: string | null
+    vergiNo: string | null
   }>({
     teklifToplami: null,
     yaklasikMaliyet: null,
     teslimTarihi: null,
     yasaklilikDurumu: null,
-    vergiNo: null,
-  });
+    vergiNo: null
+  })
 
   // Mock form state for Fatura
-  const [faturaNo, setFaturaNo] = useState<string>("");
-  const [faturaTarihi, setFaturaTarihi] = useState<string>("");
+  const [faturaNo, setFaturaNo] = useState<string>('')
+  const [faturaTarihi, setFaturaTarihi] = useState<string>('')
 
   useEffect(() => {
-    if (!activeDosyaId) return;
+    if (!activeDosyaId) return
 
     const checkKazananFirma = async (): Promise<void> => {
       try {
         const res = await window.electron.ipcRenderer.invoke(
-          "db:query",
+          'db:query',
           `SELECT d.firma_id, f.unvan, f.vergi_no,
                   d.yaklasik_maliyet, d.teslim_tarihi
            FROM DATA_TeminDosyasi d
            LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
            WHERE d.id = ?`,
-          [activeDosyaId],
-        );
+          [activeDosyaId]
+        )
 
         if (res.success && res.data && res.data.length > 0) {
-          const row = res.data[0];
-          setKazananFirmaId(row.firma_id || null);
-          setKazananFirmaUnvan(row.unvan || "");
+          const row = res.data[0]
+          setKazananFirmaId(row.firma_id || null)
+          setKazananFirmaUnvan(row.unvan || '')
 
-          let teklifToplami: number | null = null;
-          let yasaklilikDurumu: string | null = null;
+          let teklifToplami: number | null = null
+          let yasaklilikDurumu: string | null = null
           if (row.firma_id) {
             const teklifRes = await window.electron.ipcRenderer.invoke(
-              "db:query",
+              'db:query',
               `SELECT tf.teklif_toplami, tf.yasaklilik_durumu
                FROM DATA_TeminFirma tf
                WHERE tf.temin_dosya_id = ? AND tf.firma_id = ?`,
-              [activeDosyaId, row.firma_id],
-            );
+              [activeDosyaId, row.firma_id]
+            )
             if (teklifRes.success && teklifRes.data?.length > 0) {
-              teklifToplami = teklifRes.data[0].teklif_toplami;
-              yasaklilikDurumu = teklifRes.data[0].yasaklilik_durumu;
+              teklifToplami = teklifRes.data[0].teklif_toplami
+              yasaklilikDurumu = teklifRes.data[0].yasaklilik_durumu
             }
           }
 
@@ -127,49 +122,48 @@ export function KabulVeOdeme(): React.JSX.Element {
             yaklasikMaliyet: row.yaklasik_maliyet || null,
             teslimTarihi: row.teslim_tarihi || null,
             yasaklilikDurumu,
-            vergiNo: row.vergi_no || null,
-          });
+            vergiNo: row.vergi_no || null
+          })
         } else {
-          setKazananFirmaId(null);
+          setKazananFirmaId(null)
         }
       } catch {
-        setKazananFirmaId(null);
+        setKazananFirmaId(null)
       }
-    };
+    }
 
-    checkKazananFirma();
-  }, [activeDosyaId]);
+    checkKazananFirma()
+  }, [activeDosyaId])
 
   const formatCurrency = (val: number | null): string => {
-    if (val === null || val === undefined) return "—";
-    return new Intl.NumberFormat("tr-TR", {
-      style: "currency",
-      currency: "TRY",
-      minimumFractionDigits: 2,
-    }).format(val);
-  };
+    if (val === null || val === undefined) return '—'
+    return new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: 'TRY',
+      minimumFractionDigits: 2
+    }).format(val)
+  }
 
   const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return "—";
+    if (!dateStr) return '—'
     try {
-      const d = new Date(dateStr);
-      return new Intl.DateTimeFormat("tr-TR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }).format(d);
+      const d = new Date(dateStr)
+      return new Intl.DateTimeFormat('tr-TR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(d)
     } catch {
-      return dateStr;
+      return dateStr
     }
-  };
+  }
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
-        (d) =>
-          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
-      )
-      : false;
+          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
+        )
+      : false
 
     return (
       <DocumentPreviewModal
@@ -177,9 +171,10 @@ export function KabulVeOdeme(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ""}
-        baseContext={previewData.snapshotContext ||
-          contextsByPath[previewData.processPath] || dosyaContext}
+        masterHtml={masterHtml || ''}
+        baseContext={
+          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+        }
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -194,7 +189,7 @@ export function KabulVeOdeme(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    );
+    )
   }
 
   return (
@@ -206,9 +201,7 @@ export function KabulVeOdeme(): React.JSX.Element {
       {kazananFirmaId === undefined && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-sm text-slate-500">
-            Kontrol ediliyor...
-          </span>
+          <span className="ml-3 text-sm text-slate-500">Kontrol ediliyor...</span>
         </div>
       )}
 
@@ -224,13 +217,10 @@ export function KabulVeOdeme(): React.JSX.Element {
                   Kazanan Firma Belirlenmedi
                 </h3>
                 <p className="text-xs text-amber-700 dark:text-amber-400/90 leading-relaxed max-w-xl">
-                  Muayene & Kabul & Ödeme belgelerini oluşturabilmek için önce
-                  {" "}
-                  <strong>Piyasa Fiyat Araştırması</strong>{" "}
-                  adımında kazanan firmayı belirlemeniz gerekir. Tutanağı
-                  kaydederken <em>"En Düşük Teklifi Kazanan Yap"</em>{" "}
-                  seçeneğini işaretleyin ya da açılan firma listesinden kazananı
-                  elle seçin.
+                  Muayene & Kabul & Ödeme belgelerini oluşturabilmek için önce{' '}
+                  <strong>Piyasa Fiyat Araştırması</strong> adımında kazanan firmayı belirlemeniz
+                  gerekir. Tutanağı kaydederken <em>"En Düşük Teklifi Kazanan Yap"</em> seçeneğini
+                  işaretleyin ya da açılan firma listesinden kazananı elle seçin.
                 </p>
               </div>
             </div>
@@ -259,7 +249,6 @@ export function KabulVeOdeme(): React.JSX.Element {
         <div className="flex flex-col gap-6 animate-in fade-in duration-300">
           {/* Header Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5">
-
             {stageSablons.length > 0 && (
               <div className="shrink-0 self-start md:self-center">
                 <PrintDropdownButton
@@ -274,9 +263,7 @@ export function KabulVeOdeme(): React.JSX.Element {
                   quickOpenExternal={quickOpenExternal}
                   isSablonDisabled={isSablonDisabled}
                   buttonHeightClass="h-10"
-                  label={disableDocumentGuidance
-                    ? "İşlemler"
-                    : "Belgeleri İncele ve Çıktı Al"}
+                  label={disableDocumentGuidance ? 'İşlemler' : 'Belgeleri İncele ve Çıktı Al'}
                 />
               </div>
             )}
@@ -335,8 +322,7 @@ export function KabulVeOdeme(): React.JSX.Element {
                 </h4>
 
                 <div className="flex flex-col gap-4 relative">
-                  <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700/50 -z-10">
-                  </div>
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700/50 -z-10"></div>
 
                   {/* 1. Mal/Hizmet Teslimi */}
                   <div className="flex gap-3">
@@ -350,11 +336,15 @@ export function KabulVeOdeme(): React.JSX.Element {
                       </div>
                     )}
                     <div>
-                      <h5 className={`text-xs font-bold ${firmaStats.teslimTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
+                      <h5
+                        className={`text-xs font-bold ${firmaStats.teslimTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}
+                      >
                         1. Mal/Hizmet Teslimi
                       </h5>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        {firmaStats.teslimTarihi ? `Teslim Edildi (${new Date(firmaStats.teslimTarihi).toLocaleDateString('tr-TR')})` : 'Tedarikçi teslimatı bekleniyor.'}
+                        {firmaStats.teslimTarihi
+                          ? `Teslim Edildi (${new Date(firmaStats.teslimTarihi).toLocaleDateString('tr-TR')})`
+                          : 'Tedarikçi teslimatı bekleniyor.'}
                       </p>
                     </div>
                   </div>
@@ -375,11 +365,17 @@ export function KabulVeOdeme(): React.JSX.Element {
                       </div>
                     )}
                     <div>
-                      <h5 className={`text-xs font-bold ${!firmaStats.teslimTarihi ? 'text-slate-500 dark:text-slate-400' : faturaNo ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
+                      <h5
+                        className={`text-xs font-bold ${!firmaStats.teslimTarihi ? 'text-slate-500 dark:text-slate-400' : faturaNo ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}
+                      >
                         2. Muayene & Kabul İşlemi
                       </h5>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        {!firmaStats.teslimTarihi ? 'Kabul işlemleri beklemede.' : faturaNo ? 'Kabul Edildi (Komisyon Onaylı)' : 'Komisyon tarafından ürünler inceleniyor.'}
+                        {!firmaStats.teslimTarihi
+                          ? 'Kabul işlemleri beklemede.'
+                          : faturaNo
+                            ? 'Kabul Edildi (Komisyon Onaylı)'
+                            : 'Komisyon tarafından ürünler inceleniyor.'}
                       </p>
                     </div>
                   </div>
@@ -400,11 +396,15 @@ export function KabulVeOdeme(): React.JSX.Element {
                       </div>
                     )}
                     <div>
-                      <h5 className={`text-xs font-bold ${!faturaNo ? 'text-slate-500 dark:text-slate-400' : faturaTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}>
+                      <h5
+                        className={`text-xs font-bold ${!faturaNo ? 'text-slate-500 dark:text-slate-400' : faturaTarihi ? 'text-slate-800 dark:text-slate-200' : 'text-blue-700 dark:text-blue-400'}`}
+                      >
                         3. TİF & Fatura Kaydı
                       </h5>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        {!faturaNo ? 'Kabul sonrası fatura ve taşınır işlemi.' : `Fatura No: ${faturaNo}`}
+                        {!faturaNo
+                          ? 'Kabul sonrası fatura ve taşınır işlemi.'
+                          : `Fatura No: ${faturaNo}`}
                       </p>
                     </div>
                   </div>
@@ -421,11 +421,15 @@ export function KabulVeOdeme(): React.JSX.Element {
                       </div>
                     )}
                     <div>
-                      <h5 className={`text-xs font-bold ${!faturaTarihi ? 'text-slate-500 dark:text-slate-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                      <h5
+                        className={`text-xs font-bold ${!faturaTarihi ? 'text-slate-500 dark:text-slate-400' : 'text-blue-700 dark:text-blue-400'}`}
+                      >
                         4. Ödeme Emri Belgesi (ÖEB)
                       </h5>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        {!faturaTarihi ? 'Harcama birimi tarafından ödeme emri düzenlenmesi.' : 'ÖEB MYS sistemine gönderilmeye hazır.'}
+                        {!faturaTarihi
+                          ? 'Harcama birimi tarafından ödeme emri düzenlenmesi.'
+                          : 'ÖEB MYS sistemine gönderilmeye hazır.'}
                       </p>
                     </div>
                   </div>
@@ -488,17 +492,16 @@ export function KabulVeOdeme(): React.JSX.Element {
                         KDV (%20)
                       </span>
                       <span className="font-bold text-slate-800 dark:text-slate-200">
-                        {formatCurrency((firmaStats.teklifToplami || 0) * 0.20)}
+                        {formatCurrency((firmaStats.teklifToplami || 0) * 0.2)}
                       </span>
                     </div>
-                    <div className="h-px w-full bg-slate-200 dark:bg-slate-700">
-                    </div>
+                    <div className="h-px w-full bg-slate-200 dark:bg-slate-700"></div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-700 dark:text-slate-300 font-bold">
                         Brüt Tutar
                       </span>
                       <span className="font-black text-slate-900 dark:text-white">
-                        {formatCurrency((firmaStats.teklifToplami || 0) * 1.20)}
+                        {formatCurrency((firmaStats.teklifToplami || 0) * 1.2)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-sm text-red-600 dark:text-red-400 mt-2">
@@ -507,9 +510,7 @@ export function KabulVeOdeme(): React.JSX.Element {
                         Kesintiler (Damga Vergisi vb.)
                       </span>
                       <span className="font-bold">
-                        - {formatCurrency(
-                          (firmaStats.teklifToplami || 0) * 0.00948,
-                        )}
+                        - {formatCurrency((firmaStats.teklifToplami || 0) * 0.00948)}
                       </span>
                     </div>
                   </div>
@@ -522,8 +523,8 @@ export function KabulVeOdeme(): React.JSX.Element {
                     </span>
                     <span className="text-2xl font-black text-blue-900 dark:text-blue-300">
                       {formatCurrency(
-                        ((firmaStats.teklifToplami || 0) * 1.20) -
-                          ((firmaStats.teklifToplami || 0) * 0.00948),
+                        (firmaStats.teklifToplami || 0) * 1.2 -
+                          (firmaStats.teklifToplami || 0) * 0.00948
                       )}
                     </span>
                   </div>
@@ -531,8 +532,8 @@ export function KabulVeOdeme(): React.JSX.Element {
                     disabled={!faturaNo || !faturaTarihi}
                     className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg ${
                       !faturaNo || !faturaTarihi
-                        ? "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-70"
-                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                        ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-70'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
                     }`}
                   >
                     ÖEB Oluştur
@@ -544,5 +545,5 @@ export function KabulVeOdeme(): React.JSX.Element {
         </div>
       )}
     </SubScreen>
-  );
+  )
 }

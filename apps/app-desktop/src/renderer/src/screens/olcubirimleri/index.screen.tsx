@@ -254,4 +254,3 @@ export default function OlcuBirimleriScreen(): React.JSX.Element {
     </div>
   )
 }
-

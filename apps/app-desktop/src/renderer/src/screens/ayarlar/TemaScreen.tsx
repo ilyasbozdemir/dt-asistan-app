@@ -1492,4 +1492,3 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
     </div>
   )
 }
-

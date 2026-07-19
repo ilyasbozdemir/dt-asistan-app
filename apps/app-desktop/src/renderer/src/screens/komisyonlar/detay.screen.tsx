@@ -535,4 +535,3 @@ export default function KomisyonDetayScreen(): React.JSX.Element {
     </div>
   )
 }
-

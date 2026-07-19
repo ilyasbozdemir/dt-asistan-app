@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import React, { useEffect, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import {
   AlertTriangle,
   ArrowLeft,
@@ -13,20 +13,17 @@ import {
   Percent,
   ShieldCheck,
   TrendingDown,
-  Trophy,
-} from "lucide-react";
-import { cn } from "../../../../utils/cn";
-import { SubScreen } from "../../SubScreens.screen";
-import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
-import {
-  normalizeForMatch,
-  useDosyaAsamasiSablons,
-} from "./useDosyaAsamasiSablons";
-import { PrintDropdownButton } from "../../components/PrintDropdownButton";
-import { useSettingsStore } from "../../../../store/settingsStore";
-import { useWorkspaceStore } from "../../../../store/workspaceStore";
-import { APP_ROUTES } from "../../../../constants/routeConstants";
-import { WinnerDocumentsMenu } from "./components/WinnerDocumentsMenu";
+  Trophy
+} from 'lucide-react'
+import { cn } from '../../../../utils/cn'
+import { SubScreen } from '../../SubScreens.screen'
+import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
+import { normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
+import { PrintDropdownButton } from '../../components/PrintDropdownButton'
+import { useSettingsStore } from '../../../../store/settingsStore'
+import { useWorkspaceStore } from '../../../../store/workspaceStore'
+import { APP_ROUTES } from '../../../../constants/routeConstants'
+import { WinnerDocumentsMenu } from './components/WinnerDocumentsMenu'
 
 export function SiparisVeSozlesme(): React.JSX.Element {
   const {
@@ -52,34 +49,30 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     toggleStar,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled,
-  } = useDosyaAsamasiSablons();
+    isSablonDisabled
+  } = useDosyaAsamasiSablons()
 
-  const { disableDocumentGuidance } = useSettingsStore();
-  const { activeDosyaId } = useWorkspaceStore();
+  const { disableDocumentGuidance } = useSettingsStore()
+  const { activeDosyaId } = useWorkspaceStore()
 
   const stageSablons = sablons.filter(
-    (s) =>
-      s.kategori === "3-siparis-ve-sozlesme" ||
-      s.kategori === "3. Sipariş & Sözleşme",
-  );
+    (s) => s.kategori === '3-siparis-ve-sozlesme' || s.kategori === '3. Sipariş & Sözleşme'
+  )
 
   // Kazanan firma guard state
-  const [kazananFirmaId, setKazananFirmaId] = useState<
-    number | null | undefined
-  >(undefined); // undefined = yükleniyor
-  const [kazananFirmaUnvan, setKazananFirmaUnvan] = useState<string>("");
+  const [kazananFirmaId, setKazananFirmaId] = useState<number | null | undefined>(undefined) // undefined = yükleniyor
+  const [kazananFirmaUnvan, setKazananFirmaUnvan] = useState<string>('')
 
   // İstatistik verileri
   const [firmaStats, setFirmaStats] = useState<{
-    teklifToplami: number | null;
-    yaklasikMaliyet: number | null;
-    teslimTarihi: string | null;
-    yasaklilikDurumu: string | null;
-    vergiNo: string | null;
-    teklifSozlesmeTuru: string | null;
-    sozlesmeYapilacakMi: number;
-    istekliFirmaSayisi: number;
+    teklifToplami: number | null
+    yaklasikMaliyet: number | null
+    teslimTarihi: string | null
+    yasaklilikDurumu: string | null
+    vergiNo: string | null
+    teklifSozlesmeTuru: string | null
+    sozlesmeYapilacakMi: number
+    istekliFirmaSayisi: number
   }>({
     teklifToplami: null,
     yaklasikMaliyet: null,
@@ -88,58 +81,56 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     vergiNo: null,
     teklifSozlesmeTuru: null,
     sozlesmeYapilacakMi: 0,
-    istekliFirmaSayisi: 0,
-  });
+    istekliFirmaSayisi: 0
+  })
 
   useEffect(() => {
-    if (!activeDosyaId) return;
+    if (!activeDosyaId) return
 
     const checkKazananFirma = async (): Promise<void> => {
       try {
         // Ana dosya + firma bilgisi
         const res = await window.electron.ipcRenderer.invoke(
-          "db:query",
+          'db:query',
           `SELECT d.firma_id, f.unvan, f.vergi_no,
                   d.yaklasik_maliyet, d.teslim_tarihi,
                   d.teklif_sozlesme_turu, d.sozlesme_yapilacak_mi
            FROM DATA_TeminDosyasi d
            LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
            WHERE d.id = ?`,
-          [activeDosyaId],
-        );
+          [activeDosyaId]
+        )
 
         if (res.success && res.data && res.data.length > 0) {
-          const row = res.data[0];
-          setKazananFirmaId(row.firma_id || null);
-          setKazananFirmaUnvan(row.unvan || "");
+          const row = res.data[0]
+          setKazananFirmaId(row.firma_id || null)
+          setKazananFirmaUnvan(row.unvan || '')
 
           // Kazanan firmanın teklif toplamı ve yasaklılık durumu
-          let teklifToplami: number | null = null;
-          let yasaklilikDurumu: string | null = null;
+          let teklifToplami: number | null = null
+          let yasaklilikDurumu: string | null = null
           if (row.firma_id) {
             const teklifRes = await window.electron.ipcRenderer.invoke(
-              "db:query",
+              'db:query',
               `SELECT tf.teklif_toplami, tf.yasaklilik_durumu
                FROM DATA_TeminFirma tf
                WHERE tf.temin_dosya_id = ? AND tf.firma_id = ?`,
-              [activeDosyaId, row.firma_id],
-            );
+              [activeDosyaId, row.firma_id]
+            )
             if (teklifRes.success && teklifRes.data?.length > 0) {
-              teklifToplami = teklifRes.data[0].teklif_toplami;
-              yasaklilikDurumu = teklifRes.data[0].yasaklilik_durumu;
+              teklifToplami = teklifRes.data[0].teklif_toplami
+              yasaklilikDurumu = teklifRes.data[0].yasaklilik_durumu
             }
           }
 
           // İstekli firma sayısı
           const firmCountRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
+            'db:query',
             `SELECT COUNT(*) as cnt FROM DATA_TeminFirma WHERE temin_dosya_id = ?`,
-            [activeDosyaId],
-          );
+            [activeDosyaId]
+          )
           const istekliFirmaSayisi =
-            firmCountRes.success && firmCountRes.data?.length > 0
-              ? firmCountRes.data[0].cnt
-              : 0;
+            firmCountRes.success && firmCountRes.data?.length > 0 ? firmCountRes.data[0].cnt : 0
 
           setFirmaStats({
             teklifToplami,
@@ -149,56 +140,54 @@ export function SiparisVeSozlesme(): React.JSX.Element {
             vergiNo: row.vergi_no || null,
             teklifSozlesmeTuru: row.teklif_sozlesme_turu || null,
             sozlesmeYapilacakMi: row.sozlesme_yapilacak_mi || 0,
-            istekliFirmaSayisi,
-          });
+            istekliFirmaSayisi
+          })
         } else {
-          setKazananFirmaId(null);
+          setKazananFirmaId(null)
         }
       } catch {
-        setKazananFirmaId(null);
+        setKazananFirmaId(null)
       }
-    };
+    }
 
-    checkKazananFirma();
-  }, [activeDosyaId]);
+    checkKazananFirma()
+  }, [activeDosyaId])
 
   // Hesaplamalar
-  const tasarrufOrani = firmaStats.yaklasikMaliyet && firmaStats.teklifToplami
-    ? (((firmaStats.yaklasikMaliyet - firmaStats.teklifToplami) /
-      firmaStats.yaklasikMaliyet) *
-      100)
-    : null;
+  const tasarrufOrani =
+    firmaStats.yaklasikMaliyet && firmaStats.teklifToplami
+      ? ((firmaStats.yaklasikMaliyet - firmaStats.teklifToplami) / firmaStats.yaklasikMaliyet) * 100
+      : null
 
   const formatCurrency = (val: number | null): string => {
-    if (val === null || val === undefined) return "—";
-    return new Intl.NumberFormat("tr-TR", {
-      style: "currency",
-      currency: "TRY",
-      minimumFractionDigits: 2,
-    }).format(val);
-  };
+    if (val === null || val === undefined) return '—'
+    return new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: 'TRY',
+      minimumFractionDigits: 2
+    }).format(val)
+  }
 
   const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return "—";
+    if (!dateStr) return '—'
     try {
-      const d = new Date(dateStr);
-      return new Intl.DateTimeFormat("tr-TR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }).format(d);
+      const d = new Date(dateStr)
+      return new Intl.DateTimeFormat('tr-TR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(d)
     } catch {
-      return dateStr;
+      return dateStr
     }
-  };
+  }
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
-        (d) =>
-          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
-      )
-      : false;
+          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
+        )
+      : false
 
     return (
       <DocumentPreviewModal
@@ -206,9 +195,10 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ""}
-        baseContext={previewData.snapshotContext ||
-          contextsByPath[previewData.processPath] || dosyaContext}
+        masterHtml={masterHtml || ''}
+        baseContext={
+          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+        }
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -223,7 +213,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    );
+    )
   }
 
   return (
@@ -236,9 +226,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
       {kazananFirmaId === undefined && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-sm text-slate-500">
-            Kontrol ediliyor...
-          </span>
+          <span className="ml-3 text-sm text-slate-500">Kontrol ediliyor...</span>
         </div>
       )}
 
@@ -256,14 +244,10 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                   Kazanan Firma Belirlenmedi
                 </h3>
                 <p className="text-xs text-amber-700 dark:text-amber-400/90 leading-relaxed max-w-xl">
-                  Sipariş &amp; Sözleşme belgelerini oluşturabilmek için önce
-                  {" "}
-                  <strong>Piyasa Fiyat Araştırması</strong>{" "}
-                  adımında kazanan firmayı belirlemeniz gerekir. Tutanağı
-                  kaydederken{" "}
-                  <em>&ldquo;En Düşük Teklifi Kazanan Yap&rdquo;</em>{" "}
-                  seçeneğini işaretleyin ya da açılan firma listesinden kazananı
-                  elle seçin.
+                  Sipariş &amp; Sözleşme belgelerini oluşturabilmek için önce{' '}
+                  <strong>Piyasa Fiyat Araştırması</strong> adımında kazanan firmayı belirlemeniz
+                  gerekir. Tutanağı kaydederken <em>&ldquo;En Düşük Teklifi Kazanan Yap&rdquo;</em>{' '}
+                  seçeneğini işaretleyin ya da açılan firma listesinden kazananı elle seçin.
                 </p>
               </div>
             </div>
@@ -294,38 +278,38 @@ export function SiparisVeSozlesme(): React.JSX.Element {
             </h4>
             <ol className="flex flex-col gap-2">
               {[
-                { step: "1", label: "Hazırlık & İhtiyaç", done: true },
+                { step: '1', label: 'Hazırlık & İhtiyaç', done: true },
                 {
-                  step: "2",
-                  label: "Piyasa Fiyat Araştırması — Kazanan firma belirle",
+                  step: '2',
+                  label: 'Piyasa Fiyat Araştırması — Kazanan firma belirle',
                   done: false,
-                  current: true,
+                  current: true
                 },
-                { step: "3", label: "Sipariş & Sözleşme", done: false },
+                { step: '3', label: 'Sipariş & Sözleşme', done: false },
                 {
-                  step: "4",
-                  label: "Muayene & Kabul & Ödeme İşlemleri",
-                  done: false,
+                  step: '4',
+                  label: 'Muayene & Kabul & Ödeme İşlemleri',
+                  done: false
                 },
-                { step: "5", label: "Klasör & Kapaklar", done: false },
+                { step: '5', label: 'Klasör & Kapaklar', done: false }
               ].map((item) => (
                 <li
                   key={item.step}
                   className={`flex items-center gap-3 text-xs font-bold px-3 py-2 rounded-xl transition-colors ${
                     item.current
-                      ? "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60"
+                      ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60'
                       : item.done
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-slate-400 dark:text-slate-600"
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-slate-400 dark:text-slate-600'
                   }`}
                 >
                   <span
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
                       item.current
-                        ? "bg-amber-500 text-white"
+                        ? 'bg-amber-500 text-white'
                         : item.done
-                        ? "bg-emerald-500 text-white"
-                        : "bg-slate-200 dark:bg-slate-800 text-slate-500"
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
                     }`}
                   >
                     {item.step}
@@ -359,7 +343,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                     Kazanan / Yüklenici Firma
                   </span>
                   <span className="text-sm font-extrabold text-emerald-800 dark:text-emerald-300">
-                    {kazananFirmaUnvan || "Seçili Firma"}
+                    {kazananFirmaUnvan || 'Seçili Firma'}
                   </span>
                 </div>
               </div>
@@ -368,13 +352,13 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                 {firmaStats.yasaklilikDurumu && (
                   <span
                     className={cn(
-                      "px-2 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1",
-                      firmaStats.yasaklilikDurumu === "Temiz" &&
-                        "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50",
-                      firmaStats.yasaklilikDurumu === "Yasaklı" &&
-                        "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50",
-                      firmaStats.yasaklilikDurumu === "Sorgulanmadı" &&
-                        "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700",
+                      'px-2 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1',
+                      firmaStats.yasaklilikDurumu === 'Temiz' &&
+                        'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50',
+                      firmaStats.yasaklilikDurumu === 'Yasaklı' &&
+                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50',
+                      firmaStats.yasaklilikDurumu === 'Sorgulanmadı' &&
+                        'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
                     )}
                   >
                     <ShieldCheck className="w-3 h-3" />
@@ -427,16 +411,14 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                 </div>
                 <span
                   className={cn(
-                    "text-sm font-extrabold",
+                    'text-sm font-extrabold',
                     tasarrufOrani !== null && tasarrufOrani >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-600 dark:text-red-400",
-                    tasarrufOrani === null && "text-slate-400",
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-red-600 dark:text-red-400',
+                    tasarrufOrani === null && 'text-slate-400'
                   )}
                 >
-                  {tasarrufOrani !== null
-                    ? `%${tasarrufOrani.toFixed(1)}`
-                    : "—"}
+                  {tasarrufOrani !== null ? `%${tasarrufOrani.toFixed(1)}` : '—'}
                 </span>
               </div>
 
@@ -466,8 +448,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                 </span>
               )}
               <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                📝 Sözleşme:{" "}
-                {firmaStats.sozlesmeYapilacakMi ? "Yapılacak" : "Yapılmayacak"}
+                📝 Sözleşme: {firmaStats.sozlesmeYapilacakMi ? 'Yapılacak' : 'Yapılmayacak'}
               </span>
             </div>
           </div>
@@ -475,7 +456,6 @@ export function SiparisVeSozlesme(): React.JSX.Element {
           {/* ═══ Ana İçerik Kartı ═══ */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
             <div className="flex items-center justify-end border-b border-slate-100 dark:border-slate-800 pb-4">
-
               <div className="flex items-center gap-2 relative">
                 <WinnerDocumentsMenu
                   onPrintResultApproval={() => {
@@ -485,17 +465,16 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                     // Kabul Yazısı
                   }}
                   onEkapBlacklistQuery={() => {
-                    window.electron?.ipcRenderer.send("window:open-external", {
-                      url:
-                        "https://ekapv2.kik.gov.tr/sorgulamalar/yasak-sorgulama",
-                      title: "EKAP Kamu İhale Yasaklı Sorgulama",
-                    });
+                    window.electron?.ipcRenderer.send('window:open-external', {
+                      url: 'https://ekapv2.kik.gov.tr/sorgulamalar/yasak-sorgulama',
+                      title: 'EKAP Kamu İhale Yasaklı Sorgulama'
+                    })
                   }}
                   onEdevletBlacklistQuery={() => {
-                    window.electron?.ipcRenderer.send("window:open-external", {
-                      url: "https://www.turkiye.gov.tr/kik-yasakli-sorgula",
-                      title: "e-Devlet KİK Yasaklılık Sorgulama",
-                    });
+                    window.electron?.ipcRenderer.send('window:open-external', {
+                      url: 'https://www.turkiye.gov.tr/kik-yasakli-sorgula',
+                      title: 'e-Devlet KİK Yasaklılık Sorgulama'
+                    })
                   }}
                 />
 
@@ -513,9 +492,7 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                       quickOpenExternal={quickOpenExternal}
                       isSablonDisabled={isSablonDisabled}
                       buttonHeightClass="h-10"
-                      label={disableDocumentGuidance
-                        ? "İşlemler"
-                        : "Belgeleri Yazdır"}
+                      label={disableDocumentGuidance ? 'İşlemler' : 'Belgeleri Yazdır'}
                     />
                   </div>
                 )}
@@ -527,72 +504,70 @@ export function SiparisVeSozlesme(): React.JSX.Element {
               {[
                 {
                   icon: FileCheck,
-                  label: "Sonuç Onay Belgesi",
-                  desc:
-                    "Piyasa fiyat araştırması sonuç onay belgesini hazırlayın",
-                  color: "emerald" as const,
+                  label: 'Sonuç Onay Belgesi',
+                  desc: 'Piyasa fiyat araştırması sonuç onay belgesini hazırlayın',
+                  color: 'emerald' as const
                 },
                 {
                   icon: ShieldCheck,
-                  label: "Yasaklılık Sorgulaması",
-                  desc:
-                    "Kazanan firmanın EKAP ve e-Devlet yasaklılık kontrolünü yapın",
-                  color: "orange" as const,
+                  label: 'Yasaklılık Sorgulaması',
+                  desc: 'Kazanan firmanın EKAP ve e-Devlet yasaklılık kontrolünü yapın',
+                  color: 'orange' as const
                 },
                 {
                   icon: Building2,
-                  label: "Kabul Yazısı / Tebligat",
-                  desc: "Kazanan firmaya sonucun tebliğ edilmesi",
-                  color: "blue" as const,
+                  label: 'Kabul Yazısı / Tebligat',
+                  desc: 'Kazanan firmaya sonucun tebliğ edilmesi',
+                  color: 'blue' as const
                 },
                 {
                   icon: Clock,
-                  label: "Sözleşmeye Davet",
-                  desc: "Firmayı sözleşme imzalamaya davet edin (10 gün süre)",
-                  color: "violet" as const,
+                  label: 'Sözleşmeye Davet',
+                  desc: 'Firmayı sözleşme imzalamaya davet edin (10 gün süre)',
+                  color: 'violet' as const
                 },
                 {
                   icon: CheckCircle2,
-                  label: "Sözleşme İmzalama",
-                  desc: "Doğrudan temin sözleşmesini hazırlayın ve imzalayın",
-                  color: "cyan" as const,
-                },
+                  label: 'Sözleşme İmzalama',
+                  desc: 'Doğrudan temin sözleşmesini hazırlayın ve imzalayın',
+                  color: 'cyan' as const
+                }
               ].map((step, index, arr) => {
                 const colorClasses = {
                   emerald: {
-                    bg: "bg-emerald-100 dark:bg-emerald-900/30",
-                    border: "border-emerald-300 dark:border-emerald-700",
-                    text: "text-emerald-600 dark:text-emerald-400",
-                    line: "bg-emerald-200 dark:bg-emerald-800",
+                    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+                    border: 'border-emerald-300 dark:border-emerald-700',
+                    text: 'text-emerald-600 dark:text-emerald-400',
+                    line: 'bg-emerald-200 dark:bg-emerald-800'
                   },
                   orange: {
-                    bg: "bg-orange-100 dark:bg-orange-900/30",
-                    border: "border-orange-300 dark:border-orange-700",
-                    text: "text-orange-600 dark:text-orange-400",
-                    line: "bg-orange-200 dark:bg-orange-800",
+                    bg: 'bg-orange-100 dark:bg-orange-900/30',
+                    border: 'border-orange-300 dark:border-orange-700',
+                    text: 'text-orange-600 dark:text-orange-400',
+                    line: 'bg-orange-200 dark:bg-orange-800'
                   },
                   blue: {
-                    bg: "bg-blue-100 dark:bg-blue-900/30",
-                    border: "border-blue-300 dark:border-blue-700",
-                    text: "text-blue-600 dark:text-blue-400",
-                    line: "bg-blue-200 dark:bg-blue-800",
+                    bg: 'bg-blue-100 dark:bg-blue-900/30',
+                    border: 'border-blue-300 dark:border-blue-700',
+                    text: 'text-blue-600 dark:text-blue-400',
+                    line: 'bg-blue-200 dark:bg-blue-800'
                   },
                   violet: {
-                    bg: "bg-violet-100 dark:bg-violet-900/30",
-                    border: "border-violet-300 dark:border-violet-700",
-                    text: "text-violet-600 dark:text-violet-400",
-                    line: "bg-violet-200 dark:bg-violet-800",
+                    bg: 'bg-violet-100 dark:bg-violet-900/30',
+                    border: 'border-violet-300 dark:border-violet-700',
+                    text: 'text-violet-600 dark:text-violet-400',
+                    line: 'bg-violet-200 dark:bg-violet-800'
                   },
                   cyan: {
-                    bg: "bg-cyan-100 dark:bg-cyan-900/30",
-                    border: "border-cyan-300 dark:border-cyan-700",
-                    text: "text-cyan-600 dark:text-cyan-400",
-                    line: "bg-cyan-200 dark:bg-cyan-800",
-                  },
-                };
-                const c = colorClasses[step.color];
-                const StepIcon = step.icon;
-                const isLast = index === arr.length - 1;
+                    bg: 'bg-cyan-100 dark:bg-cyan-900/30',
+                    border: 'border-cyan-300 dark:border-cyan-700',
+                    text: 'text-cyan-600 dark:text-cyan-400',
+                    line: 'bg-cyan-200 dark:bg-cyan-800'
+                  }
+                }
+                const c = colorClasses[step.color]
+                const StepIcon = step.icon
+                const isLast = index === arr.length - 1
 
                 return (
                   <div key={step.label} className="flex gap-3">
@@ -600,24 +575,19 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                     <div className="flex flex-col items-center">
                       <div
                         className={cn(
-                          "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border",
+                          'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border',
                           c.bg,
-                          c.border,
+                          c.border
                         )}
                       >
-                        <StepIcon className={cn("w-4 h-4", c.text)} />
+                        <StepIcon className={cn('w-4 h-4', c.text)} />
                       </div>
                       {!isLast && (
-                        <div
-                          className={cn(
-                            "w-0.5 flex-1 min-h-4 my-1 rounded-full",
-                            c.line,
-                          )}
-                        />
+                        <div className={cn('w-0.5 flex-1 min-h-4 my-1 rounded-full', c.line)} />
                       )}
                     </div>
                     {/* İçerik */}
-                    <div className={cn("pb-4", isLast && "pb-0")}>
+                    <div className={cn('pb-4', isLast && 'pb-0')}>
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                         {step.label}
                       </span>
@@ -626,12 +596,12 @@ export function SiparisVeSozlesme(): React.JSX.Element {
                       </p>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           </div>
         </div>
       )}
     </SubScreen>
-  );
+  )
 }

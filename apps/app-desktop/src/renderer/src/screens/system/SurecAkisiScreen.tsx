@@ -59,18 +59,22 @@ export default function SurecAkisiScreen(): React.JSX.Element {
       id: 1,
       title: 'İhtiyaç Oluştu',
       subtitle: 'Dosya ve İş Tanımlama',
-      description: 'İhtiyaç duyulan mal, hizmet veya yapım işi belirlenerek sisteme kaydedilir, iş adı ve dosya numarası atanır.',
+      description:
+        'İhtiyaç duyulan mal, hizmet veya yapım işi belirlenerek sisteme kaydedilir, iş adı ve dosya numarası atanır.',
       status: completedSteps.includes(1) ? 'completed' : currentStep === 1 ? 'current' : 'pending',
-      details: 'Doğrudan temin sürecinin ilk halkasıdır. İlgili birimlerin talepleri doğrultusunda dosya konusu, alım türü ve yaklaşık bütçe tanımlanarak iş başlatılır.',
+      details:
+        'Doğrudan temin sürecinin ilk halkasıdır. İlgili birimlerin talepleri doğrultusunda dosya konusu, alım türü ve yaklaşık bütçe tanımlanarak iş başlatılır.',
       route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC
     },
     {
       id: 2,
       title: 'Doğrudan Temin Onayı Alındı',
       subtitle: 'Onay Belgesi & Olurlar',
-      description: 'Harcama yetkilisinden (en üst amir) işin başlatılması ve bütçe kullanımı için resmi olur yazısı ve onay alınır.',
+      description:
+        'Harcama yetkilisinden (en üst amir) işin başlatılması ve bütçe kullanımı için resmi olur yazısı ve onay alınır.',
       status: completedSteps.includes(2) ? 'completed' : currentStep === 2 ? 'current' : 'pending',
-      details: '4734 Sayılı Kanun\'un ilgili maddelerine (22/d vb.) göre hazırlanan doğrudan temin onay belgesi harcama yetkilisine sunulur ve imzalatılır.',
+      details:
+        "4734 Sayılı Kanun'un ilgili maddelerine (22/d vb.) göre hazırlanan doğrudan temin onay belgesi harcama yetkilisine sunulur ve imzalatılır.",
       route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
       requiredDocs: ['Doğrudan Temin Onay Belgesi (Onay Belgesi)']
     },
@@ -78,9 +82,11 @@ export default function SurecAkisiScreen(): React.JSX.Element {
       id: 3,
       title: 'Piyasa Fiyat Araştırması Yapıldı',
       subtitle: 'Teklifler & Piyasa Fiyat Araştırma Tutanağı',
-      description: 'En az 3 firmadan veya piyasadan fiyat teklifleri toplanarak Piyasa Fiyat Araştırma Tutanağı (PFAT) düzenlenir.',
+      description:
+        'En az 3 firmadan veya piyasadan fiyat teklifleri toplanarak Piyasa Fiyat Araştırma Tutanağı (PFAT) düzenlenir.',
       status: completedSteps.includes(3) ? 'completed' : currentStep === 3 ? 'current' : 'pending',
-      details: 'Fiyat komisyonu üyeleri tarafından piyasadan alınan teklifler değerlendirilir. Eşzamanlı olarak yaklaşık maliyet cetveli de netleştirilmiş olur.',
+      details:
+        'Fiyat komisyonu üyeleri tarafından piyasadan alınan teklifler değerlendirilir. Eşzamanlı olarak yaklaşık maliyet cetveli de netleştirilmiş olur.',
       route: APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI,
       requiredDocs: ['Piyasa Fiyat Araştırması Tutanağı', 'Yaklaşık Maliyet Cetveli']
     },
@@ -88,71 +94,95 @@ export default function SurecAkisiScreen(): React.JSX.Element {
       id: 4,
       title: 'Yüklenici Belirlendi',
       subtitle: 'En Düşük / En Uygun Teklif Sahibi',
-      description: 'Gelen teklifler arasından en uygun fiyatı sunan istekli belirlenerek üzerine ihale (doğrudan temin alımı) bırakılır.',
+      description:
+        'Gelen teklifler arasından en uygun fiyatı sunan istekli belirlenerek üzerine ihale (doğrudan temin alımı) bırakılır.',
       status: completedSteps.includes(4) ? 'completed' : currentStep === 4 ? 'current' : 'pending',
-      details: 'Tutanakta belirtilen en avantajlı teklifi veren firma yüklenici (kazanan istekli) olarak seçilir ve sipariş aşamasına geçilir.',
+      details:
+        'Tutanakta belirtilen en avantajlı teklifi veren firma yüklenici (kazanan istekli) olarak seçilir ve sipariş aşamasına geçilir.',
       route: APP_ROUTES.SIPARIS_VE_SOZLESME
     },
     {
       id: 5,
       title: 'Mal/Hizmet Teslim Edildi',
       subtitle: 'Fiili Teslimat ve İrsaliye',
-      description: 'Yüklenici firma, siparişe konu olan malı veya hizmeti kuruma belirlenen süre içinde teslim eder.',
+      description:
+        'Yüklenici firma, siparişe konu olan malı veya hizmeti kuruma belirlenen süre içinde teslim eder.',
       status: completedSteps.includes(5) ? 'completed' : currentStep === 5 ? 'current' : 'pending',
-      details: 'Teslimat sırasında irsaliye veya fatura ile fiziksel kontrol yapılır, teslimat süreci resmileştirilir.',
+      details:
+        'Teslimat sırasında irsaliye veya fatura ile fiziksel kontrol yapılır, teslimat süreci resmileştirilir.',
       route: APP_ROUTES.FATURA_VE_IRSALIYE
     },
     {
       id: 6,
       title: 'Teslim Tesellüm Tutanağı',
       subtitle: 'Teslim Eden & Teslim Alan İmzaları',
-      description: 'Malın yüklenici tarafından sorunsuz teslim edildiğini, kurum adına kimlerin teslim aldığını gösteren kanıt tutanağıdır.',
+      description:
+        'Malın yüklenici tarafından sorunsuz teslim edildiğini, kurum adına kimlerin teslim aldığını gösteren kanıt tutanağıdır.',
       status: completedSteps.includes(6) ? 'completed' : currentStep === 6 ? 'current' : 'pending',
-      details: 'Tutanakta teslim eden (firma temsilcisi) ve teslim alan (kurum görevlileri) bilgileri, imzaları yer alır.',
+      details:
+        'Tutanakta teslim eden (firma temsilcisi) ve teslim alan (kurum görevlileri) bilgileri, imzaları yer alır.',
       requiredDocs: ['Teslim Tesellüm Tutanağı']
     },
     {
       id: 7,
       title: 'Muayene ve Kabul Tutanağı',
       subtitle: 'Komisyon İncelemesi ve Kabulü',
-      description: 'Muayene ve Kabul Komisyonu üyeleri teslim edilen mal/hizmetin teknik şartnameye uygunluğunu inceleyerek kabul tutanağını imzalar.',
+      description:
+        'Muayene ve Kabul Komisyonu üyeleri teslim edilen mal/hizmetin teknik şartnameye uygunluğunu inceleyerek kabul tutanağını imzalar.',
       status: completedSteps.includes(7) ? 'completed' : currentStep === 7 ? 'current' : 'pending',
-      details: 'Komisyon üyeleri toplanarak kontrol yapar. Malzemelerin kalitesi, özellikleri incelenir ve uygunsa "Kabul Edilmiştir" kararı verilir.',
+      details:
+        'Komisyon üyeleri toplanarak kontrol yapar. Malzemelerin kalitesi, özellikleri incelenir ve uygunsa "Kabul Edilmiştir" kararı verilir.',
       requiredDocs: ['Muayene ve Kabul Komisyonu Tutanağı']
     },
     {
       id: 8,
       title: 'Fatura Düzenlendi',
       subtitle: 'Fatura Girişi ve Kontrolleri',
-      description: 'Fatura yüklenici firma tarafından düzenlenir, KDV oranları ve birim fiyatlar doğrulanır.',
+      description:
+        'Fatura yüklenici firma tarafından düzenlenir, KDV oranları ve birim fiyatlar doğrulanır.',
       status: completedSteps.includes(8) ? 'completed' : currentStep === 8 ? 'current' : 'pending',
-      details: 'Faturadaki KDV oranları, birim fiyatlar ve toplam tutar ile yaklaşık maliyet/piyasa tutanaklarındaki tutarlar tam uyumlu olmalıdır.',
+      details:
+        'Faturadaki KDV oranları, birim fiyatlar ve toplam tutar ile yaklaşık maliyet/piyasa tutanaklarındaki tutarlar tam uyumlu olmalıdır.',
       route: APP_ROUTES.FATURA_VE_IRSALIYE
     },
     {
       id: 9,
       title: 'Ödeme Talep Dilekçesi',
       subtitle: 'Yüklenici Ödeme Başvurusu',
-      description: 'Yüklenici firmanın alacağının kendi banka hesabına (IBAN) ödenmesi için harcama birimine sunduğu talep dilekçesidir.',
+      description:
+        'Yüklenici firmanın alacağının kendi banka hesabına (IBAN) ödenmesi için harcama birimine sunduğu talep dilekçesidir.',
       status: completedSteps.includes(9) ? 'completed' : currentStep === 9 ? 'current' : 'pending',
-      details: 'Resmi dilekçede firmanın unvanı, fatura bilgileri ve ödemenin yapılacağı IBAN adresi yer alır.',
+      details:
+        'Resmi dilekçede firmanın unvanı, fatura bilgileri ve ödemenin yapılacağı IBAN adresi yer alır.',
       requiredDocs: ['Ödeme Talep Dilekçesi']
     },
     {
       id: 10,
       title: 'Taşınır İşlem Fişi (Varsa)',
       subtitle: 'Malzemelerin Envantere Girişi',
-      description: 'Alınan malzemeler demirbaş veya tüketim malzemesi ise Taşınır Mal Yönetmeliği gereği envantere (TİF) kaydedilir.',
-      status: completedSteps.includes(10) ? 'completed' : currentStep === 10 ? 'current' : 'pending',
-      details: 'TİF belgesi taşınır kayıt yetkilisi tarafından düzenlenir ve ödeme emri belgesinin ekine konulması yasal olarak zorunludur (Mal alımlarında).'
+      description:
+        'Alınan malzemeler demirbaş veya tüketim malzemesi ise Taşınır Mal Yönetmeliği gereği envantere (TİF) kaydedilir.',
+      status: completedSteps.includes(10)
+        ? 'completed'
+        : currentStep === 10
+          ? 'current'
+          : 'pending',
+      details:
+        'TİF belgesi taşınır kayıt yetkilisi tarafından düzenlenir ve ödeme emri belgesinin ekine konulması yasal olarak zorunludur (Mal alımlarında).'
     },
     {
       id: 11,
       title: 'Ödeme Emri Belgesi (ÖEB)',
       subtitle: 'Muhasebe Ödeme İşlemi',
-      description: 'Gerçekleştirme görevlisi ve harcama yetkilisinin imzasıyla hazırlanan ÖEB muhasebe birimine gönderilir ve ödeme tamamlanır.',
-      status: completedSteps.includes(11) ? 'completed' : currentStep === 11 ? 'current' : 'pending',
-      details: 'Tüm evrakların tam olduğu muhasebe yetkilisince onaylandıktan sonra, bütçe tertibinden yüklenicinin IBAN hesabına tutar EFT/Havale ile gönderilir ve dosya kapanır.',
+      description:
+        'Gerçekleştirme görevlisi ve harcama yetkilisinin imzasıyla hazırlanan ÖEB muhasebe birimine gönderilir ve ödeme tamamlanır.',
+      status: completedSteps.includes(11)
+        ? 'completed'
+        : currentStep === 11
+          ? 'current'
+          : 'pending',
+      details:
+        'Tüm evrakların tam olduğu muhasebe yetkilisince onaylandıktan sonra, bütçe tertibinden yüklenicinin IBAN hesabına tutar EFT/Havale ile gönderilir ve dosya kapanır.',
       requiredDocs: ['Ödeme Emri Belgesi (MYS ÖEB)']
     }
   ]
@@ -197,7 +227,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 </span>
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
-                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme gibi tüm işlemlerini tek ekrandan yönetin.
+                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme gibi tüm
+                işlemlerini tek ekrandan yönetin.
               </p>
             </div>
           </div>
@@ -238,8 +269,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                     isActive
                       ? 'bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900/60 shadow-sm'
                       : isCompleted
-                      ? 'bg-slate-50/50 border-slate-100 dark:bg-slate-900/10 dark:border-slate-850 hover:bg-slate-100'
-                      : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/40'
+                        ? 'bg-slate-50/50 border-slate-100 dark:bg-slate-900/10 dark:border-slate-850 hover:bg-slate-100'
+                        : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/40'
                   }`}
                 >
                   {/* Circle Indicator */}
@@ -249,8 +280,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                         isCompleted
                           ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/10'
                           : isActive
-                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 ring-4 ring-indigo-500/10'
-                          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 ring-4 ring-indigo-500/10'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                       }`}
                     >
                       {isCompleted ? <Check className="w-4 h-4" /> : step.id}
@@ -357,7 +388,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Teslim Eden (Yüklenici Temsilcisi)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Teslim Eden (Yüklenici Temsilcisi)
+                    </label>
                     <div className="relative">
                       <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                       <input
@@ -372,7 +405,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Teslim Alan (Kurum Görevlisi)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Teslim Alan (Kurum Görevlisi)
+                    </label>
                     <div className="relative">
                       <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                       <input
@@ -405,7 +440,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Fatura No</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Fatura No
+                    </label>
                     <input
                       type="text"
                       name="faturaNo"
@@ -417,7 +454,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Fatura Tarihi</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Fatura Tarihi
+                    </label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                       <input
@@ -431,7 +470,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Fatura Tutarı (TL)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Fatura Tutarı (TL)
+                    </label>
                     <input
                       type="text"
                       name="faturaTutari"
@@ -461,7 +502,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 </h3>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Ödemenin Yapılacağı Banka IBAN Numarası</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Ödemenin Yapılacağı Banka IBAN Numarası
+                    </label>
                     <div className="relative">
                       <CreditCard className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                       <input
@@ -490,11 +533,14 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {activeStepObj.id === 10 && (
               <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-indigo-500" /> Taşınır İşlem Fişi (TİF) Takibi
+                  <AlertCircle className="w-4 h-4 text-indigo-500" /> Taşınır İşlem Fişi (TİF)
+                  Takibi
                 </h3>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Taşınır Fiş Numarası (TİF No)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                      Taşınır Fiş Numarası (TİF No)
+                    </label>
                     <input
                       type="text"
                       name="tasinirFisNo"
@@ -530,7 +576,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <Clock className="w-4 h-4" />
               <span>
-                {activeStepObj.route ? 'Bu aşamaya özel işlemler ve veri giriş ekranı mevcuttur.' : 'Bu aşama genel takip listesine dahildir.'}
+                {activeStepObj.route
+                  ? 'Bu aşamaya özel işlemler ve veri giriş ekranı mevcuttur.'
+                  : 'Bu aşama genel takip listesine dahildir.'}
               </span>
             </div>
 

@@ -876,4 +876,3 @@ export default function PersonelScreen({
     </div>
   )
 }
-

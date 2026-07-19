@@ -455,12 +455,15 @@ export function useAnnouncements() {
               month: 'short',
               year: 'numeric'
             })
-            const formattedMaliyet = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(row.yaklasik_maliyet || 0)
-            
+            const formattedMaliyet = new Intl.NumberFormat('tr-TR', {
+              style: 'currency',
+              currency: 'TRY'
+            }).format(row.yaklasik_maliyet || 0)
+
             let title = 'Temin Dosyası Güncellemesi'
             let content = `"${row.konu || 'Konu Belirtilmedi'}" (${row.temin_no || 'No Yok'}) dosyası işlem görüyor.`
             let type: 'info' | 'success' | 'warning' | 'error' = 'info'
-            
+
             if (row.status === 'iptal') {
               title = 'Dosya İptal Edildi'
               content = `"${row.konu}" (${row.temin_no}) dosyası iptal edildi.`

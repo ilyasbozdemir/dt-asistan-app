@@ -373,4 +373,3 @@ export default function AmbarScreen(): React.JSX.Element {
     </div>
   )
 }
-

@@ -673,4 +673,3 @@ Yanıtını SADECE JSON formatında ver.`}
     </div>
   )
 }
-

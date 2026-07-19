@@ -1234,10 +1234,10 @@ if (!gotTheLock && !isMultiInstance) {
           return { success: false, error: 'Aktif bir çalışma dosyası bulunamadı!' }
         }
         workspaceManager.save()
-        
+
         // TODO: MOCK UPLOAD TO SERVER
         console.log(`[Mock] Uploading ${filePath} to web server as a backup...`)
-        
+
         // Wait 1.5s to simulate upload
         await new Promise((resolve) => setTimeout(resolve, 1500))
 
@@ -1257,12 +1257,24 @@ if (!gotTheLock && !isMultiInstance) {
         workspaceManager.save()
 
         const db = workspaceManager.getDb()
-        const hostRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpHost'").get() as { value: string }
-        const portRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPort'").get() as { value: string }
-        const userRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpUser'").get() as { value: string }
-        const passRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPass'").get() as { value: string }
-        const emailRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpReceiver'").get() as { value: string }
-        const secureRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpSecure'").get() as { value: string }
+        const hostRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpHost'").get() as {
+          value: string
+        }
+        const portRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPort'").get() as {
+          value: string
+        }
+        const userRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpUser'").get() as {
+          value: string
+        }
+        const passRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPass'").get() as {
+          value: string
+        }
+        const emailRow = db
+          .prepare("SELECT value FROM settings WHERE key = 'smtpReceiver'")
+          .get() as { value: string }
+        const secureRow = db
+          .prepare("SELECT value FROM settings WHERE key = 'smtpSecure'")
+          .get() as { value: string }
 
         if (!hostRow?.value || !userRow?.value || !passRow?.value) {
           return { success: false, error: 'SMTP ayarları yapılandırılmamış!' }
@@ -3325,8 +3337,8 @@ if (!gotTheLock && !isMultiInstance) {
       console.log(`Yeni sürüm bulundu! Sürüm: ${info.version}`)
 
       try {
-        const versionsPath = app.isPackaged 
-          ? join(process.resourcesPath, 'versions.json') 
+        const versionsPath = app.isPackaged
+          ? join(process.resourcesPath, 'versions.json')
           : join(app.getAppPath(), '../../packages/database/versions.json')
         if (fs.existsSync(versionsPath)) {
           const versionsList: string[] = JSON.parse(fs.readFileSync(versionsPath, 'utf8'))

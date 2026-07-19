@@ -72,7 +72,11 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
             {firma.vergi_no && (
               <div className="flex items-center gap-2 truncate">
                 <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span className="truncate">VN: <strong className="text-slate-655 dark:text-slate-355">{firma.vergi_no}</strong> {firma.vergi_dairesi && `(${firma.vergi_dairesi})`}</span>
+                <span className="truncate">
+                  VN:{' '}
+                  <strong className="text-slate-655 dark:text-slate-355">{firma.vergi_no}</strong>{' '}
+                  {firma.vergi_dairesi && `(${firma.vergi_dairesi})`}
+                </span>
               </div>
             )}
             {firma.ilgili_adi && (
