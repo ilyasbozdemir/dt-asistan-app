@@ -37,7 +37,7 @@ const defaultAsamalar: Asama[] = [
   {
     id: 4,
     asama_sira: 4,
-    asama_adi: "Muayene & Kabul & Ödeme İşlemleri",
+    asama_adi: "Muayebe & Kabul & Ödeme İşlemleri",
     aciklama:
       "Mal veya hizmetin teslim alındığı, kabul komisyonunca onaylandığı ve ödeme evraklarının (ÖEB) Mali Hizmetlere sevk edildiği son aşamadır.",
     rozet_rengi: "emerald",

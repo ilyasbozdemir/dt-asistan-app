@@ -23,7 +23,7 @@ import { z } from 'zod'
 const IhtiyacListesiConfig: TemplateConfig = {
   id: 'ihtiyac-listesi',
   name: 'İhtiyaç Listesi',
-  category: 'Hazırlık ve İhtiyaç',
+  category: 'Hazırlık & İhtiyaç & Onay',
   version: '2.0',
   schema: IhtiyacListesiSchema,
   htmlPath: 'templates/html/ihtiyac-listesi.html',
@@ -49,7 +49,7 @@ const IhtiyacListesiConfig: TemplateConfig = {
 const LuzumMuzekkeresiConfig: TemplateConfig = {
   id: 'luzum-muzekkeresi',
   name: 'Lüzum Müzekkeresi',
-  category: 'Hazırlık ve İhtiyaç',
+  category: 'Hazırlık & İhtiyaç & Onay',
   version: '1.5',
   schema: z.record(z.string(), z.any()), // TODO: Özel schema yazılacak
   htmlPath: 'templates/html/luzum-muzekkeresi.html',

@@ -113,7 +113,7 @@ export function Header(): React.JSX.Element {
           name: "Adım Adım Süreç",
           items: [
             {
-              label: "1. Hazırlık ve İhtiyaç",
+              label: "1. Hazırlık & İhtiyaç & Onay",
               onClick: () =>
                 navigate({ to: "/dosya/hazirlik-ve-ihtiyac" as any }),
             },

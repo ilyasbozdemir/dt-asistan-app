@@ -30,6 +30,9 @@ import { DATA_TeminFirma } from './tables/DATA_TeminFirma'
 import { DATA_TeminKalemTeklif } from './tables/DATA_TeminKalemTeklif'
 import { DATA_TeminKomisyon } from './tables/DATA_TeminKomisyon'
 import { DATA_TeminBelge } from './tables/DATA_TeminBelge'
+import { DATA_TIF } from './tables/DATA_TIF'
+import { DATA_TIF_Kalem } from './tables/DATA_TIF_Kalem'
+import { DATA_AmbarStok } from './tables/DATA_AmbarStok'
 import { LOG_SystemLog } from './tables/LOG_SystemLog'
 import { DATA_DosyaSablonVeri } from './tables/DATA_DosyaSablonVeri'
 import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
@@ -68,6 +71,9 @@ export const schema = {
     DATA_TeminKalemTeklif,
     DATA_TeminKomisyon,
     DATA_TeminBelge,
+    DATA_TIF,
+    DATA_TIF_Kalem,
+    DATA_AmbarStok,
     DATA_DosyaSablonVeri,
     LOG_SystemLog
   ]

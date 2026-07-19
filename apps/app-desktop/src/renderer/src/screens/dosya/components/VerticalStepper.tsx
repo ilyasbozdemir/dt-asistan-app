@@ -12,13 +12,13 @@ import { cn } from "../../../utils/cn";
 const STEPS = [
   {
     id: 1,
-    label: "Hazırlık ve İhtiyaç",
+    label: "Hazırlık & İhtiyaç & Onay",
     route: "/dosya/hazirlik-ve-ihtiyac",
     icon: Package,
   },
   {
     id: 2,
-    label: "Piyasa Fiyat Araştırması",
+    label: "Teklifler & Piyasa Fiyat Araştırması",
     route: "/dosya/piyasa-fiyat-arastirmasi",
     icon: Search,
   },
