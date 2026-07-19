@@ -90,7 +90,7 @@ export function PiyasaFiyatArastirmasiFirmsTab({
             <span className="text-base mt-0.5">ℹ️</span>
             <span className="leading-relaxed">
               Bu alandaki verileri bir önceki adım olan{" "}
-              <strong>Hazırlık & İhtiyaç & Onay</strong>{" "}
+              <strong>İhtiyaç Listesi & Maliyet & Onay</strong>{" "}
               aşamasında da güncelleyebilirsiniz. Orada yapılan değişiklikler
               otomatik olarak buraya yansır.
             </span>
@@ -99,7 +99,7 @@ export function PiyasaFiyatArastirmasiFirmsTab({
             to="/dosya/hazirlik-ve-ihtiyac"
             className="shrink-0 text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg transition-all border-0 cursor-pointer text-center whitespace-nowrap shadow-sm shadow-blue-600/20"
           >
-            Hazırlık & İhtiyaç & Onay'a Git
+            İhtiyaç Listesi & Maliyet & Onay'a Git
           </Link>
         </div>
       </div>

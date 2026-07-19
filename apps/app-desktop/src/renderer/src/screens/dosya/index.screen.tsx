@@ -382,7 +382,7 @@ export default function DosyaScreen(): React.JSX.Element {
   const getAsamaLabel = (asamaId: number) => {
     switch (asamaId) {
       case 1:
-        return "1. Hazırlık & İhtiyaç & Onay";
+        return "1. İhtiyaç Listesi & Maliyet & Onay";
       case 2:
         return "2. Piyasa Fiyat Araştırması";
       case 3:
@@ -392,7 +392,7 @@ export default function DosyaScreen(): React.JSX.Element {
       case 5:
         return "5. Dosya Kapatıldı";
       default:
-        return "1. Hazırlık & İhtiyaç & Onay";
+        return "1. İhtiyaç Listesi & Maliyet & Onay";
     }
   };
 
@@ -592,7 +592,9 @@ export default function DosyaScreen(): React.JSX.Element {
                           to="/dosya/hazirlik-ve-ihtiyac"
                           className="flex items-center justify-between p-3 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/20 hover:border-blue-300 dark:hover:border-blue-900 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition-all font-bold text-xs text-slate-700 dark:text-slate-300 group cursor-pointer"
                         >
-                          <span>1. Hazırlık & İhtiyaç & Onay Aşaması</span>
+                          <span>
+                            1. İhtiyaç Listesi & Maliyet & Onay Aşaması
+                          </span>
                           <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                         </Link>
                         <Link

@@ -98,7 +98,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
 
   return (
     <SubScreen
-      title="Hazırlık & İhtiyaç & Onay"
+      title="İhtiyaç Listesi & Maliyet & Onay"
       icon={Package}
       description="Dosyanıza malzeme, hizmet veya yapım işi ekleyebilir ve yönetebilirsiniz. Son Alım Fiyat Cetveli şablonu sayesinde, malzemelerin son alım fiyatları, kimden/hangi firmadan alındığı gibi geçmiş analiz verileri otomatik olarak listelenir."
     >

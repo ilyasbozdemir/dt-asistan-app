@@ -20,7 +20,7 @@ export interface ProcessStage {
 
 export const subPagesMapping: ProcessStage[] = [
   {
-    name: 'Hazırlık & İhtiyaç & Onay',
+    name: 'İhtiyaç Listesi & Maliyet & Onay',
     path: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
     icon: PackageSearch,
     stage: 1

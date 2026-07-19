@@ -21,7 +21,7 @@ interface StepConfig {
 const STEPS: StepConfig[] = [
   {
     id: 1,
-    label: "Hazırlık & İhtiyaç & Onay",
+    label: "İhtiyaç Listesi & Maliyet & Onay",
     shortLabel: "Hazırlık",
     route: "/dosya/hazirlik-ve-ihtiyac",
     icon: Package,

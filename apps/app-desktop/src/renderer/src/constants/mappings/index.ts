@@ -18,7 +18,7 @@ import { YaklasikMaliyetCetveliMapping } from './yaklasik-maliyet-cetveli.mappin
 import * as allOther from './all-templates.mapping'
 
 export const processMappingRegistry: Record<string, ProcessMapping> = {
-  // Hazırlık & İhtiyaç & Onay
+  // İhtiyaç Listesi & Maliyet & Onay
   '/dosya/hazirlik-ve-ihtiyac': IhtiyacListesiMapping,
   '/dosya/malzemeler/liste': IhtiyacListesiMapping,
   '/dosya/luzum/talep-formu': IhtiyacTalepFormuMapping,

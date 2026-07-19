@@ -12,7 +12,7 @@ import { cn } from "../../../utils/cn";
 const STEPS = [
   {
     id: 1,
-    label: "Hazırlık & İhtiyaç & Onay",
+    label: "İhtiyaç Listesi & Maliyet & Onay",
     route: "/dosya/hazirlik-ve-ihtiyac",
     icon: Package,
   },
