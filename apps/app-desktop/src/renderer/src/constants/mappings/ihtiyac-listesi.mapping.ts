@@ -11,9 +11,17 @@ export const IhtiyacListesiMapping: ProcessMapping = {
     aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı (örn: E-10234521-934.01-0001)'
   },
 
+  tarih: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'temin_tarihi',
+    varsayilan: new Date().toLocaleDateString('tr-TR'),
+    aciklama: 'Belge tarihi'
+  },
+
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
     sutun: 'makam_adi',
+    varsayilan: 'BELEDİYE BAŞKANLIĞINA',
     aciklama: 'Sunulacak makam adı'
   },
 
@@ -33,13 +41,15 @@ export const IhtiyacListesiMapping: ProcessMapping = {
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'ihtiyac_yeri',
+    sutun: 'harcama_birimi',
+    varsayilan: 'Müdürlüğümüzün',
     aciklama: 'İhtiyaç listesi yerleri'
   },
 
   isinAciklamasi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'isin_aciklamasi',
+    varsayilan: 'ihtiyacı olan',
     aciklama: 'İşin Açıklaması/Açıklama'
   },
   olurYazisi: {

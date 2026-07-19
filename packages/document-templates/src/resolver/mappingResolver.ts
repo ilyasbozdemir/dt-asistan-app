@@ -55,6 +55,47 @@ export async function resolveEvrakSayisi(
 }
 
 /**
+ * Resolves institution header lines e.g. ["T.C.", "İZMİR BÜYÜKŞEHİR BELEDİYESİ", "Destek Hizmetleri Dairesi Başkanlığı"]
+ */
+export async function resolveAntetSatirlari(
+  queryExecutor: (sql: string, params: any[]) => Promise<any[]>
+): Promise<string[]> {
+  try {
+    const res = await queryExecutor(
+      'SELECT kurum_anteti, ust_kurum_adi, kurum_adi, birim_adi FROM TANIM_Kurum LIMIT 1',
+      []
+    );
+    if (res && res.length > 0) {
+      const row = res[0];
+      if (row.kurum_anteti) {
+        try {
+          const parsed = JSON.parse(row.kurum_anteti);
+          if (Array.isArray(parsed) && parsed.filter(Boolean).length > 0) {
+            return parsed.filter((s: string) => s && s.trim() !== '');
+          }
+        } catch {
+          if (typeof row.kurum_anteti === 'string' && row.kurum_anteti.trim()) {
+            return row.kurum_anteti.split('\n').map((s: string) => s.trim()).filter(Boolean);
+          }
+        }
+      }
+
+      const built: string[] = ['T.C.'];
+      if (row.ust_kurum_adi) built.push(row.ust_kurum_adi.toUpperCase());
+      if (row.kurum_adi) built.push(row.kurum_adi.toUpperCase());
+      if (row.birim_adi) built.push(row.birim_adi);
+
+      if (built.length > 1) {
+        return built;
+      }
+    }
+  } catch (err) {
+    console.error('Antet satırları çözümlenirken hata:', err);
+  }
+  return ['T.C.', 'BELEDİYE BAŞKANLIĞI', 'Destek Hizmetleri Müdürlüğü'];
+}
+
+/**
  * Resolves all variables in a ProcessMapping using database query execution.
  */
 export async function resolveTemplateData(
@@ -68,6 +109,12 @@ export async function resolveTemplateData(
     // 0. Automatic official evrakSayisi formatting
     if (sablonDegiskeni === 'evrakSayisi' && !rule.formul && rule.deger === undefined) {
       resolvedPayload['evrakSayisi'] = await resolveEvrakSayisi(activeDosyaId, queryExecutor);
+      continue;
+    }
+
+    // 0.b Automatic institution antet lines formatting
+    if (sablonDegiskeni === 'antetSatirlari' && !rule.deger) {
+      resolvedPayload['antetSatirlari'] = await resolveAntetSatirlari(queryExecutor);
       continue;
     }
     // 1. Static value
