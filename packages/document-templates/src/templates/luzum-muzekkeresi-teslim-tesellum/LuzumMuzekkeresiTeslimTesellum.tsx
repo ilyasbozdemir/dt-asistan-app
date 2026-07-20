@@ -19,7 +19,9 @@ const formatCurrency = (val: any): string => {
   if (typeof val === "string" && (val.includes("TL") || val.includes(","))) {
     return val;
   }
-  const num = typeof val === "number" ? val : parseFloat(String(val).replace(/[^0-9.-]/g, ""));
+  const num = typeof val === "number"
+    ? val
+    : parseFloat(String(val).replace(/[^0-9.-]/g, ""));
   if (isNaN(num)) {
     return String(val);
   }
@@ -140,7 +142,14 @@ export function LuzumMuzekkeresiTeslimTesellum({
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "bold", width: "120px", padding: "4px 0", verticalAlign: "top" }}>
+                      <td
+                        style={{
+                          fontWeight: "bold",
+                          width: "120px",
+                          padding: "4px 0",
+                          verticalAlign: "top",
+                        }}
+                      >
                         İşin Değeri (KDV Hariç):
                       </td>
                       <td

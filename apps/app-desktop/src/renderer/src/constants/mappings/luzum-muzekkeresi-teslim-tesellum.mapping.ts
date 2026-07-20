@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const LuzumTeslimTesellumMapping: ProcessMapping = {
   antetSatirlari: {
@@ -21,10 +21,10 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     deger: true,
     aciklama: 'Kurum içi mi?'
   },
-  kurumumu: {
+  kurumumuz: {
     tablo: 'TANIM_Kurum',
     sutun: 'kurum_adi',
-    aciklama: 'Kurumun adı'
+    aciklama: 'Kurumun adı (tabiri ile birlikte)'
   },
   dosyaNumarasi: {
     formul: '{{DATA_TeminDosyasi.butce_yili}}-{{DATA_TeminDosyasi.temin_no_clean}}',

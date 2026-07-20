@@ -19,6 +19,7 @@ import {
 } from "@dt-asistan/document-templates";
 import * as Templates from "@dt-asistan/document-templates";
 import { getDefaultMappingForProcess } from "../../../../constants/mappings";
+import { getInstitutionSuffixes } from "../../../../utils/kurumHelper";
 
 interface DocumentPreviewModalV2Props {
   isOpen: boolean;
@@ -74,7 +75,15 @@ export function DocumentPreviewModalV2({
   onClose,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const { activeDosyaId } = useWorkspaceStore();
-  const { showLogoLeft, showLogoRight } = useSettingsStore();
+  const {
+    showLogoLeft,
+    showLogoRight,
+    subInstitutionType,
+    customSubInstitutionLabel,
+    customSubInstitutionKurumumuz,
+    customSubInstitutionKurumu,
+    customSubInstitutionKurumlari,
+  } = useSettingsStore();
   const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
   const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
   const [previewScale, setPreviewScale] = useState(1);
@@ -185,6 +194,15 @@ export function DocumentPreviewModalV2({
 
         finalData.tarih = finalData.tarih || finalData.onayaSunulanTarih || '';
         finalData.onayTarihi = finalData.onayTarihi || finalData.dosyaTarihi || '';
+
+        // Derive kurumumuz from institution type suffix (e.g. "Belediyemiz", "Müdürlüğümüz")
+        const suffixes = getInstitutionSuffixes(subInstitutionType || 'belediye', {
+          label: customSubInstitutionLabel,
+          kurumumuz: customSubInstitutionKurumumuz,
+          kurumu: customSubInstitutionKurumu,
+          kurumlari: customSubInstitutionKurumlari,
+        });
+        finalData.kurumumuz = suffixes.kurumumuz;
 
         setFormData(finalData);
       } catch (err) {
