@@ -6,5 +6,9 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     name: 'IhtiyacListesi',
     category: '1-ihtiyac-tespiti-ve-baslangic'
   },
-  
+  {
+    id: 'luzum-muzekkeresi',
+    name: 'LuzumMuzekkeresi',
+    category: '1-ihtiyac-tespiti-ve-baslangic'
+  }
 ];

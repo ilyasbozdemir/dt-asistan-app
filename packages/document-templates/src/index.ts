@@ -8,8 +8,8 @@ export * from "./document/DocumentFooter";
 export * from "./document/DocumentTable";
 export * from "./document/ApprovalSignature";
 export * from "./document/DynamicPaginatedTable";
-
 export * from "./templates/ihtiyac-listesi";
+export * from "./templates/luzum-muzekkeresi";
 
 // Mapping Resolver
 export * from "./resolver/types";

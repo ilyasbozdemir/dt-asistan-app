@@ -48,7 +48,8 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       : false
 
     const isV2 =
-      previewData?.dosyaAdi && previewData.dosyaAdi.replace('.html', '') === 'ihtiyac-listesi'
+      previewData?.dosyaAdi &&
+      ['ihtiyac-listesi', 'luzum-muzekkeresi'].includes(previewData.dosyaAdi.replace('.html', ''))
 
     if (isV2) {
       return (

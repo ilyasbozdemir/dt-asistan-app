@@ -17,7 +17,7 @@ import {
   TemplateResolver,
 } from "@dt-asistan/document-templates";
 import * as Templates from "@dt-asistan/document-templates";
-import { IhtiyacListesiMapping } from "../../../../constants/mappings/ihtiyac-listesi.mapping";
+import { getDefaultMappingForProcess } from "../../../../constants/mappings";
 
 interface DocumentPreviewModalV2Props {
   isOpen: boolean;
@@ -35,6 +35,7 @@ interface Personel {
 
 const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,
+  LuzumMuzekkeresi: Templates.LuzumMuzekkeresi as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<
@@ -116,19 +117,19 @@ export function DocumentPreviewModalV2({
           return [];
         };
 
+        const mapping = getDefaultMappingForProcess(documentId || '');
         const resolver = new TemplateResolver(queryExecutor);
-
         // Resolve using the pre-defined mapping
         const resolved = await resolver.resolve(
-          IhtiyacListesiMapping,
+          mapping,
           activeDosyaId,
         );
 
         // Fetch or load saved snapshot values if exists
         const snapshotRes = await window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = (SELECT id FROM TANIM_Sablon WHERE dosya_adi = 'ihtiyac-listesi.html' LIMIT 1)",
-          [activeDosyaId],
+          "SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = (SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1)",
+          [activeDosyaId, `${documentId}.html`],
         );
 
         let finalData = { ...resolved };
@@ -316,9 +317,10 @@ export function DocumentPreviewModalV2({
         return [];
       };
 
+      const mapping = getDefaultMappingForProcess(documentId || '');
       const resolver = new TemplateResolver(queryExecutor);
       const resolved = await resolver.resolve(
-        IhtiyacListesiMapping,
+        mapping,
         activeDosyaId,
       );
 

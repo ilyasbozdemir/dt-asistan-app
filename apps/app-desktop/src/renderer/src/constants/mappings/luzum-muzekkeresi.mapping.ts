@@ -8,9 +8,7 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
   },
   dosyaKonusu: { deger: 'Lüzum Müzekkeresi', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
-    formul:
-      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'DETSİS No - Yıl - Dosya No birleşimi olarak otomatik üretilir'
+    aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı (örn: E-10234521-934.01-0001)'
   },
   sunulacakMakamAdi: {
     tablo: 'TANIM_Kurum',
