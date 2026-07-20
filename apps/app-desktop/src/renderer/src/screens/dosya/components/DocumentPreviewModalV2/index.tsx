@@ -183,6 +183,9 @@ export function DocumentPreviewModalV2({
           finalData.antetSatirlari = resolved.antetSatirlari;
         }
 
+        finalData.tarih = finalData.tarih || finalData.onayaSunulanTarih || '';
+        finalData.onayTarihi = finalData.onayTarihi || finalData.dosyaTarihi || '';
+
         setFormData(finalData);
       } catch (err) {
         console.error("Error loading V2 template data:", err);
@@ -237,6 +240,8 @@ export function DocumentPreviewModalV2({
       <ActiveComponent
         data={{
           ...formData,
+          tarih: formData.tarih || formData.onayaSunulanTarih || '',
+          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
           solLogo: showLogoLeft ? formData.solLogo : null,
           sagLogo: showLogoRight ? formData.sagLogo : null,
         }}
@@ -351,7 +356,11 @@ export function DocumentPreviewModalV2({
         activeDosyaId,
       );
 
-      setFormData(resolved);
+      setFormData({
+        ...resolved,
+        tarih: resolved.tarih || resolved.onayaSunulanTarih || '',
+        onayTarihi: resolved.onayTarihi || resolved.dosyaTarihi || '',
+      });
     } catch (e) {
       console.error("Failed to refresh template resolution:", e);
     }
@@ -424,6 +433,8 @@ export function DocumentPreviewModalV2({
                     <ActiveComponent
                       data={{
                         ...formData,
+                        tarih: formData.tarih || formData.onayaSunulanTarih || '',
+                        onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
                         solLogo: showLogoLeft ? formData.solLogo : null,
                         sagLogo: showLogoRight ? formData.sagLogo : null,
                       }}
