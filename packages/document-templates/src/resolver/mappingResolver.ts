@@ -146,9 +146,9 @@ export async function resolveAntetSatirlari(
       } catch (e) {}
     }
 
-    // 3. Standard default header if still empty
+    // 3. Fallback to clean T.C. if TANIM_Kurum and TANIM_Ayar had no header lines
     if (result.length === 0) {
-      result = ['T.C.', 'BELEDİYE BAŞKANLIĞI', 'Destek Hizmetleri Müdürlüğü'];
+      result = ['T.C.'];
     }
 
     // 4. Fetch antet_ek_satir from DATA_TeminDosyasi for active file if set
@@ -169,7 +169,7 @@ export async function resolveAntetSatirlari(
   } catch (err) {
     console.error('Antet satırları çözümlenirken hata:', err);
   }
-  return ['T.C.', 'BELEDİYE BAŞKANLIĞI', 'Destek Hizmetleri Müdürlüğü'];
+  return ['T.C.'];
 }
 
 /**
