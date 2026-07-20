@@ -121,14 +121,14 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
   },
   talepEdenPersonelAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'hazirlayan_personel_id',
+    sutun: 'talep_eden_personel_id',
     iliskiliTablo: 'TANIM_Personel',
     iliskiliSutun: 'ad_soyad',
     aciklama: 'Talep Eden Personel Adı Soyadı'
   },
   talepEdenPersonelUnvan: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'hazirlayan_personel_id',
+    sutun: 'talep_eden_personel_id',
     iliskiliTablo: 'TANIM_Personel',
     iliskiliSutun: 'unvan',
     aciklama: 'Talep Eden Personel Unvanı'
