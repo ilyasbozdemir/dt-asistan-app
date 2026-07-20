@@ -515,10 +515,10 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
     setFormData((prev) => ({
       ...prev,
       birim_id: birim.id,
-      antet_ek_satir: birim.antet_ek_satir || prev.antet_ek_satir,
-      sunulacak_makam: birim.sunum_makami || prev.sunulacak_makam,
-      ihtiyac_yeri: birim.ihtiyac_yeri_eki || prev.ihtiyac_yeri,
-      e_butce: birim.e_butce || prev.e_butce
+      antet_ek_satir: birim.antet_ek_satir || '',
+      sunulacak_makam: birim.sunum_makami || '',
+      ihtiyac_yeri: birim.ihtiyac_yeri_eki || '',
+      e_butce: birim.e_butce || ''
     }))
     setShowBirimSearch(false)
     setBirimSearchQuery('')

@@ -82,7 +82,7 @@ export async function resolveAntetSatirlari(
 
     // 1. Fetch kurum_anteti or individual institution columns from TANIM_Kurum
     const kurumRes = await queryExecutor(
-      'SELECT kurum_anteti, ust_kurum_adi, kurum_adi, birim_adi FROM TANIM_Kurum LIMIT 1',
+      'SELECT kurum_anteti, ust_kurum_adi, kurum_adi FROM TANIM_Kurum LIMIT 1',
       []
     );
 
@@ -106,7 +106,20 @@ export async function resolveAntetSatirlari(
         const built: string[] = ['T.C.'];
         if (row.ust_kurum_adi && row.ust_kurum_adi.trim()) built.push(row.ust_kurum_adi.toUpperCase());
         if (row.kurum_adi && row.kurum_adi.trim()) built.push(row.kurum_adi.toUpperCase());
-        if (row.birim_adi && row.birim_adi.trim()) built.push(row.birim_adi);
+
+        let birimAdi = '';
+        if (activeDosyaId) {
+          try {
+            const birimRes = await queryExecutor(
+              'SELECT b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id WHERE d.id = ? LIMIT 1',
+              [activeDosyaId]
+            );
+            if (birimRes && birimRes.length > 0 && birimRes[0].birim_adi) {
+              birimAdi = birimRes[0].birim_adi.trim();
+            }
+          } catch (e) {}
+        }
+        if (birimAdi) built.push(birimAdi);
 
         if (built.length > 1) {
           result = built;
@@ -338,9 +351,9 @@ export async function resolveTemplateData(
   // Automatic solLogo and sagLogo fallback from TANIM_Kurum or TANIM_Ayar
   if (!resolvedPayload['solLogo']) {
     try {
-      const res = await queryExecutor('SELECT sol_logo FROM TANIM_Kurum LIMIT 1', []);
-      if (res?.[0]?.sol_logo) {
-        resolvedPayload['solLogo'] = res[0].sol_logo;
+      const res = await queryExecutor('SELECT logo_sol FROM TANIM_Kurum LIMIT 1', []);
+      if (res?.[0]?.logo_sol) {
+        resolvedPayload['solLogo'] = res[0].logo_sol;
       } else {
         const ayarRes = await queryExecutor('SELECT deger FROM TANIM_Ayar WHERE anahtar IN ("logoLeft", "sol_logo") LIMIT 1', []);
         if (ayarRes?.[0]?.deger) resolvedPayload['solLogo'] = ayarRes[0].deger;
@@ -349,9 +362,9 @@ export async function resolveTemplateData(
   }
   if (!resolvedPayload['sagLogo']) {
     try {
-      const res = await queryExecutor('SELECT sag_logo FROM TANIM_Kurum LIMIT 1', []);
-      if (res?.[0]?.sag_logo) {
-        resolvedPayload['sagLogo'] = res[0].sag_logo;
+      const res = await queryExecutor('SELECT logo_sag FROM TANIM_Kurum LIMIT 1', []);
+      if (res?.[0]?.logo_sag) {
+        resolvedPayload['sagLogo'] = res[0].logo_sag;
       } else {
         const ayarRes = await queryExecutor('SELECT deger FROM TANIM_Ayar WHERE anahtar IN ("logoRight", "sag_logo") LIMIT 1', []);
         if (ayarRes?.[0]?.deger) resolvedPayload['sagLogo'] = ayarRes[0].deger;
