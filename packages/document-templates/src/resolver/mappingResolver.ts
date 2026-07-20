@@ -356,7 +356,7 @@ export async function resolveTemplateData(
       if (logoSol) {
         resolvedPayload['solLogo'] = res[0].logo_sol;
       } else {
-        const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoLeft", "sol_logo")', []);
+        const ayarRes = await queryExecutor("SELECT key, value FROM settings WHERE key IN ('logoLeft', 'sol_logo')", []);
         const logoVal = ayarRes?.find((r: any) => r.key === 'logoLeft')?.value || ayarRes?.find((r: any) => r.key === 'sol_logo')?.value;
         const cleanLogoVal = logoVal ? String(logoVal).replace(/['"]+/g, '').trim() : '';
         if (cleanLogoVal) resolvedPayload['solLogo'] = logoVal;
@@ -370,7 +370,7 @@ export async function resolveTemplateData(
       if (logoSag) {
         resolvedPayload['sagLogo'] = res[0].logo_sag;
       } else {
-        const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoRight", "sag_logo")', []);
+        const ayarRes = await queryExecutor("SELECT key, value FROM settings WHERE key IN ('logoRight', 'sag_logo')", []);
         const logoVal = ayarRes?.find((r: any) => r.key === 'logoRight')?.value || ayarRes?.find((r: any) => r.key === 'sag_logo')?.value;
         const cleanLogoVal = logoVal ? String(logoVal).replace(/['"]+/g, '').trim() : '';
         if (cleanLogoVal) resolvedPayload['sagLogo'] = logoVal;
