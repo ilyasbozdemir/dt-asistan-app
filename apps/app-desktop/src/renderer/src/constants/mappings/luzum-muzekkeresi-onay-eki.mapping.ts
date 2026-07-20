@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const LuzumOnayEkiMapping: ProcessMapping = {
   antetSatirlari: {
@@ -15,14 +15,18 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     aciklama: 'Ek numarası'
   },
   talepEdenPersonelAdi: {
-    tablo: 'TANIM_Personel',
-    sutun: 'ad_soyad',
-    aciklama: 'Talep eden personelin adı soyadı'
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'talep_eden_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Talep Eden Personel Adı Soyadı'
   },
   talepEdenPersonelUnvan: {
-    tablo: 'TANIM_Personel',
-    sutun: 'unvan',
-    aciklama: 'Talep eden personelin ünvanı'
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'talep_eden_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Talep Eden Personel Unvanı'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
@@ -82,5 +86,16 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     sutun: 'kep_adresi',
     varsayilan: '[Kep Adresi Belirtilmedi]',
     aciklama: 'Kurum kep adresi'
+  },
+  kurumAdi: {
+    tablo: 'TANIM_Kurum',
+    sutun: 'kurum_adi',
+    aciklama: 'Kurum adı'
+  },
+  altKurumTipi: {
+    tablo: 'TANIM_Kurum',
+    sutun: 'alt_kurum_tipi',
+    varsayilan: 'belediye',
+    aciklama: 'Alt Kurum Tipi / Tabiri'
   }
 }

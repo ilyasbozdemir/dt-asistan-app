@@ -6,6 +6,7 @@ export const LuzumMuzekkeresiOnayEkiSchema = BaseTemplateSchema.extend({
   dosyaKonusu: z.string().optional(),
   talepEdenPersonelAdi: z.string().optional(),
   talepEdenPersonelUnvan: z.string().optional(),
+  altKurumTipi: z.string().optional(),
   ihtiyacKalemleri: z
     .array(
       z.object({

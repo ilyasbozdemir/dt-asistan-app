@@ -1,7 +1,6 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
-import { PersonelCard } from "../../document/ApprovalSignature";
 import { paginateData } from "../../document/DynamicPaginatedTable";
 import { LuzumMuzekkeresiOnayEkiType } from "./LuzumMuzekkeresiOnayEki.schema";
 
@@ -14,6 +13,30 @@ interface LuzumMuzekkeresiOnayEkiProps {
   lastPageLimit?: number;
 }
 
+function getKurumName(
+  kurumAdi?: string | null,
+  altKurumTipi?: string | null,
+): string {
+  if (!altKurumTipi || altKurumTipi === "diger") {
+    return kurumAdi || "";
+  }
+
+  const map: Record<string, string> = {
+    belediye: "Belediyemiz",
+    mudurluk: "Müdürlüğümüz",
+    bakanlik: "Bakanlığımız",
+    valilik: "Valiliğimiz",
+    kaymakamlik: "Kaymakamlığımız",
+    universite: "Üniversitemiz",
+    il_ozel: "İl Özel İdaremiz",
+    koy: "Muhtarlığımız",
+    sgk: "Müdürlüğümüz",
+    kurul: "Kurulumuz",
+  };
+
+  return map[altKurumTipi] || kurumAdi || "";
+}
+
 export function LuzumMuzekkeresiOnayEki({
   data = {},
   pageSize = "A4",
@@ -23,21 +46,11 @@ export function LuzumMuzekkeresiOnayEki({
   lastPageLimit,
 }: LuzumMuzekkeresiOnayEkiProps) {
   const columns: any[] = [
-    { key: "siraNo", label: "Sıra No", width: "8%", align: "center" },
-    { key: "kodu", label: "Kodu / Barkodu", width: "15%", align: "left" },
-    {
-      key: "malzemeAdi",
-      label: "Malzeme/Hizmet Kalemi",
-      width: "35%",
-      align: "left",
-    },
-    {
-      key: "ozelligi",
-      label: "Açıklama / Özellikleri",
-      width: "22%",
-      align: "left",
-    },
+    { key: "kodu", label: "Kodu", width: "15%", align: "left" },
+    { key: "malzemeAdi", label: "Malzeme Adı", width: "35%", align: "left" },
+    { key: "ozelligi", label: "Özelliği", width: "25%", align: "left" },
     { key: "birimi", label: "Birimi", width: "10%", align: "center" },
+    { key: "kdvOrani", label: "KDV Oranı", width: "10%", align: "center" },
     { key: "miktar", label: "Miktar", width: "10%", align: "right" },
   ];
 
@@ -72,29 +85,45 @@ export function LuzumMuzekkeresiOnayEki({
             hideHeader={!isFirstPage}
           >
             {isFirstPage && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "20px",
-                }}
-              >
-                <div style={{ fontSize: "11pt", fontWeight: "bold" }}>
-                  EK NO: {data.ekNo || "1"}
-                </div>
+              <>
                 <div
                   style={{
-                    fontSize: "12pt",
-                    fontWeight: "bold",
                     textAlign: "center",
-                    flex: 1,
-                    marginRight: "40px",
+                    fontWeight: "bold",
+                    fontSize: "12pt",
+                    textTransform: "uppercase",
+                    margin: "10px 0 20px 0",
                   }}
                 >
-                  İHTİYAÇ LİSTESİ
+                  {data.dosyaKonusu || "Lüzum Müzekkeresi"}
                 </div>
-              </div>
+
+                <div
+                  style={{
+                    textAlign: "right",
+                    marginBottom: "20px",
+                    fontWeight: "bold",
+                    fontSize: "11pt",
+                  }}
+                >
+                  EK: {data.ekNo || "1"}
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "justify",
+                    textIndent: "40px",
+                    marginBottom: "20px",
+                    fontSize: "11pt",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {getKurumName(data.kurumAdi, data.altKurumTipi) ||
+                    "[Kurum Adı]"}{" "}
+                  için aşağıda müfredatı ve evsafı yazılı malzemelere ihtiyaç
+                  görüldüğünden satın alınması arz olunur.
+                </div>
+              </>
             )}
 
             <DocumentTable
@@ -107,17 +136,24 @@ export function LuzumMuzekkeresiOnayEki({
             {isLastPage && (
               <div
                 style={{
+                  marginLeft: "auto",
+                  width: "180px",
+                  textAlign: "center",
                   marginTop: "30px",
-                  display: "flex",
-                  justifyContent: "flex-end",
+                  marginBottom: "20px",
+                  lineHeight: 1.3,
+                  fontSize: "11pt",
                   pageBreakInside: "avoid",
                 }}
               >
-                <PersonelCard
-                  adSoyad={data.talepEdenPersonelAdi}
-                  unvan={data.talepEdenPersonelUnvan}
-                  align="right"
-                />
+                {data.dosyaTarihi ||
+                  data.tarih ||
+                  new Date().toLocaleDateString("tr-TR")}
+                <br />
+                <br />
+                {data.talepEdenPersonelAdi || ""}
+                <br />
+                {data.talepEdenPersonelUnvan || ""}
               </div>
             )}
           </DocumentLayout>

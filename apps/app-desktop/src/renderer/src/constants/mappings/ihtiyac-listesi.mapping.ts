@@ -25,7 +25,7 @@ export const IhtiyacListesiMapping: ProcessMapping = {
   },
   onayTarihi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'temin_tarihi',
+    sutun: 'onay_tarihi',
     varsayilan: new Date().toLocaleDateString('tr-TR'),
     aciklama: 'OLUR / Onay tarihi'
   },
