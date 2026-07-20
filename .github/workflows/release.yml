@@ -51,6 +51,9 @@ jobs:
             exit 1
           )
 
+      - name: Build Database Package
+        run: pnpm --filter @dt/database build
+
       - name: Build and Package
         working-directory: apps/app-desktop
         run: pnpm build && npx electron-builder --win --x64 -p never
