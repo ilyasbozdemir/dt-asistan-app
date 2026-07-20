@@ -37,7 +37,7 @@ export const AnnouncementsPanel: React.FC<AnnouncementsPanelProps> = ({
             Aktif duyuru bulunmuyor.
           </div>
         ) : (
-          announcements.map((ann) => {
+          announcements.map((ann, idx) => {
             let DotIcon = Info
             let colorClass = 'bg-blue-500 text-white'
 
@@ -53,7 +53,7 @@ export const AnnouncementsPanel: React.FC<AnnouncementsPanelProps> = ({
             }
 
             return (
-              <div key={ann.id} className="flex gap-3 items-start">
+              <div key={`${ann.id}-${idx}`} className="flex gap-3 items-start">
                 <div
                   className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${colorClass}`}
                 >

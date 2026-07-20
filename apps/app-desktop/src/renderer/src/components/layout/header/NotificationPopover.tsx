@@ -92,7 +92,7 @@ export function NotificationPopover({
             {announcements && announcements.length > 0 ? (
               announcements.slice(0, 15).map((item, i) => (
                 <div
-                  key={item.id || i}
+                  key={`notif-${item.id || ''}-${i}`}
                   className={`p-3 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors flex gap-2.5 ${getBorderColor(item.type || 'info')}`}
                 >
                   {getIcon(item.type || 'info')}

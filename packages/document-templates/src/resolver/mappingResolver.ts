@@ -352,24 +352,28 @@ export async function resolveTemplateData(
   if (!resolvedPayload['solLogo']) {
     try {
       const res = await queryExecutor('SELECT logo_sol FROM TANIM_Kurum LIMIT 1', []);
-      if (res?.[0]?.logo_sol) {
+      const logoSol = res?.[0]?.logo_sol ? String(res[0].logo_sol).replace(/['"]+/g, '').trim() : '';
+      if (logoSol) {
         resolvedPayload['solLogo'] = res[0].logo_sol;
       } else {
         const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoLeft", "sol_logo")', []);
         const logoVal = ayarRes?.find((r: any) => r.key === 'logoLeft')?.value || ayarRes?.find((r: any) => r.key === 'sol_logo')?.value;
-        if (logoVal) resolvedPayload['solLogo'] = logoVal;
+        const cleanLogoVal = logoVal ? String(logoVal).replace(/['"]+/g, '').trim() : '';
+        if (cleanLogoVal) resolvedPayload['solLogo'] = logoVal;
       }
     } catch (e) {}
   }
   if (!resolvedPayload['sagLogo']) {
     try {
       const res = await queryExecutor('SELECT logo_sag FROM TANIM_Kurum LIMIT 1', []);
-      if (res?.[0]?.logo_sag) {
+      const logoSag = res?.[0]?.logo_sag ? String(res[0].logo_sag).replace(/['"]+/g, '').trim() : '';
+      if (logoSag) {
         resolvedPayload['sagLogo'] = res[0].logo_sag;
       } else {
         const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoRight", "sag_logo")', []);
         const logoVal = ayarRes?.find((r: any) => r.key === 'logoRight')?.value || ayarRes?.find((r: any) => r.key === 'sag_logo')?.value;
-        if (logoVal) resolvedPayload['sagLogo'] = logoVal;
+        const cleanLogoVal = logoVal ? String(logoVal).replace(/['"]+/g, '').trim() : '';
+        if (cleanLogoVal) resolvedPayload['sagLogo'] = logoVal;
       }
     } catch (e) {}
   }

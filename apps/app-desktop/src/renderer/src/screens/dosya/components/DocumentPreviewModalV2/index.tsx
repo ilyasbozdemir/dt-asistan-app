@@ -164,7 +164,7 @@ export function DocumentPreviewModalV2({
 
         setFormData(finalData);
       } catch (err) {
-        console.error("Error loading V2 template data:", err);
+        console.error('Error loading V2 template data:', err);
       }
     };
 
