@@ -127,17 +127,17 @@ export async function resolveAntetSatirlari(
       }
     }
 
-    // 2. Fallback to TANIM_Ayar (institutionLetterhead or institutionName) if TANIM_Kurum has no antet
+    // 2. Fallback to settings (institutionLetterhead or institutionName) if TANIM_Kurum has no antet
     if (result.length === 0) {
       try {
         const ayarRes = await queryExecutor(
-          'SELECT anahtar, deger FROM TANIM_Ayar WHERE anahtar IN ("institutionLetterhead", "institutionName", "parentInstitution")',
+          'SELECT key, value FROM settings WHERE key IN ("institutionLetterhead", "institutionName", "parentInstitution")',
           []
         );
         if (ayarRes && Array.isArray(ayarRes)) {
           const ayarMap: Record<string, string> = {};
           ayarRes.forEach((item: any) => {
-            ayarMap[item.anahtar] = item.deger;
+            ayarMap[item.key] = item.value;
           });
 
           if (ayarMap.institutionLetterhead) {
@@ -159,7 +159,7 @@ export async function resolveAntetSatirlari(
       } catch (e) {}
     }
 
-    // 3. Fallback to clean T.C. if TANIM_Kurum and TANIM_Ayar had no header lines
+    // 3. Fallback to clean T.C. if TANIM_Kurum and settings had no header lines
     if (result.length === 0) {
       result = ['T.C.'];
     }
@@ -348,15 +348,16 @@ export async function resolveTemplateData(
     }
   }
 
-  // Automatic solLogo and sagLogo fallback from TANIM_Kurum or TANIM_Ayar
+  // Automatic solLogo and sagLogo fallback from TANIM_Kurum or settings
   if (!resolvedPayload['solLogo']) {
     try {
       const res = await queryExecutor('SELECT logo_sol FROM TANIM_Kurum LIMIT 1', []);
       if (res?.[0]?.logo_sol) {
         resolvedPayload['solLogo'] = res[0].logo_sol;
       } else {
-        const ayarRes = await queryExecutor('SELECT deger FROM TANIM_Ayar WHERE anahtar IN ("logoLeft", "sol_logo") LIMIT 1', []);
-        if (ayarRes?.[0]?.deger) resolvedPayload['solLogo'] = ayarRes[0].deger;
+        const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoLeft", "sol_logo")', []);
+        const logoVal = ayarRes?.find((r: any) => r.key === 'logoLeft')?.value || ayarRes?.find((r: any) => r.key === 'sol_logo')?.value;
+        if (logoVal) resolvedPayload['solLogo'] = logoVal;
       }
     } catch (e) {}
   }
@@ -366,8 +367,9 @@ export async function resolveTemplateData(
       if (res?.[0]?.logo_sag) {
         resolvedPayload['sagLogo'] = res[0].logo_sag;
       } else {
-        const ayarRes = await queryExecutor('SELECT deger FROM TANIM_Ayar WHERE anahtar IN ("logoRight", "sag_logo") LIMIT 1', []);
-        if (ayarRes?.[0]?.deger) resolvedPayload['sagLogo'] = ayarRes[0].deger;
+        const ayarRes = await queryExecutor('SELECT key, value FROM settings WHERE key IN ("logoRight", "sag_logo")', []);
+        const logoVal = ayarRes?.find((r: any) => r.key === 'logoRight')?.value || ayarRes?.find((r: any) => r.key === 'sag_logo')?.value;
+        if (logoVal) resolvedPayload['sagLogo'] = logoVal;
       }
     } catch (e) {}
   }

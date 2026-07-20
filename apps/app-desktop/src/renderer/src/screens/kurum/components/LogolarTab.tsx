@@ -11,7 +11,7 @@ interface LogolarTabProps {
   setLogoRight: (logo: string | null) => void
 }
 
-export function LogolarTab(props: LogolarTabProps) {
+export function LogolarTab(props: LogolarTabProps): React.ReactElement {
   const { institutionLogo, setInstitutionLogo, logoLeft, setLogoLeft, logoRight, setLogoRight } =
     props
 
