@@ -107,14 +107,44 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     varsayilan: '',
     aciklama: 'Sunan personelin telefon numarası'
   },
+  onayaSunulanTarih: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'temin_tarihi',
+    varsayilan: new Date().toLocaleDateString('tr-TR'),
+    aciklama: 'Onaya sunulma tarihi'
+  },
+  onayTarihi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_tarihi',
+    varsayilan: new Date().toLocaleDateString('tr-TR'),
+    aciklama: 'OLUR / Onay tarihi'
+  },
   talepEdenPersonelAdi: {
-    tablo: 'TANIM_Personel',
-    sutun: 'ad_soyad',
-    aciklama: 'Talep eden personelin adı soyadı'
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Talep Eden Personel Adı Soyadı'
   },
   talepEdenPersonelUnvan: {
-    tablo: 'TANIM_Personel',
-    sutun: 'unvan',
-    aciklama: 'Talep eden personelin ünvanı'
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hazirlayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Talep Eden Personel Unvanı'
+  },
+  onaylayanPersonelAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Harcama Yetkilisi / Onaylayan Adı Soyadı'
+  },
+  onaylayanPersonelUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Harcama Yetkilisi / Onaylayan Unvanı'
   }
 }

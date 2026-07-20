@@ -49,7 +49,12 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
 
     const isV2 =
       previewData?.dosyaAdi &&
-      ['ihtiyac-listesi', 'luzum-muzekkeresi'].includes(previewData.dosyaAdi.replace('.html', ''))
+      [
+        'ihtiyac-listesi',
+        'luzum-muzekkeresi',
+        'luzum-muzekkeresi-onay-eki',
+        'luzum-muzekkeresi-teslim-tesellum'
+      ].includes(previewData.dosyaAdi.replace('.html', ''))
 
     if (isV2) {
       return (

@@ -85,7 +85,8 @@ export function LuzumMuzekkeresi({
               <>
                 <MetadataBlock
                   evrakSayisi={data.evrakSayisi}
-                  tarih={data.onayaSunulanTarih || data.tarih || data.dosyaTarihi}
+                  tarih={data.onayaSunulanTarih || data.tarih ||
+                    data.dosyaTarihi}
                   dosyaKonusu={data.dosyaKonusu || "Lüzum Müzekkeresi"}
                   showBorder={false}
                 />
@@ -149,13 +150,15 @@ export function LuzumMuzekkeresi({
             />
 
             {isLastPage && data.olurYazisi && (
-              <ApprovalSignature
-                title={data.olurBaslik || "OLUR"}
-                date={data.onayTarihi || data.tarih || data.dosyaTarihi}
-                adSoyad={data.onaylayanPersonelAdi}
-                unvan={data.onaylayanPersonelUnvan}
-                marginTop={40}
-              />
+              <div style={{ marginTop: "auto" }}>
+                <ApprovalSignature
+                  title={data.olurBaslik || "OLUR"}
+                  date={data.onayTarihi || data.tarih || data.dosyaTarihi}
+                  adSoyad={data.onaylayanPersonelAdi}
+                  unvan={data.onaylayanPersonelUnvan}
+                  showSpace={true}
+                />
+              </div>
             )}
           </DocumentLayout>
         );

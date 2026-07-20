@@ -36,6 +36,8 @@ interface Personel {
 const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,
   LuzumMuzekkeresi: Templates.LuzumMuzekkeresi as TemplateComponentType,
+  LuzumMuzekkeresiOnayEki: Templates.LuzumMuzekkeresiOnayEki as TemplateComponentType,
+  LuzumMuzekkeresiTeslimTesellum: Templates.LuzumMuzekkeresiTeslimTesellum as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<
