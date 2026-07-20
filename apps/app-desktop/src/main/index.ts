@@ -1674,7 +1674,7 @@ if (!gotTheLock && !isMultiInstance) {
     ipcMain.handle('open-pdf-external', async (_, htmlContent: string) => {
       try {
         const pdfBuffer = await renderPdfBuffer(htmlContent)
-        const tempPath = join(app.getPath('temp'), `evraktron_preview_${Date.now()}.pdf`)
+        const tempPath = join(app.getPath('temp'), `dt-asistan_preview_${Date.now()}.pdf`)
         fs.writeFileSync(tempPath, pdfBuffer)
         await shell.openPath(tempPath)
         return { success: true }
