@@ -5,6 +5,8 @@ interface SettingsState {
   institutionLogo: string | null
   logoLeft: string | null
   logoRight: string | null
+  showLogoLeft: boolean
+  showLogoRight: boolean
   adminName: string
   adminTitle: string
   adminUsername: string
@@ -57,6 +59,8 @@ interface SettingsState {
   disclaimerHistory: string
   setDisclaimerHistory: (history: string) => void
   setDisclaimerAccepted: (val: boolean) => void
+  setShowLogoLeft: (val: boolean) => void
+  setShowLogoRight: (val: boolean) => void
   loadSettings: () => Promise<void>
 }
 
@@ -65,6 +69,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   institutionLogo: null,
   logoLeft: null,
   logoRight: null,
+  showLogoLeft: true,
+  showLogoRight: true,
   adminName: 'Sistem Yöneticisi',
   adminTitle: 'Destek Sorumlusu',
   adminUsername: 'admin',
@@ -95,6 +101,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   disclaimerHistory: '[]',
   setDisableDocumentGuidance: (val) => set({ disableDocumentGuidance: val }),
   setUnifiedStepperMode: (val) => set({ unifiedStepperMode: val }),
+  setShowLogoLeft: (val) => set({ showLogoLeft: val }),
+  setShowLogoRight: (val) => set({ showLogoRight: val }),
   setInstitutionName: (name) => set({ institutionName: name }),
   setInstitutionLogo: (logo) => set({ institutionLogo: logo }),
   setAdminName: (name) => set({ adminName: name }),
@@ -125,6 +133,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         institutionLogo: settings.institutionLogo || null,
         logoLeft: settings.logoLeft || null,
         logoRight: settings.logoRight || null,
+        showLogoLeft: settings.showLogoLeft !== 'false',
+        showLogoRight: settings.showLogoRight !== 'false',
         adminName: settings.adminName || 'Sistem Yöneticisi',
         adminTitle: settings.adminTitle || 'Destek Sorumlusu',
         adminUsername: settings.adminUsername || 'admin',
@@ -160,6 +170,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         institutionLogo: null,
         logoLeft: null,
         logoRight: null,
+        showLogoLeft: true,
+        showLogoRight: true,
         adminName: 'Sistem Yöneticisi',
         adminTitle: 'Destek Sorumlusu',
         adminUsername: 'admin',

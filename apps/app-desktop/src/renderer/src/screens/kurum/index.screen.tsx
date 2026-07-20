@@ -40,6 +40,8 @@ export default function KurumScreen(): React.JSX.Element {
     institutionLogo: defaultInstitutionLogo,
     logoLeft: defaultLogoLeft,
     logoRight: defaultLogoRight,
+    showLogoLeft: defaultShowLogoLeft,
+    showLogoRight: defaultShowLogoRight,
     loadSettings: reloadSettingsStore
   } = useSettingsStore()
 
@@ -52,6 +54,8 @@ export default function KurumScreen(): React.JSX.Element {
   const [institutionLogo, setInstitutionLogo] = useState<string | null>(defaultInstitutionLogo)
   const [logoLeft, setLogoLeft] = useState<string | null>(defaultLogoLeft)
   const [logoRight, setLogoRight] = useState<string | null>(defaultLogoRight)
+  const [showLogoLeft, setShowLogoLeft] = useState<boolean>(defaultShowLogoLeft)
+  const [showLogoRight, setShowLogoRight] = useState<boolean>(defaultShowLogoRight)
 
   // Fetch initial data
   React.useEffect(() => {
@@ -110,7 +114,9 @@ export default function KurumScreen(): React.JSX.Element {
       await window.electron.ipcRenderer.invoke('db:save-settings', {
         institutionLogo,
         logoLeft,
-        logoRight
+        logoRight,
+        showLogoLeft: String(showLogoLeft),
+        showLogoRight: String(showLogoRight)
       })
 
       await reloadSettingsStore() // refresh app-wide settings store
@@ -301,6 +307,10 @@ export default function KurumScreen(): React.JSX.Element {
                     setLogoLeft={setLogoLeft}
                     logoRight={logoRight}
                     setLogoRight={setLogoRight}
+                    showLogoLeft={showLogoLeft}
+                    setShowLogoLeft={setShowLogoLeft}
+                    showLogoRight={showLogoRight}
+                    setShowLogoRight={setShowLogoRight}
                   />
                 )}
               </div>

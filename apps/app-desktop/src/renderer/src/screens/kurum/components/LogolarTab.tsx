@@ -9,11 +9,25 @@ interface LogolarTabProps {
   setLogoLeft: (logo: string | null) => void
   logoRight: string | null
   setLogoRight: (logo: string | null) => void
+  showLogoLeft: boolean
+  setShowLogoLeft: (val: boolean) => void
+  showLogoRight: boolean
+  setShowLogoRight: (val: boolean) => void
 }
 
 export function LogolarTab(props: LogolarTabProps): React.ReactElement {
-  const { institutionLogo, setInstitutionLogo, logoLeft, setLogoLeft, logoRight, setLogoRight } =
-    props
+  const {
+    institutionLogo,
+    setInstitutionLogo,
+    logoLeft,
+    setLogoLeft,
+    logoRight,
+    setLogoRight,
+    showLogoLeft,
+    setShowLogoLeft,
+    showLogoRight,
+    setShowLogoRight
+  } = props
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -199,6 +213,19 @@ export function LogolarTab(props: LogolarTabProps): React.ReactElement {
                 </button>
               )}
             </div>
+            
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+              <input
+                id="show-logo-left"
+                type="checkbox"
+                checked={showLogoLeft}
+                onChange={(e) => setShowLogoLeft(e.target.checked)}
+                className="rounded border-slate-300 dark:border-slate-800 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+              />
+              <label htmlFor="show-logo-left" className="text-[10px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                Belgelerde Sol Logoyu Göster
+              </label>
+            </div>
           </div>
         </div>
 
@@ -278,6 +305,19 @@ export function LogolarTab(props: LogolarTabProps): React.ReactElement {
                   Kaldır
                 </button>
               )}
+            </div>
+            
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+              <input
+                id="show-logo-right"
+                type="checkbox"
+                checked={showLogoRight}
+                onChange={(e) => setShowLogoRight(e.target.checked)}
+                className="rounded border-slate-300 dark:border-slate-800 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+              />
+              <label htmlFor="show-logo-right" className="text-[10px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                Belgelerde Sağ Logoyu Göster
+              </label>
             </div>
           </div>
         </div>

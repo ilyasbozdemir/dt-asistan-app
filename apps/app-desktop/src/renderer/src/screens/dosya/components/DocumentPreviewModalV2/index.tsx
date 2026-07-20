@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
+import { useSettingsStore } from "../../../../store/settingsStore";
 import {
   IhtiyacListesiType,
   TEMPLATE_REGISTRY,
@@ -36,8 +37,10 @@ interface Personel {
 const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,
   LuzumMuzekkeresi: Templates.LuzumMuzekkeresi as TemplateComponentType,
-  LuzumMuzekkeresiOnayEki: Templates.LuzumMuzekkeresiOnayEki as TemplateComponentType,
-  LuzumMuzekkeresiTeslimTesellum: Templates.LuzumMuzekkeresiTeslimTesellum as TemplateComponentType,
+  LuzumMuzekkeresiOnayEki: Templates
+    .LuzumMuzekkeresiOnayEki as TemplateComponentType,
+  LuzumMuzekkeresiTeslimTesellum: Templates
+    .LuzumMuzekkeresiTeslimTesellum as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<
@@ -71,6 +74,7 @@ export function DocumentPreviewModalV2({
   onClose,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const { activeDosyaId } = useWorkspaceStore();
+  const { showLogoLeft, showLogoRight } = useSettingsStore();
   const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
   const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
   const [previewScale, setPreviewScale] = useState(1);
@@ -119,7 +123,7 @@ export function DocumentPreviewModalV2({
           return [];
         };
 
-        const mapping = getDefaultMappingForProcess(documentId || '');
+        const mapping = getDefaultMappingForProcess(documentId || "");
         const resolver = new TemplateResolver(queryExecutor);
         // Resolve using the pre-defined mapping
         const resolved = await resolver.resolve(
@@ -140,17 +144,28 @@ export function DocumentPreviewModalV2({
             const savedData = JSON.parse(snapshotRes.data[0].veri_json);
             // Smart merge inspired by V1: do not let stale placeholders or old hardcoded antets overwrite fresh resolved data
             for (const [key, val] of Object.entries(savedData)) {
-              if (val !== undefined && val !== null && val !== '') {
-                if (key === 'antetSatirlari' && resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) && resolved.antetSatirlari.length > 0) {
+              if (val !== undefined && val !== null && val !== "") {
+                if (
+                  key === "antetSatirlari" && resolved.antetSatirlari &&
+                  Array.isArray(resolved.antetSatirlari) &&
+                  resolved.antetSatirlari.length > 0
+                ) {
                   finalData.antetSatirlari = resolved.antetSatirlari;
                   continue;
                 }
-                const isSavedPlaceholder = typeof val === 'string' && val.includes('[Belirtilmedi');
-                const isSavedAcme = typeof val === 'string' && val.toUpperCase().includes('ACME');
-                const isSavedAntetPlaceholder = Array.isArray(val) && val.some((s: any) => String(s).includes('[Belirtilmedi'));
-                const hasFreshRealValue = resolved[key] && !String(resolved[key]).includes('[Belirtilmedi');
+                const isSavedPlaceholder = typeof val === "string" &&
+                  val.includes("[Belirtilmedi");
+                const isSavedAcme = typeof val === "string" &&
+                  val.toUpperCase().includes("ACME");
+                const isSavedAntetPlaceholder = Array.isArray(val) &&
+                  val.some((s: any) => String(s).includes("[Belirtilmedi"));
+                const hasFreshRealValue = resolved[key] &&
+                  !String(resolved[key]).includes("[Belirtilmedi");
 
-                if ((isSavedPlaceholder || isSavedAcme || isSavedAntetPlaceholder) && hasFreshRealValue) {
+                if (
+                  (isSavedPlaceholder || isSavedAcme ||
+                    isSavedAntetPlaceholder) && hasFreshRealValue
+                ) {
                   continue;
                 }
                 finalData[key] = val;
@@ -161,13 +176,16 @@ export function DocumentPreviewModalV2({
           }
         }
 
-        if (resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) && resolved.antetSatirlari.length > 0) {
+        if (
+          resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) &&
+          resolved.antetSatirlari.length > 0
+        ) {
           finalData.antetSatirlari = resolved.antetSatirlari;
         }
 
         setFormData(finalData);
       } catch (err) {
-        console.error('Error loading V2 template data:', err);
+        console.error("Error loading V2 template data:", err);
       }
     };
 
@@ -215,8 +233,15 @@ export function DocumentPreviewModalV2({
 
   // 5. Generate compiled HTML string containing current CSS stylesheets
   const getCompiledHtml = (): string => {
-    if (!ActiveComponent) return "";
-    const bodyHtml = renderToString(<ActiveComponent data={formData} />);
+    const bodyHtml = renderToString(
+      <ActiveComponent
+        data={{
+          ...formData,
+          solLogo: showLogoLeft ? formData.solLogo : null,
+          sagLogo: showLogoRight ? formData.sagLogo : null,
+        }}
+      />,
+    );
     const styles = Array.from(
       document.querySelectorAll("style, link[rel='stylesheet']"),
     )
@@ -319,7 +344,7 @@ export function DocumentPreviewModalV2({
         return [];
       };
 
-      const mapping = getDefaultMappingForProcess(documentId || '');
+      const mapping = getDefaultMappingForProcess(documentId || "");
       const resolver = new TemplateResolver(queryExecutor);
       const resolved = await resolver.resolve(
         mapping,
@@ -396,7 +421,13 @@ export function DocumentPreviewModalV2({
                       </div>
                     }
                   >
-                    <ActiveComponent data={formData} />
+                    <ActiveComponent
+                      data={{
+                        ...formData,
+                        solLogo: showLogoLeft ? formData.solLogo : null,
+                        sagLogo: showLogoRight ? formData.sagLogo : null,
+                      }}
+                    />
                   </TemplateErrorBoundary>
                 )
                 : (
@@ -420,14 +451,13 @@ export function DocumentPreviewModalV2({
               </label>
               <input
                 type="text"
-                value={formData.tarih || formData.onayaSunulanTarih || ''}
+                value={formData.tarih || formData.onayaSunulanTarih || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
                     tarih: e.target.value,
-                    onayaSunulanTarih: e.target.value
-                  }))
-                }
+                    onayaSunulanTarih: e.target.value,
+                  }))}
                 placeholder="GG.AA.YYYY"
                 className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
               />
@@ -439,14 +469,13 @@ export function DocumentPreviewModalV2({
               </label>
               <input
                 type="text"
-                value={formData.onayTarihi || formData.dosyaTarihi || ''}
+                value={formData.onayTarihi || formData.dosyaTarihi || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
                     onayTarihi: e.target.value,
-                    dosyaTarihi: e.target.value
-                  }))
-                }
+                    dosyaTarihi: e.target.value,
+                  }))}
                 placeholder="GG.AA.YYYY"
                 className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
               />
