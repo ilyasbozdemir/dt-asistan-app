@@ -22,8 +22,6 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
   marginBottom = 20,
   showContactInfo = false,
 }) => {
-  if (!adSoyad) return null;
-
   return (
     <div
       style={{
@@ -46,8 +44,12 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
           lineHeight: 1.8,
         }}
       >
-        <div style={{ fontWeight: "bold", fontSize: "11pt" }}>{adSoyad}</div>
-        {unvan && <div style={{ fontSize: "11pt" }}>{unvan}</div>}
+        <div style={{ fontWeight: "bold", fontSize: "11pt" }}>
+          <EditableField name="hazirlayanPersonelAdi" value={adSoyad || ""} placeholder="Hazırlayan Adı Soyadı" />
+        </div>
+        <div style={{ fontSize: "11pt" }}>
+          <EditableField name="hazirlayanPersonelUnvan" value={unvan || ""} placeholder="Hazırlayan Unvanı" />
+        </div>
         {showContactInfo && (
           <>
             {telefon && (
@@ -110,14 +112,12 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
         <div
           style={{ fontWeight: "bold", fontSize: "12pt", marginBottom: "4px" }}
         >
-          {title}
+          <EditableField name="olurBaslik" value={title} placeholder="OLUR" />
         </div>
 
-        {date && (
-          <div style={{ fontSize: "11pt", marginBottom: "8px" }}>
-            {date}
-          </div>
-        )}
+        <div style={{ fontSize: "11pt", marginBottom: "8px" }}>
+          <EditableField name="onayTarihi" value={date || ""} placeholder="GG.AA.YYYY" />
+        </div>
 
         {showSpace && (
           <div
@@ -125,19 +125,15 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
           />
         )}
 
-        {adSoyad && (
-          <div
-            style={{ fontSize: "11pt", fontWeight: "bold", marginTop: "4px" }}
-          >
-            {adSoyad}
-          </div>
-        )}
+        <div
+          style={{ fontSize: "11pt", fontWeight: "bold", marginTop: "4px" }}
+        >
+          <EditableField name="onaylayanPersonelAdi" value={adSoyad || ""} placeholder="Onaylayan Adı Soyadı" />
+        </div>
 
-        {unvan && (
-          <div style={{ fontSize: "11pt" }}>
-            {unvan}
-          </div>
-        )}
+        <div style={{ fontSize: "11pt" }}>
+          <EditableField name="onaylayanPersonelUnvan" value={unvan || ""} placeholder="Onaylayan Unvanı" />
+        </div>
       </div>
     </div>
   );
@@ -190,6 +186,7 @@ export const CommissionList: React.FC<CommissionListProps> = ({
 interface MetadataBlockProps {
   evrakSayisi?: string;
   tarih?: string;
+  onayaSunulanTarih?: string;
   dosyaKonusu?: string;
   showBorder?: boolean;
 }
@@ -197,9 +194,12 @@ interface MetadataBlockProps {
 export const MetadataBlock: React.FC<MetadataBlockProps> = ({
   evrakSayisi,
   tarih,
+  onayaSunulanTarih,
   dosyaKonusu,
   showBorder = false,
 }) => {
+  const displayTarih = onayaSunulanTarih || tarih;
+
   return (
     <div
       style={{
@@ -258,9 +258,9 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
         </table>
       </div>
 
-      {tarih !== undefined && (
+      {displayTarih !== undefined && (
         <div style={{ fontSize: "11pt", textAlign: "right" }}>
-          <strong>Tarih:</strong> <EditableField name="tarih" value={tarih} />
+          <strong>Tarih:</strong> <EditableField name="onayaSunulanTarih" value={displayTarih} />
         </div>
       )}
     </div>
