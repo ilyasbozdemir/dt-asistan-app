@@ -1,9 +1,10 @@
 import React from "react";
 import {
+  Calculator,
   FileCheck2,
+  FileSignature,
   LayoutGrid,
   List,
-  Plus,
   Table,
   TrendingUp,
 } from "lucide-react";
@@ -71,9 +72,9 @@ export function PiyasaFiyatArastirmasiDashboard({
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* Sub-navigation Tabs & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800/80">
-        {/* Left side: View Mode switcher tabs */}
+      {/* Top Header Controls Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+        {/* Left side: View switch tabs */}
         <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/40 w-fit shrink-0">
           <button
             type="button"
@@ -86,7 +87,7 @@ export function PiyasaFiyatArastirmasiDashboard({
             )}
           >
             <FileCheck2 className="w-3.5 h-3.5" />
-            Belgeler
+            Belgeler & İşlemler
           </button>
           <button
             type="button"
@@ -108,20 +109,24 @@ export function PiyasaFiyatArastirmasiDashboard({
           {/* Separate Actions */}
           <button
             onClick={() => handleNewDocument("maliyet")}
-            className="group flex items-center gap-2 text-xs font-semibold px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 rounded-xl transition-all duration-300 h-10 cursor-pointer border border-slate-250 dark:border-slate-750/80 shrink-0 shadow-3xs"
+            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white border border-blue-400/30 dark:border-blue-500/40 overflow-hidden"
             title="Yeni yaklaşık maliyet hesap cetveli oluşturma ve teklif/proforma giriş alanı"
           >
-            <Plus className="w-4.5 h-4.5 transition-transform group-hover:scale-110 group-hover:rotate-90 duration-300 text-blue-500" />
-            <span>Yeni YMHC Oluştur</span>
+            <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
+              <Calculator className="w-3.5 h-3.5" />
+            </span>
+            <span className="tracking-wide">Yeni YMHC Oluştur</span>
           </button>
 
           <button
             onClick={() => handleNewDocument("tutanak")}
-            className="group flex items-center gap-2 text-xs font-semibold px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 rounded-xl transition-all duration-300 h-10 cursor-pointer border border-slate-250 dark:border-slate-750/80 shrink-0 shadow-3xs"
+            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/30 dark:border-emerald-500/40 overflow-hidden"
             title="Yeni piyasa fiyat araştırma tutanağı (PFAT) oluşturma ve teklif/proforma giriş alanı"
           >
-            <Plus className="w-4.5 h-4.5 transition-transform group-hover:scale-110 group-hover:rotate-90 duration-300" />
-            <span>Yeni PFAT Oluştur</span>
+            <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
+              <FileSignature className="w-3.5 h-3.5" />
+            </span>
+            <span className="tracking-wide">Yeni PFAT Oluştur</span>
           </button>
 
           {dashboardViewMode === "documents" && (

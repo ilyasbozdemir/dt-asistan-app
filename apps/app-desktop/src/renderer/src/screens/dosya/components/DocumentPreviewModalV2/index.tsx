@@ -211,7 +211,16 @@ export function DocumentPreviewModalV2({
     };
 
     loadInitialData();
-  }, [isOpen, activeDosyaId, documentId]);
+  }, [
+    isOpen,
+    activeDosyaId,
+    documentId,
+    subInstitutionType,
+    customSubInstitutionLabel,
+    customSubInstitutionKurumumuz,
+    customSubInstitutionKurumu,
+    customSubInstitutionKurumlari,
+  ]);
 
   // 3. Document scaling logic based on preview container size
   useEffect(() => {
@@ -374,10 +383,18 @@ export function DocumentPreviewModalV2({
         activeDosyaId,
       );
 
+      const suffixes = getInstitutionSuffixes(subInstitutionType || 'belediye', {
+        label: customSubInstitutionLabel,
+        kurumumuz: customSubInstitutionKurumumuz,
+        kurumu: customSubInstitutionKurumu,
+        kurumlari: customSubInstitutionKurumlari,
+      });
+
       setFormData({
         ...resolved,
         tarih: resolved.tarih || resolved.onayaSunulanTarih || '',
         onayTarihi: resolved.onayTarihi || resolved.dosyaTarihi || '',
+        kurumumuz: suffixes.kurumumuz,
       });
     } catch (e) {
       console.error("Failed to refresh template resolution:", e);
