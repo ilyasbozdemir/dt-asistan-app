@@ -261,18 +261,18 @@ export function DocumentPreviewModalV2({
 
   if (!isOpen) return null;
 
-  // 5. Generate compiled HTML string containing current CSS stylesheets
   const getCompiledHtml = (): string => {
+    if (!ActiveComponent) return "";
     const bodyHtml = renderToString(
-      <ActiveComponent
-        data={{
+      React.createElement(ActiveComponent, {
+        data: {
           ...formData,
           tarih: formData.tarih || formData.onayaSunulanTarih || '',
           onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
           solLogo: showLogoLeft ? formData.solLogo : null,
           sagLogo: showLogoRight ? formData.sagLogo : null,
-        }}
-      />,
+        },
+      }),
     );
     const styles = Array.from(
       document.querySelectorAll("style, link[rel='stylesheet']"),
@@ -465,15 +465,15 @@ export function DocumentPreviewModalV2({
                       </div>
                     }
                   >
-                    <ActiveComponent
-                      data={{
-                        ...formData,
-                        tarih: formData.tarih || formData.onayaSunulanTarih || '',
-                        onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
-                        solLogo: showLogoLeft ? formData.solLogo : null,
-                        sagLogo: showLogoRight ? formData.sagLogo : null,
-                      }}
-                    />
+                      {React.createElement(ActiveComponent, {
+                        data: {
+                          ...formData,
+                          tarih: formData.tarih || formData.onayaSunulanTarih || '',
+                          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
+                          solLogo: showLogoLeft ? formData.solLogo : null,
+                          sagLogo: showLogoRight ? formData.sagLogo : null,
+                        },
+                      })}
                   </TemplateErrorBoundary>
                 )
                 : (
