@@ -25,5 +25,15 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     id: 'harcama-talimati',
     name: 'HarcamaTalimati',
     category: '1-ihtiyac-tespiti-ve-baslangic'
+  },
+  {
+    id: 'komisyon-gorevlendirme-onayi',
+    name: 'KomisyonGorevlendirmeOnayi',
+    category: '1-ihtiyac-tespiti-ve-baslangic'
+  },
+  {
+    id: 'komisyon-gorevlendirme-onayi-eki',
+    name: 'KomisyonGorevlendirmeOnayiEki',
+    category: '1-ihtiyac-tespiti-ve-baslangic'
   }
 ];

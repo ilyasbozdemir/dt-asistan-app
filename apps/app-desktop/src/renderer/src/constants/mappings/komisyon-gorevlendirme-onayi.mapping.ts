@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const KomisyonGorevlendirmeOnayiMapping: ProcessMapping = {
   kurumUst: {
@@ -69,5 +69,15 @@ export const KomisyonGorevlendirmeOnayiMapping: ProcessMapping = {
   kurumIci: {
     deger: true,
     aciklama: 'Kurum içi mi?'
+  },
+  fiyatKomisyonu: {
+    tablo: 'DATA_TeminKomisyon',
+    sutun: '*',
+    aciklama: 'Piyasa Araştırma ve Satınalma Komisyon Üyeleri'
+  },
+  muayeneKomisyonu: {
+    tablo: 'DATA_TeminKomisyon',
+    sutun: '*',
+    aciklama: 'Muayene Kabul ve Teslim Alma Komisyon Üyeleri'
   }
 }

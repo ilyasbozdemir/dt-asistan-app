@@ -272,6 +272,71 @@ export async function resolveTemplateData(
       continue;
     }
 
+    // 3.5 Commission members (fiyatKomisyonu / muayeneKomisyonu / komisyon)
+    if (sablonDegiskeni === 'fiyatKomisyonu' || sablonDegiskeni === 'muayeneKomisyonu' || sablonDegiskeni === 'komisyon') {
+      try {
+        let members: any[] = [];
+        // 1. Try querying DATA_TeminKomisyon for active file
+        const fileKomQuery = `SELECT tk.*, p.ad_soyad, p.unvan 
+                              FROM DATA_TeminKomisyon tk 
+                              LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id 
+                              WHERE tk.temin_dosya_id = ?`;
+        const fileKomRows = await queryExecutor(fileKomQuery, [activeDosyaId]);
+        if (fileKomRows && fileKomRows.length > 0) {
+          if (sablonDegiskeni === 'fiyatKomisyonu') {
+            const filtered = fileKomRows.filter((r: any) =>
+              !r.komisyon_turu || r.komisyon_turu.toLowerCase().includes('fiyat') || r.komisyon_turu.toLowerCase().includes('piyasa')
+            );
+            members = filtered.length > 0 ? filtered : fileKomRows;
+          } else if (sablonDegiskeni === 'muayeneKomisyonu') {
+            const filtered = fileKomRows.filter((r: any) =>
+              r.komisyon_turu?.toLowerCase().includes('muayene') || r.komisyon_turu?.toLowerCase().includes('kabul')
+            );
+            members = filtered.length > 0 ? filtered : fileKomRows;
+          } else {
+            members = fileKomRows;
+          }
+        }
+
+        // 2. Fallback: Query TANIM_Komisyon & TANIM_KomisyonUye (Komisyon Yönetimi)
+        if (members.length === 0) {
+          const tanimQuery = `SELECT u.*, k.ad as komisyon_adi, p.ad_soyad, p.unvan, g.ad as gorev_adi
+                              FROM TANIM_KomisyonUye u
+                              JOIN TANIM_Komisyon k ON u.komisyon_id = k.id
+                              LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
+                              LEFT JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id
+                              WHERE k.aktif_mi = 1 OR k.aktif_mi IS NULL`;
+          const tanimRows = await queryExecutor(tanimQuery, []);
+          if (tanimRows && tanimRows.length > 0) {
+            if (sablonDegiskeni === 'fiyatKomisyonu') {
+              const filtered = tanimRows.filter((r: any) =>
+                r.komisyon_adi?.toLowerCase().includes('fiyat') || r.komisyon_adi?.toLowerCase().includes('piyasa')
+              );
+              members = filtered.length > 0 ? filtered : tanimRows;
+            } else if (sablonDegiskeni === 'muayeneKomisyonu') {
+              const filtered = tanimRows.filter((r: any) =>
+                r.komisyon_adi?.toLowerCase().includes('muayene') || r.komisyon_adi?.toLowerCase().includes('kabul')
+              );
+              members = filtered.length > 0 ? filtered : tanimRows;
+            } else {
+              members = tanimRows;
+            }
+          }
+        }
+
+        resolvedPayload[sablonDegiskeni] = members.map((m: any) => ({
+          adSoyad: m.ad_soyad || m.adSoyad || 'Belirtilmedi',
+          unvan: m.unvan || '',
+          gorevi: m.gorev || m.gorev_adi || (m.asil_mi === 0 ? 'Yedek Üye' : 'Üye'),
+          pozisyonu: m.unvan || ''
+        }));
+        continue;
+      } catch (err) {
+        resolvedPayload[sablonDegiskeni] = [];
+        continue;
+      }
+    }
+
     // 4. Single table columns or JSON array of strings
     if (rule.tablo && rule.sutun && rule.sutun !== '*') {
       try {

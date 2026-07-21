@@ -54,7 +54,9 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         'harcama-talimati',
         'luzum-muzekkeresi',
         'luzum-muzekkeresi-onay-eki',
-        'luzum-muzekkeresi-teslim-tesellum'
+        'luzum-muzekkeresi-teslim-tesellum',
+        'komisyon-gorevlendirme-onayi',
+        'komisyon-gorevlendirme-onayi-eki'
       ].includes(previewData.dosyaAdi.replace('.html', ''))
 
     if (isV2) {
