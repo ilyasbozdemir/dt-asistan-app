@@ -330,6 +330,19 @@ export async function resolveTemplateData(
           } catch (e) {}
         }
         
+        // Dynamic fallback for aciklama / isinAciklamasi if empty in DATA_TeminDosyasi
+        if ((sablonDegiskeni === 'aciklama' || sablonDegiskeni === 'isinAciklamasi') && (!rawValue || String(rawValue).trim() === '')) {
+          try {
+            const dosyaRes = await queryExecutor(
+              'SELECT isin_aciklamasi, konu, isin_gerekcesi FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
+              [activeDosyaId]
+            );
+            if (dosyaRes?.[0]) {
+              rawValue = dosyaRes[0].isin_aciklamasi || dosyaRes[0].konu || dosyaRes[0].isin_gerekcesi || '';
+            }
+          } catch (e) {}
+        }
+
         // Handle stringified JSON arrays (like antetSatirlari)
         if (typeof rawValue === 'string' && (rawValue.trim().startsWith('[') || rawValue.trim().startsWith('{'))) {
           try {
@@ -422,7 +435,10 @@ async function resolveFormula(
         }
         
         const res = await queryExecutor(query, params);
-        const val = res?.[0]?.[column] ?? '';
+        let val = res?.[0]?.[column] ?? '';
+        if (column === 'detsis_kodu' && (!val || String(val).trim() === '' || String(val).trim() === '0000000000')) {
+          val = '934';
+        }
         resolved = resolved.replace(fullToken, String(val));
       } catch (err) {
         resolved = resolved.replace(fullToken, '');

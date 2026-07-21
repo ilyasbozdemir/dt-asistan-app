@@ -5,3 +5,4 @@ dist/
 .eslintcache
 *.log
 .pnpm-store/
+TODO.md

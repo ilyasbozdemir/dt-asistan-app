@@ -9,6 +9,7 @@ export * from "./document/DocumentTable";
 export * from "./document/ApprovalSignature";
 export * from "./document/DynamicPaginatedTable";
 export * from "./templates/ihtiyac-listesi";
+export * from "./templates/harcama-talimati";
 export * from "./templates/luzum-muzekkeresi";
 export * from "./templates/luzum-muzekkeresi-onay-eki";
 export * from "./templates/luzum-muzekkeresi-teslim-tesellum";

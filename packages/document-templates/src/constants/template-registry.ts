@@ -20,5 +20,10 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     id: 'luzum-muzekkeresi-teslim-tesellum',
     name: 'LuzumMuzekkeresiTeslimTesellum',
     category: '1-ihtiyac-tespiti-ve-baslangic'
+  },
+  {
+    id: 'harcama-talimati',
+    name: 'HarcamaTalimati',
+    category: '1-ihtiyac-tespiti-ve-baslangic'
   }
 ];

@@ -51,6 +51,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       previewData?.dosyaAdi &&
       [
         'ihtiyac-listesi',
+        'harcama-talimati',
         'luzum-muzekkeresi',
         'luzum-muzekkeresi-onay-eki',
         'luzum-muzekkeresi-teslim-tesellum'
