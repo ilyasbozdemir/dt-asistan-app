@@ -8,6 +8,8 @@ export * from "./document/DocumentFooter";
 export * from "./document/DocumentTable";
 export * from "./document/ApprovalSignature";
 export * from "./document/DynamicPaginatedTable";
+export * from "./document/EditableField";
+export * from "./document/TemplateEditContext";
 export * from "./templates/ihtiyac-listesi";
 export * from "./templates/harcama-talimati";
 export * from "./templates/luzum-muzekkeresi";
@@ -23,4 +25,5 @@ export * from "./resolver/MappingResolverTest";
 export * from "./resolver/TemplateResolver";
 
 export * from "./constants/template-registry";
+export * from "./constants/editable-fields";
 export * from "./types";

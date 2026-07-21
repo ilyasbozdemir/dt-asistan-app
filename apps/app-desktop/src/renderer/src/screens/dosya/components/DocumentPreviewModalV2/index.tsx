@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { renderToString } from "react-dom/server";
 import {
+  ChevronLeft,
+  ChevronRight,
   Download,
+  Edit3,
   Eye,
   FileText,
   MoreVertical,
@@ -12,9 +15,12 @@ import {
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../store/settingsStore";
 import {
+  getTemplateEditableFields,
   IhtiyacListesiType,
   TEMPLATE_REGISTRY,
   TemplateComponentType,
+  TemplateEditProvider,
+  TemplateFieldConfig,
   TemplateResolver,
 } from "@dt-asistan/document-templates";
 import * as Templates from "@dt-asistan/document-templates";
@@ -92,6 +98,7 @@ export function DocumentPreviewModalV2({
   const [previewScale, setPreviewScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -445,6 +452,81 @@ export function DocumentPreviewModalV2({
 
         {/* Content Body */}
         <div className="flex flex-1 overflow-hidden">
+          {/* Left Sidebar: Dynamic Editable Fields */}
+          <div
+            className={`transition-all duration-300 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/70 flex flex-col ${
+              sidebarOpen ? "w-80 min-w-[320px]" : "w-12 min-w-[48px]"
+            }`}
+          >
+            {/* Sidebar Header */}
+            <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+              {sidebarOpen && (
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+                    Belge Değişkenleri
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={() => setSidebarOpen((prev) => !prev)}
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer mx-auto"
+                title={sidebarOpen ? "Paneli Daralt" : "Paneli Genişlet"}
+              >
+                {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {sidebarOpen && (
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                {getTemplateEditableFields(documentId || "").length > 0 ? (
+                  getTemplateEditableFields(documentId || "").map((field: TemplateFieldConfig) => {
+                    const value = formData[field.key as keyof typeof formData] || "";
+                    return (
+                      <div key={field.key} className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                          <span>{field.label}</span>
+                          <span className="text-[9px] text-slate-400 font-normal">{`{{${field.key}}}`}</span>
+                        </label>
+                        {field.type === "textarea" ? (
+                          <textarea
+                            rows={3}
+                            value={String(value)}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                [field.key]: e.target.value,
+                              }))
+                            }
+                            placeholder={field.placeholder || `${field.label} giriniz...`}
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden text-slate-800 dark:text-slate-100 shadow-2xs resize-y"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={String(value)}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                [field.key]: e.target.value,
+                              }))
+                            }
+                            placeholder={field.placeholder || `${field.label} giriniz...`}
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden text-slate-800 dark:text-slate-100 shadow-2xs"
+                          />
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center text-xs text-slate-400 py-8">
+                    Bu şablon için düzenlenebilir alan konfigürasyonu tanımlanmamıştır.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Right panel: Live A4 PDF Layout Preview */}
           <div
             ref={previewContainerRef}
@@ -468,6 +550,12 @@ export function DocumentPreviewModalV2({
                       </div>
                     }
                   >
+                    <TemplateEditProvider
+                      isEditing={true}
+                      onFieldChange={(key, val) =>
+                        setFormData((prev) => ({ ...prev, [key]: val }))
+                      }
+                    >
                       {React.createElement(ActiveComponent, {
                         data: {
                           ...formData,
@@ -477,6 +565,7 @@ export function DocumentPreviewModalV2({
                           sagLogo: showLogoRight ? formData.sagLogo : null,
                         },
                       })}
+                    </TemplateEditProvider>
                   </TemplateErrorBoundary>
                 )
                 : (

@@ -1,5 +1,6 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
+import { EditableField } from "../../document/EditableField";
 import { HarcamaTalimatiType } from "./HarcamaTalimati.schema";
 
 interface HarcamaTalimatiProps {
@@ -119,7 +120,7 @@ export function HarcamaTalimati({
                 Gerekçesi ve Hukuki Dayanağı
               </td>
               <td style={{ border: "1px solid #000", width: "65%", padding: "6px 8px" }}>
-                {data.gerekce || "-"}
+                <EditableField name="gerekce" value={data.gerekce} multiline placeholder="Gerekçe" />
               </td>
             </tr>
 
@@ -129,7 +130,7 @@ export function HarcamaTalimati({
                 Konusu / Nev'i / Niteliği
               </td>
               <td style={{ border: "1px solid #000", width: "65%", fontWeight: "bold", padding: "6px 8px" }}>
-                {data.isAdi || "-"}
+                <EditableField name="isAdi" value={data.isAdi || data.konu} placeholder="İşin Adı" />
               </td>
             </tr>
 
@@ -139,7 +140,7 @@ export function HarcamaTalimati({
                 Miktarı
               </td>
               <td style={{ border: "1px solid #000", width: "65%", padding: "6px 8px" }}>
-                {data.miktar || "-"}
+                <EditableField name="miktar" value={data.miktar} placeholder="Miktar" />
               </td>
             </tr>
 
@@ -149,7 +150,7 @@ export function HarcamaTalimati({
                 Gerçekleştirme Süresi
               </td>
               <td style={{ border: "1px solid #000", width: "65%", padding: "6px 8px" }}>
-                {data.sure || "-"}
+                <EditableField name="sure" value={data.sure} placeholder="Gerçekleştirme Süresi" />
               </td>
             </tr>
 
@@ -159,7 +160,7 @@ export function HarcamaTalimati({
                 Gerçekleştirme Usulü
               </td>
               <td style={{ border: "1px solid #000", width: "65%", padding: "6px 8px" }}>
-                {data.teminSekli || "-"}
+                <EditableField name="teminSekli" value={data.teminSekli} placeholder="Gerçekleştirme Usulü" />
               </td>
             </tr>
 
@@ -179,7 +180,7 @@ export function HarcamaTalimati({
                 Kullanılabilir Ödenek Tutarı
               </td>
               <td style={{ border: "1px solid #000", width: "65%", padding: "6px 8px" }}>
-                {data.odenekTutari || "-"}
+                <EditableField name="odenekTutari" value={data.odenekTutari ? String(data.odenekTutari) : ""} placeholder="Kullanılabilir Ödenek Tutarı" />
               </td>
             </tr>
 
@@ -237,7 +238,7 @@ export function HarcamaTalimati({
                   whiteSpace: "pre-wrap",
                 }}
               >
-                {data.aciklama || data.isinAciklamasi || data.isAdi || data.isinAdi || data.gerekce || "-"}
+                <EditableField name="aciklama" value={data.aciklama || data.isinAciklamasi || data.isAdi || data.isinAdi || data.gerekce} multiline placeholder="Açıklama giriniz..." />
               </td>
             </tr>
           </tbody>

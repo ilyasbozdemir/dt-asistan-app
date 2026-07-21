@@ -1,4 +1,5 @@
 import React from "react";
+import { EditableField } from "./EditableField";
 
 interface PersonelCardProps {
   adSoyad?: string | null;
@@ -221,7 +222,7 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
           }}
         >
           <tbody>
-            {evrakSayisi && (
+            {evrakSayisi !== undefined && (
               <tr>
                 <td style={{ verticalAlign: "top", padding: 0, width: "45px" }}>
                   <strong>Sayı</strong>
@@ -230,11 +231,11 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
                   <strong>:</strong>
                 </td>
                 <td style={{ verticalAlign: "top", padding: 0 }}>
-                  {evrakSayisi}
+                  <EditableField name="evrakSayisi" value={evrakSayisi} />
                 </td>
               </tr>
             )}
-            {dosyaKonusu && (
+            {dosyaKonusu !== undefined && (
               <tr>
                 <td style={{ verticalAlign: "top", padding: 0, width: "45px" }}>
                   <strong>Konu</strong>
@@ -249,7 +250,7 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
                     textAlign: "justify",
                   }}
                 >
-                  {dosyaKonusu}
+                  <EditableField name="dosyaKonusu" value={dosyaKonusu} />
                 </td>
               </tr>
             )}
@@ -257,9 +258,9 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
         </table>
       </div>
 
-      {tarih && (
+      {tarih !== undefined && (
         <div style={{ fontSize: "11pt", textAlign: "right" }}>
-          <strong>Tarih:</strong> {tarih}
+          <strong>Tarih:</strong> <EditableField name="tarih" value={tarih} />
         </div>
       )}
     </div>

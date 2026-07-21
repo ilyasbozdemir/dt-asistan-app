@@ -6,6 +6,7 @@ import {
   MetadataBlock,
   PersonelCard,
 } from "../../document/ApprovalSignature";
+import { EditableField } from "../../document/EditableField";
 import {
   DEFAULT_LIMITS,
   LANDSCAPE_LIMITS,
@@ -101,7 +102,11 @@ export function IhtiyacListesi({
                     pageBreakInside: "avoid",
                   }}
                 >
-                  {data.sunulacakMakamAdi}
+                  <EditableField
+                    name="sunulacakMakamAdi"
+                    value={data.sunulacakMakamAdi}
+                    placeholder="SUNULACAK MAKAM ADI"
+                  />
                 </div>
 
                 <div
@@ -113,7 +118,11 @@ export function IhtiyacListesi({
                     lineHeight: 1.5,
                   }}
                 >
-                  {data.ihtiyacYeri || "Müdürlüğümüzün"}{" "}
+                  <EditableField
+                    name="ihtiyacYeri"
+                    value={data.ihtiyacYeri || "Müdürlüğümüzün"}
+                    placeholder="İhtiyaç Yeri"
+                  />{" "}
                   ihtiyacı olan aşağıda yazılı mal/hizmet kalemlerinin temin
                   edilmesi gerekmektedir;
                 </div>
@@ -128,7 +137,11 @@ export function IhtiyacListesi({
                   }}
                 >
                   Söz konusu ihtiyacın 4734 sayılı Kamu İhale Kanununun{" "}
-                  {data.maddeNo || "22/d"}{" "}
+                  <EditableField
+                    name="maddeNo"
+                    value={data.maddeNo || "22/d"}
+                    placeholder="22/d"
+                  />{" "}
                   maddesine göre temini için gereğini olurlarınıza arz ederim.
                 </div>
 

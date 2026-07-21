@@ -1,5 +1,6 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
+import { EditableField } from "../../document/EditableField";
 import { KomisyonGorevlendirmeOnayiType } from "./KomisyonGorevlendirmeOnayi.schema";
 
 interface KomisyonGorevlendirmeOnayiProps {
@@ -57,19 +58,19 @@ export function KomisyonGorevlendirmeOnayi({
                   <td style={{ fontWeight: "bold", paddingRight: "8px", whiteSpace: "nowrap" }}>
                     Sayı
                   </td>
-                  <td>: {data.evrakSayisi || "-"}</td>
+                  <td>: <EditableField name="evrakSayisi" value={data.evrakSayisi} /></td>
                 </tr>
                 <tr>
                   <td style={{ fontWeight: "bold", paddingRight: "8px", whiteSpace: "nowrap" }}>
                     Konu
                   </td>
-                  <td>: {data.konu || "Görevlendirme"}</td>
+                  <td>: <EditableField name="konu" value={data.konu || "Görevlendirme"} /></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div>
-            <strong>Tarih:</strong> {data.tarih || "-"}
+            <strong>Tarih:</strong> <EditableField name="tarih" value={data.tarih} />
           </div>
         </div>
 
@@ -84,7 +85,7 @@ export function KomisyonGorevlendirmeOnayi({
               textTransform: "uppercase",
             }}
           >
-            {mainHeaderTitle}
+            <EditableField name="sunulacakMakamAdi" value={mainHeaderTitle} placeholder="KURUM BAŞKANLIĞINA" />
           </div>
         </div>
 
@@ -98,7 +99,7 @@ export function KomisyonGorevlendirmeOnayi({
           }}
         >
           {data.kurumumuz || "Kurumumuz"} bünyesindeki{" "}
-          <strong>{data.isAdi || data.isinAdi || "-"}</strong> işine ait fiyat araştırması ile
+          <strong><EditableField name="isAdi" value={data.isAdi || data.isinAdi} placeholder="İşin Adı" /></strong> işine ait fiyat araştırması ile
           muayene ve kabulü yapmak üzere aşağıdaki personeller görevlendirilecek olup,
         </div>
         <div
@@ -123,9 +124,9 @@ export function KomisyonGorevlendirmeOnayi({
               lineHeight: 1.4,
             }}
           >
-            <strong>{data.hazirlayanPersonelAdi || ""}</strong>
+            <strong><EditableField name="hazirlayanPersonelAdi" value={data.hazirlayanPersonelAdi} placeholder="Hazırlayan Adı Soyadı" /></strong>
             <br />
-            {data.hazirlayanPersonelUnvan || ""}
+            <EditableField name="hazirlayanPersonelUnvan" value={data.hazirlayanPersonelUnvan} placeholder="Hazırlayan Unvanı" />
           </div>
         </div>
 
@@ -335,13 +336,13 @@ export function KomisyonGorevlendirmeOnayi({
             OLUR
           </div>
           <div style={{ marginBottom: "8px", fontSize: "10.5pt" }}>
-            {data.tarih || "-"}
+            <EditableField name="onayTarihi" value={data.onayTarihi || data.tarih} placeholder="GG.AA.YYYY" />
           </div>
           <div style={{ fontWeight: "bold", fontSize: "11pt" }}>
-            {data.baskanAdi || data.onaylayanPersonelAdi || ""}
+            <EditableField name="onaylayanPersonelAdi" value={data.baskanAdi || data.onaylayanPersonelAdi} placeholder="Onaylayan Adı Soyadı" />
           </div>
           <div style={{ fontSize: "10.5pt" }}>
-            {data.baskanUnvan || data.onaylayanPersonelUnvan || ""}
+            <EditableField name="onaylayanPersonelUnvan" value={data.baskanUnvan || data.onaylayanPersonelUnvan} placeholder="Onaylayan Unvanı" />
           </div>
         </div>
       </div>
