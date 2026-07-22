@@ -74,10 +74,18 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
         }}
       >
         <div style={{ fontWeight: "bold", fontSize: "11pt" }}>
-          <EditableField name="hazirlayanPersonelAdi" value={adSoyad || ""} placeholder="Hazırlayan Adı Soyadı" />
+          <EditableField
+            name="hazirlayanPersonelAdi"
+            value={adSoyad || ""}
+            placeholder="Hazırlayan Adı Soyadı"
+          />
         </div>
         <div style={{ fontSize: "11pt" }}>
-          <EditableField name="hazirlayanPersonelUnvan" value={unvan || ""} placeholder="Hazırlayan Unvanı" />
+          <EditableField
+            name="hazirlayanPersonelUnvan"
+            value={unvan || ""}
+            placeholder="Hazırlayan Unvanı"
+          />
         </div>
         {showContactInfo && (
           <>
@@ -141,30 +149,6 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
           position: "relative",
         }}
       >
-        {isEditing && onFieldChange && (
-          <div
-            onClick={() => onFieldChange("olurYazisi", false)}
-            style={{
-              position: "absolute",
-              top: "-22px",
-              right: "0",
-              fontSize: "9pt",
-              color: "#475569",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              backgroundColor: "#f1f5f9",
-              padding: "2px 8px",
-              borderRadius: "4px",
-              border: "1px solid #cbd5e1",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-            title="OLUR bloğunu gizlemek için tıklayın"
-          >
-            <span>☑ OLUR Açık</span>
-          </div>
-        )}
         <div
           style={{ fontWeight: "bold", fontSize: "12pt", marginBottom: "4px" }}
         >
@@ -172,7 +156,11 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
         </div>
 
         <div style={{ fontSize: "11pt", marginBottom: "8px" }}>
-          <EditableField name="onayTarihi" value={date || ""} placeholder="GG.AA.YYYY" />
+          <EditableField
+            name="onayTarihi"
+            value={date || ""}
+            placeholder="GG.AA.YYYY"
+          />
         </div>
 
         {showSpace && (
@@ -184,11 +172,19 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
         <div
           style={{ fontSize: "11pt", fontWeight: "bold", marginTop: "4px" }}
         >
-          <EditableField name="onaylayanPersonelAdi" value={adSoyad || ""} placeholder="Onaylayan Adı Soyadı" />
+          <EditableField
+            name="onaylayanPersonelAdi"
+            value={adSoyad || ""}
+            placeholder="Onaylayan Adı Soyadı"
+          />
         </div>
 
         <div style={{ fontSize: "11pt" }}>
-          <EditableField name="onaylayanPersonelUnvan" value={unvan || ""} placeholder="Onaylayan Unvanı" />
+          <EditableField
+            name="onaylayanPersonelUnvan"
+            value={unvan || ""}
+            placeholder="Onaylayan Unvanı"
+          />
         </div>
       </div>
     </div>
@@ -316,7 +312,8 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
 
       {displayTarih !== undefined && (
         <div style={{ fontSize: "11pt", textAlign: "right" }}>
-          <strong>Tarih:</strong> <EditableField name="onayaSunulanTarih" value={displayTarih} />
+          <strong>Tarih:</strong>{" "}
+          <EditableField name="onayaSunulanTarih" value={displayTarih} />
         </div>
       )}
     </div>

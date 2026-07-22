@@ -7,12 +7,16 @@ import {
   Edit3,
   Eye,
   FileText,
+  Maximize2,
+  Minimize2,
   MoreVertical,
   Printer,
   RefreshCw,
   Save,
   Sliders,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../store/settingsStore";
@@ -32,6 +36,7 @@ interface DocumentPreviewModalV2Props {
   documentId: string | null;
   onClose: () => void;
   isModal?: boolean;
+  backLabel?: string;
 }
 
 interface Personel {
@@ -111,6 +116,9 @@ export function DocumentPreviewModalV2({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [zoomMode, setZoomMode] = useState<"auto" | "manual">("auto");
+  const [manualZoom, setManualZoom] = useState(1.0);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -297,8 +305,12 @@ export function DocumentPreviewModalV2({
     customSubInstitutionKurumlari,
   ]);
 
-  // 3. Document scaling logic based on preview container size
+  // 3. Document scaling logic based on preview container size or manual zoom
   useEffect(() => {
+    if (zoomMode === "manual") {
+      setPreviewScale(manualZoom);
+      return;
+    }
     if (!previewContainerRef.current || !isOpen) return;
 
     const observer = new ResizeObserver((entries) => {
@@ -316,7 +328,7 @@ export function DocumentPreviewModalV2({
 
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
-  }, [isOpen, documentId, orientation]);
+  }, [isOpen, documentId, orientation, zoomMode, manualZoom]);
 
   // 4. Dropdown closing logic
   useEffect(() => {
@@ -488,13 +500,15 @@ export function DocumentPreviewModalV2({
 
   const mainContent = (
     <div
-      className={isModal
-        ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
-        : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"}
-      onClick={(e) => isModal && e.stopPropagation()}
+      className={isFullScreen
+        ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none shadow-none flex flex-col bg-white dark:bg-slate-900 overflow-hidden animate-in fade-in duration-150"
+        : (isModal
+          ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
+          : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm")}
+      onClick={(e) => (isModal || isFullScreen) && e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4 shrink-0 select-none">
         {/* Left: Back Button & Title */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
@@ -511,8 +525,65 @@ export function DocumentPreviewModalV2({
           </div>
         </div>
 
-        {/* Right: Actions (Belge Ayarları, Save, Print, Options, Close) */}
+        {/* Right: Actions (Zoom, FullScreen, Belge Ayarları, Save, Print, Options, Close) */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Zoom Controls (ZoomOut, Reset, ZoomIn) */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl p-0.5">
+            <button
+              onClick={() => {
+                setZoomMode("manual");
+                setManualZoom((prev) =>
+                  Math.max(0.4, Number((prev - 0.1).toFixed(1)))
+                );
+              }}
+              className="p-1 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
+              title="Uzaklaştır (%10)"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={() => {
+                setZoomMode("auto");
+                setManualZoom(1.0);
+              }}
+              className="px-2 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer min-w-[55px] text-center"
+              title="Otomatik Sığdır (Sıfırla)"
+            >
+              {zoomMode === "auto"
+                ? `% ${Math.round(previewScale * 100)}`
+                : `% ${Math.round(manualZoom * 100)}`}
+            </button>
+
+            <button
+              onClick={() => {
+                setZoomMode("manual");
+                setManualZoom((prev) =>
+                  Math.min(2.0, Number((prev + 0.1).toFixed(1)))
+                );
+              }}
+              className="p-1 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
+              title="Yakınlaştır (%10)"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Toggle Full Screen */}
+          <button
+            onClick={() => setIsFullScreen((v) => !v)}
+            className={`p-1.5 rounded-xl font-bold transition-all flex items-center justify-center text-xs cursor-pointer border ${
+              isFullScreen
+                ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800"
+                : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
+            }`}
+            title={isFullScreen ? "Tam Ekrandan Çık" : "Tam Ekran Önizleme"}
+          >
+            {isFullScreen
+              ? <Minimize2 className="w-4 h-4" />
+              : <Maximize2 className="w-4 h-4" />}
+          </button>
+
           {/* Toggle Sidebar (Belge Ayarları) */}
           <button
             onClick={() => setSidebarOpen((v) => !v)}
@@ -521,7 +592,9 @@ export function DocumentPreviewModalV2({
                 ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
                 : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
             }`}
-            title={sidebarOpen ? "Belge Ayarlarını Gizle" : "Belge Ayarlarını Göster"}
+            title={sidebarOpen
+              ? "Belge Ayarlarını Gizle"
+              : "Belge Ayarlarını Göster"}
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>{sidebarOpen ? "Ayarlar Açık" : "Belge Ayarları"}</span>
@@ -645,8 +718,8 @@ export function DocumentPreviewModalV2({
           <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
             <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
               💡 <strong>Canlı Düzenleme:</strong>{" "}
-              Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki
-              A4 sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
+              Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki A4
+              sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
             </div>
 
             {/* Toggles & Settings */}
