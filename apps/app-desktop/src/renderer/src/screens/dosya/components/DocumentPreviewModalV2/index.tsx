@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { renderToString } from "react-dom/server";
 import {
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -10,17 +11,16 @@ import {
   MoreVertical,
   Printer,
   RefreshCw,
+  Save,
   X,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../store/settingsStore";
 import {
-  getTemplateEditableFields,
   IhtiyacListesiType,
   TEMPLATE_REGISTRY,
   TemplateComponentType,
   TemplateEditProvider,
-  TemplateFieldConfig,
   TemplateResolver,
 } from "@dt-asistan/document-templates";
 import * as Templates from "@dt-asistan/document-templates";
@@ -31,6 +31,8 @@ interface DocumentPreviewModalV2Props {
   isOpen: boolean;
   documentId: string | null;
   onClose: () => void;
+  isModal?: boolean;
+  backLabel?: string;
 }
 
 interface Personel {
@@ -49,8 +51,10 @@ const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   LuzumMuzekkeresiTeslimTesellum: Templates
     .LuzumMuzekkeresiTeslimTesellum as TemplateComponentType,
   HarcamaTalimati: Templates.HarcamaTalimati as TemplateComponentType,
-  KomisyonGorevlendirmeOnayi: Templates.KomisyonGorevlendirmeOnayi as TemplateComponentType,
-  KomisyonGorevlendirmeOnayiEki: Templates.KomisyonGorevlendirmeOnayiEki as TemplateComponentType,
+  KomisyonGorevlendirmeOnayi: Templates
+    .KomisyonGorevlendirmeOnayi as TemplateComponentType,
+  KomisyonGorevlendirmeOnayiEki: Templates
+    .KomisyonGorevlendirmeOnayiEki as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<
@@ -82,6 +86,8 @@ export function DocumentPreviewModalV2({
   isOpen,
   documentId,
   onClose,
+  isModal = false,
+  backLabel = "İşlemlere Dön",
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const { activeDosyaId } = useWorkspaceStore();
   const {
@@ -95,13 +101,48 @@ export function DocumentPreviewModalV2({
   } = useSettingsStore();
   const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
   const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
+  const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
+  const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
+  const [isEditingMode, setIsEditingMode] = useState(true);
   const [previewScale, setPreviewScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveToDb = async (): Promise<void> => {
+    if (!activeDosyaId || !documentId) return;
+    setIsSaving(true);
+    try {
+      const jsonStr = JSON.stringify(formData);
+      const sablonRes = await window.electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1",
+        [`${documentId}.html`],
+      );
+      if (sablonRes.success && sablonRes.data.length > 0) {
+        const sablonId = sablonRes.data[0].id;
+        await window.electron.ipcRenderer.invoke(
+          "db:query",
+          `INSERT INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json, guncelleme_tarihi)
+           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+           ON CONFLICT(temin_dosya_id, sablon_id)
+           DO UPDATE SET veri_json = excluded.veri_json, guncelleme_tarihi = CURRENT_TIMESTAMP`,
+          [activeDosyaId, sablonId, jsonStr],
+        );
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2000);
+      }
+    } catch (e) {
+      console.error("Belge kaydetme hatası:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // 1. Find template config in registry
   const activeTemplateConf = TEMPLATE_REGISTRY.find((t) => t.id === documentId);
@@ -202,16 +243,20 @@ export function DocumentPreviewModalV2({
           finalData.antetSatirlari = resolved.antetSatirlari;
         }
 
-        finalData.tarih = finalData.tarih || finalData.onayaSunulanTarih || '';
-        finalData.onayTarihi = finalData.onayTarihi || finalData.dosyaTarihi || '';
+        finalData.tarih = finalData.tarih || finalData.onayaSunulanTarih || "";
+        finalData.onayTarihi = finalData.onayTarihi || finalData.dosyaTarihi ||
+          "";
 
         // Derive kurumumuz from institution type suffix (e.g. "Belediyemiz", "Müdürlüğümüz")
-        const suffixes = getInstitutionSuffixes(subInstitutionType || 'belediye', {
-          label: customSubInstitutionLabel,
-          kurumumuz: customSubInstitutionKurumumuz,
-          kurumu: customSubInstitutionKurumu,
-          kurumlari: customSubInstitutionKurumlari,
-        });
+        const suffixes = getInstitutionSuffixes(
+          subInstitutionType || "belediye",
+          {
+            label: customSubInstitutionLabel,
+            kurumumuz: customSubInstitutionKurumumuz,
+            kurumu: customSubInstitutionKurumu,
+            kurumlari: customSubInstitutionKurumlari,
+          },
+        );
         finalData.kurumumuz = suffixes.kurumumuz;
 
         setFormData(finalData);
@@ -277,8 +322,8 @@ export function DocumentPreviewModalV2({
       React.createElement(ActiveComponent, {
         data: {
           ...formData,
-          tarih: formData.tarih || formData.onayaSunulanTarih || '',
-          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
+          tarih: formData.tarih || formData.onayaSunulanTarih || "",
+          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
           solLogo: showLogoLeft ? formData.solLogo : null,
           sagLogo: showLogoRight ? formData.sagLogo : null,
         },
@@ -393,17 +438,20 @@ export function DocumentPreviewModalV2({
         activeDosyaId,
       );
 
-      const suffixes = getInstitutionSuffixes(subInstitutionType || 'belediye', {
-        label: customSubInstitutionLabel,
-        kurumumuz: customSubInstitutionKurumumuz,
-        kurumu: customSubInstitutionKurumu,
-        kurumlari: customSubInstitutionKurumlari,
-      });
+      const suffixes = getInstitutionSuffixes(
+        subInstitutionType || "belediye",
+        {
+          label: customSubInstitutionLabel,
+          kurumumuz: customSubInstitutionKurumumuz,
+          kurumu: customSubInstitutionKurumu,
+          kurumlari: customSubInstitutionKurumlari,
+        },
+      );
 
       setFormData({
         ...resolved,
-        tarih: resolved.tarih || resolved.onayaSunulanTarih || '',
-        onayTarihi: resolved.onayTarihi || resolved.dosyaTarihi || '',
+        tarih: resolved.tarih || resolved.onayaSunulanTarih || "",
+        onayTarihi: resolved.onayTarihi || resolved.dosyaTarihi || "",
         kurumumuz: suffixes.kurumumuz,
       });
     } catch (e) {
@@ -411,279 +459,311 @@ export function DocumentPreviewModalV2({
     }
   };
 
-  return (
+  const mainContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
-      style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      className={isModal
+        ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
+        : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"}
+      onClick={(e) => isModal && e.stopPropagation()}
     >
-      <div
-        className="bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
-              <FileText className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
-                {activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim() ||
-                  "Belge Düzenleyici"}
-                <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-655 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider">
-                  Akıllı Belge
-                </span>
-              </h2>
-              <p className="text-[11px] text-slate-400 font-medium">
-                İhtiyaçlarınızı doğru ve eksiksiz şekilde belgelemek, satın alma
-                sürecinizin başarısı için en önemli adımdır. Aşağıdaki
-                alanlardan belgenizi anlık düzenleyebilirsiniz.
-              </p>
-            </div>
-          </div>
-
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+        <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors cursor-pointer mr-2 border border-slate-200/80 dark:border-slate-700/80 shadow-xs"
+            title={`${backLabel} seçeneğine geri dön`}
           >
-            <X className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
+            <span>{backLabel}</span>
           </button>
+
+          <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
+              {activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim() ||
+                "Belge Düzenleyici"}
+              <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-655 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider">
+                Akıllı Belge
+              </span>
+            </h2>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Belgenizi sağdaki A4 sayfası üzerinde doğrudan tıklayarak canlı
+              düzenleyebilirsiniz.
+            </p>
+          </div>
         </div>
 
-        {/* Content Body */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left Sidebar: Dynamic Editable Fields */}
-          <div
-            className={`transition-all duration-300 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/70 flex flex-col ${
-              sidebarOpen ? "w-80 min-w-[320px]" : "w-12 min-w-[48px]"
-            }`}
-          >
-            {/* Sidebar Header */}
-            <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-              {sidebarOpen && (
-                <div className="flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
-                    Belge Değişkenleri
+        <button
+          onClick={onClose}
+          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Content area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left panel: Document Settings */}
+        <div
+          className={`bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 flex flex-col ${
+            sidebarOpen ? "w-72" : "w-12"
+          }`}
+        >
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+            {sidebarOpen && (
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+                  Belge Ayarları
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer mx-auto"
+              title={sidebarOpen ? "Paneli Daralt" : "Paneli Genişlet"}
+            >
+              {sidebarOpen
+                ? <ChevronLeft className="w-4 h-4" />
+                : <ChevronRight className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {sidebarOpen && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
+              <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
+                💡 <strong>Canlı Düzenleme:</strong>{" "}
+                Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki
+                A4 sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
+              </div>
+
+              {/* Toggles & Settings */}
+              <div className="space-y-3">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                  Görünüm & Düzenleme Kontrolleri
+                </span>
+
+                <label className="flex items-center justify-between p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 rounded-xl cursor-pointer hover:border-blue-300 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
+                        Metin Düzenleme Modu
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                        {isEditingMode
+                          ? "Canlı düzenleme açık"
+                          : "Önizleme modu (Sabit Metin)"}
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isEditingMode}
+                    onChange={(e) => setIsEditingMode(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    OLUR Bloğunu Göster
                   </span>
+                  <input
+                    type="checkbox"
+                    checked={formData.olurYazisi !== false}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        olurYazisi: e.target.checked,
+                      }))}
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    Sol Amblem / Logo
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={localShowLogoLeft}
+                    onChange={(e) => setLocalShowLogoLeft(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    Sağ Amblem / Logo
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={localShowLogoRight}
+                    onChange={(e) => setLocalShowLogoRight(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right panel: Live A4 PDF Layout Preview */}
+        <div
+          ref={previewContainerRef}
+          className="flex-1 bg-slate-200/50 dark:bg-slate-950 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar"
+        >
+          <div
+            className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out"
+            style={{
+              transform: `scale(${previewScale})`,
+              width: "800px",
+              minHeight: "1131px",
+            }}
+          >
+            {ActiveComponent
+              ? (
+                <TemplateErrorBoundary
+                  fallback={
+                    <div className="p-8 text-center text-red-500 font-semibold bg-red-50 dark:bg-red-950/20 border border-red-250 dark:border-red-900 rounded-xl m-4">
+                      ⚠️ Belge şablonu çizilirken bir hata oluştu. Değişkenleri
+                      kontrol edip tekrar deneyiniz.
+                    </div>
+                  }
+                >
+                  <TemplateEditProvider
+                    isEditing={isEditingMode}
+                    onFieldChange={(key, val) =>
+                      setFormData((prev) => ({ ...prev, [key]: val }))}
+                  >
+                    {React.createElement(ActiveComponent, {
+                      data: {
+                        ...formData,
+                        tarih: formData.tarih || formData.onayaSunulanTarih ||
+                          "",
+                        onayTarihi: formData.onayTarihi ||
+                          formData.dosyaTarihi || "",
+                        solLogo: showLogoLeft ? formData.solLogo : null,
+                        sagLogo: showLogoRight ? formData.sagLogo : null,
+                      },
+                    })}
+                  </TemplateEditProvider>
+                </TemplateErrorBoundary>
+              )
+              : (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400 mt-32">
+                  <FileText className="w-12 h-12 mb-3 opacity-20" />
+                  <p className="font-medium">
+                    Şablon Yüklenemedi veya Seçilmedi
+                  </p>
                 </div>
               )}
-              <button
-                onClick={() => setSidebarOpen((prev) => !prev)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer mx-auto"
-                title={sidebarOpen ? "Paneli Daralt" : "Paneli Genişlet"}
-              >
-                {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              </button>
-            </div>
+          </div>
+        </div>
+      </div>
 
-            {sidebarOpen && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                {getTemplateEditableFields(documentId || "").length > 0 ? (
-                  getTemplateEditableFields(documentId || "").map((field: TemplateFieldConfig) => {
-                    const value = formData[field.key as keyof typeof formData] || "";
-                    return (
-                      <div key={field.key} className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between">
-                          <span>{field.label}</span>
-                          <span className="text-[9px] text-slate-400 font-normal">{`{{${field.key}}}`}</span>
-                        </label>
-                        {field.type === "textarea" ? (
-                          <textarea
-                            rows={3}
-                            value={String(value)}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                [field.key]: e.target.value,
-                              }))
-                            }
-                            placeholder={field.placeholder || `${field.label} giriniz...`}
-                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden text-slate-800 dark:text-slate-100 shadow-2xs resize-y"
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            value={String(value)}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                [field.key]: e.target.value,
-                              }))
-                            }
-                            placeholder={field.placeholder || `${field.label} giriniz...`}
-                            className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden text-slate-800 dark:text-slate-100 shadow-2xs"
-                          />
-                        )}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-center text-xs text-slate-400 py-8">
-                    Bu şablon için düzenlenebilir alan konfigürasyonu tanımlanmamıştır.
-                  </div>
-                )}
+      {/* Footer controls */}
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          {/* Options Dropdown (3-Dots Menu) */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setDownloadOpen((v) => !v)}
+              disabled={isPrinting}
+              title="Diğer Seçenekler"
+              className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-sm shadow-2xs cursor-pointer"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {downloadOpen && (
+              <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150 overflow-hidden">
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handleRefreshFromDb();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <span>Güncel Verileri Al</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handlePdf();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
+                >
+                  <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <span>PDF Olarak Kaydet</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handleOpenPdfInNewTab();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
+                >
+                  <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <span>Tarayıcıda Aç</span>
+                </button>
               </div>
             )}
           </div>
 
-          {/* Right panel: Live A4 PDF Layout Preview */}
-          <div
-            ref={previewContainerRef}
-            className="flex-1 bg-slate-200/50 dark:bg-slate-950 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar"
+          {/* Main Save & Print Buttons */}
+          <button
+            onClick={handleSaveToDb}
+            disabled={isSaving}
+            className={`px-5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm cursor-pointer shadow-sm ${
+              saveSuccess
+                ? "bg-emerald-600 text-white"
+                : "bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600"
+            }`}
           >
-            <div
-              className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out"
-              style={{
-                transform: `scale(${previewScale})`,
-                width: "800px",
-                minHeight: "1131px",
-              }}
-            >
-              {ActiveComponent
-                ? (
-                  <TemplateErrorBoundary
-                    fallback={
-                      <div className="p-8 text-center text-red-500 font-semibold bg-red-50 dark:bg-red-950/20 border border-red-250 dark:border-red-900 rounded-xl m-4">
-                        ⚠️ Belge şablonu çizilirken bir hata oluştu.
-                        Değişkenleri kontrol edip tekrar deneyiniz.
-                      </div>
-                    }
-                  >
-                    <TemplateEditProvider
-                      isEditing={true}
-                      onFieldChange={(key, val) =>
-                        setFormData((prev) => ({ ...prev, [key]: val }))
-                      }
-                    >
-                      {React.createElement(ActiveComponent, {
-                        data: {
-                          ...formData,
-                          tarih: formData.tarih || formData.onayaSunulanTarih || '',
-                          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || '',
-                          solLogo: showLogoLeft ? formData.solLogo : null,
-                          sagLogo: showLogoRight ? formData.sagLogo : null,
-                        },
-                      })}
-                    </TemplateEditProvider>
-                  </TemplateErrorBoundary>
-                )
-                : (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-400 mt-32">
-                    <FileText className="w-12 h-12 mb-3 opacity-20" />
-                    <p className="font-medium">
-                      Şablon Yüklenemedi veya Seçilmedi
-                    </p>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
+            <Save className="w-4 h-4" />
+            <span>
+              {saveSuccess
+                ? "Kaydedildi!"
+                : isSaving
+                ? "Kaydediliyor..."
+                : "Kaydet"}
+            </span>
+          </button>
 
-        {/* Footer controls */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                Belge Tarihi:
-              </label>
-              <input
-                type="text"
-                value={formData.tarih || formData.onayaSunulanTarih || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    tarih: e.target.value,
-                    onayaSunulanTarih: e.target.value,
-                  }))}
-                placeholder="GG.AA.YYYY"
-                className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
-              />
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                Onay Tarihi (OLUR):
-              </label>
-              <input
-                type="text"
-                value={formData.onayTarihi || formData.dosyaTarihi || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    onayTarihi: e.target.value,
-                    dosyaTarihi: e.target.value,
-                  }))}
-                placeholder="GG.AA.YYYY"
-                className="w-28 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            {/* Options Dropdown (3-Dots Menu) */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setDownloadOpen((v) => !v)}
-                disabled={isPrinting}
-                title="Diğer Seçenekler"
-                className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-sm shadow-2xs cursor-pointer"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-
-              {downloadOpen && (
-                <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150 overflow-hidden">
-                  <button
-                    onClick={async () => {
-                      setDownloadOpen(false);
-                      await handleRefreshFromDb();
-                    }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors"
-                  >
-                    <RefreshCw className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                    <span>Güncel Verileri Al</span>
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      setDownloadOpen(false);
-                      await handlePdf();
-                    }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                  >
-                    <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                    <span>PDF Olarak Kaydet</span>
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      setDownloadOpen(false);
-                      await handleOpenPdfInNewTab();
-                    }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                  >
-                    <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span>Tarayıcıda Aç</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Main Print Button */}
-            <button
-              onClick={handlePrint}
-              disabled={isPrinting}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 text-sm shadow-sm shadow-blue-600/20 cursor-pointer"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Yazdır</span>
-            </button>
-          </div>
+          <button
+            onClick={handlePrint}
+            disabled={isPrinting}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 text-sm shadow-sm shadow-blue-600/20 cursor-pointer"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Yazdır</span>
+          </button>
         </div>
       </div>
     </div>
   );
+
+  if (isModal) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
+        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      >
+        {mainContent}
+      </div>
+    );
+  }
+
+  return mainContent;
 }
 
 export default DocumentPreviewModalV2;

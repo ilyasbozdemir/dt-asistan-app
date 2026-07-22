@@ -65,6 +65,8 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
           isOpen={previewModalOpen}
           documentId={previewData.dosyaAdi ? previewData.dosyaAdi.replace('.html', '') : ''}
           onClose={() => setPreviewModalOpen(false)}
+          isModal={false}
+          backLabel="İşlemlere Dön"
         />
       )
     }
