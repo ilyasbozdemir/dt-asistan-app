@@ -165,7 +165,7 @@ export function PiyasaFiyatArastirmasiDashboard({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Header Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+      <div className="relative z-40 flex flex-wrap items-center justify-between gap-4 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
         {/* Left side: View switch tabs */}
         <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/40 w-fit shrink-0">
           <button
@@ -285,33 +285,18 @@ export function PiyasaFiyatArastirmasiDashboard({
               )}
 
               <MalzemeTabloPopover
+                step={2}
+                onIstekliFirmaSettings={() => {
+                  setIsFormOpen(true);
+                  setActiveFormTab("firms");
+                }}
                 disableDocumentGuidance={disableDocumentGuidance}
-                onIhtiyacListesi={() =>
-                  handleOpenSablonByDosyaAdi("ihtiyac-listesi")}
-                onIhtiyacTalepFormu={() =>
-                  handleOpenSablonByDosyaAdi("ihtiyac-talep-formu")}
-                onLuzumMuzekkeresi={() =>
-                  handleOpenSablonByDosyaAdi("luzum-muzekkeresi")}
-                onLuzumMuzekkeresiOnayEki={() =>
-                  handleOpenSablonByDosyaAdi("luzum-muzekkeresi-onay-eki")}
-                onLuzumMuzekkeresiTeslimTesellum={() =>
-                  handleOpenSablonByDosyaAdi(
-                    "luzum-muzekkeresi-teslim-tesellum",
-                  )}
-                onHarcamaTalimati={() =>
-                  handleOpenSablonByDosyaAdi("harcama-talimati")}
-                onHarcamaPusulasi={() =>
-                  handleOpenSablonByDosyaAdi("harcama-pusulasi")}
                 onGorevlendirmeOnayi={() =>
                   handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
                 onGorevlendirmeOnayEki={() =>
-                  handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
-                onYaklasikMaliyetKomisyonu={() =>
                   handleOpenSablonByDosyaAdi(
-                    "yaklasik-maliyet-tespit-komisyonu",
+                    "komisyon-gorevlendirme-onayi-eki",
                   )}
-                onMuayeneKabulKomisyonu={() =>
-                  handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
                 onFiyatArastirmaKomisyonu={() =>
                   handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
                 onPiyasaArastirmaGorevlendirmesi={() =>

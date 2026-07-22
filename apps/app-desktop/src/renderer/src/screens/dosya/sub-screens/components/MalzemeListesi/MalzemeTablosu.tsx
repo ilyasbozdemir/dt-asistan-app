@@ -590,7 +590,7 @@ export function MalzemeTablosu({
             İhtiyaç Kalemi Ekle
           </button>
 
-          {disableDocumentGuidance && combinedSablons.length > 0 &&
+          {!disableDocumentGuidance && combinedSablons.length > 0 &&
             onSablonClick && (
             <>
               <PrintDropdownButtonV2
@@ -613,6 +613,7 @@ export function MalzemeTablosu({
           )}
 
           <MalzemeTabloPopover
+            step={1}
             onSelectAll={handleToggleSelectAll}
             onDeleteSelected={handleDeleteSelected}
             onExcelImport={handleExcelImport}
@@ -640,32 +641,8 @@ export function MalzemeTablosu({
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
             onYaklasikMaliyetKomisyonu={() =>
               handleOpenSablonByDosyaAdi("yaklasik-maliyet-tespit-komisyonu")}
-            onMuayeneKabulKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
-            onFiyatArastirmaKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
-            onPiyasaArastirmaGorevlendirmesi={() =>
-              handleOpenSablonByDosyaAdi(
-                "piyasa-fiyat-arastirma-gorevlendirmesi",
-              )}
-            onPiyasaArastirmaTutanagi={() =>
-              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
-            onYaklasikMaliyetHesapCetveli={() =>
-              handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
             onSonAlimCetveli={() =>
               handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
-            onPiyasaSonucCetveli={() =>
-              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirmasi-sonuc-cetveli")}
-            onTeklifIstemeMektubu={() =>
-              handleOpenSablonByDosyaAdi("teklif-isteme-mektubu")}
-            onTeklifMektubuDagitim={() =>
-              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim")}
-            onTeklifMektubuKarma={() =>
-              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim-karma")}
-            onFirmalarTeklifCetveli={() =>
-              handleOpenSablonByDosyaAdi("firmalar-teklif-cetveli")}
-            onYasaklilikSorgulama={() =>
-              handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
             onOnayBelgesi={() =>
               handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
           />

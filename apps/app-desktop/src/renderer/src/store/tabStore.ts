@@ -148,8 +148,7 @@ export const useTabStore = create<TabState>((set, get) => ({
 
       if (existingDosyaIndex > -1) {
         const updatedTabs = [...tabs]
-        // Keep the existing label to prevent the tab name from changing dynamically in Stepper Mode
-        const label = tabs[existingDosyaIndex].label
+        const label = getTabLabel(path)
         updatedTabs[existingDosyaIndex] = { path, label }
         set({ tabs: updatedTabs, activeTabPath: path })
         return
