@@ -561,8 +561,24 @@ export function MalzemeTablosu({
               handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
             onSonAlimCetveli={() =>
               handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
+            onPiyasaSonucCetveli={() =>
+              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirmasi-sonuc-cetveli")}
+            onTeklifIstemeMektubu={() =>
+              handleOpenSablonByDosyaAdi("teklif-isteme-mektubu")}
+            onTeklifMektubuDagitim={() =>
+              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim")}
+            onTeklifMektubuKarma={() =>
+              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim-karma")}
+            onFirmalarTeklifCetveli={() =>
+              handleOpenSablonByDosyaAdi("firmalar-teklif-cetveli")}
+            onYasaklilikSorgulama={() =>
+              handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
             onOnayBelgesi={() =>
               handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
+            onHarcamaTalimati={() =>
+              handleOpenSablonByDosyaAdi("harcama-talimati")}
+            onLuzumMuzekkeresi={() =>
+              handleOpenSablonByDosyaAdi("luzum-muzekkeresi")}
           />
         </div>
       </div>

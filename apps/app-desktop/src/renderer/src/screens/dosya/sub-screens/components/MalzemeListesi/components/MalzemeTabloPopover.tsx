@@ -1,12 +1,19 @@
+import React from "react";
 import {
   BookOpen,
+  Building2,
   Calculator,
   Check,
   ChevronDown,
   ClipboardList,
   Download,
   FileCheck,
+  FileSignature,
+  FileSpreadsheet,
   FileText,
+  Layers,
+  Send,
+  ShieldAlert,
   Trash2,
   UserCheck,
   Users,
@@ -28,6 +35,7 @@ export interface MalzemeTabloPopoverProps {
   onDeleteSelected?: () => void;
   onExcelImport?: () => void;
   onKomisyonSettings?: () => void;
+  onIstekliFirmaSettings?: () => void;
   onDownloadTemplate?: () => void;
   onExportToLibrary?: () => void;
   // Komisyon İşlemleri
@@ -41,8 +49,17 @@ export interface MalzemeTabloPopoverProps {
   onPiyasaArastirmaTutanagi?: () => void;
   onYaklasikMaliyetHesapCetveli?: () => void;
   onSonAlimCetveli?: () => void;
+  onPiyasaSonucCetveli?: () => void;
+  // İstekli Firmalar & Teklif Belgeleri
+  onTeklifIstemeMektubu?: () => void;
+  onTeklifMektubuDagitim?: () => void;
+  onTeklifMektubuKarma?: () => void;
+  onFirmalarTeklifCetveli?: () => void;
+  onYasaklilikSorgulama?: () => void;
   // Onay İşlemleri
   onOnayBelgesi?: () => void;
+  onHarcamaTalimati?: () => void;
+  onLuzumMuzekkeresi?: () => void;
   disableDocumentGuidance?: boolean;
 }
 
@@ -51,6 +68,7 @@ export function MalzemeTabloPopover({
   onDeleteSelected,
   onExcelImport,
   onKomisyonSettings,
+  onIstekliFirmaSettings,
   onDownloadTemplate,
   onExportToLibrary,
   onGorevlendirmeOnayi,
@@ -62,7 +80,15 @@ export function MalzemeTabloPopover({
   onPiyasaArastirmaTutanagi,
   onYaklasikMaliyetHesapCetveli,
   onSonAlimCetveli,
+  onPiyasaSonucCetveli,
+  onTeklifIstemeMektubu,
+  onTeklifMektubuDagitim,
+  onTeklifMektubuKarma,
+  onFirmalarTeklifCetveli,
+  onYasaklilikSorgulama,
   onOnayBelgesi,
+  onHarcamaTalimati,
+  onLuzumMuzekkeresi,
   disableDocumentGuidance,
 }: MalzemeTabloPopoverProps): React.JSX.Element {
   return (
@@ -78,7 +104,7 @@ export function MalzemeTabloPopover({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent className="w-64" align="end">
         <DropdownMenuLabel className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 py-1">
           Tablo İşlemleri
         </DropdownMenuLabel>
@@ -123,8 +149,15 @@ export function MalzemeTabloPopover({
 
         {onKomisyonSettings && (
           <DropdownMenuItem onClick={onKomisyonSettings}>
-            <Users className="w-3.5 h-3.5 text-slate-455 mr-2" />
+            <Users className="w-3.5 h-3.5 text-blue-500 mr-2" />
             Komisyon Ayarları
+          </DropdownMenuItem>
+        )}
+
+        {onIstekliFirmaSettings && (
+          <DropdownMenuItem onClick={onIstekliFirmaSettings}>
+            <Building2 className="w-3.5 h-3.5 text-purple-500 mr-2" />
+            İstekli Firma Ayarları
           </DropdownMenuItem>
         )}
 
@@ -133,7 +166,7 @@ export function MalzemeTabloPopover({
             <DropdownMenuSeparator />
 
             <DropdownMenuLabel className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 py-1">
-              Yazdırma İşlemleri
+              Yazdırma & Şablon Belgeleri
             </DropdownMenuLabel>
 
             {/* KOMİSYON BELGELERİ ALT MENÜSÜ */}
@@ -142,7 +175,7 @@ export function MalzemeTabloPopover({
                 <Users className="w-3.5 h-3.5 text-blue-500 mr-2" />
                 Komisyon Belgeleri
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-60">
+              <DropdownMenuSubContent className="w-64">
                 <DropdownMenuItem
                   onClick={onGorevlendirmeOnayi ||
                     (() => console.log("Görevlendirme Onayı tıklandı"))}
@@ -200,7 +233,7 @@ export function MalzemeTabloPopover({
                 <ClipboardList className="w-3.5 h-3.5 text-indigo-500 mr-2" />
                 Fiyat Araştırma Belgeleri
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-60">
+              <DropdownMenuSubContent className="w-64">
                 <DropdownMenuItem
                   onClick={onPiyasaArastirmaGorevlendirmesi ||
                     (() =>
@@ -234,6 +267,62 @@ export function MalzemeTabloPopover({
                   <Calculator className="w-3.5 h-3.5 text-emerald-500 mr-2" />
                   Son Alım Cetveli
                 </DropdownMenuItem>
+
+                {onPiyasaSonucCetveli && (
+                  <DropdownMenuItem onClick={onPiyasaSonucCetveli}>
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-500 mr-2" />
+                    Piyasa Arş. Sonuç Cetveli
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            {/* İSTEKLİ FİRMALAR & TEKLİF BELGELERİ ALT MENÜSÜ */}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Building2 className="w-3.5 h-3.5 text-purple-500 mr-2" />
+                İstekli Firmalar & Teklifler
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-64">
+                <DropdownMenuItem
+                  onClick={onTeklifIstemeMektubu ||
+                    (() => console.log("Teklif İsteme Mektubu tıklandı"))}
+                >
+                  <Send className="w-3.5 h-3.5 text-purple-500 mr-2" />
+                  Teklif İsteme Mektubu / Fiyat Formu
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onTeklifMektubuDagitim ||
+                    (() => console.log("Teklif Mektubu Dağıtım tıklandı"))}
+                >
+                  <FileSignature className="w-3.5 h-3.5 text-violet-500 mr-2" />
+                  Teklif Mektubu (Dağıtım)
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onTeklifMektubuKarma ||
+                    (() => console.log("Teklif Mektubu Dağıtım Karma tıklandı"))}
+                >
+                  <Layers className="w-3.5 h-3.5 text-fuchsia-500 mr-2" />
+                  Teklif Mektubu (Dağıtım Karma)
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onFirmalarTeklifCetveli ||
+                    (() => console.log("Firmalara Teklif Cetveli tıklandı"))}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-500 mr-2" />
+                  Firmalara Teklif Cetveli
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onYasaklilikSorgulama ||
+                    (() => console.log("EKAP Yasaklılık Sorgulama tıklandı"))}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-500 mr-2" />
+                  EKAP Yasaklılık Sorgulama
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
 
@@ -243,14 +332,28 @@ export function MalzemeTabloPopover({
                 <FileCheck className="w-3.5 h-3.5 text-amber-500 mr-2" />
                 Onay Belgeleri
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-60">
+              <DropdownMenuSubContent className="w-64">
                 <DropdownMenuItem
                   onClick={onOnayBelgesi ||
                     (() => console.log("Onay Belgesi tıklandı"))}
                 >
                   <FileCheck className="w-3.5 h-3.5 text-amber-500 mr-2" />
-                  Onay Belgesi
+                  Doğrudan Temin Onay Belgesi
                 </DropdownMenuItem>
+
+                {onHarcamaTalimati && (
+                  <DropdownMenuItem onClick={onHarcamaTalimati}>
+                    <FileText className="w-3.5 h-3.5 text-amber-600 mr-2" />
+                    Harcama Talimatı
+                  </DropdownMenuItem>
+                )}
+
+                {onLuzumMuzekkeresi && (
+                  <DropdownMenuItem onClick={onLuzumMuzekkeresi}>
+                    <FileText className="w-3.5 h-3.5 text-amber-700 mr-2" />
+                    Lüzum Müzekkeresi
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </>
