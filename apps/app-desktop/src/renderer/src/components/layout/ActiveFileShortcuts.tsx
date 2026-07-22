@@ -10,7 +10,8 @@ import {
   LayoutTemplate,
   PackageSearch,
   UserCheck,
-  Users
+  Users,
+  Warehouse
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -69,6 +70,12 @@ export function ActiveFileShortcuts(): React.JSX.Element {
       path: '/komisyonlar',
       icon: UserCheck,
       color: 'hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
+    },
+    {
+      name: 'Ambar Yönetimi',
+      path: '/ambar',
+      icon: Warehouse,
+      color: 'hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/20'
     }
   ]
 

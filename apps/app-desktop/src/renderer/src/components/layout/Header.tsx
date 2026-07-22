@@ -176,6 +176,10 @@ export function Header(): React.JSX.Element {
           label: 'Görev Tanımları',
           onClick: () => navigate({ to: '/komisyon-gorevleri' as any })
         },
+        {
+          label: 'Ambar Yönetimi',
+          onClick: () => navigate({ to: '/ambar' as any })
+        },
         { divider: true },
         {
           label: 'İstekli Firma Yönetimi',
