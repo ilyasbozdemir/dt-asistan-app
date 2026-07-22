@@ -118,7 +118,13 @@ export function DocumentPreviewModalV2({
     if (!activeDosyaId || !documentId) return;
     setIsSaving(true);
     try {
-      const jsonStr = JSON.stringify(formData);
+      const dataToSave = {
+        ...formData,
+        showLogoLeft: localShowLogoLeft,
+        showLogoRight: localShowLogoRight,
+        olurYazisi: formData.olurYazisi !== false,
+      };
+      const jsonStr = JSON.stringify(dataToSave);
       const sablonRes = await window.electron.ipcRenderer.invoke(
         "db:query",
         "SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1",
@@ -231,6 +237,15 @@ export function DocumentPreviewModalV2({
                 finalData[key] = val;
               }
             }
+            if (savedData.showLogoLeft !== undefined) {
+              setLocalShowLogoLeft(Boolean(savedData.showLogoLeft));
+            }
+            if (savedData.showLogoRight !== undefined) {
+              setLocalShowLogoRight(Boolean(savedData.showLogoRight));
+            }
+            if (savedData.olurYazisi !== undefined) {
+              finalData.olurYazisi = savedData.olurYazisi;
+            }
           } catch (e) {
             console.error("Failed to parse saved snapshot JSON", e);
           }
@@ -324,8 +339,9 @@ export function DocumentPreviewModalV2({
           ...formData,
           tarih: formData.tarih || formData.onayaSunulanTarih || "",
           onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
-          solLogo: showLogoLeft ? formData.solLogo : null,
-          sagLogo: showLogoRight ? formData.sagLogo : null,
+          solLogo: localShowLogoLeft ? formData.solLogo : null,
+          sagLogo: localShowLogoRight ? formData.sagLogo : null,
+          olurYazisi: formData.olurYazisi !== false,
         },
       }),
     );
@@ -648,8 +664,9 @@ export function DocumentPreviewModalV2({
                           "",
                         onayTarihi: formData.onayTarihi ||
                           formData.dosyaTarihi || "",
-                        solLogo: showLogoLeft ? formData.solLogo : null,
-                        sagLogo: showLogoRight ? formData.sagLogo : null,
+                        solLogo: localShowLogoLeft ? formData.solLogo : null,
+                        sagLogo: localShowLogoRight ? formData.sagLogo : null,
+                        olurYazisi: formData.olurYazisi !== false,
                       },
                     })}
                   </TemplateEditProvider>

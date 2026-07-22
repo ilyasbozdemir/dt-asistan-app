@@ -162,7 +162,7 @@ export function LuzumMuzekkeresi({
               striped={false}
             />
 
-            {isLastPage && data.olurYazisi && (
+            {isLastPage && data.olurYazisi !== false && (
               <div style={{ marginTop: "auto" }}>
                 <ApprovalSignature
                   title={data.olurBaslik || "OLUR"}
