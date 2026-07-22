@@ -26,10 +26,11 @@ export const PreviewHeader: React.FC<PreviewHeaderProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-600 dark:text-slate-400 mr-1"
-            title={`Daha önceden açılan ${title} dosyasını aç`}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-700 shadow-2xs mr-1"
+            title="İşlemler ve İhtiyaç Listesi Ekranına Dön"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
+            <span>İşlemlere Dön</span>
           </button>
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
             <FileText className="w-5 h-5" />

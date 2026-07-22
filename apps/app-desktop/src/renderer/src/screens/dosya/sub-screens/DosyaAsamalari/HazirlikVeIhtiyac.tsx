@@ -40,64 +40,6 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
 
   const state = useMalzemeListesi(activeDosyaId);
 
-  if (previewData && previewModalOpen) {
-    const isStarred = previewData?.title
-      ? activeStarredDocs.some(
-        (d) =>
-          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
-      )
-      : false;
-
-    const isV2 = previewData?.dosyaAdi &&
-      [
-        "ihtiyac-listesi",
-        "harcama-talimati",
-        "luzum-muzekkeresi",
-        "luzum-muzekkeresi-onay-eki",
-        "luzum-muzekkeresi-teslim-tesellum",
-        "komisyon-gorevlendirme-onayi",
-        "komisyon-gorevlendirme-onayi-eki",
-      ].includes(previewData.dosyaAdi.replace(".html", ""));
-
-    if (isV2) {
-      return (
-        <DocumentPreviewModalV2
-          isOpen={previewModalOpen}
-          documentId={previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace(".html", "")
-            : ""}
-          onClose={() => setPreviewModalOpen(false)}
-          isModal={false}
-        />
-      );
-    }
-
-    return (
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => setPreviewModalOpen(false)}
-        title={previewData.title}
-        templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ""}
-        baseContext={previewData.snapshotContext ||
-          contextsByPath[previewData.processPath] || dosyaContext}
-        placeholders={placeholders}
-        personelListesi={personelListesi}
-        onPrint={executePrint}
-        onExportPdf={executeExportPdf}
-        onExportDocx={executeExportDocx}
-        onExportUdf={executeExportUdf}
-        isStarred={isStarred}
-        onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
-        isInline={true}
-        templateTestVerisi={previewData.templateTestVerisi}
-        dosyaAdi={previewData.dosyaAdi || undefined}
-        onRefreshSnapshot={refreshSnapshot}
-        onSaveSnapshot={saveSnapshot}
-      />
-    );
-  }
-
   const stageSablons = sablons
     .filter(
       (s) =>
@@ -118,6 +60,26 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         s.dosya_adi === "dagitim-cizelgesi-karma.html",
     )
     .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
+
+  const isStarred = previewData?.title
+    ? activeStarredDocs.some(
+      (d) =>
+        normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
+    )
+    : false;
+
+  const isV2 = previewData?.dosyaAdi &&
+    [
+      "ihtiyac-listesi",
+      "ihtiyac-talep-formu",
+      "harcama-talimati",
+      "harcama-pusulasi",
+      "luzum-muzekkeresi",
+      "luzum-muzekkeresi-onay-eki",
+      "luzum-muzekkeresi-teslim-tesellum",
+      "komisyon-gorevlendirme-onayi",
+      "komisyon-gorevlendirme-onayi-eki",
+    ].includes(previewData.dosyaAdi.replace(".html", ""));
 
   return (
     <SubScreen
@@ -142,6 +104,45 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         activeDosya={activeDosya}
         activeDosyaId={activeDosyaId}
       />
+
+      {previewData && previewModalOpen && (
+        isV2
+          ? (
+            <DocumentPreviewModalV2
+              isOpen={previewModalOpen}
+              documentId={previewData.dosyaAdi
+                ? previewData.dosyaAdi.replace(".html", "")
+                : ""}
+              onClose={() => setPreviewModalOpen(false)}
+              isModal={true}
+            />
+          )
+          : (
+            <DocumentPreviewModal
+              isOpen={previewModalOpen}
+              onClose={() => setPreviewModalOpen(false)}
+              title={previewData.title}
+              templateHtml={previewData.templateHtml}
+              masterHtml={masterHtml || ""}
+              baseContext={previewData.snapshotContext ||
+                contextsByPath[previewData.processPath] || dosyaContext}
+              placeholders={placeholders}
+              personelListesi={personelListesi}
+              onPrint={executePrint}
+              onExportPdf={executeExportPdf}
+              onExportDocx={executeExportDocx}
+              onExportUdf={executeExportUdf}
+              isStarred={isStarred}
+              onToggleStar={() =>
+                previewData?.title && toggleStar(previewData.title)}
+              isInline={false}
+              templateTestVerisi={previewData.templateTestVerisi}
+              dosyaAdi={previewData.dosyaAdi || undefined}
+              onRefreshSnapshot={refreshSnapshot}
+              onSaveSnapshot={saveSnapshot}
+            />
+          )
+      )}
     </SubScreen>
   );
 }

@@ -511,6 +511,16 @@ export function DocumentPreviewModalV2({
       <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4 shrink-0 select-none">
         {/* Left: Back Button & Title */}
         <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-700 shrink-0"
+            title="İşlemler ve İhtiyaç Listesi Ekranına Dön"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
+            <span>İşlemlere Dön</span>
+          </button>
+
           <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
             <FileText className="w-4 h-4" />
           </div>
@@ -694,8 +704,10 @@ export function DocumentPreviewModalV2({
       <div className="flex-1 flex overflow-hidden min-h-0 relative">
         {/* Left panel: Document Settings */}
         <div
-          className={`bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 flex flex-col shrink-0 h-full overflow-hidden ${
-            sidebarOpen ? "w-72" : "w-0 opacity-0 pointer-events-none"
+          className={`bg-slate-50 dark:bg-slate-900/50 transition-all duration-200 flex flex-col shrink-0 h-full overflow-hidden ${
+            sidebarOpen
+              ? "w-72 border-r border-slate-200 dark:border-slate-800 opacity-100"
+              : "w-0 border-0 opacity-0 pointer-events-none hidden"
           }`}
         >
           {/* Sidebar Header */}

@@ -14,6 +14,7 @@ import { cn } from "../../../../../utils/cn";
 import { MalzemeTabloPopover } from "./components/MalzemeTabloPopover";
 import { useSettingsStore } from "../../../../../store/settingsStore";
 import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
+import { normalizeForMatch } from "../../DosyaAsamalari/useDosyaAsamasiSablonsV2";
 
 export function MalzemeTablosu({
   state,
@@ -469,18 +470,96 @@ export function MalzemeTablosu({
     return baseSablons;
   }, [stageSablons, komisyonSablons]);
 
-  const handleOpenSablonByDosyaAdi = (dosyaAdi: string) => {
-    if (!onSablonClick) return;
-    let sablon = sablons?.find((s: any) => s.dosya_adi === dosyaAdi);
-    if (!sablon) {
-      sablon = sablons?.find((s: any) =>
-        s.dosya_adi.toLowerCase().includes(dosyaAdi.toLowerCase())
-      );
+  const handleOpenSablonByDosyaAdi = (targetKey: string) => {
+    if (!onSablonClick || !sablons || sablons.length === 0) return;
+
+    const ALIAS_MAP: Record<string, string[]> = {
+      "teklif-isteme-mektubu": [
+        "fiyat-arastirma-mektubu",
+        "arastirma-mektubu",
+        "birim-fiyat-teklif-mektubu",
+        "teklif-isteme-mektubu",
+      ],
+      "teklif-mektubu-dagitim": [
+        "dagitim-cizelgesi",
+        "teklif-mektubu-dagitim-cizelgesi",
+        "teklif-mektubu-dagitim",
+      ],
+      "teklif-mektubu-dagitim-karma": [
+        "dagitim-cizelgesi-karma",
+        "teklif-mektubu-dagitim-karma",
+        "teklif-mektubu-karma",
+      ],
+      "firmalar-teklif-cetveli": [
+        "birim-fiyat-teklif-cetveli",
+        "firmalar-teklif-cetveli",
+        "piyasa-fiyat-arastirmasi-sonuc-cetveli",
+      ],
+      "yasaklilik-sorgulama-tutanagi": [
+        "yasaklilik-sorgulama-tutanagi",
+        "yasaklilik-sorgulama",
+        "ekap-yasaklilik",
+      ],
+      "piyasa-fiyat-arastirma-gorevlendirmesi": [
+        "piyasa-fiyat-arastirma-gorevlendirmesi",
+        "gorevlendirme-yazisi",
+      ],
+      "piyasa-fiyat-arastirma-tutanagi": [
+        "piyasa-fiyat-arastirma-tutanagi",
+        "fiyat-arastirmasi-tutanagi",
+      ],
+      "yaklasik-maliyet-cetveli": [
+        "yaklasik-maliyet-cetveli",
+        "yaklasik-maliyet-hesap-cetveli",
+      ],
+      "dogrudan-temin-onay-belgesi": [
+        "dogrudan-temin-onay-belgesi",
+        "idare-onay-belgesi",
+        "onay-belgesi",
+      ],
+    };
+
+    const cleanTarget = targetKey.replace(/\.html$/, "").toLowerCase().trim();
+    const candidateKeys = ALIAS_MAP[cleanTarget] || [cleanTarget];
+
+    let foundSablon: any = null;
+
+    // 1. Exact match on dosya_adi (with or without .html)
+    for (const key of candidateKeys) {
+      foundSablon = sablons.find((s: any) => {
+        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "").toLowerCase().trim();
+        return fileBase === key;
+      });
+      if (foundSablon) break;
     }
-    if (sablon) {
-      onSablonClick(sablon, sablon.ad);
+
+    // 2. Exact match on route_path or id
+    if (!foundSablon) {
+      for (const key of candidateKeys) {
+        foundSablon = sablons.find((s: any) => {
+          const route = (s.route_path || s.id || "").toLowerCase().trim();
+          return route === key;
+        });
+        if (foundSablon) break;
+      }
+    }
+
+    // 3. Fallback: Normalized title exact match to prevent cross-contamination
+    if (!foundSablon) {
+      for (const key of candidateKeys) {
+        const normKey = normalizeForMatch(key);
+        foundSablon = sablons.find((s: any) => {
+          const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
+          return normSablonName === normKey;
+        });
+        if (foundSablon) break;
+      }
+    }
+
+    if (foundSablon) {
+      onSablonClick(foundSablon, foundSablon.ad);
     } else {
-      console.warn("Şablon bulunamadı:", dosyaAdi);
+      console.warn("Şablon bulunamadı:", targetKey);
     }
   };
 
@@ -541,6 +620,20 @@ export function MalzemeTablosu({
             onExportToLibrary={handleExportToLibrary}
             onKomisyonSettings={() => setKomisyonPanelOpen(true)}
             disableDocumentGuidance={disableDocumentGuidance}
+            onIhtiyacListesi={() =>
+              handleOpenSablonByDosyaAdi("ihtiyac-listesi")}
+            onIhtiyacTalepFormu={() =>
+              handleOpenSablonByDosyaAdi("ihtiyac-talep-formu")}
+            onLuzumMuzekkeresi={() =>
+              handleOpenSablonByDosyaAdi("luzum-muzekkeresi")}
+            onLuzumMuzekkeresiOnayEki={() =>
+              handleOpenSablonByDosyaAdi("luzum-muzekkeresi-onay-eki")}
+            onLuzumMuzekkeresiTeslimTesellum={() =>
+              handleOpenSablonByDosyaAdi("luzum-muzekkeresi-teslim-tesellum")}
+            onHarcamaTalimati={() =>
+              handleOpenSablonByDosyaAdi("harcama-talimati")}
+            onHarcamaPusulasi={() =>
+              handleOpenSablonByDosyaAdi("harcama-pusulasi")}
             onGorevlendirmeOnayi={() =>
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
             onGorevlendirmeOnayEki={() =>
@@ -575,10 +668,6 @@ export function MalzemeTablosu({
               handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
             onOnayBelgesi={() =>
               handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
-            onHarcamaTalimati={() =>
-              handleOpenSablonByDosyaAdi("harcama-talimati")}
-            onLuzumMuzekkeresi={() =>
-              handleOpenSablonByDosyaAdi("luzum-muzekkeresi")}
           />
         </div>
       </div>

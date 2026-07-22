@@ -11,6 +11,7 @@ import {
   FileSignature,
   FileSpreadsheet,
   FileText,
+  FolderPlus,
   Layers,
   Send,
   ShieldAlert,
@@ -38,6 +39,14 @@ export interface MalzemeTabloPopoverProps {
   onIstekliFirmaSettings?: () => void;
   onDownloadTemplate?: () => void;
   onExportToLibrary?: () => void;
+  // Talep & Başlangıç Belgeleri
+  onIhtiyacListesi?: () => void;
+  onIhtiyacTalepFormu?: () => void;
+  onLuzumMuzekkeresi?: () => void;
+  onLuzumMuzekkeresiOnayEki?: () => void;
+  onLuzumMuzekkeresiTeslimTesellum?: () => void;
+  onHarcamaTalimati?: () => void;
+  onHarcamaPusulasi?: () => void;
   // Komisyon İşlemleri
   onGorevlendirmeOnayi?: () => void;
   onGorevlendirmeOnayEki?: () => void;
@@ -58,8 +67,6 @@ export interface MalzemeTabloPopoverProps {
   onYasaklilikSorgulama?: () => void;
   // Onay İşlemleri
   onOnayBelgesi?: () => void;
-  onHarcamaTalimati?: () => void;
-  onLuzumMuzekkeresi?: () => void;
   disableDocumentGuidance?: boolean;
 }
 
@@ -71,6 +78,13 @@ export function MalzemeTabloPopover({
   onIstekliFirmaSettings,
   onDownloadTemplate,
   onExportToLibrary,
+  onIhtiyacListesi,
+  onIhtiyacTalepFormu,
+  onLuzumMuzekkeresi,
+  onLuzumMuzekkeresiOnayEki,
+  onLuzumMuzekkeresiTeslimTesellum,
+  onHarcamaTalimati,
+  onHarcamaPusulasi,
   onGorevlendirmeOnayi,
   onGorevlendirmeOnayEki,
   onYaklasikMaliyetKomisyonu,
@@ -87,8 +101,6 @@ export function MalzemeTabloPopover({
   onFirmalarTeklifCetveli,
   onYasaklilikSorgulama,
   onOnayBelgesi,
-  onHarcamaTalimati,
-  onLuzumMuzekkeresi,
   disableDocumentGuidance,
 }: MalzemeTabloPopoverProps): React.JSX.Element {
   return (
@@ -168,6 +180,64 @@ export function MalzemeTabloPopover({
             <DropdownMenuLabel className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 py-1">
               Yazdırma & Şablon Belgeleri
             </DropdownMenuLabel>
+
+            {/* TALEP & BAŞLANGIÇ BELGELERİ ALT MENÜSÜ */}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FolderPlus className="w-3.5 h-3.5 text-teal-500 mr-2" />
+                Talep & Başlangıç Belgeleri
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-64">
+                {onIhtiyacListesi && (
+                  <DropdownMenuItem onClick={onIhtiyacListesi}>
+                    <FileText className="w-3.5 h-3.5 text-teal-500 mr-2" />
+                    İhtiyaç Listesi
+                  </DropdownMenuItem>
+                )}
+
+                {onIhtiyacTalepFormu && (
+                  <DropdownMenuItem onClick={onIhtiyacTalepFormu}>
+                    <FileText className="w-3.5 h-3.5 text-teal-500 mr-2" />
+                    İhtiyaç Talep Formu
+                  </DropdownMenuItem>
+                )}
+
+                {onLuzumMuzekkeresi && (
+                  <DropdownMenuItem onClick={onLuzumMuzekkeresi}>
+                    <FileText className="w-3.5 h-3.5 text-teal-600 mr-2" />
+                    Lüzum Müzekkeresi
+                  </DropdownMenuItem>
+                )}
+
+                {onLuzumMuzekkeresiOnayEki && (
+                  <DropdownMenuItem onClick={onLuzumMuzekkeresiOnayEki}>
+                    <FileText className="w-3.5 h-3.5 text-teal-600 mr-2" />
+                    Lüzum Müzekkeresi Onay Eki
+                  </DropdownMenuItem>
+                )}
+
+                {onLuzumMuzekkeresiTeslimTesellum && (
+                  <DropdownMenuItem onClick={onLuzumMuzekkeresiTeslimTesellum}>
+                    <FileText className="w-3.5 h-3.5 text-teal-600 mr-2" />
+                    Lüzum Müz. Teslim Tesellüm
+                  </DropdownMenuItem>
+                )}
+
+                {onHarcamaTalimati && (
+                  <DropdownMenuItem onClick={onHarcamaTalimati}>
+                    <FileText className="w-3.5 h-3.5 text-teal-700 mr-2" />
+                    Harcama Talimatı
+                  </DropdownMenuItem>
+                )}
+
+                {onHarcamaPusulasi && (
+                  <DropdownMenuItem onClick={onHarcamaPusulasi}>
+                    <FileText className="w-3.5 h-3.5 text-teal-700 mr-2" />
+                    Harcama Pusulası
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
 
             {/* KOMİSYON BELGELERİ ALT MENÜSÜ */}
             <DropdownMenuSub>
@@ -271,7 +341,7 @@ export function MalzemeTabloPopover({
                 {onPiyasaSonucCetveli && (
                   <DropdownMenuItem onClick={onPiyasaSonucCetveli}>
                     <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-500 mr-2" />
-                    Piyasa Arş. Sonuç Cetveli
+                    Piyasa Arş. Sonuc Cetveli
                   </DropdownMenuItem>
                 )}
               </DropdownMenuSubContent>
@@ -302,7 +372,8 @@ export function MalzemeTabloPopover({
 
                 <DropdownMenuItem
                   onClick={onTeklifMektubuKarma ||
-                    (() => console.log("Teklif Mektubu Dağıtım Karma tıklandı"))}
+                    (() =>
+                      console.log("Teklif Mektubu Dağıtım Karma tıklandı"))}
                 >
                   <Layers className="w-3.5 h-3.5 text-fuchsia-500 mr-2" />
                   Teklif Mektubu (Dağıtım Karma)
@@ -340,20 +411,6 @@ export function MalzemeTabloPopover({
                   <FileCheck className="w-3.5 h-3.5 text-amber-500 mr-2" />
                   Doğrudan Temin Onay Belgesi
                 </DropdownMenuItem>
-
-                {onHarcamaTalimati && (
-                  <DropdownMenuItem onClick={onHarcamaTalimati}>
-                    <FileText className="w-3.5 h-3.5 text-amber-600 mr-2" />
-                    Harcama Talimatı
-                  </DropdownMenuItem>
-                )}
-
-                {onLuzumMuzekkeresi && (
-                  <DropdownMenuItem onClick={onLuzumMuzekkeresi}>
-                    <FileText className="w-3.5 h-3.5 text-amber-700 mr-2" />
-                    Lüzum Müzekkeresi
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </>
