@@ -120,7 +120,6 @@ export function MalzemeTabloPopover({
         <DropdownMenuLabel className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 py-1">
           Tablo İşlemleri
         </DropdownMenuLabel>
-
         <DropdownMenuItem
           onClick={onSelectAll || (() => console.log("Tümünü Seç tıklandı"))}
         >
@@ -393,23 +392,6 @@ export function MalzemeTabloPopover({
                 >
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-500 mr-2" />
                   EKAP Yasaklılık Sorgulama
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-
-            {/* ONAY BELGELERİ ALT MENÜSÜ */}
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <FileCheck className="w-3.5 h-3.5 text-amber-500 mr-2" />
-                Onay Belgeleri
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-64">
-                <DropdownMenuItem
-                  onClick={onOnayBelgesi ||
-                    (() => console.log("Onay Belgesi tıklandı"))}
-                >
-                  <FileCheck className="w-3.5 h-3.5 text-amber-500 mr-2" />
-                  Doğrudan Temin Onay Belgesi
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>

@@ -11,7 +11,9 @@ import {
 import { cn } from "../../../../../utils/cn";
 import { DocumentsDashboard } from "./DocumentsDashboard";
 import { PricesSummaryDashboard } from "./PricesSummaryDashboard";
-import { PrintDropdownButton } from "../../../components/PrintDropdownButton";
+import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
+import { MalzemeTabloPopover } from "../../components/MalzemeListesi/components/MalzemeTabloPopover";
+import { normalizeForMatch } from "../useDosyaAsamasiSablons";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
@@ -70,6 +72,96 @@ export function PiyasaFiyatArastirmasiDashboard({
   setActiveActionDropdown,
   handleUpdateDocumentDate,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
+  const handleOpenSablonByDosyaAdi = (targetKey: string) => {
+    if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
+
+    const ALIAS_MAP: Record<string, string[]> = {
+      "teklif-isteme-mektubu": [
+        "fiyat-arastirma-mektubu",
+        "arastirma-mektubu",
+        "birim-fiyat-teklif-mektubu",
+        "teklif-isteme-mektubu",
+      ],
+      "teklif-mektubu-dagitim": [
+        "dagitim-cizelgesi",
+        "teklif-mektubu-dagitim-cizelgesi",
+        "teklif-mektubu-dagitim",
+      ],
+      "teklif-mektubu-dagitim-karma": [
+        "dagitim-cizelgesi-karma",
+        "teklif-mektubu-dagitim-karma",
+        "teklif-mektubu-karma",
+      ],
+      "firmalar-teklif-cetveli": [
+        "birim-fiyat-teklif-cetveli",
+        "firmalar-teklif-cetveli",
+        "piyasa-fiyat-arastirmasi-sonuc-cetveli",
+      ],
+      "yasaklilik-sorgulama-tutanagi": [
+        "yasaklilik-sorgulama-tutanagi",
+        "yasaklilik-sorgulama",
+        "ekap-yasaklilik",
+      ],
+      "piyasa-fiyat-arastirma-gorevlendirmesi": [
+        "piyasa-fiyat-arastirma-gorevlendirmesi",
+        "gorevlendirme-yazisi",
+      ],
+      "piyasa-fiyat-arastirma-tutanagi": [
+        "piyasa-fiyat-arastirma-tutanagi",
+        "fiyat-arastirmasi-tutanagi",
+      ],
+      "yaklasik-maliyet-cetveli": [
+        "yaklasik-maliyet-cetveli",
+        "yaklasik-maliyet-hesap-cetveli",
+      ],
+      "dogrudan-temin-onay-belgesi": [
+        "dogrudan-temin-onay-belgesi",
+        "idare-onay-belgesi",
+        "onay-belgesi",
+      ],
+    };
+
+    const cleanTarget = targetKey.replace(/\.html$/, "").toLowerCase().trim();
+    const candidateKeys = ALIAS_MAP[cleanTarget] || [cleanTarget];
+
+    let foundSablon: any = null;
+
+    for (const key of candidateKeys) {
+      foundSablon = sablons.find((s: any) => {
+        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "").toLowerCase().trim();
+        return fileBase === key;
+      });
+      if (foundSablon) break;
+    }
+
+    if (!foundSablon) {
+      for (const key of candidateKeys) {
+        foundSablon = sablons.find((s: any) => {
+          const route = (s.route_path || s.id || "").toLowerCase().trim();
+          return route === key;
+        });
+        if (foundSablon) break;
+      }
+    }
+
+    if (!foundSablon) {
+      for (const key of candidateKeys) {
+        const normKey = normalizeForMatch(key);
+        foundSablon = sablons.find((s: any) => {
+          const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
+          return normSablonName === normKey;
+        });
+        if (foundSablon) break;
+      }
+    }
+
+    if (foundSablon) {
+      handleOpenPreviewForSablon(foundSablon, foundSablon.ad);
+    } else {
+      console.warn("Şablon bulunamadı:", targetKey);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Header Controls Bar */}
@@ -109,7 +201,7 @@ export function PiyasaFiyatArastirmasiDashboard({
           {/* Separate Actions */}
           <button
             onClick={() => handleNewDocument("maliyet")}
-            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white border border-blue-400/30 dark:border-blue-500/40 overflow-hidden"
+            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white border border-blue-400/30 dark:border-blue-500/40 overflow-hidden"
             title="Yeni yaklaşık maliyet hesap cetveli oluşturma ve teklif/proforma giriş alanı"
           >
             <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
@@ -120,7 +212,7 @@ export function PiyasaFiyatArastirmasiDashboard({
 
           <button
             onClick={() => handleNewDocument("tutanak")}
-            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/30 dark:border-emerald-500/40 overflow-hidden"
+            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 bg-linear-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/30 dark:border-emerald-500/40 overflow-hidden"
             title="Yeni piyasa fiyat araştırma tutanağı (PFAT) oluşturma ve teklif/proforma giriş alanı"
           >
             <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
@@ -175,8 +267,8 @@ export function PiyasaFiyatArastirmasiDashboard({
                 </div>
               )}
 
-              {stageSablons.length > 0 && (
-                <PrintDropdownButton
+              {!disableDocumentGuidance && stageSablons.length > 0 && (
+                <PrintDropdownButtonV2
                   kategori="2-piyasa-fiyat-arastirmasi"
                   sablons={sablons}
                   overrideSablons={stageSablons}
@@ -188,11 +280,67 @@ export function PiyasaFiyatArastirmasiDashboard({
                   quickOpenExternal={quickOpenExternal}
                   isSablonDisabled={isSablonDisabled}
                   buttonHeightClass="h-10"
-                  label={disableDocumentGuidance
-                    ? "İşlemler"
-                    : "Belgeleri Yazdır"}
+                  label="Belgeleri Yazdır"
                 />
               )}
+
+              <MalzemeTabloPopover
+                disableDocumentGuidance={disableDocumentGuidance}
+                onIhtiyacListesi={() =>
+                  handleOpenSablonByDosyaAdi("ihtiyac-listesi")}
+                onIhtiyacTalepFormu={() =>
+                  handleOpenSablonByDosyaAdi("ihtiyac-talep-formu")}
+                onLuzumMuzekkeresi={() =>
+                  handleOpenSablonByDosyaAdi("luzum-muzekkeresi")}
+                onLuzumMuzekkeresiOnayEki={() =>
+                  handleOpenSablonByDosyaAdi("luzum-muzekkeresi-onay-eki")}
+                onLuzumMuzekkeresiTeslimTesellum={() =>
+                  handleOpenSablonByDosyaAdi(
+                    "luzum-muzekkeresi-teslim-tesellum",
+                  )}
+                onHarcamaTalimati={() =>
+                  handleOpenSablonByDosyaAdi("harcama-talimati")}
+                onHarcamaPusulasi={() =>
+                  handleOpenSablonByDosyaAdi("harcama-pusulasi")}
+                onGorevlendirmeOnayi={() =>
+                  handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
+                onGorevlendirmeOnayEki={() =>
+                  handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+                onYaklasikMaliyetKomisyonu={() =>
+                  handleOpenSablonByDosyaAdi(
+                    "yaklasik-maliyet-tespit-komisyonu",
+                  )}
+                onMuayeneKabulKomisyonu={() =>
+                  handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
+                onFiyatArastirmaKomisyonu={() =>
+                  handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
+                onPiyasaArastirmaGorevlendirmesi={() =>
+                  handleOpenSablonByDosyaAdi(
+                    "piyasa-fiyat-arastirma-gorevlendirmesi",
+                  )}
+                onPiyasaArastirmaTutanagi={() =>
+                  handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+                onYaklasikMaliyetHesapCetveli={() =>
+                  handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
+                onSonAlimCetveli={() =>
+                  handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
+                onPiyasaSonucCetveli={() =>
+                  handleOpenSablonByDosyaAdi(
+                    "piyasa-fiyat-arastirmasi-sonuc-cetveli",
+                  )}
+                onTeklifIstemeMektubu={() =>
+                  handleOpenSablonByDosyaAdi("teklif-isteme-mektubu")}
+                onTeklifMektubuDagitim={() =>
+                  handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim")}
+                onTeklifMektubuKarma={() =>
+                  handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim-karma")}
+                onFirmalarTeklifCetveli={() =>
+                  handleOpenSablonByDosyaAdi("firmalar-teklif-cetveli")}
+                onYasaklilikSorgulama={() =>
+                  handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
+                onOnayBelgesi={() =>
+                  handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
+              />
             </>
           )}
         </div>
@@ -219,8 +367,8 @@ export function PiyasaFiyatArastirmasiDashboard({
             activeActionDropdown={activeActionDropdown}
             setActiveActionDropdown={setActiveActionDropdown}
             handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-            quickOpenExternal={quickOpenExternal}
             quickPrint={quickPrint}
+            quickOpenExternal={quickOpenExternal}
             handleUpdateDocumentDate={handleUpdateDocumentDate}
           />
         )}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PackageSearch } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
 import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
 import { normalizeForMatch } from "./useDosyaAsamasiSablons";
 import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
 import { PiyasaFiyatArastirmasiDashboard } from "./components/PiyasaFiyatArastirmasiDashboard";
@@ -112,39 +113,25 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
   const stageDocs = savedDocuments;
   const { disableDocumentGuidance } = useSettingsStore();
 
-  if (previewData && previewModalOpen) {
-    const isStarred = previewData?.title
-      ? activeStarredDocs.some(
-        (d) =>
-          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
-      )
-      : false;
+  const isStarred = previewData?.title
+    ? activeStarredDocs.some(
+      (d) =>
+        normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
+    )
+    : false;
 
-    return (
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => setPreviewModalOpen(false)}
-        title={previewData.title}
-        templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ""}
-        baseContext={previewData.snapshotContext ||
-          contextsByPath[previewData.processPath] || dosyaContext}
-        placeholders={placeholders}
-        personelListesi={personelListesi}
-        onPrint={executePrint}
-        onExportPdf={executeExportPdf}
-        onExportDocx={executeExportDocx}
-        onExportUdf={executeExportUdf}
-        isStarred={isStarred}
-        onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
-        isInline={true}
-        templateTestVerisi={previewData.templateTestVerisi}
-        dosyaAdi={previewData.dosyaAdi}
-        onRefreshSnapshot={refreshSnapshot}
-        onSaveSnapshot={saveSnapshot}
-      />
-    );
-  }
+  const isV2 = previewData?.dosyaAdi &&
+    [
+      "ihtiyac-listesi",
+      "ihtiyac-talep-formu",
+      "harcama-talimati",
+      "harcama-pusulasi",
+      "luzum-muzekkeresi",
+      "luzum-muzekkeresi-onay-eki",
+      "luzum-muzekkeresi-teslim-tesellum",
+      "komisyon-gorevlendirme-onayi",
+      "komisyon-gorevlendirme-onayi-eki",
+    ].includes(previewData.dosyaAdi.replace(".html", ""));
 
   return (
     <SubScreen
@@ -229,6 +216,46 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         setModalSearchQuery={setModalSearchQuery}
         onAddFirms={handleBulkAddFirms}
       />
+
+      {/* BELGE ÖNİZLEME MODALI (OVERLAY) */}
+      {previewData && previewModalOpen && (
+        isV2
+          ? (
+            <DocumentPreviewModalV2
+              isOpen={previewModalOpen}
+              documentId={previewData.dosyaAdi
+                ? previewData.dosyaAdi.replace(".html", "")
+                : ""}
+              onClose={() => setPreviewModalOpen(false)}
+              isModal={true}
+            />
+          )
+          : (
+            <DocumentPreviewModal
+              isOpen={previewModalOpen}
+              onClose={() => setPreviewModalOpen(false)}
+              title={previewData.title}
+              templateHtml={previewData.templateHtml}
+              masterHtml={masterHtml || ""}
+              baseContext={previewData.snapshotContext ||
+                contextsByPath[previewData.processPath] || dosyaContext}
+              placeholders={placeholders}
+              personelListesi={personelListesi}
+              onPrint={executePrint}
+              onExportPdf={executeExportPdf}
+              onExportDocx={executeExportDocx}
+              onExportUdf={executeExportUdf}
+              isStarred={isStarred}
+              onToggleStar={() =>
+                previewData?.title && toggleStar(previewData.title)}
+              isInline={false}
+              templateTestVerisi={previewData.templateTestVerisi}
+              dosyaAdi={previewData.dosyaAdi}
+              onRefreshSnapshot={refreshSnapshot}
+              onSaveSnapshot={saveSnapshot}
+            />
+          )
+      )}
     </SubScreen>
   );
 }
