@@ -3,6 +3,7 @@ import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
 import {
   ApprovalSignature,
+  EditableOlurPlaceholder,
   MetadataBlock,
   PersonelCard,
 } from "../../document/ApprovalSignature";
@@ -162,16 +163,20 @@ export function LuzumMuzekkeresi({
               striped={false}
             />
 
-            {isLastPage && data.olurYazisi !== false && (
-              <div style={{ marginTop: "auto" }}>
-                <ApprovalSignature
-                  title={data.olurBaslik || "OLUR"}
-                  date={data.onayTarihi || data.tarih || data.dosyaTarihi}
-                  adSoyad={data.onaylayanPersonelAdi}
-                  unvan={data.onaylayanPersonelUnvan}
-                  showSpace={true}
-                />
-              </div>
+            {isLastPage && (
+              data.olurYazisi !== false ? (
+                <div style={{ marginTop: "auto" }}>
+                  <ApprovalSignature
+                    title={data.olurBaslik || "OLUR"}
+                    date={data.onayTarihi || data.tarih || data.dosyaTarihi}
+                    adSoyad={data.onaylayanPersonelAdi}
+                    unvan={data.onaylayanPersonelUnvan}
+                    showSpace={true}
+                  />
+                </div>
+              ) : (
+                <EditableOlurPlaceholder />
+              )
             )}
           </DocumentLayout>
         );

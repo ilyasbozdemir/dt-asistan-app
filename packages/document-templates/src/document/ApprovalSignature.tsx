@@ -1,5 +1,34 @@
 import React from "react";
 import { EditableField } from "./EditableField";
+import { useTemplateEdit } from "./TemplateEditContext";
+
+export const EditableOlurPlaceholder: React.FC = () => {
+  const { isEditing, onFieldChange } = useTemplateEdit();
+  if (!isEditing || !onFieldChange) return null;
+
+  return (
+    <div
+      onClick={() => onFieldChange("olurYazisi", true)}
+      style={{
+        marginTop: "30px",
+        padding: "8px 16px",
+        border: "1.5px dashed #94a3b8",
+        borderRadius: "8px",
+        textAlign: "center",
+        color: "#475569",
+        fontSize: "10pt",
+        fontWeight: "bold",
+        cursor: "pointer",
+        backgroundColor: "#f8fafc",
+        userSelect: "none",
+      }}
+      title="OLUR bloğunu belgeye eklemek için tıklayın"
+    >
+      <span style={{ marginRight: "6px" }}>☑</span>
+      OLUR Bloğu Gizli (Göster ve Düzenle)
+    </div>
+  );
+};
 
 interface PersonelCardProps {
   adSoyad?: string | null;
@@ -88,6 +117,8 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
   marginTop = 40,
   align = "center",
 }) => {
+  const { isEditing, onFieldChange } = useTemplateEdit();
+
   return (
     <div
       style={{
@@ -107,8 +138,33 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
           textAlign: "center",
           minWidth: "250px",
           lineHeight: 1.5,
+          position: "relative",
         }}
       >
+        {isEditing && onFieldChange && (
+          <div
+            onClick={() => onFieldChange("olurYazisi", false)}
+            style={{
+              position: "absolute",
+              top: "-22px",
+              right: "0",
+              fontSize: "9pt",
+              color: "#475569",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              backgroundColor: "#f1f5f9",
+              padding: "2px 8px",
+              borderRadius: "4px",
+              border: "1px solid #cbd5e1",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+            title="OLUR bloğunu gizlemek için tıklayın"
+          >
+            <span>☑ OLUR Açık</span>
+          </div>
+        )}
         <div
           style={{ fontWeight: "bold", fontSize: "12pt", marginBottom: "4px" }}
         >

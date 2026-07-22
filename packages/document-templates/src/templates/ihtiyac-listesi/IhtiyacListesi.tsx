@@ -3,6 +3,7 @@ import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
 import {
   ApprovalSignature,
+  EditableOlurPlaceholder,
   MetadataBlock,
   PersonelCard,
 } from "../../document/ApprovalSignature";
@@ -162,18 +163,22 @@ export function IhtiyacListesi({
               striped={false}
             />
 
-            {isLastPage && data.olurYazisi !== false && (
-              <div style={{ marginTop: "auto" }}>
-                <ApprovalSignature
-                  title={(data as any).olurBaslik || "OLUR"}
-                  date={data.onayTarihi || data.dosyaTarihi || data.tarih ||
-                    data.onayaSunulanTarih}
-                  adSoyad={data.onaylayanPersonelAdi}
-                  unvan={data.onaylayanPersonelUnvan}
-                  showSpace={true}
-                  marginTop={40}
-                />
-              </div>
+            {isLastPage && (
+              data.olurYazisi !== false ? (
+                <div style={{ marginTop: "auto" }}>
+                  <ApprovalSignature
+                    title={(data as any).olurBaslik || "OLUR"}
+                    date={data.onayTarihi || data.dosyaTarihi || data.tarih ||
+                      data.onayaSunulanTarih}
+                    adSoyad={data.onaylayanPersonelAdi}
+                    unvan={data.onaylayanPersonelUnvan}
+                    showSpace={true}
+                    marginTop={40}
+                  />
+                </div>
+              ) : (
+                <EditableOlurPlaceholder />
+              )
             )}
           </DocumentLayout>
         );

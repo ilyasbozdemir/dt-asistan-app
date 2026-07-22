@@ -483,41 +483,122 @@ export function DocumentPreviewModalV2({
       onClick={(e) => isModal && e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4">
+        {/* Left: Back Button & Title */}
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onClose}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors cursor-pointer mr-2 border border-slate-200/80 dark:border-slate-700/80 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors cursor-pointer shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs"
             title={`${backLabel} seçeneğine geri dön`}
           >
             <ArrowLeft className="w-4 h-4" />
             <span>{backLabel}</span>
           </button>
 
-          <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
-            <FileText className="w-5 h-5" />
+          <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
+            <FileText className="w-4 h-4" />
           </div>
-          <div>
-            <h2 className="text-base font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2 truncate">
               {activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim() ||
                 "Belge Düzenleyici"}
-              <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-655 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider">
+              <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider shrink-0">
                 Akıllı Belge
               </span>
             </h2>
-            <p className="text-[11px] text-slate-400 font-medium">
-              Belgenizi sağdaki A4 sayfası üzerinde doğrudan tıklayarak canlı
-              düzenleyebilirsiniz.
-            </p>
           </div>
         </div>
 
-        <button
-          onClick={onClose}
-          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Right: Actions (Save, Print, Options, Close) */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Main Save Button */}
+          <button
+            onClick={handleSaveToDb}
+            disabled={isSaving}
+            className={`px-4 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs ${
+              saveSuccess
+                ? "bg-emerald-600 text-white"
+                : "bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600"
+            }`}
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>
+              {saveSuccess
+                ? "Kaydedildi!"
+                : isSaving
+                ? "Kaydediliyor..."
+                : "Kaydet"}
+            </span>
+          </button>
+
+          {/* Main Print Button */}
+          <button
+            onClick={handlePrint}
+            disabled={isPrinting}
+            className="px-4.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-blue-600/20 cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Yazdır</span>
+          </button>
+
+          {/* Options Dropdown (3-Dots Menu) */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setDownloadOpen((v) => !v)}
+              disabled={isPrinting}
+              title="Diğer Seçenekler"
+              className="p-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-xs shadow-2xs cursor-pointer"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {downloadOpen && (
+              <div className="absolute top-full mt-2 right-0 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handleRefreshFromDb();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors"
+                >
+                  <RefreshCw className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <span>Güncel Verileri Al</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handlePdf();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
+                >
+                  <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <span>PDF Olarak Kaydet</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handleOpenPdfInNewTab();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
+                >
+                  <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <span>Tarayıcıda Aç</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1" />
+
+          <button
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Content area */}
@@ -681,89 +762,6 @@ export function DocumentPreviewModalV2({
                 </div>
               )}
           </div>
-        </div>
-      </div>
-
-      {/* Footer controls */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          {/* Options Dropdown (3-Dots Menu) */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDownloadOpen((v) => !v)}
-              disabled={isPrinting}
-              title="Diğer Seçenekler"
-              className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-sm shadow-2xs cursor-pointer"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-            {downloadOpen && (
-              <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150 overflow-hidden">
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handleRefreshFromDb();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors"
-                >
-                  <RefreshCw className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                  <span>Güncel Verileri Al</span>
-                </button>
-
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handlePdf();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                >
-                  <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                  <span>PDF Olarak Kaydet</span>
-                </button>
-
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handleOpenPdfInNewTab();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                >
-                  <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>Tarayıcıda Aç</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Main Save & Print Buttons */}
-          <button
-            onClick={handleSaveToDb}
-            disabled={isSaving}
-            className={`px-5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm cursor-pointer shadow-sm ${
-              saveSuccess
-                ? "bg-emerald-600 text-white"
-                : "bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600"
-            }`}
-          >
-            <Save className="w-4 h-4" />
-            <span>
-              {saveSuccess
-                ? "Kaydedildi!"
-                : isSaving
-                ? "Kaydediliyor..."
-                : "Kaydet"}
-            </span>
-          </button>
-
-          <button
-            onClick={handlePrint}
-            disabled={isPrinting}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 text-sm shadow-sm shadow-blue-600/20 cursor-pointer"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Yazdır</span>
-          </button>
         </div>
       </div>
     </div>
