@@ -3,7 +3,6 @@ import { renderToString } from "react-dom/server";
 import {
   ArrowLeft,
   ChevronLeft,
-  ChevronRight,
   Download,
   Edit3,
   Eye,
@@ -12,6 +11,7 @@ import {
   Printer,
   RefreshCw,
   Save,
+  Sliders,
   X,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
@@ -32,7 +32,6 @@ interface DocumentPreviewModalV2Props {
   documentId: string | null;
   onClose: () => void;
   isModal?: boolean;
-  backLabel?: string;
 }
 
 interface Personel {
@@ -87,7 +86,6 @@ export function DocumentPreviewModalV2({
   documentId,
   onClose,
   isModal = false,
-  backLabel = "İşlemlere Dön",
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const { activeDosyaId } = useWorkspaceStore();
   const {
@@ -103,6 +101,9 @@ export function DocumentPreviewModalV2({
   const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
   const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
   const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
+    "portrait",
+  );
   const [isEditingMode, setIsEditingMode] = useState(true);
   const [previewScale, setPreviewScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -123,6 +124,7 @@ export function DocumentPreviewModalV2({
         showLogoLeft: localShowLogoLeft,
         showLogoRight: localShowLogoRight,
         olurYazisi: formData.olurYazisi !== false,
+        orientation,
       };
       const jsonStr = JSON.stringify(dataToSave);
       const sablonRes = await window.electron.ipcRenderer.invoke(
@@ -246,6 +248,9 @@ export function DocumentPreviewModalV2({
             if (savedData.olurYazisi !== undefined) {
               finalData.olurYazisi = savedData.olurYazisi;
             }
+            if (savedData.orientation) {
+              setOrientation(savedData.orientation);
+            }
           } catch (e) {
             console.error("Failed to parse saved snapshot JSON", e);
           }
@@ -298,12 +303,12 @@ export function DocumentPreviewModalV2({
 
     const observer = new ResizeObserver((entries) => {
       const { width } = entries[0].contentRect;
-      const A4_WIDTH = 800; // Base layout width
+      const targetWidth = orientation === "landscape" ? 1131 : 800; // Base layout width
       const PADDING = 64;
       const availableWidth = width - PADDING;
 
-      if (availableWidth > 250 && availableWidth < A4_WIDTH) {
-        setPreviewScale(availableWidth / A4_WIDTH);
+      if (availableWidth > 250 && availableWidth < targetWidth) {
+        setPreviewScale(availableWidth / targetWidth);
       } else {
         setPreviewScale(1);
       }
@@ -311,7 +316,7 @@ export function DocumentPreviewModalV2({
 
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
-  }, [isOpen, documentId]);
+  }, [isOpen, documentId, orientation]);
 
   // 4. Dropdown closing logic
   useEffect(() => {
@@ -342,7 +347,9 @@ export function DocumentPreviewModalV2({
           solLogo: localShowLogoLeft ? formData.solLogo : null,
           sagLogo: localShowLogoRight ? formData.sagLogo : null,
           olurYazisi: formData.olurYazisi !== false,
+          orientation,
         },
+        orientation,
       }),
     );
     const styles = Array.from(
@@ -359,6 +366,10 @@ export function DocumentPreviewModalV2({
           <title>${activeTemplateConf?.name || "Belge"}</title>
           ${styles}
           <style>
+            @page {
+              size: A4 ${orientation};
+              margin: 0;
+            }
             body {
               background: white !important;
               margin: 0 !important;
@@ -486,15 +497,6 @@ export function DocumentPreviewModalV2({
       <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4">
         {/* Left: Back Button & Title */}
         <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-xl transition-colors cursor-pointer shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs"
-            title={`${backLabel} seçeneğine geri dön`}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{backLabel}</span>
-          </button>
-
           <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
             <FileText className="w-4 h-4" />
           </div>
@@ -509,8 +511,22 @@ export function DocumentPreviewModalV2({
           </div>
         </div>
 
-        {/* Right: Actions (Save, Print, Options, Close) */}
+        {/* Right: Actions (Belge Ayarları, Save, Print, Options, Close) */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Toggle Sidebar (Belge Ayarları) */}
+          <button
+            onClick={() => setSidebarOpen((v) => !v)}
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer border ${
+              sidebarOpen
+                ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
+                : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
+            }`}
+            title={sidebarOpen ? "Belge Ayarlarını Gizle" : "Belge Ayarlarını Göster"}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>{sidebarOpen ? "Ayarlar Açık" : "Belge Ayarları"}</span>
+          </button>
+
           {/* Main Save Button */}
           <button
             onClick={handleSaveToDb}
@@ -602,125 +618,156 @@ export function DocumentPreviewModalV2({
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0 relative">
         {/* Left panel: Document Settings */}
         <div
-          className={`bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 flex flex-col ${
-            sidebarOpen ? "w-72" : "w-12"
+          className={`bg-slate-50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 transition-all duration-200 flex flex-col shrink-0 h-full overflow-hidden ${
+            sidebarOpen ? "w-72" : "w-0 opacity-0 pointer-events-none"
           }`}
         >
           {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-            {sidebarOpen && (
-              <div className="flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
-                  Belge Ayarları
-                </span>
-              </div>
-            )}
+          <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+                Belge Ayarları
+              </span>
+            </div>
             <button
-              onClick={() => setSidebarOpen((prev) => !prev)}
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer mx-auto"
-              title={sidebarOpen ? "Paneli Daralt" : "Paneli Genişlet"}
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer"
+              title="Paneli Kapat"
             >
-              {sidebarOpen
-                ? <ChevronLeft className="w-4 h-4" />
-                : <ChevronRight className="w-4 h-4" />}
+              <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
 
-          {sidebarOpen && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
-              <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
-                💡 <strong>Canlı Düzenleme:</strong>{" "}
-                Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki
-                A4 sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
-              </div>
-
-              {/* Toggles & Settings */}
-              <div className="space-y-3">
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                  Görünüm & Düzenleme Kontrolleri
-                </span>
-
-                <label className="flex items-center justify-between p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 rounded-xl cursor-pointer hover:border-blue-300 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                    <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                        Metin Düzenleme Modu
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                        {isEditingMode
-                          ? "Canlı düzenleme açık"
-                          : "Önizleme modu (Sabit Metin)"}
-                      </span>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isEditingMode}
-                    onChange={(e) => setIsEditingMode(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    OLUR Bloğunu Göster
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={formData.olurYazisi !== false}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        olurYazisi: e.target.checked,
-                      }))}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    Sol Amblem / Logo
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={localShowLogoLeft}
-                    onChange={(e) => setLocalShowLogoLeft(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    Sağ Amblem / Logo
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={localShowLogoRight}
-                    onChange={(e) => setLocalShowLogoRight(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                  />
-                </label>
-              </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
+            <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
+              💡 <strong>Canlı Düzenleme:</strong>{" "}
+              Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki
+              A4 sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
             </div>
-          )}
+
+            {/* Toggles & Settings */}
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Görünüm & Düzenleme Kontrolleri
+              </span>
+
+              {/* Metin Düzenleme Modu */}
+              <label className="flex items-center justify-between p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 rounded-xl cursor-pointer hover:border-blue-300 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
+                      Metin Düzenleme Modu
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                      {isEditingMode
+                        ? "Canlı düzenleme açık"
+                        : "Önizleme modu (Sabit Metin)"}
+                    </span>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={isEditingMode}
+                  onChange={(e) => setIsEditingMode(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                />
+              </label>
+
+              {/* Sayfa Yönü (Dikey / Yatay) */}
+              <div className="p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">
+                  Sayfa Yönü (Düzen)
+                </span>
+                <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setOrientation("portrait")}
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      orientation === "portrait"
+                        ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Dikey</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrientation("landscape")}
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      orientation === "landscape"
+                        ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 rotate-90" />
+                    <span>Yatay</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* OLUR Bloğu Toggle */}
+              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  OLUR Bloğunu Göster
+                </span>
+                <input
+                  type="checkbox"
+                  checked={formData.olurYazisi !== false}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      olurYazisi: e.target.checked,
+                    }))}
+                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                />
+              </label>
+
+              {/* Sol Amblem */}
+              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Sol Amblem / Logo
+                </span>
+                <input
+                  type="checkbox"
+                  checked={localShowLogoLeft}
+                  onChange={(e) => setLocalShowLogoLeft(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                />
+              </label>
+
+              {/* Sağ Amblem */}
+              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Sağ Amblem / Logo
+                </span>
+                <input
+                  type="checkbox"
+                  checked={localShowLogoRight}
+                  onChange={(e) => setLocalShowLogoRight(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                />
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Right panel: Live A4 PDF Layout Preview */}
         <div
           ref={previewContainerRef}
-          className="flex-1 bg-slate-200/50 dark:bg-slate-950 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar"
+          className="flex-1 bg-slate-200/50 dark:bg-slate-955 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar min-h-0 min-w-0"
         >
           <div
-            className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out"
+            className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out shrink-0"
             style={{
               transform: `scale(${previewScale})`,
-              width: "800px",
-              minHeight: "1131px",
+              width: orientation === "landscape" ? "1131px" : "800px",
+              minHeight: orientation === "landscape" ? "800px" : "1131px",
             }}
           >
             {ActiveComponent
@@ -748,7 +795,9 @@ export function DocumentPreviewModalV2({
                         solLogo: localShowLogoLeft ? formData.solLogo : null,
                         sagLogo: localShowLogoRight ? formData.sagLogo : null,
                         olurYazisi: formData.olurYazisi !== false,
+                        orientation,
                       },
+                      orientation,
                     })}
                   </TemplateEditProvider>
                 </TemplateErrorBoundary>

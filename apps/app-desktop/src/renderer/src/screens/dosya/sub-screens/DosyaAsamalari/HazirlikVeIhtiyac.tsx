@@ -1,13 +1,13 @@
-import React from 'react'
-import { Package } from 'lucide-react'
-import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { normalizeForMatch } from './useDosyaAsamasiSablons'
-import { useDosyaAsamasiSablonsV2 } from './useDosyaAsamasiSablonsV2'
-import { useMalzemeListesi } from '../components/MalzemeListesi/useMalzemeListesi'
-import { MalzemeEkleModal } from '../components/MalzemeListesi/MalzemeEkleModal'
-import { MalzemeTablosu } from '../components/MalzemeListesi/MalzemeTablosu'
-import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
+import React from "react";
+import { Package } from "lucide-react";
+import { SubScreen } from "../../SubScreens.screen";
+import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
+import { normalizeForMatch } from "./useDosyaAsamasiSablons";
+import { useDosyaAsamasiSablonsV2 } from "./useDosyaAsamasiSablonsV2";
+import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
+import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
+import { MalzemeTablosu } from "../components/MalzemeListesi/MalzemeTablosu";
+import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
 
 export function HazirlikVeIhtiyac(): React.JSX.Element {
   const {
@@ -35,40 +35,41 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     refreshSnapshot,
     saveSnapshot,
     isSablonDisabled,
-    activeDosya
-  } = useDosyaAsamasiSablonsV2()
+    activeDosya,
+  } = useDosyaAsamasiSablonsV2();
 
-  const state = useMalzemeListesi(activeDosyaId)
+  const state = useMalzemeListesi(activeDosyaId);
 
   if (previewData && previewModalOpen) {
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
+        (d) =>
+          normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
+      )
+      : false;
 
-    const isV2 =
-      previewData?.dosyaAdi &&
+    const isV2 = previewData?.dosyaAdi &&
       [
-        'ihtiyac-listesi',
-        'harcama-talimati',
-        'luzum-muzekkeresi',
-        'luzum-muzekkeresi-onay-eki',
-        'luzum-muzekkeresi-teslim-tesellum',
-        'komisyon-gorevlendirme-onayi',
-        'komisyon-gorevlendirme-onayi-eki'
-      ].includes(previewData.dosyaAdi.replace('.html', ''))
+        "ihtiyac-listesi",
+        "harcama-talimati",
+        "luzum-muzekkeresi",
+        "luzum-muzekkeresi-onay-eki",
+        "luzum-muzekkeresi-teslim-tesellum",
+        "komisyon-gorevlendirme-onayi",
+        "komisyon-gorevlendirme-onayi-eki",
+      ].includes(previewData.dosyaAdi.replace(".html", ""));
 
     if (isV2) {
       return (
         <DocumentPreviewModalV2
           isOpen={previewModalOpen}
-          documentId={previewData.dosyaAdi ? previewData.dosyaAdi.replace('.html', '') : ''}
+          documentId={previewData.dosyaAdi
+            ? previewData.dosyaAdi.replace(".html", "")
+            : ""}
           onClose={() => setPreviewModalOpen(false)}
           isModal={false}
-          backLabel="İşlemlere Dön"
         />
-      )
+      );
     }
 
     return (
@@ -77,10 +78,9 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onClose={() => setPreviewModalOpen(false)}
         title={previewData.title}
         templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
+        masterHtml={masterHtml || ""}
+        baseContext={previewData.snapshotContext ||
+          contextsByPath[previewData.processPath] || dosyaContext}
         placeholders={placeholders}
         personelListesi={personelListesi}
         onPrint={executePrint}
@@ -95,29 +95,29 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         onRefreshSnapshot={refreshSnapshot}
         onSaveSnapshot={saveSnapshot}
       />
-    )
+    );
   }
 
   const stageSablons = sablons
     .filter(
       (s) =>
-        s.kategori === '1-ihtiyac-tespiti-ve-baslangic' ||
-        s.kategori === '1. İhtiyaç Tespiti & Başlangıç' ||
-        s.dosya_adi === 'dogrudan-temin-onay-belgesi.html' ||
-        s.dosya_adi === 'komisyon-gorevlendirme-onayi.html' ||
-        s.dosya_adi === 'piyasa-fiyat-arastirma-gorevlendirmesi.html'
+        s.kategori === "1-ihtiyac-tespiti-ve-baslangic" ||
+        s.kategori === "1. İhtiyaç Tespiti & Başlangıç" ||
+        s.dosya_adi === "dogrudan-temin-onay-belgesi.html" ||
+        s.dosya_adi === "komisyon-gorevlendirme-onayi.html" ||
+        s.dosya_adi === "piyasa-fiyat-arastirma-gorevlendirmesi.html",
     )
-    .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
+    .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
 
   const dagitimSablons = sablons
     .filter(
       (s) =>
-        s.dosya_adi === 'birim-fiyat-teklif-mektubu.html' ||
-        s.dosya_adi === 'fiyat-arastirma-mektubu.html' ||
-        s.dosya_adi === 'teklif-mektubu-dagitim-cizelgesi.html' ||
-        s.dosya_adi === 'dagitim-cizelgesi-karma.html'
+        s.dosya_adi === "birim-fiyat-teklif-mektubu.html" ||
+        s.dosya_adi === "fiyat-arastirma-mektubu.html" ||
+        s.dosya_adi === "teklif-mektubu-dagitim-cizelgesi.html" ||
+        s.dosya_adi === "dagitim-cizelgesi-karma.html",
     )
-    .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
+    .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
 
   return (
     <SubScreen
@@ -143,5 +143,5 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         activeDosyaId={activeDosyaId}
       />
     </SubScreen>
-  )
+  );
 }
