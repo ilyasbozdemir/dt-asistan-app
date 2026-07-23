@@ -1,661 +1,1074 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 import {
-  AlertCircle,
-  ArrowRight,
-  Building,
-  Calendar,
-  Check,
+  ChevronDown,
+  Package,
+  Building2,
   CheckCircle2,
-  ChevronRight,
   Clock,
-  CreditCard,
+  Users,
   FileText,
-  Info,
   Printer,
-  Sparkles,
-  User,
-} from "lucide-react";
-import { useWorkspaceStore } from "../../store/workspaceStore";
-import { useDosyalarHooks } from "../dosyalar/dosyalar.hooks";
-import { useCiktiMerkeziData } from "../dosya/CiktiMerkezi.hooks";
-import { useNavigate } from "@tanstack/react-router";
-import { APP_ROUTES } from "../../constants/routeConstants";
+  Download,
+  UserCheck,
+  PenLine,
+  PlusCircle,
+  X,
+  ArrowUpRight,
+  Upload,
+  Trash2,
+  Sparkles
+} from 'lucide-react'
+import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
+import { useCiktiMerkeziData } from '../dosya/CiktiMerkezi.hooks'
+import { useNavigate } from '@tanstack/react-router'
 
-interface Step {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  route?: string;
-  status: "completed" | "current" | "pending";
-  details: string;
-  requiredDocs?: string[];
+interface Belge {
+  id: number
+  ad: string
+  asama: string
+  durum: 'imzalandı' | 'imza_bekliyor' | 'oluşturuldu' | 'taslak' | 'oluşturulmadı'
+}
+
+interface TaranmisBelge {
+  id: number
+  ad: string
+  boyut: string
+  tarih: string
+}
+
+interface Kalem {
+  id: number
+  malzemeAdi: string
+  miktar: number
+  birim: string
+  birimFiyat: number
+  toplamBedel: number
+  tasinirKodu: string
+}
+
+interface FirmaItem {
+  id: number
+  unvan: string
+  telefon: string
+  email: string
+  davetTarihi: string
+  teklifTarihi: string | null
+  teklifBedeli: number | null
+  durumu: 'seçildi' | 'teklif' | 'reddedildi'
+}
+
+interface Uye {
+  id: number
+  adSoyad: string
+  unvan: string
+  gorev: string
+  imza: 'imzaladı' | 'bekliyor'
+}
+
+interface Komisyon {
+  id: number
+  tur: string
+  dayanak: string
+  olusturmaTarihi: string
+  durum: 'aktif' | 'tamamlandı' | 'bekliyor'
+  uyeler: Uye[]
+}
+
+interface TaskItem {
+  name: string
+  done: boolean
+  tab: string
+}
+
+interface Stage {
+  id: number
+  title: string
+  tasks: TaskItem[]
 }
 
 export default function SurecAkisiScreen(): React.JSX.Element {
-  const { activeDosyaId } = useWorkspaceStore();
-  const { dosyalar } = useDosyalarHooks();
-  const navigate = useNavigate();
+  const { activeDosyaId } = useWorkspaceStore()
+  const { dosyalar } = useDosyalarHooks()
+  const navigate = useNavigate()
 
-  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId);
-  const { dosyaContext } = useCiktiMerkeziData(activeDosyaId);
+  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
+  const { dosyaContext } = useCiktiMerkeziData(activeDosyaId)
 
-  // Simulation state
-  const [currentStep, setCurrentStep] = useState<number>(3); // default active step in detail panel
-  const [completedSteps, setCompletedSteps] = useState<number[]>([1, 2]);
-  const [formInputs, setFormInputs] = useState({
-    teslimEden: dosyaContext?.hazirlayanPersonelAdi || "",
-    teslimAlan: dosyaContext?.onaylayanPersonelAdi || "",
-    faturaNo: "",
-    faturaTarihi: new Date().toISOString().split("T")[0],
-    faturaTutari: dosyaContext?.yaklasikMaliyetTutar || "",
-    iban: "",
-    tasinirFisNo: "",
-  });
-  const [isSaved, setIsSaved] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>('ozet')
 
-  const steps: Step[] = [
+  const [belgeler, setBelgeler] = useState<Belge[]>([
+    { id: 1, ad: 'Malzeme Talep Formu', asama: 'İhtiyaç Tespiti', durum: 'imzalandı' },
+    { id: 2, ad: 'Komisyon Görevlendirme Yazısı', asama: 'İhtiyaç Tespiti', durum: 'imzalandı' },
+    { id: 3, ad: 'Piyasa Araştırması Tutanağı', asama: 'Piyasa Araştırması', durum: 'imzalandı' },
+    { id: 4, ad: 'Yaklaşık Maliyet Cetveli', asama: 'Onay Süreci', durum: 'oluşturuldu' },
+    { id: 5, ad: 'Doğrudan Temin Onay Belgesi', asama: 'Onay Süreci', durum: 'taslak' },
+    { id: 6, ad: 'Sipariş Mektubu', asama: 'Onay Süreci', durum: 'oluşturulmadı' },
+    { id: 7, ad: 'Muayene Kabul Tutanağı', asama: 'Teslim ve Kabul', durum: 'oluşturulmadı' },
+    { id: 8, ad: 'Taşınır İşlem Fişi', asama: 'Teslim ve Kabul', durum: 'oluşturulmadı' },
+    { id: 9, ad: 'Ödeme Emri Belgesi', asama: 'Ödeme İşlemleri', durum: 'oluşturulmadı' }
+  ])
+
+  const [selectedBelge, setSelectedBelge] = useState<Belge | null>(null)
+  const [taranmisBelgeler, setTaranmisBelgeler] = useState<TaranmisBelge[]>([
+    { id: 1, ad: 'yaklasik_maliyet_imzali.pdf', boyut: '842 KB', tarih: '18.01.2024' }
+  ])
+  const [surukleniyor, setSurukleniyor] = useState<boolean>(false)
+
+  const dosyaBoyutFormatla = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const dosyalariEkle = (fileList: FileList | null): void => {
+    if (!fileList) return
+    const pdfler = Array.from(fileList).filter(
+      (f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
+    )
+    if (pdfler.length === 0) return
+    setTaranmisBelgeler((prev) => [
+      ...prev,
+      ...pdfler.map((f, i) => ({
+        id: Date.now() + i,
+        ad: f.name,
+        boyut: dosyaBoyutFormatla(f.size),
+        tarih: new Date().toLocaleDateString('tr-TR')
+      }))
+    ])
+  }
+
+  const taranmisBelgeSil = (id: number): void => {
+    setTaranmisBelgeler((prev) => prev.filter((b) => b.id !== id))
+  }
+
+  const activeDosyaAny = activeDosya as any
+
+  const dosya = {
+    dosyaNo: activeDosya?.temin_no || 'DT-2024-001',
+    teminTuru: activeDosyaAny?.alim_turu || activeDosya?.tur || 'Doğrudan Temin',
+    kanunMaddesi: '4734 Sayılı Kanun md. 22/d',
+    tarih: activeDosyaAny?.tarih || activeDosya?.dosya_acilis_tarihi || '15.01.2024',
+    durum: 'Onay Süreci'
+  }
+
+  const kalemler: Kalem[] = (dosyaContext?.kalemler && dosyaContext.kalemler.length > 0)
+    ? dosyaContext.kalemler.map((k: any, idx: number) => ({
+        id: idx + 1,
+        malzemeAdi: k.malzeme_adi || k.kalem_adi || 'Malzeme Kalemi',
+        miktar: k.miktar || 1,
+        birim: k.birim || 'Adet',
+        birimFiyat: k.birim_fiyat || 0,
+        toplamBedel: k.toplam_tutar || (k.miktar || 1) * (k.birim_fiyat || 0),
+        tasinirKodu: k.tasinir_kodu || '150.01.01'
+      }))
+    : [
+        { id: 1, malzemeAdi: 'Bilgisayar (Masaüstü)', miktar: 5, birim: 'Adet', birimFiyat: 15000, toplamBedel: 75000, tasinirKodu: '150.01.01' },
+        { id: 2, malzemeAdi: 'Yazıcı (A4 Laser)', miktar: 3, birim: 'Adet', birimFiyat: 4000, toplamBedel: 12000, tasinirKodu: '150.02.05' },
+        { id: 3, malzemeAdi: 'Monitör (27 inç)', miktar: 5, birim: 'Adet', birimFiyat: 2500, toplamBedel: 12500, tasinirKodu: '150.01.03' },
+        { id: 4, malzemeAdi: 'Klavye Mekanik', miktar: 10, birim: 'Adet', birimFiyat: 600, toplamBedel: 6000, tasinirKodu: '150.01.04' }
+      ]
+
+  const firmalar: FirmaItem[] = [
+    { id: 1, unvan: 'TEKNOLOJİ A.Ş.', telefon: '0312 555 1234', email: 'satis@teknoloji.com.tr', davetTarihi: '16.01.2024', teklifTarihi: '19.01.2024', teklifBedeli: 105500, durumu: 'seçildi' },
+    { id: 2, unvan: 'BİLGİSAYAR TİC. LTD.', telefon: '0216 555 5678', email: 'info@bilgisayar.com.tr', davetTarihi: '16.01.2024', teklifTarihi: '20.01.2024', teklifBedeli: 112000, durumu: 'teklif' },
+    { id: 3, unvan: 'SANAYİ ÜRÜNLERİ LTD.', telefon: '0312 555 9999', email: 'satis@sanayi.com.tr', davetTarihi: '16.01.2024', teklifTarihi: null, teklifBedeli: null, durumu: 'reddedildi' }
+  ]
+
+  const [expandedKomisyon, setExpandedKomisyon] = useState<number | null>(1)
+
+  const komisyonlar: Komisyon[] = [
     {
       id: 1,
-      title: "İhtiyaç Oluştu",
-      subtitle: "Dosya ve İş Tanımlama",
-      description:
-        "İhtiyaç duyulan mal, hizmet veya yapım işi belirlenerek sisteme kaydedilir, iş adı ve dosya numarası atanır.",
-      status: completedSteps.includes(1)
-        ? "completed"
-        : currentStep === 1
-        ? "current"
-        : "pending",
-      details:
-        "Doğrudan temin sürecinin ilk halkasıdır. İlgili birimlerin talepleri doğrultusunda dosya konusu, alım türü ve yaklaşık bütçe tanımlanarak iş başlatılır.",
-      route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
+      tur: 'Piyasa Fiyat Araştırma Komisyonu',
+      dayanak: '4734 Sayılı Kanun md. 22 — Yaklaşık Maliyet Tespiti',
+      olusturmaTarihi: '15.01.2024',
+      durum: 'aktif',
+      uyeler: [
+        { id: 1, adSoyad: dosyaContext?.hazirlayanPersonelAdi || 'Ahmet YILMAZ', unvan: 'Fen İşleri Müdürü', gorev: 'Komisyon Başkanı', imza: 'imzaladı' },
+        { id: 2, adSoyad: 'Elif KAYA', unvan: 'Mühendis', gorev: 'Üye', imza: 'imzaladı' },
+        { id: 3, adSoyad: 'Zeynep ARSLAN', unvan: 'Muhasebe Yetkilisi Mutemedi', gorev: 'Raportör', imza: 'imzaladı' }
+      ]
     },
     {
       id: 2,
-      title: "Doğrudan Temin Onayı Alındı",
-      subtitle: "Onay Belgesi & Olurlar",
-      description:
-        "Harcama yetkilisinden (en üst amir) işin başlatılması ve bütçe kullanımı için resmi olur yazısı ve onay alınır.",
-      status: completedSteps.includes(2)
-        ? "completed"
-        : currentStep === 2
-        ? "current"
-        : "pending",
-      details:
-        "4734 Sayılı Kanun'un ilgili maddelerine (22/d vb.) göre hazırlanan doğrudan temin onay belgesi harcama yetkilisine sunulur ve imzalatılır.",
-      route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
-      requiredDocs: ["Doğrudan Temin Onay Belgesi (Onay Belgesi)"],
+      tur: 'Muayene ve Kabul Komisyonu',
+      dayanak: 'Muayene ve Kabul Yönetmeliği',
+      olusturmaTarihi: '—',
+      durum: 'bekliyor',
+      uyeler: [
+        { id: 4, adSoyad: dosyaContext?.onaylayanPersonelAdi || 'Mehmet DEMİR', unvan: 'Ayniyat Saymanı', gorev: 'Komisyon Başkanı', imza: 'bekliyor' },
+        { id: 5, adSoyad: 'Selin TAN', unvan: 'Teknisyen', gorev: 'Üye', imza: 'bekliyor' },
+        { id: 6, adSoyad: 'Burak ÖZ', unvan: 'Mühendis', gorev: 'Üye', imza: 'bekliyor' }
+      ]
+    }
+  ]
+
+  const [stages, setStages] = useState<Stage[]>([
+    {
+      id: 1,
+      title: 'İhtiyaç Tespiti',
+      tasks: [
+        { name: 'Malzeme Talep Formu', done: true, tab: 'malzeme' },
+        { name: 'Komisyonu Yönet', done: true, tab: 'komisyon' },
+        { name: 'Görevlendirme Yazısı', done: true, tab: 'belgeler' }
+      ]
+    },
+    {
+      id: 2,
+      title: 'Piyasa Araştırması',
+      tasks: [
+        { name: 'İstekli Firmaları Yönet', done: true, tab: 'firmalar' },
+        { name: 'Araştırma Mektubu Gönder', done: true, tab: 'belgeler' },
+        { name: 'Fiyat Teklifi Al', done: true, tab: 'firmalar' },
+        { name: 'Karşılaştır', done: true, tab: 'firmalar' }
+      ]
     },
     {
       id: 3,
-      title: "Piyasa Fiyat Araştırması Yapıldı",
-      subtitle: "Teklifler & Piyasa Fiyat Araştırma Tutanağı",
-      description:
-        "En az 3 firmadan veya piyasadan fiyat teklifleri toplanarak Piyasa Fiyat Araştırma Tutanağı (PFAT) düzenlenir.",
-      status: completedSteps.includes(3)
-        ? "completed"
-        : currentStep === 3
-        ? "current"
-        : "pending",
-      details:
-        "Fiyat komisyonu üyeleri tarafından piyasadan alınan teklifler değerlendirilir. Eşzamanlı olarak yaklaşık maliyet cetveli de netleştirilmiş olur.",
-      route: APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI,
-      requiredDocs: [
-        "Piyasa Fiyat Araştırması Tutanağı",
-        "Yaklaşık Maliyet Cetveli",
-      ],
+      title: 'Onay Süreci',
+      tasks: [
+        { name: 'Yaklaşık Maliyet Cetveli', done: true, tab: 'belgeler' },
+        { name: 'Doğrudan Temin Onay Belgesi', done: false, tab: 'belgeler' },
+        { name: 'Sipariş Ver', done: false, tab: 'belgeler' }
+      ]
     },
     {
       id: 4,
-      title: "Yüklenici Belirlendi",
-      subtitle: "En Düşük / En Uygun Teklif Sahibi",
-      description:
-        "Gelen teklifler arasından en uygun fiyatı sunan istekli belirlenerek üzerine ihale (doğrudan temin alımı) bırakılır.",
-      status: completedSteps.includes(4)
-        ? "completed"
-        : currentStep === 4
-        ? "current"
-        : "pending",
-      details:
-        "Tutanakta belirtilen en avantajlı teklifi veren firma yüklenici (kazanan istekli) olarak seçilir ve sipariş aşamasına geçilir.",
-      route: APP_ROUTES.SIPARIS_VE_SOZLESME,
+      title: 'Teslim ve Kabul',
+      tasks: [
+        { name: 'Malı Al (T.İF)', done: false, tab: 'belgeler' },
+        { name: 'Muayene-Kabul', done: false, tab: 'komisyon' },
+        { name: 'Ambar Kaydı', done: false, tab: 'belgeler' }
+      ]
     },
     {
       id: 5,
-      title: "Mal/Hizmet Teslim Edildi",
-      subtitle: "Fiili Teslimat ve İrsaliye",
-      description:
-        "Yüklenici firma, siparişe konu olan malı veya hizmeti kuruma belirlenen süre içinde teslim eder.",
-      status: completedSteps.includes(5)
-        ? "completed"
-        : currentStep === 5
-        ? "current"
-        : "pending",
-      details:
-        "Teslimat sırasında irsaliye veya fatura ile fiziksel kontrol yapılır, teslimat süreci resmileştirilir.",
-      route: APP_ROUTES.FATURA_VE_IRSALIYE,
-    },
-    {
-      id: 6,
-      title: "Teslim Tesellüm Tutanağı",
-      subtitle: "Teslim Eden & Teslim Alan İmzaları",
-      description:
-        "Malın yüklenici tarafından sorunsuz teslim edildiğini, kurum adına kimlerin teslim aldığını gösteren kanıt tutanağıdır.",
-      status: completedSteps.includes(6)
-        ? "completed"
-        : currentStep === 6
-        ? "current"
-        : "pending",
-      details:
-        "Tutanakta teslim eden (firma temsilcisi) ve teslim alan (kurum görevlileri) bilgileri, imzaları yer alır.",
-      requiredDocs: ["Teslim Tesellüm Tutanağı"],
-    },
-    {
-      id: 7,
-      title: "Muayene ve Kabul Tutanağı",
-      subtitle: "Komisyon İncelemesi ve Kabulü",
-      description:
-        "Muayene ve Kabul Komisyonu üyeleri teslim edilen mal/hizmetin teknik şartnameye uygunluğunu inceleyerek kabul tutanağını imzalar.",
-      status: completedSteps.includes(7)
-        ? "completed"
-        : currentStep === 7
-        ? "current"
-        : "pending",
-      details:
-        'Komisyon üyeleri toplanarak kontrol yapar. Malzemelerin kalitesi, özellikleri incelenir ve uygunsa "Kabul Edilmiştir" kararı verilir.',
-      requiredDocs: ["Muayene ve Kabul Komisyonu Tutanağı"],
-    },
-    {
-      id: 8,
-      title: "Fatura Düzenlendi",
-      subtitle: "Fatura Girişi ve Kontrolleri",
-      description:
-        "Fatura yüklenici firma tarafından düzenlenir, KDV oranları ve birim fiyatlar doğrulanır.",
-      status: completedSteps.includes(8)
-        ? "completed"
-        : currentStep === 8
-        ? "current"
-        : "pending",
-      details:
-        "Faturadaki KDV oranları, birim fiyatlar ve toplam tutar ile yaklaşık maliyet/piyasa tutanaklarındaki tutarlar tam uyumlu olmalıdır.",
-      route: APP_ROUTES.FATURA_VE_IRSALIYE,
-    },
-    {
-      id: 9,
-      title: "Ödeme Talep Dilekçesi",
-      subtitle: "Yüklenici Ödeme Başvurusu",
-      description:
-        "Yüklenici firmanın alacağının kendi banka hesabına (IBAN) ödenmesi için harcama birimine sunduğu talep dilekçesidir.",
-      status: completedSteps.includes(9)
-        ? "completed"
-        : currentStep === 9
-        ? "current"
-        : "pending",
-      details:
-        "Resmi dilekçede firmanın unvanı, fatura bilgileri ve ödemenin yapılacağı IBAN adresi yer alır.",
-      requiredDocs: ["Ödeme Talep Dilekçesi"],
-    },
-    {
-      id: 10,
-      title: "Taşınır İşlem Fişi (Varsa)",
-      subtitle: "Malzemelerin Envantere Girişi",
-      description:
-        "Alınan malzemeler demirbaş veya tüketim malzemesi ise Taşınır Mal Yönetmeliği gereği envantere (TİF) kaydedilir.",
-      status: completedSteps.includes(10)
-        ? "completed"
-        : currentStep === 10
-        ? "current"
-        : "pending",
-      details:
-        "TİF belgesi taşınır kayıt yetkilisi tarafından düzenlenir ve ödeme emri belgesinin ekine konulması yasal olarak zorunludur (Mal alımlarında).",
-    },
-    {
-      id: 11,
-      title: "Ödeme Emri Belgesi (ÖEB)",
-      subtitle: "Muhasebe Ödeme İşlemi",
-      description:
-        "Gerçekleştirme görevlisi ve harcama yetkilisinin imzasıyla hazırlanan ÖEB muhasebe birimine gönderilir ve ödeme tamamlanır.",
-      status: completedSteps.includes(11)
-        ? "completed"
-        : currentStep === 11
-        ? "current"
-        : "pending",
-      details:
-        "Tüm evrakların tam olduğu muhasebe yetkilisince onaylandıktan sonra, bütçe tertibinden yüklenicinin IBAN hesabına tutar EFT/Havale ile gönderilir ve dosya kapanır.",
-      requiredDocs: ["Ödeme Emri Belgesi (MYS ÖEB)"],
-    },
-  ];
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormInputs((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleToggleStepComplete = (stepId: number) => {
-    if (completedSteps.includes(stepId)) {
-      setCompletedSteps(completedSteps.filter((id) => id !== stepId));
-    } else {
-      setCompletedSteps([...completedSteps, stepId]);
+      title: 'Ödeme İşlemleri',
+      tasks: [
+        { name: 'Ödeme Yazısı', done: false, tab: 'belgeler' },
+        { name: 'Ödeme Emri', done: false, tab: 'belgeler' },
+        { name: 'Muhasebe Kaydı', done: false, tab: 'belgeler' }
+      ]
     }
-  };
+  ])
 
-  const handleSaveStepData = (stepTitle: string) => {
-    setIsSaved(stepTitle);
-    setTimeout(() => setIsSaved(null), 3000);
-  };
+  const toggleTask = (stageId: number, taskIndex: number): void => {
+    setStages((prev) =>
+      prev.map((s) =>
+        s.id !== stageId
+          ? s
+          : {
+              ...s,
+              tasks: s.tasks.map((t, i) => (i === taskIndex ? { ...t, done: !t.done } : t))
+            }
+      )
+    )
+  }
 
-  const activeStepObj = steps.find((s) => s.id === currentStep) || steps[0];
+  const stagesWithStatus = stages.map((s) => {
+    const total = s.tasks.length
+    const doneCount = s.tasks.filter((t) => t.done).length
+    const progress = Math.round((doneCount / total) * 100)
+    const status: 'completed' | 'in-progress' | 'pending' =
+      progress === 100 ? 'completed' : progress > 0 ? 'in-progress' : 'pending'
+    return { ...s, progress, status }
+  })
+
+  const getStatusColor = (status: string): string =>
+    ({
+      completed: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+      'in-progress': 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+      pending: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+    }[status] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200')
+
+  const getStatusLabel = (status: string): string =>
+    ({
+      completed: '✓ Tamamlandı',
+      'in-progress': '◉ Yapılıyor',
+      pending: '◯ Bekleniyor'
+    }[status] || '◯ Bekleniyor')
+
+  const getLineColor = (status: string): string =>
+    ({
+      completed: 'bg-emerald-500',
+      'in-progress': 'bg-blue-500',
+      pending: 'bg-slate-300 dark:bg-slate-700'
+    }[status] || 'bg-slate-300')
+
+  const getFirmaStatusBadge = (durumu: string): string =>
+    ({
+      seçildi: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+      teklif: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+      reddedildi: 'bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
+    }[durumu] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200')
+
+  const getFirmaStatusLabel = (durumu: string): string =>
+    ({
+      seçildi: '✓ Seçildi',
+      teklif: '◉ Teklif Bekleniyor',
+      reddedildi: '✗ Reddedildi'
+    }[durumu] || '◯ Bekleniyor')
+
+  const getBelgeDurumBadge = (durum: string): string =>
+    ({
+      imzalandı: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+      imza_bekliyor: 'bg-orange-100 dark:bg-orange-950/40 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+      oluşturuldu: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+      taslak: 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+      oluşturulmadı: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+    }[durum] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200')
+
+  const getBelgeDurumLabel = (durum: string): string =>
+    ({
+      imzalandı: 'İmzalandı',
+      imza_bekliyor: 'İmzadan Dönüş Bekleniyor',
+      oluşturuldu: 'Oluşturuldu',
+      taslak: 'Taslak',
+      oluşturulmadı: 'Oluşturulmadı'
+    }[durum] || 'Oluşturulmadı')
+
+  const getKomisyonDurumBadge = (durum: string): string =>
+    ({
+      aktif: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+      tamamlandı: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+      bekliyor: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+    }[durum] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200')
+
+  const getKomisyonDurumLabel = (durum: string): string =>
+    ({
+      aktif: '◉ Aktif',
+      tamamlandı: '✓ Tamamlandı',
+      bekliyor: '◯ Henüz Görevlendirilmedi'
+    }[durum] || '◯ Bekliyor')
+
+  const belgeSonrakiDurum = (durum: string): Belge['durum'] =>
+    ({
+      oluşturulmadı: 'taslak' as const,
+      taslak: 'oluşturuldu' as const,
+      oluşturuldu: 'imza_bekliyor' as const,
+      imza_bekliyor: 'imzalandı' as const,
+      imzalandı: 'imzalandı' as const
+    }[durum] || 'taslak')
+
+  const belgeOlustur = (id: number): void => {
+    setBelgeler((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, durum: belgeSonrakiDurum(b.durum) } : b))
+    )
+  }
+
+  const toplamBedel = kalemler.reduce((acc, k) => acc + k.toplamBedel, 0)
+  const totalTasks = stages.reduce((acc, s) => acc + s.tasks.length, 0)
+  const completedTasks = stages.reduce((acc, s) => acc + s.tasks.filter((t) => t.done).length, 0)
+  const overallProgress = Math.round((completedTasks / totalTasks) * 100)
+  const belgeTamamlanan = belgeler.filter((b) => b.durum === 'imzalandı').length
+
+  const tabs = [
+    { id: 'ozet', label: 'Özet' },
+    { id: 'malzeme', label: 'Malzeme Listesi' },
+    { id: 'firmalar', label: 'İstekli Firmalar' },
+    { id: 'komisyon', label: 'Komisyon' },
+    { id: 'belgeler', label: 'Belgeler' },
+    { id: 'surec', label: 'Süreç' }
+  ]
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/60 overflow-hidden animate-in fade-in duration-500">
-      {/* Top Header */}
-      <div className="flex-none p-6 pb-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-955">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400">
-              <Sparkles className="w-7 h-7" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center gap-2">
-                Dosya Yönetim Paneli
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">
-                  Beta
-                </span>
-              </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
-                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme
-                gibi tüm işlemlerini tek ekrandan yönetin.
-              </p>
-            </div>
-          </div>
-
-          {activeDosya && (
-            <div className="bg-slate-50 dark:bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3 text-xs">
-              <Building className="w-4 h-4 text-slate-400" />
+    <div className="w-full min-h-screen bg-slate-50 dark:bg-slate-900/60 p-6 animate-in fade-in duration-500 overflow-y-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Başlık ve Dosya Bilgileri */}
+        <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-blue-500/10 rounded-xl text-blue-600 dark:text-blue-400">
+                <Sparkles className="w-7 h-7" />
+              </div>
               <div>
-                <div className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
-                  {activeDosya.konu}
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  Dosya No: {activeDosya.temin_no || "Belirsiz"}
-                </div>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center gap-2">
+                  Doğrudan Temin Süreci
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 uppercase tracking-widest">
+                    Canlı Takip
+                  </span>
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
+                  {dosya.kanunMaddesi} — {activeDosya?.konu || 'Aktif temin dosyası takip ve yönetim merkezi'}
+                </p>
               </div>
             </div>
-          )}
-        </div>
-      </div>
+            <span className="text-xs px-3 py-1.5 rounded-xl border font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800 shrink-0">
+              {dosya.durum}
+            </span>
+          </div>
 
-      {/* Main Container */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Side - Process Pipeline */}
-        <div className="w-[480px] shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-y-auto p-4 custom-scrollbar">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4 px-2">
-            Adım Adım Süreç Adımları ({completedSteps.length} / 11 Tamamlandı)
-          </h2>
-          <div className="space-y-2">
-            {steps.map((step) => {
-              const isCompleted = completedSteps.includes(step.id);
-              const isActive = currentStep === step.id;
-
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => setCurrentStep(step.id)}
-                  className={`w-full flex items-start gap-4 p-3 rounded-xl border text-left transition-all duration-200 ${
-                    isActive
-                      ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900/60 shadow-sm"
-                      : isCompleted
-                      ? "bg-slate-50/50 border-slate-100 dark:bg-slate-900/10 dark:border-slate-850 hover:bg-slate-100"
-                      : "border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/40"
-                  }`}
-                >
-                  {/* Circle Indicator */}
-                  <div className="flex flex-col items-center shrink-0">
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                        isCompleted
-                          ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/10"
-                          : isActive
-                          ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 ring-4 ring-indigo-500/10"
-                          : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                      }`}
-                    >
-                      {isCompleted ? <Check className="w-4 h-4" /> : step.id}
-                    </div>
-                    {step.id !== 11 && (
-                      <div className="w-[1.5px] h-10 bg-slate-200 dark:bg-slate-800 mt-2" />
-                    )}
-                  </div>
-
-                  {/* Title & Info */}
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3
-                        className={`text-xs font-bold truncate ${
-                          isActive
-                            ? "text-indigo-700 dark:text-indigo-400"
-                            : "text-slate-800 dark:text-slate-200"
-                        }`}
-                      >
-                        {step.title}
-                      </h3>
-                      {isCompleted && (
-                        <span className="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-955/35 px-1.5 py-0.2 rounded uppercase">
-                          Tamamlandı
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                      {step.subtitle}
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 leading-normal font-normal">
-                      {step.description}
-                    </p>
-                  </div>
-
-                  <ChevronRight
-                    className={`w-4 h-4 text-slate-400 mt-2 shrink-0 transition-transform ${
-                      isActive ? "translate-x-1 text-indigo-500" : ""
-                    }`}
-                  />
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
+                Dosya Numarası
+              </div>
+              <div className="text-base font-extrabold text-slate-900 dark:text-slate-100 font-mono">
+                {dosya.dosyaNo}
+              </div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
+                Temin Türü
+              </div>
+              <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                {dosya.teminTuru}
+              </div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
+                Açılış Tarihi
+              </div>
+              <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                {dosya.tarih}
+              </div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
+                Görevli Komisyon
+              </div>
+              <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                {komisyonlar.length} Komisyon
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Side - Interactive Details Panel */}
-        <div className="flex-1 bg-slate-50 dark:bg-slate-900/40 p-6 overflow-y-auto custom-scrollbar flex flex-col justify-between">
-          <div className="space-y-6">
-            {/* Step Header Card */}
-            <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1">
-                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-500">
-                    ADIM #{activeStepObj.id}
+        {/* Tab Navigasyonu */}
+        <div className="border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <div className="flex gap-2 min-w-max">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedTab(tab.id)}
+                className={`px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  selectedTab === tab.id
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-955 rounded-t-xl'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ÖZET */}
+        {selectedTab === 'ozet' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-in fade-in duration-300">
+            <div className="bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Clock className="text-blue-600 dark:text-blue-400" size={24} />
+                <div>
+                  <div className="text-xs text-blue-600 dark:text-blue-400 font-bold">Genel İlerleme</div>
+                  <div className="text-3xl font-black text-blue-900 dark:text-blue-100">{overallProgress}%</div>
+                </div>
+              </div>
+              <div className="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-3">
+                <div
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${overallProgress}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={24} />
+                <div>
+                  <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Tamamlanan Görevler</div>
+                  <div className="text-3xl font-black text-emerald-900 dark:text-emerald-100">
+                    {completedTasks}/{totalTasks}
                   </div>
-                  <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
-                    {activeStepObj.title}
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    {activeStepObj.subtitle}
+                </div>
+              </div>
+              <div className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                Toplam görevlerin %{Math.round((completedTasks / totalTasks) * 100)}'si tamamlandı
+              </div>
+            </div>
+
+            <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Package className="text-amber-600 dark:text-amber-400" size={24} />
+                <div>
+                  <div className="text-xs text-amber-600 dark:text-amber-400 font-bold">Toplam Bedel</div>
+                  <div className="text-2xl font-black text-amber-900 dark:text-amber-100">
+                    {toplamBedel.toLocaleString('tr-TR')} ₺
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-amber-700 dark:text-amber-300 font-medium">
+                {kalemler.length} malzeme kalemi
+              </div>
+            </div>
+
+            <div className="bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <FileText className="text-purple-600 dark:text-purple-400" size={24} />
+                <div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400 font-bold">Belgeler</div>
+                  <div className="text-3xl font-black text-purple-900 dark:text-purple-100">
+                    {belgeTamamlanan}/{belgeler.length}
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">İmzalanan belge sayısı</div>
+            </div>
+
+            <div className="md:col-span-4 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="text-slate-500" size={18} />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                  Komisyon İmza Durumu
+                </h3>
+              </div>
+              <div className="space-y-4">
+                {komisyonlar.map((k) => (
+                  <div key={k.id}>
+                    <div className="text-xs font-bold text-slate-500 mb-2">{k.tur}</div>
+                    <div className="flex flex-wrap gap-3">
+                      {k.uyeler.map((u) => (
+                        <span
+                          key={u.id}
+                          className={`text-xs px-3 py-1.5 rounded-xl border font-bold ${
+                            u.imza === 'imzaladı'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                          }`}
+                        >
+                          {u.imza === 'imzaladı' ? '✓' : '◯'} {u.adSoyad} — {u.gorev}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MALZEME LİSTESİ */}
+        {selectedTab === 'malzeme' && (
+          <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-300">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-slate-100 dark:bg-slate-900 uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="px-6 py-3.5">Malzeme Adı</th>
+                    <th className="px-6 py-3.5">Taşınır Kodu</th>
+                    <th className="px-6 py-3.5 text-center">Miktar</th>
+                    <th className="px-6 py-3.5 text-center">Birim Fiyat</th>
+                    <th className="px-6 py-3.5 text-right">Toplam Bedel</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                  {kalemler.map((kalem, index) => (
+                    <tr
+                      key={kalem.id}
+                      className={index % 2 === 0 ? 'bg-white dark:bg-slate-955' : 'bg-slate-50/50 dark:bg-slate-900/30'}
+                    >
+                      <td className="px-6 py-4 text-xs text-slate-900 dark:text-slate-100 font-bold">
+                        {kalem.malzemeAdi}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-lg font-mono text-[11px] font-bold">
+                          {kalem.tasinirKodu}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center font-medium">
+                        {kalem.miktar} {kalem.birim}
+                      </td>
+                      <td className="px-6 py-4 text-center font-medium">
+                        {kalem.birimFiyat.toLocaleString('tr-TR')} ₺
+                      </td>
+                      <td className="px-6 py-4 font-black text-right text-slate-900 dark:text-slate-100">
+                        {kalem.toplamBedel.toLocaleString('tr-TR')} ₺
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="bg-blue-50/60 dark:bg-blue-950/30 border-t-2 border-slate-200 dark:border-slate-800 font-bold">
+                    <td colSpan={4} className="px-6 py-4 text-right text-slate-800 dark:text-slate-200 font-extrabold uppercase">
+                      TOPLAM BEDEL:
+                    </td>
+                    <td className="px-6 py-4 text-right text-blue-600 dark:text-blue-400 text-base font-black">
+                      {toplamBedel.toLocaleString('tr-TR')} ₺
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* İSTEKLİ FİRMALAR */}
+        {selectedTab === 'firmalar' && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                  İstekli Firmaları Yönet
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Bu dosya için davet edilen ve teklif veren firmalar
+                </p>
+              </div>
+              <button
+                onClick={() => navigate({ to: '/firmalar' as any })}
+                className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2 cursor-pointer transition-colors"
+              >
+                <PlusCircle size={16} /> Firma Yönetimi
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {firmalar.map((firma) => (
+                <div
+                  key={firma.id}
+                  className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg transition-shadow space-y-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-100 dark:bg-blue-950/50 rounded-2xl p-3 text-blue-600 dark:text-blue-400">
+                      <Building2 size={22} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                        {firma.unvan}
+                      </h3>
+                      <span
+                        className={`inline-block text-[10px] px-2.5 py-0.5 rounded-lg border font-bold mt-1.5 ${getFirmaStatusBadge(
+                          firma.durumu
+                        )}`}
+                      >
+                        {getFirmaStatusLabel(firma.durumu)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 border-t border-slate-100 dark:border-slate-850 pt-4 text-xs">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span className="text-slate-400">Telefon</span>
+                      <span className="font-semibold">{firma.telefon}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span className="text-slate-400">E-Posta</span>
+                      <span className="font-semibold truncate max-w-[150px]">{firma.email}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span className="text-slate-400">Davet Tarihi</span>
+                      <span className="font-semibold">{firma.davetTarihi}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span className="text-slate-400">Teklif Tarihi</span>
+                      <span className="font-semibold">{firma.teklifTarihi || '—'}</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-850">
+                      <span className="text-slate-500 font-bold">Teklif Bedeli</span>
+                      <span className="text-slate-900 dark:text-slate-100 font-black">
+                        {firma.teklifBedeli ? `${firma.teklifBedeli.toLocaleString('tr-TR')} ₺` : '—'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* KOMİSYON */}
+        {selectedTab === 'komisyon' && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                  Komisyonları Yönet
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Bu dosya için görevlendirilen komisyonlar ve üyeleri
+                </p>
+              </div>
+              <button
+                onClick={() => navigate({ to: '/komisyonlar' as any })}
+                className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2 cursor-pointer transition-colors"
+              >
+                <PlusCircle size={16} /> Komisyon Yönetimi
+              </button>
+            </div>
+
+            {komisyonlar.map((k) => (
+              <div
+                key={k.id}
+                className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-955 hover:shadow-xs transition-shadow"
+              >
+                <div
+                  onClick={() => setExpandedKomisyon(expandedKomisyon === k.id ? null : k.id)}
+                  className="flex items-center gap-4 p-4 cursor-pointer bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                >
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-xs">
+                    <Users size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                        {k.tur}
+                      </h3>
+                      <span
+                        className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold ${getKomisyonDurumBadge(
+                          k.durum
+                        )}`}
+                      >
+                        {getKomisyonDurumLabel(k.durum)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                      {k.dayanak} · Görevlendirme: {k.olusturmaTarihi} · {k.uyeler.length} üye
+                    </p>
+                  </div>
+                  <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors shrink-0">
+                    <ChevronDown
+                      size={20}
+                      className={`text-slate-500 transition-transform ${
+                        expandedKomisyon === k.id ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {expandedKomisyon === k.id && (
+                  <div className="bg-white dark:bg-slate-955 border-t border-slate-200 dark:border-slate-800">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 dark:bg-slate-900 uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                          <tr>
+                            <th className="px-6 py-2.5">Ad Soyad</th>
+                            <th className="px-6 py-2.5">Unvan</th>
+                            <th className="px-6 py-2.5">Görev</th>
+                            <th className="px-6 py-2.5 text-center">İmza Durumu</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                          {k.uyeler.map((u, i) => (
+                            <tr
+                              key={u.id}
+                              className={i % 2 === 0 ? 'bg-white dark:bg-slate-955' : 'bg-slate-50/50 dark:bg-slate-900/30'}
+                            >
+                              <td className="px-6 py-3 font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <UserCheck size={16} className="text-slate-400" /> {u.adSoyad}
+                              </td>
+                              <td className="px-6 py-3 text-slate-600 dark:text-slate-400 font-medium">
+                                {u.unvan}
+                              </td>
+                              <td className="px-6 py-3 text-slate-600 dark:text-slate-400 font-medium">
+                                {u.gorev}
+                              </td>
+                              <td className="px-6 py-3 text-center">
+                                <span
+                                  className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold ${
+                                    u.imza === 'imzaladı'
+                                      ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                >
+                                  {u.imza === 'imzaladı' ? '✓ İmzaladı' : '◯ Bekliyor'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* BELGELER */}
+        {selectedTab === 'belgeler' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                    Süreç Belgeleri
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Bir belge seçip oluştur, imzaya gönder veya yazdır
                   </p>
                 </div>
-
-                <button
-                  onClick={() => handleToggleStepComplete(activeStepObj.id)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                    completedSteps.includes(activeStepObj.id)
-                      ? "bg-emerald-500 border-emerald-500 text-white shadow-sm"
-                      : "bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 border-slate-250 dark:border-slate-800"
-                  }`}
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>
-                    {completedSteps.includes(activeStepObj.id)
-                      ? "Tamamlandı"
-                      : "Tamamlandı Olarak İşaretle"}
-                  </span>
-                </button>
-              </div>
-
-              <div className="border-t border-slate-100 dark:border-slate-900 pt-4 text-xs text-slate-600 dark:text-slate-355 leading-relaxed font-normal">
-                {activeStepObj.details}
-              </div>
-
-              {activeStepObj.requiredDocs && (
-                <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800 space-y-2">
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5" />{" "}
-                    Gereken Belgeler / Çıktılar
-                  </div>
-                  <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300 font-semibold">
-                    {activeStepObj.requiredDocs.map((doc, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                        {doc}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="divide-y divide-slate-100 dark:divide-slate-850">
+                  {belgeler.map((b) => (
+                    <div
+                      key={b.id}
+                      onClick={() => setSelectedBelge(b)}
+                      className={`flex items-center justify-between gap-4 px-6 py-4 cursor-pointer transition-colors ${
+                        selectedBelge?.id === b.id
+                          ? 'bg-blue-50 dark:bg-blue-950/40'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-900/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText size={18} className="text-slate-400 shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                            {b.ad}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">{b.asama}</div>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold shrink-0 ${getBelgeDurumBadge(
+                          b.durum
+                        )}`}
+                      >
+                        {getBelgeDurumLabel(b.durum)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 h-fit lg:sticky lg:top-6 shadow-xs">
+                {selectedBelge ? (
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                          {selectedBelge.ad}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          {selectedBelge.asama}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedBelge(null)}
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <span
+                      className={`inline-block text-[10px] px-2.5 py-0.5 rounded-lg border font-bold ${getBelgeDurumBadge(
+                        selectedBelge.durum
+                      )}`}
+                    >
+                      {getBelgeDurumLabel(selectedBelge.durum)}
+                    </span>
+
+                    <div className="space-y-2 pt-2">
+                      {selectedBelge.durum !== 'imzalandı' && (
+                        <button
+                          onClick={() => {
+                            belgeOlustur(selectedBelge.id)
+                            setSelectedBelge((prev) =>
+                              prev ? { ...prev, durum: belgeSonrakiDurum(prev.durum) } : null
+                            )
+                          }}
+                          className={`w-full flex items-center justify-center gap-2 text-xs font-bold rounded-xl px-4 py-2.5 transition-colors cursor-pointer ${
+                            selectedBelge.durum === 'imza_bekliyor'
+                              ? 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+                              : 'text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20'
+                          }`}
+                        >
+                          <PenLine size={16} />
+                          {selectedBelge.durum === 'oluşturulmadı'
+                            ? 'Taslak Oluştur'
+                            : selectedBelge.durum === 'taslak'
+                            ? 'Onaya Gönder'
+                            : selectedBelge.durum === 'oluşturuldu'
+                            ? 'İmzaya Gönder'
+                            : 'İmzalı Nüsha Geldi, İşaretle'}
+                        </button>
+                      )}
+                      {selectedBelge.durum === 'imza_bekliyor' && (
+                        <p className="text-[11px] text-slate-400 text-center px-2">
+                          Belge ilgili makama gönderildi. İmzalı hali elinize ulaştığında yukarıdaki butonla işaretleyebilirsiniz.
+                        </p>
+                      )}
+                      <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl px-4 py-2.5 transition-colors cursor-pointer">
+                        <Printer size={16} /> Yazdır
+                      </button>
+                      <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl px-4 py-2.5 transition-colors cursor-pointer">
+                        <Download size={16} /> PDF İndir
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-xs text-slate-400 italic">
+                    Detayları görmek için soldan bir belge seçin
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Interactive Section depending on Step ID */}
-            {activeStepObj.id === 6 && (
-              <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-indigo-500" />{" "}
-                  Teslim Tesellüm Bilgileri Girişi
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Teslim Eden (Yüklenici Temsilcisi)
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                      <input
-                        type="text"
-                        name="teslimEden"
-                        value={formInputs.teslimEden}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Örn: Ahmet Yılmaz"
-                      />
+            {/* TARANAN BELGE YÜKLEME */}
+            <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                Taranan Belgeler
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-4">
+                Fiziksel imzalı belgelerin taranmış (PDF) hallerini buraya yükleyin — dosyanın ekinde tutulur.
+              </p>
+
+              <label
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setSurukleniyor(true)
+                }}
+                onDragLeave={() => setSurukleniyor(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setSurukleniyor(false)
+                  dosyalariEkle(e.dataTransfer.files)
+                }}
+                className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-2xl px-6 py-8 cursor-pointer transition-colors ${
+                  surukleniyor
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+                    : 'border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-slate-50/50 dark:bg-slate-900/40'
+                }`}
+              >
+                <Upload size={24} className={surukleniyor ? 'text-blue-500' : 'text-slate-400'} />
+                <div className="text-xs text-slate-600 dark:text-slate-300 text-center font-medium">
+                  <span className="font-bold text-blue-600 dark:text-blue-400">Dosya seç</span> veya sürükleyip bırak
+                </div>
+                <div className="text-[10px] text-slate-400">Yalnızca PDF</div>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => dosyalariEkle(e.target.files)}
+                />
+              </label>
+
+              {taranmisBelgeler.length > 0 && (
+                <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                  {taranmisBelgeler.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-center justify-between gap-4 px-4 py-3 bg-slate-50/50 dark:bg-slate-900/30"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText size={16} className="text-red-500 shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-xs text-slate-900 dark:text-slate-100 font-bold truncate">
+                            {b.ad}
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            {b.boyut} · {b.tarih}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => taranmisBelgeSil(b.id)}
+                        className="shrink-0 text-slate-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
+                        title="Kaldır"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Teslim Alan (Kurum Görevlisi)
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                      <input
-                        type="text"
-                        name="teslimAlan"
-                        value={formInputs.teslimAlan}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Örn: Mehmet Demir"
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    onClick={() => handleSaveStepData("teslim")}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
-                  >
-                    Bilgileri Kaydet
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeStepObj.id === 8 && (
-              <div className="bg-white dark:bg-slate-955 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-indigo-500" />{" "}
-                  Fatura Detayları Girişi
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Fatura No
-                    </label>
-                    <input
-                      type="text"
-                      name="faturaNo"
-                      value={formInputs.faturaNo}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Örn: GIB2026000018"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Fatura Tarihi
-                    </label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                      <input
-                        type="date"
-                        name="faturaTarihi"
-                        value={formInputs.faturaTarihi}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Fatura Tutarı (TL)
-                    </label>
-                    <input
-                      type="text"
-                      name="faturaTutari"
-                      value={formInputs.faturaTutari}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Örn: 24.500,00"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    onClick={() => handleSaveStepData("fatura")}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
-                  >
-                    Fatura Bilgilerini Kaydet
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeStepObj.id === 9 && (
-              <div className="bg-white dark:bg-slate-955 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-indigo-500" />{" "}
-                  Ödeme Talep ve IBAN Bilgisi
-                </h3>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Ödemenin Yapılacağı Banka IBAN Numarası
-                    </label>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                      <input
-                        type="text"
-                        name="iban"
-                        value={formInputs.iban}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="TR00 0000 0000 0000 0000 0000 00"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    onClick={() => handleSaveStepData("iban")}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
-                  >
-                    IBAN Bilgisini Kaydet
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeStepObj.id === 10 && (
-              <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-indigo-500" />{" "}
-                  Taşınır İşlem Fişi (TİF) Takibi
-                </h3>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
-                      Taşınır Fiş Numarası (TİF No)
-                    </label>
-                    <input
-                      type="text"
-                      name="tasinirFisNo"
-                      value={formInputs.tasinirFisNo}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Örn: 2026/458"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    onClick={() => handleSaveStepData("tif")}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
-                  >
-                    TİF Numarasını Kaydet
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isSaved && (
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 text-green-800 dark:text-green-300 p-3.5 rounded-xl text-xs flex items-center gap-2 animate-in fade-in duration-300">
-                <Check className="w-4 h-4 text-green-500" />
-                <span>
-                  İlgili aşama bilgileri başarıyla yerel taslağa kaydedildi.
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Action Footer for Selected Step */}
-          <div className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <Clock className="w-4 h-4" />
-              <span>
-                {activeStepObj.route
-                  ? "Bu aşamaya özel işlemler ve veri giriş ekranı mevcuttur."
-                  : "Bu aşama genel takip listesine dahildir."}
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              {activeStepObj.route && (
-                <button
-                  onClick={() => navigate({ to: activeStepObj.route as any })}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
-                >
-                  İşlem Ekranına Git
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {activeStepObj.requiredDocs && (
-                <button
-                  onClick={() =>
-                    navigate({ to: APP_ROUTES.DOSYA_CIKTI_MERKEZI as any })}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-md shadow-indigo-500/25 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  Belgeleri Yazdır
-                </button>
               )}
             </div>
           </div>
-        </div>
+        )}
+
+        {/* SÜREÇ TABI */}
+        {selectedTab === 'surec' && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Bir görevi işaretlemek için kutuya, ilgili sekmeye gitmek için ok ikonuna tıklayın.
+            </p>
+            <div className="flex flex-col md:flex-row items-stretch gap-3">
+              {stagesWithStatus.map((stage, index) => (
+                <React.Fragment key={stage.id}>
+                  <div className="flex-1 min-w-0 md:min-w-[190px] border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-955 overflow-hidden flex flex-col shadow-xs">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-xs">
+                          {stage.id}
+                        </div>
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs leading-tight">
+                          {stage.title}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-slate-200 dark:bg-slate-800 rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full transition-all duration-300 ${getLineColor(
+                              stage.status
+                            )}`}
+                            style={{ width: `${stage.progress}%` }}
+                          ></div>
+                        </div>
+                        <span
+                          className={`text-[9px] px-2 py-0.5 rounded-md border font-extrabold whitespace-nowrap ${getStatusColor(
+                            stage.status
+                          )}`}
+                        >
+                          {getStatusLabel(stage.status)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-2 flex-1 space-y-1">
+                      {stage.tasks.map((task, taskIndex) => (
+                        <div
+                          key={taskIndex}
+                          className="group flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+                        >
+                          <button
+                            onClick={() => toggleTask(stage.id, taskIndex)}
+                            className="shrink-0 w-4 h-4 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer"
+                            style={{
+                              borderColor: task.done ? '#10b981' : '#cbd5e1',
+                              backgroundColor: task.done ? '#10b981' : 'transparent'
+                            }}
+                            title="Tamamlandı olarak işaretle"
+                          >
+                            {task.done && <span className="text-white text-[10px] font-bold">✓</span>}
+                          </button>
+                          <span
+                            className={`flex-1 text-xs ${
+                              task.done
+                                ? 'text-slate-400 dark:text-slate-500 line-through'
+                                : 'text-slate-800 dark:text-slate-200 font-semibold'
+                            }`}
+                          >
+                            {task.name}
+                          </span>
+                          {task.tab && (
+                            <button
+                              onClick={() => setSelectedTab(task.tab)}
+                              className="shrink-0 text-slate-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                              title="İlgili sekmeye git"
+                            >
+                              <ArrowUpRight size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {index < stagesWithStatus.length - 1 && (
+                    <>
+                      <div className="hidden md:flex items-center justify-center px-1">
+                        <ChevronDown className="text-slate-300 dark:text-slate-700 -rotate-90" size={20} />
+                      </div>
+                      <div className="flex md:hidden items-center justify-center py-1">
+                        <ChevronDown className="text-slate-300 dark:text-slate-700" size={20} />
+                      </div>
+                    </>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  );
+  )
 }
