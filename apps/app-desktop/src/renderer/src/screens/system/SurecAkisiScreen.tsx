@@ -16,12 +16,17 @@ import {
   ArrowUpRight,
   Upload,
   Trash2,
-  Sparkles
+  Sparkles,
+  MoreVertical,
+  Eye,
+  Edit3,
+  ExternalLink
 } from 'lucide-react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 import { useCiktiMerkeziData } from '../dosya/CiktiMerkezi.hooks'
 import { useNavigate } from '@tanstack/react-router'
+import { Modal } from '../../components/ui/Modal'
 
 interface Belge {
   id: number
@@ -110,6 +115,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
   ])
 
   const [selectedBelge, setSelectedBelge] = useState<Belge | null>(null)
+  const [menuAcikId, setMenuAcikId] = useState<number | null>(null)
+  const [previewBelge, setPreviewBelge] = useState<Belge | null>(null)
+
   const [taranmisBelgeler, setTaranmisBelgeler] = useState<TaranmisBelge[]>([
     { id: 1, ad: 'yaklasik_maliyet_imzali.pdf', boyut: '842 KB', tarih: '18.01.2024' }
   ])
@@ -149,6 +157,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
     teminTuru: activeDosyaAny?.alim_turu || activeDosya?.tur || 'Doğrudan Temin',
     kanunMaddesi: '4734 Sayılı Kanun md. 22/d',
     tarih: activeDosyaAny?.tarih || activeDosya?.dosya_acilis_tarihi || '15.01.2024',
+    sonTeklifTarihi: '20.01.2024',
     durum: 'Onay Süreci'
   }
 
@@ -357,6 +366,172 @@ export default function SurecAkisiScreen(): React.JSX.Element {
     )
   }
 
+  const belgeOnizlemeIcerigi = (belge: Belge | null) => {
+    if (!belge) return null
+
+    if (belge.ad === 'Yaklaşık Maliyet Cetveli') {
+      const piyasaKomisyonu = komisyonlar.find((k) => k.tur.includes('Piyasa'))
+      return (
+        <div className="space-y-4 font-sans text-slate-800 dark:text-slate-200">
+          <div className="text-center font-bold text-sm mb-2 uppercase border-b pb-2 border-slate-200 dark:border-slate-800">
+            Yaklaşık Maliyet Hesap Cetveli
+          </div>
+          <table className="w-full text-xs border-collapse border border-slate-300 dark:border-slate-800">
+            <thead>
+              <tr className="bg-slate-100 dark:bg-slate-900 font-bold">
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-left">Sıra</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-left">Malzeme Adı</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">Miktar</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">Birim Fiyat</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right">Tutar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {kalemler.map((k, i) => (
+                <tr key={k.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40">
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2">{i + 1}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 font-semibold">{k.malzemeAdi}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">{k.miktar} {k.birim}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">{k.birimFiyat.toLocaleString('tr-TR')} ₺</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right font-bold">{k.toplamBedel.toLocaleString('tr-TR')} ₺</td>
+                </tr>
+              ))}
+              <tr className="bg-slate-100 dark:bg-slate-900 font-black">
+                <td colSpan={4} className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right uppercase">TOPLAM YAKLAŞIK MALİYET</td>
+                <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right text-blue-600 dark:text-blue-400 text-sm">{toplamBedel.toLocaleString('tr-TR')} ₺</td>
+              </tr>
+            </tbody>
+          </table>
+          {piyasaKomisyonu && (
+            <div className="grid grid-cols-3 gap-4 text-xs text-center mt-8 pt-4 border-t border-slate-200 dark:border-slate-800">
+              {piyasaKomisyonu.uyeler.map((u) => (
+                <div key={u.id} className="space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-slate-100">{u.adSoyad}</div>
+                  <div className="text-[11px] text-slate-500">{u.gorev}</div>
+                  <div className="text-[10px] text-emerald-600 font-semibold mt-1">✓ {u.imza}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (belge.ad === 'Piyasa Araştırması Tutanağı') {
+      const enUygun = [...firmalar].filter((f) => f.teklifBedeli).sort((a, b) => (a.teklifBedeli || 0) - (b.teklifBedeli || 0))[0]
+      const piyasaKomisyonu = komisyonlar.find((k) => k.tur.includes('Piyasa'))
+      return (
+        <div className="space-y-4 font-sans text-slate-800 dark:text-slate-200">
+          <div className="text-center font-bold text-sm mb-2 uppercase border-b pb-2 border-slate-200 dark:border-slate-800">
+            Piyasa Fiyat Araştırması Tutanağı
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            {dosya.dosyaNo} sayılı dosya kapsamında ihtiyaç duyulan malzemelerin temini için aşağıda unvanları yazılı firmalardan fiyat teklifi alınmış olup, sonuçlar aşağıda gösterilmiştir.
+          </p>
+          <table className="w-full text-xs border-collapse border border-slate-300 dark:border-slate-800">
+            <thead>
+              <tr className="bg-slate-100 dark:bg-slate-900 font-bold">
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-left">Firma Unvanı</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">Teklif Tarihi</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right">Teklif Bedeli</th>
+                <th className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">Değerlendirme</th>
+              </tr>
+            </thead>
+            <tbody>
+              {firmalar.map((f) => (
+                <tr key={f.id} className={f.durumu === 'seçildi' ? 'bg-emerald-50/60 dark:bg-emerald-950/30' : ''}>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 font-semibold">{f.unvan}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center">{f.teklifTarihi || '—'}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-right font-bold">{f.teklifBedeli ? `${f.teklifBedeli.toLocaleString('tr-TR')} ₺` : '—'}</td>
+                  <td className="border border-slate-300 dark:border-slate-800 px-2.5 py-2 text-center font-bold">{getFirmaStatusLabel(f.durumu)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {enUygun && (
+            <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed">
+              Yapılan değerlendirme sonucunda en uygun teklifin <strong className="text-blue-600 dark:text-blue-400">{enUygun.unvan}</strong> firmasından geldiği tespit edilmiş olup <strong className="text-emerald-600 dark:text-emerald-400">{enUygun.teklifBedeli?.toLocaleString('tr-TR')} ₺</strong> bedelle işlem yapılması komisyonumuzca uygun görülmüştür.
+            </p>
+          )}
+          {piyasaKomisyonu && (
+            <div className="grid grid-cols-3 gap-4 text-xs text-center mt-8 pt-4 border-t border-slate-200 dark:border-slate-800">
+              {piyasaKomisyonu.uyeler.map((u) => (
+                <div key={u.id} className="space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-slate-100">{u.adSoyad}</div>
+                  <div className="text-[11px] text-slate-500">{u.gorev}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-10 text-xs text-slate-400 space-y-2">
+        <FileText className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-700 mb-2" />
+        <p className="font-bold text-slate-600 dark:text-slate-300">Bu belge türü için dinamik şablon hazırlanmıştır.</p>
+        <p className="text-[11px]">Baskı ve çıktı için Çıktı Merkezi ekranını kullanabilirsiniz.</p>
+      </div>
+    )
+  }
+
+  const IlgiliBelgeCubugu = ({ belgeAdi }: { belgeAdi: string }) => {
+    const belge = belgeler.find((b) => b.ad === belgeAdi)
+    if (!belge) return null
+    return (
+      <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 mb-4 shadow-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <FileText size={16} className="text-slate-400 shrink-0" />
+          <span className="text-xs text-slate-600 dark:text-slate-400 truncate">
+            İlgili belge: <span className="font-bold text-slate-900 dark:text-slate-100">{belge.ad}</span>
+          </span>
+          <span
+            className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold shrink-0 ${getBelgeDurumBadge(
+              belge.durum
+            )}`}
+          >
+            {getBelgeDurumLabel(belge.durum)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setPreviewBelge(belge)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+            title="Önizle"
+          >
+            <Eye size={16} />
+          </button>
+          <button
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Yazdır"
+          >
+            <Printer size={16} />
+          </button>
+          <button
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="İndir"
+          >
+            <Download size={16} />
+          </button>
+          <button
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Tarayıcıda Aç"
+          >
+            <ExternalLink size={16} />
+          </button>
+          <button
+            onClick={() => setSelectedTab('belgeler')}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Belgeler sekmesine git"
+          >
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const toplamBedel = kalemler.reduce((acc, k) => acc + k.toplamBedel, 0)
   const totalTasks = stages.reduce((acc, s) => acc + s.tasks.length, 0)
   const completedTasks = stages.reduce((acc, s) => acc + s.tasks.filter((t) => t.done).length, 0)
@@ -376,14 +551,14 @@ export default function SurecAkisiScreen(): React.JSX.Element {
     <div className="w-full min-h-screen bg-slate-50 dark:bg-slate-900/60 p-6 animate-in fade-in duration-500 overflow-y-auto">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Başlık ve Dosya Bilgileri */}
-        <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="bg-white dark:bg-slate-955 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-blue-500/10 rounded-xl text-blue-600 dark:text-blue-400">
                 <Sparkles className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-850 dark:text-slate-100 flex items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-855 dark:text-slate-100 flex items-center gap-2">
                   Doğrudan Temin Süreci
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 uppercase tracking-widest">
                     Canlı Takip
@@ -399,7 +574,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
               <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
                 Dosya Numarası
@@ -426,6 +601,22 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             </div>
             <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
               <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
+                Son Teklif Tarihi
+              </div>
+              <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                {dosya.sonTeklifTarihi}
+              </div>
+            </div>
+            <div className="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+              <div className="text-xs text-blue-600 dark:text-blue-400 font-bold mb-1">
+                Dosyanın Durumu
+              </div>
+              <div className="text-base font-extrabold text-blue-900 dark:text-blue-100">
+                {dosya.durum}
+              </div>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1">
                 Görevli Komisyon
               </div>
               <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">
@@ -433,6 +624,50 @@ export default function SurecAkisiScreen(): React.JSX.Element {
               </div>
             </div>
           </div>
+
+          {/* Mini Süreç Şeridi — tüm sekmelerde görünür */}
+          <button
+            onClick={() => setSelectedTab('surec')}
+            className="w-full mt-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl px-5 py-3 flex items-center hover:border-blue-400 transition-colors group cursor-pointer"
+          >
+            {stagesWithStatus.map((stage, index) => (
+              <React.Fragment key={stage.id}>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${
+                      stage.status === 'completed'
+                        ? 'bg-emerald-500 text-white'
+                        : stage.status === 'in-progress'
+                        ? 'bg-blue-600 text-white ring-4 ring-blue-500/20'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {stage.status === 'completed' ? '✓' : stage.id}
+                  </div>
+                  <span
+                    className={`hidden sm:inline text-xs whitespace-nowrap ${
+                      stage.status === 'in-progress'
+                        ? 'font-bold text-slate-900 dark:text-slate-100'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {stage.title}
+                  </span>
+                </div>
+                {index < stagesWithStatus.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 rounded-full ${
+                      stage.status === 'completed' ? 'bg-emerald-400' : 'bg-slate-200 dark:bg-slate-800'
+                    }`}
+                  ></div>
+                )}
+              </React.Fragment>
+            ))}
+            <ArrowUpRight
+              size={16}
+              className="ml-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors shrink-0"
+            />
+          </button>
         </div>
 
         {/* Tab Navigasyonu */}
@@ -516,6 +751,62 @@ export default function SurecAkisiScreen(): React.JSX.Element {
               <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">İmzalanan belge sayısı</div>
             </div>
 
+            {/* Süreç Akışı Kartı */}
+            <div className="md:col-span-4 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-slate-500" size={18} />
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Süreç Akışı</h3>
+                </div>
+                <button
+                  onClick={() => setSelectedTab('surec')}
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  Tüm görevleri gör <ArrowUpRight size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                {stagesWithStatus.map((stage) => {
+                  const doneCount = stage.tasks.filter((t) => t.done).length
+                  return (
+                    <button
+                      key={stage.id}
+                      onClick={() => setSelectedTab('surec')}
+                      className="text-left border border-slate-150 dark:border-slate-800 rounded-xl p-3.5 hover:border-blue-400 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div
+                          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                            stage.status === 'completed'
+                              ? 'bg-emerald-500 text-white'
+                              : stage.status === 'in-progress'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                          }`}
+                        >
+                          {stage.status === 'completed' ? '✓' : stage.id}
+                        </div>
+                        <span className="text-xs font-bold text-slate-855 dark:text-slate-100 leading-tight">
+                          {stage.title}
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mb-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getLineColor(
+                            stage.status
+                          )}`}
+                          style={{ width: `${stage.progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-semibold">
+                        {doneCount}/{stage.tasks.length} görev
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             <div className="md:col-span-4 bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
               <div className="flex items-center gap-2 mb-4">
                 <Users className="text-slate-500" size={18} />
@@ -550,53 +841,56 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
         {/* MALZEME LİSTESİ */}
         {selectedTab === 'malzeme' && (
-          <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-300">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                <thead className="bg-slate-100 dark:bg-slate-900 uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="px-6 py-3.5">Malzeme Adı</th>
-                    <th className="px-6 py-3.5">Taşınır Kodu</th>
-                    <th className="px-6 py-3.5 text-center">Miktar</th>
-                    <th className="px-6 py-3.5 text-center">Birim Fiyat</th>
-                    <th className="px-6 py-3.5 text-right">Toplam Bedel</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-                  {kalemler.map((kalem, index) => (
-                    <tr
-                      key={kalem.id}
-                      className={index % 2 === 0 ? 'bg-white dark:bg-slate-955' : 'bg-slate-50/50 dark:bg-slate-900/30'}
-                    >
-                      <td className="px-6 py-4 text-xs text-slate-900 dark:text-slate-100 font-bold">
-                        {kalem.malzemeAdi}
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <IlgiliBelgeCubugu belgeAdi="Yaklaşık Maliyet Cetveli" />
+            <div className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                  <thead className="bg-slate-100 dark:bg-slate-900 uppercase font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                      <th className="px-6 py-3.5">Malzeme Adı</th>
+                      <th className="px-6 py-3.5">Taşınır Kodu</th>
+                      <th className="px-6 py-3.5 text-center">Miktar</th>
+                      <th className="px-6 py-3.5 text-center">Birim Fiyat</th>
+                      <th className="px-6 py-3.5 text-right">Toplam Bedel</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                    {kalemler.map((kalem, index) => (
+                      <tr
+                        key={kalem.id}
+                        className={index % 2 === 0 ? 'bg-white dark:bg-slate-955' : 'bg-slate-50/50 dark:bg-slate-900/30'}
+                      >
+                        <td className="px-6 py-4 text-xs text-slate-900 dark:text-slate-100 font-bold">
+                          {kalem.malzemeAdi}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-lg font-mono text-[11px] font-bold">
+                            {kalem.tasinirKodu}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center font-medium">
+                          {kalem.miktar} {kalem.birim}
+                        </td>
+                        <td className="px-6 py-4 text-center font-medium">
+                          {kalem.birimFiyat.toLocaleString('tr-TR')} ₺
+                        </td>
+                        <td className="px-6 py-4 font-black text-right text-slate-900 dark:text-slate-100">
+                          {kalem.toplamBedel.toLocaleString('tr-TR')} ₺
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-blue-50/60 dark:bg-blue-950/30 border-t-2 border-slate-200 dark:border-slate-800 font-bold">
+                      <td colSpan={4} className="px-6 py-4 text-right text-slate-800 dark:text-slate-200 font-extrabold uppercase">
+                        TOPLAM BEDEL:
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-lg font-mono text-[11px] font-bold">
-                          {kalem.tasinirKodu}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center font-medium">
-                        {kalem.miktar} {kalem.birim}
-                      </td>
-                      <td className="px-6 py-4 text-center font-medium">
-                        {kalem.birimFiyat.toLocaleString('tr-TR')} ₺
-                      </td>
-                      <td className="px-6 py-4 font-black text-right text-slate-900 dark:text-slate-100">
-                        {kalem.toplamBedel.toLocaleString('tr-TR')} ₺
+                      <td className="px-6 py-4 text-right text-blue-600 dark:text-blue-400 text-base font-black">
+                        {toplamBedel.toLocaleString('tr-TR')} ₺
                       </td>
                     </tr>
-                  ))}
-                  <tr className="bg-blue-50/60 dark:bg-blue-950/30 border-t-2 border-slate-200 dark:border-slate-800 font-bold">
-                    <td colSpan={4} className="px-6 py-4 text-right text-slate-800 dark:text-slate-200 font-extrabold uppercase">
-                      TOPLAM BEDEL:
-                    </td>
-                    <td className="px-6 py-4 text-right text-blue-600 dark:text-blue-400 text-base font-black">
-                      {toplamBedel.toLocaleString('tr-TR')} ₺
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -620,6 +914,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 <PlusCircle size={16} /> Firma Yönetimi
               </button>
             </div>
+            <IlgiliBelgeCubugu belgeAdi="Piyasa Araştırması Tutanağı" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {firmalar.map((firma) => (
                 <div
@@ -693,6 +988,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 <PlusCircle size={16} /> Komisyon Yönetimi
               </button>
             </div>
+            <IlgiliBelgeCubugu belgeAdi="Komisyon Görevlendirme Yazısı" />
 
             {komisyonlar.map((k) => (
               <div
@@ -801,7 +1097,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                     <div
                       key={b.id}
                       onClick={() => setSelectedBelge(b)}
-                      className={`flex items-center justify-between gap-4 px-6 py-4 cursor-pointer transition-colors ${
+                      className={`relative flex items-center justify-between gap-4 px-6 py-4 cursor-pointer transition-colors ${
                         selectedBelge?.id === b.id
                           ? 'bg-blue-50 dark:bg-blue-950/40'
                           : 'hover:bg-slate-50 dark:hover:bg-slate-900/40'
@@ -816,13 +1112,71 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                           <div className="text-[11px] text-slate-500 dark:text-slate-400">{b.asama}</div>
                         </div>
                       </div>
-                      <span
-                        className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold shrink-0 ${getBelgeDurumBadge(
-                          b.durum
-                        )}`}
-                      >
-                        {getBelgeDurumLabel(b.durum)}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`text-[10px] px-2.5 py-0.5 rounded-lg border font-bold ${getBelgeDurumBadge(
+                            b.durum
+                          )}`}
+                        >
+                          {getBelgeDurumLabel(b.durum)}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setMenuAcikId(menuAcikId === b.id ? null : b.id)
+                          }}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          title="Diğer işlemler"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      </div>
+
+                      {/* Dropdown Menu */}
+                      {menuAcikId === b.id && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute right-6 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-20 py-1 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in slide-in-from-top-1 duration-200"
+                        >
+                          <div className="py-0.5">
+                            <button
+                              onClick={() => {
+                                setPreviewBelge(b)
+                                setMenuAcikId(null)
+                              }}
+                              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <Eye size={14} className="text-blue-500" /> Önizle
+                            </button>
+                            <button
+                              onClick={() => setMenuAcikId(null)}
+                              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <ExternalLink size={14} className="text-slate-400" /> Tarayıcıda Aç
+                            </button>
+                            <button
+                              onClick={() => setMenuAcikId(null)}
+                              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <Edit3 size={14} className="text-slate-400" /> Düzenle
+                            </button>
+                          </div>
+                          <div className="py-0.5">
+                            <button
+                              onClick={() => setMenuAcikId(null)}
+                              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <Printer size={14} className="text-slate-400" /> Yazdır
+                            </button>
+                            <button
+                              onClick={() => setMenuAcikId(null)}
+                              className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            >
+                              <Download size={14} className="text-slate-400" /> İndir
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -886,6 +1240,12 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                           Belge ilgili makama gönderildi. İmzalı hali elinize ulaştığında yukarıdaki butonla işaretleyebilirsiniz.
                         </p>
                       )}
+                      <button
+                        onClick={() => setPreviewBelge(selectedBelge)}
+                        className="w-full flex items-center justify-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2.5 transition-colors cursor-pointer"
+                      >
+                        <Eye size={16} /> İçeriği Önizle
+                      </button>
                       <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl px-4 py-2.5 transition-colors cursor-pointer">
                         <Printer size={16} /> Yazdır
                       </button>
@@ -1069,6 +1429,35 @@ export default function SurecAkisiScreen(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      {/* BELGE ÖNİZLEME MODAL */}
+      {previewBelge && (
+        <Modal
+          isOpen={Boolean(previewBelge)}
+          onClose={() => setPreviewBelge(null)}
+          title={`Belge Önizleme: ${previewBelge.ad}`}
+          description={`${previewBelge.asama} Aşaması — Durum: ${getBelgeDurumLabel(previewBelge.durum)}`}
+          className="max-w-4xl"
+        >
+          <div className="p-4 bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner max-h-[70vh] overflow-y-auto custom-scrollbar">
+            {belgeOnizlemeIcerigi(previewBelge)}
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4">
+            <button
+              onClick={() => setPreviewBelge(null)}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+            >
+              Kapat
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20"
+            >
+              <Printer size={14} /> Yazdır
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
