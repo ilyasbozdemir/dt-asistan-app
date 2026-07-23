@@ -734,7 +734,7 @@ export const manifests: any[] = [
   }
 ,
   {
-    "app": "1.0.0-beta.66",
+    "app": "1.0.0-beta.67",
     "schema_min": 1,
     "schema_max": 31,
     "release_date": "2026-07-22",
