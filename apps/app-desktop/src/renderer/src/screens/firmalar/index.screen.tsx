@@ -31,7 +31,15 @@ const emptyFirma: FirmaInput = {
   tc_kimlik_no: '',
   dogum_tarihi: '',
   vergi_dairesi: '',
-  vergi_no: ''
+  vergi_no: '',
+  deneyim_skoru: 0,
+  kalite_skoru: 0,
+  odeme_disiplini: 1,
+  kara_liste: 0,
+  kara_liste_neden: '',
+  son_iletisim_tarihi: '',
+  sorumlu_personel_id: null,
+  iletisim_notlari: '[]'
 }
 
 export default function FirmalarScreen(): React.JSX.Element {
@@ -53,8 +61,8 @@ export default function FirmalarScreen(): React.JSX.Element {
 
   const openEditModal = (e: React.MouseEvent, firma: any) => {
     e.stopPropagation()
-    const { id, aktif_mi, created_at, ...editableData } = firma
-    setForm(editableData)
+    const { id, aktif_mi, created_at, updated_at, ...editableData } = firma
+    setForm({ ...emptyFirma, ...editableData })
     setEditingId(id)
     setShowExtraFields(false)
     setIsModalOpen(true)
@@ -120,10 +128,10 @@ export default function FirmalarScreen(): React.JSX.Element {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3 text-slate-855 dark:text-slate-100">
             <Building2 className="w-8 h-8 text-blue-600" />
-            İstekli Firma Yönetimi
+            İstekli Firma Yönetimi & CRM
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-            Doğrudan temin süreçlerinde kullanılacak firma ve tedarikçi havuzunu yönetin.
+            Tedarikçi firmaların performans skoru, kara liste durumları ve iletişim geçmişini yönetin.
           </p>
         </div>
         <div className="flex items-center gap-4 sm:gap-6 shrink-0">

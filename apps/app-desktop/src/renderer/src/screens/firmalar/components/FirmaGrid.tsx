@@ -1,5 +1,5 @@
 import React from 'react'
-import { Building2, Edit2, Trash2, Phone, User, Globe, Mail } from 'lucide-react'
+import { Building2, Edit2, Trash2, Phone, User } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 
 interface FirmaGridProps {
@@ -21,13 +21,21 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
         <div
           key={firma.id}
           onClick={() => handleViewClick(firma)}
-          className="flex flex-col p-5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group relative cursor-pointer overflow-hidden min-h-[175px]"
+          className={`flex flex-col p-5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-900 border rounded-2xl hover:border-blue-400 dark:hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group relative cursor-pointer overflow-hidden min-h-[175px] ${
+            firma.kara_liste === 1
+              ? 'border-red-300 dark:border-red-900/50 bg-red-50/10'
+              : 'border-slate-200/80 dark:border-slate-800'
+          }`}
         >
           {/* Accent line on top of card */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className={`absolute top-0 left-0 right-0 h-1 transition-opacity duration-300 ${
+            firma.kara_liste === 1
+              ? 'bg-red-500 opacity-100'
+              : 'bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100'
+          }`} />
 
           {/* Action buttons */}
-          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
             <Button
               title="Düzenle"
               variant="ghost"
@@ -49,7 +57,12 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
           </div>
 
           {/* Badges row */}
-          <div className="flex items-center gap-2 mb-3.5 pr-14">
+          <div className="flex items-center gap-1.5 mb-3.5 pr-14 flex-wrap">
+            {firma.kara_liste === 1 && (
+              <span className="font-bold text-[9px] text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950/80 border border-red-200 dark:border-red-800 px-2 py-0.5 rounded-lg tracking-wider animate-pulse flex items-center gap-1">
+                🚫 KARA LİSTE
+              </span>
+            )}
             {firma.firma_kodu && (
               <span className="font-mono font-black text-[9px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-100/50 dark:border-blue-900/30 px-2 py-0.5 rounded-lg tracking-wider">
                 {firma.firma_kodu}
@@ -58,6 +71,11 @@ export const FirmaGrid: React.FC<FirmaGridProps> = ({
             {firma.il && (
               <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-200/30 dark:border-slate-700/20">
                 {firma.il}
+              </span>
+            )}
+            {Boolean(firma.deneyim_skoru) && (
+              <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border border-amber-200/50 dark:border-amber-800/30 px-1.5 py-0.5 rounded-lg">
+                ⭐ {firma.deneyim_skoru}/5
               </span>
             )}
           </div>

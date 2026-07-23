@@ -52,12 +52,20 @@ export function IstekliFirmalar(): React.JSX.Element {
     loadFirms()
   }, [activeDosyaId])
 
-  const handleAddFirm = async (firmaId: number): Promise<void> => {
+  const handleAddFirm = async (firma: any): Promise<void> => {
+    if (firma.kara_liste === 1) {
+      const confirmAdd = confirm(
+        `⚠️ DİKKAT: "${firma.unvan}" firması KARA LİSTEDEDİR!\n\n` +
+          `Gerekçe: ${firma.kara_liste_neden || 'Belirtilmemiş.'}\n\n` +
+          `Yine de bu doğrudan temin dosyasına eklemek istiyor musunuz?`
+      )
+      if (!confirmAdd) return
+    }
     try {
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         "INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, teklif_durumu) VALUES (?, ?, 'Davet Edildi')",
-        [activeDosyaId, firmaId]
+        [activeDosyaId, firma.id]
       )
       if (res.success) {
         loadFirms()
@@ -125,20 +133,32 @@ export function IstekliFirmalar(): React.JSX.Element {
             ) : (
               unassociatedFirms.map((firma) => (
                 <div key={firma.id} className="py-2.5 flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <span
-                      className="block text-xs font-bold text-slate-800 dark:text-slate-250 truncate"
-                      title={firma.unvan}
-                    >
-                      {firma.unvan}
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="block text-xs font-bold text-slate-800 dark:text-slate-250 truncate"
+                        title={firma.unvan}
+                      >
+                        {firma.unvan}
+                      </span>
+                      {firma.kara_liste === 1 && (
+                        <span className="text-[8px] font-black text-red-600 bg-red-100 dark:bg-red-950 px-1 py-0.2 rounded shrink-0">
+                          🚫 KARA LİSTE
+                        </span>
+                      )}
+                    </div>
                     <span className="block text-[9px] text-slate-400">
-                      Vergi No: {firma.vergi_no || 'Belirtilmemiş'}
+                      Vergi No: {firma.vergi_no || 'Belirtilmemiş'} {firma.deneyim_skoru ? `| ⭐ ${firma.deneyim_skoru}/5` : ''}
                     </span>
                   </div>
                   <button
-                    onClick={() => handleAddFirm(firma.id)}
-                    className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black cursor-pointer transition-colors"
+                    onClick={() => handleAddFirm(firma)}
+                    className={cn(
+                      "px-2.5 py-1 text-[10px] font-black rounded-lg cursor-pointer transition-colors shrink-0",
+                      firma.kara_liste === 1
+                        ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-950/50 dark:text-red-300"
+                        : "bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400"
+                    )}
                   >
                     Ekle
                   </button>

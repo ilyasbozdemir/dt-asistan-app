@@ -195,6 +195,98 @@ export const FirmaModal: React.FC<FirmaModalProps> = ({
               />
               <Field label="Vergi No" field="vergi_no" form={form} handleChange={handleChange} />
             </div>
+
+            {/* CRM Alanları */}
+            <div className="space-y-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                ⭐ CRM & Performans Değerlendirmesi
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                    Deneyim Skoru (1-5 Yıldız)
+                  </label>
+                  <select
+                    value={form.deneyim_skoru || 0}
+                    onChange={(e) => handleChange('deneyim_skoru' as any, Number(e.target.value) as any)}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 rounded-xl px-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={0}>Seçilmedi (0)</option>
+                    <option value={1}>⭐ (1 - Çok Zayıf)</option>
+                    <option value={2}>⭐⭐ (2 - Zayıf)</option>
+                    <option value={3}>⭐⭐⭐ (3 - Orta)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4 - İyi)</option>
+                    <option value={5}>⭐⭐⭐⭐⭐ (5 - Mükemmel)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                    Kalite Skoru (1-5 Yıldız)
+                  </label>
+                  <select
+                    value={form.kalite_skoru || 0}
+                    onChange={(e) => handleChange('kalite_skoru' as any, Number(e.target.value) as any)}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 rounded-xl px-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={0}>Seçilmedi (0)</option>
+                    <option value={1}>⭐ (1 - Kalitesiz)</option>
+                    <option value={2}>⭐⭐ (2 - Düşük Kalite)</option>
+                    <option value={3}>⭐⭐⭐ (3 - Standart)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4 - Yüksek Kalite)</option>
+                    <option value={5}>⭐⭐⭐⭐⭐ (5 - Üst Düzey)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                    Ödeme Disiplini
+                  </label>
+                  <select
+                    value={form.odeme_disiplini ?? 1}
+                    onChange={(e) => handleChange('odeme_disiplini' as any, Number(e.target.value) as any)}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs py-1.5 h-9 rounded-xl px-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={1}>✅ Zamanında Ödeme / Düzenli</option>
+                    <option value={0}>⚠️ Aksatıyor / Sorunlu</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Kara Liste Toggle */}
+              <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-900/40 p-3.5 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-red-700 dark:text-red-400">
+                    🚫 Kara Liste (Güvenilmez Firma Durumu)
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form.kara_liste)}
+                      onChange={(e) => handleChange('kara_liste' as any, (e.target.checked ? 1 : 0) as any)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:after:border-slate-600 peer-checked:bg-red-600"></div>
+                  </label>
+                </div>
+
+                {Boolean(form.kara_liste) && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-red-600 dark:text-red-300 mb-1">
+                      Kara Liste Nedeni / Açıklaması
+                    </label>
+                    <textarea
+                      value={form.kara_liste_neden || ''}
+                      onChange={(e) => handleChange('kara_liste_neden' as any, e.target.value as any)}
+                      placeholder="Örn: 2 defa taahhüt edilen teslimatı 30 gün geciktirdi veya eksik/hasarlı ürün teslim etti."
+                      rows={2}
+                      className="w-full bg-white dark:bg-slate-900 border border-red-300 dark:border-red-800 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

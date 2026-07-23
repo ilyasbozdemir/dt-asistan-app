@@ -8,6 +8,7 @@ import { TANIM_Kurum } from './tables/TANIM_Kurum'
 import { TANIM_Asama } from './tables/TANIM_Asama'
 import { DATA_TeminDosyasi } from './tables/DATA_TeminDosyasi'
 import { TANIM_Firma } from './tables/TANIM_Firma'
+import { TANIM_FirmaIletisimNotu } from './tables/TANIM_FirmaIletisimNotu'
 import { TANIM_Ambar } from './tables/TANIM_Ambar'
 import { TANIM_AlimTuru } from './tables/TANIM_AlimTuru'
 import { TANIM_Sablon } from './tables/TANIM_Sablon'
@@ -48,6 +49,7 @@ export const schema = {
     TANIM_Roller,
     TANIM_Asama,
     TANIM_Firma,
+    TANIM_FirmaIletisimNotu,
     TANIM_Ambar,
     TANIM_TasinirKod,
     TANIM_OkasKod,

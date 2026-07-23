@@ -1,214 +1,253 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
-  CheckCircle2,
-  Clock,
-  FileText,
-  Printer,
-  ChevronRight,
-  Sparkles,
+  AlertCircle,
   ArrowRight,
-  Info,
-  Calendar,
   Building,
-  User,
-  CreditCard,
+  Calendar,
   Check,
-  AlertCircle
-} from 'lucide-react'
-import { useWorkspaceStore } from '../../store/workspaceStore'
-import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
-import { useCiktiMerkeziData } from '../dosya/CiktiMerkezi.hooks'
-import { useNavigate } from '@tanstack/react-router'
-import { APP_ROUTES } from '../../constants/routeConstants'
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  CreditCard,
+  FileText,
+  Info,
+  Printer,
+  Sparkles,
+  User,
+} from "lucide-react";
+import { useWorkspaceStore } from "../../store/workspaceStore";
+import { useDosyalarHooks } from "../dosyalar/dosyalar.hooks";
+import { useCiktiMerkeziData } from "../dosya/CiktiMerkezi.hooks";
+import { useNavigate } from "@tanstack/react-router";
+import { APP_ROUTES } from "../../constants/routeConstants";
 
 interface Step {
-  id: number
-  title: string
-  subtitle: string
-  description: string
-  route?: string
-  status: 'completed' | 'current' | 'pending'
-  details: string
-  requiredDocs?: string[]
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  route?: string;
+  status: "completed" | "current" | "pending";
+  details: string;
+  requiredDocs?: string[];
 }
 
 export default function SurecAkisiScreen(): React.JSX.Element {
-  const { activeDosyaId } = useWorkspaceStore()
-  const { dosyalar } = useDosyalarHooks()
-  const navigate = useNavigate()
+  const { activeDosyaId } = useWorkspaceStore();
+  const { dosyalar } = useDosyalarHooks();
+  const navigate = useNavigate();
 
-  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
-  const { dosyaContext } = useCiktiMerkeziData(activeDosyaId)
+  const activeDosya = dosyalar.find((d) => d.id === activeDosyaId);
+  const { dosyaContext } = useCiktiMerkeziData(activeDosyaId);
 
   // Simulation state
-  const [currentStep, setCurrentStep] = useState<number>(3) // default active step in detail panel
-  const [completedSteps, setCompletedSteps] = useState<number[]>([1, 2])
+  const [currentStep, setCurrentStep] = useState<number>(3); // default active step in detail panel
+  const [completedSteps, setCompletedSteps] = useState<number[]>([1, 2]);
   const [formInputs, setFormInputs] = useState({
-    teslimEden: dosyaContext?.hazirlayanPersonelAdi || '',
-    teslimAlan: dosyaContext?.onaylayanPersonelAdi || '',
-    faturaNo: '',
-    faturaTarihi: new Date().toISOString().split('T')[0],
-    faturaTutari: dosyaContext?.yaklasikMaliyetTutar || '',
-    iban: '',
-    tasinirFisNo: ''
-  })
-  const [isSaved, setIsSaved] = useState<string | null>(null)
+    teslimEden: dosyaContext?.hazirlayanPersonelAdi || "",
+    teslimAlan: dosyaContext?.onaylayanPersonelAdi || "",
+    faturaNo: "",
+    faturaTarihi: new Date().toISOString().split("T")[0],
+    faturaTutari: dosyaContext?.yaklasikMaliyetTutar || "",
+    iban: "",
+    tasinirFisNo: "",
+  });
+  const [isSaved, setIsSaved] = useState<string | null>(null);
 
   const steps: Step[] = [
     {
       id: 1,
-      title: 'İhtiyaç Oluştu',
-      subtitle: 'Dosya ve İş Tanımlama',
+      title: "İhtiyaç Oluştu",
+      subtitle: "Dosya ve İş Tanımlama",
       description:
-        'İhtiyaç duyulan mal, hizmet veya yapım işi belirlenerek sisteme kaydedilir, iş adı ve dosya numarası atanır.',
-      status: completedSteps.includes(1) ? 'completed' : currentStep === 1 ? 'current' : 'pending',
+        "İhtiyaç duyulan mal, hizmet veya yapım işi belirlenerek sisteme kaydedilir, iş adı ve dosya numarası atanır.",
+      status: completedSteps.includes(1)
+        ? "completed"
+        : currentStep === 1
+        ? "current"
+        : "pending",
       details:
-        'Doğrudan temin sürecinin ilk halkasıdır. İlgili birimlerin talepleri doğrultusunda dosya konusu, alım türü ve yaklaşık bütçe tanımlanarak iş başlatılır.',
-      route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC
+        "Doğrudan temin sürecinin ilk halkasıdır. İlgili birimlerin talepleri doğrultusunda dosya konusu, alım türü ve yaklaşık bütçe tanımlanarak iş başlatılır.",
+      route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
     },
     {
       id: 2,
-      title: 'Doğrudan Temin Onayı Alındı',
-      subtitle: 'Onay Belgesi & Olurlar',
+      title: "Doğrudan Temin Onayı Alındı",
+      subtitle: "Onay Belgesi & Olurlar",
       description:
-        'Harcama yetkilisinden (en üst amir) işin başlatılması ve bütçe kullanımı için resmi olur yazısı ve onay alınır.',
-      status: completedSteps.includes(2) ? 'completed' : currentStep === 2 ? 'current' : 'pending',
+        "Harcama yetkilisinden (en üst amir) işin başlatılması ve bütçe kullanımı için resmi olur yazısı ve onay alınır.",
+      status: completedSteps.includes(2)
+        ? "completed"
+        : currentStep === 2
+        ? "current"
+        : "pending",
       details:
         "4734 Sayılı Kanun'un ilgili maddelerine (22/d vb.) göre hazırlanan doğrudan temin onay belgesi harcama yetkilisine sunulur ve imzalatılır.",
       route: APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
-      requiredDocs: ['Doğrudan Temin Onay Belgesi (Onay Belgesi)']
+      requiredDocs: ["Doğrudan Temin Onay Belgesi (Onay Belgesi)"],
     },
     {
       id: 3,
-      title: 'Piyasa Fiyat Araştırması Yapıldı',
-      subtitle: 'Teklifler & Piyasa Fiyat Araştırma Tutanağı',
+      title: "Piyasa Fiyat Araştırması Yapıldı",
+      subtitle: "Teklifler & Piyasa Fiyat Araştırma Tutanağı",
       description:
-        'En az 3 firmadan veya piyasadan fiyat teklifleri toplanarak Piyasa Fiyat Araştırma Tutanağı (PFAT) düzenlenir.',
-      status: completedSteps.includes(3) ? 'completed' : currentStep === 3 ? 'current' : 'pending',
+        "En az 3 firmadan veya piyasadan fiyat teklifleri toplanarak Piyasa Fiyat Araştırma Tutanağı (PFAT) düzenlenir.",
+      status: completedSteps.includes(3)
+        ? "completed"
+        : currentStep === 3
+        ? "current"
+        : "pending",
       details:
-        'Fiyat komisyonu üyeleri tarafından piyasadan alınan teklifler değerlendirilir. Eşzamanlı olarak yaklaşık maliyet cetveli de netleştirilmiş olur.',
+        "Fiyat komisyonu üyeleri tarafından piyasadan alınan teklifler değerlendirilir. Eşzamanlı olarak yaklaşık maliyet cetveli de netleştirilmiş olur.",
       route: APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI,
-      requiredDocs: ['Piyasa Fiyat Araştırması Tutanağı', 'Yaklaşık Maliyet Cetveli']
+      requiredDocs: [
+        "Piyasa Fiyat Araştırması Tutanağı",
+        "Yaklaşık Maliyet Cetveli",
+      ],
     },
     {
       id: 4,
-      title: 'Yüklenici Belirlendi',
-      subtitle: 'En Düşük / En Uygun Teklif Sahibi',
+      title: "Yüklenici Belirlendi",
+      subtitle: "En Düşük / En Uygun Teklif Sahibi",
       description:
-        'Gelen teklifler arasından en uygun fiyatı sunan istekli belirlenerek üzerine ihale (doğrudan temin alımı) bırakılır.',
-      status: completedSteps.includes(4) ? 'completed' : currentStep === 4 ? 'current' : 'pending',
+        "Gelen teklifler arasından en uygun fiyatı sunan istekli belirlenerek üzerine ihale (doğrudan temin alımı) bırakılır.",
+      status: completedSteps.includes(4)
+        ? "completed"
+        : currentStep === 4
+        ? "current"
+        : "pending",
       details:
-        'Tutanakta belirtilen en avantajlı teklifi veren firma yüklenici (kazanan istekli) olarak seçilir ve sipariş aşamasına geçilir.',
-      route: APP_ROUTES.SIPARIS_VE_SOZLESME
+        "Tutanakta belirtilen en avantajlı teklifi veren firma yüklenici (kazanan istekli) olarak seçilir ve sipariş aşamasına geçilir.",
+      route: APP_ROUTES.SIPARIS_VE_SOZLESME,
     },
     {
       id: 5,
-      title: 'Mal/Hizmet Teslim Edildi',
-      subtitle: 'Fiili Teslimat ve İrsaliye',
+      title: "Mal/Hizmet Teslim Edildi",
+      subtitle: "Fiili Teslimat ve İrsaliye",
       description:
-        'Yüklenici firma, siparişe konu olan malı veya hizmeti kuruma belirlenen süre içinde teslim eder.',
-      status: completedSteps.includes(5) ? 'completed' : currentStep === 5 ? 'current' : 'pending',
+        "Yüklenici firma, siparişe konu olan malı veya hizmeti kuruma belirlenen süre içinde teslim eder.",
+      status: completedSteps.includes(5)
+        ? "completed"
+        : currentStep === 5
+        ? "current"
+        : "pending",
       details:
-        'Teslimat sırasında irsaliye veya fatura ile fiziksel kontrol yapılır, teslimat süreci resmileştirilir.',
-      route: APP_ROUTES.FATURA_VE_IRSALIYE
+        "Teslimat sırasında irsaliye veya fatura ile fiziksel kontrol yapılır, teslimat süreci resmileştirilir.",
+      route: APP_ROUTES.FATURA_VE_IRSALIYE,
     },
     {
       id: 6,
-      title: 'Teslim Tesellüm Tutanağı',
-      subtitle: 'Teslim Eden & Teslim Alan İmzaları',
+      title: "Teslim Tesellüm Tutanağı",
+      subtitle: "Teslim Eden & Teslim Alan İmzaları",
       description:
-        'Malın yüklenici tarafından sorunsuz teslim edildiğini, kurum adına kimlerin teslim aldığını gösteren kanıt tutanağıdır.',
-      status: completedSteps.includes(6) ? 'completed' : currentStep === 6 ? 'current' : 'pending',
+        "Malın yüklenici tarafından sorunsuz teslim edildiğini, kurum adına kimlerin teslim aldığını gösteren kanıt tutanağıdır.",
+      status: completedSteps.includes(6)
+        ? "completed"
+        : currentStep === 6
+        ? "current"
+        : "pending",
       details:
-        'Tutanakta teslim eden (firma temsilcisi) ve teslim alan (kurum görevlileri) bilgileri, imzaları yer alır.',
-      requiredDocs: ['Teslim Tesellüm Tutanağı']
+        "Tutanakta teslim eden (firma temsilcisi) ve teslim alan (kurum görevlileri) bilgileri, imzaları yer alır.",
+      requiredDocs: ["Teslim Tesellüm Tutanağı"],
     },
     {
       id: 7,
-      title: 'Muayene ve Kabul Tutanağı',
-      subtitle: 'Komisyon İncelemesi ve Kabulü',
+      title: "Muayene ve Kabul Tutanağı",
+      subtitle: "Komisyon İncelemesi ve Kabulü",
       description:
-        'Muayene ve Kabul Komisyonu üyeleri teslim edilen mal/hizmetin teknik şartnameye uygunluğunu inceleyerek kabul tutanağını imzalar.',
-      status: completedSteps.includes(7) ? 'completed' : currentStep === 7 ? 'current' : 'pending',
+        "Muayene ve Kabul Komisyonu üyeleri teslim edilen mal/hizmetin teknik şartnameye uygunluğunu inceleyerek kabul tutanağını imzalar.",
+      status: completedSteps.includes(7)
+        ? "completed"
+        : currentStep === 7
+        ? "current"
+        : "pending",
       details:
         'Komisyon üyeleri toplanarak kontrol yapar. Malzemelerin kalitesi, özellikleri incelenir ve uygunsa "Kabul Edilmiştir" kararı verilir.',
-      requiredDocs: ['Muayene ve Kabul Komisyonu Tutanağı']
+      requiredDocs: ["Muayene ve Kabul Komisyonu Tutanağı"],
     },
     {
       id: 8,
-      title: 'Fatura Düzenlendi',
-      subtitle: 'Fatura Girişi ve Kontrolleri',
+      title: "Fatura Düzenlendi",
+      subtitle: "Fatura Girişi ve Kontrolleri",
       description:
-        'Fatura yüklenici firma tarafından düzenlenir, KDV oranları ve birim fiyatlar doğrulanır.',
-      status: completedSteps.includes(8) ? 'completed' : currentStep === 8 ? 'current' : 'pending',
+        "Fatura yüklenici firma tarafından düzenlenir, KDV oranları ve birim fiyatlar doğrulanır.",
+      status: completedSteps.includes(8)
+        ? "completed"
+        : currentStep === 8
+        ? "current"
+        : "pending",
       details:
-        'Faturadaki KDV oranları, birim fiyatlar ve toplam tutar ile yaklaşık maliyet/piyasa tutanaklarındaki tutarlar tam uyumlu olmalıdır.',
-      route: APP_ROUTES.FATURA_VE_IRSALIYE
+        "Faturadaki KDV oranları, birim fiyatlar ve toplam tutar ile yaklaşık maliyet/piyasa tutanaklarındaki tutarlar tam uyumlu olmalıdır.",
+      route: APP_ROUTES.FATURA_VE_IRSALIYE,
     },
     {
       id: 9,
-      title: 'Ödeme Talep Dilekçesi',
-      subtitle: 'Yüklenici Ödeme Başvurusu',
+      title: "Ödeme Talep Dilekçesi",
+      subtitle: "Yüklenici Ödeme Başvurusu",
       description:
-        'Yüklenici firmanın alacağının kendi banka hesabına (IBAN) ödenmesi için harcama birimine sunduğu talep dilekçesidir.',
-      status: completedSteps.includes(9) ? 'completed' : currentStep === 9 ? 'current' : 'pending',
+        "Yüklenici firmanın alacağının kendi banka hesabına (IBAN) ödenmesi için harcama birimine sunduğu talep dilekçesidir.",
+      status: completedSteps.includes(9)
+        ? "completed"
+        : currentStep === 9
+        ? "current"
+        : "pending",
       details:
-        'Resmi dilekçede firmanın unvanı, fatura bilgileri ve ödemenin yapılacağı IBAN adresi yer alır.',
-      requiredDocs: ['Ödeme Talep Dilekçesi']
+        "Resmi dilekçede firmanın unvanı, fatura bilgileri ve ödemenin yapılacağı IBAN adresi yer alır.",
+      requiredDocs: ["Ödeme Talep Dilekçesi"],
     },
     {
       id: 10,
-      title: 'Taşınır İşlem Fişi (Varsa)',
-      subtitle: 'Malzemelerin Envantere Girişi',
+      title: "Taşınır İşlem Fişi (Varsa)",
+      subtitle: "Malzemelerin Envantere Girişi",
       description:
-        'Alınan malzemeler demirbaş veya tüketim malzemesi ise Taşınır Mal Yönetmeliği gereği envantere (TİF) kaydedilir.',
+        "Alınan malzemeler demirbaş veya tüketim malzemesi ise Taşınır Mal Yönetmeliği gereği envantere (TİF) kaydedilir.",
       status: completedSteps.includes(10)
-        ? 'completed'
+        ? "completed"
         : currentStep === 10
-          ? 'current'
-          : 'pending',
+        ? "current"
+        : "pending",
       details:
-        'TİF belgesi taşınır kayıt yetkilisi tarafından düzenlenir ve ödeme emri belgesinin ekine konulması yasal olarak zorunludur (Mal alımlarında).'
+        "TİF belgesi taşınır kayıt yetkilisi tarafından düzenlenir ve ödeme emri belgesinin ekine konulması yasal olarak zorunludur (Mal alımlarında).",
     },
     {
       id: 11,
-      title: 'Ödeme Emri Belgesi (ÖEB)',
-      subtitle: 'Muhasebe Ödeme İşlemi',
+      title: "Ödeme Emri Belgesi (ÖEB)",
+      subtitle: "Muhasebe Ödeme İşlemi",
       description:
-        'Gerçekleştirme görevlisi ve harcama yetkilisinin imzasıyla hazırlanan ÖEB muhasebe birimine gönderilir ve ödeme tamamlanır.',
+        "Gerçekleştirme görevlisi ve harcama yetkilisinin imzasıyla hazırlanan ÖEB muhasebe birimine gönderilir ve ödeme tamamlanır.",
       status: completedSteps.includes(11)
-        ? 'completed'
+        ? "completed"
         : currentStep === 11
-          ? 'current'
-          : 'pending',
+        ? "current"
+        : "pending",
       details:
-        'Tüm evrakların tam olduğu muhasebe yetkilisince onaylandıktan sonra, bütçe tertibinden yüklenicinin IBAN hesabına tutar EFT/Havale ile gönderilir ve dosya kapanır.',
-      requiredDocs: ['Ödeme Emri Belgesi (MYS ÖEB)']
-    }
-  ]
+        "Tüm evrakların tam olduğu muhasebe yetkilisince onaylandıktan sonra, bütçe tertibinden yüklenicinin IBAN hesabına tutar EFT/Havale ile gönderilir ve dosya kapanır.",
+      requiredDocs: ["Ödeme Emri Belgesi (MYS ÖEB)"],
+    },
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormInputs((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleToggleStepComplete = (stepId: number) => {
     if (completedSteps.includes(stepId)) {
-      setCompletedSteps(completedSteps.filter((id) => id !== stepId))
+      setCompletedSteps(completedSteps.filter((id) => id !== stepId));
     } else {
-      setCompletedSteps([...completedSteps, stepId])
+      setCompletedSteps([...completedSteps, stepId]);
     }
-  }
+  };
 
   const handleSaveStepData = (stepTitle: string) => {
-    setIsSaved(stepTitle)
-    setTimeout(() => setIsSaved(null), 3000)
-  }
+    setIsSaved(stepTitle);
+    setTimeout(() => setIsSaved(null), 3000);
+  };
 
-  const activeStepObj = steps.find((s) => s.id === currentStep) || steps[0]
+  const activeStepObj = steps.find((s) => s.id === currentStep) || steps[0];
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900/60 overflow-hidden animate-in fade-in duration-500">
@@ -227,8 +266,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                 </span>
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
-                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme gibi tüm
-                işlemlerini tek ekrandan yönetin.
+                Aktif dosyanızın ihtiyaç tespiti, muayene kabul, fatura ve ödeme
+                gibi tüm işlemlerini tek ekrandan yönetin.
               </p>
             </div>
           </div>
@@ -241,7 +280,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   {activeDosya.konu}
                 </div>
                 <div className="text-[10px] text-slate-500">
-                  Dosya No: {activeDosya.temin_no || 'Belirsiz'}
+                  Dosya No: {activeDosya.temin_no || "Belirsiz"}
                 </div>
               </div>
             </div>
@@ -258,8 +297,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
           </h2>
           <div className="space-y-2">
             {steps.map((step) => {
-              const isCompleted = completedSteps.includes(step.id)
-              const isActive = currentStep === step.id
+              const isCompleted = completedSteps.includes(step.id);
+              const isActive = currentStep === step.id;
 
               return (
                 <button
@@ -267,10 +306,10 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   onClick={() => setCurrentStep(step.id)}
                   className={`w-full flex items-start gap-4 p-3 rounded-xl border text-left transition-all duration-200 ${
                     isActive
-                      ? 'bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900/60 shadow-sm'
+                      ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900/60 shadow-sm"
                       : isCompleted
-                        ? 'bg-slate-50/50 border-slate-100 dark:bg-slate-900/10 dark:border-slate-850 hover:bg-slate-100'
-                        : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/40'
+                      ? "bg-slate-50/50 border-slate-100 dark:bg-slate-900/10 dark:border-slate-850 hover:bg-slate-100"
+                      : "border-transparent hover:bg-slate-50 dark:hover:bg-slate-900/40"
                   }`}
                 >
                   {/* Circle Indicator */}
@@ -278,10 +317,10 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                     <div
                       className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                         isCompleted
-                          ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/10'
+                          ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/10"
                           : isActive
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 ring-4 ring-indigo-500/10'
-                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                          ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 ring-4 ring-indigo-500/10"
+                          : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                       }`}
                     >
                       {isCompleted ? <Check className="w-4 h-4" /> : step.id}
@@ -297,8 +336,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                       <h3
                         className={`text-xs font-bold truncate ${
                           isActive
-                            ? 'text-indigo-700 dark:text-indigo-400'
-                            : 'text-slate-800 dark:text-slate-200'
+                            ? "text-indigo-700 dark:text-indigo-400"
+                            : "text-slate-800 dark:text-slate-200"
                         }`}
                       >
                         {step.title}
@@ -309,7 +348,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">{step.subtitle}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                      {step.subtitle}
+                    </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 leading-normal font-normal">
                       {step.description}
                     </p>
@@ -317,11 +358,11 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
                   <ChevronRight
                     className={`w-4 h-4 text-slate-400 mt-2 shrink-0 transition-transform ${
-                      isActive ? 'translate-x-1 text-indigo-500' : ''
+                      isActive ? "translate-x-1 text-indigo-500" : ""
                     }`}
                   />
                 </button>
-              )
+              );
             })}
           </div>
         </div>
@@ -339,22 +380,24 @@ export default function SurecAkisiScreen(): React.JSX.Element {
                   <h2 className="text-lg font-bold text-slate-855 dark:text-slate-100 flex items-center gap-2">
                     {activeStepObj.title}
                   </h2>
-                  <p className="text-xs text-slate-400">{activeStepObj.subtitle}</p>
+                  <p className="text-xs text-slate-400">
+                    {activeStepObj.subtitle}
+                  </p>
                 </div>
 
                 <button
                   onClick={() => handleToggleStepComplete(activeStepObj.id)}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
                     completedSteps.includes(activeStepObj.id)
-                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 border-slate-250 dark:border-slate-800'
+                      ? "bg-emerald-500 border-emerald-500 text-white shadow-sm"
+                      : "bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 border-slate-250 dark:border-slate-800"
                   }`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>
                     {completedSteps.includes(activeStepObj.id)
-                      ? 'Tamamlandı'
-                      : 'Tamamlandı Olarak İşaretle'}
+                      ? "Tamamlandı"
+                      : "Tamamlandı Olarak İşaretle"}
                   </span>
                 </button>
               </div>
@@ -366,7 +409,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
               {activeStepObj.requiredDocs && (
                 <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800 space-y-2">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5" /> Gereken Belgeler / Çıktılar
+                    <FileText className="w-3.5 h-3.5" />{" "}
+                    Gereken Belgeler / Çıktılar
                   </div>
                   <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300 font-semibold">
                     {activeStepObj.requiredDocs.map((doc, idx) => (
@@ -384,7 +428,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {activeStepObj.id === 6 && (
               <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-indigo-500" /> Teslim Tesellüm Bilgileri Girişi
+                  <Info className="w-4 h-4 text-indigo-500" />{" "}
+                  Teslim Tesellüm Bilgileri Girişi
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -424,7 +469,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button
-                    onClick={() => handleSaveStepData('teslim')}
+                    onClick={() => handleSaveStepData("teslim")}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
                   >
                     Bilgileri Kaydet
@@ -436,7 +481,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {activeStepObj.id === 8 && (
               <div className="bg-white dark:bg-slate-955 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-indigo-500" /> Fatura Detayları Girişi
+                  <CreditCard className="w-4 h-4 text-indigo-500" />{" "}
+                  Fatura Detayları Girişi
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
@@ -486,7 +532,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button
-                    onClick={() => handleSaveStepData('fatura')}
+                    onClick={() => handleSaveStepData("fatura")}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
                   >
                     Fatura Bilgilerini Kaydet
@@ -498,7 +544,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {activeStepObj.id === 9 && (
               <div className="bg-white dark:bg-slate-955 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-indigo-500" /> Ödeme Talep ve IBAN Bilgisi
+                  <Info className="w-4 h-4 text-indigo-500" />{" "}
+                  Ödeme Talep ve IBAN Bilgisi
                 </h3>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -521,7 +568,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button
-                    onClick={() => handleSaveStepData('iban')}
+                    onClick={() => handleSaveStepData("iban")}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
                   >
                     IBAN Bilgisini Kaydet
@@ -533,8 +580,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {activeStepObj.id === 10 && (
               <div className="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-150 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-indigo-500" /> Taşınır İşlem Fişi (TİF)
-                  Takibi
+                  <AlertCircle className="w-4 h-4 text-indigo-500" />{" "}
+                  Taşınır İşlem Fişi (TİF) Takibi
                 </h3>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
@@ -554,7 +601,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button
-                    onClick={() => handleSaveStepData('tif')}
+                    onClick={() => handleSaveStepData("tif")}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/10 cursor-pointer"
                   >
                     TİF Numarasını Kaydet
@@ -566,7 +613,9 @@ export default function SurecAkisiScreen(): React.JSX.Element {
             {isSaved && (
               <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 text-green-800 dark:text-green-300 p-3.5 rounded-xl text-xs flex items-center gap-2 animate-in fade-in duration-300">
                 <Check className="w-4 h-4 text-green-500" />
-                <span>İlgili aşama bilgileri başarıyla yerel taslağa kaydedildi.</span>
+                <span>
+                  İlgili aşama bilgileri başarıyla yerel taslağa kaydedildi.
+                </span>
               </div>
             )}
           </div>
@@ -577,8 +626,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
               <Clock className="w-4 h-4" />
               <span>
                 {activeStepObj.route
-                  ? 'Bu aşamaya özel işlemler ve veri giriş ekranı mevcuttur.'
-                  : 'Bu aşama genel takip listesine dahildir.'}
+                  ? "Bu aşamaya özel işlemler ve veri giriş ekranı mevcuttur."
+                  : "Bu aşama genel takip listesine dahildir."}
               </span>
             </div>
 
@@ -595,7 +644,8 @@ export default function SurecAkisiScreen(): React.JSX.Element {
 
               {activeStepObj.requiredDocs && (
                 <button
-                  onClick={() => navigate({ to: APP_ROUTES.DOSYA_CIKTI_MERKEZI as any })}
+                  onClick={() =>
+                    navigate({ to: APP_ROUTES.DOSYA_CIKTI_MERKEZI as any })}
                   className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-md shadow-indigo-500/25 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
@@ -607,5 +657,5 @@ export default function SurecAkisiScreen(): React.JSX.Element {
         </div>
       </div>
     </div>
-  )
+  );
 }

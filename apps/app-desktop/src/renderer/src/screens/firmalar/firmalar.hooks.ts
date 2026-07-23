@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+export interface IletisimNotu {
+  tarih: string
+  not: string
+  kisi: string
+}
+
 export interface Firma {
   id: number
   firma_kodu: string
@@ -23,10 +29,20 @@ export interface Firma {
   vergi_dairesi: string
   vergi_no: string
   aktif_mi: number
+  // CRM Alanları
+  deneyim_skoru: number
+  kalite_skoru: number
+  odeme_disiplini: number
+  kara_liste: number
+  kara_liste_neden: string
+  son_iletisim_tarihi: string
+  sorumlu_personel_id: number | null
+  iletisim_notlari: string // JSON string of IletisimNotu[]
   created_at: string
+  updated_at: string
 }
 
-export type FirmaInput = Omit<Firma, 'id' | 'aktif_mi' | 'created_at'>
+export type FirmaInput = Omit<Firma, 'id' | 'aktif_mi' | 'created_at' | 'updated_at'>
 
 const fetchFirmalar = async (): Promise<Firma[]> => {
   const res = await window.electron.ipcRenderer.invoke(
@@ -109,7 +125,16 @@ export function useFirmalarHooks() {
         'tc_kimlik_no',
         'dogum_tarihi',
         'vergi_dairesi',
-        'vergi_no'
+        'vergi_no',
+        // CRM
+        'deneyim_skoru',
+        'kalite_skoru',
+        'odeme_disiplini',
+        'kara_liste',
+        'kara_liste_neden',
+        'son_iletisim_tarihi',
+        'sorumlu_personel_id',
+        'iletisim_notlari'
       ]
       const placeholders = cols.map(() => '?').join(', ')
       const values = cols.map((col) => {
@@ -198,3 +223,89 @@ export function useFirmalarHooks() {
     deleteFirma: deleteFirmaMutation.mutateAsync
   }
 }
+
+export interface FirmaIletisimNotuItem {
+  id: number
+  firma_id: number
+  not_metni: string
+  gorusen_kisi: string
+  iletisim_tarihi: string
+  created_at: string
+}
+
+export function useFirmaNotlariHooks(firmaId?: number | null) {
+  const queryClient = useQueryClient()
+
+  const { data: notlar = [], isLoading: isLoadingNotlar } = useQuery({
+    queryKey: ['firma_notlari', firmaId],
+    queryFn: async (): Promise<FirmaIletisimNotuItem[]> => {
+      if (!firmaId) return []
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT * FROM TANIM_FirmaIletisimNotu WHERE firma_id = ? ORDER BY id DESC',
+        [firmaId]
+      )
+      if (!res.success) throw new Error(res.error)
+      return res.data
+    },
+    enabled: Boolean(firmaId)
+  })
+
+  const addNotMutation = useMutation({
+    mutationFn: async (notData: {
+      firma_id: number
+      not_metni: string
+      gorusen_kisi?: string
+      iletisim_tarihi?: string
+    }) => {
+      const { firma_id, not_metni, gorusen_kisi, iletisim_tarihi } = notData
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `INSERT INTO TANIM_FirmaIletisimNotu (firma_id, not_metni, gorusen_kisi, iletisim_tarihi) VALUES (?, ?, ?, ?)`,
+        [
+          firma_id,
+          not_metni,
+          gorusen_kisi || '',
+          iletisim_tarihi || new Date().toISOString().split('T')[0]
+        ]
+      )
+      if (!res.success) throw new Error(res.error)
+
+      // Ayrıca firmanın son_iletisim_tarihi alanını güncelle
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `UPDATE TANIM_Firma SET son_iletisim_tarihi = ? WHERE id = ?`,
+        [iletisim_tarihi || new Date().toISOString().split('T')[0], firma_id]
+      )
+
+      return res
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['firma_notlari', variables.firma_id] })
+      queryClient.invalidateQueries({ queryKey: ['firmalar'] })
+    }
+  })
+
+  const deleteNotMutation = useMutation({
+    mutationFn: async ({ id, firma_id }: { id: number; firma_id: number }) => {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'DELETE FROM TANIM_FirmaIletisimNotu WHERE id = ?',
+        [id]
+      )
+      if (!res.success) throw new Error(res.error)
+      return res
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['firma_notlari', variables.firma_id] })
+    }
+  })
+
+  return {
+    notlar,
+    isLoadingNotlar,
+    addNot: addNotMutation.mutateAsync,
+    deleteNot: deleteNotMutation.mutateAsync
+  }
+}
+

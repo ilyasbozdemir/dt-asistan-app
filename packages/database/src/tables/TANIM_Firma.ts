@@ -25,11 +25,26 @@ export const TANIM_Firma = {
     { name: 'vergi_dairesi', type: 'TEXT', description: 'Vergi Dairesi' },
     { name: 'vergi_no', type: 'TEXT', description: 'Vergi Numarası' },
     { name: 'aktif_mi', type: 'INTEGER', notNull: true, default: 1, description: 'Aktif mı?' },
+    // --- CRM Alanları ---
+    { name: 'deneyim_skoru', type: 'INTEGER', default: 0, description: 'Geçmiş Deneyim Skoru (0-5)' },
+    { name: 'kalite_skoru', type: 'INTEGER', default: 0, description: 'Ürün/Hizmet Kalite Skoru (0-5)' },
+    { name: 'odeme_disiplini', type: 'INTEGER', default: 1, description: 'Ödeme Disiplini (1: Zamanında, 0: Geciktiriyor)' },
+    { name: 'kara_liste', type: 'INTEGER', default: 0, description: 'Kara Listede mi? (0: Hayır, 1: Evet)' },
+    { name: 'kara_liste_neden', type: 'TEXT', description: 'Kara Liste Nedeni' },
+    { name: 'son_iletisim_tarihi', type: 'TEXT', description: 'Son İletişim Tarihi (ISO)' },
+    { name: 'sorumlu_personel_id', type: 'INTEGER', description: 'Sorumlu Personel ID (FK → TANIM_Personel)' },
+    { name: 'iletisim_notlari', type: 'TEXT', description: 'İletişim Notları (JSON array: [{tarih, not, kisi}])' },
     {
       name: 'created_at',
       type: 'DATETIME',
       default: 'CURRENT_TIMESTAMP',
       description: 'Created At'
+    },
+    {
+      name: 'updated_at',
+      type: 'DATETIME',
+      default: 'CURRENT_TIMESTAMP',
+      description: 'Son Güncelleme'
     }
   ],
   initialData: []
