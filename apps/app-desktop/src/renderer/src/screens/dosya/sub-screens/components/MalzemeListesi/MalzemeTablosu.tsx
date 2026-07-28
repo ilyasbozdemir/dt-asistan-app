@@ -614,6 +614,8 @@ export function MalzemeTablosu({
 
           <MalzemeTabloPopover
             step={1}
+            selectedCount={selectedIds.size}
+            totalCount={items.length}
             onSelectAll={handleToggleSelectAll}
             onDeleteSelected={handleDeleteSelected}
             onExcelImport={handleExcelImport}

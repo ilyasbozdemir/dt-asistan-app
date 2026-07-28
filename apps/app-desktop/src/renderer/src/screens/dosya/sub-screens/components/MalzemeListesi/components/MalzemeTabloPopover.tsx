@@ -23,6 +23,8 @@ export type { PopoverCategoryConfig, PopoverItemConfig };
 
 export interface MalzemeTabloPopoverProps {
   step?: number;
+  selectedCount?: number;
+  totalCount?: number;
   onSelectAll?: () => void;
   onDeleteSelected?: () => void;
   onExcelImport?: () => void;
@@ -86,10 +88,10 @@ export function MalzemeTabloPopover(
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer h-8"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer h-8"
         >
-          <ClipboardList className="w-3.5 h-3.5 text-slate-500" />
-          İşlemler
+          <ClipboardList className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+          Tablo İşlemleri
           <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
       </DropdownMenuTrigger>

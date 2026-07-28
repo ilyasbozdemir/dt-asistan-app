@@ -165,7 +165,7 @@ export function buildDocumentCategories(
           id: "yaklasikMaliyetKomisyonu",
           label: "Yaklaşık Maliyet Tespit Kom.",
           icon: UserCheck,
-          iconColorClass: "text-slate-450 dark:text-slate-500",
+          iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onYaklasikMaliyetKomisyonu,
           steps: [1],
         },
@@ -173,7 +173,7 @@ export function buildDocumentCategories(
           id: "muayeneKabulKomisyonu",
           label: "Muayene Kabul ve Tespit Kom.",
           icon: UserCheck,
-          iconColorClass: "text-slate-450 dark:text-slate-500",
+          iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onMuayeneKabulKomisyonu,
           steps: [4],
         },
@@ -181,7 +181,7 @@ export function buildDocumentCategories(
           id: "fiyatArastirmaKomisyonu",
           label: "Fiyat Araştırma ve Muayene Kom.",
           icon: UserCheck,
-          iconColorClass: "text-slate-450 dark:text-slate-500",
+          iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onFiyatArastirmaKomisyonu,
           steps: [2],
         },
@@ -325,6 +325,8 @@ export function buildTableActionItems(
   props: MalzemeTabloPopoverProps,
 ): PopoverItemConfig[] {
   const {
+    selectedCount = 0,
+    totalCount = 0,
     onSelectAll,
     onDeleteSelected,
     onExcelImport,
@@ -334,47 +336,51 @@ export function buildTableActionItems(
     onIstekliFirmaSettings,
   } = props;
 
+  const isAllSelected = totalCount > 0 && selectedCount === totalCount;
+
   const rawItems: PopoverItemConfig[] = [
     {
       id: "selectAll",
-      label: "Tümünü Seç",
+      label: isAllSelected ? "Seçimi Kaldır" : "Tümünü Seç",
       icon: Check,
-      iconColorClass: "text-slate-450 dark:text-slate-500",
+      iconColorClass: isAllSelected ? "text-blue-500" : "text-slate-400 dark:text-slate-500",
       onClick: onSelectAll,
     },
     {
       id: "deleteSelected",
-      label: "Seçilenleri Sil",
+      label: selectedCount > 0 ? `Seçilenleri Sil (${selectedCount})` : "Seçilenleri Sil",
       icon: Trash2,
-      itemClassName: "text-red-655 focus:text-red-655 dark:focus:text-red-400",
+      itemClassName: selectedCount > 0
+        ? "text-red-600 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 font-semibold"
+        : "text-slate-400 dark:text-slate-500",
       onClick: onDeleteSelected,
     },
     {
       id: "excelImport",
       label: "Excel'den İçe Aktar",
-      icon: FileText,
-      iconColorClass: "text-slate-450 dark:text-slate-500",
+      icon: FileSpreadsheet,
+      iconColorClass: "text-emerald-500",
       onClick: onExcelImport,
     },
     {
       id: "downloadTemplate",
       label: "Excel Şablonunu İndir",
       icon: Download,
-      iconColorClass: "text-slate-450 dark:text-slate-500",
+      iconColorClass: "text-blue-500",
       onClick: onDownloadTemplate,
     },
     {
       id: "exportToLibrary",
       label: "Genel Kütüphaneye Aktar",
       icon: BookOpen,
-      iconColorClass: "text-slate-450 dark:text-slate-500",
+      iconColorClass: "text-amber-500",
       onClick: onExportToLibrary,
     },
     {
       id: "komisyonSettings",
       label: "Komisyon Ayarları",
       icon: Users,
-      iconColorClass: "text-blue-500",
+      iconColorClass: "text-indigo-500",
       onClick: onKomisyonSettings,
     },
     {
@@ -388,3 +394,4 @@ export function buildTableActionItems(
 
   return rawItems.filter((item) => Boolean(item.onClick));
 }
+
