@@ -138,7 +138,7 @@ export function MalzemeTabloPopover(
                     />
                     {cat.title}
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="w-64">
+                  <DropdownMenuSubContent className="w-64" sideOffset={6} alignOffset={-4}>
                     {cat.items.map((item) => {
                       const ItemIcon = item.icon;
                       return (
