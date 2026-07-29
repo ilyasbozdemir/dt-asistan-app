@@ -40,7 +40,8 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
       'piyasa-fiyat-arastirma-gorevlendirmesi',
       'piyasa-fiyat-arastirma-tutanagi',
       'teklif-mektubu-dagitim-cizelgesi',
-      'yaklasik-maliyet-cetveli'
+      'yaklasik-maliyet-cetveli',
+      'yaklasik-maliyet-teklif-mektubu'
     ]
   },
   {

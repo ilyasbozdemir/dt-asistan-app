@@ -171,6 +171,7 @@ const TEMPLATE_NAMES: Record<string, string> = {
   'piyasa-fiyat-arastirma-tutanagi': 'PİYASA FİYAT ARAŞTIRMA TUTANAĞI',
   'teklif-mektubu-dagitim-cizelgesi': 'TEKLİF MEKTUBU DAĞITIM ÇİZELGESİ',
   'yaklasik-maliyet-cetveli': 'YAKLAŞIK MALİYET CETVELİ',
+  'yaklasik-maliyet-teklif-mektubu': 'YAKLAŞIK MALİYET TEKLİF MEKTUBU',
   'butce-sorgusu': 'BÜTÇE SORGUSU',
   'dogrudan-temin-onay-belgesi': 'DOĞRUDAN TEMİN ONAY BELGESİ',
   'dogrudan-temin-sonuc-onay-belgesi': 'DOĞRUDAN TEMİN SONUÇ ONAY BELGESİ',
