@@ -73,7 +73,7 @@ export function SubScreen({
     window.electron.ipcRenderer
       .invoke(
         'db:query',
-        'SELECT id, konu, temin_no, starred_docs FROM DATA_TeminDosyasi WHERE id = ?',
+        'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id WHERE d.id = ?',
         [activeDosyaId]
       )
       .then((res) => {
@@ -124,6 +124,66 @@ export function SubScreen({
                 dosyalar listesinden
               </Link>{' '}
               bir dosya seçin.
+            </div>
+          </div>
+        )}
+
+        {/* AKTİF DOSYA & DOĞRUDAN TEMİN TİPİ BİLGİ KART BARI (TÜM ADIMLARDA GENEL RENDER EDİLİR) */}
+        {activeDosyaId && activeDosya && (
+          <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-bold border border-blue-100 dark:border-blue-900/30">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
+                    {activeDosya.konu || 'İsimsiz Dosya'}
+                  </h3>
+                  {activeDosya.temin_no && (
+                    <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold">
+                      #{activeDosya.temin_no}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                  {activeDosya.birim_adi && <span>{activeDosya.birim_adi}</span>}
+                  {activeDosya.birim_adi && <span>•</span>}
+                  <span>Bütçe Yılı: {activeDosya.butce_yili || new Date().getFullYear()}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Doğrudan Temin Tipi / Usulü Badge */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                <span className="text-indigo-600/80 dark:text-indigo-400/80">Temin Usulü:</span>
+                <strong className="font-bold text-indigo-800 dark:text-indigo-200">
+                  {activeDosya.ihale_sekli ||
+                    activeDosya.ihale_usulu ||
+                    activeDosya.usul ||
+                    activeDosya.temin_usulu ||
+                    '4734 / 22-d'}
+                </strong>
+              </div>
+
+              {/* Alım Türü Badge (Mal / Hizmet / Yapım) */}
+              <div
+                className={cn(
+                  'px-3.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5',
+                  (activeDosya.ihale_tipi || activeDosya.tur)?.toLowerCase().includes('hizmet')
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                    : (activeDosya.ihale_tipi || activeDosya.tur)?.toLowerCase().includes('yapım')
+                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-300'
+                    : 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/40 text-sky-700 dark:text-sky-300'
+                )}
+              >
+                <span className="opacity-80">Alım Türü:</span>
+                <strong className="font-bold">
+                  {activeDosya.ihale_tipi || activeDosya.tur || 'Mal Alımı'}
+                </strong>
+              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React from "react";
-import { Package } from "lucide-react";
+import { FileText, Package } from "lucide-react";
+import { cn } from "../../../../utils/cn";
 import { SubScreen } from "../../SubScreens.screen";
 import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
 import { normalizeForMatch } from "./useDosyaAsamasiSablons";
