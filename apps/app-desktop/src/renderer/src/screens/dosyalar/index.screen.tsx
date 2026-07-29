@@ -314,9 +314,19 @@ export default function DosyalarScreen(): React.ReactNode {
       group.files.push(dosya);
     });
 
+    const getFileTime = (f: typeof dosyalar[0]) => {
+      if (f.dosya_acilis_tarihi) return new Date(f.dosya_acilis_tarihi).getTime();
+      if (f.created_at) return new Date(f.created_at).getTime();
+      return f.id || 0;
+    };
+
+    groups.forEach((group) => {
+      group.files.sort((a, b) => getFileTime(b) - getFileTime(a));
+    });
+
     groups.sort((a, b) => {
-      const maxA = Math.max(...a.files.map((f) => f.id));
-      const maxB = Math.max(...b.files.map((f) => f.id));
+      const maxA = Math.max(...a.files.map(getFileTime));
+      const maxB = Math.max(...b.files.map(getFileTime));
       return maxB - maxA;
     });
 
