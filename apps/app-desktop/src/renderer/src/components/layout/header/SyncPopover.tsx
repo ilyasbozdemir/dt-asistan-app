@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Cloud, Shield, Wifi, WifiOff, RefreshCw } from 'lucide-react'
+import packageJson from '../../../../../../package.json'
 
 export function SyncPopover(): React.JSX.Element {
   const [showSyncPopover, setShowSyncPopover] = useState(false)
@@ -9,12 +10,22 @@ export function SyncPopover(): React.JSX.Element {
   const [syncMessage, setSyncMessage] = useState('')
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
+  const [appVersion, setAppVersion] = useState(packageJson.version)
   const [dbVersionLocal, setDbVersionLocal] = useState(104)
   const [dbVersionCloud, setDbVersionCloud] = useState(104)
   const [isOfflineMode, setIsOfflineMode] = useState(false)
   const syncRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if ((window as any).api?.getAppVersion) {
+      ;(window as any).api
+        .getAppVersion()
+        .then((v: string) => {
+          if (v) setAppVersion(v)
+        })
+        .catch(console.error)
+    }
+
     window.electron?.ipcRenderer
       .invoke('db:get-settings')
       .then((settings) => {
@@ -190,13 +201,13 @@ export function SyncPopover(): React.JSX.Element {
             <div className="flex justify-between items-center text-slate-500">
               <span>Yerel Veri Sürümü:</span>
               <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                v{dbVersionLocal}
+                v{appVersion}
               </span>
             </div>
             <div className="flex justify-between items-center text-slate-500">
               <span>Bulut Sunucu Sürümü:</span>
               <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                v{dbVersionCloud}
+                v{appVersion}
               </span>
             </div>
             {dbVersionLocal < dbVersionCloud && (
