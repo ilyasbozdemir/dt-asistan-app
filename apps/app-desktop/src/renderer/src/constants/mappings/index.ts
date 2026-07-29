@@ -77,6 +77,7 @@ export const processMappingRegistry: Record<string, ProcessMapping> = {
   'harcama-pusulasi': allOther.HarcamaPusulasiMapping,
   'hizmet-isleri-kabul-teklif-belgesi': allOther.HizmetIsleriKabulTeklifBelgesiMapping,
   'hizmet-isleri-kabul-tutanagi': allOther.HizmetIsleriKabulTutanagiMapping,
+  'gunluk-calisma-puantaj-cizelgesi': allOther.HizmetIsleriKabulTutanagiMapping,
   'muayene-kabul-tutanagi': allOther.MuayeneKabulTutanagiMapping,
   'odeme-emri-belgesi': allOther.OdemeEmriBelgesiMapping,
   'odeme-yazisi': allOther.OdemeYazisiMapping,

@@ -67,6 +67,7 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
     klasorAdi: '4-kabul-ve-odeme-islemleri',
     sablonlar: [
       'banka-degisiklik-bildirimi',
+      'gunluk-calisma-puantaj-cizelgesi',
       'hakedis-raporu',
       'harcama-pusulasi',
       'hizmet-isleri-kabul-teklif-belgesi',

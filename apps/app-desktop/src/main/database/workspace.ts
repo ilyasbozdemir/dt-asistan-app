@@ -184,6 +184,7 @@ const TEMPLATE_NAMES: Record<string, string> = {
   'kabul-edilen-teklif-alternatif': 'KABUL EDİLEN TEKLİF (ALTERNATİF)',
   'sozlesmeye-davet': 'SÖZLEŞMEYE DAVET',
   'teklif-mektubu': 'TEKLİF MEKTUBU',
+  'gunluk-calisma-puantaj-cizelgesi': 'GÜNLÜK ÇALIŞMA PUANTAJ ÇİZELGESİ',
   'hakedis-raporu': 'HAKEDİŞ RAPORU',
   'harcama-pusulasi': 'HARCAMA PUSULASI',
   'hizmet-isleri-kabul-teklif-belgesi': 'HİZMET İŞLERİ KABUL TEKLİF BELGESİ',
