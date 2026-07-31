@@ -4,6 +4,7 @@ export type TemplateType = {
   id: string;
   name: string;
   category: string;
+  supportsOlur?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

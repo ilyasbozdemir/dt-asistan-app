@@ -1,7 +1,12 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
-import { DateEditableField, MetadataBlock, toIsoDate, toTrDate } from "../../document/ApprovalSignature";
+import {
+  DateEditableField,
+  MetadataBlock,
+  toIsoDate,
+  toTrDate,
+} from "../../document/ApprovalSignature";
 import { EditableField } from "../../document/EditableField";
 import {
   DEFAULT_LIMITS,
@@ -422,17 +427,37 @@ export function IhtiyacTalepFormu({
                   </tbody>
                 </table>
 
-                {data.altNotlar && (
-                  <div
-                    style={{
-                      marginTop: "16px",
-                      fontSize: "9pt",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {data.altNotlar}
-                  </div>
-                )}
+                <div
+                  style={{
+                    marginTop: "16px",
+                    fontSize: "9pt",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  <EditableField
+                    name="altNotlar"
+                    value={data.altNotlar ||
+                      "1- Hizmet ve Yapım işi alımlarında Taşınır Kayıt Yetkilisi görüşü yazılmayacaktır.\n2- İstenilen malzeme depoda var ise bu talep formu satın alma birimine gönderilmeyecektir.\n3- Hizmet, Yapım İşleri ve Mal alımlarında (Demirbaş v.b. gibi) Teknik Şartname hazırlanması zorunludur. (Tüm Teknik Şartnameler hazırlayanlar tarafından eksiksiz bir şekilde doldurulup Üst yazıyla Personel ve Destek Hizmetleri Başkanlığına gönderilecektir. Teknik şartname olmayan talepler değerlendirmeye alınmayacaktır. Bu hususların eksiksiz yerine getirilmesi ve Makam Onayı alınmasından sonra satın alma işlemleri başlatılacaktır.)"}
+                    multiline
+                    placeholder="Alt Notlar"
+                  />
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "12px",
+                    fontSize: "9.5pt",
+                    fontWeight: "bold",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  <EditableField
+                    name="ekler"
+                    value={data.ekler || "EKİ: Talebe ait teknik şartnameler"}
+                    placeholder="EKİ: Talebe ait teknik şartnameler"
+                    multiline
+                  />
+                </div>
               </div>
             )}
           </DocumentLayout>

@@ -21,6 +21,7 @@ export const IhtiyacTalepFormuSchema = z.object({
   gerekce: z.any().optional(),
   ihtiyacYeri: z.any().optional(),
   altNotlar: z.any().optional(),
+  ekler: z.any().optional(),
   ihtiyacKalemleri: z.array(z.any()).optional(),
 }).catchall(z.any());
 
