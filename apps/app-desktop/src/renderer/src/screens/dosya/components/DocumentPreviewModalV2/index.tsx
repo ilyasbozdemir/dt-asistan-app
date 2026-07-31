@@ -49,6 +49,7 @@ interface Personel {
 
 const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,
+  IhtiyacTalepFormu: Templates.IhtiyacTalepFormu as TemplateComponentType,
   LuzumMuzekkeresi: Templates.LuzumMuzekkeresi as TemplateComponentType,
   LuzumMuzekkeresiOnayEki: Templates
     .LuzumMuzekkeresiOnayEki as TemplateComponentType,

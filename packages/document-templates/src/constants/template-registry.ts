@@ -7,6 +7,11 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     category: '1-ihtiyac-tespiti-ve-baslangic'
   },
   {
+    id: 'ihtiyac-talep-formu',
+    name: 'IhtiyacTalepFormu',
+    category: '1-ihtiyac-tespiti-ve-baslangic'
+  },
+  {
     id: 'luzum-muzekkeresi',
     name: 'LuzumMuzekkeresi',
     category: '1-ihtiyac-tespiti-ve-baslangic'

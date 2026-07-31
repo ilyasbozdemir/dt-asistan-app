@@ -27,18 +27,21 @@ export function EditableField({
   const [isHovered, setIsHovered] = useState(false);
 
   const activeEditing = isEditing !== undefined ? isEditing : context.isEditing;
-  const activeOnChange =
-    onChange ||
+  const activeOnChange = onChange ||
     (name && context.onFieldChange
       ? (val: string) => context.onFieldChange!(name, val)
       : undefined);
 
   if (!activeEditing || !activeOnChange) {
-    return <span style={style} className={className}>{value || placeholder}</span>;
+    return <span style={style} className={className}>{value || ""}</span>;
   }
 
   const baseStyle: React.CSSProperties = {
-    backgroundColor: isFocused ? "#ffffff" : isHovered ? "#f8fafc" : "transparent",
+    backgroundColor: isFocused
+      ? "#ffffff"
+      : isHovered
+      ? "#f8fafc"
+      : "transparent",
     border: "none",
     borderBottom: isFocused
       ? "2px solid #2563eb"
@@ -86,8 +89,14 @@ export function EditableField({
   }
 
   // Calculate dynamic inline width so input fits text naturally without breaking sentence flow
-  const charLength = Math.max((value || "").length, (placeholder || "").length, 4);
-  const calculatedWidth = `${Math.min(Math.max(charLength * 9 + 10, 50), 600)}px`;
+  const charLength = Math.max(
+    (value || "").length,
+    (placeholder || "").length,
+    4,
+  );
+  const calculatedWidth = `${
+    Math.min(Math.max(charLength * 9 + 10, 50), 600)
+  }px`;
 
   return (
     <input

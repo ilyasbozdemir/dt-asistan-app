@@ -11,6 +11,7 @@ export * from "./document/DynamicPaginatedTable";
 export * from "./document/EditableField";
 export * from "./document/TemplateEditContext";
 export * from "./templates/ihtiyac-listesi";
+export * from "./templates/ihtiyac-talep-formu";
 export * from "./templates/harcama-talimati";
 export * from "./templates/luzum-muzekkeresi";
 export * from "./templates/luzum-muzekkeresi-onay-eki";
