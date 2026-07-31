@@ -2,6 +2,86 @@ import React from "react";
 import { EditableField } from "./EditableField";
 import { useTemplateEdit } from "./TemplateEditContext";
 
+export function toIsoDate(trDateStr?: string | null): string {
+  if (!trDateStr) return new Date().toISOString().split("T")[0];
+  const clean = String(trDateStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+    return clean.split(" ")[0];
+  }
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
+    const [d, m, y] = clean.split(".");
+    return `${y}-${m}-${d}`;
+  }
+  try {
+    const dt = new Date(clean);
+    if (!isNaN(dt.getTime())) {
+      return dt.toISOString().split("T")[0];
+    }
+  } catch {}
+  return new Date().toISOString().split("T")[0];
+}
+
+export function toTrDate(isoOrStr?: string | null): string {
+  if (!isoOrStr) return "";
+  const clean = String(isoOrStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+    const [y, m, d] = clean.split(" ")[0].split("-");
+    return `${d}.${m}.${y}`;
+  }
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
+    return clean;
+  }
+  return clean;
+}
+
+export interface DateEditableFieldProps {
+  name: string;
+  value?: string;
+  placeholder?: string;
+  defaultDate?: string;
+}
+
+export function DateEditableField({
+  name,
+  value,
+  placeholder = "GG.AA.YYYY",
+  defaultDate,
+}: DateEditableFieldProps) {
+  const { isEditing, onFieldChange } = useTemplateEdit();
+  const displayVal = value || defaultDate || toTrDate(new Date().toISOString().split("T")[0]);
+  const isoVal = toIsoDate(displayVal);
+
+  if (!isEditing || !onFieldChange) {
+    return <span>{displayVal}</span>;
+  }
+
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+      <input
+        type="date"
+        value={isoVal}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val) {
+            onFieldChange(name, toTrDate(val));
+          }
+        }}
+        style={{
+          fontSize: "7.5pt",
+          padding: "1px 3px",
+          borderRadius: "4px",
+          border: "1px solid #cbd5e1",
+          backgroundColor: "#ffffff",
+          cursor: "pointer",
+          color: "#0f172a",
+        }}
+        title="Tarih seçin"
+      />
+      <EditableField name={name} value={displayVal} placeholder={placeholder} />
+    </div>
+  );
+}
+
 export const EditableOlurPlaceholder: React.FC = () => {
   const { isEditing, onFieldChange } = useTemplateEdit();
   if (!isEditing || !onFieldChange) return null;
@@ -125,8 +205,6 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
   marginTop = 40,
   align = "center",
 }) => {
-  const { isEditing, onFieldChange } = useTemplateEdit();
-
   return (
     <div
       style={{
@@ -156,7 +234,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
         </div>
 
         <div style={{ fontSize: "11pt", marginBottom: "8px" }}>
-          <EditableField
+          <DateEditableField
             name="onayTarihi"
             value={date || ""}
             placeholder="GG.AA.YYYY"
@@ -313,7 +391,7 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
       {displayTarih !== undefined && (
         <div style={{ fontSize: "11pt", textAlign: "right" }}>
           <strong>Tarih:</strong>{" "}
-          <EditableField name="onayaSunulanTarih" value={displayTarih} />
+          <DateEditableField name="onayaSunulanTarih" value={displayTarih} />
         </div>
       )}
     </div>

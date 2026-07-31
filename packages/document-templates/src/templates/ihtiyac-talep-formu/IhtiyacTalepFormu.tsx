@@ -1,7 +1,7 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
-import { MetadataBlock } from "../../document/ApprovalSignature";
+import { DateEditableField, MetadataBlock, toIsoDate, toTrDate } from "../../document/ApprovalSignature";
 import { EditableField } from "../../document/EditableField";
 import {
   DEFAULT_LIMITS,
@@ -10,87 +10,6 @@ import {
 } from "../../document/DynamicPaginatedTable";
 import { useTemplateEdit } from "../../document/TemplateEditContext";
 import { IhtiyacTalepFormuType } from "./IhtiyacTalepFormu.schema";
-
-function toIsoDate(trDateStr?: string | null): string {
-  if (!trDateStr) return new Date().toISOString().split("T")[0];
-  const clean = String(trDateStr).trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
-    return clean.split(" ")[0];
-  }
-  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
-    const [d, m, y] = clean.split(".");
-    return `${y}-${m}-${d}`;
-  }
-  try {
-    const dt = new Date(clean);
-    if (!isNaN(dt.getTime())) {
-      return dt.toISOString().split("T")[0];
-    }
-  } catch {}
-  return new Date().toISOString().split("T")[0];
-}
-
-function toTrDate(isoOrStr?: string | null): string {
-  if (!isoOrStr) return "";
-  const clean = String(isoOrStr).trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
-    const [y, m, d] = clean.split(" ")[0].split("-");
-    return `${d}.${m}.${y}`;
-  }
-  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
-    return clean;
-  }
-  return clean;
-}
-
-interface DateEditableFieldProps {
-  name: string;
-  value?: string;
-  placeholder?: string;
-  defaultDate?: string;
-}
-
-function DateEditableField({
-  name,
-  value,
-  placeholder = "GG.AA.YYYY",
-  defaultDate,
-}: DateEditableFieldProps) {
-  const { isEditing, onFieldChange } = useTemplateEdit();
-  const displayVal = value || defaultDate ||
-    toTrDate(new Date().toISOString().split("T")[0]);
-  const isoVal = toIsoDate(displayVal);
-
-  if (!isEditing || !onFieldChange) {
-    return <span>{displayVal}</span>;
-  }
-
-  return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-      <input
-        type="date"
-        value={isoVal}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (val) {
-            onFieldChange(name, toTrDate(val));
-          }
-        }}
-        style={{
-          fontSize: "7.5pt",
-          padding: "1px 3px",
-          borderRadius: "4px",
-          border: "1px solid #cbd5e1",
-          backgroundColor: "#ffffff",
-          cursor: "pointer",
-          color: "#0f172a",
-        }}
-        title="Tarih seçin"
-      />
-      <EditableField name={name} value={displayVal} placeholder={placeholder} />
-    </div>
-  );
-}
 
 interface IhtiyacTalepFormuProps {
   data?: Partial<IhtiyacTalepFormuType>;
