@@ -1,18 +1,14 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
-import {
-  ApprovalSignature,
-  EditableOlurPlaceholder,
-  MetadataBlock,
-  PersonelCard,
-} from "../../document/ApprovalSignature";
+import { MetadataBlock } from "../../document/ApprovalSignature";
 import { EditableField } from "../../document/EditableField";
 import {
   DEFAULT_LIMITS,
   LANDSCAPE_LIMITS,
   paginateData,
 } from "../../document/DynamicPaginatedTable";
+import { useTemplateEdit } from "../../document/TemplateEditContext";
 import { IhtiyacTalepFormuType } from "./IhtiyacTalepFormu.schema";
 
 interface IhtiyacTalepFormuProps {
@@ -32,13 +28,16 @@ export function IhtiyacTalepFormu({
   middlePageLimit,
   lastPageLimit,
 }: IhtiyacTalepFormuProps) {
+  const { isEditing, onFieldChange } = useTemplateEdit();
+  const personelList: any[] = (data as any).personelListesi || [];
+
   const columns: any[] = [
     { key: "siraNo", label: "S. NO", width: "8%", align: "center" },
-    { key: "malzemeAdi", label: "MALZEME/HİZMET ADI", width: "32%", align: "left" },
+    { key: "malzemeAdi", label: "MALZEME/HİZMET ADI", width: "35%", align: "left" },
     { key: "ozelligi", label: "ÖZELLİĞİ", width: "25%", align: "left" },
     { key: "miktar", label: "MİKTAR", width: "10%", align: "right" },
     { key: "birimi", label: "BİRİM", width: "10%", align: "center" },
-    { key: "kodu", label: "TAŞINIR KODU", width: "15%", align: "center" },
+    { key: "kodu", label: "TAŞINIR KODU", width: "12%", align: "center" },
   ];
 
   const fLimit = firstPageLimit ?? (data as any).firstPageLimit;
@@ -65,6 +64,19 @@ export function IhtiyacTalepFormu({
   const items = data.ihtiyacKalemleri || [];
   const pages = paginateData(items, limits);
 
+  const talepEdenAd = data.talepEdenPersonelAdi || data.hazirlayanPersonelAdi || "";
+  const talepEdenUnvan = data.talepEdenPersonelUnvan || data.hazirlayanPersonelUnvan || "";
+  const onaylayanAd = data.onaylayanPersonelAdi || "";
+  const onaylayanUnvan = data.onaylayanPersonelUnvan || "";
+  const tarihVal = data.tarih || data.onayaSunulanTarih || "";
+  const dosyaTarihiVal = data.dosyaTarihi || data.onayTarihi || tarihVal;
+
+  const cellStyle: React.CSSProperties = {
+    border: "1px solid #000",
+    padding: "6px",
+    fontSize: "9.5pt",
+  };
+
   return (
     <>
       {pages.map((pageItems, pageIdx) => {
@@ -86,7 +98,7 @@ export function IhtiyacTalepFormu({
               <>
                 <MetadataBlock
                   evrakSayisi={data.evrakSayisi}
-                  tarih={data.onayaSunulanTarih || data.tarih || data.dosyaTarihi}
+                  tarih={tarihVal}
                   dosyaKonusu={data.dosyaKonusu || "İhtiyaç Talep Formu"}
                   showBorder={false}
                 />
@@ -109,6 +121,8 @@ export function IhtiyacTalepFormu({
                     marginBottom: "12px",
                     fontWeight: "bold",
                     fontSize: "10pt",
+                    border: "1px solid #000",
+                    padding: "6px 10px",
                   }}
                 >
                   TALEP EDEN BİRİM:{" "}
@@ -136,63 +150,192 @@ export function IhtiyacTalepFormu({
                     textAlign: "justify",
                     lineHeight: 1.4,
                     marginBottom: "16px",
+                    textIndent: "40px",
                   }}
                 >
                   Yukarıda istemi yapılan taleplerimizin önceki sarf edilen miktarlarla uyumlu ve ihtiyaçların fazla talep edilmediği, fazla talep edilmesinden kaynaklanan yasal sorumlulukların tarafımıza ait olduğunu hazırlamış olduğumuz talebe ait ekteki teknik şartnamelerin yürürlükteki kanunlara, yönetmeliklere uygun olduğunu ve rekabete engel teşkil etmediğini taahhüt ederiz.
                 </div>
 
-                <div
+                {/* HTML index.html formatında BİRİMİN TALEP GEREKÇESİ tablosu */}
+                <table
                   style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
                     border: "1px solid #000",
-                    borderRadius: "4px",
-                    padding: "8px 12px",
-                    marginBottom: "16px",
+                    marginTop: "12px",
                     fontSize: "9.5pt",
                   }}
                 >
-                  <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
-                    BİRİMİN TALEP GEREKÇESİ:
-                  </div>
-                  <EditableField
-                    name="gerekce"
-                    value={data.gerekce}
-                    placeholder="Gerekçe yazınız..."
-                    multiline
-                  />
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "24px",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: "bold", fontSize: "10pt", marginBottom: "4px" }}>
-                      TALEBİ YAPAN
-                    </div>
-                    <PersonelCard
-                      adSoyad={data.talepEdenPersonelAdi || data.hazirlayanPersonelAdi}
-                      unvan={data.talepEdenPersonelUnvan || data.hazirlayanPersonelUnvan}
-                      align="left"
-                    />
-                  </div>
-
-                  <div>
-                    {data.olurYazisi !== false ? (
-                      <ApprovalSignature
-                        title={data.olurBaslik || "ONAYLAYAN"}
-                        date={data.onayTarihi || data.dosyaTarihi || data.tarih}
-                        adSoyad={data.onaylayanPersonelAdi}
-                        unvan={data.onaylayanPersonelUnvan}
-                        showSpace={false}
-                      />
-                    ) : (
-                      <EditableOlurPlaceholder />
-                    )}
-                  </div>
-                </div>
+                  <tbody>
+                    <tr>
+                      <td
+                        colSpan={3}
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          backgroundColor: "#f8fafc",
+                        }}
+                      >
+                        BİRİMİN TALEP GEREKÇESİ
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          width: "33%",
+                        }}
+                      >
+                        TALEBİ YAPAN
+                      </td>
+                      <td
+                        colSpan={2}
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          width: "67%",
+                        }}
+                      >
+                        ONAYLAYAN
+                      </td>
+                    </tr>
+                    <tr style={{ height: "90px", verticalAlign: "top" }}>
+                      <td style={{ ...cellStyle, textAlign: "center" }}>
+                        <div>{tarihVal}</div>
+                        {isEditing && personelList.length > 0 && (
+                          <div style={{ marginTop: "4px", marginBottom: "4px" }}>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                const selectedId = Number(e.target.value);
+                                const p = personelList.find((item: any) => item.id === selectedId);
+                                if (p && onFieldChange) {
+                                  onFieldChange("talepEdenPersonelAdi", p.ad_soyad);
+                                  onFieldChange("talepEdenPersonelUnvan", p.unvan || "");
+                                }
+                              }}
+                              style={{
+                                fontSize: "7.5pt",
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                                border: "1px solid #cbd5e1",
+                                backgroundColor: "#f8fafc",
+                                maxWidth: "180px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <option value="">👤 Personel Seç...</option>
+                              {personelList.map((p: any) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div style={{ fontWeight: "bold", marginTop: "4px" }}>
+                          <EditableField
+                            name="talepEdenPersonelAdi"
+                            value={talepEdenAd}
+                            placeholder="Talep Eden Ad Soyad"
+                          />
+                        </div>
+                        <div>
+                          <EditableField
+                            name="talepEdenPersonelUnvan"
+                            value={talepEdenUnvan}
+                            placeholder="Unvan"
+                          />
+                        </div>
+                      </td>
+                      <td colSpan={2} style={{ ...cellStyle, textAlign: "center" }}>
+                        <div>{dosyaTarihiVal}</div>
+                        {isEditing && personelList.length > 0 && (
+                          <div style={{ marginTop: "4px", marginBottom: "4px" }}>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                const selectedId = Number(e.target.value);
+                                const p = personelList.find((item: any) => item.id === selectedId);
+                                if (p && onFieldChange) {
+                                  onFieldChange("onaylayanPersonelAdi", p.ad_soyad);
+                                  onFieldChange("onaylayanPersonelUnvan", p.unvan || "");
+                                }
+                              }}
+                              style={{
+                                fontSize: "7.5pt",
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                                border: "1px solid #cbd5e1",
+                                backgroundColor: "#f8fafc",
+                                maxWidth: "180px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <option value="">👤 Personel Seç...</option>
+                              {personelList.map((p: any) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div style={{ fontWeight: "bold", marginTop: "4px" }}>
+                          <EditableField
+                            name="onaylayanPersonelAdi"
+                            value={onaylayanAd}
+                            placeholder="Onaylayan Ad Soyad"
+                          />
+                        </div>
+                        <div>
+                          <EditableField
+                            name="onaylayanPersonelUnvan"
+                            value={onaylayanUnvan}
+                            placeholder="Unvan"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3} style={{ ...cellStyle, fontWeight: "bold" }}>
+                        GEREKÇE: (Gerekçe yazılmayan talepler kabul edilmeyecektir.)
+                      </td>
+                    </tr>
+                    <tr style={{ height: "50px", verticalAlign: "top" }}>
+                      <td colSpan={3} style={{ ...cellStyle, padding: "8px" }}>
+                        <EditableField
+                          name="gerekce"
+                          value={data.gerekce}
+                          placeholder="Gerekçe yazınız..."
+                          multiline
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
+                        TAŞINIR KAYIT YETKİLİSİNİN GÖRÜŞÜ
+                      </td>
+                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
+                        TAŞINIR KODU
+                      </td>
+                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
+                        ……/……/202..
+                      </td>
+                    </tr>
+                    <tr style={{ height: "90px", verticalAlign: "top" }}>
+                      <td style={cellStyle}></td>
+                      <td style={cellStyle}></td>
+                      <td style={{ ...cellStyle, textAlign: "center", verticalAlign: "middle" }}>
+                        Taşınır Kayıt Yetkilisinin<br />İmza ve Kaşesi
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 {data.altNotlar && (
                   <div style={{ marginTop: "16px", fontSize: "9pt", fontStyle: "italic" }}>

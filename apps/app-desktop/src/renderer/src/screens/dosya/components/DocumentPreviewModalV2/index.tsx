@@ -874,6 +874,7 @@ export function DocumentPreviewModalV2({
                     {React.createElement(ActiveComponent, {
                       data: {
                         ...formData,
+                        personelListesi: (formData as any).personelListesi || personelListesi,
                         tarih: formData.tarih || formData.onayaSunulanTarih ||
                           "",
                         onayTarihi: formData.onayTarihi ||
