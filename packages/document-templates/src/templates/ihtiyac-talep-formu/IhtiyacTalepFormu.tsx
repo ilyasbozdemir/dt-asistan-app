@@ -25,6 +25,11 @@ interface IhtiyacTalepFormuProps {
   lastPageLimit?: number;
 }
 
+const DEFAULT_ALT_NOTLAR =
+  "1- Hizmet ve Yapım işi alımlarında Taşınır Kayıt Yetkilisi görüşü yazılmayacaktır.\n2- İstenilen malzeme depoda var ise bu talep formu satın alma birimine gönderilmeyecektir.\n3- Hizmet, Yapım İşleri ve Mal alımlarında (Demirbaş v.b. gibi) Teknik Şartname hazırlanması zorunludur. (Tüm Teknik Şartnameler hazırlayanlar tarafından eksiksiz bir şekilde doldurulup Üst yazıyla Personel ve Destek Hizmetleri Başkanlığına gönderilecektir. Teknik şartname olmayan talepler değerlendirmeye alınmayacaktır. Bu hususların eksiksiz yerine getirilmesi ve Makam Onayı alınmasından sonra satın alma işlemleri başlatılacaktır.)";
+
+const DEFAULT_EKLER = "EKİ: Talebe ait teknik şartnameler";
+
 export function IhtiyacTalepFormu({
   data = {},
   pageSize = "A4",
@@ -436,8 +441,7 @@ export function IhtiyacTalepFormu({
                 >
                   <EditableField
                     name="altNotlar"
-                    value={data.altNotlar ||
-                      "1- Hizmet ve Yapım işi alımlarında Taşınır Kayıt Yetkilisi görüşü yazılmayacaktır.\n2- İstenilen malzeme depoda var ise bu talep formu satın alma birimine gönderilmeyecektir.\n3- Hizmet, Yapım İşleri ve Mal alımlarında (Demirbaş v.b. gibi) Teknik Şartname hazırlanması zorunludur. (Tüm Teknik Şartnameler hazırlayanlar tarafından eksiksiz bir şekilde doldurulup Üst yazıyla Personel ve Destek Hizmetleri Başkanlığına gönderilecektir. Teknik şartname olmayan talepler değerlendirmeye alınmayacaktır. Bu hususların eksiksiz yerine getirilmesi ve Makam Onayı alınmasından sonra satın alma işlemleri başlatılacaktır.)"}
+                    value={data.altNotlar || DEFAULT_ALT_NOTLAR}
                     multiline
                     placeholder="Alt Notlar"
                   />
@@ -453,7 +457,7 @@ export function IhtiyacTalepFormu({
                 >
                   <EditableField
                     name="ekler"
-                    value={data.ekler || "EKİ: Talebe ait teknik şartnameler"}
+                    value={data.ekler || DEFAULT_EKLER}
                     placeholder="EKİ: Talebe ait teknik şartnameler"
                     multiline
                   />
