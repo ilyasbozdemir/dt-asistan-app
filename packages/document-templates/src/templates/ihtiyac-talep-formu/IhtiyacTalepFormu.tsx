@@ -11,6 +11,87 @@ import {
 import { useTemplateEdit } from "../../document/TemplateEditContext";
 import { IhtiyacTalepFormuType } from "./IhtiyacTalepFormu.schema";
 
+function toIsoDate(trDateStr?: string | null): string {
+  if (!trDateStr) return new Date().toISOString().split("T")[0];
+  const clean = String(trDateStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+    return clean.split(" ")[0];
+  }
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
+    const [d, m, y] = clean.split(".");
+    return `${y}-${m}-${d}`;
+  }
+  try {
+    const dt = new Date(clean);
+    if (!isNaN(dt.getTime())) {
+      return dt.toISOString().split("T")[0];
+    }
+  } catch {}
+  return new Date().toISOString().split("T")[0];
+}
+
+function toTrDate(isoOrStr?: string | null): string {
+  if (!isoOrStr) return "";
+  const clean = String(isoOrStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+    const [y, m, d] = clean.split(" ")[0].split("-");
+    return `${d}.${m}.${y}`;
+  }
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(clean)) {
+    return clean;
+  }
+  return clean;
+}
+
+interface DateEditableFieldProps {
+  name: string;
+  value?: string;
+  placeholder?: string;
+  defaultDate?: string;
+}
+
+function DateEditableField({
+  name,
+  value,
+  placeholder = "GG.AA.YYYY",
+  defaultDate,
+}: DateEditableFieldProps) {
+  const { isEditing, onFieldChange } = useTemplateEdit();
+  const displayVal = value || defaultDate ||
+    toTrDate(new Date().toISOString().split("T")[0]);
+  const isoVal = toIsoDate(displayVal);
+
+  if (!isEditing || !onFieldChange) {
+    return <span>{displayVal}</span>;
+  }
+
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+      <input
+        type="date"
+        value={isoVal}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val) {
+            onFieldChange(name, toTrDate(val));
+          }
+        }}
+        style={{
+          fontSize: "7.5pt",
+          padding: "1px 3px",
+          borderRadius: "4px",
+          border: "1px solid #cbd5e1",
+          backgroundColor: "#ffffff",
+          cursor: "pointer",
+          color: "#0f172a",
+        }}
+        title="Tarih seçin"
+      />
+      <EditableField name={name} value={displayVal} placeholder={placeholder} />
+    </div>
+  );
+}
+
 interface IhtiyacTalepFormuProps {
   data?: Partial<IhtiyacTalepFormuType>;
   pageSize?: "A4" | "A3";
@@ -33,7 +114,12 @@ export function IhtiyacTalepFormu({
 
   const columns: any[] = [
     { key: "siraNo", label: "S. NO", width: "8%", align: "center" },
-    { key: "malzemeAdi", label: "MALZEME/HİZMET ADI", width: "35%", align: "left" },
+    {
+      key: "malzemeAdi",
+      label: "MALZEME/HİZMET ADI",
+      width: "35%",
+      align: "left",
+    },
     { key: "ozelligi", label: "ÖZELLİĞİ", width: "25%", align: "left" },
     { key: "miktar", label: "MİKTAR", width: "10%", align: "right" },
     { key: "birimi", label: "BİRİM", width: "10%", align: "center" },
@@ -64,12 +150,17 @@ export function IhtiyacTalepFormu({
   const items = data.ihtiyacKalemleri || [];
   const pages = paginateData(items, limits);
 
-  const talepEdenAd = data.talepEdenPersonelAdi || data.hazirlayanPersonelAdi || "";
-  const talepEdenUnvan = data.talepEdenPersonelUnvan || data.hazirlayanPersonelUnvan || "";
+  const defaultToday = toTrDate(new Date().toISOString().split("T")[0]);
+  const talepEdenAd = data.talepEdenPersonelAdi || data.hazirlayanPersonelAdi ||
+    "";
+  const talepEdenUnvan = data.talepEdenPersonelUnvan ||
+    data.hazirlayanPersonelUnvan || "";
   const onaylayanAd = data.onaylayanPersonelAdi || "";
   const onaylayanUnvan = data.onaylayanPersonelUnvan || "";
-  const tarihVal = data.tarih || data.onayaSunulanTarih || "";
-  const dosyaTarihiVal = data.dosyaTarihi || data.onayTarihi || tarihVal;
+  const tarihVal = data.tarih || data.onayaSunulanTarih || data.dosyaTarihi ||
+    defaultToday;
+  const dosyaTarihiVal = data.dosyaTarihi || data.onayTarihi || tarihVal ||
+    defaultToday;
 
   const cellStyle: React.CSSProperties = {
     border: "1px solid #000",
@@ -128,7 +219,8 @@ export function IhtiyacTalepFormu({
                   TALEP EDEN BİRİM:{" "}
                   <EditableField
                     name="ihtiyacYeri"
-                    value={data.ihtiyacYeri || (data as any).mudurluk || (data as any).kurum_adi}
+                    value={data.ihtiyacYeri || (data as any).mudurluk ||
+                      (data as any).kurum_adi}
                     placeholder="Birim Adı"
                   />
                 </div>
@@ -153,7 +245,13 @@ export function IhtiyacTalepFormu({
                     textIndent: "40px",
                   }}
                 >
-                  Yukarıda istemi yapılan taleplerimizin önceki sarf edilen miktarlarla uyumlu ve ihtiyaçların fazla talep edilmediği, fazla talep edilmesinden kaynaklanan yasal sorumlulukların tarafımıza ait olduğunu hazırlamış olduğumuz talebe ait ekteki teknik şartnamelerin yürürlükteki kanunlara, yönetmeliklere uygun olduğunu ve rekabete engel teşkil etmediğini taahhüt ederiz.
+                  Yukarıda istemi yapılan taleplerimizin önceki sarf edilen
+                  miktarlarla uyumlu ve ihtiyaçların fazla talep edilmediği,
+                  fazla talep edilmesinden kaynaklanan yasal sorumlulukların
+                  tarafımıza ait olduğunu hazırlamış olduğumuz talebe ait ekteki
+                  teknik şartnamelerin yürürlükteki kanunlara, yönetmeliklere
+                  uygun olduğunu ve rekabete engel teşkil etmediğini taahhüt
+                  ederiz.
                 </div>
 
                 {/* HTML index.html formatında BİRİMİN TALEP GEREKÇESİ tablosu */}
@@ -205,17 +303,33 @@ export function IhtiyacTalepFormu({
                     </tr>
                     <tr style={{ height: "90px", verticalAlign: "top" }}>
                       <td style={{ ...cellStyle, textAlign: "center" }}>
-                        <div>{tarihVal}</div>
+                        <div>
+                          <DateEditableField
+                            name="tarih"
+                            value={data.tarih || data.onayaSunulanTarih}
+                            defaultDate={tarihVal}
+                          />
+                        </div>
                         {isEditing && personelList.length > 0 && (
-                          <div style={{ marginTop: "4px", marginBottom: "4px" }}>
+                          <div
+                            style={{ marginTop: "4px", marginBottom: "4px" }}
+                          >
                             <select
                               value=""
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
-                                const p = personelList.find((item: any) => item.id === selectedId);
+                                const p = personelList.find((item: any) =>
+                                  item.id === selectedId
+                                );
                                 if (p && onFieldChange) {
-                                  onFieldChange("talepEdenPersonelAdi", p.ad_soyad);
-                                  onFieldChange("talepEdenPersonelUnvan", p.unvan || "");
+                                  onFieldChange(
+                                    "talepEdenPersonelAdi",
+                                    p.ad_soyad,
+                                  );
+                                  onFieldChange(
+                                    "talepEdenPersonelUnvan",
+                                    p.unvan || "",
+                                  );
                                 }
                               }}
                               style={{
@@ -252,18 +366,37 @@ export function IhtiyacTalepFormu({
                           />
                         </div>
                       </td>
-                      <td colSpan={2} style={{ ...cellStyle, textAlign: "center" }}>
-                        <div>{dosyaTarihiVal}</div>
+                      <td
+                        colSpan={2}
+                        style={{ ...cellStyle, textAlign: "center" }}
+                      >
+                        <div>
+                          <DateEditableField
+                            name="dosyaTarihi"
+                            value={data.dosyaTarihi || data.onayTarihi}
+                            defaultDate={dosyaTarihiVal}
+                          />
+                        </div>
                         {isEditing && personelList.length > 0 && (
-                          <div style={{ marginTop: "4px", marginBottom: "4px" }}>
+                          <div
+                            style={{ marginTop: "4px", marginBottom: "4px" }}
+                          >
                             <select
                               value=""
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
-                                const p = personelList.find((item: any) => item.id === selectedId);
+                                const p = personelList.find((item: any) =>
+                                  item.id === selectedId
+                                );
                                 if (p && onFieldChange) {
-                                  onFieldChange("onaylayanPersonelAdi", p.ad_soyad);
-                                  onFieldChange("onaylayanPersonelUnvan", p.unvan || "");
+                                  onFieldChange(
+                                    "onaylayanPersonelAdi",
+                                    p.ad_soyad,
+                                  );
+                                  onFieldChange(
+                                    "onaylayanPersonelUnvan",
+                                    p.unvan || "",
+                                  );
                                 }
                               }}
                               style={{
@@ -302,8 +435,12 @@ export function IhtiyacTalepFormu({
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={3} style={{ ...cellStyle, fontWeight: "bold" }}>
-                        GEREKÇE: (Gerekçe yazılmayan talepler kabul edilmeyecektir.)
+                      <td
+                        colSpan={3}
+                        style={{ ...cellStyle, fontWeight: "bold" }}
+                      >
+                        GEREKÇE: (Gerekçe yazılmayan talepler kabul
+                        edilmeyecektir.)
                       </td>
                     </tr>
                     <tr style={{ height: "50px", verticalAlign: "top" }}>
@@ -317,20 +454,49 @@ export function IhtiyacTalepFormu({
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
+                      <td
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
                         TAŞINIR KAYIT YETKİLİSİNİN GÖRÜŞÜ
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
+                      <td
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
                         TAŞINIR KODU
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center", fontWeight: "bold" }}>
-                        ……/……/202..
+                      <td
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <DateEditableField
+                          name="tasinirTarihi"
+                          value={data.tasinirTarihi}
+                          placeholder="……/……/202.."
+                          defaultDate={dosyaTarihiVal}
+                        />
                       </td>
                     </tr>
                     <tr style={{ height: "90px", verticalAlign: "top" }}>
                       <td style={cellStyle}></td>
                       <td style={cellStyle}></td>
-                      <td style={{ ...cellStyle, textAlign: "center", verticalAlign: "middle" }}>
+                      <td
+                        style={{
+                          ...cellStyle,
+                          textAlign: "center",
+                          verticalAlign: "middle",
+                        }}
+                      >
                         Taşınır Kayıt Yetkilisinin<br />İmza ve Kaşesi
                       </td>
                     </tr>
@@ -338,7 +504,13 @@ export function IhtiyacTalepFormu({
                 </table>
 
                 {data.altNotlar && (
-                  <div style={{ marginTop: "16px", fontSize: "9pt", fontStyle: "italic" }}>
+                  <div
+                    style={{
+                      marginTop: "16px",
+                      fontSize: "9pt",
+                      fontStyle: "italic",
+                    }}
+                  >
                     {data.altNotlar}
                   </div>
                 )}

@@ -304,24 +304,16 @@ export function buildDocumentContext(
   }
   const sdpKodu = `934.${sdpAltKodu}`
 
-  let formattedEvrakSayisi = 'Belirtilmedi'
-  if (dosyaSayisi) {
-    const rawNumberStr = dosyaSayisi.includes('/')
-      ? dosyaSayisi.split('/').pop()
-      : dosyaSayisi.includes('-')
-        ? dosyaSayisi.split('-').pop()
-        : dosyaSayisi
-    const cleanSayi = String(rawNumberStr || '').replace(/\D/g, '') || '1'
-    const paddedSayi = cleanSayi.padStart(4, '0')
+  const effectiveDetsis = detsisNo || '0000000000'
+  const rawNumberStr = dosyaSayisi.includes('/')
+    ? dosyaSayisi.split('/').pop()
+    : dosyaSayisi.includes('-')
+      ? dosyaSayisi.split('-').pop()
+      : dosyaSayisi
+  const cleanSayi = String(rawNumberStr || '').replace(/\D/g, '') || '1'
+  const paddedSayi = cleanSayi.padStart(4, '0')
 
-    if (detsisNo) {
-      formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-${paddedSayi}`
-    } else {
-      formattedEvrakSayisi = paddedSayi
-    }
-  } else if (detsisNo) {
-    formattedEvrakSayisi = `E-${detsisNo}-${sdpKodu}-0001`
-  }
+  const formattedEvrakSayisi = `E-${effectiveDetsis}-${sdpKodu}-${paddedSayi}`
 
   const rawMaddeler = dosyaResData?.isin_aciklama_maddeleri
   let aciklamaMaddeleri: any[] = []
