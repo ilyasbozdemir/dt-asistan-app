@@ -1,5 +1,5 @@
 import React from "react";
-import { EditableField } from "./EditableField";
+import { EditableField, FIELD_SOURCE_INFO } from "./EditableField";
 import { useTemplateEdit } from "./TemplateEditContext";
 
 export function toIsoDate(trDateStr?: string | null): string {
@@ -55,6 +55,8 @@ export function DateEditableField({
     return <span>{displayVal}</span>;
   }
 
+  const tooltipText = FIELD_SOURCE_INFO[name] || "ℹ️ Tarih seçmek veya değiştirmek için takvime tıklayın.";
+
   return (
     <input
       type="date"
@@ -75,7 +77,7 @@ export function DateEditableField({
         color: "#0f172a",
         fontFamily: "inherit",
       }}
-      title="Tarih değiştirmek için tıklayın"
+      title={tooltipText}
     />
   );
 }

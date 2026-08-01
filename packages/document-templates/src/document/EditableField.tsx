@@ -1,6 +1,41 @@
 import React, { useState } from "react";
 import { useTemplateEdit } from "./TemplateEditContext";
 
+export const FIELD_SOURCE_INFO: Record<string, string> = {
+  evrakSayisi:
+    "ℹ️ Kurum DETSİS Kodu + SDP Kodu + Dosya Numarasından otomatik üretilir. İsterseniz buradan elle değiştirebilirsiniz.",
+  tarih:
+    "ℹ️ Varsayılanı dosya tarihidir. Tıklayarak veya takvimden değiştirebilirsiniz.",
+  onayaSunulanTarih:
+    "ℹ️ Varsayılanı dosya tarihidir. Tıklayarak veya takvimden değiştirebilirsiniz.",
+  onayTarihi:
+    "ℹ️ Varsayılanı onay tarihidir. Tıklayarak veya takvimden değiştirebilirsiniz.",
+  dosyaTarihi: "ℹ️ Dosya Açılış / Oluşturulma Tarihi alanından çekilir.",
+  hazirlayanPersonelAdi:
+    "ℹ️ Dosya Detayı -> Hazırlayan Personel ayarından çekilir. 'Personel Seç' menüsünden de değiştirebilirsiniz.",
+  hazirlayanPersonelUnvan: "ℹ️ Seçilen Hazırlayan Personelin unvanıdır.",
+  talepEdenPersonelAdi:
+    "ℹ️ Dosya Detayı -> Talep Eden / Hazırlayan Personel ayarından çekilir. 'Personel Seç' menüsünden de değiştirebilirsiniz.",
+  talepEdenPersonelUnvan: "ℹ️ Seçilen Talep Eden Personelin unvanıdır.",
+  onaylayanPersonelAdi:
+    "ℹ️ Dosya Detayı -> Onaylayan Personel (Harcama Yetkilisi) ayarından çekilir. 'Personel Seç' menüsünden de değiştirebilirsiniz.",
+  onaylayanPersonelUnvan: "ℹ️ Seçilen Onaylayan Personelin unvanıdır.",
+  ihtiyacYeri:
+    "ℹ️ Dosya Detayı -> İhtiyaç Yeri veya Kurum Ayarları -> Harcama Birimi alanından çekilir.",
+  gerekce: "ℹ️ Dosya Detayı -> İşin Açıklaması / Gerekçesi alanından çekilir.",
+  aciklama: "ℹ️ Dosya Detayı -> İşin Açıklaması alanından çekilir.",
+  isinAciklamasi: "ℹ️ Dosya Detayı -> İşin Açıklaması alanından çekilir.",
+  isAdi: "ℹ️ Dosya Detayı -> Konu / İşin Adı alanından çekilir.",
+  dosyaKonusu: "ℹ️ Dosya Detayı -> Konu alanından çekilir.",
+  sunulacakMakamAdi:
+    "ℹ️ Kurum Ayarları -> Sunulacak Makam Adı alanından çekilir.",
+  maddeNo: "ℹ️ İhale / Doğrudan Temin Usulü (Örn: 22/d) alanından çekilir.",
+  altNotlar:
+    "ℹ️ Belge alt notları ve uyarılarıdır. Tıklayarak düzenleyebilirsiniz.",
+  ekler: "ℹ️ Belgeye eklenen teknik şartname ve ek bilgisidir.",
+  tasinirTarihi: "ℹ️ Taşınır Kayıt Yetkilisi görüş tarihidir.",
+};
+
 export interface EditableFieldProps {
   name?: string;
   value?: string;
@@ -10,6 +45,7 @@ export interface EditableFieldProps {
   style?: React.CSSProperties;
   className?: string;
   isEditing?: boolean;
+  title?: string;
 }
 
 export function EditableField({
@@ -21,6 +57,7 @@ export function EditableField({
   style = {},
   className = "",
   isEditing,
+  title,
 }: EditableFieldProps) {
   const context = useTemplateEdit();
   const [isFocused, setIsFocused] = useState(false);
@@ -35,6 +72,9 @@ export function EditableField({
   if (!activeEditing || !activeOnChange) {
     return <span style={style} className={className}>{value || ""}</span>;
   }
+
+  const tooltipText = title || (name ? FIELD_SOURCE_INFO[name] : undefined) ||
+    `ℹ️ Tıklayarak '${placeholder || name || "alanı"}' düzenleyebilirsiniz.`;
 
   const baseStyle: React.CSSProperties = {
     backgroundColor: isFocused
@@ -72,6 +112,7 @@ export function EditableField({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         placeholder={placeholder}
+        title={tooltipText}
         rows={Math.max(2, (value || "").split("\n").length)}
         style={{
           ...baseStyle,
@@ -88,7 +129,6 @@ export function EditableField({
     );
   }
 
-  // Calculate dynamic inline width so input fits text naturally without breaking sentence flow
   const charLength = Math.max(
     (value || "").length,
     (placeholder || "").length,
@@ -108,6 +148,7 @@ export function EditableField({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       placeholder={placeholder}
+      title={tooltipText}
       style={{
         ...baseStyle,
         display: "inline-block",
