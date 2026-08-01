@@ -56,29 +56,27 @@ export function DateEditableField({
   }
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-      <input
-        type="date"
-        value={isoVal}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (val) {
-            onFieldChange(name, toTrDate(val));
-          }
-        }}
-        style={{
-          fontSize: "7.5pt",
-          padding: "1px 3px",
-          borderRadius: "4px",
-          border: "1px solid #cbd5e1",
-          backgroundColor: "#ffffff",
-          cursor: "pointer",
-          color: "#0f172a",
-        }}
-        title="Tarih seçin"
-      />
-      <EditableField name={name} value={displayVal} placeholder={placeholder} />
-    </div>
+    <input
+      type="date"
+      value={isoVal}
+      onChange={(e) => {
+        const val = e.target.value;
+        if (val) {
+          onFieldChange(name, toTrDate(val));
+        }
+      }}
+      style={{
+        fontSize: "9pt",
+        padding: "2px 5px",
+        borderRadius: "4px",
+        border: "1px solid #94a3b8",
+        backgroundColor: "#f8fafc",
+        cursor: "pointer",
+        color: "#0f172a",
+        fontFamily: "inherit",
+      }}
+      title="Tarih değiştirmek için tıklayın"
+    />
   );
 }
 
@@ -119,6 +117,8 @@ interface PersonelCardProps {
   marginTop?: number;
   marginBottom?: number;
   showContactInfo?: boolean;
+  nameField?: string;
+  unvanField?: string;
 }
 
 export const PersonelCard: React.FC<PersonelCardProps> = ({
@@ -130,7 +130,12 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
   marginTop = 20,
   marginBottom = 20,
   showContactInfo = false,
+  nameField = "hazirlayanPersonelAdi",
+  unvanField = "hazirlayanPersonelUnvan",
 }) => {
+  const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
+  const personelList = personelListesi || [];
+
   return (
     <div
       style={{
@@ -149,22 +154,55 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
       <div
         style={{
           textAlign: "center",
-          minWidth: "250px",
+          minWidth: "220px",
           lineHeight: 1.8,
         }}
       >
+        {isEditing && personelList.length > 0 && (
+          <div style={{ marginBottom: "6px" }}>
+            <select
+              value=""
+              onChange={(e) => {
+                const selectedId = Number(e.target.value);
+                const p = personelList.find((item: any) => item.id === selectedId);
+                if (p && onFieldChange) {
+                  onFieldChange(nameField, p.ad_soyad);
+                  onFieldChange(unvanField, p.unvan || "");
+                }
+              }}
+              style={{
+                fontSize: "7.5pt",
+                padding: "2px 4px",
+                borderRadius: "4px",
+                border: "1px solid #cbd5e1",
+                backgroundColor: "#f8fafc",
+                maxWidth: "180px",
+                cursor: "pointer",
+                margin: "0 auto",
+              }}
+            >
+              <option value="">👤 Personel Seç...</option>
+              {personelList.map((p: any) => (
+                <option key={p.id} value={p.id}>
+                  {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div style={{ fontWeight: "bold", fontSize: "11pt" }}>
           <EditableField
-            name="hazirlayanPersonelAdi"
+            name={nameField}
             value={adSoyad || ""}
-            placeholder="Hazırlayan Adı Soyadı"
+            placeholder={isEditing && personelList.length > 0 ? "Adı Soyadı" : "Hazırlayan Adı Soyadı"}
           />
         </div>
         <div style={{ fontSize: "11pt" }}>
           <EditableField
-            name="hazirlayanPersonelUnvan"
+            name={unvanField}
             value={unvan || ""}
-            placeholder="Hazırlayan Unvanı"
+            placeholder="Unvanı"
           />
         </div>
         {showContactInfo && (
@@ -194,6 +232,8 @@ interface ApprovalSignatureProps {
   showSpace?: boolean;
   marginTop?: number;
   align?: "left" | "center" | "right";
+  nameField?: string;
+  unvanField?: string;
 }
 
 export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
@@ -204,7 +244,12 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
   showSpace = true,
   marginTop = 40,
   align = "center",
+  nameField = "onaylayanPersonelAdi",
+  unvanField = "onaylayanPersonelUnvan",
 }) => {
+  const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
+  const personelList = personelListesi || [];
+
   return (
     <div
       style={{
@@ -222,7 +267,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
       <div
         style={{
           textAlign: "center",
-          minWidth: "250px",
+          minWidth: "220px",
           lineHeight: 1.5,
           position: "relative",
         }}
@@ -241,9 +286,42 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
           />
         </div>
 
+        {isEditing && personelList.length > 0 && (
+          <div style={{ marginTop: "4px", marginBottom: "6px" }}>
+            <select
+              value=""
+              onChange={(e) => {
+                const selectedId = Number(e.target.value);
+                const p = personelList.find((item: any) => item.id === selectedId);
+                if (p && onFieldChange) {
+                  onFieldChange(nameField, p.ad_soyad);
+                  onFieldChange(unvanField, p.unvan || "");
+                }
+              }}
+              style={{
+                fontSize: "7.5pt",
+                padding: "2px 4px",
+                borderRadius: "4px",
+                border: "1px solid #cbd5e1",
+                backgroundColor: "#f8fafc",
+                maxWidth: "180px",
+                cursor: "pointer",
+                margin: "0 auto",
+              }}
+            >
+              <option value="">👤 Personel Seç...</option>
+              {personelList.map((p: any) => (
+                <option key={p.id} value={p.id}>
+                  {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {showSpace && (
           <div
-            style={{ minHeight: "30px", marginBottom: "4px" }}
+            style={{ minHeight: "24px", marginBottom: "4px" }}
           />
         )}
 
@@ -251,17 +329,17 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
           style={{ fontSize: "11pt", fontWeight: "bold", marginTop: "4px" }}
         >
           <EditableField
-            name="onaylayanPersonelAdi"
+            name={nameField}
             value={adSoyad || ""}
-            placeholder="Onaylayan Adı Soyadı"
+            placeholder={isEditing && personelList.length > 0 ? "Adı Soyadı" : "Onaylayan Adı Soyadı"}
           />
         </div>
 
         <div style={{ fontSize: "11pt" }}>
           <EditableField
-            name="onaylayanPersonelUnvan"
+            name={unvanField}
             value={unvan || ""}
-            placeholder="Onaylayan Unvanı"
+            placeholder="Unvanı"
           />
         </div>
       </div>

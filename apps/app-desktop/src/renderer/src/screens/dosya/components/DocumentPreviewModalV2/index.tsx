@@ -870,6 +870,7 @@ export function DocumentPreviewModalV2({
                     isEditing={isEditingMode}
                     onFieldChange={(key, val) =>
                       setFormData((prev) => ({ ...prev, [key]: val }))}
+                    personelListesi={personelListesi}
                   >
                     {React.createElement(ActiveComponent, {
                       data: {

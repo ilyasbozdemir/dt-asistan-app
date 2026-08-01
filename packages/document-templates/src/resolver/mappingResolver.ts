@@ -28,7 +28,7 @@ export async function resolveEvrakSayisi(
     }
 
     if (!detsisNo) {
-      detsisNo = '10234521';
+      detsisNo = '0000000000';
     }
 
     const dosyaRes = await queryExecutor(
@@ -501,8 +501,8 @@ async function resolveFormula(
         
         const res = await queryExecutor(query, params);
         let val = res?.[0]?.[column] ?? '';
-        if (column === 'detsis_kodu' && (!val || String(val).trim() === '' || String(val).trim() === '0000000000')) {
-          val = '934';
+        if (column === 'detsis_kodu' && (!val || String(val).trim() === '')) {
+          val = '0000000000';
         }
         resolved = resolved.replace(fullToken, String(val));
       } catch (err) {
