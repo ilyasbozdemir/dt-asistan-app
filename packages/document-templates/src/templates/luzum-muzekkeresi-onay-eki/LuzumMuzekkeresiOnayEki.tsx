@@ -1,6 +1,12 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
+import {
+  DateEditableField,
+  PersonelCard,
+  toTrDate,
+} from "../../document/ApprovalSignature";
+import { EditableField } from "../../document/EditableField";
 import { paginateData } from "../../document/DynamicPaginatedTable";
 import { LuzumMuzekkeresiOnayEkiType } from "./LuzumMuzekkeresiOnayEki.schema";
 
@@ -50,7 +56,7 @@ export function LuzumMuzekkeresiOnayEki({
     { key: "malzemeAdi", label: "Malzeme Adı", width: "35%", align: "left" },
     { key: "ozelligi", label: "Özelliği", width: "25%", align: "left" },
     { key: "birimi", label: "Birimi", width: "10%", align: "center" },
-    { key: "kdvOrani", label: "KDV Oranı", width: "10%", align: "center" },
+    { key: "kdvOrani", label: "KDV Oranı (%)", width: "10%", align: "center" },
     { key: "miktar", label: "Miktar", width: "10%", align: "right" },
   ];
 
@@ -66,6 +72,8 @@ export function LuzumMuzekkeresiOnayEki({
   }));
 
   const pages = paginateData(items, limits);
+  const defaultToday = toTrDate(new Date().toISOString().split("T")[0]);
+  const dosyaTarihiVal = data.dosyaTarihi || data.tarih || defaultToday;
 
   return (
     <>
@@ -95,7 +103,11 @@ export function LuzumMuzekkeresiOnayEki({
                     margin: "10px 0 20px 0",
                   }}
                 >
-                  {data.dosyaKonusu || "Lüzum Müzekkeresi"}
+                  <EditableField
+                    name="dosyaKonusu"
+                    value={data.dosyaKonusu || "Lüzum Müzekkeresi"}
+                    placeholder="Lüzum Müzekkeresi"
+                  />
                 </div>
 
                 <div
@@ -106,7 +118,12 @@ export function LuzumMuzekkeresiOnayEki({
                     fontSize: "11pt",
                   }}
                 >
-                  EK: {data.ekNo || "1"}
+                  EK:{" "}
+                  <EditableField
+                    name="ekNo"
+                    value={data.ekNo || "1"}
+                    placeholder="1"
+                  />
                 </div>
 
                 <div
@@ -118,8 +135,15 @@ export function LuzumMuzekkeresiOnayEki({
                     lineHeight: 1.5,
                   }}
                 >
-                  {getKurumName(data.kurumAdi, data.altKurumTipi) ||
-                    "[Kurum Adı]"}{" "}
+                  <EditableField
+                    name="kurumMetni"
+                    value={
+                      data.kurumMetni ||
+                      getKurumName(data.kurumAdi, data.altKurumTipi) ||
+                      "Müdürlüğümüz"
+                    }
+                    placeholder="Müdürlüğümüz"
+                  />{" "}
                   için aşağıda müfredatı ve evsafı yazılı malzemelere ihtiyaç
                   görüldüğünden satın alınması arz olunur.
                 </div>
@@ -137,23 +161,31 @@ export function LuzumMuzekkeresiOnayEki({
               <div
                 style={{
                   marginLeft: "auto",
-                  width: "180px",
+                  width: "220px",
                   textAlign: "center",
                   marginTop: "30px",
                   marginBottom: "20px",
-                  lineHeight: 1.3,
                   fontSize: "11pt",
                   pageBreakInside: "avoid",
                 }}
               >
-                {data.dosyaTarihi ||
-                  data.tarih ||
-                  new Date().toLocaleDateString("tr-TR")}
-                <br />
-                <br />
-                {data.talepEdenPersonelAdi || ""}
-                <br />
-                {data.talepEdenPersonelUnvan || ""}
+                <div style={{ marginBottom: "8px" }}>
+                  <DateEditableField
+                    name="dosyaTarihi"
+                    value={data.dosyaTarihi || data.tarih}
+                    defaultDate={dosyaTarihiVal}
+                  />
+                </div>
+
+                <PersonelCard
+                  adSoyad={data.talepEdenPersonelAdi || data.hazirlayanPersonelAdi}
+                  unvan={data.talepEdenPersonelUnvan || data.hazirlayanPersonelUnvan}
+                  nameField="talepEdenPersonelAdi"
+                  unvanField="talepEdenPersonelUnvan"
+                  align="center"
+                  marginTop={0}
+                  marginBottom={0}
+                />
               </div>
             )}
           </DocumentLayout>

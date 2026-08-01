@@ -7,7 +7,7 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
     aciklama: 'Dosyanın antet satırları'
   },
   dosyaKonusu: {
-    deger: 'Lüzum Müzekkeresi',
+    deger: '"dosyaKonusu": "LÜZUM MÜZEKKERESİ",',
     aciklama: 'Belgenin konusu'
   },
   ekNo: {

@@ -343,12 +343,16 @@ export function buildTableActionItems(
       id: "selectAll",
       label: isAllSelected ? "Seçimi Kaldır" : "Tümünü Seç",
       icon: Check,
-      iconColorClass: isAllSelected ? "text-blue-500" : "text-slate-400 dark:text-slate-500",
+      iconColorClass: isAllSelected
+        ? "text-blue-500"
+        : "text-slate-400 dark:text-slate-500",
       onClick: onSelectAll,
     },
     {
       id: "deleteSelected",
-      label: selectedCount > 0 ? `Seçilenleri Sil (${selectedCount})` : "Seçilenleri Sil",
+      label: selectedCount > 0
+        ? `Seçilenleri Sil (${selectedCount})`
+        : "Seçilenleri Sil",
       icon: Trash2,
       itemClassName: selectedCount > 0
         ? "text-red-600 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-950/30 font-semibold"
@@ -394,4 +398,3 @@ export function buildTableActionItems(
 
   return rawItems.filter((item) => Boolean(item.onClick));
 }
-

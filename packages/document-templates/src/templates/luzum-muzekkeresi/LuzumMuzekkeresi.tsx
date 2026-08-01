@@ -164,19 +164,19 @@ export function LuzumMuzekkeresi({
             />
 
             {isLastPage && (
-              data.olurYazisi !== false ? (
-                <div style={{ marginTop: "auto" }}>
-                  <ApprovalSignature
-                    title={data.olurBaslik || "OLUR"}
-                    date={data.onayTarihi || data.tarih || data.dosyaTarihi}
-                    adSoyad={data.onaylayanPersonelAdi}
-                    unvan={data.onaylayanPersonelUnvan}
-                    showSpace={true}
-                  />
-                </div>
-              ) : (
-                <EditableOlurPlaceholder />
-              )
+              data.olurYazisi !== false
+                ? (
+                  <div style={{ marginTop: "auto" }}>
+                    <ApprovalSignature
+                      title={data.olurBaslik || "OLUR"}
+                      date={data.onayTarihi || data.tarih || data.dosyaTarihi}
+                      adSoyad={data.onaylayanPersonelAdi}
+                      unvan={data.onaylayanPersonelUnvan}
+                      showSpace={true}
+                    />
+                  </div>
+                )
+                : <EditableOlurPlaceholder />
             )}
           </DocumentLayout>
         );

@@ -25,8 +25,30 @@ interface IhtiyacTalepFormuProps {
   lastPageLimit?: number;
 }
 
-const DEFAULT_ALT_NOTLAR =
-  "1- Hizmet ve Yapım işi alımlarında Taşınır Kayıt Yetkilisi görüşü yazılmayacaktır.\n2- İstenilen malzeme depoda var ise bu talep formu satın alma birimine gönderilmeyecektir.\n3- Hizmet, Yapım İşleri ve Mal alımlarında (Demirbaş v.b. gibi) Teknik Şartname hazırlanması zorunludur. (Tüm Teknik Şartnameler hazırlayanlar tarafından eksiksiz bir şekilde doldurulup Üst yazıyla Personel ve Destek Hizmetleri Başkanlığına gönderilecektir. Teknik şartname olmayan talepler değerlendirmeye alınmayacaktır. Bu hususların eksiksiz yerine getirilmesi ve Makam Onayı alınmasından sonra satın alma işlemleri başlatılacaktır.)";
+export function getDynamicAltNotlar(data: any): string {
+  if (data?.altNotlar) return data.altNotlar;
+
+  const birimAdi =
+    data?.mudurluk ||
+    data?.birim_adi ||
+    data?.harcamaBirimAdi ||
+    "Destek Hizmetleri Başkanlığı";
+
+  let birimYonelme = birimAdi;
+  if (!birimAdi.endsWith("na") && !birimAdi.endsWith("ne")) {
+    if (/[ıi]$/i.test(birimAdi) || /[uü]$/i.test(birimAdi) || /ğ[ıi]$/i.test(birimAdi)) {
+      birimYonelme = `${birimAdi}na`;
+    } else if (/[aeoö]$/i.test(birimAdi)) {
+      birimYonelme = `${birimAdi}ne`;
+    } else {
+      birimYonelme = `${birimAdi}'ne`;
+    }
+  }
+
+  return `1- Hizmet ve Yapım işi alımlarında Taşınır Kayıt Yetkilisi görüşü yazılmayacaktır.
+2- İstenilen malzeme depoda var ise bu talep formu satın alma birimine gönderilmeyecektir.
+3- Hizmet, Yapım İşleri ve Mal alımlarında (Demirbaş v.b. gibi) Teknik Şartname hazırlanması zorunludur. (Tüm Teknik Şartnameler hazırlayanlar tarafından eksiksiz bir şekilde doldurulup Üst yazıyla ${birimYonelme} gönderilecektir. Teknik şartname olmayan talepler değerlendirmeye alınmayacaktır. Bu hususların eksiksiz yerine getirilmesi ve Makam Onayı alınmasından sonra satın alma işlemleri başlatılacaktır.)`;
+}
 
 const DEFAULT_EKLER = "EKİ: Talebe ait teknik şartnameler";
 
@@ -90,6 +112,20 @@ export function IhtiyacTalepFormu({
     defaultToday;
   const dosyaTarihiVal = data.dosyaTarihi || data.onayTarihi || tarihVal ||
     defaultToday;
+
+  const talepEdenMatched = personelList.find(
+    (p: any) =>
+      p.ad_soyad &&
+      String(p.ad_soyad).trim().toLowerCase() === String(talepEdenAd || "").trim().toLowerCase()
+  );
+  const talepEdenSelectedId = talepEdenMatched ? String(talepEdenMatched.id) : "";
+
+  const onaylayanMatched = personelList.find(
+    (p: any) =>
+      p.ad_soyad &&
+      String(p.ad_soyad).trim().toLowerCase() === String(onaylayanAd || "").trim().toLowerCase()
+  );
+  const onaylayanSelectedId = onaylayanMatched ? String(onaylayanMatched.id) : "";
 
   const cellStyle: React.CSSProperties = {
     border: "1px solid #000",
@@ -183,7 +219,6 @@ export function IhtiyacTalepFormu({
                   ederiz.
                 </div>
 
-                {/* HTML index.html formatında BİRİMİN TALEP GEREKÇESİ tablosu */}
                 <table
                   style={{
                     width: "100%",
@@ -244,7 +279,7 @@ export function IhtiyacTalepFormu({
                             style={{ marginTop: "4px", marginBottom: "4px" }}
                           >
                             <select
-                              value=""
+                              value={talepEdenSelectedId}
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
                                 const p = personelList.find((item: any) =>
@@ -311,7 +346,7 @@ export function IhtiyacTalepFormu({
                             style={{ marginTop: "4px", marginBottom: "4px" }}
                           >
                             <select
-                              value=""
+                              value={onaylayanSelectedId}
                               onChange={(e) => {
                                 const selectedId = Number(e.target.value);
                                 const p = personelList.find((item: any) =>
@@ -441,7 +476,7 @@ export function IhtiyacTalepFormu({
                 >
                   <EditableField
                     name="altNotlar"
-                    value={data.altNotlar || DEFAULT_ALT_NOTLAR}
+                    value={getDynamicAltNotlar(data)}
                     multiline
                     placeholder="Alt Notlar"
                   />

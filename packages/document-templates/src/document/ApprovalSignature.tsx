@@ -137,6 +137,12 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
 }) => {
   const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
   const personelList = personelListesi || [];
+  const matched = personelList.find(
+    (p: any) =>
+      p.ad_soyad &&
+      String(p.ad_soyad).trim().toLowerCase() === String(adSoyad || "").trim().toLowerCase()
+  );
+  const selectedValue = matched ? String(matched.id) : "";
 
   return (
     <div
@@ -163,7 +169,7 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
         {isEditing && personelList.length > 0 && (
           <div style={{ marginBottom: "6px" }}>
             <select
-              value=""
+              value={selectedValue}
               onChange={(e) => {
                 const selectedId = Number(e.target.value);
                 const p = personelList.find((item: any) => item.id === selectedId);
@@ -182,6 +188,7 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
                 cursor: "pointer",
                 margin: "0 auto",
               }}
+              title="Kayıtlı personellerden seçim yapın"
             >
               <option value="">👤 Personel Seç...</option>
               {personelList.map((p: any) => (
@@ -251,6 +258,12 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
 }) => {
   const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
   const personelList = personelListesi || [];
+  const matched = personelList.find(
+    (p: any) =>
+      p.ad_soyad &&
+      String(p.ad_soyad).trim().toLowerCase() === String(adSoyad || "").trim().toLowerCase()
+  );
+  const selectedValue = matched ? String(matched.id) : "";
 
   return (
     <div
@@ -291,7 +304,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
         {isEditing && personelList.length > 0 && (
           <div style={{ marginTop: "4px", marginBottom: "6px" }}>
             <select
-              value=""
+              value={selectedValue}
               onChange={(e) => {
                 const selectedId = Number(e.target.value);
                 const p = personelList.find((item: any) => item.id === selectedId);
@@ -310,6 +323,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
                 cursor: "pointer",
                 margin: "0 auto",
               }}
+              title="Kayıtlı personellerden seçim yapın"
             >
               <option value="">👤 Personel Seç...</option>
               {personelList.map((p: any) => (

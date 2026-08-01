@@ -6,7 +6,7 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
     sutun: 'kurum_anteti',
     aciklama: 'Dosyanın antet satırları'
   },
-  dosyaKonusu: { deger: 'Lüzum Müzekkeresi', aciklama: 'Belge Başlığı / Konusu' },
+  dosyaKonusu: { deger: '"dosyaKonusu": "LÜZUM MÜZEKKERESİ",', aciklama: 'Belge Başlığı / Konusu' },
   evrakSayisi: {
     aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı (örn: E-10234521-934.01-0001)'
   },
@@ -27,12 +27,12 @@ export const LuzumMuzekkeresiMapping: ProcessMapping = {
       kdvOrani: 'kdv_orani',
       miktar: 'miktar'
     },
-    aciklama: 'Lüzum Müzekkeresi kalemleri'
+    aciklama: '"dosyaKonusu": "LÜZUM MÜZEKKERESİ", kalemleri'
   },
   ihtiyacYeri: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'ihtiyac_yeri',
-    aciklama: 'Lüzum Müzekkeresi yerleri'
+    aciklama: '"dosyaKonusu": "LÜZUM MÜZEKKERESİ", yerleri'
   },
   isinAciklamasi: {
     tablo: 'DATA_TeminDosyasi',

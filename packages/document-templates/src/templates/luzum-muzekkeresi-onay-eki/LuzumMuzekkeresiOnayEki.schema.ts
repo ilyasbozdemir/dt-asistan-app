@@ -4,6 +4,7 @@ import { BaseTemplateSchema } from "../../base.schema";
 export const LuzumMuzekkeresiOnayEkiSchema = BaseTemplateSchema.extend({
   ekNo: z.string().optional(),
   dosyaKonusu: z.string().optional(),
+  kurumMetni: z.string().optional(),
   talepEdenPersonelAdi: z.string().optional(),
   talepEdenPersonelUnvan: z.string().optional(),
   altKurumTipi: z.string().optional(),

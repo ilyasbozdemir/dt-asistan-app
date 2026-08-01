@@ -50,7 +50,7 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/dosya/malzemeler/liste')) return 'İhtiyaç Listesi'
   if (path.startsWith('/dosya/malzemeler/son-alim')) return 'Son Alım Fiyat Cetveli'
   if (path.startsWith('/dosya/luzum/talep-formu')) return 'İhtiyaç Talep Formu'
-  if (path.startsWith('/dosya/luzum/belge')) return 'Lüzum Müzekkeresi'
+  if (path.startsWith('/dosya/luzum/belge')) return '"dosyaKonusu": "LÜZUM MÜZEKKERESİ",'
   if (path.startsWith('/dosya/luzum/onay-eki')) return 'Onay Eki'
   if (path.startsWith('/dosya/onay/butce-sorgu')) return 'Bütçe Sorgusu'
   if (path.startsWith('/dosya/komisyon/fiyat-arastirma')) return 'Fiyat Araştırma Komisyonu'

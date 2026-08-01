@@ -901,7 +901,7 @@ export function MalzemeListesi(): React.JSX.Element {
           <div className="flex flex-col items-center justify-center text-center p-6 text-slate-400">
             <FileText className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
             <p className="text-xs">
-              Lüzum müzekkeresinde malzeme tablosunun altında görünecek herhangi bir özel şart
+              "dosyaKonusu": "LÜZUM MÜZEKKERESİ",nde malzeme tablosunun altında görünecek herhangi bir özel şart
               eklenmemiş.
             </p>
           </div>
@@ -972,7 +972,7 @@ export function MalzemeListesi(): React.JSX.Element {
         isOpen={isMaddeModalOpen}
         onClose={() => setIsMaddeModalOpen(false)}
         title={editingMaddeIndex !== null ? 'Madde / Şart Düzenle' : 'Yeni Madde / Şart Ekle'}
-        description="Lüzum müzekkeresinde görünecek özel şart veya açıklama maddesi metni."
+        description="Belgede görünecek özel şart veya açıklama maddesi metni."
       >
         <form
           onSubmit={(e) => {
