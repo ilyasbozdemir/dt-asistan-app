@@ -105,6 +105,7 @@ export function DocumentPreviewModalV2({
   } = useSettingsStore();
   const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
   const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
+  const [firmaListesi, setFirmaListesi] = useState<any[]>([]);
   const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
   const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">(
@@ -182,6 +183,128 @@ export function DocumentPreviewModalV2({
         if (personelRes.success) {
           setPersonelListesi(personelRes.data);
         }
+        let fileFirms: any[] = [];
+        if (activeDosyaId) {
+          const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            `SELECT 
+               df.id as temin_firma_id,
+               COALESCE(f.id, df.firma_id, df.id) as id,
+               COALESCE(NULLIF(f.unvan, ''), NULLIF(df.unvan, '')) as unvan,
+               COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+               COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
+               COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
+             FROM DATA_TeminFirma df
+             LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
+             WHERE df.temin_dosya_id = ?
+             ORDER BY df.id ASC`,
+            [activeDosyaId],
+          );
+          if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
+            fileFirms = dosyaFirmaRes.data.filter(
+              (f: any) => f.unvan && String(f.unvan).trim() !== "",
+            );
+          }
+
+          // Calculate totals for each firm in activeDosyaId (exact logic as PricesSummaryDashboard)
+          const itemsRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            "SELECT id, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
+            [activeDosyaId],
+          );
+          const items = itemsRes.success ? itemsRes.data : [];
+
+          const bidsRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            "SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
+            [activeDosyaId],
+          );
+          const bids = bidsRes.success ? bidsRes.data : [];
+
+          fileFirms.forEach((firm: any) => {
+            let total = 0;
+            items.forEach((item: any) => {
+              const bid = bids.find(
+                (b: any) =>
+                  b.temin_kalem_id === item.id &&
+                  (b.temin_firma_id === firm.temin_firma_id ||
+                    b.temin_firma_id === firm.id),
+              );
+              if (bid && bid.birim_fiyat > 0) {
+                total += bid.birim_fiyat * (item.miktar || 0);
+              }
+            });
+            firm.total = total;
+          });
+
+          const nonZeroTotals = fileFirms.filter((f) => f.total > 0);
+          const lowestTotal = nonZeroTotals.length > 0
+            ? Math.min(...nonZeroTotals.map((f) => f.total))
+            : 0;
+
+          fileFirms.forEach((f) => {
+            if (f.total > 0 && f.total === lowestTotal) {
+              f.isWinner = true;
+              const formattedTotal = f.total.toLocaleString("tr-TR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              });
+              f.label = `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
+            } else if (f.total > 0) {
+              const formattedTotal = f.total.toLocaleString("tr-TR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              });
+              f.label = `🏢 ${f.unvan} (${formattedTotal} TL)`;
+            } else {
+              f.label = `🏢 ${f.unvan}`;
+            }
+          });
+
+          // Sort so winning firm comes first
+          fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0));
+        }
+
+        if (fileFirms.length === 0) {
+          const allTeminFirmsRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            `SELECT 
+               COALESCE(f.id, df.firma_id, df.id) as id,
+               COALESCE(NULLIF(f.unvan, ''), NULLIF(df.unvan, '')) as unvan,
+               COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+               COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
+               COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
+             FROM DATA_TeminFirma df
+             LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
+             ORDER BY df.id DESC`,
+          );
+          if (allTeminFirmsRes.success && allTeminFirmsRes.data.length > 0) {
+            fileFirms = allTeminFirmsRes.data.filter(
+              (f: any) => f.unvan && String(f.unvan).trim() !== "",
+            );
+          }
+        }
+
+        const globalFirmaRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT id, unvan, yetkili_ad_soyad, telefon, eposta FROM TANIM_Firma WHERE aktif_mi = 1 AND unvan IS NOT NULL AND unvan != '' ORDER BY unvan ASC",
+        );
+        const globalFirms = globalFirmaRes.success ? globalFirmaRes.data : [];
+
+        const combinedFirms = [...fileFirms];
+        globalFirms.forEach((g: any) => {
+          if (
+            g.unvan && !combinedFirms.some((f: any) =>
+              f.unvan &&
+              String(f.unvan).trim().toLowerCase() ===
+                String(g.unvan).trim().toLowerCase()
+            )
+          ) {
+            combinedFirms.push(g);
+          }
+        });
+
+        setFirmaListesi(combinedFirms);
 
         // Setup TemplateResolver
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -286,7 +409,19 @@ export function DocumentPreviewModalV2({
             kurumlari: customSubInstitutionKurumlari,
           },
         );
-        finalData.kurumumuz = suffixes.kurumumuz;
+        // Pre-populate winner firm (lowest offer) as default teslimEden if not set
+        const winnerFirm = fileFirms.find((f: any) => f.isWinner);
+        if (winnerFirm) {
+          if (!finalData.yukleniciFirma) {
+            finalData.yukleniciFirma = winnerFirm.unvan;
+          }
+          if (!finalData.teslimEden_0_adSoyad && (!finalData.teslimEdenler || !finalData.teslimEdenler[0]?.adSoyad)) {
+            finalData.teslimEden_0_adSoyad = winnerFirm.unvan;
+            finalData.teslimEden_0_unvan = winnerFirm.yetkili_ad_soyad
+              ? `Yetkili: ${winnerFirm.yetkili_ad_soyad}`
+              : "Yüklenici Firma / Yetkilisi";
+          }
+        }
 
         setFormData(finalData);
       } catch (err) {
@@ -871,11 +1006,15 @@ export function DocumentPreviewModalV2({
                     onFieldChange={(key, val) =>
                       setFormData((prev) => ({ ...prev, [key]: val }))}
                     personelListesi={personelListesi}
+                    firmaListesi={firmaListesi}
                   >
                     {React.createElement(ActiveComponent, {
                       data: {
                         ...formData,
-                        personelListesi: (formData as any).personelListesi || personelListesi,
+                        personelListesi: (formData as any).personelListesi ||
+                          personelListesi,
+                        firmaListesi: (formData as any).firmaListesi ||
+                          firmaListesi,
                         tarih: formData.tarih || formData.onayaSunulanTarih ||
                           "",
                         onayTarihi: formData.onayTarihi ||

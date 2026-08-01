@@ -121,6 +121,9 @@ interface PersonelCardProps {
   showContactInfo?: boolean;
   nameField?: string;
   unvanField?: string;
+  placeholderName?: string;
+  placeholderUnvan?: string;
+  isFirmaSelect?: boolean;
 }
 
 export const PersonelCard: React.FC<PersonelCardProps> = ({
@@ -134,15 +137,38 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
   showContactInfo = false,
   nameField = "hazirlayanPersonelAdi",
   unvanField = "hazirlayanPersonelUnvan",
+  placeholderName,
+  placeholderUnvan,
+  isFirmaSelect = false,
 }) => {
-  const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
+  const { isEditing, onFieldChange, personelListesi, firmaListesi } = useTemplateEdit();
   const personelList = personelListesi || [];
-  const matched = personelList.find(
-    (p: any) =>
-      p.ad_soyad &&
-      String(p.ad_soyad).trim().toLowerCase() === String(adSoyad || "").trim().toLowerCase()
-  );
-  const selectedValue = matched ? String(matched.id) : "";
+  const rawFirmaList = firmaListesi || [];
+
+  const firmaList = [...rawFirmaList];
+  if (adSoyad && isFirmaSelect && !firmaList.some((f: any) => f.unvan && String(f.unvan).trim().toLowerCase() === String(adSoyad).trim().toLowerCase())) {
+    firmaList.unshift({ id: `custom_${adSoyad}`, unvan: adSoyad });
+  }
+
+  const validFirmaList = firmaList.filter((f: any) => f && f.unvan && String(f.unvan).trim() !== "");
+
+  const matched = isFirmaSelect
+    ? validFirmaList.find(
+        (f: any) =>
+          f.unvan &&
+          String(f.unvan).trim().toLowerCase() === String(adSoyad || "").trim().toLowerCase()
+      )
+    : personelList.find(
+        (p: any) =>
+          p.ad_soyad &&
+          String(p.ad_soyad).trim().toLowerCase() === String(adSoyad || "").trim().toLowerCase()
+      );
+
+  const selectedValue = matched ? String(matched.id || matched.unvan) : "";
+
+  const namePlaceholder = placeholderName ||
+    (isFirmaSelect ? "Firma Adı / Kaşe" : (isEditing && personelList.length > 0 ? "Adı Soyadı" : "Adı Soyadı / Kaşe"));
+  const unvanPlaceholder = placeholderUnvan || "Unvanı";
 
   return (
     <div
@@ -166,16 +192,34 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
           lineHeight: 1.8,
         }}
       >
-        {isEditing && personelList.length > 0 && (
+        {isEditing && (
           <div style={{ marginBottom: "6px" }}>
             <select
               value={selectedValue}
               onChange={(e) => {
-                const selectedId = Number(e.target.value);
-                const p = personelList.find((item: any) => item.id === selectedId);
-                if (p && onFieldChange) {
-                  onFieldChange(nameField, p.ad_soyad);
-                  onFieldChange(unvanField, p.unvan || "");
+                const val = e.target.value;
+                if (isFirmaSelect) {
+                  const f = validFirmaList.find((item: any) => String(item.id || item.unvan) === val);
+                  if (f && onFieldChange) {
+                    onFieldChange(nameField, f.unvan);
+                    onFieldChange(
+                      unvanField,
+                      f.yetkili_ad_soyad ? `Yetkili: ${f.yetkili_ad_soyad}` : "Yüklenici Firma / Yetkilisi"
+                    );
+                  } else if (onFieldChange && val === "") {
+                    onFieldChange(nameField, "");
+                    onFieldChange(unvanField, "");
+                  }
+                } else {
+                  const selectedId = Number(val);
+                  const p = personelList.find((item: any) => item.id === selectedId);
+                  if (p && onFieldChange) {
+                    onFieldChange(nameField, p.ad_soyad);
+                    onFieldChange(unvanField, p.unvan || "");
+                  } else if (onFieldChange && val === "") {
+                    onFieldChange(nameField, "");
+                    onFieldChange(unvanField, "");
+                  }
                 }
               }}
               style={{
@@ -188,14 +232,20 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
                 cursor: "pointer",
                 margin: "0 auto",
               }}
-              title="Kayıtlı personellerden seçim yapın"
+              title={isFirmaSelect ? "Kayıtlı/İstekli firmalardan seçim yapın" : "Kayıtlı personellerden seçim yapın"}
             >
-              <option value="">👤 Personel Seç...</option>
-              {personelList.map((p: any) => (
-                <option key={p.id} value={p.id}>
-                  {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
-                </option>
-              ))}
+              <option value="">{isFirmaSelect ? "🏢 Firma Seç..." : "👤 Personel Seç..."}</option>
+              {isFirmaSelect
+                ? validFirmaList.map((f: any, idx: number) => (
+                    <option key={f.id || idx} value={String(f.id || f.unvan)}>
+                      {f.unvan}
+                    </option>
+                  ))
+                : personelList.map((p: any) => (
+                    <option key={p.id} value={String(p.id)}>
+                      {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                    </option>
+                  ))}
             </select>
           </div>
         )}
@@ -204,14 +254,14 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
           <EditableField
             name={nameField}
             value={adSoyad || ""}
-            placeholder={isEditing && personelList.length > 0 ? "Adı Soyadı" : "Hazırlayan Adı Soyadı"}
+            placeholder={namePlaceholder}
           />
         </div>
         <div style={{ fontSize: "11pt" }}>
           <EditableField
             name={unvanField}
             value={unvan || ""}
-            placeholder="Unvanı"
+            placeholder={unvanPlaceholder}
           />
         </div>
         {showContactInfo && (

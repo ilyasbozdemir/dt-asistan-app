@@ -5,6 +5,8 @@ export const LuzumMuzekkeresiTeslimTesellumSchema = BaseTemplateSchema.extend({
   isinAdi: z.string().optional(),
   isinDegeri: z.string().optional(),
   dosyaNumarasi: z.string().optional(),
+  evrakSayisi: z.string().optional(),
+  yukleniciFirma: z.string().optional(),
   kurumumuz: z.string().optional(),
   dosyaTarihi: z.string().optional(),
   ihtiyacKalemleri: z

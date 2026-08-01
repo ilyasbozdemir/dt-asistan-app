@@ -1,7 +1,12 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { DocumentTable } from "../../document/DocumentTable";
-import { PersonelCard } from "../../document/ApprovalSignature";
+import {
+  DateEditableField,
+  PersonelCard,
+  toTrDate,
+} from "../../document/ApprovalSignature";
+import { EditableField } from "../../document/EditableField";
 import { paginateData } from "../../document/DynamicPaginatedTable";
 import { LuzumMuzekkeresiTeslimTesellumType } from "./LuzumMuzekkeresiTeslimTesellum.schema";
 
@@ -69,6 +74,35 @@ export function LuzumMuzekkeresiTeslimTesellum({
   }));
 
   const pages = paginateData(items, limits);
+  const defaultToday = toTrDate(new Date().toISOString().split("T")[0]);
+  const dosyaTarihiVal = (data as any).tarih || data.dosyaTarihi ||
+    (data as any).onayaSunulanTarih || defaultToday;
+
+  const firmaUnvan = data.yukleniciFirma || (data as any).kazananFirma || (data as any).firmaAdi || "";
+
+  const teslimEdenlerList =
+    data.teslimEdenler && data.teslimEdenler.length > 0
+      ? data.teslimEdenler
+      : [
+        {
+          adSoyad: (data as any).teslimEdenPersonelAdi || firmaUnvan || "",
+          unvan: (data as any).teslimEdenPersonelUnvan || (firmaUnvan ? "Yüklenici Firma / Yetkilisi" : ""),
+        },
+      ];
+
+  const teslimAlanlarList =
+    data.teslimAlanlar && data.teslimAlanlar.length > 0
+      ? data.teslimAlanlar
+      : [
+        {
+          adSoyad: (data as any).teslimAlanPersonelAdi ||
+            (data as any).talepEdenPersonelAdi ||
+            (data as any).hazirlayanPersonelAdi || "",
+          unvan: (data as any).teslimAlanPersonelUnvan ||
+            (data as any).talepEdenPersonelUnvan ||
+            (data as any).hazirlayanPersonelUnvan || "",
+        },
+      ];
 
   return (
     <>
@@ -92,14 +126,17 @@ export function LuzumMuzekkeresiTeslimTesellum({
                 <div
                   style={{
                     textAlign: "right",
-                    fontSize: "9.5pt",
+                    fontSize: "10pt",
                     marginBottom: "10px",
                     fontWeight: "bold",
                   }}
                 >
-                  Tarih: {(data as any).tarih || data.dosyaTarihi ||
-                    (data as any).onayaSunulanTarih ||
-                    "..../..../20...."}
+                  Tarih:{" "}
+                  <DateEditableField
+                    name="tarih"
+                    value={dosyaTarihiVal}
+                    defaultDate={defaultToday}
+                  />
                 </div>
 
                 <div
@@ -111,7 +148,11 @@ export function LuzumMuzekkeresiTeslimTesellum({
                     marginBottom: "20px",
                   }}
                 >
-                  TESLİM TESELLÜM BELGESİ
+                  <EditableField
+                    name="dosyaKonusu"
+                    value={data.dosyaKonusu || "TESLİM TESELLÜM BELGESİ"}
+                    placeholder="TESLİM TESELLÜM BELGESİ"
+                  />
                 </div>
 
                 <table
@@ -138,14 +179,18 @@ export function LuzumMuzekkeresiTeslimTesellum({
                         colSpan={3}
                         style={{ padding: "4px 0", verticalAlign: "top" }}
                       >
-                        {data.isinAdi || "-"}
+                        <EditableField
+                          name="isinAdi"
+                          value={data.isinAdi}
+                          placeholder="İşin Adı"
+                        />
                       </td>
                     </tr>
                     <tr>
                       <td
                         style={{
                           fontWeight: "bold",
-                          width: "120px",
+                          width: "140px",
                           padding: "4px 0",
                           verticalAlign: "top",
                         }}
@@ -154,17 +199,21 @@ export function LuzumMuzekkeresiTeslimTesellum({
                       </td>
                       <td
                         style={{
-                          width: "40%",
+                          width: "35%",
                           padding: "4px 0",
                           verticalAlign: "top",
                         }}
                       >
-                        {formatCurrency(data.isinDegeri)}
+                        <EditableField
+                          name="isinDegeri"
+                          value={formatCurrency(data.isinDegeri)}
+                          placeholder="0,00 TL"
+                        />
                       </td>
                       <td
                         style={{
                           fontWeight: "bold",
-                          width: "100px",
+                          width: "80px",
                           padding: "4px 0",
                           textAlign: "right",
                           paddingRight: "10px",
@@ -174,7 +223,11 @@ export function LuzumMuzekkeresiTeslimTesellum({
                         Sayı:
                       </td>
                       <td style={{ padding: "4px 0", verticalAlign: "top" }}>
-                        {(data as any).evrakSayisi || data.dosyaNumarasi || "-"}
+                        <EditableField
+                          name="evrakSayisi"
+                          value={(data as any).evrakSayisi || data.dosyaNumarasi}
+                          placeholder="E-0000000000-934.01-0001"
+                        />
                       </td>
                     </tr>
                   </tbody>
@@ -189,9 +242,19 @@ export function LuzumMuzekkeresiTeslimTesellum({
                     lineHeight: 1.5,
                   }}
                 >
-                  {data.kurumumuz || "Müdürlüğümüz"} bünyesinde gerçekleştirilen
-                  {" "}
-                  <strong>{data.isinAdi || "Doğrudan Temin"}</strong>{" "}
+                  <EditableField
+                    name="kurumumuz"
+                    value={data.kurumumuz || "Müdürlüğümüz"}
+                    placeholder="Müdürlüğümüz"
+                  />{" "}
+                  bünyesinde gerçekleştirilen{" "}
+                  <strong>
+                    <EditableField
+                      name="isinAdi"
+                      value={data.isinAdi || "Doğrudan Temin"}
+                      placeholder="Doğrudan Temin"
+                    />
+                  </strong>{" "}
                   dosyası kapsamında alınan, aşağıda listede cinsi ve miktarı
                   belirtilen malzemeler, teslim eden firma yetkilisi/personeli
                   tarafından getirilerek ilgili komisyon/yetkililerce tam,
@@ -231,19 +294,20 @@ export function LuzumMuzekkeresiTeslimTesellum({
                   >
                     TESLİM EDENLER
                   </div>
-                  {data.teslimEdenler && data.teslimEdenler.length > 0
-                    ? (
-                      data.teslimEdenler.map((person: any, idx: number) => (
-                        <PersonelCard
-                          key={idx}
-                          adSoyad={person.adSoyad}
-                          unvan={person.unvan}
-                          align="center"
-                          marginBottom={16}
-                        />
-                      ))
-                    )
-                    : null}
+                  {teslimEdenlerList.map((person: any, idx: number) => (
+                    <PersonelCard
+                      key={idx}
+                      isFirmaSelect={true}
+                      adSoyad={person.adSoyad}
+                      unvan={person.unvan}
+                      nameField={`teslimEden_${idx}_adSoyad`}
+                      unvanField={`teslimEden_${idx}_unvan`}
+                      placeholderName="Firma Adı / Kaşe"
+                      placeholderUnvan="Unvanı"
+                      align="center"
+                      marginBottom={16}
+                    />
+                  ))}
                 </div>
 
                 <div>
@@ -259,19 +323,19 @@ export function LuzumMuzekkeresiTeslimTesellum({
                   >
                     TESLİM ALANLAR
                   </div>
-                  {data.teslimAlanlar && data.teslimAlanlar.length > 0
-                    ? (
-                      data.teslimAlanlar.map((person: any, idx: number) => (
-                        <PersonelCard
-                          key={idx}
-                          adSoyad={person.adSoyad}
-                          unvan={person.unvan}
-                          align="center"
-                          marginBottom={16}
-                        />
-                      ))
-                    )
-                    : null}
+                  {teslimAlanlarList.map((person: any, idx: number) => (
+                    <PersonelCard
+                      key={idx}
+                      adSoyad={person.adSoyad}
+                      unvan={person.unvan}
+                      nameField={`teslimAlan_${idx}_adSoyad`}
+                      unvanField={`teslimAlan_${idx}_unvan`}
+                      placeholderName="Teslim Alan Personel"
+                      placeholderUnvan="Unvanı"
+                      align="center"
+                      marginBottom={16}
+                    />
+                  ))}
                 </div>
               </div>
             )}

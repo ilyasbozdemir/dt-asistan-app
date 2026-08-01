@@ -10,6 +10,9 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     deger: 'TESLİM TESELLÜM BELGESİ',
     aciklama: 'Belgenin konusu'
   },
+  evrakSayisi: {
+    aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı (örn: E-10234521-934.01-0001)'
+  },
   isinAdi: {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'dosya_adi',
@@ -20,6 +23,14 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     sutun: 'kurum_ici',
     deger: true,
     aciklama: 'Kurum içi mi?'
+  },
+  yukleniciFirma: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'kazanan_firma_id',
+    iliskiliTablo: 'TANIM_Firma',
+    iliskiliSutun: 'unvan',
+    varsayilan: '',
+    aciklama: 'Kazanan / Yüklenici Firma Unvanı'
   },
   kurumumuz: {
     tablo: 'TANIM_Kurum',
