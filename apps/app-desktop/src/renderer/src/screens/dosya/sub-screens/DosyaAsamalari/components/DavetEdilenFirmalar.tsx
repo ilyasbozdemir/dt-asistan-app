@@ -39,11 +39,11 @@ export const DavetEdilenFirmalar: React.FC<DavetEdilenFirmalarProps> = ({
             düzenleyin.
           </p>
         </div>
-        {isEditing && onAddClick && (
+        {onAddClick && (
           <button
             type="button"
             onClick={onAddClick}
-            className="mt-2 flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-0"
+            className="mt-2 flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-0 shadow-md"
           >
             <Plus className="w-4 h-4" />
             İstekli Firma Seç / Ekle

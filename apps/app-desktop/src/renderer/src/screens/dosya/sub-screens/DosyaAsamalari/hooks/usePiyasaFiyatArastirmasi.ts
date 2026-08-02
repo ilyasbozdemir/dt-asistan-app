@@ -272,22 +272,27 @@ export function usePiyasaFiyatArastirmasiLogic() {
   }, [activeDosyaId, activeTabPath, loadData])
 
   const handleBulkAddFirms = async (): Promise<void> => {
-    if (!activeDosyaId || selectedFirmIds.length === 0) return
+    const targetDosyaId = activeDosyaId || Number(sessionStorage.getItem('workspace_dosya_id') || 0)
+    if (!targetDosyaId || selectedFirmIds.length === 0) {
+      if (!targetDosyaId) alert('Aktif dosya kimliği (ID) bulunamadı.')
+      return
+    }
     try {
       for (const fId of selectedFirmIds) {
         const poolFirm = allPoolFirms.find((pf) => pf.id === fId)
         if (!poolFirm) continue
 
+        const firmUnvan = poolFirm.unvan || (poolFirm as any).firma_adi || 'İstekli Firma'
         await window.electron.ipcRenderer.invoke(
           'db:run',
-          `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi')`,
+          `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu, aktif_mi) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi', 1)`,
           [
-            activeDosyaId,
+            targetDosyaId,
             poolFirm.id,
-            poolFirm.unvan,
+            firmUnvan,
             poolFirm.vergi_no || '',
             poolFirm.telefon || '',
-            poolFirm.email || ''
+            poolFirm.email || (poolFirm as any).eposta || ''
           ]
         )
       }

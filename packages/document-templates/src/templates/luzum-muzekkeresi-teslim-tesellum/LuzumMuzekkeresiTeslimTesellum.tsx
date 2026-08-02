@@ -78,22 +78,36 @@ export function LuzumMuzekkeresiTeslimTesellum({
   const dosyaTarihiVal = (data as any).tarih || data.dosyaTarihi ||
     (data as any).onayaSunulanTarih || defaultToday;
 
+  const firmaListesi: any[] = (data as any).firmaListesi || [];
+  const winnerFirm = firmaListesi.find((f: any) => f.isWinner) ||
+    firmaListesi[0];
   const firmaUnvan = data.yukleniciFirma || (data as any).kazananFirma ||
-    (data as any).firmaAdi || "";
+    (data as any).firmaAdi || winnerFirm?.unvan || "";
 
-  const teslimEdenlerList = data.teslimEdenler && data.teslimEdenler.length > 0
+  const rawTeslimEdenler = data.teslimEdenler && data.teslimEdenler.length > 0
     ? data.teslimEdenler
     : [
       {
-        adSoyad: (data as any).teslimEden_0_adSoyad !== undefined
-          ? (data as any).teslimEden_0_adSoyad
-          : ((data as any).teslimEdenPersonelAdi || firmaUnvan || ""),
-        unvan: (data as any).teslimEden_0_unvan !== undefined
-          ? (data as any).teslimEden_0_unvan
-          : ((data as any).teslimEdenPersonelUnvan ||
-            (firmaUnvan ? "Yüklenici Firma / Yetkilisi" : "")),
+        adSoyad: (data as any).teslimEden_0_adSoyad ||
+          (data as any).teslimEdenPersonelAdi || firmaUnvan || "",
+        unvan: (data as any).teslimEden_0_unvan ||
+          (data as any).teslimEdenPersonelUnvan ||
+          (firmaUnvan ? "Yüklenici Firma / Yetkilisi" : ""),
       },
     ];
+
+  const teslimEdenlerList = rawTeslimEdenler.map((item: any, idx: number) => {
+    const overrideAd = (data as any)[`teslimEden_${idx}_adSoyad`];
+    const overrideUnvan = (data as any)[`teslimEden_${idx}_unvan`];
+    const ad = overrideAd || item.adSoyad || firmaUnvan || "";
+    const unv = overrideUnvan || item.unvan ||
+      (ad ? "Yüklenici Firma / Yetkilisi" : "");
+    return {
+      ...item,
+      adSoyad: ad,
+      unvan: unv,
+    };
+  });
 
   const teslimAlanlarList = data.teslimAlanlar && data.teslimAlanlar.length > 0
     ? data.teslimAlanlar

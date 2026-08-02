@@ -112,7 +112,8 @@ export function buildDocumentCategories(
           onClick: onLuzumMuzekkeresiOnayEki,
           steps: [1],
         },
-        {
+        /*
+          {
           id: "luzumMuzekkeresiTeslimTesellum",
           label: "Lüzum Müz. Teslim Tesellüm",
           icon: FileText,
@@ -120,6 +121,8 @@ export function buildDocumentCategories(
           onClick: onLuzumMuzekkeresiTeslimTesellum,
           steps: [1],
         },
+        */
+
         {
           id: "harcamaTalimati",
           label: "Harcama Talimatı",

@@ -200,19 +200,19 @@ export function DocumentPreviewModalV2({
           setPersonelListesi(personelRes.data);
         }
         let fileFirms: any[] = [];
-          if (propInvitedFirms && propInvitedFirms.length > 0) {
-            fileFirms = propInvitedFirms.map((f: any) => ({
-              temin_firma_id: f.temin_firma_id || f.id,
-              id: f.id || f.firma_id || f.temin_firma_id,
-              unvan: f.unvan || f.firma_adi || "İstekli Firma",
-              yetkili_ad_soyad: f.yetkili_ad_soyad || "",
-              telefon: f.telefon || "",
-              eposta: f.eposta || f.email || "",
-            }));
-          } else if (activeDosyaId) {
-            const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
-              "db:query",
-              `SELECT 
+        if (propInvitedFirms && propInvitedFirms.length > 0) {
+          fileFirms = propInvitedFirms.map((f: any) => ({
+            temin_firma_id: f.temin_firma_id || f.id,
+            id: f.id || f.firma_id || f.temin_firma_id,
+            unvan: f.unvan || f.firma_adi || "İstekli Firma",
+            yetkili_ad_soyad: f.yetkili_ad_soyad || "",
+            telefon: f.telefon || "",
+            eposta: f.eposta || f.email || "",
+          }));
+        } else if (activeDosyaId) {
+          const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
+            "db:query",
+            `SELECT 
                  df.id as temin_firma_id,
                  COALESCE(f.id, df.firma_id, df.id) as id,
                  COALESCE(
@@ -229,73 +229,72 @@ export function DocumentPreviewModalV2({
                LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
                WHERE df.temin_dosya_id = ?
                ORDER BY df.id ASC`,
-              [activeDosyaId],
+            [activeDosyaId],
+          );
+          if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
+            fileFirms = dosyaFirmaRes.data.filter(
+              (f: any) => f.unvan && String(f.unvan).trim() !== "",
             );
-            if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
-              fileFirms = dosyaFirmaRes.data.filter(
-                (f: any) => f.unvan && String(f.unvan).trim() !== "",
-              );
-            }
           }
+        }
 
-          // Calculate totals for each firm in activeDosyaId (exact logic as PricesSummaryDashboard)
-          const itemsRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            "SELECT id, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
-            [activeDosyaId],
-          );
-          const items = itemsRes.success ? itemsRes.data : [];
+        // Calculate totals for each firm in activeDosyaId (exact logic as PricesSummaryDashboard)
+        const itemsRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT id, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
+          [activeDosyaId],
+        );
+        const items = itemsRes.success ? itemsRes.data : [];
 
-          const bidsRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            "SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
-            [activeDosyaId],
-          );
-          const bids = bidsRes.success ? bidsRes.data : [];
+        const bidsRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
+          [activeDosyaId],
+        );
+        const bids = bidsRes.success ? bidsRes.data : [];
 
-          fileFirms.forEach((firm: any) => {
-            let total = 0;
-            items.forEach((item: any) => {
-              const bid = bids.find(
-                (b: any) =>
-                  b.temin_kalem_id === item.id &&
-                  (b.temin_firma_id === firm.temin_firma_id ||
-                    b.temin_firma_id === firm.id),
-              );
-              if (bid && bid.birim_fiyat > 0) {
-                total += bid.birim_fiyat * (item.miktar || 0);
-              }
-            });
-            firm.total = total;
-          });
-
-          const nonZeroTotals = fileFirms.filter((f) => f.total > 0);
-          const lowestTotal = nonZeroTotals.length > 0
-            ? Math.min(...nonZeroTotals.map((f) => f.total))
-            : 0;
-
-          fileFirms.forEach((f) => {
-            if (f.total > 0 && f.total === lowestTotal) {
-              f.isWinner = true;
-              const formattedTotal = f.total.toLocaleString("tr-TR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              });
-              f.label =
-                `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
-            } else if (f.total > 0) {
-              const formattedTotal = f.total.toLocaleString("tr-TR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              });
-              f.label = `🏢 ${f.unvan} (${formattedTotal} TL)`;
-            } else {
-              f.label = `🏢 ${f.unvan}`;
+        fileFirms.forEach((firm: any) => {
+          let total = 0;
+          items.forEach((item: any) => {
+            const bid = bids.find(
+              (b: any) =>
+                b.temin_kalem_id === item.id &&
+                (b.temin_firma_id === firm.temin_firma_id ||
+                  b.temin_firma_id === firm.id),
+            );
+            if (bid && bid.birim_fiyat > 0) {
+              total += bid.birim_fiyat * (item.miktar || 0);
             }
           });
+          firm.total = total;
+        });
 
-          // Sort so winning firm comes first
-          fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0));
+        const nonZeroTotals = fileFirms.filter((f) => f.total > 0);
+        const lowestTotal = nonZeroTotals.length > 0
+          ? Math.min(...nonZeroTotals.map((f) => f.total))
+          : 0;
+
+        fileFirms.forEach((f) => {
+          if (f.total > 0 && f.total === lowestTotal) {
+            f.isWinner = true;
+            const formattedTotal = f.total.toLocaleString("tr-TR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            f.label = `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
+          } else if (f.total > 0) {
+            const formattedTotal = f.total.toLocaleString("tr-TR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            f.label = `🏢 ${f.unvan} (${formattedTotal} TL)`;
+          } else {
+            f.label = `🏢 ${f.unvan}`;
+          }
+        });
+
+        // Sort so winning firm comes first
+        fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0));
 
         if (fileFirms.length === 0) {
           const allTeminFirmsRes = await window.electron.ipcRenderer.invoke(
@@ -448,19 +447,20 @@ export function DocumentPreviewModalV2({
           },
         );
         finalData.firmaListesi = combinedFirms;
-        // Pre-populate winner firm (lowest offer) as default teslimEden if not set
-        const winnerFirm = fileFirms.find((f: any) => f.isWinner);
-        if (winnerFirm) {
+        // Pre-populate default firm (lowest offer winner or first firm in list) as default teslimEden if not set
+        const defaultFirm = fileFirms.find((f: any) => f.isWinner) ||
+          fileFirms[0] || combinedFirms[0];
+        if (defaultFirm) {
           if (!finalData.yukleniciFirma) {
-            finalData.yukleniciFirma = winnerFirm.unvan;
+            finalData.yukleniciFirma = defaultFirm.unvan;
           }
           if (
-            !finalData.teslimEden_0_adSoyad &&
-            (!finalData.teslimEdenler || !finalData.teslimEdenler[0]?.adSoyad)
+            !finalData.teslimEden_0_adSoyad ||
+            finalData.teslimEden_0_adSoyad === ""
           ) {
-            finalData.teslimEden_0_adSoyad = winnerFirm.unvan;
-            finalData.teslimEden_0_unvan = winnerFirm.yetkili_ad_soyad
-              ? `Yetkili: ${winnerFirm.yetkili_ad_soyad}`
+            finalData.teslimEden_0_adSoyad = defaultFirm.unvan;
+            finalData.teslimEden_0_unvan = defaultFirm.yetkili_ad_soyad
+              ? `Yetkili: ${defaultFirm.yetkili_ad_soyad}`
               : "Yüklenici Firma / Yetkilisi";
           }
         }
