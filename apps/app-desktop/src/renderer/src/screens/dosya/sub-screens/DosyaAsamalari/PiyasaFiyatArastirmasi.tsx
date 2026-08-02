@@ -54,6 +54,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     modalSearchQuery,
     setModalSearchQuery,
     handleBulkAddFirms,
+    handleAddSingleFirm,
     handleRemoveFirm,
     handlePriceChange,
     getLowestBidInfo,
@@ -172,6 +173,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             stageSablons={stageSablons}
             disableDocumentGuidance={disableDocumentGuidance}
             invitedFirms={invitedFirms}
+            allPoolFirms={allPoolFirms}
+            handleAddSingleFirm={handleAddSingleFirm}
+            handleRemoveFirm={handleRemoveFirm}
             items={items}
             bids={bids}
             sablons={sablons}

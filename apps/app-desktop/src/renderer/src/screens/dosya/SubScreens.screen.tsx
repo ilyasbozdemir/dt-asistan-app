@@ -175,8 +175,8 @@ export function SubScreen({
                   (activeDosya.ihale_tipi || activeDosya.tur)?.toLowerCase().includes('hizmet')
                     ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300'
                     : (activeDosya.ihale_tipi || activeDosya.tur)?.toLowerCase().includes('yapım')
-                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-300'
-                    : 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/40 text-sky-700 dark:text-sky-300'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-300'
+                      : 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/40 text-sky-700 dark:text-sky-300'
                 )}
               >
                 <span className="opacity-80">Alım Türü:</span>
@@ -206,5 +206,6 @@ export * from './sub-screens/DosyaAsamalari/KlasorVeKapaklar'
 export * from './sub-screens/YaklasikMaliyetCetveli'
 export * from './sub-screens/FaturaVeIrsaliye'
 export * from './sub-screens/ImzaliBelgeler'
+export * from './sub-screens/DatabaseBrowserScreen'
 export * from './CiktiMerkezi.screen'
 export * from './CiktiMerkezi'

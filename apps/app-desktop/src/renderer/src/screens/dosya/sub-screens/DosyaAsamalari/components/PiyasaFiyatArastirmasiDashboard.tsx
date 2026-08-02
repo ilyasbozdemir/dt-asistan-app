@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Calculator,
   FileCheck2,
@@ -14,6 +14,10 @@ import { PricesSummaryDashboard } from "./PricesSummaryDashboard";
 import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
 import { MalzemeTabloPopover } from "../../components/MalzemeListesi/components/MalzemeTabloPopover";
 import { normalizeForMatch } from "../useDosyaAsamasiSablons";
+import { FiyatIstenenFirmalarınSecilmesi } from "./FiyatIstenenFirmalarınSecilmesi";
+import { PoolFirm } from "../hooks/usePiyasaFiyatArastirmasi";
+import { SABLON_ALIAS_MAP } from "../constants/sablonAliases";
+import { BelgeItem, BelgeListesi } from "./BelgeListesi";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
@@ -34,6 +38,9 @@ interface PiyasaFiyatArastirmasiDashboardProps {
   isSablonDisabled: (sablon: any) => boolean;
   disableDocumentGuidance: boolean;
   invitedFirms: any[];
+  allPoolFirms?: PoolFirm[];
+  handleAddSingleFirm?: (firma: PoolFirm) => void;
+  handleRemoveFirm?: (id: number) => void;
   items: any[];
   bids: any;
   setActiveFormTab: (tab: "firms" | "matrix") => void;
@@ -65,6 +72,9 @@ export function PiyasaFiyatArastirmasiDashboard({
   isSablonDisabled,
   disableDocumentGuidance,
   invitedFirms,
+  allPoolFirms,
+  handleAddSingleFirm,
+  handleRemoveFirm,
   items,
   bids,
   setActiveFormTab,
@@ -75,60 +85,15 @@ export function PiyasaFiyatArastirmasiDashboard({
   const handleOpenSablonByDosyaAdi = (targetKey: string) => {
     if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
 
-    const ALIAS_MAP: Record<string, string[]> = {
-      "teklif-isteme-mektubu": [
-        "fiyat-arastirma-mektubu",
-        "arastirma-mektubu",
-        "birim-fiyat-teklif-mektubu",
-        "teklif-isteme-mektubu",
-      ],
-      "teklif-mektubu-dagitim": [
-        "dagitim-cizelgesi",
-        "teklif-mektubu-dagitim-cizelgesi",
-        "teklif-mektubu-dagitim",
-      ],
-      "teklif-mektubu-dagitim-karma": [
-        "dagitim-cizelgesi-karma",
-        "teklif-mektubu-dagitim-karma",
-        "teklif-mektubu-karma",
-      ],
-      "firmalar-teklif-cetveli": [
-        "birim-fiyat-teklif-cetveli",
-        "firmalar-teklif-cetveli",
-        "piyasa-fiyat-arastirmasi-sonuc-cetveli",
-      ],
-      "yasaklilik-sorgulama-tutanagi": [
-        "yasaklilik-sorgulama-tutanagi",
-        "yasaklilik-sorgulama",
-        "ekap-yasaklilik",
-      ],
-      "piyasa-fiyat-arastirma-gorevlendirmesi": [
-        "piyasa-fiyat-arastirma-gorevlendirmesi",
-        "gorevlendirme-yazisi",
-      ],
-      "piyasa-fiyat-arastirma-tutanagi": [
-        "piyasa-fiyat-arastirma-tutanagi",
-        "fiyat-arastirmasi-tutanagi",
-      ],
-      "yaklasik-maliyet-cetveli": [
-        "yaklasik-maliyet-cetveli",
-        "yaklasik-maliyet-hesap-cetveli",
-      ],
-      "dogrudan-temin-onay-belgesi": [
-        "dogrudan-temin-onay-belgesi",
-        "idare-onay-belgesi",
-        "onay-belgesi",
-      ],
-    };
-
     const cleanTarget = targetKey.replace(/\.html$/, "").toLowerCase().trim();
-    const candidateKeys = ALIAS_MAP[cleanTarget] || [cleanTarget];
+    const candidateKeys = SABLON_ALIAS_MAP[cleanTarget] || [cleanTarget];
 
     let foundSablon: any = null;
 
     for (const key of candidateKeys) {
       foundSablon = sablons.find((s: any) => {
-        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "").toLowerCase().trim();
+        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "")
+          .toLowerCase().trim();
         return fileBase === key;
       });
       if (foundSablon) break;
@@ -162,9 +127,111 @@ export function PiyasaFiyatArastirmasiDashboard({
     }
   };
 
+  const belgeler: BelgeItem[] = [
+    {
+      id: 1,
+      belgeTipiId: "piyasa-fiyat-arastirmasi",
+      belgeAdi: "Piyasa Fiyat Araştırma Tutanağı",
+      belgeTarihi: "02.08.2026",
+      durum: "Tamamlandı",
+      siraNo: 1,
+      data: {
+        firmalar: [],
+        ihtiyacKalemleri: [],
+        firmaTeklifleri: [],
+      },
+    },
+    {
+      id: 2,
+      belgeTipiId: "piyasa-fiyat-arastirmasi",
+      belgeAdi: "Piyasa Fiyat Araştırma Tutanağı",
+      belgeTarihi: "03.08.2026",
+      durum: "Taslak",
+      siraNo: 2,
+      data: {
+        firmalar: [],
+        ihtiyacKalemleri: [],
+        firmaTeklifleri: [],
+      },
+    },
+    {
+      id: 3,
+      belgeTipiId: "yaklasik-maliyet",
+      belgeAdi: "Yaklaşık Maliyet Hesap Cetveli",
+      belgeTarihi: "03.08.2026",
+      durum: "Hazır",
+      siraNo: 1,
+      data: {},
+    },
+  ];
+
+  const firmaColumns = useMemo(
+    () => [
+      { key: "unvan", label: "Firma Unvanı" },
+      { key: "vergi_no", label: "Vergi No / VKN" },
+      { key: "telefon", label: "Telefon" },
+      { key: "email", label: "E-Posta" },
+      { key: "sehir", label: "İl / Semt" },
+    ],
+    [],
+  );
+
+  const formattedFirms = useMemo(() => {
+    if (!allPoolFirms) return [];
+    return allPoolFirms.map((pf) => {
+      const existingInvited = invitedFirms?.find(
+        (ifrm) => ifrm.firma_id === pf.id,
+      );
+      return {
+        ...pf,
+        temin_firma_id: existingInvited?.id,
+        isAdded: Boolean(existingInvited),
+        sehir: pf.il || (pf as any).sehir || "-",
+        telefon: pf.telefon || "-",
+        email: pf.email || (pf as any).eposta || "-",
+        vergi_no: pf.vergi_no || "-",
+      };
+    });
+  }, [allPoolFirms, invitedFirms]);
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Header Controls Bar */}
+
+      <FiyatIstenenFirmalarınSecilmesi
+        title="Fiyat İstenen Firmaların Seçilmesi"
+        firms={formattedFirms}
+        columns={firmaColumns}
+        onFirmaEkle={(firma) => {
+          if (handleAddSingleFirm) {
+            handleAddSingleFirm(firma);
+          }
+        }}
+        onFirmaCikar={(firma) => {
+          if (handleRemoveFirm && (firma as any).temin_firma_id) {
+            handleRemoveFirm((firma as any).temin_firma_id);
+          }
+        }}
+      />
+      <BelgeListesi
+        title="Dosya Belgeleri"
+        belgeler={belgeler}
+        viewMode={docViewMode}
+        onViewModeChange={changeDocViewMode}
+        onCreate={() => {
+          console.log("Yeni belge oluştur");
+        }}
+        onView={(belge) => {
+          console.log("Belge görüntüle:", belge);
+        }}
+        onEdit={(belge) => {
+          console.log("Belge düzenle:", belge);
+        }}
+        onDelete={(belge) => {
+          console.log("Belge sil:", belge);
+        }}
+      />
+
       <div className="relative z-40 flex flex-wrap items-center justify-between gap-4 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
         {/* Left side: View switch tabs */}
         <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/40 w-fit shrink-0">

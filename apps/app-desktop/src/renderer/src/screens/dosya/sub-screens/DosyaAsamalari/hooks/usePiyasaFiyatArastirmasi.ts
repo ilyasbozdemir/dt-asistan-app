@@ -169,9 +169,34 @@ export function usePiyasaFiyatArastirmasiLogic() {
     if (!activeDosyaId) return
     setLoading(true)
     try {
+      // 1. Delete duplicate rows in DATA_TeminFirma (keep only the first one)
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `DELETE FROM DATA_TeminFirma 
+         WHERE temin_dosya_id = ? 
+           AND id NOT IN (
+             SELECT MIN(id) 
+             FROM DATA_TeminFirma 
+             WHERE temin_dosya_id = ?
+             GROUP BY firma_id
+           )`,
+        [activeDosyaId, activeDosyaId]
+      )
+
+      // 2. Clean up bids that reference deleted duplicate firms
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `DELETE FROM DATA_TeminKalemTeklif 
+         WHERE temin_dosya_id = ? 
+           AND temin_firma_id NOT IN (
+             SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ?
+           )`,
+        [activeDosyaId, activeDosyaId]
+      )
+
       const resInvited = await window.electron.ipcRenderer.invoke(
         'db:query',
-        `SELECT 
+        `SELECT
            df.*,
            COALESCE(
              NULLIF(df.unvan, ''),
@@ -182,8 +207,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
            ) as unvan,
            COALESCE(NULLIF(df.yetkili_ad_soyad, ''), NULLIF(f.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
            COALESCE(NULLIF(df.telefon, ''), NULLIF(f.telefon, '')) as telefon,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as eposta,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as email
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as email,
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as eposta
          FROM DATA_TeminFirma df
          LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
          WHERE df.temin_dosya_id = ? AND df.aktif_mi = 1
@@ -214,8 +239,29 @@ export function usePiyasaFiyatArastirmasiLogic() {
         [activeDosyaId]
       )
 
-      if (resInvited.success) setInvitedFirms(resInvited.data || [])
-      if (resPool.success) setAllPoolFirms(resPool.data || [])
+      if (resInvited.success) {
+        // Olası duplicate ID'leri temizle (React key çakışmasını önle)
+        const rawInvited: BiddingFirm[] = resInvited.data || []
+        const seenInvited = new Set<number>()
+        setInvitedFirms(
+          rawInvited.filter((f) => {
+            if (seenInvited.has(f.id)) return false
+            seenInvited.add(f.id)
+            return true
+          })
+        )
+      }
+      if (resPool.success) {
+        const rawPool: PoolFirm[] = resPool.data || []
+        const seenPool = new Set<number>()
+        setAllPoolFirms(
+          rawPool.filter((p) => {
+            if (seenPool.has(p.id)) return false
+            seenPool.add(p.id)
+            return true
+          })
+        )
+      }
       if (resItems.success) setItems(resItems.data || [])
       let defaultDate = ''
       if (resDosya.success && resDosya.data && resDosya.data.length > 0) {
@@ -282,6 +328,16 @@ export function usePiyasaFiyatArastirmasiLogic() {
         const poolFirm = allPoolFirms.find((pf) => pf.id === fId)
         if (!poolFirm) continue
 
+        // Check if already added
+        const checkRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ? AND firma_id = ? AND aktif_mi = 1',
+          [targetDosyaId, poolFirm.id]
+        )
+        if (checkRes.success && checkRes.data && checkRes.data.length > 0) {
+          continue
+        }
+
         const firmUnvan = poolFirm.unvan || (poolFirm as any).firma_adi || 'İstekli Firma'
         await window.electron.ipcRenderer.invoke(
           'db:run',
@@ -298,6 +354,42 @@ export function usePiyasaFiyatArastirmasiLogic() {
       }
       setSelectedFirmIds([])
       setIsFirmModalOpen(false)
+      await loadData()
+    } catch (err: any) {
+      alert('Hata: ' + err.message)
+    }
+  }
+
+  const handleAddSingleFirm = async (poolFirm: PoolFirm): Promise<void> => {
+    const targetDosyaId = activeDosyaId || Number(sessionStorage.getItem('workspace_dosya_id') || 0)
+    if (!targetDosyaId) {
+      alert('Aktif dosya kimliği (ID) bulunamadı.')
+      return
+    }
+    try {
+      // Check if already added
+      const checkRes = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ? AND firma_id = ? AND aktif_mi = 1',
+        [targetDosyaId, poolFirm.id]
+      )
+      if (checkRes.success && checkRes.data && checkRes.data.length > 0) {
+        return
+      }
+
+      const firmUnvan = poolFirm.unvan || (poolFirm as any).firma_adi || 'İstekli Firma'
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `INSERT INTO DATA_TeminFirma (temin_dosya_id, firma_id, unvan, vergi_no, telefon, email, davet_edildi_mi, teklif_durumu, aktif_mi) VALUES (?, ?, ?, ?, ?, ?, 1, 'Davet Edildi', 1)`,
+        [
+          targetDosyaId,
+          poolFirm.id,
+          firmUnvan,
+          poolFirm.vergi_no || '',
+          poolFirm.telefon || '',
+          poolFirm.email || (poolFirm as any).eposta || ''
+        ]
+      )
       await loadData()
     } catch (err: any) {
       alert('Hata: ' + err.message)
@@ -691,6 +783,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
     setManualFilter,
     displaySablons,
     handleBulkAddFirms,
+    handleAddSingleFirm,
     handleRemoveFirm,
     handlePriceChange,
     getLowestBidInfo,

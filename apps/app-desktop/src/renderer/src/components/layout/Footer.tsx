@@ -5,10 +5,12 @@ import locData from '../../generated-loc.json'
 import { NetworkSyncModal } from '../network/NetworkSyncModal'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useTabStore } from '../../store/tabStore'
 
 export function Footer(): React.JSX.Element {
   const { activeMeta, activeDosyaId, fileName } = useWorkspaceStore()
   const { institutionName, eButceKodu } = useSettingsStore()
+  const { addTab } = useTabStore()
   const [showAbout, setShowAbout] = useState(false)
   const [showNetwork, setShowNetwork] = useState(false)
   const [appVersion, setAppVersion] = useState(packageJson.version)
@@ -61,9 +63,14 @@ export function Footer(): React.JSX.Element {
     <footer className="h-8 shrink-0 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 px-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 select-none z-40">
       <div className="flex items-center space-x-2">
         {fileName && (
-          <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px]">
+          <button
+            type="button"
+            onClick={() => addTab('/dosya/veritabani')}
+            title="Veritabanı & Dosya Bilgileri"
+            className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px] hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer hover:underline"
+          >
             📄 {fileName}
-          </span>
+          </button>
         )}
         {activeDosyaId && (
           <>

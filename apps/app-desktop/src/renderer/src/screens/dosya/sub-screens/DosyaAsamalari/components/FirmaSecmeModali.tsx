@@ -36,8 +36,19 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
   onAddFirms
 }) => {
   const [viewType, setViewType] = useState<'table' | 'grid' | 'list'>('table')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!isOpen) return null
+
+  const handleAddFirmsWithLoading = async () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await onAddFirms()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const unselectedFirms = allPoolFirms.filter(
     (pf) => !invitedFirms.some((ifrm) => ifrm.firma_id === pf.id)
@@ -307,11 +318,11 @@ export const FirmaSecmeModali: React.FC<FirmaSecmeModaliProps> = ({
               İptal
             </button>
             <button
-              onClick={onAddFirms}
-              disabled={selectedFirmIds.length === 0}
+              onClick={handleAddFirmsWithLoading}
+              disabled={selectedFirmIds.length === 0 || isSubmitting}
               className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
             >
-              Seçilenleri Dosyaya Ekle
+              {isSubmitting ? 'Ekleniyor...' : 'Seçilenleri Dosyaya Ekle'}
             </button>
           </div>
         </div>

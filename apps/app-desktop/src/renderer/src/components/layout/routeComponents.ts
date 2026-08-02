@@ -37,7 +37,8 @@ import {
   KlasorVeKapaklar,
   YaklasikMaliyetCetveli,
   CiktiMerkeziScreen,
-  CiktiMerkezi
+  CiktiMerkezi,
+  DatabaseBrowserScreen
 } from '../../screens/dosya/SubScreens.screen'
 
 import TaslakYoneticisi from '../../screens/system/TaslakYoneticisi'
@@ -78,6 +79,7 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/dosya/klasor-ve-kapaklar': KlasorVeKapaklar,
   '/dosya/firmalar-maliyet/yaklasik': YaklasikMaliyetCetveli,
   '/dosya/cikti-merkezi': CiktiMerkezi,
+  '/dosya/veritabani': DatabaseBrowserScreen,
   '/cikti-merkezi': CiktiMerkeziScreen,
   '/olcubirimleri': OlcuBirimleriScreen,
   '/malzemeler/yeni': YeniMalzemeScreen,
