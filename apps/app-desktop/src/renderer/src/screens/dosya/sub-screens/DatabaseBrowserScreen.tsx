@@ -31,36 +31,36 @@ export function DatabaseBrowserScreen(): React.JSX.Element {
   const [consoleError, setConsoleError] = useState<string | null>(null)
   const [consoleLoading, setConsoleLoading] = useState<boolean>(false)
 
-  // Fetch tables and counts
-  const loadTables = async (): Promise<void> => {
-    try {
-      const res = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-      )
-      if (res.success && res.data) {
-        const list: TableInfo[] = []
-        for (const t of res.data) {
-          const countRes = await window.electron.ipcRenderer.invoke(
-            'db:query',
-            `SELECT COUNT(*) as row_count FROM ${t.name}`
-          )
-          list.push({
-            name: t.name,
-            count: countRes.success && countRes.data[0] ? countRes.data[0].row_count : 0
-          })
-        }
-        setTables(list)
-        if (list.length > 0 && !selectedTable) {
-          setSelectedTable(list[0].name)
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load sqlite tables:', e)
-    }
-  }
-
   useEffect(() => {
+    // Fetch tables and counts
+    const loadTables = async (): Promise<void> => {
+      try {
+        const res = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        )
+        if (res.success && res.data) {
+          const list: TableInfo[] = []
+          for (const t of res.data) {
+            const countRes = await window.electron.ipcRenderer.invoke(
+              'db:query',
+              `SELECT COUNT(*) as row_count FROM ${t.name}`
+            )
+            list.push({
+              name: t.name,
+              count: countRes.success && countRes.data[0] ? countRes.data[0].row_count : 0
+            })
+          }
+          setTables(list)
+          if (list.length > 0 && !selectedTable) {
+            setSelectedTable(list[0].name)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load sqlite tables:', e)
+      }
+    }
+
     loadTables()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

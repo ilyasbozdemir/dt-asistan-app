@@ -221,7 +221,7 @@ export function PiyasaFiyatArastirmasiDashboard({
         }}
       />
       <BelgeListesi
-        title="Dosya Belgeleri"
+        title="Hazırlanan Tutanaklar"
         belgeler={belgeler}
         viewMode={docViewMode}
         onViewModeChange={changeDocViewMode}
