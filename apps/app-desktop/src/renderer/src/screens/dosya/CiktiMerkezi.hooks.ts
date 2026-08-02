@@ -105,31 +105,6 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           [activeDosyaId]
         )
 
-        // Olası mükerrer (duplicate) firmaları temizle (Self-healing)
-        await window.electron.ipcRenderer.invoke(
-          'db:run',
-          `DELETE FROM DATA_TeminFirma 
-           WHERE temin_dosya_id = ? 
-             AND id NOT IN (
-               SELECT MIN(id) 
-               FROM DATA_TeminFirma 
-               WHERE temin_dosya_id = ?
-               GROUP BY firma_id
-             )`,
-          [activeDosyaId, activeDosyaId]
-        )
-
-        // Temizlenen firmaların tekliflerini de temizle
-        await window.electron.ipcRenderer.invoke(
-          'db:run',
-          `DELETE FROM DATA_TeminKalemTeklif 
-           WHERE temin_dosya_id = ? 
-             AND temin_firma_id NOT IN (
-               SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ?
-             )`,
-          [activeDosyaId, activeDosyaId]
-        )
-
         // Firmaları çek (DATA_TeminFirma ve TANIM_Firma birleşimi)
         const firmsRes = await window.electron.ipcRenderer.invoke(
           'db:query',

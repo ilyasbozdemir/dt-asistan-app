@@ -18,6 +18,7 @@ import { FiyatIstenenFirmalarınSecilmesi } from "./FiyatIstenenFirmalarınSecil
 import { PoolFirm } from "../hooks/usePiyasaFiyatArastirmasi";
 import { SABLON_ALIAS_MAP } from "../constants/sablonAliases";
 import { BelgeItem, BelgeListesi } from "./BelgeListesi";
+import { formatDateString } from "../../../CiktiMerkezi.contextBuilder";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
@@ -52,6 +53,7 @@ interface PiyasaFiyatArastirmasiDashboardProps {
     docName: string,
   ) => void;
   setIsFirmModalOpen?: (val: boolean) => void;
+  handleDeleteDocument?: (id: number) => void;
 }
 
 export function PiyasaFiyatArastirmasiDashboard({
@@ -83,6 +85,7 @@ export function PiyasaFiyatArastirmasiDashboard({
   setActiveActionDropdown,
   handleUpdateDocumentDate,
   setIsFirmModalOpen,
+  handleDeleteDocument,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
   const handleOpenSablonByDosyaAdi = (targetKey: string) => {
     if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
@@ -129,43 +132,53 @@ export function PiyasaFiyatArastirmasiDashboard({
     }
   };
 
-  const belgeler: BelgeItem[] = [
-    {
-      id: 1,
-      belgeTipiId: "piyasa-fiyat-arastirmasi",
-      belgeAdi: "Piyasa Fiyat Araştırma Tutanağı",
-      belgeTarihi: "02.08.2026",
-      durum: "Tamamlandı",
-      siraNo: 1,
-      data: {
-        firmalar: [],
-        ihtiyacKalemleri: [],
-        firmaTeklifleri: [],
-      },
-    },
-    {
-      id: 2,
-      belgeTipiId: "piyasa-fiyat-arastirmasi",
-      belgeAdi: "Piyasa Fiyat Araştırma Tutanağı",
-      belgeTarihi: "03.08.2026",
-      durum: "Taslak",
-      siraNo: 2,
-      data: {
-        firmalar: [],
-        ihtiyacKalemleri: [],
-        firmaTeklifleri: [],
-      },
-    },
-    {
-      id: 3,
-      belgeTipiId: "yaklasik-maliyet",
-      belgeAdi: "Yaklaşık Maliyet Hesap Cetveli",
-      belgeTarihi: "03.08.2026",
-      durum: "Hazır",
-      siraNo: 1,
-      data: {},
-    },
-  ];
+  const mappedBelgeler = useMemo(() => {
+    if (!stageDocs) return [];
+    
+    // Group and sort by id to determine siraNo sequentially
+    const sortedDocs = [...stageDocs].sort((a, b) => a.id - b.id);
+    const counts: Record<string, number> = {};
+    
+    return sortedDocs.map((doc) => {
+      const isMaliyet = doc.belge_adi === 'Yaklaşık Maliyet Cetveli' || doc.belge_adi?.toLowerCase().includes('maliyet');
+      const typeId = isMaliyet ? 'yaklasik-maliyet' : 'piyasa-fiyat-arastirmasi';
+      
+      counts[typeId] = (counts[typeId] || 0) + 1;
+      
+      return {
+        id: doc.id,
+        belgeTipiId: typeId,
+        belgeAdi: doc.belge_adi,
+        belgeTarihi: doc.belge_tarihi ? formatDateString(doc.belge_tarihi) || doc.belge_tarihi : '-',
+        durum: 'Tamamlandı' as const,
+        siraNo: counts[typeId],
+        data: doc,
+      };
+    });
+  }, [stageDocs]);
+
+  const handleOpenBelgePreview = (belge: BelgeItem) => {
+    const targetSablon = sablons.find((s: any) => {
+      const lowerAd = s.ad.toLowerCase();
+      const lowerDocName = belge.belgeAdi.toLowerCase();
+      return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd);
+    });
+
+    if (targetSablon) {
+      let snapshotCtx = undefined;
+      const originalDoc = belge.data as any;
+      if (originalDoc?.veri_json) {
+        try {
+          snapshotCtx = JSON.parse(originalDoc.veri_json);
+        } catch (e) {
+          console.error('Error parsing saved document JSON:', e);
+        }
+      }
+      handleOpenPreviewForSablon(targetSablon, targetSablon.ad, snapshotCtx);
+    } else {
+      alert('Bu belge için uygun şablon bulunamadı.');
+    }
+  };
 
   const firmaColumns = useMemo(
     () => [
@@ -179,22 +192,23 @@ export function PiyasaFiyatArastirmasiDashboard({
   );
 
   const formattedFirms = useMemo(() => {
-    if (!allPoolFirms) return [];
-    return allPoolFirms.map((pf) => {
-      const existingInvited = invitedFirms?.find(
+    return invitedFirms.map((pf) => {
+      const isInvited = invitedFirms.some(
         (ifrm) => ifrm.firma_id === pf.id,
       );
       return {
-        ...pf,
-        temin_firma_id: existingInvited?.id,
-        isAdded: Boolean(existingInvited),
-        sehir: pf.il || (pf as any).sehir || "-",
-        telefon: pf.telefon || "-",
-        email: pf.email || (pf as any).eposta || "-",
+        id: pf.id,
+        firma_id: pf.firma_id,
+        unvan: pf.unvan,
         vergi_no: pf.vergi_no || "-",
+        telefon: pf.telefon || "-",
+        email: pf.email || pf.eposta || "-",
+        sehir: pf.il || "-",
+        temin_firma_id: pf.id,
+        isInvited,
       };
     });
-  }, [allPoolFirms, invitedFirms]);
+  }, [invitedFirms]);
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
@@ -222,20 +236,22 @@ export function PiyasaFiyatArastirmasiDashboard({
       />
       <BelgeListesi
         title="Hazırlanan Tutanaklar"
-        belgeler={belgeler}
+        belgeler={mappedBelgeler}
         viewMode={docViewMode}
         onViewModeChange={changeDocViewMode}
-        onCreate={() => {
-          console.log("Yeni belge oluştur");
-        }}
-        onView={(belge) => {
-          console.log("Belge görüntüle:", belge);
-        }}
-        onEdit={(belge) => {
-          console.log("Belge düzenle:", belge);
-        }}
+        onView={handleOpenBelgePreview}
+        onEdit={handleOpenBelgePreview}
         onDelete={(belge) => {
-          console.log("Belge sil:", belge);
+          if (handleDeleteDocument) {
+            handleDeleteDocument(belge.id);
+          }
+        }}
+        onCreateBelge={(type) => {
+          if (type === "yaklasik-maliyet") {
+            handleNewDocument("maliyet");
+          } else {
+            handleNewDocument("tutanak");
+          }
         }}
       />
 

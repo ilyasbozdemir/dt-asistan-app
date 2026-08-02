@@ -169,31 +169,6 @@ export function usePiyasaFiyatArastirmasiLogic() {
     if (!activeDosyaId) return
     setLoading(true)
     try {
-      // 1. Delete duplicate rows in DATA_TeminFirma (keep only the first one)
-      await window.electron.ipcRenderer.invoke(
-        'db:run',
-        `DELETE FROM DATA_TeminFirma 
-         WHERE temin_dosya_id = ? 
-           AND id NOT IN (
-             SELECT MIN(id) 
-             FROM DATA_TeminFirma 
-             WHERE temin_dosya_id = ?
-             GROUP BY firma_id
-           )`,
-        [activeDosyaId, activeDosyaId]
-      )
-
-      // 2. Clean up bids that reference deleted duplicate firms
-      await window.electron.ipcRenderer.invoke(
-        'db:run',
-        `DELETE FROM DATA_TeminKalemTeklif 
-         WHERE temin_dosya_id = ? 
-           AND temin_firma_id NOT IN (
-             SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ?
-           )`,
-        [activeDosyaId, activeDosyaId]
-      )
-
       const resInvited = await window.electron.ipcRenderer.invoke(
         'db:query',
         `SELECT
@@ -743,6 +718,34 @@ export function usePiyasaFiyatArastirmasiLogic() {
     }
   }
 
+  const handleDeleteDocument = async (docId: number): Promise<void> => {
+    if (!window.confirm('Bu belgeyi silmek istediğinize emin misiniz?')) {
+      return
+    }
+    try {
+      const res = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        'DELETE FROM DATA_TeminBelge WHERE id = ?',
+        [docId]
+      )
+      if (res.success) {
+        // Belgeleri yeniden yükle
+        const resBelgelerNew = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          "SELECT * FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi IN ('Yaklaşık Maliyet Cetveli', 'Piyasa Fiyat Araştırma Tutanağı')",
+          [activeDosyaId]
+        )
+        if (resBelgelerNew.success && resBelgelerNew.data) {
+          setSavedDocuments(resBelgelerNew.data)
+        }
+      } else {
+        alert('Belge silinirken hata oluştu: ' + res.error)
+      }
+    } catch (err: any) {
+      alert('Hata: ' + err.message)
+    }
+  }
+
   const lowestTotalFirmaId = useMemo(() => {
     let minTotal = Infinity
     let minId: number | null = null
@@ -813,6 +816,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
     setManualWinnerFirmaId,
     belgeleriKaydet,
     setBelgeleriKaydet,
-    handleUpdateDocumentDate
+    handleUpdateDocumentDate,
+    handleDeleteDocument
   }
 }
