@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useTabStore } from '../../store/tabStore'
 import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 import { ProcessStepper } from './components/ProcessStepper'
@@ -16,14 +17,17 @@ interface SubScreenProps {
   icon: React.ElementType
   description: string
   children?: React.ReactNode
+  hideStepper?: boolean
 }
 
 export function SubScreen({
   title,
   icon: Icon,
   description,
-  children
+  children,
+  hideStepper = false
 }: SubScreenProps): React.JSX.Element {
+  const { activeTabPath } = useTabStore()
   const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
 
   useEffect(() => {
@@ -52,8 +56,9 @@ export function SubScreen({
   }, [activeDosyaId, title, setActiveStarredDocs])
 
   // Mevcut sayfanın stepper'a dahil olup olmadığını belirle
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-  const showStepper = STEPPER_ROUTES.some((r) => currentPath.includes(r))
+  const currentPath =
+    activeTabPath || (typeof window !== 'undefined' ? window.location.pathname : '')
+  const showStepper = !hideStepper && STEPPER_ROUTES.some((r) => currentPath.includes(r))
 
   return (
     <div className="p-6 md:p-8 w-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

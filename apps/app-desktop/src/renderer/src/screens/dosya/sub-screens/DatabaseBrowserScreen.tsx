@@ -118,8 +118,9 @@ export function DatabaseBrowserScreen(): React.JSX.Element {
       } else {
         setConsoleError(res.error || 'Sorgu çalıştırılırken bilinmeyen bir hata oluştu.')
       }
-    } catch (e: any) {
-      setConsoleError(e.message || 'Hata: Sorgu yürütülemedi.')
+    } catch (e) {
+      const err = e as Error
+      setConsoleError(err.message || 'Hata: Sorgu yürütülemedi.')
     } finally {
       setConsoleLoading(false)
     }
@@ -130,6 +131,7 @@ export function DatabaseBrowserScreen(): React.JSX.Element {
       title="SQLite Veritabanı Gezgini"
       icon={Database}
       description="Çalışma dosyasındaki verilerin şemalarını, tablolarını ve kayıtlarını inceleyin."
+      hideStepper
     >
       <div className="flex gap-6 h-[calc(100vh-240px)] min-h-[500px] mt-4 relative font-sans">
         {/* Sidebar: Tables List */}
