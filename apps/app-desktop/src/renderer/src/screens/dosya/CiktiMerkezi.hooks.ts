@@ -105,6 +105,31 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           [activeDosyaId]
         )
 
+        // Olası mükerrer (duplicate) firmaları temizle (Self-healing)
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          `DELETE FROM DATA_TeminFirma 
+           WHERE temin_dosya_id = ? 
+             AND id NOT IN (
+               SELECT MIN(id) 
+               FROM DATA_TeminFirma 
+               WHERE temin_dosya_id = ?
+               GROUP BY firma_id
+             )`,
+          [activeDosyaId, activeDosyaId]
+        )
+
+        // Temizlenen firmaların tekliflerini de temizle
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          `DELETE FROM DATA_TeminKalemTeklif 
+           WHERE temin_dosya_id = ? 
+             AND temin_firma_id NOT IN (
+               SELECT id FROM DATA_TeminFirma WHERE temin_dosya_id = ?
+             )`,
+          [activeDosyaId, activeDosyaId]
+        )
+
         // Firmaları çek (DATA_TeminFirma ve TANIM_Firma birleşimi)
         const firmsRes = await window.electron.ipcRenderer.invoke(
           'db:query',
@@ -114,7 +139,13 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
            WHERE df.temin_dosya_id = ?`,
           [activeDosyaId]
         )
-        const firms = firmsRes.success ? firmsRes.data : []
+        let firms = firmsRes.success ? firmsRes.data : []
+        const seenFirmaIds = new Set<number>()
+        firms = firms.filter((f: any) => {
+          if (seenFirmaIds.has(f.firma_id)) return false
+          seenFirmaIds.add(f.firma_id)
+          return true
+        })
 
         // Teklifleri çek
         const bidsRes = await window.electron.ipcRenderer.invoke(
@@ -393,6 +424,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
   useEffect(() => {
     if (!activeDosyaId) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
 
     const unlisten = window.electron.ipcRenderer.on('db:invalidated', () => {

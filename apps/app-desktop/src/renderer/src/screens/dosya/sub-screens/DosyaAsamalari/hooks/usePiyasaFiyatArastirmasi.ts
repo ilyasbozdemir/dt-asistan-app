@@ -245,8 +245,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
         const seenInvited = new Set<number>()
         setInvitedFirms(
           rawInvited.filter((f) => {
-            if (seenInvited.has(f.id)) return false
-            seenInvited.add(f.id)
+            if (seenInvited.has(f.firma_id)) return false
+            seenInvited.add(f.firma_id)
             return true
           })
         )
@@ -314,6 +314,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
   }, [activeDosyaId])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
   }, [activeDosyaId, activeTabPath, loadData])
 
