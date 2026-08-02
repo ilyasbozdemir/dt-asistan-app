@@ -284,14 +284,13 @@ function RowMenu({
   }, [])
 
   useEffect(() => {
-    if (open) {
-      updateCoords()
-      window.addEventListener('resize', updateCoords)
-      window.addEventListener('scroll', updateCoords, true)
-      return () => {
-        window.removeEventListener('resize', updateCoords)
-        window.removeEventListener('scroll', updateCoords, true)
-      }
+    if (!open) return undefined
+    updateCoords()
+    window.addEventListener('resize', updateCoords)
+    window.addEventListener('scroll', updateCoords, true)
+    return () => {
+      window.removeEventListener('resize', updateCoords)
+      window.removeEventListener('scroll', updateCoords, true)
     }
   }, [open, updateCoords])
 
