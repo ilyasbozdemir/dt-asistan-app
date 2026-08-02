@@ -21,6 +21,7 @@ import {
 import { useWorkspaceStore } from "../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../store/settingsStore";
 import {
+  getTemplateEditableFields,
   IhtiyacListesiType,
   TEMPLATE_REGISTRY,
   TemplateComponentType,
@@ -66,6 +67,9 @@ const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   FiyatArastirmaMektubu: Templates.FiyatArastirmaMektubu as TemplateComponentType,
   BirimFiyatTeklifMektubu: Templates.BirimFiyatTeklifMektubu as TemplateComponentType,
   ArastirmaMektubu: Templates.ArastirmaMektubu as TemplateComponentType,
+  PiyasaFiyatArastirmaTutanagi: Templates.PiyasaFiyatArastirmaTutanagi as TemplateComponentType,
+  PiyasaFiyatArastirmaGorevlendirmesi: Templates.PiyasaFiyatArastirmaGorevlendirmesi as TemplateComponentType,
+  YaklasikMaliyetCetveli: Templates.YaklasikMaliyetCetveli as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<
@@ -1022,6 +1026,117 @@ export function DocumentPreviewModalV2({
                 />
               </label>
             </div>
+
+            {/* Belge Alanları Formu (Personel Seçimi, Tarih, Metinler) */}
+            {documentId && getTemplateEditableFields(documentId).length > 0 && (
+              <div className="space-y-3.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                  Belge Alanları & İmzalar
+                </span>
+
+                {getTemplateEditableFields(documentId).map((field) => {
+                  const isPersonelField =
+                    field.category === "personel" ||
+                    field.key.toLowerCase().includes("personel") ||
+                    field.key.toLowerCase().includes("baskan") ||
+                    field.key.toLowerCase().includes("teslim") ||
+                    field.key.toLowerCase().includes("satici");
+
+                  const isUnvanField = field.key.toLowerCase().includes("unvan");
+                  const val = (formData as any)[field.key] ?? "";
+
+                  return (
+                    <div key={field.key} className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                        {field.label}
+                      </label>
+
+                      {isPersonelField && !isUnvanField && personelListesi.length > 0 ? (
+                        <select
+                          value={
+                            personelListesi.find((p) => p.ad_soyad === val)?.id || ""
+                          }
+                          onChange={(e) => {
+                            const selectedId = Number(e.target.value);
+                            const selectedP = personelListesi.find(
+                              (p) => p.id === selectedId,
+                            );
+                            if (selectedP) {
+                              setFormData((prev) => {
+                                const next: any = { ...prev, [field.key]: selectedP.ad_soyad };
+                                if (field.key === "hazirlayanPersonelAdi") {
+                                  next.hazirlayanPersonelUnvan = selectedP.unvan || "";
+                                } else if (
+                                  field.key === "onaylayanPersonelAdi" ||
+                                  field.key === "baskanAdi"
+                                ) {
+                                  next.onaylayanPersonelUnvan = selectedP.unvan || "";
+                                  next.baskanUnvan = selectedP.unvan || "";
+                                } else if (field.key === "teslimEdenAd") {
+                                  next.teslimEdenUnvan = selectedP.unvan || "";
+                                } else if (field.key === "teslimAlanAd") {
+                                  next.teslimAlanUnvan = selectedP.unvan || "";
+                                }
+                                return next;
+                              });
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                        >
+                          <option value="">-- Personel Seçiniz --</option>
+                          {personelListesi.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.ad_soyad} {p.unvan ? `(${p.unvan})` : ""}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.type === "date" || (field.category === "tarih" && field.key !== "evrakSayisi") ? (
+                        <input
+                          type="date"
+                          value={
+                            typeof val === "string" && val.includes(".")
+                              ? val.split(".").reverse().join("-")
+                              : val
+                          }
+                          onChange={(e) => {
+                            const rawDate = e.target.value;
+                            if (!rawDate) {
+                              setFormData((prev) => ({ ...prev, [field.key]: "" }));
+                              return;
+                            }
+                            const parts = rawDate.split("-");
+                            const formattedDate =
+                              parts.length === 3
+                                ? `${parts[2]}.${parts[1]}.${parts[0]}`
+                                : rawDate;
+                            setFormData((prev) => ({ ...prev, [field.key]: formattedDate }));
+                          }}
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                        />
+                      ) : field.type === "textarea" ? (
+                        <textarea
+                          rows={3}
+                          value={val}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                          placeholder={field.placeholder || field.label}
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-none"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={val}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                          placeholder={field.placeholder || field.label}
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

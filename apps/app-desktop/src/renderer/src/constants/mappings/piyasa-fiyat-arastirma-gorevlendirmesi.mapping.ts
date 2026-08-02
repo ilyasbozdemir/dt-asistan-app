@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   antetSatirlari: {
@@ -20,6 +20,9 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'temin_no_clean',
     aciklama: 'Temin Numarası'
+  },
+  evrakSayisi: {
+    aciklama: 'E-DETSİS-SDP-NO standart formatına uygun resmi evrak sayısı'
   },
   dosyaKonusu: { deger: 'Piyasa Fiyat Araştırma Görevlendirmesi', aciklama: 'Belgenin konusu' },
   dosyaTarihi: {

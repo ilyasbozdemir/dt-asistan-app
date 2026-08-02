@@ -1,6 +1,12 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { EditableField } from "../../document/EditableField";
+import {
+  ApprovalSignature,
+  DateEditableField,
+  EditableOlurPlaceholder,
+  PersonelCard,
+} from "../../document/ApprovalSignature";
 import { KomisyonGorevlendirmeOnayiType } from "./KomisyonGorevlendirmeOnayi.schema";
 
 interface KomisyonGorevlendirmeOnayiProps {
@@ -70,7 +76,11 @@ export function KomisyonGorevlendirmeOnayi({
             </table>
           </div>
           <div>
-            <strong>Tarih:</strong> <EditableField name="tarih" value={data.tarih} />
+            <strong>Tarih:</strong>{" "}
+            <DateEditableField
+              name="tarih"
+              value={data.tarih || data.onayaSunulanTarih || data.dosyaTarihi}
+            />
           </div>
         </div>
 
@@ -106,7 +116,7 @@ export function KomisyonGorevlendirmeOnayi({
           style={{
             textAlign: "justify",
             textIndent: "35px",
-            marginBottom: "25px",
+            marginBottom: "15px",
             lineHeight: 1.5,
           }}
         >
@@ -114,21 +124,15 @@ export function KomisyonGorevlendirmeOnayi({
         </div>
 
         {/* Preparer Signature */}
-        <div style={{ width: "100%", display: "flow-root", marginBottom: "25px" }}>
-          <div
-            style={{
-              float: "right",
-              textAlign: "center",
-              width: "220px",
-              fontSize: "10.5pt",
-              lineHeight: 1.4,
-            }}
-          >
-            <strong><EditableField name="hazirlayanPersonelAdi" value={data.hazirlayanPersonelAdi} placeholder="Hazırlayan Adı Soyadı" /></strong>
-            <br />
-            <EditableField name="hazirlayanPersonelUnvan" value={data.hazirlayanPersonelUnvan} placeholder="Hazırlayan Unvanı" />
-          </div>
-        </div>
+        <PersonelCard
+          adSoyad={data.hazirlayanPersonelAdi}
+          unvan={data.hazirlayanPersonelUnvan}
+          align="right"
+          nameField="hazirlayanPersonelAdi"
+          unvanField="hazirlayanPersonelUnvan"
+          marginTop={10}
+          marginBottom={20}
+        />
 
         {/* Table 1: PİYASA ARAŞTIRMA VE SATINALMA KOMİSYONU */}
         <div
@@ -322,29 +326,20 @@ export function KomisyonGorevlendirmeOnayi({
         </table>
 
         {/* Approval / OLUR Section */}
-        <div
-          style={{
-            marginTop: "25px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            pageBreakInside: "avoid",
-          }}
-        >
-          <div style={{ fontWeight: "bold", fontSize: "11.5pt", marginBottom: "4px" }}>
-            OLUR
-          </div>
-          <div style={{ marginBottom: "8px", fontSize: "10.5pt" }}>
-            <EditableField name="onayTarihi" value={data.onayTarihi || data.tarih} placeholder="GG.AA.YYYY" />
-          </div>
-          <div style={{ fontWeight: "bold", fontSize: "11pt" }}>
-            <EditableField name="onaylayanPersonelAdi" value={data.baskanAdi || data.onaylayanPersonelAdi} placeholder="Onaylayan Adı Soyadı" />
-          </div>
-          <div style={{ fontSize: "10.5pt" }}>
-            <EditableField name="onaylayanPersonelUnvan" value={data.baskanUnvan || data.onaylayanPersonelUnvan} placeholder="Onaylayan Unvanı" />
-          </div>
-        </div>
+        {data.olurYazisi !== false ? (
+          <ApprovalSignature
+            title="OLUR"
+            date={data.onayTarihi || data.tarih || data.dosyaTarihi}
+            adSoyad={data.baskanAdi || data.onaylayanPersonelAdi}
+            unvan={data.baskanUnvan || data.onaylayanPersonelUnvan}
+            nameField="baskanAdi"
+            unvanField="baskanUnvan"
+            showSpace={true}
+            marginTop={30}
+          />
+        ) : (
+          <EditableOlurPlaceholder />
+        )}
       </div>
     </DocumentLayout>
   );

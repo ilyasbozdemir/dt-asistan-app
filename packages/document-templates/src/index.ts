@@ -22,6 +22,9 @@ export * from "./templates/komisyon-gorevlendirme-onayi-eki";
 export * from "./templates/fiyat-arastirma-mektubu";
 export * from "./templates/birim-fiyat-teklif-mektubu";
 export * from "./templates/arastirma-mektubu";
+export * from "./templates/piyasa-fiyat-arastirma-tutanagi";
+export * from "./templates/piyasa-fiyat-arastirma-gorevlendirmesi";
+export * from "./templates/yaklasik-maliyet-cetveli";
 
 // Mapping Resolver
 export * from "./resolver/types";

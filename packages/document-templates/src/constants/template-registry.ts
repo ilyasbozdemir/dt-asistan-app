@@ -73,4 +73,22 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     category: "2-piyasa-fiyat-arastirmasi",
     supportsOlur: false,
   },
+  {
+    id: "piyasa-fiyat-arastirma-tutanagi",
+    name: "PiyasaFiyatArastirmaTutanagi",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: true,
+  },
+  {
+    id: "piyasa-fiyat-arastirma-gorevlendirmesi",
+    name: "PiyasaFiyatArastirmaGorevlendirmesi",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: false,
+  },
+  {
+    id: "yaklasik-maliyet-cetveli",
+    name: "YaklasikMaliyetCetveli",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: false,
+  },
 ];

@@ -1,5 +1,6 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
+import { PersonelCard } from "../../document/ApprovalSignature";
 import { KomisyonGorevlendirmeOnayiEkiType } from "./KomisyonGorevlendirmeOnayiEki.schema";
 
 interface KomisyonGorevlendirmeOnayiEkiProps {
@@ -244,21 +245,14 @@ export function KomisyonGorevlendirmeOnayiEki({
         </table>
 
         {/* Preparer Signature */}
-        <div style={{ width: "100%", display: "flow-root", marginTop: "20px" }}>
-          <div
-            style={{
-              float: "right",
-              textAlign: "center",
-              width: "220px",
-              fontSize: "10.5pt",
-              lineHeight: 1.4,
-            }}
-          >
-            <strong>{data.hazirlayanPersonelAdi || ""}</strong>
-            <br />
-            {data.hazirlayanPersonelUnvan || ""}
-          </div>
-        </div>
+        <PersonelCard
+          adSoyad={data.hazirlayanPersonelAdi}
+          unvan={data.hazirlayanPersonelUnvan}
+          align="right"
+          nameField="hazirlayanPersonelAdi"
+          unvanField="hazirlayanPersonelUnvan"
+          marginTop={20}
+        />
       </div>
     </DocumentLayout>
   );
