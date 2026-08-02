@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   FileJson,
   Database,
@@ -12,7 +12,7 @@ import {
   Check,
   Copy
 } from 'lucide-react'
-import { DatabaseBrowserModal } from './DatabaseBrowserModal'
+import { useTabStore } from '../../../store/tabStore'
 
 import { WorkspaceMeta } from '../../../store/workspaceStore'
 
@@ -48,7 +48,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
   copied,
   handleCopyPath
 }) => {
-  const [dbBrowserOpen, setDbBrowserOpen] = useState(false)
+  const { addTab } = useTabStore()
 
   return (
     <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm min-h-[460px] flex flex-col justify-between animate-in fade-in duration-200">
@@ -211,7 +211,7 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setDbBrowserOpen(true)}
+                  onClick={() => addTab('/dosya/veritabani')}
                   className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/10 cursor-pointer shrink-0 font-sans"
                 >
                   🔍 Veritabanını İncele
@@ -275,10 +275,6 @@ export const SelectedFileInspector: React.FC<SelectedFileInspectorProps> = ({
             </button>
           </div>
         </div>
-      )}
-
-      {dbBrowserOpen && (
-        <DatabaseBrowserModal isOpen={dbBrowserOpen} onClose={() => setDbBrowserOpen(false)} />
       )}
     </div>
   )
