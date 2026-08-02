@@ -55,4 +55,22 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     category: "4-kabul-ve-odeme-islemleri",
     supportsOlur: false,
   },
+  {
+    id: "fiyat-arastirma-mektubu",
+    name: "FiyatArastirmaMektubu",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: false,
+  },
+  {
+    id: "birim-fiyat-teklif-mektubu",
+    name: "BirimFiyatTeklifMektubu",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: false,
+  },
+  {
+    id: "arastirma-mektubu",
+    name: "ArastirmaMektubu",
+    category: "2-piyasa-fiyat-arastirmasi",
+    supportsOlur: false,
+  },
 ];

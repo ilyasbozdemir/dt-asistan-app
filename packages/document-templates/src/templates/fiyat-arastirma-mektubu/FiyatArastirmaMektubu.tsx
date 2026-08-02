@@ -1,0 +1,182 @@
+import React from "react";
+import { DocumentLayout } from "../../document/DocumentLayout";
+import { EditableField } from "../../document/EditableField";
+import { DateEditableField } from "../../document/ApprovalSignature";
+import { FiyatArastirmaMektubuType } from "./FiyatArastirmaMektubu.schema";
+
+interface FiyatArastirmaMektubuProps {
+  data?: Partial<FiyatArastirmaMektubuType> & Record<string, any>;
+  pageSize?: "A4" | "A3";
+  orientation?: "portrait" | "landscape";
+}
+
+export function FiyatArastirmaMektubu({
+  data = {},
+  pageSize = "A4",
+  orientation = "portrait",
+}: FiyatArastirmaMektubuProps) {
+  const items = data.ihtiyacKalemleri || [];
+  const komisyon = data.komisyonUyeleri || [];
+
+  return (
+    <DocumentLayout
+      data={data as any}
+      hideFooter={false}
+      pageSize={pageSize}
+      orientation={orientation}
+      pageNumber={1}
+      totalPages={1}
+    >
+      <div style={{ width: "100%", fontSize: "10.5pt", color: "#000", fontFamily: "'Times New Roman', Times, serif", lineHeight: 1.4 }}>
+        {/* BÖLÜM 1: FİYAT ARAŞTIRMA MEKTUBU */}
+        <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "11.5pt", margin: "8px 0", textTransform: "uppercase" }}>
+          FİYAT ARAŞTIRMA MEKTUBU
+        </div>
+
+        <div style={{ textIndent: "30px", textAlign: "justify", marginBottom: "12px" }}>
+          {data.idareAdi || "Kurumumuz"}, <EditableField name="isinAdi" value={data.isinAdi} placeholder="İşin Adı" /> için fiyat araştırması yapılmaktadır. Birim fiyatlarını KDV hariç olarak{" "}
+          <EditableField name="gunSayisi" value={data.gunSayisi} placeholder="..." /> (
+          <EditableField name="gunSayisiYazi" value={data.gunSayisiYazi} placeholder="..." />) gün içinde bildirmenizi rica ederim.
+        </div>
+
+        {/* KOMİSYON ÜYELERİ */}
+        {komisyon.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", margin: "10px 0", textAlign: "center" }}>
+            {komisyon.map((uye, idx) => (
+              <div key={idx} style={{ width: "25%", boxSizing: "border-box", fontSize: "9.5pt", padding: "4px 2px", lineHeight: 1.3 }}>
+                <strong>{uye.adSoyad}</strong>
+                <br />
+                {uye.unvan}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ borderTop: "1px solid #000", margin: "14px 0" }} />
+
+        {/* BÖLÜM 2: FİYAT ARAŞTIRMA VE BİRİM FİYAT TEKLİF MEKTUBU */}
+        <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "11.5pt", margin: "8px 0", textTransform: "uppercase" }}>
+          FİYAT ARAŞTIRMA VE BİRİM FİYAT TEKLİF MEKTUBU
+        </div>
+        <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "10.5pt", marginBottom: "8px" }}>
+          {data.idareAdi || "KURUM ADI"}
+        </div>
+
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", fontSize: "9.5pt" }}>
+          <tbody>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", fontWeight: "bold", width: "45%" }}>
+                Teklif Sahibinin Adı Soyadı / Ticaret Ünvanı
+              </td>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", width: "55%" }}>
+                <EditableField name="teklifSahibi" value={data.teklifSahibi} placeholder="Firma Ünvanı" />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", fontWeight: "bold" }}>Açık Tebligat Adresi</td>
+              <td style={{ border: "1px solid #000", padding: "4px 8px" }}>
+                <EditableField name="tebligatAdresi" value={data.tebligatAdresi} placeholder="Adres" />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", fontWeight: "bold" }}>Bağlı Olduğu Vergi Dairesi ve Numarası</td>
+              <td style={{ border: "1px solid #000", padding: "4px 8px" }}>
+                <EditableField name="vergiNo" value={data.vergiNo} placeholder="Vergi Dairesi / No" />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", fontWeight: "bold" }}>Telefon ve Faks Numarası</td>
+              <td style={{ border: "1px solid #000", padding: "4px 8px" }}>
+                <EditableField name="telefonFaks" value={data.telefonFaks} placeholder="Telefon / Faks" />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "4px 8px", fontWeight: "bold" }}>Elektronik Posta Adresi (varsa)</td>
+              <td style={{ border: "1px solid #000", padding: "4px 8px" }}>
+                <EditableField name="eposta" value={data.eposta} placeholder="E-Posta" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* AÇIKLAMA / TAAHHÜT METNİ */}
+        <div style={{ border: "1px solid #000", padding: "8px 12px", fontSize: "9pt", lineHeight: 1.35, marginTop: "8px" }}>
+          {data.aciklama ? (
+            <div style={{ whiteSpace: "pre-wrap", textAlign: "justify" }}>{data.aciklama}</div>
+          ) : (
+            <ol style={{ margin: 0, paddingLeft: "18px" }}>
+              <li style={{ marginBottom: "3px", textAlign: "justify" }}>Teklifimiz teklif tarihinden itibaren geçerlidir.</li>
+              <li style={{ marginBottom: "3px", textAlign: "justify" }}>Teklifimize Damga Vergisi, Resim Harç, Pul ve Ulaştırma Giderleri dahildir.</li>
+              <li style={{ marginBottom: "3px", textAlign: "justify" }}>İhale konusu iş için teklif vermediğimizi/verdiğimizi beyan ederiz.</li>
+              <li style={{ marginBottom: "3px", textAlign: "justify" }}>Aldığınız herhangi bir teklifi veya en düşük teklifi seçmek zorunda olmadığınızı kabul ediyoruz.</li>
+              <li style={{ marginBottom: "3px", textAlign: "justify" }}>4734 Sayılı Kamu İhale Kanununun 4. maddesindeki "Yerli İstekli" tanımı gereğince yerli istekli durumundayız.</li>
+              <li style={{ textAlign: "justify" }}>Teklif ettiğimiz birim fiyatları üzerinden KDV HARİÇ bedel karşılığında kabul ve taahhüt ederiz.</li>
+            </ol>
+          )}
+        </div>
+
+        {/* KAŞE VE İMZA */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: "12px", marginBottom: "12px" }}>
+          <div style={{ fontStyle: "italic", color: "#333", fontSize: "10pt" }}>Para Birimi: Türk Lirası (TL)</div>
+          <div style={{ textAlign: "center", width: "220px", fontSize: "10.5pt", lineHeight: 1.4, marginLeft: "auto" }}>
+            <DateEditableField name="tarih" value={data.tarih || data.dosyaTarihi} placeholder="……/……/20…" />
+            <br />
+            <br />
+            Kaşe ve İmza
+          </div>
+        </div>
+
+        {/* BİRİM FİYAT TEKLİF CETVELİ TABLOSU */}
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", fontSize: "9.5pt" }}>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "5%", textAlign: "center", fontWeight: "bold" }}>Sıra</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "32%", textAlign: "left", fontWeight: "bold" }}>Malzeme/Hizmet Adı</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "17%", textAlign: "left", fontWeight: "bold" }}>Özelliği</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "9%", textAlign: "center", fontWeight: "bold" }}>Birimi</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "9%", textAlign: "center", fontWeight: "bold" }}>Miktar</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "14%", textAlign: "center", fontWeight: "bold" }}>Birim Fiyatı</th>
+              <th style={{ border: "1px solid #000", padding: "5px", width: "14%", textAlign: "center", fontWeight: "bold" }}>Tutarı</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.length > 0 ? (
+              items.map((item, idx) => (
+                <tr key={idx}>
+                  <td style={{ border: "1px solid #000", padding: "5px", textAlign: "center" }}>{item.siraNo || idx + 1}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px" }}>{item.malzemeAdi}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px" }}>{item.ozelligi || "-"}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px", textAlign: "center" }}>{item.birimi || "-"}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{item.miktar}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{item.birimFiyat ? `${item.birimFiyat} ₺` : ""}</td>
+                  <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{item.tutar ? `${item.tutar} ₺` : ""}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} style={{ border: "1px solid #000", padding: "8px", textAlign: "center", fontStyle: "italic" }}>
+                  Kalem bulunamadı
+                </td>
+              </tr>
+            )}
+            <tr>
+              <td colSpan={5} style={{ border: "none" }} />
+              <td style={{ border: "1px solid #000", padding: "5px", textAlign: "center", fontWeight: "bold" }}>TOPLAM</td>
+              <td style={{ border: "1px solid #000", padding: "5px", height: "24px" }} />
+            </tr>
+            <tr>
+              <td colSpan={5} style={{ border: "none" }} />
+              <td style={{ border: "1px solid #000", padding: "5px", textAlign: "center", fontWeight: "bold" }}>KDV %{data.kdvOrani ?? 20}</td>
+              <td style={{ border: "1px solid #000", padding: "5px", height: "24px" }} />
+            </tr>
+            <tr>
+              <td colSpan={5} style={{ border: "none" }} />
+              <td style={{ border: "1px solid #000", padding: "5px", textAlign: "center", fontWeight: "bold" }}>G.TOPLAM</td>
+              <td style={{ border: "1px solid #000", padding: "5px", height: "24px" }} />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </DocumentLayout>
+  );
+}

@@ -1,5 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import {
   AlertTriangle,
   Building2,
@@ -12,113 +18,115 @@ import {
   Square,
   Tag,
   Trash2,
-  User,
-  UserCheck,
-  X
-} from 'lucide-react'
+  X,
+} from "lucide-react";
 
-const MIN_FIRMS = 2
-const MAX_FIRMS = 3
+const MIN_FIRMS = 2;
+const MAX_FIRMS = 3;
 
 export interface Firma {
-  id: number
-  firma_no?: string
-  unvan: string
-  telefon?: string
-  faks?: string
-  email?: string
-  semt?: string
-  sehir?: string
-  isAdded?: boolean
-  temin_firma_id?: number
+  id: number;
+  firma_no?: string;
+  unvan: string;
+  telefon?: string;
+  faks?: string;
+  email?: string;
+  semt?: string;
+  sehir?: string;
+  isAdded?: boolean;
+  temin_firma_id?: number;
   /** Eğer true ise belgede 'Sayın İlgili' yerine firma unvanı basılır */
-  unvanKullan?: boolean
-  [key: string]: unknown
+  unvanKullan?: boolean;
+  [key: string]: unknown;
 }
 
 export interface FirmaColumn {
-  key: string
-  label: string
-  className?: string
-  render?: (firma: Firma) => React.ReactNode
+  key: string;
+  label: string;
+  className?: string;
+  render?: (firma: Firma) => React.ReactNode;
 }
 
 export interface FiyatIstenenFirmalarınSecilmesiProps {
-  title?: string
+  title?: string;
   /** Havuz firmaları (eklenmiş + eklenmemiş hepsi, isAdded bayrağıyla) */
-  firms: Firma[]
-  columns: FirmaColumn[]
-  onFirmaEkle: (firma: Firma) => void
-  onFirmaCikar?: (firma: Firma) => void
+  firms: Firma[];
+  columns: FirmaColumn[];
+  onFirmaEkle: (firma: Firma) => void;
+  onFirmaCikar?: (firma: Firma) => void;
   /** Fiyat Girişi / Matrisi Açma */
-  onFiyatGir?: () => void
+  onFiyatGir?: () => void;
   /** Fiyat Piyasa Araştırma Formu açma */
-  onFiyatPiyasaFormu?: (firma: Firma) => void
+  onFiyatPiyasaFormu?: (firma: Firma) => void;
   /** Birim Fiyat Araştırması açma */
-  onBirimFiyatArastirmasi?: (firma: Firma) => void
+  onBirimFiyatArastirmasi?: (firma: Firma) => void;
   /** Unvan Kullan toggle callback — per firma güncelleme */
-  onUnvanKullanToggle?: (firma: Firma, value: boolean) => void
+  onUnvanKullanToggle?: (firma: Firma, value: boolean) => void;
   /** Rich Firma Seçme Modalini tetikleme callback */
-  onOpenFirmaSecmeModali?: () => void
+  onOpenFirmaSecmeModali?: () => void;
+  /** Ekstra Üst Bar Butonları / Popover (Örn. Tablo İşlemleri) */
+  extraHeaderAction?: React.ReactNode;
 }
 
 /* ─── Firma Seçim Modali ─────────────────────────────────────────── */
 interface FirmaEkleModaliProps {
-  availableFirms: Firma[]
-  addedCount: number
-  onConfirm: (firms: Firma[]) => void | Promise<void>
-  onClose: () => void
+  availableFirms: Firma[];
+  addedCount: number;
+  onConfirm: (firms: Firma[]) => void | Promise<void>;
+  onClose: () => void;
 }
 
-function FirmaEkleModali({ availableFirms, addedCount, onConfirm, onClose }: FirmaEkleModaliProps) {
-  const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<Set<number>>(new Set())
+function FirmaEkleModali(
+  { availableFirms, addedCount, onConfirm, onClose }: FirmaEkleModaliProps,
+) {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
-  const remaining = MAX_FIRMS - addedCount
+  const remaining = MAX_FIRMS - addedCount;
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return availableFirms
+    const q = query.trim().toLowerCase();
+    if (!q) return availableFirms;
     return availableFirms.filter(
       (f) =>
-        String(f.unvan ?? '')
+        String(f.unvan ?? "")
           .toLowerCase()
           .includes(q) ||
-        String(f.vergi_no ?? '')
+        String(f.vergi_no ?? "")
           .toLowerCase()
           .includes(q) ||
-        String(f.sehir ?? '')
+        String(f.sehir ?? "")
           .toLowerCase()
           .includes(q) ||
-        String(f.telefon ?? '')
+        String(f.telefon ?? "")
           .toLowerCase()
-          .includes(q)
-    )
-  }, [availableFirms, query])
+          .includes(q),
+    );
+  }, [availableFirms, query]);
 
   const toggle = (id: number) => {
     setSelected((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(id)) {
-        next.delete(id)
+        next.delete(id);
       } else {
-        if (next.size < remaining) next.add(id)
+        if (next.size < remaining) next.add(id);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConfirm = async () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const firmsToAdd = availableFirms.filter((f) => selected.has(f.id))
-      await onConfirm(firmsToAdd)
+      const firmsToAdd = availableFirms.filter((f) => selected.has(f.id));
+      await onConfirm(firmsToAdd);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
@@ -130,8 +138,9 @@ function FirmaEkleModali({ availableFirms, addedCount, onConfirm, onClose }: Fir
               İstekli Firma Ekle
             </h2>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Havuzdan firma seçin — en fazla{' '}
-              <span className="font-bold text-amber-500">{MAX_FIRMS}</span> firma eklenebilir
+              Havuzdan firma seçin — en fazla{" "}
+              <span className="font-bold text-amber-500">{MAX_FIRMS}</span>{" "}
+              firma eklenebilir
               {remaining < MAX_FIRMS && (
                 <span className="ml-1 text-slate-500">
                   (mevcut: {addedCount}, {remaining} ekleyebilirsiniz)
@@ -151,8 +160,8 @@ function FirmaEkleModali({ availableFirms, addedCount, onConfirm, onClose }: Fir
         {remaining === 0 && (
           <div className="mx-5 mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 text-[11px] font-semibold">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-            Maksimum {MAX_FIRMS} firma eklenebilir. Daha fazla eklemek için önce bir firmayı
-            çıkarın.
+            Maksimum {MAX_FIRMS}{" "}
+            firma eklenebilir. Daha fazla eklemek için önce bir firmayı çıkarın.
           </div>
         )}
 
@@ -171,57 +180,70 @@ function FirmaEkleModali({ availableFirms, addedCount, onConfirm, onClose }: Fir
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-1.5">
-          {filtered.length === 0 ? (
-            <p className="py-8 text-center text-xs text-slate-400">Eşleşen firma bulunamadı.</p>
-          ) : (
-            filtered.map((firma) => {
-              const isSelected = selected.has(firma.id)
-              const isDisabled = !isSelected && selected.size >= remaining
-              return (
-                <button
-                  key={firma.id}
-                  type="button"
-                  disabled={isDisabled}
-                  onClick={() => toggle(firma.id)}
-                  className={[
-                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer',
-                    isSelected
-                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
-                      : isDisabled
-                        ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-150 dark:border-slate-800 opacity-50 cursor-not-allowed'
-                        : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10'
-                  ].join(' ')}
-                >
-                  <span className={isSelected ? 'text-blue-500' : 'text-slate-400'}>
-                    {isSelected ? (
-                      <CheckSquare className="w-4 h-4" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
-                      {firma.unvan}
-                    </p>
-                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                      {[firma.vergi_no, firma.sehir, firma.telefon].filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
-                </button>
-              )
-            })
-          )}
+          {filtered.length === 0
+            ? (
+              <p className="py-8 text-center text-xs text-slate-400">
+                Eşleşen firma bulunamadı.
+              </p>
+            )
+            : (
+              filtered.map((firma) => {
+                const isSelected = selected.has(firma.id);
+                const isDisabled = !isSelected && selected.size >= remaining;
+                return (
+                  <button
+                    key={firma.id}
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => toggle(firma.id)}
+                    className={[
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer",
+                      isSelected
+                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700"
+                        : isDisabled
+                        ? "bg-slate-50 dark:bg-slate-800/40 border-slate-150 dark:border-slate-800 opacity-50 cursor-not-allowed"
+                        : "bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10",
+                    ].join(" ")}
+                  >
+                    <span
+                      className={isSelected
+                        ? "text-blue-500"
+                        : "text-slate-400"}
+                    >
+                      {isSelected
+                        ? <CheckSquare className="w-4 h-4" />
+                        : <Square className="w-4 h-4" />}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
+                        {firma.unvan}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                        {[firma.vergi_no, firma.sehir, firma.telefon].filter(
+                          Boolean,
+                        ).join(" · ")}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })
+            )}
         </div>
 
         <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <p className="text-[11px] text-slate-500">
-            {selected.size > 0 ? (
-              <span>
-                <span className="font-bold text-blue-600">{selected.size}</span> firma seçildi
-              </span>
-            ) : (
-              'Eklenecek firmaları işaretleyin'
-            )}
+            {selected.size > 0
+              ? (
+                <span>
+                  <span className="font-bold text-blue-600">
+                    {selected.size}
+                  </span>{" "}
+                  firma seçildi
+                </span>
+              )
+              : (
+                "Eklenecek firmaları işaretleyin"
+              )}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -237,23 +259,23 @@ function FirmaEkleModali({ availableFirms, addedCount, onConfirm, onClose }: Fir
               disabled={selected.size === 0 || isSubmitting}
               className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer border-0"
             >
-              {isSubmitting ? 'Ekleniyor...' : `Ekle (${selected.size})`}
+              {isSubmitting ? "Ekleniyor..." : `Ekle (${selected.size})`}
             </button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /* ─── Satır Kebap Menüsü ─────────────────────────────────────────── */
 interface RowMenuProps {
-  firma: Firma
-  onFirmaCikar?: (firma: Firma) => void
-  onFiyatGir?: () => void
-  onFiyatPiyasaFormu?: (firma: Firma) => void
-  onBirimFiyatArastirmasi?: (firma: Firma) => void
-  onUnvanKullanToggle?: (firma: Firma, value: boolean) => void
+  firma: Firma;
+  onFirmaCikar?: (firma: Firma) => void;
+  onFiyatGir?: () => void;
+  onFiyatPiyasaFormu?: (firma: Firma) => void;
+  onBirimFiyatArastirmasi?: (firma: Firma) => void;
+  onUnvanKullanToggle?: (firma: Firma, value: boolean) => void;
 }
 
 function RowMenu({
@@ -262,62 +284,64 @@ function RowMenu({
   onFiyatGir,
   onFiyatPiyasaFormu,
   onBirimFiyatArastirmasi,
-  onUnvanKullanToggle
+  onUnvanKullanToggle,
 }: RowMenuProps): React.JSX.Element {
-  const [open, setOpen] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null)
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(
+    null,
+  );
 
   const updateCoords = useCallback(() => {
     if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      const menuWidth = 240
-      let left = rect.right - menuWidth
-      if (left < 10) left = 10
-      let top = rect.bottom + 4
+      const rect = buttonRef.current.getBoundingClientRect();
+      const menuWidth = 240;
+      let left = rect.right - menuWidth;
+      if (left < 10) left = 10;
+      let top = rect.bottom + 4;
       if (top + 260 > window.innerHeight) {
-        top = Math.max(10, rect.top - 260 - 4)
+        top = Math.max(10, rect.top - 260 - 4);
       }
-      setCoords({ top, left })
+      setCoords({ top, left });
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (!open) return undefined
-    updateCoords()
-    window.addEventListener('resize', updateCoords)
-    window.addEventListener('scroll', updateCoords, true)
+    if (!open) return undefined;
+    updateCoords();
+    window.addEventListener("resize", updateCoords);
+    window.addEventListener("scroll", updateCoords, true);
     return () => {
-      window.removeEventListener('resize', updateCoords)
-      window.removeEventListener('scroll', updateCoords, true)
-    }
-  }, [open, updateCoords])
+      window.removeEventListener("resize", updateCoords);
+      window.removeEventListener("scroll", updateCoords, true);
+    };
+  }, [open, updateCoords]);
 
   // Dışarı tıklayınca kapat
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const handler = (e: MouseEvent) => {
-      const target = e.target as Node
+      const target = e.target as Node;
       if (
         buttonRef.current &&
         !buttonRef.current.contains(target) &&
         menuRef.current &&
         !menuRef.current.contains(target)
       ) {
-        setOpen(false)
+        setOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
-  const unvanKullan = Boolean(firma.unvanKullan)
+  const unvanKullan = Boolean(firma.unvanKullan);
 
   const handleItem = (fn: () => void) => {
-    fn()
-    setOpen(false)
-  }
+    fn();
+    setOpen(false);
+  };
 
   return (
     <div className="relative inline-block">
@@ -341,88 +365,38 @@ function RowMenu({
           >
             {/* Fiyat Girişi */}
             {onFiyatGir && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => handleItem(onFiyatGir)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
-                >
-                  <Calculator className="w-4 h-4 text-emerald-500 shrink-0" />
-                  Teklif / Fiyat Gir
-                </button>
-                <hr className="my-1 border-slate-100 dark:border-slate-800" />
-              </>
-            )}
-
-            {/* Belge işlemleri */}
-            {(onFiyatPiyasaFormu || onBirimFiyatArastirmasi) && (
-              <>
-                <p className="px-3 pt-1.5 pb-1 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                  Belgeler
-                </p>
-                {onFiyatPiyasaFormu && (
-                  <button
-                    type="button"
-                    onClick={() => handleItem(() => onFiyatPiyasaFormu(firma))}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    Fiyat Piyasa Araştırma Formu
-                  </button>
-                )}
-                {onBirimFiyatArastirmasi && (
-                  <button
-                    type="button"
-                    onClick={() => handleItem(() => onBirimFiyatArastirmasi(firma))}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <Tag className="w-3.5 h-3.5 text-violet-500 shrink-0" />
-                    Birim Fiyat Araştırması
-                  </button>
-                )}
-                <hr className="my-1 border-slate-100 dark:border-slate-800" />
-              </>
-            )}
-
-            {/* Unvan / Sayın İlgili toggle */}
-            <p className="px-3 pt-1 pb-1 text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              Belge Seçeneği (Hitap)
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                onUnvanKullanToggle?.(firma, !unvanKullan)
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              {unvanKullan ? (
-                <UserCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-              ) : (
-                <User className="w-4 h-4 text-slate-400 shrink-0" />
-              )}
-              <div className="flex-1 text-left min-w-0">
-                <p className="font-medium truncate">
-                  {unvanKullan ? 'Firma Unvanı Hitsaplı' : 'Sayın İlgili Hitsaplı'}
-                </p>
-                <p className="text-[10px] text-slate-400">
-                  {unvanKullan ? 'Belgede firma adı yazar' : 'Belgede "Sayın İlgili" yazar'}
-                </p>
-              </div>
-              {/* Toggle pill */}
-              <span
-                className={[
-                  'inline-flex h-4 w-7 rounded-full transition-colors shrink-0',
-                  unvanKullan ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
-                ].join(' ')}
+              <button
+                type="button"
+                onClick={() => handleItem(onFiyatGir)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
               >
-                <span
-                  className={[
-                    'my-0.5 mx-0.5 h-3 w-3 rounded-full bg-white shadow transition-transform',
-                    unvanKullan ? 'translate-x-3' : 'translate-x-0'
-                  ].join(' ')}
-                />
-              </span>
-            </button>
+                <Calculator className="w-4 h-4 text-emerald-500 shrink-0" />
+                Teklif / Fiyat Gir
+              </button>
+            )}
+
+            {/* Belge İndirme / Görüntüleme Mektupları */}
+            {onFiyatPiyasaFormu && (
+              <button
+                type="button"
+                onClick={() => handleItem(() => onFiyatPiyasaFormu(firma))}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                Fiyat Araştırma Formu
+              </button>
+            )}
+
+            {onBirimFiyatArastirmasi && (
+              <button
+                type="button"
+                onClick={() => handleItem(() => onBirimFiyatArastirmasi(firma))}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <Tag className="w-3.5 h-3.5 text-violet-500 shrink-0" />
+                Birim Fiyat Araştırma Mektubu
+              </button>
+            )}
 
             {onFirmaCikar && (
               <>
@@ -438,15 +412,15 @@ function RowMenu({
               </>
             )}
           </div>,
-          document.body
+          document.body,
         )}
     </div>
-  )
+  );
 }
 
 /* ─── Ana Bileşen ────────────────────────────────────────────────── */
 export function FiyatIstenenFirmalarınSecilmesi({
-  title = 'Fiyat İstenen Firmaların Seçilmesi',
+  title = "Fiyat İstenen Firmaların Seçilmesi",
   firms,
   columns,
   onFirmaEkle,
@@ -455,39 +429,40 @@ export function FiyatIstenenFirmalarınSecilmesi({
   onFiyatPiyasaFormu,
   onBirimFiyatArastirmasi,
   onUnvanKullanToggle,
-  onOpenFirmaSecmeModali
+  onOpenFirmaSecmeModali,
+  extraHeaderAction,
 }: FiyatIstenenFirmalarınSecilmesiProps): React.JSX.Element {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Duplicate ID'leri filtrele — allPoolFirms'den kaynaklanan çakışmaları önle
   const addedFirms = useMemo(() => {
-    const seen = new Set<number>()
+    const seen = new Set<number>();
     return firms.filter((f) => {
-      if (!f.isAdded) return false
-      const key = f.temin_firma_id ?? f.id
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-  }, [firms])
+      if (!f.isAdded) return false;
+      const key = f.temin_firma_id ?? f.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [firms]);
 
   const availableFirms = useMemo(() => {
-    const seen = new Set<number>()
+    const seen = new Set<number>();
     return firms.filter((f) => {
-      if (f.isAdded || seen.has(f.id)) return false
-      seen.add(f.id)
-      return true
-    })
-  }, [firms])
+      if (f.isAdded || seen.has(f.id)) return false;
+      seen.add(f.id);
+      return true;
+    });
+  }, [firms]);
 
-  const canAdd = addedFirms.length < MAX_FIRMS
+  const canAdd = addedFirms.length <= MAX_FIRMS;
 
   const handleConfirm = async (selected: Firma[]) => {
     for (const f of selected) {
-      await onFirmaEkle(f)
+      await onFirmaEkle(f);
     }
-    setIsModalOpen(false)
-  }
+    setIsModalOpen(false);
+  };
 
   return (
     <>
@@ -508,16 +483,18 @@ export function FiyatIstenenFirmalarınSecilmesi({
               <Building2 className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">{title}</h3>
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                {title}
+              </h3>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Fiyat teklifi istenecek firmalar — en az{' '}
+                Fiyat teklifi istenecek firmalar — en az{" "}
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   {MIN_FIRMS}
-                </span>{' '}
-                en fazla{' '}
+                </span>{" "}
+                en fazla{" "}
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   {MAX_FIRMS}
-                </span>{' '}
+                </span>{" "}
                 firma eklenebilir.
               </p>
             </div>
@@ -547,17 +524,21 @@ export function FiyatIstenenFirmalarınSecilmesi({
               disabled={!canAdd || availableFirms.length === 0}
               onClick={() => {
                 if (onOpenFirmaSecmeModali) {
-                  onOpenFirmaSecmeModali()
+                  onOpenFirmaSecmeModali();
                 } else {
-                  setIsModalOpen(true)
+                  setIsModalOpen(true);
                 }
               }}
-              title={!canAdd ? `Maksimum ${MAX_FIRMS} firma eklenebilir` : 'Firma ekle'}
+              title={!canAdd
+                ? `Maksimum ${MAX_FIRMS} firma eklenebilir`
+                : "Firma ekle"}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-bold transition-colors cursor-pointer border-0 shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               Firma Ekle
             </button>
+
+            {extraHeaderAction}
           </div>
         </div>
 
@@ -570,15 +551,12 @@ export function FiyatIstenenFirmalarınSecilmesi({
                   <th
                     key={column.key}
                     className={`px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap ${
-                      column.className ?? ''
+                      column.className ?? ""
                     }`}
                   >
                     {column.label}
                   </th>
                 ))}
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Hitap Şekli
-                </th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-14">
                   İşlem
                 </th>
@@ -586,86 +564,65 @@ export function FiyatIstenenFirmalarınSecilmesi({
             </thead>
 
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {addedFirms.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    className="px-4 py-10 text-center text-xs text-slate-400"
-                  >
-                    Henüz firma eklenmedi.{' '}
-                    {availableFirms.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setIsModalOpen(true)}
-                        className="text-blue-500 hover:underline font-semibold cursor-pointer bg-transparent border-0 p-0"
-                      >
-                        Firma ekle
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ) : (
-                addedFirms.map((firma, idx) => (
-                  <tr
-                    key={
-                      firma.temin_firma_id
-                        ? `temin-${firma.temin_firma_id}`
-                        : `firm-${firma.id}-${idx}`
-                    }
-                    className="group hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
-                  >
-                    {columns.map((column) => (
-                      <td
-                        key={column.key}
-                        className={`px-4 py-3 text-xs text-slate-700 dark:text-slate-300 ${
-                          column.className ?? ''
-                        }`}
-                      >
-                        {column.render ? column.render(firma) : String(firma[column.key] ?? '-')}
-                      </td>
-                    ))}
-
-                    {/* Hitap Şekli Badge */}
-                    <td className="px-4 py-3 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => onUnvanKullanToggle?.(firma, !firma.unvanKullan)}
-                        title="Belgelerde hitap şeklini değiştirmek için tıklayın"
-                        className={[
-                          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all cursor-pointer',
-                          firma.unvanKullan
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/60'
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                        ].join(' ')}
-                      >
-                        {firma.unvanKullan ? (
-                          <UserCheck className="w-3 h-3 text-emerald-500" />
-                        ) : (
-                          <User className="w-3 h-3 text-slate-400" />
-                        )}
-                        <span>{firma.unvanKullan ? 'Unvan Kullanılıyor' : 'Sayın İlgili'}</span>
-                      </button>
-                    </td>
-
-                    {/* ⋮ Kebap Menüsü */}
-                    <td className="px-3 py-2 text-right">
-                      <RowMenu
-                        firma={firma}
-                        onFirmaCikar={onFirmaCikar}
-                        onFiyatGir={onFiyatGir}
-                        onFiyatPiyasaFormu={onFiyatPiyasaFormu}
-                        onBirimFiyatArastirmasi={onBirimFiyatArastirmasi}
-                        onUnvanKullanToggle={onUnvanKullanToggle}
-                      />
+              {addedFirms.length === 0
+                ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length + 1}
+                      className="px-4 py-10 text-center text-xs text-slate-400"
+                    >
+                      Henüz firma eklenmedi.{" "}
+                      {availableFirms.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setIsModalOpen(true)}
+                          className="text-blue-500 hover:underline font-semibold cursor-pointer bg-transparent border-0 p-0"
+                        >
+                          Firma ekle
+                        </button>
+                      )}
                     </td>
                   </tr>
-                ))
-              )}
+                )
+                : (
+                  addedFirms.map((firma, idx) => (
+                    <tr
+                      key={firma.temin_firma_id
+                        ? `temin-${firma.temin_firma_id}`
+                        : `firm-${firma.id}-${idx}`}
+                      className="group hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
+                    >
+                      {columns.map((column) => (
+                        <td
+                          key={column.key}
+                          className={`px-4 py-3 text-xs text-slate-700 dark:text-slate-300 ${
+                            column.className ?? ""
+                          }`}
+                        >
+                          {column.render
+                            ? column.render(firma)
+                            : String(firma[column.key] ?? "-")}
+                        </td>
+                      ))}
+
+                      {/* ⋮ Kebap Menüsü */}
+                      <td className="px-3 py-2 text-right">
+                        <RowMenu
+                          firma={firma}
+                          onFirmaCikar={onFirmaCikar}
+                          onFiyatGir={onFiyatGir}
+                          onFiyatPiyasaFormu={onFiyatPiyasaFormu}
+                          onBirimFiyatArastirmasi={onBirimFiyatArastirmasi}
+                          onUnvanKullanToggle={onUnvanKullanToggle}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
             </tbody>
           </table>
         </div>
       </div>
     </>
-  )
+  );
 }
-

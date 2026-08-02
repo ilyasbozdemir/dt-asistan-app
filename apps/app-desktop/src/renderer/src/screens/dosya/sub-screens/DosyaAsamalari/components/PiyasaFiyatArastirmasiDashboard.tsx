@@ -226,6 +226,12 @@ export function PiyasaFiyatArastirmasiDashboard({
           setIsFormOpen(true);
           setActiveFormTab("matrix");
         }}
+        onFiyatPiyasaFormu={() => {
+          handleOpenSablonByDosyaAdi("arastirma-mektubu");
+        }}
+        onBirimFiyatArastirmasi={() => {
+          handleOpenSablonByDosyaAdi("birim-fiyat-arastirmasi");
+        }}
         onFirmaEkle={(firma) => {
           if (handleAddSingleFirm) {
             handleAddSingleFirm(firma);
@@ -241,6 +247,44 @@ export function PiyasaFiyatArastirmasiDashboard({
             setIsFirmModalOpen(true);
           }
         }}
+        extraHeaderAction={
+          <MalzemeTabloPopover
+            step={2}
+            disableDocumentGuidance={disableDocumentGuidance}
+            onGorevlendirmeOnayi={() =>
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
+            onGorevlendirmeOnayEki={() =>
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+            onFiyatArastirmaKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+            onPiyasaArastirmaGorevlendirmesi={() =>
+              handleOpenSablonByDosyaAdi(
+                "piyasa-fiyat-arastirma-gorevlendirmesi",
+              )}
+            onPiyasaArastirmaTutanagi={() =>
+              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+            onYaklasikMaliyetHesapCetveli={() =>
+              handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
+            onSonAlimCetveli={() =>
+              handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
+            onPiyasaSonucCetveli={() =>
+              handleOpenSablonByDosyaAdi(
+                "piyasa-fiyat-arastirmasi-sonuc-cetveli",
+              )}
+            onTeklifIstemeMektubu={() =>
+              handleOpenSablonByDosyaAdi("arastirma-mektubu")}
+            onTeklifMektubuDagitim={() =>
+              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim")}
+            onTeklifMektubuKarma={() =>
+              handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim-karma")}
+            onFirmalarTeklifCetveli={() =>
+              handleOpenSablonByDosyaAdi("firmalar-teklif-cetveli")}
+            onYasaklilikSorgulama={() =>
+              handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
+            onOnayBelgesi={() =>
+              handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
+          />
+        }
       />
       {dashboardViewMode === "prices"
         ? (

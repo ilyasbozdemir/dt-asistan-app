@@ -19,6 +19,9 @@ export * from "./templates/luzum-muzekkeresi-onay-eki";
 export * from "./templates/luzum-muzekkeresi-teslim-tesellum";
 export * from "./templates/komisyon-gorevlendirme-onayi";
 export * from "./templates/komisyon-gorevlendirme-onayi-eki";
+export * from "./templates/fiyat-arastirma-mektubu";
+export * from "./templates/birim-fiyat-teklif-mektubu";
+export * from "./templates/arastirma-mektubu";
 
 // Mapping Resolver
 export * from "./resolver/types";
