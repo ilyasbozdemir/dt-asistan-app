@@ -78,31 +78,35 @@ export function LuzumMuzekkeresiTeslimTesellum({
   const dosyaTarihiVal = (data as any).tarih || data.dosyaTarihi ||
     (data as any).onayaSunulanTarih || defaultToday;
 
-  const firmaUnvan = data.yukleniciFirma || (data as any).kazananFirma || (data as any).firmaAdi || "";
+  const firmaUnvan = data.yukleniciFirma || (data as any).kazananFirma ||
+    (data as any).firmaAdi || "";
 
-  const teslimEdenlerList =
-    data.teslimEdenler && data.teslimEdenler.length > 0
-      ? data.teslimEdenler
-      : [
-        {
-          adSoyad: (data as any).teslimEdenPersonelAdi || firmaUnvan || "",
-          unvan: (data as any).teslimEdenPersonelUnvan || (firmaUnvan ? "Yüklenici Firma / Yetkilisi" : ""),
-        },
-      ];
+  const teslimEdenlerList = data.teslimEdenler && data.teslimEdenler.length > 0
+    ? data.teslimEdenler
+    : [
+      {
+        adSoyad: (data as any).teslimEden_0_adSoyad !== undefined
+          ? (data as any).teslimEden_0_adSoyad
+          : ((data as any).teslimEdenPersonelAdi || firmaUnvan || ""),
+        unvan: (data as any).teslimEden_0_unvan !== undefined
+          ? (data as any).teslimEden_0_unvan
+          : ((data as any).teslimEdenPersonelUnvan ||
+            (firmaUnvan ? "Yüklenici Firma / Yetkilisi" : "")),
+      },
+    ];
 
-  const teslimAlanlarList =
-    data.teslimAlanlar && data.teslimAlanlar.length > 0
-      ? data.teslimAlanlar
-      : [
-        {
-          adSoyad: (data as any).teslimAlanPersonelAdi ||
-            (data as any).talepEdenPersonelAdi ||
-            (data as any).hazirlayanPersonelAdi || "",
-          unvan: (data as any).teslimAlanPersonelUnvan ||
-            (data as any).talepEdenPersonelUnvan ||
-            (data as any).hazirlayanPersonelUnvan || "",
-        },
-      ];
+  const teslimAlanlarList = data.teslimAlanlar && data.teslimAlanlar.length > 0
+    ? data.teslimAlanlar
+    : [
+      {
+        adSoyad: (data as any).teslimAlanPersonelAdi ||
+          (data as any).talepEdenPersonelAdi ||
+          (data as any).hazirlayanPersonelAdi || "",
+        unvan: (data as any).teslimAlanPersonelUnvan ||
+          (data as any).talepEdenPersonelUnvan ||
+          (data as any).hazirlayanPersonelUnvan || "",
+      },
+    ];
 
   return (
     <>
@@ -190,42 +194,21 @@ export function LuzumMuzekkeresiTeslimTesellum({
                       <td
                         style={{
                           fontWeight: "bold",
-                          width: "140px",
+                          width: "120px",
                           padding: "4px 0",
-                          verticalAlign: "top",
-                        }}
-                      >
-                        İşin Değeri (KDV Hariç):
-                      </td>
-                      <td
-                        style={{
-                          width: "35%",
-                          padding: "4px 0",
-                          verticalAlign: "top",
-                        }}
-                      >
-                        <EditableField
-                          name="isinDegeri"
-                          value={formatCurrency(data.isinDegeri)}
-                          placeholder="0,00 TL"
-                        />
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: "bold",
-                          width: "80px",
-                          padding: "4px 0",
-                          textAlign: "right",
-                          paddingRight: "10px",
                           verticalAlign: "top",
                         }}
                       >
                         Sayı:
                       </td>
-                      <td style={{ padding: "4px 0", verticalAlign: "top" }}>
+                      <td
+                        colSpan={3}
+                        style={{ padding: "4px 0", verticalAlign: "top" }}
+                      >
                         <EditableField
                           name="evrakSayisi"
-                          value={(data as any).evrakSayisi || data.dosyaNumarasi}
+                          value={(data as any).evrakSayisi ||
+                            data.dosyaNumarasi}
                           placeholder="E-0000000000-934.01-0001"
                         />
                       </td>

@@ -145,12 +145,42 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
   const personelList = personelListesi || [];
   const rawFirmaList = firmaListesi || [];
 
-  const firmaList = [...rawFirmaList];
-  if (adSoyad && isFirmaSelect && !firmaList.some((f: any) => f.unvan && String(f.unvan).trim().toLowerCase() === String(adSoyad).trim().toLowerCase())) {
-    firmaList.unshift({ id: `custom_${adSoyad}`, unvan: adSoyad });
+  const normalizedFirmaList = rawFirmaList.map((item: any) => {
+    if (item && item.firm) {
+      const u = item.firm.unvan || item.firm.firma_adi || item.unvan || "İstekli Firma";
+      return {
+        ...item.firm,
+        id: item.firm.id || item.id,
+        unvan: u,
+        total: item.total,
+        isWinner: item.isWinner,
+        label: item.label || item.firm.label || (item.total > 0 ? `${u} (${item.total} TL)` : u),
+      };
+    }
+    const u = item?.unvan || item?.firma_adi || item?.name || "";
+    return {
+      ...item,
+      unvan: u,
+      label: item?.label || u,
+    };
+  });
+
+  const firmaList = [...normalizedFirmaList];
+  if (
+    adSoyad &&
+    isFirmaSelect &&
+    !firmaList.some(
+      (f: any) =>
+        (f.unvan || f.label) &&
+        String(f.unvan || f.label).trim().toLowerCase() === String(adSoyad).trim().toLowerCase()
+    )
+  ) {
+    firmaList.unshift({ id: `custom_${adSoyad}`, unvan: adSoyad, label: adSoyad });
   }
 
-  const validFirmaList = firmaList.filter((f: any) => f && f.unvan && String(f.unvan).trim() !== "");
+  const validFirmaList = firmaList.filter(
+    (f: any) => f && (f.unvan || f.label) && String(f.unvan || f.label).trim() !== ""
+  );
 
   const matched = isFirmaSelect
     ? validFirmaList.find(
@@ -234,11 +264,11 @@ export const PersonelCard: React.FC<PersonelCardProps> = ({
               }}
               title={isFirmaSelect ? "Kayıtlı/İstekli firmalardan seçim yapın" : "Kayıtlı personellerden seçim yapın"}
             >
-              <option value="">{isFirmaSelect ? "🏢 Firma Seç..." : "👤 Personel Seç..."}</option>
+              <option value="">{isFirmaSelect ? "🏢 Firma Seç... (Seçim Yok / Null)" : "👤 Personel Seç..."}</option>
               {isFirmaSelect
                 ? validFirmaList.map((f: any, idx: number) => (
                     <option key={f.id || idx} value={String(f.id || f.unvan)}>
-                      {f.unvan}
+                      {f.label || f.unvan}
                     </option>
                   ))
                 : personelList.map((p: any) => (

@@ -69,18 +69,33 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     )
     : false;
 
-  const isV2 = previewData?.dosyaAdi &&
-    [
-      "ihtiyac-listesi",
-      "ihtiyac-talep-formu",
-      "harcama-talimati",
-      "harcama-pusulasi",
-      "luzum-muzekkeresi",
-      "luzum-muzekkeresi-onay-eki",
-      "luzum-muzekkeresi-teslim-tesellum",
-      "komisyon-gorevlendirme-onayi",
-      "komisyon-gorevlendirme-onayi-eki",
-    ].includes(previewData.dosyaAdi.replace(".html", ""));
+  const isV2 = Boolean(
+    previewData?.dosyaAdi &&
+      [
+        "ihtiyac-listesi",
+        "ihtiyaclistesi",
+        "ihtiyac-talep-formu",
+        "ihtiyactalepformu",
+        "harcama-talimati",
+        "harcamatalimati",
+        "harcama-pusulasi",
+        "harcamapusulasi",
+        "luzum-muzekkeresi",
+        "luzummuzekkeresi",
+        "luzum-muzekkeresi-onay-eki",
+        "luzummuzekkeresionayeki",
+        "luzum-muzekkeresi-teslim-tesellum",
+        "luzummuzekkeresiteslimtesellum",
+        "komisyon-gorevlendirme-onayi",
+        "komisyongorevlendirmeonayi",
+        "komisyon-gorevlendirme-onayi-eki",
+        "komisyongorevlendirmeonayieki",
+      ].some((name) =>
+        previewData.dosyaAdi?.toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .includes(name.replace(/[^a-z0-9]/g, ""))
+      )
+  );
 
   return (
     <SubScreen
@@ -114,6 +129,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
               documentId={previewData.dosyaAdi
                 ? previewData.dosyaAdi.replace(".html", "")
                 : ""}
+              dosyaId={activeDosyaId || undefined}
               onClose={() => setPreviewModalOpen(false)}
               isModal={true}
             />

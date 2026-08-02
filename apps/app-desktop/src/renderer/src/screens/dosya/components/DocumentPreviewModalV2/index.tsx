@@ -34,6 +34,8 @@ import { getInstitutionSuffixes } from "../../../../utils/kurumHelper";
 interface DocumentPreviewModalV2Props {
   isOpen: boolean;
   documentId: string | null;
+  dosyaId?: number | null;
+  invitedFirms?: any[];
   onClose: () => void;
   isModal?: boolean;
   backLabel?: string;
@@ -63,25 +65,34 @@ const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
 };
 
 class TemplateErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback: React.ReactNode },
+  { children: React.ReactNode; fallback?: React.ReactNode },
   { hasError: boolean }
 > {
-  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+  constructor(
+    props: { children: React.ReactNode; fallback?: React.ReactNode },
+  ) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): { hasError: boolean } {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch(error: any, errorInfo: any) {
     console.error("Template rendering error:", error, errorInfo);
   }
 
-  render(): React.ReactNode {
+  render() {
     if (this.state.hasError) {
-      return this.props.fallback;
+      return (
+        this.props.fallback || (
+          <div className="p-8 text-center text-amber-700 bg-amber-50 rounded-xl border border-amber-200 m-4">
+            ⚠️ Belge şablonu çizilirken bir hata oluştu. Değişkenleri kontrol
+            edip tekrar deneyiniz.
+          </div>
+        )
+      );
     }
     return this.props.children;
   }
@@ -90,10 +101,15 @@ class TemplateErrorBoundary extends React.Component<
 export function DocumentPreviewModalV2({
   isOpen,
   documentId,
+  dosyaId: propDosyaId,
+  invitedFirms: propInvitedFirms,
   onClose,
   isModal = false,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
-  const { activeDosyaId } = useWorkspaceStore();
+  const { activeDosyaId: storeDosyaId } = useWorkspaceStore();
+  const activeDosyaId = propDosyaId ||
+    storeDosyaId ||
+    Number(sessionStorage.getItem("workspace_dosya_id") || 0);
   const {
     showLogoLeft,
     showLogoRight,
@@ -171,7 +187,7 @@ export function DocumentPreviewModalV2({
 
   // 2. Fetch data from DB & personnel list on open
   useEffect(() => {
-    if (!isOpen || !activeDosyaId) return;
+    if (!isOpen) return;
 
     const loadInitialData = async (): Promise<void> => {
       try {
@@ -184,26 +200,42 @@ export function DocumentPreviewModalV2({
           setPersonelListesi(personelRes.data);
         }
         let fileFirms: any[] = [];
-        if (activeDosyaId) {
-          const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            `SELECT 
-               df.id as temin_firma_id,
-               COALESCE(f.id, df.firma_id, df.id) as id,
-               COALESCE(NULLIF(f.unvan, ''), NULLIF(df.unvan, '')) as unvan,
-               COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
-               COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
-               COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
-             FROM DATA_TeminFirma df
-             LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
-             WHERE df.temin_dosya_id = ?
-             ORDER BY df.id ASC`,
-            [activeDosyaId],
-          );
-          if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
-            fileFirms = dosyaFirmaRes.data.filter(
-              (f: any) => f.unvan && String(f.unvan).trim() !== "",
+          if (propInvitedFirms && propInvitedFirms.length > 0) {
+            fileFirms = propInvitedFirms.map((f: any) => ({
+              temin_firma_id: f.temin_firma_id || f.id,
+              id: f.id || f.firma_id || f.temin_firma_id,
+              unvan: f.unvan || f.firma_adi || "İstekli Firma",
+              yetkili_ad_soyad: f.yetkili_ad_soyad || "",
+              telefon: f.telefon || "",
+              eposta: f.eposta || f.email || "",
+            }));
+          } else if (activeDosyaId) {
+            const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
+              "db:query",
+              `SELECT 
+                 df.id as temin_firma_id,
+                 COALESCE(f.id, df.firma_id, df.id) as id,
+                 COALESCE(
+                   NULLIF(df.unvan, ''),
+                   NULLIF(f.unvan, ''),
+                   NULLIF(f.firma_adi, ''),
+                   NULLIF(df.firma_adi, ''),
+                   'İstekli Firma'
+                 ) as unvan,
+                 COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+                 COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
+                 COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
+               FROM DATA_TeminFirma df
+               LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
+               WHERE df.temin_dosya_id = ?
+               ORDER BY df.id ASC`,
+              [activeDosyaId],
             );
+            if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
+              fileFirms = dosyaFirmaRes.data.filter(
+                (f: any) => f.unvan && String(f.unvan).trim() !== "",
+              );
+            }
           }
 
           // Calculate totals for each firm in activeDosyaId (exact logic as PricesSummaryDashboard)
@@ -249,7 +281,8 @@ export function DocumentPreviewModalV2({
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               });
-              f.label = `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
+              f.label =
+                `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
             } else if (f.total > 0) {
               const formattedTotal = f.total.toLocaleString("tr-TR", {
                 minimumFractionDigits: 2,
@@ -263,14 +296,19 @@ export function DocumentPreviewModalV2({
 
           // Sort so winning firm comes first
           fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0));
-        }
 
         if (fileFirms.length === 0) {
           const allTeminFirmsRes = await window.electron.ipcRenderer.invoke(
             "db:query",
             `SELECT 
                COALESCE(f.id, df.firma_id, df.id) as id,
-               COALESCE(NULLIF(f.unvan, ''), NULLIF(df.unvan, '')) as unvan,
+               COALESCE(
+                 NULLIF(df.unvan, ''),
+                 NULLIF(f.unvan, ''),
+                 NULLIF(f.firma_adi, ''),
+                 NULLIF(df.firma_adi, ''),
+                 'İstekli Firma'
+               ) as unvan,
                COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
                COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
                COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
@@ -328,7 +366,7 @@ export function DocumentPreviewModalV2({
         // Resolve using the pre-defined mapping
         const resolved = await resolver.resolve(
           mapping,
-          activeDosyaId,
+          activeDosyaId || 0,
         );
 
         // Fetch or load saved snapshot values if exists
@@ -409,13 +447,17 @@ export function DocumentPreviewModalV2({
             kurumlari: customSubInstitutionKurumlari,
           },
         );
+        finalData.firmaListesi = combinedFirms;
         // Pre-populate winner firm (lowest offer) as default teslimEden if not set
         const winnerFirm = fileFirms.find((f: any) => f.isWinner);
         if (winnerFirm) {
           if (!finalData.yukleniciFirma) {
             finalData.yukleniciFirma = winnerFirm.unvan;
           }
-          if (!finalData.teslimEden_0_adSoyad && (!finalData.teslimEdenler || !finalData.teslimEdenler[0]?.adSoyad)) {
+          if (
+            !finalData.teslimEden_0_adSoyad &&
+            (!finalData.teslimEdenler || !finalData.teslimEdenler[0]?.adSoyad)
+          ) {
             finalData.teslimEden_0_adSoyad = winnerFirm.unvan;
             finalData.teslimEden_0_unvan = winnerFirm.yetkili_ad_soyad
               ? `Yetkili: ${winnerFirm.yetkili_ad_soyad}`
@@ -434,6 +476,7 @@ export function DocumentPreviewModalV2({
     isOpen,
     activeDosyaId,
     documentId,
+    propInvitedFirms,
     subInstitutionType,
     customSubInstitutionLabel,
     customSubInstitutionKurumumuz,

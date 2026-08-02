@@ -15,7 +15,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
   },
   isinAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'dosya_adi',
+    sutun: 'konu',
     aciklama: 'İşin adı'
   },
   kurumIci: {
