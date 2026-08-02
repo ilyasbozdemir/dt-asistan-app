@@ -62,6 +62,7 @@ const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
     .KomisyonGorevlendirmeOnayi as TemplateComponentType,
   KomisyonGorevlendirmeOnayiEki: Templates
     .KomisyonGorevlendirmeOnayiEki as TemplateComponentType,
+  HarcamaPusulasi: Templates.HarcamaPusulasi as TemplateComponentType,
 };
 
 class TemplateErrorBoundary extends React.Component<

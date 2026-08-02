@@ -222,6 +222,10 @@ export function PiyasaFiyatArastirmasiDashboard({
         title="Fiyat İstenen Firmaların Seçilmesi"
         firms={formattedFirms}
         columns={firmaColumns}
+        onFiyatGir={() => {
+          setIsFormOpen(true);
+          setActiveFormTab("matrix");
+        }}
         onFirmaEkle={(firma) => {
           if (handleAddSingleFirm) {
             handleAddSingleFirm(firma);

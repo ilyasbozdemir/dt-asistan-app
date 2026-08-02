@@ -13,6 +13,7 @@ export * from "./document/TemplateEditContext";
 export * from "./templates/ihtiyac-listesi";
 export * from "./templates/ihtiyac-talep-formu";
 export * from "./templates/harcama-talimati";
+export * from "./templates/harcama-pusulasi";
 export * from "./templates/luzum-muzekkeresi";
 export * from "./templates/luzum-muzekkeresi-onay-eki";
 export * from "./templates/luzum-muzekkeresi-teslim-tesellum";

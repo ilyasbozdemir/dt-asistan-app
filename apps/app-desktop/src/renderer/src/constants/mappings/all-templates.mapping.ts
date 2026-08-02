@@ -667,6 +667,16 @@ export const HakedisRaporuMapping: ProcessMapping = {
 // 23. Harcama Pusulası
 // ===========================================================
 export const HarcamaPusulasiMapping: ProcessMapping = {
+  evrakSayisi: {
+    formul:
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+    aciklama: 'DETSİS No - Yıl - Dosya No'
+  },
+  tarih: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onay_tarihi',
+    aciklama: 'Onay Tarihi'
+  },
   idareAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'İdare Adı' },
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   alimTuru: { tablo: 'DATA_TeminDosyasi', sutun: 'alim_turu', aciklama: 'Alım Türü' },

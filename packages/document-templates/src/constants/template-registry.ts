@@ -49,4 +49,10 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     category: "1-ihtiyac-tespiti-ve-baslangic",
     supportsOlur: false,
   },
+  {
+    id: "harcama-pusulasi",
+    name: "HarcamaPusulasi",
+    category: "4-kabul-ve-odeme-islemleri",
+    supportsOlur: false,
+  },
 ];

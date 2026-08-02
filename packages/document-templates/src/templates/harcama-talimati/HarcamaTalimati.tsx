@@ -1,6 +1,7 @@
 import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { EditableField } from "../../document/EditableField";
+import { DateEditableField, PersonelCard } from "../../document/ApprovalSignature";
 import { HarcamaTalimatiType } from "./HarcamaTalimati.schema";
 
 interface HarcamaTalimatiProps {
@@ -67,10 +68,10 @@ export function HarcamaTalimati({
             {/* Sayı and Tarih */}
             <tr>
               <td style={{ border: "1px solid #000", width: "50%", fontWeight: "bold", padding: "6px 8px" }}>
-                Sayı: {data.evrakSayisi || "-"}
+                Sayı: <EditableField name="evrakSayisi" value={data.evrakSayisi} placeholder="E-00000000-934.01-0001" />
               </td>
               <td style={{ border: "1px solid #000", width: "50%", fontWeight: "bold", textAlign: "right", padding: "6px 8px" }}>
-                Tarih: {data.tarih || "-"}
+                Tarih: <DateEditableField name="tarih" value={data.tarih} placeholder="GG.AA.YYYY" />
               </td>
             </tr>
 
@@ -314,10 +315,18 @@ export function HarcamaTalimati({
               >
                 <div>
                   Teklif Eden Yetkili<br />
-                  {data.sunumTarihi || data.tarih || ""}<br /><br /><br />
-                  <strong>{data.hazirlayanPersonelAdi || ""}</strong><br />
-                  {data.hazirlayanPersonelUnvan || ""}
+                  <DateEditableField name="sunumTarihi" value={data.sunumTarihi || data.tarih} placeholder="GG.AA.YYYY" />
                 </div>
+                <PersonelCard
+                  adSoyad={data.hazirlayanPersonelAdi}
+                  unvan={data.hazirlayanPersonelUnvan}
+                  nameField="hazirlayanPersonelAdi"
+                  unvanField="hazirlayanPersonelUnvan"
+                  placeholderName="Hazırlayan Adı Soyadı"
+                  placeholderUnvan="Unvanı"
+                  marginTop={10}
+                  marginBottom={0}
+                />
               </td>
               <td
                 style={{
@@ -331,10 +340,18 @@ export function HarcamaTalimati({
               >
                 <div>
                   Harcama Yetkilisi<br />
-                  {data.olurTarihi || data.onayTarihi || data.tarih || ""}<br /><br /><br />
-                  <strong>{data.onaylayanPersonelAdi || ""}</strong><br />
-                  {data.onaylayanPersonelUnvan || ""}
+                  <DateEditableField name="olurTarihi" value={data.olurTarihi || data.onayTarihi || data.tarih} placeholder="GG.AA.YYYY" />
                 </div>
+                <PersonelCard
+                  adSoyad={data.onaylayanPersonelAdi}
+                  unvan={data.onaylayanPersonelUnvan}
+                  nameField="onaylayanPersonelAdi"
+                  unvanField="onaylayanPersonelUnvan"
+                  placeholderName="Onaylayan Adı Soyadı"
+                  placeholderUnvan="Unvanı"
+                  marginTop={10}
+                  marginBottom={0}
+                />
               </td>
             </tr>
           </tbody>
