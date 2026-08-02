@@ -134,23 +134,28 @@ export function PiyasaFiyatArastirmasiDashboard({
 
   const mappedBelgeler = useMemo(() => {
     if (!stageDocs) return [];
-    
+
     // Group and sort by id to determine siraNo sequentially
     const sortedDocs = [...stageDocs].sort((a, b) => a.id - b.id);
     const counts: Record<string, number> = {};
-    
+
     return sortedDocs.map((doc) => {
-      const isMaliyet = doc.belge_adi === 'Yaklaşık Maliyet Cetveli' || doc.belge_adi?.toLowerCase().includes('maliyet');
-      const typeId = isMaliyet ? 'yaklasik-maliyet' : 'piyasa-fiyat-arastirmasi';
-      
+      const isMaliyet = doc.belge_adi === "Yaklaşık Maliyet Cetveli" ||
+        doc.belge_adi?.toLowerCase().includes("maliyet");
+      const typeId = isMaliyet
+        ? "yaklasik-maliyet"
+        : "piyasa-fiyat-arastirmasi";
+
       counts[typeId] = (counts[typeId] || 0) + 1;
-      
+
       return {
         id: doc.id,
         belgeTipiId: typeId,
         belgeAdi: doc.belge_adi,
-        belgeTarihi: doc.belge_tarihi ? formatDateString(doc.belge_tarihi) || doc.belge_tarihi : '-',
-        durum: 'Tamamlandı' as const,
+        belgeTarihi: doc.belge_tarihi
+          ? formatDateString(doc.belge_tarihi) || doc.belge_tarihi
+          : "-",
+        durum: "Tamamlandı" as const,
         siraNo: counts[typeId],
         data: doc,
       };
@@ -171,12 +176,12 @@ export function PiyasaFiyatArastirmasiDashboard({
         try {
           snapshotCtx = JSON.parse(originalDoc.veri_json);
         } catch (e) {
-          console.error('Error parsing saved document JSON:', e);
+          console.error("Error parsing saved document JSON:", e);
         }
       }
       handleOpenPreviewForSablon(targetSablon, targetSablon.ad, snapshotCtx);
     } else {
-      alert('Bu belge için uygun şablon bulunamadı.');
+      alert("Bu belge için uygun şablon bulunamadı.");
     }
   };
 
@@ -192,23 +197,22 @@ export function PiyasaFiyatArastirmasiDashboard({
   );
 
   const formattedFirms = useMemo(() => {
-    return invitedFirms.map((pf) => {
-      const isInvited = invitedFirms.some(
+    if (!allPoolFirms) return [];
+    return allPoolFirms.map((pf) => {
+      const existingInvited = invitedFirms?.find(
         (ifrm) => ifrm.firma_id === pf.id,
       );
       return {
-        id: pf.id,
-        firma_id: pf.firma_id,
-        unvan: pf.unvan,
-        vergi_no: pf.vergi_no || "-",
+        ...pf,
+        temin_firma_id: existingInvited?.id,
+        isAdded: Boolean(existingInvited),
+        sehir: pf.il || (pf as any).sehir || "-",
         telefon: pf.telefon || "-",
-        email: pf.email || pf.eposta || "-",
-        sehir: pf.il || "-",
-        temin_firma_id: pf.id,
-        isInvited,
+        email: pf.email || (pf as any).eposta || "-",
+        vergi_no: pf.vergi_no || "-",
       };
     });
-  }, [invitedFirms]);
+  }, [allPoolFirms, invitedFirms]);
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
@@ -234,193 +238,6 @@ export function PiyasaFiyatArastirmasiDashboard({
           }
         }}
       />
-      <BelgeListesi
-        title="Hazırlanan Tutanaklar"
-        belgeler={mappedBelgeler}
-        viewMode={docViewMode}
-        onViewModeChange={changeDocViewMode}
-        onView={handleOpenBelgePreview}
-        onEdit={handleOpenBelgePreview}
-        onDelete={(belge) => {
-          if (handleDeleteDocument) {
-            handleDeleteDocument(belge.id);
-          }
-        }}
-        onCreateBelge={(type) => {
-          if (type === "yaklasik-maliyet") {
-            handleNewDocument("maliyet");
-          } else {
-            handleNewDocument("tutanak");
-          }
-        }}
-      />
-
-      <div className="relative z-40 flex flex-wrap items-center justify-between gap-4 p-1.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
-        {/* Left side: View switch tabs */}
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/40 w-fit shrink-0">
-          <button
-            type="button"
-            onClick={() => setDashboardViewMode("documents")}
-            className={cn(
-              "flex items-center gap-1.5 py-1.5 px-3 text-[11px] font-black rounded-lg transition-all cursor-pointer border-0",
-              dashboardViewMode === "documents"
-                ? "bg-white dark:bg-slate-900 text-slate-855 dark:text-slate-100 shadow-3xs"
-                : "text-slate-500 hover:text-slate-755 dark:hover:text-slate-355 bg-transparent",
-            )}
-          >
-            <FileCheck2 className="w-3.5 h-3.5" />
-            Belgeler & İşlemler
-          </button>
-          <button
-            type="button"
-            onClick={() => setDashboardViewMode("prices")}
-            className={cn(
-              "flex items-center gap-1.5 py-1.5 px-3 text-[11px] font-black rounded-lg transition-all cursor-pointer border-0",
-              dashboardViewMode === "prices"
-                ? "bg-white dark:bg-slate-900 text-slate-855 dark:text-slate-100 shadow-3xs"
-                : "text-slate-500 hover:text-slate-755 dark:hover:text-slate-355 bg-transparent",
-            )}
-          >
-            <TrendingUp className="w-3.5 h-3.5" />
-            Fiyat & Teklif Özeti
-          </button>
-        </div>
-
-        {/* Right side: Primary CTA and layout controls */}
-        <div className="flex flex-wrap items-center justify-end gap-3 w-fit">
-          {/* Separate Actions */}
-          <button
-            onClick={() => handleNewDocument("maliyet")}
-            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white border border-blue-400/30 dark:border-blue-500/40 overflow-hidden"
-            title="Yeni yaklaşık maliyet hesap cetveli oluşturma ve teklif/proforma giriş alanı"
-          >
-            <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
-              <Calculator className="w-3.5 h-3.5" />
-            </span>
-            <span className="tracking-wide">Yeni YMHC Oluştur</span>
-          </button>
-
-          <button
-            onClick={() => handleNewDocument("tutanak")}
-            className="group relative inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-300 h-10 cursor-pointer shrink-0 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 bg-linear-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/30 dark:border-emerald-500/40 overflow-hidden"
-            title="Yeni piyasa fiyat araştırma tutanağı (PFAT) oluşturma ve teklif/proforma giriş alanı"
-          >
-            <span className="p-1 rounded-lg bg-white/20 text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 flex items-center justify-center">
-              <FileSignature className="w-3.5 h-3.5" />
-            </span>
-            <span className="tracking-wide">Yeni PFAT Oluştur</span>
-          </button>
-
-          {dashboardViewMode === "documents" && (
-            <>
-              {stageDocs.length > 0 && (
-                <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/40 shrink-0 h-10">
-                  <button
-                    type="button"
-                    title="Izgara Görünümü"
-                    onClick={() => changeDocViewMode("grid")}
-                    className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
-                      docViewMode === "grid"
-                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
-                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
-                    )}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Liste Görünümü"
-                    onClick={() => changeDocViewMode("list")}
-                    className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
-                      docViewMode === "list"
-                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
-                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
-                    )}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Tablo Görünümü"
-                    onClick={() => changeDocViewMode("table")}
-                    className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg transition-all cursor-pointer border-0 bg-transparent",
-                      docViewMode === "table"
-                        ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-3xs"
-                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-400",
-                    )}
-                  >
-                    <Table className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-
-              {!disableDocumentGuidance && stageSablons.length > 0 && (
-                <PrintDropdownButtonV2
-                  kategori="2-piyasa-fiyat-arastirmasi"
-                  sablons={sablons}
-                  overrideSablons={stageSablons}
-                  activeStarredDocs={activeStarredDocs || []}
-                  ciktiLoading={ciktiLoading}
-                  handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-                  quickPrint={quickPrint}
-                  quickExport={quickExport}
-                  quickOpenExternal={quickOpenExternal}
-                  isSablonDisabled={isSablonDisabled}
-                  buttonHeightClass="h-10"
-                  label="Belgeleri Yazdır"
-                />
-              )}
-
-              <MalzemeTabloPopover
-                step={2}
-                onIstekliFirmaSettings={() => {
-                  setIsFormOpen(true);
-                  setActiveFormTab("firms");
-                }}
-                disableDocumentGuidance={disableDocumentGuidance}
-                onGorevlendirmeOnayi={() =>
-                  handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
-                onGorevlendirmeOnayEki={() =>
-                  handleOpenSablonByDosyaAdi(
-                    "komisyon-gorevlendirme-onayi-eki",
-                  )}
-                onFiyatArastirmaKomisyonu={() =>
-                  handleOpenSablonByDosyaAdi("fiyat-arastirma-komisyonu")}
-                onPiyasaArastirmaGorevlendirmesi={() =>
-                  handleOpenSablonByDosyaAdi(
-                    "piyasa-fiyat-arastirma-gorevlendirmesi",
-                  )}
-                onPiyasaArastirmaTutanagi={() =>
-                  handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
-                onYaklasikMaliyetHesapCetveli={() =>
-                  handleOpenSablonByDosyaAdi("yaklasik-maliyet-cetveli")}
-                onSonAlimCetveli={() =>
-                  handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
-                onPiyasaSonucCetveli={() =>
-                  handleOpenSablonByDosyaAdi(
-                    "piyasa-fiyat-arastirmasi-sonuc-cetveli",
-                  )}
-                onTeklifIstemeMektubu={() =>
-                  handleOpenSablonByDosyaAdi("teklif-isteme-mektubu")}
-                onTeklifMektubuDagitim={() =>
-                  handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim")}
-                onTeklifMektubuKarma={() =>
-                  handleOpenSablonByDosyaAdi("teklif-mektubu-dagitim-karma")}
-                onFirmalarTeklifCetveli={() =>
-                  handleOpenSablonByDosyaAdi("firmalar-teklif-cetveli")}
-                onYasaklilikSorgulama={() =>
-                  handleOpenSablonByDosyaAdi("yasaklilik-sorgulama-tutanagi")}
-                onOnayBelgesi={() =>
-                  handleOpenSablonByDosyaAdi("dogrudan-temin-onay-belgesi")}
-              />
-            </>
-          )}
-        </div>
-      </div>
-
       {dashboardViewMode === "prices"
         ? (
           <PricesSummaryDashboard
@@ -434,18 +251,40 @@ export function PiyasaFiyatArastirmasiDashboard({
           />
         )
         : (
-          <DocumentsDashboard
-            stageDocs={stageDocs}
-            docViewMode={docViewMode}
-            sablons={sablons}
-            disableDocumentGuidance={disableDocumentGuidance}
-            activeActionDropdown={activeActionDropdown}
-            setActiveActionDropdown={setActiveActionDropdown}
-            handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-            quickPrint={quickPrint}
-            quickOpenExternal={quickOpenExternal}
-            handleUpdateDocumentDate={handleUpdateDocumentDate}
-          />
+          <>
+            <BelgeListesi
+              title="Hazırlanan Tutanaklar"
+              belgeler={mappedBelgeler}
+              viewMode={docViewMode}
+              onViewModeChange={changeDocViewMode}
+              onView={handleOpenBelgePreview}
+              onEdit={handleOpenBelgePreview}
+              onDelete={(belge) => {
+                if (handleDeleteDocument) {
+                  handleDeleteDocument(belge.id);
+                }
+              }}
+              onCreateBelge={(type) => {
+                if (type === "yaklasik-maliyet") {
+                  handleNewDocument("maliyet");
+                } else {
+                  handleNewDocument("tutanak");
+                }
+              }}
+            />
+            <DocumentsDashboard
+              stageDocs={stageDocs}
+              docViewMode={docViewMode}
+              sablons={sablons}
+              disableDocumentGuidance={disableDocumentGuidance}
+              activeActionDropdown={activeActionDropdown}
+              setActiveActionDropdown={setActiveActionDropdown}
+              handleOpenPreviewForSablon={handleOpenPreviewForSablon}
+              quickPrint={quickPrint}
+              quickOpenExternal={quickOpenExternal}
+              handleUpdateDocumentDate={handleUpdateDocumentDate}
+            />
+          </>
         )}
     </div>
   );

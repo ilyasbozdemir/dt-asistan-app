@@ -176,14 +176,15 @@ export function usePiyasaFiyatArastirmasiLogic() {
            COALESCE(
              NULLIF(df.unvan, ''),
              NULLIF(f.unvan, ''),
-             NULLIF(f.firma_adi, ''),
-             NULLIF(df.firma_adi, ''),
              'İstekli Firma'
            ) as unvan,
-           COALESCE(NULLIF(df.yetkili_ad_soyad, ''), NULLIF(f.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+           COALESCE(
+             NULLIF(df.ilgili_kisi, ''),
+             NULLIF(f.ilgili_adi, '')
+           ) as yetkili_ad_soyad,
            COALESCE(NULLIF(df.telefon, ''), NULLIF(f.telefon, '')) as telefon,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as email,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as eposta
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.email, '')) as email,
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.email, '')) as eposta
          FROM DATA_TeminFirma df
          LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
          WHERE df.temin_dosya_id = ? AND df.aktif_mi = 1
@@ -438,14 +439,15 @@ export function usePiyasaFiyatArastirmasiLogic() {
            COALESCE(
              NULLIF(df.unvan, ''),
              NULLIF(f.unvan, ''),
-             NULLIF(f.firma_adi, ''),
-             NULLIF(df.firma_adi, ''),
              'İstekli Firma'
            ) as unvan,
-           COALESCE(NULLIF(df.yetkili_ad_soyad, ''), NULLIF(f.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+           COALESCE(
+             NULLIF(df.ilgili_kisi, ''),
+             NULLIF(f.ilgili_adi, '')
+           ) as yetkili_ad_soyad,
            COALESCE(NULLIF(df.telefon, ''), NULLIF(f.telefon, '')) as telefon,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as eposta,
-           COALESCE(NULLIF(df.email, ''), NULLIF(f.eposta, '')) as email
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.email, '')) as eposta,
+           COALESCE(NULLIF(df.email, ''), NULLIF(f.email, '')) as email
          FROM DATA_TeminFirma df
          LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
          WHERE df.temin_dosya_id = ? AND df.aktif_mi = 1
