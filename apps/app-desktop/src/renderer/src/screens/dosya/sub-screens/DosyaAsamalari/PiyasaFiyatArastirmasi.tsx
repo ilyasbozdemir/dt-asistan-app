@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import { PackageSearch } from "lucide-react";
-import { SubScreen } from "../../SubScreens.screen";
-import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
-import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
-import { normalizeForMatch } from "./useDosyaAsamasiSablons";
-import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
-import { PiyasaFiyatArastirmasiDashboard } from "./components/PiyasaFiyatArastirmasiDashboard";
-import { PiyasaFiyatArastirmasiForm } from "./components/PiyasaFiyatArastirmasiForm";
-import { usePiyasaFiyatArastirmasiLogic } from "./hooks/usePiyasaFiyatArastirmasi";
-import { useSettingsStore } from "../../../../store/settingsStore";
-import { useWorkspaceStore } from "../../../../store/workspaceStore";
+import React, { useState } from 'react'
+import { PackageSearch } from 'lucide-react'
+import { SubScreen } from '../../SubScreens.screen'
+import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
+import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
+import { normalizeForMatch } from './useDosyaAsamasiSablons'
+import { FirmaSecmeModali } from './components/FirmaSecmeModali'
+import { PiyasaFiyatArastirmasiDashboard } from './components/PiyasaFiyatArastirmasiDashboard'
+import { PiyasaFiyatArastirmasiForm } from './components/PiyasaFiyatArastirmasiForm'
+import { usePiyasaFiyatArastirmasiLogic } from './hooks/usePiyasaFiyatArastirmasi'
+import { useSettingsStore } from '../../../../store/settingsStore'
+import { useWorkspaceStore } from '../../../../store/workspaceStore'
 
 export function PiyasaFiyatArastirmasi(): React.JSX.Element {
-  const { activeDosyaId } = useWorkspaceStore();
-  const logic = usePiyasaFiyatArastirmasiLogic();
+  const { activeDosyaId } = useWorkspaceStore()
+  const logic = usePiyasaFiyatArastirmasiLogic()
   const {
     sablonsContext: {
       masterHtml,
@@ -38,7 +38,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       handleOpenPreviewForSablon,
       sablons,
       ciktiLoading,
-      isSablonDisabled,
+      isSablonDisabled
     },
     invitedFirms,
     allPoolFirms,
@@ -81,75 +81,70 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     maliyetCetveliTarihi,
     belgeleriKaydet,
     setBelgeleriKaydet,
-    handleUpdateDocumentDate,
-  } = logic;
+    handleUpdateDocumentDate
+  } = logic
 
-  const [activeFormTab, setActiveFormTab] = useState<"firms" | "matrix">(() => {
-    return invitedFirms.length > 0 ? "matrix" : "firms";
-  });
-  const [activeActionDropdown, setActiveActionDropdown] = useState<
-    string | null
-  >(null);
-  const [isFormFullscreen, setIsFormFullscreen] = useState<boolean>(false);
-  const [dashboardViewMode, setDashboardViewMode] = useState<
-    "documents" | "prices"
-  >("documents");
-  const [docViewMode, setDocViewMode] = useState<"grid" | "list" | "table">(
-    () => {
-      try {
-        return (localStorage.getItem("dta_doc_view_mode") as any) || "grid";
-      } catch {
-        return "grid";
-      }
-    },
-  );
-
-  const changeDocViewMode = (mode: "grid" | "list" | "table") => {
-    setDocViewMode(mode);
+  const [activeFormTab, setActiveFormTab] = useState<'firms' | 'matrix'>(() => {
+    return invitedFirms.length > 0 ? 'matrix' : 'firms'
+  })
+  const [activeActionDropdown, setActiveActionDropdown] = useState<string | null>(null)
+  const [isFormFullscreen, setIsFormFullscreen] = useState<boolean>(false)
+  const [dashboardViewMode, setDashboardViewMode] = useState<'documents' | 'prices'>('documents')
+  const [docViewMode, setDocViewMode] = useState<'grid' | 'list' | 'table'>(() => {
     try {
-      localStorage.setItem("dta_doc_view_mode", mode);
-    } catch (e) {
-      console.error(e);
+      return (localStorage.getItem('dta_doc_view_mode') as any) || 'grid'
+    } catch {
+      return 'grid'
     }
-  };
+  })
 
-  const stageDocs = savedDocuments;
-  const { disableDocumentGuidance } = useSettingsStore();
+  const changeDocViewMode = (mode: 'grid' | 'list' | 'table') => {
+    setDocViewMode(mode)
+    try {
+      localStorage.setItem('dta_doc_view_mode', mode)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const stageDocs = savedDocuments
+  const { disableDocumentGuidance } = useSettingsStore()
 
   const isStarred = previewData?.title
     ? activeStarredDocs.some(
-      (d) =>
-        normalizeForMatch(d) === normalizeForMatch(previewData.title || ""),
-    )
-    : false;
+        (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
+      )
+    : false
 
   const isV2 = Boolean(
     previewData?.dosyaAdi &&
       [
-        "ihtiyac-listesi",
-        "ihtiyaclistesi",
-        "ihtiyac-talep-formu",
-        "ihtiyactalepformu",
-        "harcama-talimati",
-        "harcamatalimati",
-        "harcama-pusulasi",
-        "harcamapusulasi",
-        "luzum-muzekkeresi",
-        "luzummuzekkeresi",
-        "luzum-muzekkeresi-onay-eki",
-        "luzummuzekkeresionayeki",
-        "luzum-muzekkeresi-teslim-tesellum",
-        "luzummuzekkeresiteslimtesellum",
-        "komisyon-gorevlendirme-onayi",
-        "komisyongorevlendirmeonayi",
-        "komisyon-gorevlendirme-onayi-eki",
-        "komisyongorevlendirmeonayieki",
-      ].some((name) =>
-        previewData.dosyaAdi?.toLowerCase()
-          .replace(/[^a-z0-9]/g, "")
-          .includes(name.replace(/[^a-z0-9]/g, ""))
-      ),
-  );
+        'ihtiyac-listesi',
+        'ihtiyaclistesi',
+        'ihtiyac-talep-formu',
+        'ihtiyactalepformu',
+        'harcama-talimati',
+        'harcamatalimati',
+        'harcama-pusulasi',
+        'harcamapusulasi',
+        'luzum-muzekkeresi',
+        'luzummuzekkeresi',
+        'luzum-muzekkeresi-onay-eki',
+        'luzummuzekkeresionayeki',
+        'luzum-muzekkeresi-teslim-tesellum',
+        'luzummuzekkeresiteslimtesellum',
+        'komisyon-gorevlendirme-onayi',
+        'komisyongorevlendirmeonayi',
+        'komisyon-gorevlendirme-onayi-eki',
+        'komisyongorevlendirmeonayieki'
+      ].some(
+        (name) =>
+          previewData.dosyaAdi
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+            .includes(name.replace(/[^a-z0-9]/g, ''))
+      )
+  )
 
   return (
     <SubScreen
@@ -157,73 +152,72 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       icon={PackageSearch}
       description="Tedarikçi teklif mektupları hazırlayabilir, toplanan teklifleri fiyat araştırma tablosuna girerek en uygun teklifleri ve yaklaşık maliyeti belirleyebilirsiniz."
     >
-      {!isFormOpen
-        ? (
-          <PiyasaFiyatArastirmasiDashboard
-            setIsFormOpen={setIsFormOpen}
-            handleNewDocument={handleNewDocument}
-            setActiveFormTab={setActiveFormTab}
-            dashboardViewMode={dashboardViewMode}
-            setDashboardViewMode={setDashboardViewMode}
-            docViewMode={docViewMode}
-            changeDocViewMode={changeDocViewMode}
-            activeActionDropdown={activeActionDropdown}
-            setActiveActionDropdown={setActiveActionDropdown}
-            stageDocs={stageDocs}
-            stageSablons={stageSablons}
-            disableDocumentGuidance={disableDocumentGuidance}
-            invitedFirms={invitedFirms}
-            allPoolFirms={allPoolFirms}
-            handleAddSingleFirm={handleAddSingleFirm}
-            handleRemoveFirm={handleRemoveFirm}
-            items={items}
-            bids={bids}
-            sablons={sablons}
-            activeStarredDocs={activeStarredDocs}
-            ciktiLoading={ciktiLoading}
-            handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-            quickPrint={quickPrint}
-            quickExport={quickExport}
-            quickOpenExternal={quickOpenExternal}
-            isSablonDisabled={isSablonDisabled}
-            handleUpdateDocumentDate={handleUpdateDocumentDate}
-          />
-        )
-        : (
-          <PiyasaFiyatArastirmasiForm
-            formMode={formMode}
-            setIsFormOpen={setIsFormOpen}
-            activeFormTab={activeFormTab}
-            setActiveFormTab={setActiveFormTab}
-            hesaplamaEsasi={hesaplamaEsasi}
-            invitedFirms={invitedFirms}
-            items={items}
-            bids={bids}
-            getEstimatedCostTotal={getEstimatedCostTotal}
-            handleSaveToDosya={handleSaveToDosya}
-            maliyetCetveliTarihi={maliyetCetveliTarihi}
-            setMaliyetCetveliTarihi={setMaliyetCetveliTarihi}
-            tutanakTarihi={tutanakTarihi}
-            setTutanakTarihi={setTutanakTarihi}
-            syncTutanak={syncTutanak}
-            setSyncTutanak={setSyncTutanak}
-            setLowestFirmAsWinner={setLowestFirmAsWinner}
-            setSetLowestFirmAsWinner={setSetLowestFirmAsWinner}
-            manualWinnerFirmaId={manualWinnerFirmaId}
-            setManualWinnerFirmaId={setManualWinnerFirmaId}
-            belgeleriKaydet={belgeleriKaydet}
-            setBelgeleriKaydet={setBelgeleriKaydet}
-            isEditingFirms={isEditingFirms}
-            setIsEditingFirms={setIsEditingFirms}
-            setIsFirmModalOpen={setIsFirmModalOpen}
-            lowestTotalFirmaId={lowestTotalFirmaId}
-            handleRemoveFirm={handleRemoveFirm}
-            getLowestBidInfo={getLowestBidInfo}
-            getAverageBid={getAverageBid}
-            handlePriceChange={handlePriceChange}
-            isFormFullscreen={isFormFullscreen}
-          />
-        )}
+      {!isFormOpen ? (
+        <PiyasaFiyatArastirmasiDashboard
+          setIsFormOpen={setIsFormOpen}
+          handleNewDocument={handleNewDocument}
+          setActiveFormTab={setActiveFormTab}
+          dashboardViewMode={dashboardViewMode}
+          setDashboardViewMode={setDashboardViewMode}
+          docViewMode={docViewMode}
+          changeDocViewMode={changeDocViewMode}
+          activeActionDropdown={activeActionDropdown}
+          setActiveActionDropdown={setActiveActionDropdown}
+          stageDocs={stageDocs}
+          stageSablons={stageSablons}
+          disableDocumentGuidance={disableDocumentGuidance}
+          invitedFirms={invitedFirms}
+          allPoolFirms={allPoolFirms}
+          handleAddSingleFirm={handleAddSingleFirm}
+          handleRemoveFirm={handleRemoveFirm}
+          items={items}
+          bids={bids}
+          sablons={sablons}
+          activeStarredDocs={activeStarredDocs}
+          ciktiLoading={ciktiLoading}
+          handleOpenPreviewForSablon={handleOpenPreviewForSablon}
+          quickPrint={quickPrint}
+          quickExport={quickExport}
+          quickOpenExternal={quickOpenExternal}
+          isSablonDisabled={isSablonDisabled}
+          handleUpdateDocumentDate={handleUpdateDocumentDate}
+          setIsFirmModalOpen={setIsFirmModalOpen}
+        />
+      ) : (
+        <PiyasaFiyatArastirmasiForm
+          formMode={formMode}
+          setIsFormOpen={setIsFormOpen}
+          activeFormTab={activeFormTab}
+          setActiveFormTab={setActiveFormTab}
+          hesaplamaEsasi={hesaplamaEsasi}
+          invitedFirms={invitedFirms}
+          items={items}
+          bids={bids}
+          getEstimatedCostTotal={getEstimatedCostTotal}
+          handleSaveToDosya={handleSaveToDosya}
+          maliyetCetveliTarihi={maliyetCetveliTarihi}
+          setMaliyetCetveliTarihi={setMaliyetCetveliTarihi}
+          tutanakTarihi={tutanakTarihi}
+          setTutanakTarihi={setTutanakTarihi}
+          syncTutanak={syncTutanak}
+          setSyncTutanak={setSyncTutanak}
+          setLowestFirmAsWinner={setLowestFirmAsWinner}
+          setSetLowestFirmAsWinner={setSetLowestFirmAsWinner}
+          manualWinnerFirmaId={manualWinnerFirmaId}
+          setManualWinnerFirmaId={setManualWinnerFirmaId}
+          belgeleriKaydet={belgeleriKaydet}
+          setBelgeleriKaydet={setBelgeleriKaydet}
+          isEditingFirms={isEditingFirms}
+          setIsEditingFirms={setIsEditingFirms}
+          setIsFirmModalOpen={setIsFirmModalOpen}
+          lowestTotalFirmaId={lowestTotalFirmaId}
+          handleRemoveFirm={handleRemoveFirm}
+          getLowestBidInfo={getLowestBidInfo}
+          getAverageBid={getAverageBid}
+          handlePriceChange={handlePriceChange}
+          isFormFullscreen={isFormFullscreen}
+        />
+      )}
 
       {/* İSTEKLİ FİRMALARDAN SEÇ MODALI */}
       <FirmaSecmeModali
@@ -239,46 +233,42 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       />
 
       {/* BELGE ÖNİZLEME MODALI (OVERLAY) */}
-      {previewData && previewModalOpen && (
-        isV2
-          ? (
-            <DocumentPreviewModalV2
-              isOpen={previewModalOpen}
-              documentId={previewData.dosyaAdi
-                ? previewData.dosyaAdi.replace(".html", "")
-                : ""}
-              dosyaId={activeDosyaId || undefined}
-              invitedFirms={logic.invitedFirms}
-              onClose={() => setPreviewModalOpen(false)}
-              isModal={true}
-            />
-          )
-          : (
-            <DocumentPreviewModal
-              isOpen={previewModalOpen}
-              onClose={() => setPreviewModalOpen(false)}
-              title={previewData.title}
-              templateHtml={previewData.templateHtml}
-              masterHtml={masterHtml || ""}
-              baseContext={previewData.snapshotContext ||
-                contextsByPath[previewData.processPath] || dosyaContext}
-              placeholders={placeholders}
-              personelListesi={personelListesi}
-              onPrint={executePrint}
-              onExportPdf={executeExportPdf}
-              onExportDocx={executeExportDocx}
-              onExportUdf={executeExportUdf}
-              isStarred={isStarred}
-              onToggleStar={() =>
-                previewData?.title && toggleStar(previewData.title)}
-              isInline={false}
-              templateTestVerisi={previewData.templateTestVerisi}
-              dosyaAdi={previewData.dosyaAdi}
-              onRefreshSnapshot={refreshSnapshot}
-              onSaveSnapshot={saveSnapshot}
-            />
-          )
-      )}
+      {previewData &&
+        previewModalOpen &&
+        (isV2 ? (
+          <DocumentPreviewModalV2
+            isOpen={previewModalOpen}
+            documentId={previewData.dosyaAdi ? previewData.dosyaAdi.replace('.html', '') : ''}
+            dosyaId={activeDosyaId || undefined}
+            invitedFirms={logic.invitedFirms}
+            onClose={() => setPreviewModalOpen(false)}
+            isModal={true}
+          />
+        ) : (
+          <DocumentPreviewModal
+            isOpen={previewModalOpen}
+            onClose={() => setPreviewModalOpen(false)}
+            title={previewData.title}
+            templateHtml={previewData.templateHtml}
+            masterHtml={masterHtml || ''}
+            baseContext={
+              previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
+            }
+            placeholders={placeholders}
+            personelListesi={personelListesi}
+            onPrint={executePrint}
+            onExportPdf={executeExportPdf}
+            onExportDocx={executeExportDocx}
+            onExportUdf={executeExportUdf}
+            isStarred={isStarred}
+            onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
+            isInline={false}
+            templateTestVerisi={previewData.templateTestVerisi}
+            dosyaAdi={previewData.dosyaAdi}
+            onRefreshSnapshot={refreshSnapshot}
+            onSaveSnapshot={saveSnapshot}
+          />
+        ))}
     </SubScreen>
-  );
+  )
 }

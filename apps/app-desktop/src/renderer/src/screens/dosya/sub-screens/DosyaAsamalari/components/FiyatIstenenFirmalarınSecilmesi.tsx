@@ -53,6 +53,8 @@ export interface FiyatIstenenFirmalarınSecilmesiProps {
   onBirimFiyatArastirmasi?: (firma: Firma) => void
   /** Unvan Kullan toggle callback — per firma güncelleme */
   onUnvanKullanToggle?: (firma: Firma, value: boolean) => void
+  /** Rich Firma Seçme Modalini tetikleme callback */
+  onOpenFirmaSecmeModali?: () => void
 }
 
 /* ─── Firma Seçim Modali ─────────────────────────────────────────── */
@@ -380,7 +382,8 @@ export function FiyatIstenenFirmalarınSecilmesi({
   onFirmaCikar,
   onFiyatPiyasaFormu,
   onBirimFiyatArastirmasi,
-  onUnvanKullanToggle
+  onUnvanKullanToggle,
+  onOpenFirmaSecmeModali
 }: FiyatIstenenFirmalarınSecilmesiProps): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -457,7 +460,13 @@ export function FiyatIstenenFirmalarınSecilmesi({
             <button
               type="button"
               disabled={!canAdd || availableFirms.length === 0}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                if (onOpenFirmaSecmeModali) {
+                  onOpenFirmaSecmeModali()
+                } else {
+                  setIsModalOpen(true)
+                }
+              }}
               title={!canAdd ? `Maksimum ${MAX_FIRMS} firma eklenebilir` : 'Firma ekle'}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-bold transition-colors cursor-pointer border-0 shadow-xs"
             >

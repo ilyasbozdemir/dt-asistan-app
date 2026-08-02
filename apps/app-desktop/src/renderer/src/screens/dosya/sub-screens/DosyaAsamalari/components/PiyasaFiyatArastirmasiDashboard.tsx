@@ -51,6 +51,7 @@ interface PiyasaFiyatArastirmasiDashboardProps {
     newDate: string,
     docName: string,
   ) => void;
+  setIsFirmModalOpen?: (val: boolean) => void;
 }
 
 export function PiyasaFiyatArastirmasiDashboard({
@@ -81,6 +82,7 @@ export function PiyasaFiyatArastirmasiDashboard({
   activeActionDropdown,
   setActiveActionDropdown,
   handleUpdateDocumentDate,
+  setIsFirmModalOpen,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
   const handleOpenSablonByDosyaAdi = (targetKey: string) => {
     if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
@@ -210,6 +212,11 @@ export function PiyasaFiyatArastirmasiDashboard({
         onFirmaCikar={(firma) => {
           if (handleRemoveFirm && (firma as any).temin_firma_id) {
             handleRemoveFirm((firma as any).temin_firma_id);
+          }
+        }}
+        onOpenFirmaSecmeModali={() => {
+          if (setIsFirmModalOpen) {
+            setIsFirmModalOpen(true);
           }
         }}
       />
