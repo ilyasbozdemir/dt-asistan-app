@@ -1,17 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  Calculator,
-  FileCheck2,
-  FileSignature,
-  LayoutGrid,
-  List,
-  Table,
-  TrendingUp,
-} from "lucide-react";
-import { cn } from "../../../../../utils/cn";
-import { DocumentsDashboard } from "./DocumentsDashboard";
 import { PricesSummaryDashboard } from "./PricesSummaryDashboard";
-import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
 import { MalzemeTabloPopover } from "../../components/MalzemeListesi/components/MalzemeTabloPopover";
 import { normalizeForMatch } from "../useDosyaAsamasiSablons";
 import { FiyatIstenenFirmalarınSecilmesi } from "./FiyatIstenenFirmalarınSecilmesi";
@@ -162,14 +150,56 @@ export function PiyasaFiyatArastirmasiDashboard({
     });
   }, [stageDocs]);
 
-  const handleOpenBelgePreview = (belge: BelgeItem) => {
-    const targetSablon = sablons.find((s: any) => {
-      const lowerAd = s.ad.toLowerCase();
-      const lowerDocName = belge.belgeAdi.toLowerCase();
-      return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd);
+  const findSablonForBelge = (belge: BelgeItem) => {
+    if (!sablons || sablons.length === 0) return null;
+
+    const originalDoc = belge.data as any;
+    const rawDocName = originalDoc?.belge_adi || belge.belgeAdi || "";
+    const normDocName = normalizeForMatch(rawDocName);
+
+    // 1. Check direct name or dosya_adi match
+    let found = sablons.find((s: any) => {
+      const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
+      return normSablonName.includes(normDocName) ||
+        normDocName.includes(normSablonName);
     });
 
-    if (targetSablon) {
+    if (found) return found;
+
+    // 2. Determine target key from belgeTipiId
+    const isMaliyet = belge.belgeTipiId === "yaklasik-maliyet" ||
+      rawDocName.toLowerCase().includes("maliyet");
+    const targetKey = isMaliyet
+      ? "yaklasik-maliyet-cetveli"
+      : "piyasa-fiyat-arastirma-tutanagi";
+    const candidateKeys = SABLON_ALIAS_MAP[targetKey] || [targetKey];
+
+    for (const key of candidateKeys) {
+      found = sablons.find((s: any) => {
+        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "")
+          .toLowerCase().trim();
+        return fileBase === key;
+      });
+      if (found) break;
+    }
+
+    if (!found) {
+      for (const key of candidateKeys) {
+        found = sablons.find((s: any) => {
+          const route = (s.route_path || s.id || "").toLowerCase().trim();
+          return route === key;
+        });
+        if (found) break;
+      }
+    }
+
+    return found || sablons[0];
+  };
+
+  const handleOpenBelgePreview = (belge: BelgeItem) => {
+    const targetSablon = findSablonForBelge(belge);
+
+    if (targetSablon && handleOpenPreviewForSablon) {
       let snapshotCtx = undefined;
       const originalDoc = belge.data as any;
       if (originalDoc?.veri_json) {
@@ -182,6 +212,20 @@ export function PiyasaFiyatArastirmasiDashboard({
       handleOpenPreviewForSablon(targetSablon, targetSablon.ad, snapshotCtx);
     } else {
       alert("Bu belge için uygun şablon bulunamadı.");
+    }
+  };
+
+  const handleOpenExternalForBelge = (belge: BelgeItem) => {
+    const targetSablon = findSablonForBelge(belge);
+    if (targetSablon && quickOpenExternal) {
+      quickOpenExternal(targetSablon);
+    }
+  };
+
+  const handleQuickPrintForBelge = (belge: BelgeItem) => {
+    const targetSablon = findSablonForBelge(belge);
+    if (targetSablon && quickPrint) {
+      quickPrint(targetSablon);
     }
   };
 
@@ -303,48 +347,36 @@ export function PiyasaFiyatArastirmasiDashboard({
           />
         )
         : (
-          <>
-            <BelgeListesi
-              title="Hazırlanan Tutanaklar"
-              belgeler={mappedBelgeler}
-              viewMode={docViewMode}
-              onViewModeChange={changeDocViewMode}
-              onView={handleOpenBelgePreview}
-              onEdit={handleOpenBelgePreview}
-              onDelete={(belge) => {
-                if (handleDeleteDocument) {
-                  handleDeleteDocument(belge.id);
-                }
-              }}
-              onCreateBelge={(type) => {
-                if (type === "yaklasik-maliyet") {
-                  handleNewDocument("maliyet");
-                } else {
-                  handleNewDocument("tutanak");
-                }
-                setActiveFormTab(
-                  invitedFirms && invitedFirms.length > 0 ? "matrix" : "firms",
-                );
-              }}
-              onManage={() => {
-                setIsFormOpen(true);
-                setActiveFormTab("firms");
-              }}
-              manageButtonLabel="Firmaları Yönet"
-            />
-            <DocumentsDashboard
-              stageDocs={stageDocs}
-              docViewMode={docViewMode}
-              sablons={sablons}
-              disableDocumentGuidance={disableDocumentGuidance}
-              activeActionDropdown={activeActionDropdown}
-              setActiveActionDropdown={setActiveActionDropdown}
-              handleOpenPreviewForSablon={handleOpenPreviewForSablon}
-              quickPrint={quickPrint}
-              quickOpenExternal={quickOpenExternal}
-              handleUpdateDocumentDate={handleUpdateDocumentDate}
-            />
-          </>
+          <BelgeListesi
+            title="Hazırlanan Tutanaklar"
+            belgeler={mappedBelgeler}
+            viewMode={docViewMode}
+            onViewModeChange={changeDocViewMode}
+            onView={handleOpenBelgePreview}
+            onOpenExternal={handleOpenExternalForBelge}
+            onPrint={handleQuickPrintForBelge}
+            onEdit={handleOpenBelgePreview}
+            onDelete={(belge) => {
+              if (handleDeleteDocument) {
+                handleDeleteDocument(belge.id);
+              }
+            }}
+            onCreateBelge={(type) => {
+              if (type === "yaklasik-maliyet") {
+                handleNewDocument("maliyet");
+              } else {
+                handleNewDocument("tutanak");
+              }
+              setActiveFormTab(
+                invitedFirms && invitedFirms.length > 0 ? "matrix" : "firms",
+              );
+            }}
+            onManage={() => {
+              setIsFormOpen(true);
+              setActiveFormTab("firms");
+            }}
+            manageButtonLabel="Firmaları Yönet"
+          />
         )}
     </div>
   );

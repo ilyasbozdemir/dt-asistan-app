@@ -82,6 +82,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     belgeleriKaydet,
     setBelgeleriKaydet,
     handleUpdateDocumentDate,
+    handleDeleteDocument,
   } = logic;
 
   const [activeFormTab, setActiveFormTab] = useState<"firms" | "matrix">(() => {
@@ -161,6 +162,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             quickOpenExternal={quickOpenExternal}
             isSablonDisabled={isSablonDisabled}
             handleUpdateDocumentDate={handleUpdateDocumentDate}
+            handleDeleteDocument={handleDeleteDocument}
             setIsFirmModalOpen={setIsFirmModalOpen}
           />
         )

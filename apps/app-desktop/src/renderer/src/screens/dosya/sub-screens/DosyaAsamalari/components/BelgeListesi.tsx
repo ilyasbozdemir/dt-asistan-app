@@ -1,13 +1,15 @@
-import React from "react";
 import {
   CalendarDays,
   CheckCircle2,
+  ExternalLink,
   Eye,
   FileText,
   Grid2X2,
   List,
+  MoreVertical,
   Pencil,
   Plus,
+  Printer,
   Settings,
   Table2,
   Trash2,
@@ -131,15 +133,9 @@ interface BelgeListesiProps {
    * MEVCUT PROP AYNI
    */
   onView?: (belge: BelgeItem) => void;
-
-  /**
-   * MEVCUT PROP AYNI
-   */
+  onOpenExternal?: (belge: BelgeItem) => void;
+  onPrint?: (belge: BelgeItem) => void;
   onEdit?: (belge: BelgeItem) => void;
-
-  /**
-   * MEVCUT PROP AYNI
-   */
   onDelete?: (belge: BelgeItem) => void;
 
   /**
@@ -178,6 +174,8 @@ export function BelgeListesi({
   viewMode = "table",
   onViewModeChange,
   onView,
+  onOpenExternal,
+  onPrint,
   onEdit,
   onDelete,
   onCreate,
@@ -228,45 +226,67 @@ export function BelgeListesi({
   };
 
   /* ---------------------------------------------------------
-   * İŞLEMLER
+   * İŞLEMLER (3 Nokta Dikey Menü)
    * --------------------------------------------------------- */
 
-  const Actions = ({ belge }: { belge: BelgeItem }) => (
-    <div className="flex items-center gap-1">
-      {onView && (
-        <button
-          type="button"
-          title="Görüntüle"
-          onClick={() => onView(belge)}
-          className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/30"
-        >
-          <Eye className="h-3.5 w-3.5" />
-        </button>
-      )}
+  const Actions = ({ belge }: { belge: BelgeItem }) => {
+    if (!onView && !onOpenExternal && !onPrint && !onEdit && !onDelete) {
+      return null;
+    }
 
-      {onEdit && (
-        <button
-          type="button"
-          title="Düzenle"
-          onClick={() => onEdit(belge)}
-          className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/30"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-      )}
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+        </DropdownMenuTrigger>
 
-      {onDelete && (
-        <button
-          type="button"
-          title="Sil"
-          onClick={() => onDelete(belge)}
-          className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      )}
-    </div>
-  );
+        <DropdownMenuContent align="end" className="w-44">
+          {onView && (
+            <DropdownMenuItem onClick={() => onView(belge)}>
+              <Eye className="mr-2 h-3.5 w-3.5 text-blue-500" />
+              Görüntüle / Önizle
+            </DropdownMenuItem>
+          )}
+
+          {onOpenExternal && (
+            <DropdownMenuItem onClick={() => onOpenExternal(belge)}>
+              <ExternalLink className="mr-2 h-3.5 w-3.5 text-purple-500" />
+              Tarayıcıda Aç
+            </DropdownMenuItem>
+          )}
+
+          {onPrint && (
+            <DropdownMenuItem onClick={() => onPrint(belge)}>
+              <Printer className="mr-2 h-3.5 w-3.5 text-emerald-500" />
+              Yazdır / İndir
+            </DropdownMenuItem>
+          )}
+
+          {onEdit && (
+            <DropdownMenuItem onClick={() => onEdit(belge)}>
+              <Pencil className="mr-2 h-3.5 w-3.5 text-amber-500" />
+              Düzenle
+            </DropdownMenuItem>
+          )}
+
+          {onDelete && (
+            <DropdownMenuItem
+              onClick={() => onDelete(belge)}
+              className="text-rose-600 focus:bg-rose-50 dark:text-rose-400 dark:focus:bg-rose-950/30"
+            >
+              <Trash2 className="mr-2 h-3.5 w-3.5 text-rose-500" />
+              Sil
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   /* ---------------------------------------------------------
    * BELGE ADI
@@ -355,54 +375,83 @@ export function BelgeListesi({
           )}
 
           {/* Yeni Belge / Tutanak Ekleme Butonu */}
-          {onCreateBelge ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  {createButtonLabel}
-                </button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end" className="w-64">
-                {belgeTipleri.map((tip) => (
-                  <DropdownMenuItem
-                    key={tip.id}
-                    onClick={() => onCreateBelge(tip.id)}
+          {onCreateBelge
+            ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
                   >
-                    <FileText className="mr-2 h-4 w-4" />
-                    {tip.ad}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : onCreate ? (
-            <button
-              type="button"
-              onClick={onCreate}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              {createButtonLabel}
-            </button>
-          ) : null}
+                    <Plus className="h-3.5 w-3.5" />
+                    {createButtonLabel}
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-64">
+                  {belgeTipleri.map((tip) => (
+                    <DropdownMenuItem
+                      key={tip.id}
+                      onClick={() => onCreateBelge(tip.id)}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      {tip.ad}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+            : onCreate
+            ? (
+              <button
+                type="button"
+                onClick={onCreate}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {createButtonLabel}
+              </button>
+            )
+            : null}
         </div>
       </div>
 
-      {
-        /* =====================================================
-       * TABLE
-       * ===================================================== */
-      }
-
-      {
-        /* =====================================================
-       * LIST
-       * ===================================================== */
-      }
+      {viewMode === "table" && belgeler.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+              <tr>
+                <th className="px-4 py-3">Belge Adı</th>
+                <th className="px-4 py-3">Tarih</th>
+                <th className="px-4 py-3">Durum</th>
+                <th className="px-4 py-3 text-right">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              {belgeler.map((belge) => (
+                <tr
+                  key={belge.id}
+                  className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
+                >
+                  <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">
+                    <div className="flex items-center gap-2.5">
+                      <FileText className="h-4 w-4 shrink-0 text-blue-500" />
+                      <span>{getBelgeAdi(belge)}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                    {belge.belgeTarihi}
+                  </td>
+                  <td className="px-4 py-3">{getDurum(belge.durum)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Actions belge={belge} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {viewMode === "list" && (
         <div className="space-y-2">
