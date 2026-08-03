@@ -8,6 +8,7 @@ import {
   List,
   Pencil,
   Plus,
+  Settings,
   Table2,
   Trash2,
   XCircle,
@@ -16,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@renderer/components/ui/DropdownMenu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 
@@ -147,7 +147,30 @@ interface BelgeListesiProps {
    */
   onCreate?: () => void;
   onCreateBelge?: (type: string) => void;
+
+  /**
+   * Yönet / Ayar butonu tetikleyicisi
+   */
+  onManage?: () => void;
+
+  /**
+   * Buton etiketleri ve şablon tipi tanımları
+   */
+  createButtonLabel?: string;
+  manageButtonLabel?: string;
+  belgeTipleri?: BelgeTipi[];
 }
+
+const DEFAULT_BELGE_TIPLERI: BelgeTipi[] = [
+  {
+    id: "piyasa-fiyat-arastirmasi",
+    ad: "Piyasa Fiyat Araştırma Tutanağı",
+  },
+  {
+    id: "yaklasik-maliyet",
+    ad: "Yaklaşık Maliyet Hesap Cetveli",
+  },
+];
 
 export function BelgeListesi({
   title = "Belgeler",
@@ -159,6 +182,10 @@ export function BelgeListesi({
   onDelete,
   onCreate,
   onCreateBelge,
+  onManage,
+  createButtonLabel = "Yeni Tutanak",
+  manageButtonLabel = "Yönet",
+  belgeTipleri = DEFAULT_BELGE_TIPLERI,
 }: BelgeListesiProps): React.JSX.Element {
   /* ---------------------------------------------------------
    * DURUM
@@ -242,46 +269,6 @@ export function BelgeListesi({
   );
 
   /* ---------------------------------------------------------
-   * GÖRÜNÜM SEÇİCİ
-   * --------------------------------------------------------- */
-
-  const ViewModeButtons = () => (
-    <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
-      {[
-        {
-          mode: "table" as const,
-          icon: Table2,
-          label: "Tablo",
-        },
-        {
-          mode: "list" as const,
-          icon: List,
-          label: "Liste",
-        },
-        {
-          mode: "grid" as const,
-          icon: Grid2X2,
-          label: "Kart",
-        },
-      ].map(({ mode, icon: Icon, label }) => (
-        <button
-          key={mode}
-          type="button"
-          title={label}
-          onClick={() => onViewModeChange?.(mode)}
-          className={`rounded-md p-1.5 transition-colors ${
-            viewMode === mode
-              ? "bg-blue-600 text-white"
-              : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-        </button>
-      ))}
-    </div>
-  );
-
-  /* ---------------------------------------------------------
    * BELGE ADI
    *
    * Aynı tipten birden fazla kayıt varsa:
@@ -320,9 +307,55 @@ export function BelgeListesi({
         </div>
 
         <div className="flex items-center gap-2">
-          <ViewModeButtons />
+          {/* Görünüm Seçici (Tablo / Liste / Kart) */}
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+            {[
+              {
+                mode: "table" as const,
+                icon: Table2,
+                label: "Tablo",
+              },
+              {
+                mode: "list" as const,
+                icon: List,
+                label: "Liste",
+              },
+              {
+                mode: "grid" as const,
+                icon: Grid2X2,
+                label: "Kart",
+              },
+            ].map(({ mode, icon: Icon, label }) => (
+              <button
+                key={mode}
+                type="button"
+                title={label}
+                onClick={() => onViewModeChange?.(mode)}
+                className={`rounded-md p-1.5 transition-colors ${
+                  viewMode === mode
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
+          </div>
 
-          {(onCreate || onCreateBelge) && (
+          {/* Yönet / Ayarlar Butonu */}
+          {onManage && (
+            <button
+              type="button"
+              onClick={onManage}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <Settings className="h-3.5 w-3.5 text-slate-500" />
+              {manageButtonLabel}
+            </button>
+          )}
+
+          {/* Yeni Belge / Tutanak Ekleme Butonu */}
+          {onCreateBelge ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -330,29 +363,32 @@ export function BelgeListesi({
                   className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Yeni Tutanak
+                  {createButtonLabel}
                 </button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuItem
-                  onClick={() => onCreateBelge?.("piyasa-fiyat-arastirmasi")}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Piyasa Fiyat Araştırma Tutanağı
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => onCreateBelge?.("yaklasik-maliyet")}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Yaklaşık Maliyet Hesap Cetveli
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
+                {belgeTipleri.map((tip) => (
+                  <DropdownMenuItem
+                    key={tip.id}
+                    onClick={() => onCreateBelge(tip.id)}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    {tip.ad}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          ) : onCreate ? (
+            <button
+              type="button"
+              onClick={onCreate}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-bold text-white transition-colors hover:bg-blue-700"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {createButtonLabel}
+            </button>
+          ) : null}
         </div>
       </div>
 

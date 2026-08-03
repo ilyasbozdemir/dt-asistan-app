@@ -41,5 +41,19 @@ export const SABLON_ALIAS_MAP: Record<string, string[]> = {
     'dogrudan-temin-onay-belgesi',
     'idare-onay-belgesi',
     'onay-belgesi'
+  ],
+  'komisyon-gorevlendirme-onayi': [
+    'komisyon-gorevlendirme-onayi',
+    'gorevlendirme-onayi',
+    'yaklasik-maliyet-tespit-komisyonu'
+  ],
+  'komisyon-gorevlendirme-onayi-eki': [
+    'komisyon-gorevlendirme-onayi-eki',
+    'gorevlendirme-onay-eki',
+    'komisyon-atama-onay-eki'
+  ],
+  'muayene-kabul-komisyonu': [
+    'muayene-kabul-komisyonu',
+    'muayene-kabul-ve-tespit-komisyonu'
   ]
 }

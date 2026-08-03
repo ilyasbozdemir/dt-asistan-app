@@ -641,6 +641,10 @@ export function MalzemeTablosu({
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
             onGorevlendirmeOnayEki={() =>
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+            onFiyatArastirmaKomisyonu={() =>
+              handleOpenSablonByDosyaAdi(
+                "piyasa-fiyat-arastirma-gorevlendirmesi",
+              )}
             onYaklasikMaliyetKomisyonu={() =>
               handleOpenSablonByDosyaAdi("yaklasik-maliyet-tespit-komisyonu")}
             onSonAlimCetveli={() =>

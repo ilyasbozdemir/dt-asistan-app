@@ -146,7 +146,7 @@ export function buildDocumentCategories(
       title: "Komisyon Belgeleri",
       icon: Users,
       iconColorClass: "text-blue-500",
-      steps: [1, 2],
+      steps: [1, 2, 3, 4],
       items: [
         {
           id: "gorevlendirmeOnayi",
@@ -154,7 +154,7 @@ export function buildDocumentCategories(
           icon: FileCheck,
           iconColorClass: "text-blue-500",
           onClick: onGorevlendirmeOnayi,
-          steps: [1, 2],
+          steps: [1, 2, 3, 4],
         },
         {
           id: "gorevlendirmeOnayEki",
@@ -162,7 +162,7 @@ export function buildDocumentCategories(
           icon: FileText,
           iconColorClass: "text-blue-500",
           onClick: onGorevlendirmeOnayEki,
-          steps: [1, 2],
+          steps: [1, 2, 3, 4],
         },
         {
           id: "yaklasikMaliyetKomisyonu",
@@ -170,7 +170,7 @@ export function buildDocumentCategories(
           icon: UserCheck,
           iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onYaklasikMaliyetKomisyonu,
-          steps: [1],
+          steps: [1, 2, 3, 4],
         },
         {
           id: "muayeneKabulKomisyonu",
@@ -178,7 +178,7 @@ export function buildDocumentCategories(
           icon: UserCheck,
           iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onMuayeneKabulKomisyonu,
-          steps: [4],
+          steps: [1, 2, 3, 4],
         },
         {
           id: "fiyatArastirmaKomisyonu",
@@ -186,7 +186,7 @@ export function buildDocumentCategories(
           icon: UserCheck,
           iconColorClass: "text-slate-400 dark:text-slate-500",
           onClick: onFiyatArastirmaKomisyonu,
-          steps: [2],
+          steps: [1, 2, 3, 4],
         },
       ],
     },

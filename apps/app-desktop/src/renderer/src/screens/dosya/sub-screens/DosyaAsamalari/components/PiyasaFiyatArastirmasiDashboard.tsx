@@ -255,8 +255,12 @@ export function PiyasaFiyatArastirmasiDashboard({
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
             onGorevlendirmeOnayEki={() =>
               handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi-eki")}
+            onYaklasikMaliyetKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
+            onMuayeneKabulKomisyonu={() =>
+              handleOpenSablonByDosyaAdi("muayene-kabul-komisyonu")}
             onFiyatArastirmaKomisyonu={() =>
-              handleOpenSablonByDosyaAdi("piyasa-fiyat-arastirma-tutanagi")}
+              handleOpenSablonByDosyaAdi("komisyon-gorevlendirme-onayi")}
             onPiyasaArastirmaGorevlendirmesi={() =>
               handleOpenSablonByDosyaAdi(
                 "piyasa-fiyat-arastirma-gorevlendirmesi",
@@ -318,7 +322,15 @@ export function PiyasaFiyatArastirmasiDashboard({
                 } else {
                   handleNewDocument("tutanak");
                 }
+                setActiveFormTab(
+                  invitedFirms && invitedFirms.length > 0 ? "matrix" : "firms",
+                );
               }}
+              onManage={() => {
+                setIsFormOpen(true);
+                setActiveFormTab("firms");
+              }}
+              manageButtonLabel="Firmaları Yönet"
             />
             <DocumentsDashboard
               stageDocs={stageDocs}
