@@ -16,7 +16,8 @@ import {
 import { Link } from '@tanstack/react-router'
 import { SubScreen } from '../../SubScreens.screen'
 import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import { normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
+import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
+import { isV2Template, normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
 import { useSettingsStore } from '../../../../store/settingsStore'
 import { useWorkspaceStore } from '../../../../store/workspaceStore'
@@ -159,13 +160,26 @@ export function KabulVeOdeme(): React.JSX.Element {
   }
 
   if (previewData && previewModalOpen) {
+    const isV2 = isV2Template(previewData.dosyaAdi || previewData.title)
     const isStarred = previewData?.title
       ? activeStarredDocs.some(
           (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
         )
       : false
 
-    return (
+    return isV2 ? (
+      <DocumentPreviewModalV2
+        isOpen={previewModalOpen}
+        documentId={
+          previewData.dosyaAdi
+            ? previewData.dosyaAdi.replace('.html', '')
+            : ''
+        }
+        dosyaId={activeDosyaId || undefined}
+        onClose={() => setPreviewModalOpen(false)}
+        isModal={true}
+      />
+    ) : (
       <DocumentPreviewModal
         isOpen={previewModalOpen}
         onClose={() => setPreviewModalOpen(false)}

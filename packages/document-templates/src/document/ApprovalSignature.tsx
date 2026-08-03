@@ -323,6 +323,7 @@ interface ApprovalSignatureProps {
   align?: "left" | "center" | "right";
   nameField?: string;
   unvanField?: string;
+  dateField?: string;
 }
 
 export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
@@ -335,6 +336,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
   align = "center",
   nameField = "onaylayanPersonelAdi",
   unvanField = "onaylayanPersonelUnvan",
+  dateField = "onayTarihi",
 }) => {
   const { isEditing, onFieldChange, personelListesi } = useTemplateEdit();
   const personelList = personelListesi || [];
@@ -375,7 +377,7 @@ export const ApprovalSignature: React.FC<ApprovalSignatureProps> = ({
 
         <div style={{ fontSize: "11pt", marginBottom: "8px" }}>
           <DateEditableField
-            name="onayTarihi"
+            name={dateField}
             value={date || ""}
             placeholder="GG.AA.YYYY"
           />

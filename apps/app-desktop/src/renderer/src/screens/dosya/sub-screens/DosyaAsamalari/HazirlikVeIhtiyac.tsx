@@ -3,7 +3,7 @@ import { FileText, Package } from "lucide-react";
 import { cn } from "../../../../utils/cn";
 import { SubScreen } from "../../SubScreens.screen";
 import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
-import { normalizeForMatch } from "./useDosyaAsamasiSablons";
+import { isV2Template, normalizeForMatch } from "./useDosyaAsamasiSablons";
 import { useDosyaAsamasiSablonsV2 } from "./useDosyaAsamasiSablonsV2";
 import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
 import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
@@ -69,33 +69,7 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
     )
     : false;
 
-  const isV2 = Boolean(
-    previewData?.dosyaAdi &&
-      [
-        "ihtiyac-listesi",
-        "ihtiyaclistesi",
-        "ihtiyac-talep-formu",
-        "ihtiyactalepformu",
-        "harcama-talimati",
-        "harcamatalimati",
-        "harcama-pusulasi",
-        "harcamapusulasi",
-        "luzum-muzekkeresi",
-        "luzummuzekkeresi",
-        "luzum-muzekkeresi-onay-eki",
-        "luzummuzekkeresionayeki",
-        "luzum-muzekkeresi-teslim-tesellum",
-        "luzummuzekkeresiteslimtesellum",
-        "komisyon-gorevlendirme-onayi",
-        "komisyongorevlendirmeonayi",
-        "komisyon-gorevlendirme-onayi-eki",
-        "komisyongorevlendirmeonayieki",
-      ].some((name) =>
-        previewData.dosyaAdi?.toLowerCase()
-          .replace(/[^a-z0-9]/g, "")
-          .includes(name.replace(/[^a-z0-9]/g, ""))
-      )
-  );
+  const isV2 = isV2Template(previewData?.dosyaAdi);
 
   return (
     <SubScreen

@@ -41,6 +41,45 @@ export const normalizeForMatch = (str: string): string =>
     .replace(/ç/g, 'c')
     .replace(/[^a-z0-9]/g, '')
 
+export const V2_TEMPLATES_NAMES = [
+  'ihtiyac-listesi',
+  'ihtiyaclistesi',
+  'ihtiyac-talep-formu',
+  'ihtiyactalepformu',
+  'harcama-talimati',
+  'harcamatalimati',
+  'harcama-pusulasi',
+  'harcamapusulasi',
+  'luzum-muzekkeresi',
+  'luzummuzekkeresi',
+  'luzum-muzekkeresi-onay-eki',
+  'luzummuzekkeresionayeki',
+  'luzum-muzekkeresi-teslim-tesellum',
+  'luzummuzekkeresiteslimtesellum',
+  'komisyon-gorevlendirme-onayi',
+  'komisyongorevlendirmeonayi',
+  'komisyon-gorevlendirme-onayi-eki',
+  'komisyongorevlendirmeonayieki',
+  'piyasa-fiyat-arastirma-tutanagi',
+  'piyasafiyatarastirmatutanagi',
+  'piyasa-fiyat-arastirma-gorevlendirmesi',
+  'piyasafiyatarastirmagorevlendirmesi',
+  'yaklasik-maliyet-cetveli',
+  'yaklasikmaliyetcetveli',
+  'fiyat-arastirma-mektubu',
+  'fiyatarastirmamektubu',
+  'birim-fiyat-teklif-mektubu',
+  'birimfiyatteklifmektubu',
+  'arastirma-mektubu',
+  'arastirmamektubu',
+]
+
+export function isV2Template(dosyaAdiOrTitle?: string | null): boolean {
+  if (!dosyaAdiOrTitle) return false
+  const clean = normalizeForMatch(dosyaAdiOrTitle)
+  return V2_TEMPLATES_NAMES.some((name) => clean.includes(normalizeForMatch(name)))
+}
+
 /**
  * SABLON_GRUPLARI — Ekranda hangi şablonlar tek kart + select ile gösterilir?
  *
