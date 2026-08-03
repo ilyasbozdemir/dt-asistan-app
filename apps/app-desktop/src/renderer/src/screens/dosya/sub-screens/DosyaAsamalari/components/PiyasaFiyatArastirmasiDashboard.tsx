@@ -361,16 +361,13 @@ export function PiyasaFiyatArastirmasiDashboard({
                 handleDeleteDocument(belge.id);
               }
             }}
-            onCreateBelge={(type) => {
-              if (type === "yaklasik-maliyet") {
-                handleNewDocument("maliyet");
-              } else {
-                handleNewDocument("tutanak");
-              }
+            onCreate={() => {
+              setIsFormOpen(true);
               setActiveFormTab(
                 invitedFirms && invitedFirms.length > 0 ? "matrix" : "firms",
               );
             }}
+            createButtonLabel="Teklif & Fiyat Girişi Yap"
             onManage={() => {
               setIsFormOpen(true);
               setActiveFormTab("firms");
