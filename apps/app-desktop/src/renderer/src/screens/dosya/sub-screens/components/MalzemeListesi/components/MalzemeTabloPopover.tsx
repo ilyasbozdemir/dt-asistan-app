@@ -61,11 +61,27 @@ export interface MalzemeTabloPopoverProps {
   // Onay İşlemleri
   onOnayBelgesi?: () => void;
   disableDocumentGuidance?: boolean;
+  buttonLabel?: string;
 }
 
 export function MalzemeTabloPopover(
   props: MalzemeTabloPopoverProps,
 ): React.JSX.Element | null {
+  const buttonLabelText = useMemo(() => {
+    if (props.buttonLabel) return props.buttonLabel;
+    switch (props.step) {
+      case 2:
+        return "Şablon & Belge İşlemleri";
+      case 3:
+        return "Sözleşme & Belge İşlemleri";
+      case 4:
+        return "Kabul & Ödeme Belgeleri";
+      case 1:
+      default:
+        return "Tablo İşlemleri";
+    }
+  }, [props.buttonLabel, props.step]);
+
   const tableActionItems = useMemo(
     () => buildTableActionItems(props),
     [props],
@@ -91,7 +107,7 @@ export function MalzemeTabloPopover(
           className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer h-8"
         >
           <ClipboardList className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-          Tablo İşlemleri
+          {buttonLabelText}
           <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
       </DropdownMenuTrigger>
@@ -100,7 +116,7 @@ export function MalzemeTabloPopover(
         {hasTableActions && (
           <>
             <DropdownMenuLabel className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 py-1">
-              Tablo İşlemleri
+              {props.step === 2 ? "Hızlı İşlemler" : "Tablo İşlemleri"}
             </DropdownMenuLabel>
             {tableActionItems.map((item) => {
               const ItemIcon = item.icon;
