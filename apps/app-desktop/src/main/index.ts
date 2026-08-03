@@ -21,7 +21,7 @@ protocol.registerSchemesAsPrivileged([
 const icon = app.isPackaged
   ? join(process.resourcesPath, 'icon.png')
   : join(__dirname, '../../resources/icon.png')
-import { workspaceManager } from './database/workspace'
+import { workspaceManager, ensureSchemaIntegrity } from './database/workspace'
 import { CURRENT_SCHEMA_VERSION, manifests } from '@dt/database'
 import nodemailer from 'nodemailer'
 import {
@@ -3219,6 +3219,17 @@ if (!gotTheLock && !isMultiInstance) {
         const rows = stmt.all(...params)
         return { success: true, data: rows }
       } catch (error: any) {
+        if (error.message && error.message.includes('no such column')) {
+          try {
+            const db = workspaceManager.getDb()
+            ensureSchemaIntegrity(db)
+            const stmt = db.prepare(sql)
+            const rows = stmt.all(...params)
+            return { success: true, data: rows }
+          } catch (retryErr: any) {
+            return { success: false, error: retryErr.message }
+          }
+        }
         return { success: false, error: error.message }
       }
     })
@@ -3233,6 +3244,19 @@ if (!gotTheLock && !isMultiInstance) {
         workspaceManager.save()
         return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
       } catch (error: any) {
+        if (error.message && error.message.includes('no such column')) {
+          try {
+            const db = workspaceManager.getDb()
+            ensureSchemaIntegrity(db)
+            const stmt = db.prepare(sql)
+            const info = stmt.run(...params)
+            broadcastDbChange()
+            workspaceManager.save()
+            return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
+          } catch (retryErr: any) {
+            return { success: false, error: retryErr.message }
+          }
+        }
         return { success: false, error: error.message }
       }
     })
@@ -3248,6 +3272,20 @@ if (!gotTheLock && !isMultiInstance) {
         workspaceManager.save()
         return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
       } catch (error: any) {
+        if (error.message && error.message.includes('no such column')) {
+          try {
+            const db = workspaceManager.getDb()
+            ensureSchemaIntegrity(db)
+            const stmt = db.prepare(sql)
+            const actualParams = params.length === 1 && Array.isArray(params[0]) ? params[0] : params
+            const info = stmt.run(...actualParams)
+            broadcastDbChange()
+            workspaceManager.save()
+            return { success: true, lastInsertRowid: info.lastInsertRowid, changes: info.changes }
+          } catch (retryErr: any) {
+            return { success: false, error: retryErr.message }
+          }
+        }
         return { success: false, error: error.message }
       }
     })

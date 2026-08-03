@@ -152,14 +152,24 @@ export function runMigrations(db: Database.Database, fromVersion: number, dbSche
               throw new Error(`Kolon tanımı bulunamadı: ${colAdd.table}.${colAdd.column}`)
 
             let sqlDef = '"' + colDef.name + '" ' + colDef.type
-            if ((colDef as any).unique) sqlDef += ' UNIQUE'
-            if ((colDef as any).notNull) sqlDef += ' NOT NULL'
-            if ((colDef as any).default !== undefined) {
-              sqlDef +=
-                ' DEFAULT ' +
-                (typeof (colDef as any).default === 'string'
-                  ? (colDef as any).default
-                  : (colDef as any).default)
+            const d = (colDef as any).default
+            if (d !== undefined) {
+              if (typeof d === 'string') {
+                const upper = d.trim().toUpperCase()
+                if (
+                  upper === 'CURRENT_TIMESTAMP' ||
+                  upper === 'CURRENT_DATE' ||
+                  upper === 'CURRENT_TIME'
+                ) {
+                  // SQLite ALTER TABLE ADD COLUMN does NOT allow non-constant defaults like CURRENT_TIMESTAMP
+                } else if (d.startsWith("'") || d.startsWith('"')) {
+                  sqlDef += ' DEFAULT ' + d
+                } else {
+                  sqlDef += " DEFAULT '" + d.replace(/'/g, "''") + "'"
+                }
+              } else {
+                sqlDef += ' DEFAULT ' + d
+              }
             }
 
             try {

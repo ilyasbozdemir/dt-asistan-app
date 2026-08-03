@@ -52,7 +52,27 @@ function normalizeMeta(raw: any): WorkspaceMeta {
   }
 }
 
-function ensureSchemaIntegrity(db: Database.Database): void {
+export function ensureSchemaIntegrity(db: Database.Database): void {
+  // Explicit migration for TANIM_Firma CRM columns to guarantee backwards-compatibility
+  const firmaCrmColumns = [
+    { name: 'deneyim_skoru', def: 'INTEGER DEFAULT 0' },
+    { name: 'kalite_skoru', def: 'INTEGER DEFAULT 0' },
+    { name: 'odeme_disiplini', def: 'INTEGER DEFAULT 1' },
+    { name: 'kara_liste', def: 'INTEGER DEFAULT 0' },
+    { name: 'kara_liste_neden', def: 'TEXT' },
+    { name: 'son_iletisim_tarihi', def: 'TEXT' },
+    { name: 'sorumlu_personel_id', def: 'INTEGER' },
+    { name: 'iletisim_notlari', def: 'TEXT' }
+  ]
+  for (const c of firmaCrmColumns) {
+    try {
+      db.exec(`ALTER TABLE TANIM_Firma ADD COLUMN "${c.name}" ${c.def};`)
+      console.log(`[Schema Self-Healing] Explicitly added TANIM_Firma.${c.name}`)
+    } catch (e: any) {
+      // Ignored if column already exists
+    }
+  }
+
   for (const table of schema.tables as any[]) {
     try {
       const tableInfo = db.prepare(`PRAGMA table_info(${table.name})`).all() as any[]
@@ -66,7 +86,18 @@ function ensureSchemaIntegrity(db: Database.Database): void {
             if (col.unique) colDef += ' UNIQUE'
             if (col.notNull) colDef += ' NOT NULL'
             if (col.default !== undefined) {
-              colDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+              const d = col.default
+              if (typeof d === 'string') {
+                if (d.toUpperCase() === 'CURRENT_TIMESTAMP') {
+                  colDef += ' DEFAULT CURRENT_TIMESTAMP'
+                } else if (d.startsWith("'") || d.startsWith('"')) {
+                  colDef += ' DEFAULT ' + d
+                } else {
+                  colDef += " DEFAULT '" + d.replace(/'/g, "''") + "'"
+                }
+              } else {
+                colDef += ' DEFAULT ' + d
+              }
             }
             return colDef
           })
@@ -83,7 +114,23 @@ function ensureSchemaIntegrity(db: Database.Database): void {
             // These are only valid at CREATE TABLE time. We skip them here to avoid errors.
             let sqlDef = '"' + col.name + '" ' + col.type
             if (col.default !== undefined) {
-              sqlDef += ' DEFAULT ' + (typeof col.default === 'string' ? col.default : col.default)
+              const d = col.default
+              if (typeof d === 'string') {
+                const upper = d.trim().toUpperCase()
+                if (
+                  upper === 'CURRENT_TIMESTAMP' ||
+                  upper === 'CURRENT_DATE' ||
+                  upper === 'CURRENT_TIME'
+                ) {
+                  // SQLite ALTER TABLE ADD COLUMN does NOT allow non-constant defaults
+                } else if (d.startsWith("'") || d.startsWith('"')) {
+                  sqlDef += ' DEFAULT ' + d
+                } else {
+                  sqlDef += " DEFAULT '" + d.replace(/'/g, "''") + "'"
+                }
+              } else {
+                sqlDef += ' DEFAULT ' + d
+              }
             }
             console.log(`[Schema Self-Healing] Adding missing column ${table.name}.${col.name}`)
             db.exec(`ALTER TABLE ${table.name} ADD COLUMN ${sqlDef};`)
