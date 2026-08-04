@@ -12,6 +12,7 @@ export interface BiddingFirm {
   email?: string
   teklif_toplami?: number
   para_birimi?: string
+  temin_firma_id?: number
 }
 
 export interface PoolFirm {
@@ -30,6 +31,10 @@ export interface BiddingKalem {
   kalem_adi: string
   miktar: number
   birim: string
+  tasinir_kodu?: string
+  okas_kodu?: string
+  aciklama?: string
+  kdv_orani?: number
 }
 
 import { useTabStore } from '../../../../../store/tabStore'
@@ -512,7 +517,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
   /**
    * "Yeni PFAT / Yaklaşık Maliyet Oluştur" butonuna tıklandığında çağrılır.
    */
-  const handleNewDocument = (mode: 'maliyet' | 'tutanak') => {
+  const handleNewDocument = (mode: 'maliyet' | 'tutanak'): void => {
     setFormMode(mode)
     const today = new Date().toISOString().split('T')[0]
     setMaliyetCetveliTarihi(today)
@@ -525,7 +530,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
     setIsFormOpen(true)
   }
 
-  const handleSaveToDosya = async (docType?: 'maliyet' | 'tutanak' | 'save_only'): Promise<void> => {
+  const handleSaveToDosya = async (
+    docType?: 'maliyet' | 'tutanak' | 'save_only'
+  ): Promise<void> => {
     const targetMode = docType || formMode
     const total = getEstimatedCostTotal()
 
@@ -594,7 +601,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
         targetMode === 'maliyet' ? 'Yaklaşık Maliyet Cetveli' : 'Piyasa Fiyat Araştırma Tutanağı'
       const docDate = targetMode === 'maliyet' ? maliyetCetveliTarihi : tutanakTarihi
 
-      const sablon = stageSablons.find((s: any) => {
+      const sablon = stageSablons.find((s) => {
         const lowerAd = s.ad.toLowerCase()
         const lowerDocName = docName.toLowerCase()
         return lowerAd.includes(lowerDocName) || lowerDocName.includes(lowerAd)
@@ -613,13 +620,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
         // Dinamik Teklifler & Firma Toplamları Hesabı
         const calculatedTeklifler = invitedFirms
-          .map((f: any, index: number) => {
+          .map((f, index: number) => {
             let sum = 0
-            items.forEach((k: any) => {
+            items.forEach((k) => {
               const price =
                 bids[`${k.id}_${f.id}`] ||
                 bids[`${k.id}_${f.firma_id}`] ||
-                bids[`${k.id}_${f.temin_firma_id}`] ||
+                (f.temin_firma_id ? bids[`${k.id}_${f.temin_firma_id}`] : 0) ||
                 0
               sum += price * (k.miktar || 0)
             })
@@ -633,13 +640,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
           })
           .sort((a, b) => a.teklifBedeliRaw - b.teklifBedeliRaw)
 
-        const firmaToplamlari = invitedFirms.map((f: any) => {
+        const firmaToplamlari = invitedFirms.map((f) => {
           let sum = 0
-          items.forEach((k: any) => {
+          items.forEach((k) => {
             const price =
               bids[`${k.id}_${f.id}`] ||
               bids[`${k.id}_${f.firma_id}`] ||
-              bids[`${k.id}_${f.temin_firma_id}`] ||
+              (f.temin_firma_id ? bids[`${k.id}_${f.temin_firma_id}`] : 0) ||
               0
             sum += price * (k.miktar || 0)
           })
@@ -653,25 +660,26 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
         if (!setLowestFirmAsWinner && manualWinnerFirmaId) {
           const manualWinner = invitedFirms.find(
-            (f: any) => f.firma_id === manualWinnerFirmaId || f.id === manualWinnerFirmaId
+            (f) => f.firma_id === manualWinnerFirmaId || f.id === manualWinnerFirmaId
           )
           if (manualWinner) {
             enAvantajliTeklifSahibi = manualWinner.unvan
-            const manualTeklif = calculatedTeklifler.find((t) => t.istekliUnvani === manualWinner.unvan)
+            const manualTeklif = calculatedTeklifler.find(
+              (t) => t.istekliUnvani === manualWinner.unvan
+            )
             if (manualTeklif) enAvantajliTeklifBedeli = manualTeklif.teklifBedeli
           }
         }
 
         const isLowestBasis = !hesaplamaEsasi?.toLowerCase().includes('ortalama')
-        let grandTotal = 0
 
-        const needItems = items.map((k: any, index: number) => {
-          const itemPrices = invitedFirms.map((f: any) => ({
+        const needItems = items.map((k, index: number) => {
+          const itemPrices = invitedFirms.map((f) => ({
             unvan: f.unvan,
             price:
               bids[`${k.id}_${f.id}`] ||
               bids[`${k.id}_${f.firma_id}`] ||
-              bids[`${k.id}_${f.temin_firma_id}`] ||
+              (f.temin_firma_id ? bids[`${k.id}_${f.temin_firma_id}`] : 0) ||
               0
           }))
           const validPrices = itemPrices.filter((p) => p.price > 0)
@@ -683,29 +691,28 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
           const chosenPrice = isLowestBasis ? minPrice : avgPrice
           const lineTotal = chosenPrice * (k.miktar || 0)
-          grandTotal += lineTotal
 
           const enUygunFirma =
             validPrices.length > 0
               ? validPrices.reduce((prev, curr) => (prev.price < curr.price ? prev : curr))
               : null
 
-          const firmaTeklifleri = invitedFirms.map((f: any) => {
+          const firmaTeklifleri = invitedFirms.map((f) => {
             const price =
               bids[`${k.id}_${f.id}`] ||
               bids[`${k.id}_${f.firma_id}`] ||
-              bids[`${k.id}_${f.temin_firma_id}`] ||
+              (f.temin_firma_id ? bids[`${k.id}_${f.temin_firma_id}`] : 0) ||
               0
             return {
               fiyat: price > 0 ? formatTR(price) : '-'
             }
           })
 
-          const firmaTeklifleriDetay = invitedFirms.map((f: any) => {
+          const firmaTeklifleriDetay = invitedFirms.map((f) => {
             const price =
               bids[`${k.id}_${f.id}`] ||
               bids[`${k.id}_${f.firma_id}`] ||
-              bids[`${k.id}_${f.temin_firma_id}`] ||
+              (f.temin_firma_id ? bids[`${k.id}_${f.temin_firma_id}`] : 0) ||
               0
             const itemTotal = price * (k.miktar || 0)
             return {
@@ -732,22 +739,25 @@ export function usePiyasaFiyatArastirmasiLogic() {
         })
 
         const formattedDocDate = formatDateString(docDate) || baseCtx.tarih || baseCtx.dosyaTarihi
+        let tutanakTarihi = baseCtx.tutanakTarihi || formattedDocDate
+        if (targetMode === 'tutanak') {
+          tutanakTarihi = formattedDocDate
+        }
+
+        let maliyetCetveliTarihi = baseCtx.maliyetCetveliTarihi || formattedDocDate
+        if (targetMode === 'maliyet') {
+          maliyetCetveliTarihi = formattedDocDate
+        }
 
         const mergedCtx = {
           ...baseCtx,
           tarih: formattedDocDate,
           dosyaTarihi: formattedDocDate,
-          tutanakTarihi:
-            targetMode === 'tutanak'
-              ? formattedDocDate
-              : baseCtx.tutanakTarihi || formattedDocDate,
-          maliyetCetveliTarihi:
-            targetMode === 'maliyet'
-              ? formattedDocDate
-              : baseCtx.maliyetCetveliTarihi || formattedDocDate,
+          tutanakTarihi,
+          maliyetCetveliTarihi,
           yaklasikMaliyet: formatTR(total),
           genelToplam: formatTR(total),
-          firmalar: invitedFirms.map((f: any) => ({ unvan: f.unvan })),
+          firmalar: invitedFirms.map((f) => ({ unvan: f.unvan })),
           firmalarColspan: invitedFirms.length + 2,
           firmaToplamlari,
           calculatedTeklifler,
@@ -803,12 +813,16 @@ export function usePiyasaFiyatArastirmasiLogic() {
           handleOpenPreviewForSablon(sablon, sablon.ad)
         }, 300)
       }
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : String(err))
     }
   }
 
-  const handleUpdateDocumentDate = async (docId: number, newDate: string, docName: string) => {
+  const handleUpdateDocumentDate = async (
+    docId: number,
+    newDate: string,
+    docName: string
+  ): Promise<void> => {
     try {
       await window.electron.ipcRenderer.invoke(
         'db:run',
