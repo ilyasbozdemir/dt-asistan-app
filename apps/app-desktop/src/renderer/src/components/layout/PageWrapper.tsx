@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Header } from './Header'
 import { ActiveFileSidebar } from './ActiveFileSidebar'
@@ -16,7 +16,7 @@ import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
 import { routeComponents } from './routeComponents'
 import { FindInPage } from './FindInPage'
 import { WorkspaceCloseModal } from './WorkspaceCloseModal'
-import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
+
 
 export function PageWrapper(): React.ReactNode {
   const routerState = useRouterState()
@@ -91,8 +91,7 @@ export function PageWrapper(): React.ReactNode {
 
   const showRightSidebar = !(unifiedStepperMode && isDosyaAsamasi)
 
-  const { settings } = useAyarlarHooks()
-  const isMailConfigured = !!settings.smtp_host
+
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [isQuittingApp, setIsQuittingApp] = useState(false)
 
@@ -148,33 +147,25 @@ export function PageWrapper(): React.ReactNode {
     }
   }
 
-  const [lastActive, setLastActive] = useState<Record<string, number>>({})
+  // useRef ile lastActive — state değil, dolayısıyla her değişimde re-render tetiklemez
+  const lastActiveRef = useRef<Record<string, number>>({})
   const [expiredPaths, setExpiredPaths] = useState<Record<string, boolean>>({})
 
-  // Update last active timestamp for current tab
+  // Update last active timestamp for current tab (ref üzerinde — re-render yok)
   useEffect(() => {
     if (activeTabPath) {
-      const handle = setTimeout(() => {
-        setLastActive((prev) => ({
-          ...prev,
-          [activeTabPath]: Date.now()
-        }))
-        setExpiredPaths((prev) => {
-          if (prev[activeTabPath]) {
-            return {
-              ...prev,
-              [activeTabPath]: false
-            }
-          }
-          return prev
-        })
-      }, 0)
-      return () => clearTimeout(handle)
+      lastActiveRef.current[activeTabPath] = Date.now()
+      setExpiredPaths((prev) => {
+        if (prev[activeTabPath]) {
+          return { ...prev, [activeTabPath]: false }
+        }
+        return prev
+      })
     }
-    return undefined
   }, [activeTabPath])
 
   // Periodic cleanup for inactive tabs (every 15 seconds)
+  // Bağımlılıklar: tabs ve activeTabPath — lastActive artık ref, bağımlılık listesinde değil
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now()
@@ -183,7 +174,7 @@ export function PageWrapper(): React.ReactNode {
         let changed = false
         for (const tab of tabs) {
           const isActive = tab.path === activeTabPath
-          const lastActiveTime = lastActive[tab.path] || now
+          const lastActiveTime = lastActiveRef.current[tab.path] || now
           const isExpired = !isActive && tab.path !== '/' && now - lastActiveTime > 5 * 60 * 1000
           if (next[tab.path] !== isExpired) {
             next[tab.path] = isExpired
@@ -194,7 +185,7 @@ export function PageWrapper(): React.ReactNode {
       })
     }, 15000)
     return () => clearInterval(interval)
-  }, [tabs, activeTabPath, lastActive])
+  }, [tabs, activeTabPath])
 
   useEffect(() => {
     if (activeFilePath && isAuthenticated) {
@@ -516,7 +507,6 @@ export function PageWrapper(): React.ReactNode {
         isOpen={isCloseModalOpen}
         onClose={() => setIsCloseModalOpen(false)}
         fileName={fileName}
-        isMailConfigured={isMailConfigured}
         onConfirm={handleConfirmClose}
       />
     </div>

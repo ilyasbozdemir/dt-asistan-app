@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { FileText, Save, Mail, AlertTriangle, Loader2, CloudUpload } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
 
 interface WorkspaceCloseModalProps {
   isOpen: boolean
   onClose: () => void
   fileName: string
-  isMailConfigured: boolean
   onConfirm: (type: 'none' | 'backup' | 'email' | 'server') => Promise<void>
 }
 
@@ -15,9 +15,10 @@ export function WorkspaceCloseModal({
   isOpen,
   onClose,
   fileName,
-  isMailConfigured,
   onConfirm
 }: WorkspaceCloseModalProps): React.JSX.Element {
+  const { settings } = useAyarlarHooks()
+  const isMailConfigured = !!settings.smtp_host
   const [selectedOption, setSelectedOption] = useState<'none' | 'backup' | 'email' | 'server'>(
     isMailConfigured ? 'email' : 'backup'
   )

@@ -377,7 +377,7 @@ export function buildDocumentContext(
     kurumAdi: institutionName,
     mudurluk: rawHarcamaBirimi,
     idareAdi: idareAdi,
-    baskanAdi: dosyaResData?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
+    baskanAdi: dosyaResData?.onaylayan_ad_soyad || '',
     baskanUnvan: dosyaResData?.onaylayan_unvan || 'Harcama Yetkilisi',
     teminNo: dosyaResData?.temin_no || 'Belirtilmedi',
     teminSekli: teminSekliText,
@@ -401,12 +401,12 @@ export function buildDocumentContext(
       dosyaResData?.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
     dokumanHazirlik: 'Hazırlanmayacaktır.',
     isinAciklamasi: dosyaResData?.isin_aciklamasi || dosyaResData?.konu || 'Belirtilmedi',
-    onaylayanPersonelAdi: dosyaResData?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
-    onaylayanPersonelUnvan: dosyaResData?.onaylayan_unvan || 'Harcama Yetkilisi',
+    onaylayanPersonelAdi: dosyaResData?.onaylayan_ad_soyad || '',
+    onaylayanPersonelUnvan: dosyaResData?.onaylayan_unvan || '',
     onaylayanlar: [
       {
-        onaylayanPersonelAdi: dosyaResData?.onaylayan_ad_soyad || 'Harcama Yetkilisi Belirtilmedi',
-        onaylayanPersonelUnvan: dosyaResData?.onaylayan_unvan || 'Harcama Yetkilisi'
+        onaylayanPersonelAdi: dosyaResData?.onaylayan_ad_soyad || '',
+        onaylayanPersonelUnvan: dosyaResData?.onaylayan_unvan || ''
       }
     ],
     komisyon: commission.map((c: any) => ({
@@ -430,18 +430,18 @@ export function buildDocumentContext(
       unvan: c.unvan,
       gorevi: c.gorevi
     })),
-    hazirlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || 'Görevli Personel',
+    hazirlayanPersonelAdi: dosyaResData?.hazirlayan_ad_soyad || '',
     hazirlayanTelefon: dosyaResData?.hazirlayan_telefon || '',
     hazirlayanEposta: dosyaResData?.hazirlayan_eposta || '',
     // Turkish characters compatibility helper
-    hazirlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || 'Unvan Belirtilmedi',
-    talepEdenPersonelAdi: dosyaResData?.talep_eden_ad_soyad || 'Belirtilmedi',
+    hazirlayanPersonelUnvan: dosyaResData?.hazirlayan_unvan || '',
+    talepEdenPersonelAdi: dosyaResData?.talep_eden_ad_soyad || '',
     talepEdenPersonelUnvan: dosyaResData?.talep_eden_unvan || '',
     talepEdenTelefon: dosyaResData?.talep_eden_telefon || '',
-    sunanPersonelAdi: dosyaResData?.sunan_ad_soyad || 'Belirtilmedi',
+    sunanPersonelAdi: dosyaResData?.sunan_ad_soyad || '',
     sunanPersonelUnvan: dosyaResData?.sunan_unvan || '',
     sunanTelefon: dosyaResData?.sunan_telefon || '',
-    ilgiliPersonelAdi: dosyaResData?.irtibat_ad_soyad || 'Belirtilmedi',
+    ilgiliPersonelAdi: dosyaResData?.irtibat_ad_soyad || '',
     ilgiliPersonelUnvan: dosyaResData?.irtibat_unvan || '',
     ilgiliTelefon: dosyaResData?.irtibat_telefon || '',
     irtibatTelefon: dosyaResData?.irtibat_telefon || '',

@@ -118,6 +118,11 @@ export const useTabStore = create<TabState>((set, get) => ({
       })
 
       if (existingKurumIndex > -1) {
+        // Aynı path'e zaten aktifse sadece activeTabPath güncelle
+        if (tabs[existingKurumIndex].path === path) {
+          set({ activeTabPath: path })
+          return
+        }
         // If it exists, replace its path and label
         const updatedTabs = [...tabs]
         const label = getTabLabel(path)
@@ -149,6 +154,11 @@ export const useTabStore = create<TabState>((set, get) => ({
       })
 
       if (existingDosyaIndex > -1) {
+        // Aynı path'e zaten aktifse sadece activeTabPath güncelle
+        if (tabs[existingDosyaIndex].path === path) {
+          set({ activeTabPath: path })
+          return
+        }
         const updatedTabs = [...tabs]
         const label = getTabLabel(path)
         updatedTabs[existingDosyaIndex] = { path, label }
@@ -161,7 +171,9 @@ export const useTabStore = create<TabState>((set, get) => ({
 
     if (!exists) {
       const label = getTabLabel(path)
-      const newTabs = [...tabs, { path, label }]
+      // Savunma: duplicate path olmamasını garantile (key çakışması engeli)
+      const uniqueTabs = tabs.filter((t) => t.path !== path)
+      const newTabs = [...uniqueTabs, { path, label }]
       set({ tabs: newTabs, activeTabPath: path })
     } else {
       set({ activeTabPath: path })
