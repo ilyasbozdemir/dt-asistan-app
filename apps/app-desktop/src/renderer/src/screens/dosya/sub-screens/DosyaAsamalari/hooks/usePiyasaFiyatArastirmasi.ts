@@ -34,6 +34,7 @@ export interface BiddingKalem {
 
 import { useTabStore } from '../../../../../store/tabStore'
 import { formatDateString } from '../../../CiktiMerkezi.contextBuilder'
+import { paraYaziyaCevir } from '../../../../../constants/sayiEslesmeleri'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function usePiyasaFiyatArastirmasiLogic() {
@@ -602,11 +603,164 @@ export function usePiyasaFiyatArastirmasiLogic() {
       let mergedCtxStr: string | null = null
       if (sablon) {
         const processPath = sablon.route_path || sablon.dosya_adi || ''
-        const baseCtx = contextsByPath[processPath] || dosyaContext
+        const baseCtx = contextsByPath[processPath] || dosyaContext || {}
+
+        const formatTR = (val: number): string =>
+          new Intl.NumberFormat('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(val)
+
+        // Dinamik Teklifler & Firma Toplamları Hesabı
+        const calculatedTeklifler = invitedFirms
+          .map((f: any, index: number) => {
+            let sum = 0
+            items.forEach((k: any) => {
+              const price =
+                bids[`${k.id}_${f.id}`] ||
+                bids[`${k.id}_${f.firma_id}`] ||
+                bids[`${k.id}_${f.temin_firma_id}`] ||
+                0
+              sum += price * (k.miktar || 0)
+            })
+            return {
+              siraNo: index + 1,
+              istekliUnvani: f.unvan,
+              teklifBedeli: formatTR(sum),
+              teklifBedeliRaw: sum,
+              yaziIle: paraYaziyaCevir(sum)
+            }
+          })
+          .sort((a, b) => a.teklifBedeliRaw - b.teklifBedeliRaw)
+
+        const firmaToplamlari = invitedFirms.map((f: any) => {
+          let sum = 0
+          items.forEach((k: any) => {
+            const price =
+              bids[`${k.id}_${f.id}`] ||
+              bids[`${k.id}_${f.firma_id}`] ||
+              bids[`${k.id}_${f.temin_firma_id}`] ||
+              0
+            sum += price * (k.miktar || 0)
+          })
+          return {
+            toplam: formatTR(sum)
+          }
+        })
+
+        let enAvantajliTeklifSahibi = calculatedTeklifler[0]?.istekliUnvani || ''
+        let enAvantajliTeklifBedeli = calculatedTeklifler[0]?.teklifBedeli || ''
+
+        if (!setLowestFirmAsWinner && manualWinnerFirmaId) {
+          const manualWinner = invitedFirms.find(
+            (f: any) => f.firma_id === manualWinnerFirmaId || f.id === manualWinnerFirmaId
+          )
+          if (manualWinner) {
+            enAvantajliTeklifSahibi = manualWinner.unvan
+            const manualTeklif = calculatedTeklifler.find((t) => t.istekliUnvani === manualWinner.unvan)
+            if (manualTeklif) enAvantajliTeklifBedeli = manualTeklif.teklifBedeli
+          }
+        }
+
+        const isLowestBasis = !hesaplamaEsasi?.toLowerCase().includes('ortalama')
+        let grandTotal = 0
+
+        const needItems = items.map((k: any, index: number) => {
+          const itemPrices = invitedFirms.map((f: any) => ({
+            unvan: f.unvan,
+            price:
+              bids[`${k.id}_${f.id}`] ||
+              bids[`${k.id}_${f.firma_id}`] ||
+              bids[`${k.id}_${f.temin_firma_id}`] ||
+              0
+          }))
+          const validPrices = itemPrices.filter((p) => p.price > 0)
+          const minPrice = validPrices.length > 0 ? Math.min(...validPrices.map((p) => p.price)) : 0
+          const avgPrice =
+            validPrices.length > 0
+              ? validPrices.reduce((sum, p) => sum + p.price, 0) / validPrices.length
+              : 0
+
+          const chosenPrice = isLowestBasis ? minPrice : avgPrice
+          const lineTotal = chosenPrice * (k.miktar || 0)
+          grandTotal += lineTotal
+
+          const enUygunFirma =
+            validPrices.length > 0
+              ? validPrices.reduce((prev, curr) => (prev.price < curr.price ? prev : curr))
+              : null
+
+          const firmaTeklifleri = invitedFirms.map((f: any) => {
+            const price =
+              bids[`${k.id}_${f.id}`] ||
+              bids[`${k.id}_${f.firma_id}`] ||
+              bids[`${k.id}_${f.temin_firma_id}`] ||
+              0
+            return {
+              fiyat: price > 0 ? formatTR(price) : '-'
+            }
+          })
+
+          const firmaTeklifleriDetay = invitedFirms.map((f: any) => {
+            const price =
+              bids[`${k.id}_${f.id}`] ||
+              bids[`${k.id}_${f.firma_id}`] ||
+              bids[`${k.id}_${f.temin_firma_id}`] ||
+              0
+            const itemTotal = price * (k.miktar || 0)
+            return {
+              birimFiyat: price > 0 ? formatTR(price) : '-',
+              tutar: itemTotal > 0 ? formatTR(itemTotal) : '-',
+              hasPrice: price > 0
+            }
+          })
+
+          return {
+            siraNo: index + 1,
+            kodu: k.tasinir_kodu || k.okas_kodu || '-',
+            malzemeAdi: k.kalem_adi,
+            ozelligi: k.aciklama || '',
+            birimi: k.birim,
+            kdvOrani: k.kdv_orani,
+            miktar: formatTR(k.miktar || 0),
+            firmaTeklifleri,
+            firmaTeklifleriDetay,
+            enUygunFirmaAdi: enUygunFirma ? enUygunFirma.unvan : 'Teklif Yok',
+            enDusukFiyat: minPrice > 0 ? formatTR(minPrice) : '-',
+            toplamBedel: lineTotal > 0 ? formatTR(lineTotal) : '-'
+          }
+        })
+
+        const formattedDocDate = formatDateString(docDate) || baseCtx.tarih || baseCtx.dosyaTarihi
+
         const mergedCtx = {
           ...baseCtx,
-          tarih: docDate ? formatDateString(docDate) : baseCtx.tarih,
-          dosyaTarihi: docDate ? formatDateString(docDate) : baseCtx.dosyaTarihi
+          tarih: formattedDocDate,
+          dosyaTarihi: formattedDocDate,
+          tutanakTarihi:
+            targetMode === 'tutanak'
+              ? formattedDocDate
+              : baseCtx.tutanakTarihi || formattedDocDate,
+          maliyetCetveliTarihi:
+            targetMode === 'maliyet'
+              ? formattedDocDate
+              : baseCtx.maliyetCetveliTarihi || formattedDocDate,
+          yaklasikMaliyet: formatTR(total),
+          genelToplam: formatTR(total),
+          firmalar: invitedFirms.map((f: any) => ({ unvan: f.unvan })),
+          firmalarColspan: invitedFirms.length + 2,
+          firmaToplamlari,
+          calculatedTeklifler,
+          enAvantajliTeklifSahibi,
+          enAvantajliTeklifBedeli,
+          ikinciAvantajliTeklifSahibi: calculatedTeklifler[1]?.istekliUnvani || '',
+          ikinciAvantajliTeklifBedeli: calculatedTeklifler[1]?.teklifBedeli || '',
+          items: needItems,
+          kalemler: needItems,
+          yukleniciFirma:
+            targetMode === 'tutanak'
+              ? enAvantajliTeklifSahibi
+              : baseCtx.yukleniciFirma || enAvantajliTeklifSahibi
         }
         mergedCtxStr = JSON.stringify(mergedCtx)
 
