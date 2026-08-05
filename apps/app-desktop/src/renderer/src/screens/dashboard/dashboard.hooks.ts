@@ -401,10 +401,9 @@ export function useAnnouncements() {
             remoteData = data
           }
         } else {
-          throw new Error('Server returned non-200 response')
+          remoteData = fallbackAnnouncements as Announcement[]
         }
-      } catch (error) {
-        console.warn('Failed to fetch remote announcements, using local fallback:', error)
+      } catch {
         remoteData = fallbackAnnouncements as Announcement[]
       }
 

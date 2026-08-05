@@ -75,7 +75,7 @@ export function DocumentsDashboard({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {stageDocs.map((doc: any) => {
+              {stageDocs.map((doc: any, idx: number) => {
                 const sablon = sablons.find((s: any) => {
                   const normAd = normalizeForMatch(s.ad)
                   const normDocName = normalizeForMatch(doc.belge_adi)
@@ -86,7 +86,7 @@ export function DocumentsDashboard({
 
                 return (
                   <tr
-                    key={doc.id || doc.belge_adi}
+                    key={`doc_tbl_${doc.id || doc.belge_adi}_${idx}`}
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                   >
                     <td className="px-5 py-4 whitespace-nowrap">
@@ -189,7 +189,7 @@ export function DocumentsDashboard({
   if (docViewMode === 'list') {
     return (
       <div className="flex flex-col gap-3">
-        {stageDocs.map((doc: any) => {
+        {stageDocs.map((doc: any, idx: number) => {
           const sablon = sablons.find((s: any) => {
             const normAd = normalizeForMatch(s.ad)
             const normDocName = normalizeForMatch(doc.belge_adi)
@@ -200,7 +200,7 @@ export function DocumentsDashboard({
 
           return (
             <div
-              key={doc.id || doc.belge_adi}
+              key={`doc_lst_${doc.id || doc.belge_adi}_${idx}`}
               className={cn(
                 'relative group bg-gradient-to-r from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-xl p-4 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4',
                 activeActionDropdown === doc.belge_adi ? 'z-30' : 'z-10'
@@ -340,7 +340,7 @@ export function DocumentsDashboard({
   /* DOCUMENTS GRID VIEW (DEFAULT) */
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      {stageDocs.map((doc: any) => {
+      {stageDocs.map((doc: any, idx: number) => {
         const sablon = sablons.find((s: any) => {
           const normAd = normalizeForMatch(s.ad)
           const normDocName = normalizeForMatch(doc.belge_adi)
@@ -351,7 +351,7 @@ export function DocumentsDashboard({
 
         return (
           <div
-            key={doc.id || doc.belge_adi}
+            key={`doc_grd_${doc.id || doc.belge_adi}_${idx}`}
             className={cn(
               'relative group bg-gradient-to-br from-slate-50/40 to-white dark:from-slate-900/40 dark:to-slate-950/60 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/[0.02] hover:border-blue-500/40 dark:hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between',
               activeActionDropdown === doc.belge_adi ? 'z-30' : 'z-10'

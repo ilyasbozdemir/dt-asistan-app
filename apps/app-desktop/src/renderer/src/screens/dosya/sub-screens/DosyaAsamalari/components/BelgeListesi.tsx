@@ -428,9 +428,9 @@ export function BelgeListesi({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {belgeler.map((belge) => (
+              {belgeler.map((belge, idx) => (
                 <tr
-                  key={belge.id}
+                  key={`belge_tbl_${belge.id || 'b'}_${idx}`}
                   className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
                 >
                   <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">
@@ -455,9 +455,9 @@ export function BelgeListesi({
 
       {viewMode === "list" && (
         <div className="space-y-2">
-          {belgeler.map((belge) => (
+          {belgeler.map((belge, idx) => (
             <div
-              key={belge.id}
+              key={`belge_lst_${belge.id || 'b'}_${idx}`}
               className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-blue-200 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900"
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -495,9 +495,9 @@ export function BelgeListesi({
 
       {viewMode === "grid" && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {belgeler.map((belge) => (
+          {belgeler.map((belge, idx) => (
             <div
-              key={belge.id}
+              key={`belge_grd_${belge.id || 'b'}_${idx}`}
               className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
             >
               <div className="flex items-start justify-between">
