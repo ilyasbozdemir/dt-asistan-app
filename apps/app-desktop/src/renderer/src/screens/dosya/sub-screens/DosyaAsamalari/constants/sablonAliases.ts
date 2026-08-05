@@ -26,8 +26,7 @@ export const SABLON_ALIAS_MAP: Record<string, string[]> = {
     'ekap-yasaklilik'
   ],
   'piyasa-fiyat-arastirma-gorevlendirmesi': [
-    'piyasa-fiyat-arastirma-gorevlendirmesi',
-    'gorevlendirme-yazisi'
+    'piyasa-fiyat-arastirma-gorevlendirmesi'
   ],
   'piyasa-fiyat-arastirma-tutanagi': [
     'piyasa-fiyat-arastirma-tutanagi',

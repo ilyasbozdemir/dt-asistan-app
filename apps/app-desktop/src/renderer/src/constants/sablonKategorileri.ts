@@ -36,7 +36,6 @@ export const SABLON_KATEGORILERI: SablonKategori[] = [
       'dagitim-cizelgesi-karma',
       'fiyat-arastirma-mektubu',
       'fiyat-arastirmasi',
-      'gorevlendirme-yazisi',
       'piyasa-fiyat-arastirma-gorevlendirmesi',
       'piyasa-fiyat-arastirma-tutanagi',
       'teklif-mektubu-dagitim-cizelgesi',

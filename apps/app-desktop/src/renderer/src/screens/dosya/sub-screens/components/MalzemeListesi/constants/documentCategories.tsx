@@ -57,7 +57,6 @@ export function buildDocumentCategories(
     onYaklasikMaliyetKomisyonu,
     onMuayeneKabulKomisyonu,
     onFiyatArastirmaKomisyonu,
-    onPiyasaArastirmaGorevlendirmesi,
     onPiyasaArastirmaTutanagi,
     onYaklasikMaliyetHesapCetveli,
     onSonAlimCetveli,
@@ -197,14 +196,6 @@ export function buildDocumentCategories(
       iconColorClass: "text-indigo-500",
       steps: [2],
       items: [
-        {
-          id: "piyasaArastirmaGorevlendirmesi",
-          label: "Piyasa Arş. Görevlendirmesi",
-          icon: ClipboardList,
-          iconColorClass: "text-indigo-500",
-          onClick: onPiyasaArastirmaGorevlendirmesi,
-          steps: [2],
-        },
         {
           id: "piyasaArastirmaTutanagi",
           label: "Piyasa Araştırma Tutanağı",

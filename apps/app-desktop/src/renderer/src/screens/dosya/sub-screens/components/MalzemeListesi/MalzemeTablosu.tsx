@@ -502,7 +502,6 @@ export function MalzemeTablosu({
       ],
       "piyasa-fiyat-arastirma-gorevlendirmesi": [
         "piyasa-fiyat-arastirma-gorevlendirmesi",
-        "gorevlendirme-yazisi",
       ],
       "piyasa-fiyat-arastirma-tutanagi": [
         "piyasa-fiyat-arastirma-tutanagi",

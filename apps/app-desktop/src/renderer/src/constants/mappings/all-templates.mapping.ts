@@ -222,22 +222,6 @@ export const FiyatArastirmasiMapping: ProcessMapping = {
 }
 
 // ===========================================================
-// 8. Görevlendirme Yazısı
-// ===========================================================
-export const GorevlendirmeYazisiMapping: ProcessMapping = {
-  antetSatirlari: { tablo: 'TANIM_Kurum', sutun: 'kurum_anteti', aciklama: 'Kurum Anteti' },
-  kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
-  kurumUst: { tablo: 'TANIM_Kurum', sutun: 'ust_idari_birim', aciklama: 'Üst İdari Birim' },
-  mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
-  isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
-  evrakSayisi: {
-    formul:
-      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
-    aciklama: 'Evrak Sayısı'
-  }
-}
-
-// ===========================================================
 // 9. Piyasa Fiyat Araştırma Tutanağı
 // ===========================================================
 export const PiyasaFiyatArastirmaTutanagiMapping: ProcessMapping = {
