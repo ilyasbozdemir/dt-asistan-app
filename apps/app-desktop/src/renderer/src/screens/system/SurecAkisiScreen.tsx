@@ -120,7 +120,7 @@ export default function SurecAkisiScreen(): React.JSX.Element {
           />
         )}
 
-        {selectedTab === "firmalarx" && (
+        {selectedTab === "firmalar" && (
           <FirmalarTab
             firmalar={firmalar}
             belgeler={belgeler}
