@@ -229,7 +229,9 @@ export const PiyasaFiyatArastirmaTutanagiMapping: ProcessMapping = {
   kurumUst: { tablo: 'TANIM_Kurum', sutun: 'ust_idari_birim', aciklama: 'Üst İdari Birim' },
   kurumAdi: { tablo: 'TANIM_Kurum', sutun: 'kurum_adi', aciklama: 'Kurum Adı' },
   mudurluk: { tablo: 'TANIM_Kurum', sutun: 'makam_adi', aciklama: 'Müdürlük / Makam' },
+  isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
+  dosyaKonusu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Dosya Konusu' },
   toplamBedel: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Toplam Bedel' }
 }
 

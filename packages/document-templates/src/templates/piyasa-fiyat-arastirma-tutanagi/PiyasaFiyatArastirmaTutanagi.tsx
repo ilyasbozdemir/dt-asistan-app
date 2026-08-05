@@ -22,7 +22,6 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
   const {
     idareAdi,
     kurumAdi,
-    isAdi = "",
     dosyaTarihi = "",
     evrakSayisi = "",
     tarih = "",
@@ -35,6 +34,62 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
     baskanAdi = "",
     baskanUnvan = "",
   } = data || {};
+
+  const isAdi = data?.isAdi || data?.isinAdi || data?.dosyaKonusu ||
+    data?.konu || "";
+
+  const turLower = String(
+    data?.alimTuru || data?.tur || data?.ihale_tipi || "",
+  ).toLowerCase();
+  const isBasligi = turLower.includes("hizmet")
+    ? "Alınan Hizmetin Adı, Niteliği:"
+    : turLower.includes("yapı") || turLower.includes("yapim")
+    ? "Yapılan İşin Adı, Niteliği:"
+    : turLower.includes("mal")
+    ? "Alınan Malın Adı, Niteliği:"
+    : "Yapılan İş / Mal / Hizmetin Adı, Niteliği:";
+
+  // Tablo 2: Alım Yapılması Uygun Görülen Kişiler için en düşük teklifi veren firmanın dinamik tespiti
+  const processedKalemler = (ihtiyacKalemleri || []).map((kalem) => {
+    let enUygunFirmaAdi = kalem.enUygunFirmaAdi || "";
+    let enDusukFiyat = kalem.enDusukFiyat;
+    let kalemToplamBedel = kalem.toplamBedel;
+
+    if (
+      !enUygunFirmaAdi &&
+      kalem.firmaTeklifleriDetay &&
+      kalem.firmaTeklifleriDetay.length > 0
+    ) {
+      let minTutar = Infinity;
+      let minIdx = -1;
+
+      kalem.firmaTeklifleriDetay.forEach((tf, idx) => {
+        const valStr = String(tf.birimFiyat || tf.tutar || "");
+        const numPrice = typeof tf.birimFiyat === "number"
+          ? tf.birimFiyat
+          : parseFloat(valStr.replace(/[^0-9.,]/g, "").replace(",", "."));
+
+        if (!isNaN(numPrice) && numPrice > 0 && numPrice < minTutar) {
+          minTutar = numPrice;
+          minIdx = idx;
+        }
+      });
+
+      if (minIdx !== -1 && firmalar[minIdx]) {
+        enUygunFirmaAdi = firmalar[minIdx].unvan || `Firma ${minIdx + 1}`;
+        const tf = kalem.firmaTeklifleriDetay[minIdx];
+        if (!enDusukFiyat) enDusukFiyat = tf.birimFiyat;
+        if (!kalemToplamBedel) kalemToplamBedel = tf.tutar;
+      }
+    }
+
+    return {
+      ...kalem,
+      enUygunFirmaAdi: enUygunFirmaAdi || "-",
+      enDusukFiyat: enDusukFiyat ?? "-",
+      toplamBedel: kalemToplamBedel ?? "-",
+    };
+  });
 
   return (
     <DocumentLayout
@@ -92,7 +147,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                   placeholder="İdare Adı"
                 />
                 <br />
-                <strong>Yapılan İş / Mal / Hizmetin Adı, Niteliği:</strong>{" "}
+                <strong>{isBasligi}</strong>{" "}
                 <EditableField
                   name="isAdi"
                   value={isAdi}
@@ -100,11 +155,13 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                 />
                 <br />
                 <strong>
-                  Yetkilendirilen Görevlilere İlişkin Onay Belgesi /
-                  Görevlendirme Onayı Tarih ve No su:
+                  Onay Belgesi Tarihi:
                 </strong>{" "}
-                <DateEditableField name="dosyaTarihi" value={dosyaTarihi} /> -
-                {" "}
+                <DateEditableField name="dosyaTarihi" value={dosyaTarihi} />
+                <br />
+                <strong>
+                  Sayı:
+                </strong>{" "}
                 <EditableField name="evrakSayisi" value={evrakSayisi} />
               </td>
               <td
@@ -490,7 +547,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {ihtiyacKalemleri.map((kalem, idx) => (
+            {processedKalemler.map((kalem, idx) => (
               <tr key={idx}>
                 <td
                   style={{
@@ -569,7 +626,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
               </tr>
             ))}
 
-            {ihtiyacKalemleri.length > 0 && (
+            {processedKalemler.length > 0 && (
               <tr style={{ fontWeight: "bold", backgroundColor: "#fafafa" }}>
                 <td
                   colSpan={6}
@@ -673,10 +730,20 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                 <span
                   style={{ fontWeight: "bold", textTransform: "uppercase" }}
                 >
-                  {uye.adSoyad}
+                  <EditableField
+                    name={`komisyon.${idx}.adSoyad`}
+                    value={uye.adSoyad || ""}
+                    placeholder="Adı Soyadı"
+                  />
                 </span>
                 <br />
-                <span>{uye.unvan}</span>
+                <span>
+                  <EditableField
+                    name={`komisyon.${idx}.unvan`}
+                    value={uye.unvan || ""}
+                    placeholder="Unvanı"
+                  />
+                </span>
               </div>
             ))}
           </div>
