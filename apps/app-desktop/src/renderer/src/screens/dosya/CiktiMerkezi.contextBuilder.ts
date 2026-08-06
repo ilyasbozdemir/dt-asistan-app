@@ -506,12 +506,12 @@ export function buildDocumentContext(
 
   if (
     resolvedMappings.ihtiyacKalemleri !== undefined &&
-    (resolvedMappings.ihtiyacKalemleri === null ||
-      String(resolvedMappings.ihtiyacKalemleri).startsWith('[Belirtilmedi'))
+    Array.isArray(resolvedMappings.ihtiyacKalemleri) &&
+    resolvedMappings.ihtiyacKalemleri.length > 0
   ) {
-    context.ihtiyacKalemleri = needItems
-  } else if (resolvedMappings.ihtiyacKalemleri !== undefined) {
     context.ihtiyacKalemleri = resolvedMappings.ihtiyacKalemleri
+  } else {
+    context.ihtiyacKalemleri = needItems
   }
 
   return context

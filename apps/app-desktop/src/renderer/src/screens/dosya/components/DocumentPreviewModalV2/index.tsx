@@ -398,6 +398,26 @@ export function DocumentPreviewModalV2({
                   finalData.antetSatirlari = resolved.antetSatirlari;
                   continue;
                 }
+                if (
+                  key === "ihtiyacKalemleri" &&
+                  resolved.ihtiyacKalemleri &&
+                  Array.isArray(resolved.ihtiyacKalemleri) &&
+                  resolved.ihtiyacKalemleri.length > 0 &&
+                  (!Array.isArray(val) || val.length === 0)
+                ) {
+                  finalData.ihtiyacKalemleri = resolved.ihtiyacKalemleri;
+                  continue;
+                }
+                if (
+                  key === "komisyon" &&
+                  resolved.komisyon &&
+                  Array.isArray(resolved.komisyon) &&
+                  resolved.komisyon.length > 0 &&
+                  (!Array.isArray(val) || val.length === 0 || val.every((c: any) => !c.adSoyad || String(c.adSoyad).includes("BELİRTİLMESİ")))
+                ) {
+                  finalData.komisyon = resolved.komisyon;
+                  continue;
+                }
                 const isSavedPlaceholder = typeof val === "string" &&
                   val.includes("[Belirtilmedi");
                 const isSavedAcme = typeof val === "string" &&

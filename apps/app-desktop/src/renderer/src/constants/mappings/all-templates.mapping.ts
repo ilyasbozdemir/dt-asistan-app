@@ -232,7 +232,42 @@ export const PiyasaFiyatArastirmaTutanagiMapping: ProcessMapping = {
   isAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   isinAdi: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'İşin Adı' },
   dosyaKonusu: { tablo: 'DATA_TeminDosyasi', sutun: 'konu', aciklama: 'Dosya Konusu' },
-  toplamBedel: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Toplam Bedel' }
+  toplamBedel: { tablo: 'DATA_TeminDosyasi', sutun: 'yaklasik_maliyet', aciklama: 'Toplam Bedel' },
+  ihtiyacKalemleri: {
+    tablo: 'DATA_TeminKalem',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      malzemeAdi: 'kalem_adi',
+      ozelligi: 'aciklama',
+      birimi: 'birim',
+      miktar: 'miktar'
+    }
+  },
+  komisyon: {
+    tablo: 'DATA_TeminKomisyon',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      adSoyad: 'ad_soyad',
+      unvan: 'unvan',
+      gorevi: 'gorevi'
+    }
+  },
+  baskanAdi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
+    aciklama: 'Harcama Yetkilisi / Onaylayan'
+  },
+  baskanUnvan: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'onaylayan_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
+    aciklama: 'Harcama Yetkilisi Unvanı'
+  }
 }
 
 // ===========================================================

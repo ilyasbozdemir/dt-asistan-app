@@ -259,13 +259,89 @@ export async function resolveTemplateData(
         const query = `SELECT * FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ?`;
         const rows = await queryExecutor(query, [activeDosyaId]);
         
+        let firms: any[] = [];
+        let bidsMap: Record<string, number> = {};
+        
+        if (rule.tablo === 'DATA_TeminKalem') {
+          try {
+            const firmQuery = `SELECT df.id as temin_firma_id,
+                                      COALESCE(NULLIF(df.unvan, ''), NULLIF(f.unvan, ''), NULLIF(f.firma_adi, ''), NULLIF(df.firma_adi, ''), 'İstekli Firma') as unvan
+                               FROM DATA_TeminFirma df
+                               LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
+                               WHERE df.temin_dosya_id = ?
+                               ORDER BY df.id ASC`;
+            firms = await queryExecutor(firmQuery, [activeDosyaId]);
+            if (firms && firms.length > 0) {
+              resolvedPayload['firmalar'] = firms.map((f: any) => ({ unvan: f.unvan }));
+            }
+            
+            const bidQuery = `SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?`;
+            const bidRows = await queryExecutor(bidQuery, [activeDosyaId]);
+            (bidRows || []).forEach((b: any) => {
+              bidsMap[`${b.temin_kalem_id}_${b.temin_firma_id}`] = b.birim_fiyat || 0;
+            });
+          } catch {
+            // Ignore firm query failure
+          }
+        }
+
+        const formatTR = (val: number) => {
+          return new Intl.NumberFormat('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(val);
+        };
+
+        const firmTotals = (firms || []).map(() => 0);
+
         resolvedPayload[sablonDegiskeni] = rows.map((row: any, idx: number) => {
           const item: Record<string, any> = { siraNo: idx + 1 };
           for (const [templateKey, dbColumn] of Object.entries(rule.altEslestirme!)) {
             item[templateKey] = row[dbColumn] ?? '';
           }
+
+          if (rule.tablo === 'DATA_TeminKalem' && firms && firms.length > 0) {
+            let minPrice = Infinity;
+            let minIdx = -1;
+
+            const firmaTeklifleriDetay = firms.map((f: any, fIdx: number) => {
+              const price = bidsMap[`${row.id}_${f.temin_firma_id}`] || 0;
+              const numMiktar = typeof row.miktar === 'number' ? row.miktar : parseFloat(String(row.miktar || 0));
+              const total = price * (isNaN(numMiktar) ? 0 : numMiktar);
+              if (price > 0) {
+                firmTotals[fIdx] += total;
+                if (price < minPrice) {
+                  minPrice = price;
+                  minIdx = fIdx;
+                }
+              }
+              return {
+                birimFiyat: price > 0 ? formatTR(price) : '-',
+                tutar: total > 0 ? formatTR(total) : '-'
+              };
+            });
+
+            item['firmaTeklifleriDetay'] = firmaTeklifleriDetay;
+            if (minIdx !== -1 && firms[minIdx]) {
+              const numMiktar = typeof row.miktar === 'number' ? row.miktar : parseFloat(String(row.miktar || 0));
+              item['enUygunFirmaAdi'] = firms[minIdx].unvan;
+              item['enDusukFiyat'] = formatTR(minPrice);
+              item['toplamBedel'] = formatTR(minPrice * (isNaN(numMiktar) ? 0 : numMiktar));
+            } else {
+              item['enUygunFirmaAdi'] = item['enUygunFirmaAdi'] || '-';
+              item['enDusukFiyat'] = item['enDusukFiyat'] || '-';
+              item['toplamBedel'] = item['toplamBedel'] || '-';
+            }
+          }
+
           return item;
         });
+
+        if (rule.tablo === 'DATA_TeminKalem' && firms && firms.length > 0) {
+          resolvedPayload['firmaToplamlariDetay'] = firmTotals.map((tot: number) => ({
+            toplam: tot > 0 ? formatTR(tot) : '-'
+          }));
+        }
       } catch (err) {
         resolvedPayload[sablonDegiskeni] = [];
       }
@@ -277,21 +353,27 @@ export async function resolveTemplateData(
       try {
         let members: any[] = [];
         // 1. Try querying DATA_TeminKomisyon for active file
-        const fileKomQuery = `SELECT tk.*, p.ad_soyad, p.unvan 
+        const fileKomQuery = `SELECT tk.*, 
+                                     COALESCE(NULLIF(tk.ad_soyad, ''), NULLIF(p.ad_soyad, ''), '') as resolved_ad_soyad,
+                                     COALESCE(NULLIF(tk.unvan, ''), NULLIF(p.unvan, ''), '') as resolved_unvan,
+                                     COALESCE(k.ad, tk.komisyon_turu) as komisyon_turu_adi
                               FROM DATA_TeminKomisyon tk 
                               LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id 
+                              LEFT JOIN TANIM_Komisyon k ON tk.komisyon_id = k.id
                               WHERE tk.temin_dosya_id = ?`;
         const fileKomRows = await queryExecutor(fileKomQuery, [activeDosyaId]);
         if (fileKomRows && fileKomRows.length > 0) {
-          if (sablonDegiskeni === 'fiyatKomisyonu') {
-            const filtered = fileKomRows.filter((r: any) =>
-              !r.komisyon_turu || r.komisyon_turu.toLowerCase().includes('fiyat') || r.komisyon_turu.toLowerCase().includes('piyasa')
-            );
+          if (sablonDegiskeni === 'fiyatKomisyonu' || sablonDegiskeni === 'komisyon') {
+            const filtered = fileKomRows.filter((r: any) => {
+              const kt = String(r.komisyon_turu_adi || r.komisyon_turu || '').toLowerCase();
+              return !kt || kt.includes('fiyat') || kt.includes('piyasa') || kt.includes('araştırma') || kt.includes('arastirma');
+            });
             members = filtered.length > 0 ? filtered : fileKomRows;
           } else if (sablonDegiskeni === 'muayeneKomisyonu') {
-            const filtered = fileKomRows.filter((r: any) =>
-              r.komisyon_turu?.toLowerCase().includes('muayene') || r.komisyon_turu?.toLowerCase().includes('kabul')
-            );
+            const filtered = fileKomRows.filter((r: any) => {
+              const kt = String(r.komisyon_turu_adi || r.komisyon_turu || '').toLowerCase();
+              return kt.includes('muayene') || kt.includes('kabul');
+            });
             members = filtered.length > 0 ? filtered : fileKomRows;
           } else {
             members = fileKomRows;
@@ -308,15 +390,17 @@ export async function resolveTemplateData(
                               WHERE k.aktif_mi = 1 OR k.aktif_mi IS NULL`;
           const tanimRows = await queryExecutor(tanimQuery, []);
           if (tanimRows && tanimRows.length > 0) {
-            if (sablonDegiskeni === 'fiyatKomisyonu') {
-              const filtered = tanimRows.filter((r: any) =>
-                r.komisyon_adi?.toLowerCase().includes('fiyat') || r.komisyon_adi?.toLowerCase().includes('piyasa')
-              );
+            if (sablonDegiskeni === 'fiyatKomisyonu' || sablonDegiskeni === 'komisyon') {
+              const filtered = tanimRows.filter((r: any) => {
+                const ka = String(r.komisyon_adi || '').toLowerCase();
+                return ka.includes('fiyat') || ka.includes('piyasa') || ka.includes('araştırma') || ka.includes('arastirma');
+              });
               members = filtered.length > 0 ? filtered : tanimRows;
             } else if (sablonDegiskeni === 'muayeneKomisyonu') {
-              const filtered = tanimRows.filter((r: any) =>
-                r.komisyon_adi?.toLowerCase().includes('muayene') || r.komisyon_adi?.toLowerCase().includes('kabul')
-              );
+              const filtered = tanimRows.filter((r: any) => {
+                const ka = String(r.komisyon_adi || '').toLowerCase();
+                return ka.includes('muayene') || ka.includes('kabul');
+              });
               members = filtered.length > 0 ? filtered : tanimRows;
             } else {
               members = tanimRows;
@@ -325,10 +409,10 @@ export async function resolveTemplateData(
         }
 
         resolvedPayload[sablonDegiskeni] = members.map((m: any) => ({
-          adSoyad: m.ad_soyad || m.adSoyad || 'Belirtilmedi',
-          unvan: m.unvan || '',
+          adSoyad: m.resolved_ad_soyad || m.ad_soyad || m.adSoyad || '',
+          unvan: m.resolved_unvan || m.unvan || '',
           gorevi: m.gorev || m.gorev_adi || (m.asil_mi === 0 ? 'Yedek Üye' : 'Üye'),
-          pozisyonu: m.unvan || ''
+          pozisyonu: m.resolved_unvan || m.unvan || ''
         }));
         continue;
       } catch (err) {

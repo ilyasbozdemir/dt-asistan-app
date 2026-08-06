@@ -41,16 +41,35 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
   const turLower = String(
     data?.alimTuru || data?.tur || data?.ihale_tipi || "",
   ).toLowerCase();
-  const isBasligi = turLower.includes("hizmet")
+  const isBasligi = data?.isHizmet || turLower.includes("hizmet")
     ? "Alınan Hizmetin Adı, Niteliği:"
-    : turLower.includes("yapı") || turLower.includes("yapim")
+    : data?.isYapim || turLower.includes("yapı") || turLower.includes("yapim")
     ? "Yapılan İşin Adı, Niteliği:"
-    : turLower.includes("mal")
+    : data?.isMal || turLower.includes("mal")
     ? "Alınan Malın Adı, Niteliği:"
     : "Yapılan İş / Mal / Hizmetin Adı, Niteliği:";
 
+  const displayKomisyon = (komisyon && komisyon.length > 0)
+    ? komisyon
+    : (data?.fiyatKomisyonu && data.fiyatKomisyonu.length > 0)
+    ? data.fiyatKomisyonu
+    : (data?.gorevlendirilenler && data.gorevlendirilenler.length > 0)
+    ? data.gorevlendirilenler
+    : [];
+
+  const displayFirmalar = (firmalar && firmalar.length > 0)
+    ? firmalar
+    : (data?.firmaListesi && data.firmaListesi.length > 0)
+    ? data.firmaListesi
+    : [];
+
   // Tablo 2: Alım Yapılması Uygun Görülen Kişiler için en düşük teklifi veren firmanın dinamik tespiti
   const processedKalemler = (ihtiyacKalemleri || []).map((kalem) => {
+    const malzemeAdi = kalem.malzemeAdi || (kalem as any).kalem_adi || (kalem as any).kalemAdi || "";
+    const ozelligi = kalem.ozelligi || (kalem as any).aciklama || "";
+    const birimi = kalem.birimi || (kalem as any).birim || "";
+    const miktar = kalem.miktar ?? "";
+
     let enUygunFirmaAdi = kalem.enUygunFirmaAdi || "";
     let enDusukFiyat = kalem.enDusukFiyat;
     let kalemToplamBedel = kalem.toplamBedel;
@@ -75,8 +94,8 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
         }
       });
 
-      if (minIdx !== -1 && firmalar[minIdx]) {
-        enUygunFirmaAdi = firmalar[minIdx].unvan || `Firma ${minIdx + 1}`;
+      if (minIdx !== -1 && displayFirmalar[minIdx]) {
+        enUygunFirmaAdi = displayFirmalar[minIdx].unvan || `Firma ${minIdx + 1}`;
         const tf = kalem.firmaTeklifleriDetay[minIdx];
         if (!enDusukFiyat) enDusukFiyat = tf.birimFiyat;
         if (!kalemToplamBedel) kalemToplamBedel = tf.tutar;
@@ -85,6 +104,10 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
 
     return {
       ...kalem,
+      malzemeAdi,
+      ozelligi,
+      birimi,
+      miktar,
       enUygunFirmaAdi: enUygunFirmaAdi || "-",
       enDusukFiyat: enDusukFiyat ?? "-",
       toplamBedel: kalemToplamBedel ?? "-",
@@ -269,7 +292,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
               >
                 Miktar
               </th>
-              {firmalar.map((f, idx) => (
+              {displayFirmalar.map((f: any, idx: number) => (
                 <th
                   key={idx}
                   colSpan={2}
@@ -281,12 +304,16 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                     fontWeight: "bold",
                   }}
                 >
-                  {f.unvan || `Firma ${idx + 1}`}
+                  <EditableField
+                    name={`firmalar.${idx}.unvan`}
+                    value={f.unvan || `Firma ${idx + 1}`}
+                    placeholder={`Firma ${idx + 1}`}
+                  />
                 </th>
               ))}
             </tr>
             <tr>
-              {firmalar.map((_, idx) => (
+              {displayFirmalar.map((_: any, idx: number) => (
                 <React.Fragment key={idx}>
                   <th
                     style={{
@@ -315,7 +342,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {ihtiyacKalemleri.map((kalem, idx) => (
+            {processedKalemler.map((kalem, idx) => (
               <tr key={idx}>
                 <td
                   style={{
@@ -362,34 +389,45 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                 >
                   {kalem.miktar}
                 </td>
-                {(kalem.firmaTeklifleriDetay || []).map((tf, fIdx) => (
-                  <React.Fragment key={fIdx}>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "4px",
-                        textAlign: "right",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {tf.birimFiyat}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "4px",
-                        textAlign: "right",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {tf.tutar}
-                    </td>
-                  </React.Fragment>
-                ))}
+                {displayFirmalar.map((_: any, fIdx: number) => {
+                  const tf = kalem.firmaTeklifleriDetay?.[fIdx] || {};
+                  return (
+                    <React.Fragment key={fIdx}>
+                      <td
+                        style={{
+                          border: "1px solid #000",
+                          padding: "4px",
+                          textAlign: "right",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <EditableField
+                          name={`ihtiyacKalemleri.${idx}.firmaTeklifleriDetay.${fIdx}.birimFiyat`}
+                          value={String(tf.birimFiyat ?? "-")}
+                          placeholder="0,00"
+                        />
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #000",
+                          padding: "4px",
+                          textAlign: "right",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <EditableField
+                          name={`ihtiyacKalemleri.${idx}.firmaTeklifleriDetay.${fIdx}.tutar`}
+                          value={String(tf.tutar ?? "-")}
+                          placeholder="0,00"
+                        />
+                      </td>
+                    </React.Fragment>
+                  );
+                })}
               </tr>
             ))}
 
-            {ihtiyacKalemleri.length > 0 && (
+            {processedKalemler.length > 0 && (
               <tr style={{ fontWeight: "bold", backgroundColor: "#fafafa" }}>
                 <td
                   colSpan={5}
@@ -401,22 +439,29 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                 >
                   Toplam Tutar :
                 </td>
-                {firmaToplamlariDetay.map((ft, idx) => (
-                  <React.Fragment key={idx}>
-                    <td style={{ border: "1px solid #000", padding: "4px" }}>
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "4px",
-                        textAlign: "right",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {ft.toplam}
-                    </td>
-                  </React.Fragment>
-                ))}
+                {displayFirmalar.map((_: any, fIdx: number) => {
+                  const ft = firmaToplamlariDetay?.[fIdx] || {};
+                  return (
+                    <React.Fragment key={fIdx}>
+                      <td style={{ border: "1px solid #000", padding: "4px" }}>
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #000",
+                          padding: "4px",
+                          textAlign: "right",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <EditableField
+                          name={`firmaToplamlariDetay.${fIdx}.toplam`}
+                          value={String(ft.toplam ?? "-")}
+                          placeholder="0,00"
+                        />
+                      </td>
+                    </React.Fragment>
+                  );
+                })}
               </tr>
             )}
           </tbody>
@@ -716,7 +761,7 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
               textAlign: "center",
             }}
           >
-            {komisyon.map((uye, idx) => (
+            {displayKomisyon.map((uye: any, idx: number) => (
               <div
                 key={idx}
                 style={{
