@@ -38,6 +38,7 @@ import { renderPdfBuffer } from './pdfService'
 import { renderDocxBuffer } from './docxService'
 import { startExpressServer, stopExpressServer } from './network/expressServer'
 import { registerArchiveHandlers } from './archive'
+import { registerAllIpcHandlers } from './ipc'
 import { TANIM_Placeholder } from '@dt/database'
 
 let isForceQuitting = false
@@ -587,179 +588,27 @@ if (!gotTheLock && !isMultiInstance) {
       }
     })
 
-    // IPC test
-    ipcMain.on('ping', () => console.log('pong'))
-
-    registerArchiveHandlers()
-
-    ipcMain.on('install-update', () => {
-      autoUpdater.quitAndInstall(false, true)
-    })
-
-    // --- EBYS Network (Socket) Handlers ---
-
-    ipcMain.handle('network:start-server', (_, port: number) => {
-      return startServer(port)
-    })
-
-    ipcMain.handle('network:stop-server', () => {
-      stopServer()
-      return { success: true }
-    })
-
-    ipcMain.handle('network:connect-client', (_, url: string) => {
-      return connectToServer(url)
-    })
-
-    ipcMain.handle('network:disconnect-client', () => {
-      disconnectFromServer()
-      return { success: true }
-    })
-
-    ipcMain.on('network:emit', (_, eventName: string, data: any) => {
-      // Eğer istemciysek sunucuya gönder
-      emitEvent(eventName, data)
-
-      // Eğer aynı zamanda sunucuysak, kendi istemcilerimize de dağıt
-      const io = getSocketServer()
-      if (io) {
-        io.emit(eventName, data)
-      }
-    })
-
-    // --- EBYS Express Network Handlers ---
-
-    ipcMain.handle('network:start-express', (_, port: number) => {
-      return startExpressServer(port)
-    })
-
-    ipcMain.handle('network:stop-express', () => {
-      stopExpressServer()
-      return { success: true }
-    })
-
-    ipcMain.handle('network:pull-db', async (_, url: string) => {
-      try {
-        const response = await fetch(`${url}/api/network/pull`)
-        if (!response.ok) {
-          const errorText = await response.text()
-          throw new Error(`Sunucu Hatası: ${response.status} - ${errorText}`)
+    const closeAllSecondaryWindows = () => {
+      const windows = BrowserWindow.getAllWindows()
+      for (let i = 1; i < windows.length; i++) {
+        if (!windows[i].isDestroyed()) {
+          windows[i].close()
         }
-
-        const arrayBuffer = await response.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-
-        let currentFile = workspaceManager.getCurrentFilePath()
-        let backupPath: string | null = null
-
-        if (!currentFile) {
-          const { canceled, filePath } = await dialog.showSaveDialog({
-            title: 'Ağdan Gelen Veritabanını Kaydet',
-            defaultPath: 'paylasim.dtal',
-            filters: [{ name: 'DTAL Dosyaları', extensions: ['dtal'] }]
-          })
-          if (canceled || !filePath) throw new Error('İşlem iptal edildi.')
-          currentFile = filePath
-        } else {
-          workspaceManager.close()
-          backupPath = currentFile + '.syncbak'
-          fs.copyFileSync(currentFile, backupPath)
-        }
-
-        try {
-          fs.writeFileSync(currentFile, buffer)
-          workspaceManager.open(currentFile, false)
-
-          BrowserWindow.getAllWindows().forEach((win) => {
-            if (!win.isDestroyed()) win.webContents.send('network:db-pulled')
-          })
-
-          return { success: true }
-        } catch (e: any) {
-          if (backupPath && fs.existsSync(backupPath)) {
-            fs.copyFileSync(backupPath, currentFile)
-            try {
-              workspaceManager.open(currentFile, false)
-            } catch {}
-          }
-          throw e
-        }
-      } catch (err: any) {
-        return { success: false, error: err.message }
       }
+    }
+
+    registerAllIpcHandlers({
+      closeAllSecondaryWindows,
+      setForceQuit: () => {
+        isForceQuitting = true
+      },
+      initialFilePath
     })
 
-    ipcMain.handle('network:push-db', async (_, url: string) => {
-      try {
-        const currentFile = workspaceManager.getCurrentFilePath()
-        if (!currentFile || !fs.existsSync(currentFile))
-          throw new Error('Gönderilecek açık bir dosya yok.')
+    createWindow()
 
-        // Ensure latest data is written
-        workspaceManager.save()
-
-        const fileData = fs.readFileSync(currentFile)
-
-        const response = await fetch(`${url}/api/network/push`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream'
-          },
-          body: fileData
-        })
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({ error: 'Bilinmeyen Hata' }))
-          throw new Error(`Hata: ${errData.error || response.statusText}`)
-        }
-
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err.message }
-      }
-    })
-
-    ipcMain.handle('network:can-undo-sync', async () => {
-      try {
-        const currentFile = workspaceManager.getCurrentFilePath()
-        if (!currentFile) return { canUndo: false }
-        const backupPath = currentFile + '.syncbak'
-        if (fs.existsSync(backupPath)) {
-          const stats = fs.statSync(backupPath)
-          return { canUndo: true, mtime: stats.mtime.toISOString() }
-        }
-        return { canUndo: false }
-      } catch {
-        return { canUndo: false }
-      }
-    })
-
-    ipcMain.handle('network:undo-sync', async () => {
-      try {
-        const currentFile = workspaceManager.getCurrentFilePath()
-        if (!currentFile) throw new Error('Açık bir çalışma dosyası yok.')
-        const backupPath = currentFile + '.syncbak'
-        if (!fs.existsSync(backupPath))
-          throw new Error('Geri alınacak senkronizasyon yedeği bulunamadı.')
-
-        workspaceManager.close()
-
-        // Restore backup
-        fs.copyFileSync(backupPath, currentFile)
-        fs.unlinkSync(backupPath)
-
-        workspaceManager.open(currentFile, false)
-
-        BrowserWindow.getAllWindows().forEach((win) => {
-          if (!win.isDestroyed()) {
-            win.webContents.send('db:invalidated')
-          }
-        })
-
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err.message }
-      }
+    app.on('activate', function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 
     // --- Workspace & SQLite Handlers ---
@@ -955,15 +804,6 @@ if (!gotTheLock && !isMultiInstance) {
       // Close the child window
       if (senderWindow && !senderWindow.isDestroyed()) {
         senderWindow.close()
-      }
-    })
-    ipcMain.handle('workspace:create', async (_, filePath: string, institutionName: string) => {
-      try {
-        const meta = workspaceManager.create(filePath, institutionName)
-        return { success: true, meta, newFilePath: workspaceManager.getCurrentFilePath() }
-      } catch (error: any) {
-        console.error('Create workspace error:', error)
-        return { success: false, error: error.message }
       }
     })
 
@@ -1167,190 +1007,6 @@ if (!gotTheLock && !isMultiInstance) {
         success: true,
         changelog: sortedChanges,
         backlog: backlog
-      }
-    })
-
-    ipcMain.handle(
-      'workspace:open',
-      async (_, filePath: string, allowMigration: boolean = false) => {
-        try {
-          closeAllSecondaryWindows()
-          const meta = workspaceManager.open(filePath, allowMigration)
-          return { success: true, meta, newFilePath: workspaceManager.getCurrentFilePath() }
-        } catch (error: any) {
-          if (error.message && error.message.startsWith('MIGRATION_REQUIRED|')) {
-            const payloadStr = error.message.split('|')[1]
-            const payload = JSON.parse(payloadStr)
-            return { success: false, ...payload } // { requiresMigration: true, pendingUpdates: [] }
-          }
-          console.error('Open workspace error:', error)
-          return { success: false, error: error.message }
-        }
-      }
-    )
-
-    ipcMain.handle('workspace:close', async () => {
-      try {
-        closeAllSecondaryWindows()
-        workspaceManager.close()
-        return { success: true }
-      } catch (error: any) {
-        console.error('Close workspace error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('workspace:backup', async (event) => {
-      try {
-        const filePath = workspaceManager.getCurrentFilePath()
-        if (!filePath) {
-          return { success: false, error: 'Aktif bir çalışma dosyası bulunamadı!' }
-        }
-        workspaceManager.save()
-
-        const win = BrowserWindow.fromWebContents(event.sender)
-        const { filePath: destPath } = await dialog.showSaveDialog(win!, {
-          title: 'Yedek Dosyasını Kaydet',
-          defaultPath: basename(filePath),
-          filters: [{ name: 'DT Asistan Veri Dosyası', extensions: ['dtal'] }]
-        })
-
-        if (!destPath) {
-          return { success: false, error: 'Yedekleme iptal edildi' }
-        }
-
-        fs.copyFileSync(filePath, destPath)
-        return { success: true, backupPath: destPath }
-      } catch (error: any) {
-        console.error('Backup workspace error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('workspace:backup-server', async () => {
-      try {
-        const filePath = workspaceManager.getCurrentFilePath()
-        if (!filePath) {
-          return { success: false, error: 'Aktif bir çalışma dosyası bulunamadı!' }
-        }
-        workspaceManager.save()
-
-        // TODO: MOCK UPLOAD TO SERVER
-        console.log(`[Mock] Uploading ${filePath} to web server as a backup...`)
-
-        // Wait 1.5s to simulate upload
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-
-        return { success: true, message: 'Web sunucusuna başarıyla yüklendi.' }
-      } catch (error: any) {
-        console.error('Backup to server error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('workspace:backup-email', async () => {
-      try {
-        const filePath = workspaceManager.getCurrentFilePath()
-        if (!filePath) {
-          return { success: false, error: 'Aktif bir çalışma dosyası bulunamadı!' }
-        }
-        workspaceManager.save()
-
-        const db = workspaceManager.getDb()
-        const hostRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpHost'").get() as {
-          value: string
-        }
-        const portRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPort'").get() as {
-          value: string
-        }
-        const userRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpUser'").get() as {
-          value: string
-        }
-        const passRow = db.prepare("SELECT value FROM settings WHERE key = 'smtpPass'").get() as {
-          value: string
-        }
-        const emailRow = db
-          .prepare("SELECT value FROM settings WHERE key = 'smtpReceiver'")
-          .get() as { value: string }
-        const secureRow = db
-          .prepare("SELECT value FROM settings WHERE key = 'smtpSecure'")
-          .get() as { value: string }
-
-        if (!hostRow?.value || !userRow?.value || !passRow?.value) {
-          return { success: false, error: 'SMTP ayarları yapılandırılmamış!' }
-        }
-
-        const receiver = emailRow?.value || userRow.value
-        const port = parseInt(portRow.value) || 587
-        const userSecure = secureRow?.value === 'true'
-        const actualSecure = port === 465 ? true : port === 587 ? false : userSecure
-
-        const transporter = nodemailer.createTransport({
-          host: hostRow.value,
-          port: port,
-          secure: actualSecure,
-          auth: {
-            user: userRow.value,
-            pass: passRow.value
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        })
-
-        const fileName = basename(filePath)
-        await transporter.sendMail({
-          from: `"DT Asistan Yedekleme" <${userRow.value}>`,
-          to: receiver,
-          subject: `DT Asistan Veritabanı Yedeği - ${fileName}`,
-          text: `Kurum dosyası yedeğiniz ektedir.\nDosya adı: ${fileName}\nTarih: ${new Date().toLocaleString('tr-TR')}`,
-          attachments: [
-            {
-              filename: fileName,
-              path: filePath
-            }
-          ]
-        })
-
-        return { success: true, email: receiver }
-      } catch (error: any) {
-        console.error('Email backup error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('app:force-quit', () => {
-      isForceQuitting = true
-      app.quit()
-    })
-
-    ipcMain.handle('workspace:get-meta', async () => {
-      try {
-        const meta = workspaceManager.getMeta()
-        return { success: true, meta }
-      } catch (error: any) {
-        console.error('Get meta error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('workspace:upload-file', async (_, sourcePath: string) => {
-      try {
-        const result = workspaceManager.uploadAttachment(sourcePath)
-        return { success: true, ...result }
-      } catch (error: any) {
-        console.error('Upload attachment error:', error)
-        return { success: false, error: error.message }
-      }
-    })
-
-    ipcMain.handle('workspace:open-file', async (_, relativePath: string) => {
-      try {
-        const success = await workspaceManager.openAttachment(relativePath)
-        return { success }
-      } catch (error: any) {
-        console.error('Open attachment error:', error)
-        return { success: false, error: error.message }
       }
     })
 

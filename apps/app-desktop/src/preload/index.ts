@@ -1,7 +1,107 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
+// Whitelist of authorized IPC channels for Preload gatekeeper
+const allowedChannels = new Set([
+  // DB
+  'db:query',
+  'db:run',
+  'db:execute',
+  'db:transaction',
+  'db:bulk-import',
+  'db:get-settings',
+  'db:save-settings',
+  'db:check-auth-setup',
+  'db:setup-auth',
+  'db:login',
+  // Workspace
+  'workspace:create',
+  'workspace:open',
+  'workspace:close',
+  'workspace:get-meta',
+  'workspace:backup',
+  'workspace:backup-server',
+  'workspace:backup-email',
+  'workspace:upload-file',
+  'workspace:open-file',
+  // Document
+  'belge:export-docx',
+  'export-docx',
+  'belge:export-udf',
+  'export-udf',
+  'belge:print-html',
+  'print-html',
+  'belge:preview-pdf',
+  'preview-pdf',
+  'belge:open-pdf-external',
+  'open-pdf-external',
+  'belge:export-html',
+  'export-html',
+  'belge:export-xlsx',
+  'export-xlsx',
+  'belge:import-docx',
+  'import-docx',
+  'belge:import-xlsx',
+  'import-xlsx',
+  'belge:open-excel',
+  'open-excel',
+  // Network / Sync
+  'network:start-server',
+  'network:stop-server',
+  'network:connect-client',
+  'network:disconnect-client',
+  'network:start-express',
+  'network:stop-express',
+  'network:pull-db',
+  'network:push-db',
+  'network:can-undo-sync',
+  'network:undo-sync',
+  'sync:test-connection',
+  // Template
+  'template:export',
+  'template:import',
+  'template:read-system',
+  'template:write-system',
+  // App
+  'app:get-version',
+  'app:isPackaged',
+  'app:force-quit',
+  'app:get-recent-files',
+  'app:add-recent-file',
+  'app:remove-recent-file',
+  'app:get-initial-file',
+  'get-initial-file',
+  'app:get-changelog',
+  'get-changelog',
+  // Dialog
+  'dialog:showSaveDialog',
+  'dialog:showOpenDialog',
+  // AI
+  'ai:generate',
+  'ai:test',
+  // Updater
+  'updater:check',
+  'updater:download',
+  'updater:quit-and-install',
+  'updater:set-dev-version'
+])
+
+// Secure gated wrapper exposing only authorized channels to renderer
+const secureElectronAPI = {
+  ...electronAPI,
+  ipcRenderer: {
+    ...electronAPI.ipcRenderer,
+    invoke: (channel: string, ...args: any[]) => {
+      if (!allowedChannels.has(channel)) {
+        console.error(`[Preload Security] Access denied for unauthorized channel: '${channel}'`)
+        throw new Error(`[Preload Security] Channel access denied: '${channel}'`)
+      }
+      return ipcRenderer.invoke(channel, ...args)
+    }
+  }
+}
+
+// Custom typed APIs for renderer
 const api = {
   aiGenerate: (options: {
     prompt: string
@@ -14,19 +114,16 @@ const api = {
     ipcRenderer.invoke('updater:set-dev-version', mode, version)
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
+    contextBridge.exposeInMainWorld('electron', secureElectronAPI)
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-ignore
+  window.electron = secureElectronAPI
+  // @ts-ignore
   window.api = api
 }

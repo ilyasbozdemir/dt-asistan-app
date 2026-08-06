@@ -52,14 +52,14 @@ export function connectToServer(url: string): { success: boolean; error?: string
   }
 }
 
-export function disconnectFromServer() {
+export function disconnectFromServer(): void {
   if (socket) {
     socket.disconnect()
     socket = null
   }
 }
 
-export function emitEvent(eventName: string, data: any) {
+export function emitEvent(eventName: string, data: any): void {
   if (socket && socket.connected) {
     socket.emit(eventName, data)
   }
