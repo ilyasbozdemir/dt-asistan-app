@@ -4,6 +4,7 @@ import { useTabStore } from '../../store/tabStore'
 import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 import { ProcessStepper } from './components/ProcessStepper'
+import DocumentPreviewModalV2 from './components/DocumentPreviewModalV2'
 
 const STEPPER_ROUTES = [
   'hazirlik-ve-ihtiyac',
@@ -18,6 +19,9 @@ interface SubScreenProps {
   description: string
   children?: React.ReactNode
   hideStepper?: boolean
+  previewDocumentId?: string | null
+  invitedFirms?: any[]
+  onClosePreview?: () => void
 }
 
 export function SubScreen({
@@ -25,7 +29,10 @@ export function SubScreen({
   icon: Icon,
   description,
   children,
-  hideStepper = false
+  hideStepper = false,
+  previewDocumentId,
+  invitedFirms,
+  onClosePreview
 }: SubScreenProps): React.JSX.Element {
   const { activeTabPath } = useTabStore()
   const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
@@ -102,6 +109,18 @@ export function SubScreen({
 
       {/* CHILDREN VIEW */}
       {activeDosyaId && children}
+
+      {/* BASE PREVIEW MODAL */}
+      {previewDocumentId && (
+        <DocumentPreviewModalV2
+          isOpen={Boolean(previewDocumentId)}
+          documentId={previewDocumentId.replace('.html', '')}
+          dosyaId={activeDosyaId || undefined}
+          invitedFirms={invitedFirms}
+          onClose={onClosePreview || (() => {})}
+          isModal={true}
+        />
+      )}
     </div>
   )
 }

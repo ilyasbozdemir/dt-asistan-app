@@ -15,8 +15,6 @@ import {
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
 import { isV2Template, normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
 import { useSettingsStore } from '../../../../store/settingsStore'
@@ -159,27 +157,13 @@ export function KabulVeOdeme(): React.JSX.Element {
     }
   }
 
-  if (previewData && previewModalOpen) {
-    return (
-      <DocumentPreviewModalV2
-        isOpen={previewModalOpen}
-        documentId={
-          previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace('.html', '')
-            : ''
-        }
-        dosyaId={activeDosyaId || undefined}
-        onClose={() => setPreviewModalOpen(false)}
-        isModal={true}
-      />
-    )
-  }
-
   return (
     <SubScreen
       title="Muayene & Kabul & Ödeme İşlemleri"
       icon={CreditCard}
       description="Muayene kabul tutanağı, hakediş raporu, taşınır işlem fişi (TİF) ve ödeme emri belgesi gibi evrakları düzenleyebilir, kabul ve ödeme süreçlerinizi tamamlayabilirsiniz."
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      onClosePreview={() => setPreviewModalOpen(false)}
     >
       {kazananFirmaId === undefined && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm flex items-center justify-center">

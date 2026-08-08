@@ -11,8 +11,6 @@ import {
   Save
 } from 'lucide-react'
 import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
 import { isV2Template, normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
 import { useSettingsStore } from '../../../../store/settingsStore'
@@ -154,33 +152,13 @@ export function KlasorVeKapaklar(): React.JSX.Element {
   const progressPercent =
     checklist.length > 0 ? Math.round((completedCount / checklist.length) * 100) : 0
 
-  if (previewData && previewModalOpen) {
-    const isV2 = isV2Template(previewData.dosyaAdi || previewData.title)
-    const isStarred = previewData?.title
-      ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
-
-    return (
-      <DocumentPreviewModalV2
-        isOpen={previewModalOpen}
-        documentId={
-          previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace('.html', '')
-            : ''
-        }
-        onClose={() => setPreviewModalOpen(false)}
-        isModal={true}
-      />
-    )
-  }
-
   return (
     <SubScreen
       title="Klasör & Kapaklar"
       icon={FolderTree}
       description="İhale kapağı, kapak içi indeks şablonu ve fiziksel arşiv dosyalarınızı hazırlayabilirsiniz. Süreci tamamlayıp dosyayı kapatabilirsiniz."
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      onClosePreview={() => setPreviewModalOpen(false)}
     >
       <div className="flex flex-col gap-6 animate-in fade-in duration-300">
         {/* TOP STATUS BAR */}

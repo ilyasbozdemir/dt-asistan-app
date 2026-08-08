@@ -2,13 +2,11 @@ import React from "react";
 import { FileText, Package } from "lucide-react";
 import { cn } from "../../../../utils/cn";
 import { SubScreen } from "../../SubScreens.screen";
-import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
 import { isV2Template, normalizeForMatch } from "./useDosyaAsamasiSablons";
 import { useDosyaAsamasiSablonsV2 } from "./useDosyaAsamasiSablonsV2";
 import { useMalzemeListesi } from "../components/MalzemeListesi/useMalzemeListesi";
 import { MalzemeEkleModal } from "../components/MalzemeListesi/MalzemeEkleModal";
 import { MalzemeTablosu } from "../components/MalzemeListesi/MalzemeTablosu";
-import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
 
 export function HazirlikVeIhtiyac(): React.JSX.Element {
   const {
@@ -76,6 +74,8 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       title="İhtiyaç Listesi & Maliyet & Onay"
       icon={Package}
       description="Dosyanıza malzeme, hizmet veya yapım işi ekleyebilir ve yönetebilirsiniz. Son Alım Fiyat Cetveli şablonu sayesinde, malzemelerin son alım fiyatları, kimden/hangi firmadan alındığı gibi geçmiş analiz verileri otomatik olarak listelenir."
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      onClosePreview={() => setPreviewModalOpen(false)}
     >
       <MalzemeEkleModal state={state} />
 
@@ -94,18 +94,6 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
         activeDosya={activeDosya}
         activeDosyaId={activeDosyaId}
       />
-
-      {previewData && previewModalOpen && (
-        <DocumentPreviewModalV2
-          isOpen={previewModalOpen}
-          documentId={previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace(".html", "")
-            : ""}
-          dosyaId={activeDosyaId || undefined}
-          onClose={() => setPreviewModalOpen(false)}
-          isModal={true}
-        />
-      )}
     </SubScreen>
   );
 }

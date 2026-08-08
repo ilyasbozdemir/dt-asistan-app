@@ -35,6 +35,14 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
     ? data.gorevlendirilenler
     : [];
 
+  const displayFirmaToplamlari = (firmaToplamlari && firmaToplamlari.length > 0)
+    ? firmaToplamlari
+    : (data?.firmaToplamlariDetay && data.firmaToplamlariDetay.length > 0)
+    ? data.firmaToplamlariDetay
+    : displayFirmalar.map((f: any) => ({
+        toplam: f.total ? f.total.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00"
+      }));
+
   const firmalarColspan = Math.max(displayFirmalar.length, 1);
 
   return (

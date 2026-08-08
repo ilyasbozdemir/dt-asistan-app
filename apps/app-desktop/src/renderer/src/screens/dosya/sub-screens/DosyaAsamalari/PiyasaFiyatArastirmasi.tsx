@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { PackageSearch } from "lucide-react";
 import { SubScreen } from "../../SubScreens.screen";
-import { DocumentPreviewModal } from "../../components/DocumentPreviewModal";
-import DocumentPreviewModalV2 from "../../components/DocumentPreviewModalV2";
 import { isV2Template, normalizeForMatch } from "./useDosyaAsamasiSablons";
 import { FirmaSecmeModali } from "./components/FirmaSecmeModali";
 import { PiyasaFiyatArastirmasiDashboard } from "./components/PiyasaFiyatArastirmasiDashboard";
@@ -131,6 +129,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       title="Teklifler & Piyasa Fiyat Araştırması"
       icon={PackageSearch}
       description="Tedarikçi teklif mektupları hazırlayabilir, toplanan teklifleri fiyat araştırma tablosuna girerek en uygun teklifleri ve yaklaşık maliyeti belirleyebilirsiniz."
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      invitedFirms={logic.invitedFirms}
+      onClosePreview={() => setPreviewModalOpen(false)}
     >
       {!isFormOpen
         ? (
@@ -214,19 +215,6 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
         setModalSearchQuery={setModalSearchQuery}
         onAddFirms={handleBulkAddFirms}
       />
-
-      {previewData && previewModalOpen && (
-        <DocumentPreviewModalV2
-          isOpen={previewModalOpen}
-          documentId={previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace(".html", "")
-            : ""}
-          dosyaId={activeDosyaId || undefined}
-          invitedFirms={logic.invitedFirms}
-          onClose={() => setPreviewModalOpen(false)}
-          isModal={true}
-        />
-      )}
     </SubScreen>
   );
 }

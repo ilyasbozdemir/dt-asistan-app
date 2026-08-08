@@ -126,7 +126,7 @@ export function useDocumentPreviewData({
         // Calculate totals for firm bidding
         const itemsRes = await window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT id, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
+          "SELECT id, kalem_adi, aciklama, birim, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC",
           [activeDosyaId],
         );
         const items = itemsRes.success ? itemsRes.data : [];
@@ -352,7 +352,115 @@ export function useDocumentPreviewData({
           kurumu: customSubInstitutionKurumu,
           kurumlari: customSubInstitutionKurumlari,
         });
+        const activeFirms = fileFirms.length > 0 ? fileFirms : combinedFirms;
+        finalData.firmalar = activeFirms;
         finalData.firmaListesi = combinedFirms;
+
+        const baseKalemler =
+          finalData.ihtiyacKalemleri &&
+          Array.isArray(finalData.ihtiyacKalemleri) &&
+          finalData.ihtiyacKalemleri.length > 0
+            ? finalData.ihtiyacKalemleri
+            : items;
+
+        if (baseKalemler && Array.isArray(baseKalemler)) {
+          let grandTotalNum = 0;
+
+          finalData.ihtiyacKalemleri = baseKalemler.map((kalem: any, idx: number) => {
+            const miktarNum = Number(kalem.miktar || 0);
+            let minPrice = Infinity;
+            let bestFirmName = "";
+
+            const teklifler = activeFirms.map((firm: any) => {
+              const bid = bids.find(
+                (b: any) =>
+                  (b.temin_kalem_id === kalem.id || b.temin_kalem_id === kalem.siraNo) &&
+                  (b.temin_firma_id === firm.temin_firma_id || b.temin_firma_id === firm.id)
+              );
+
+              const priceNum = bid ? Number(bid.birim_fiyat || 0) : 0;
+              if (priceNum > 0 && priceNum < minPrice) {
+                minPrice = priceNum;
+                bestFirmName = firm.unvan || "";
+              }
+
+              const formattedPrice = priceNum > 0
+                ? priceNum.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "";
+
+              const itemTotalNum = priceNum * miktarNum;
+              const formattedTutar = itemTotalNum > 0
+                ? itemTotalNum.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "";
+
+              return {
+                firmaId: firm.id,
+                firmaUnvan: firm.unvan,
+                birimFiyat: priceNum,
+                fiyat: formattedPrice,
+                tutar: formattedTutar,
+              };
+            });
+
+            const validMinPrice = minPrice !== Infinity ? minPrice : 0;
+            const itemCostNum = validMinPrice * miktarNum;
+            grandTotalNum += itemCostNum;
+
+            return {
+              ...kalem,
+              siraNo: kalem.siraNo || idx + 1,
+              malzemeAdi: kalem.malzemeAdi || kalem.kalem_adi || "",
+              ozelligi: kalem.ozelligi || kalem.aciklama || "",
+              birimi: kalem.birimi || kalem.birim || "",
+              miktar: miktarNum,
+              enUygunFirmaAdi: bestFirmName,
+              enDusukFiyat: validMinPrice > 0
+                ? validMinPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "-",
+              toplamBedel: itemCostNum > 0
+                ? itemCostNum.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "-",
+              firmaTeklifleri: teklifler,
+              firmaTeklifleriDetay: teklifler,
+            };
+          });
+
+          // Build firm totals row
+          const firmTotals = activeFirms.map((firm: any) => {
+            let firmTotalNum = 0;
+            finalData.ihtiyacKalemleri.forEach((kalem: any) => {
+              const miktarNum = Number(kalem.miktar || 0);
+              const tf = (kalem.firmaTeklifleriDetay || []).find(
+                (t: any) => t.firmaId === firm.id || t.firmaUnvan === firm.unvan
+              );
+              if (tf && tf.birimFiyat > 0) {
+                firmTotalNum += tf.birimFiyat * miktarNum;
+              }
+            });
+
+            return {
+              firmaId: firm.id,
+              unvan: firm.unvan,
+              toplam: firmTotalNum > 0
+                ? firmTotalNum.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : "0,00",
+            };
+          });
+
+          finalData.firmaToplamlari = firmTotals;
+          finalData.firmaToplamlariDetay = firmTotals;
+
+          if (!finalData.genelToplam || finalData.genelToplam === "0" || finalData.genelToplam === "0,00") {
+            const winnerFirm = activeFirms.find((f: any) => f.isWinner);
+            const calcTotal = winnerFirm && winnerFirm.total > 0 ? winnerFirm.total : grandTotalNum;
+            if (calcTotal > 0) {
+              finalData.genelToplam = calcTotal.toLocaleString("tr-TR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              });
+            }
+          }
+        }
 
         const defaultFirm =
           fileFirms.find((f: any) => f.isWinner) ||

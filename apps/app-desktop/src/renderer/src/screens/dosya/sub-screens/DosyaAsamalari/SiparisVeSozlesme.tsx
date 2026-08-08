@@ -17,8 +17,6 @@ import {
 } from 'lucide-react'
 import { cn } from '../../../../utils/cn'
 import { SubScreen } from '../../SubScreens.screen'
-import { DocumentPreviewModal } from '../../components/DocumentPreviewModal'
-import DocumentPreviewModalV2 from '../../components/DocumentPreviewModalV2'
 import { isV2Template, normalizeForMatch, useDosyaAsamasiSablons } from './useDosyaAsamasiSablons'
 import { PrintDropdownButton } from '../../components/PrintDropdownButton'
 import { useSettingsStore } from '../../../../store/settingsStore'
@@ -183,34 +181,13 @@ export function SiparisVeSozlesme(): React.JSX.Element {
     }
   }
 
-  if (previewData && previewModalOpen) {
-    const isV2 = isV2Template(previewData.dosyaAdi || previewData.title)
-    const isStarred = previewData?.title
-      ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
-
-    return (
-      <DocumentPreviewModalV2
-        isOpen={previewModalOpen}
-        documentId={
-          previewData.dosyaAdi
-            ? previewData.dosyaAdi.replace('.html', '')
-            : ''
-        }
-        dosyaId={activeDosyaId || undefined}
-        onClose={() => setPreviewModalOpen(false)}
-        isModal={true}
-      />
-    )
-  }
-
   return (
     <SubScreen
       title="Sipariş & Sözleşme"
       icon={FileCheck}
       description="Doğrudan temin onay belgesi, ihale komisyon kararı ve sözleşmeye davet gibi dökümanları hazırlayabilir, doğrudan temin sözleşme süreçlerinizi bu panelden yönetebilirsiniz."
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      onClosePreview={() => setPreviewModalOpen(false)}
     >
       {/* Yükleniyor durumu */}
       {kazananFirmaId === undefined && (
