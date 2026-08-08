@@ -1,8 +1,9 @@
 import React from "react";
+import { EditableField } from "../../document/EditableField";
 import { YaklasikMaliyetCetveliData } from "./YaklasikMaliyetCetveli.schema";
 
 interface Props {
-  data: YaklasikMaliyetCetveliData;
+  data?: Partial<YaklasikMaliyetCetveliData> & Record<string, any>;
 }
 
 export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
@@ -179,7 +180,23 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
           Piyasa Fiyat Araştırma Görevlisi/Görevlileri
         </div>
         <div style={{ textAlign: "justify", marginBottom: "20px", fontSize: "10pt", textIndent: "40px" }}>
-          Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu en düşük fiyatlar alınarak maliyet KDV hariç ({genelToplam}) TL olarak tespit edilmiştir.
+          Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu{" "}
+          <EditableField
+            name="hesaplamaEsasiText"
+            value={
+              data?.hesaplamaEsasiText ||
+              (String(
+                  data?.hesaplamaEsasi ||
+                    data?.hesaplama_esasi ||
+                    data?.yaklasikMaliyetEsasi ||
+                    data?.yaklasik_maliyet_hesaplamasi ||
+                    ""
+                ).toLowerCase().includes("ortalama")
+                ? "birim fiyatların ortalaması"
+                : "en düşük fiyatlar")
+            }
+          />{" "}
+          alınarak maliyet KDV hariç ({genelToplam}) TL olarak tespit edilmiştir.
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", textAlign: "center", marginTop: "20px" }}>

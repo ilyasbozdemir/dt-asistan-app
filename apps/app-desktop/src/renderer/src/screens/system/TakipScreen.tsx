@@ -588,13 +588,13 @@ export function TakipScreen(): React.JSX.Element {
                 {/* Horizontal connection line */}
                 <div className="absolute top-5 left-5 right-5 h-1 bg-slate-100 dark:bg-slate-800 hidden md:block z-0" />
 
-                {stages.map((asama) => {
+                {stages.map((asama, idx) => {
                   const isCompleted = asama.asama_sira < currentAsamaSira
                   const isActive = asama.asama_sira === currentAsamaSira
 
                   return (
                     <div
-                      key={asama.asama_sira}
+                      key={asama.id ? `stepper-stage-${asama.id}-${idx}` : `stepper-sira-${asama.asama_sira}-${idx}`}
                       className="flex md:flex-col items-start md:items-center text-left md:text-center flex-1 relative z-10 gap-3 md:gap-2 group"
                     >
                       {/* Step node */}
@@ -805,13 +805,13 @@ export function TakipScreen(): React.JSX.Element {
                 Aşama Detayları ve Açıklamalar
               </h3>
 
-              {stages.map((asama) => {
+              {stages.map((asama, idx) => {
                 const isActive = asama.asama_sira === currentAsamaSira
                 const isCompleted = asama.asama_sira < currentAsamaSira
 
                 return (
                   <div
-                    key={asama.asama_sira}
+                    key={asama.id ? `detail-stage-${asama.id}-${idx}` : `detail-sira-${asama.asama_sira}-${idx}`}
                     className={`p-5 rounded-2xl border transition-all duration-300 flex items-start gap-4 ${
                       isActive
                         ? 'bg-blue-50/50 dark:bg-blue-950/10 border-blue-200 dark:border-blue-900/50 shadow-xs'

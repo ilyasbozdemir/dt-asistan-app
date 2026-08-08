@@ -96,43 +96,15 @@ export function HazirlikVeIhtiyac(): React.JSX.Element {
       />
 
       {previewData && previewModalOpen && (
-        isV2
-          ? (
-            <DocumentPreviewModalV2
-              isOpen={previewModalOpen}
-              documentId={previewData.dosyaAdi
-                ? previewData.dosyaAdi.replace(".html", "")
-                : ""}
-              dosyaId={activeDosyaId || undefined}
-              onClose={() => setPreviewModalOpen(false)}
-              isModal={true}
-            />
-          )
-          : (
-            <DocumentPreviewModal
-              isOpen={previewModalOpen}
-              onClose={() => setPreviewModalOpen(false)}
-              title={previewData.title}
-              templateHtml={previewData.templateHtml}
-              masterHtml={masterHtml || ""}
-              baseContext={previewData.snapshotContext ||
-                contextsByPath[previewData.processPath] || dosyaContext}
-              placeholders={placeholders}
-              personelListesi={personelListesi}
-              onPrint={executePrint}
-              onExportPdf={executeExportPdf}
-              onExportDocx={executeExportDocx}
-              onExportUdf={executeExportUdf}
-              isStarred={isStarred}
-              onToggleStar={() =>
-                previewData?.title && toggleStar(previewData.title)}
-              isInline={false}
-              templateTestVerisi={previewData.templateTestVerisi}
-              dosyaAdi={previewData.dosyaAdi || undefined}
-              onRefreshSnapshot={refreshSnapshot}
-              onSaveSnapshot={saveSnapshot}
-            />
-          )
+        <DocumentPreviewModalV2
+          isOpen={previewModalOpen}
+          documentId={previewData.dosyaAdi
+            ? previewData.dosyaAdi.replace(".html", "")
+            : ""}
+          dosyaId={activeDosyaId || undefined}
+          onClose={() => setPreviewModalOpen(false)}
+          isModal={true}
+        />
       )}
     </SubScreen>
   );

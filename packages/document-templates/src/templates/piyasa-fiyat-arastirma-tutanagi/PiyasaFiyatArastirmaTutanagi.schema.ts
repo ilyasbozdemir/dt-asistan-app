@@ -58,6 +58,9 @@ export const PiyasaFiyatArastirmaTutanagiSchema = z.object({
       })
     )
     .optional(),
+  hesaplamaEsasi: z.string().optional(),
+  hesaplama_esasi: z.string().optional(),
+  hesaplamaEsasiText: z.string().optional(),
   baskanAdi: z.string().optional(),
   baskanUnvan: z.string().optional(),
 });

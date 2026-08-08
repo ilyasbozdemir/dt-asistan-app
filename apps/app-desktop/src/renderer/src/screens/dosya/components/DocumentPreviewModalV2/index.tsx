@@ -1,110 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { renderToString } from "react-dom/server";
-import {
-  ArrowLeft,
-  ChevronLeft,
-  Download,
-  Edit3,
-  Eye,
-  FileText,
-  Maximize2,
-  Minimize2,
-  MoreVertical,
-  Printer,
-  RefreshCw,
-  Save,
-  Sliders,
-  X,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
-import { useWorkspaceStore } from "../../../../store/workspaceStore";
-import { useSettingsStore } from "../../../../store/settingsStore";
-import {
-  getTemplateEditableFields,
-  IhtiyacListesiType,
-  TEMPLATE_REGISTRY,
-  TemplateComponentType,
-  TemplateEditProvider,
-  TemplateResolver,
-} from "@dt-asistan/document-templates";
-import * as Templates from "@dt-asistan/document-templates";
-import { getDefaultMappingForProcess } from "../../../../constants/mappings";
-import { getInstitutionSuffixes } from "../../../../utils/kurumHelper";
-
-interface DocumentPreviewModalV2Props {
-  isOpen: boolean;
-  documentId: string | null;
-  dosyaId?: number | null;
-  invitedFirms?: any[];
-  onClose: () => void;
-  isModal?: boolean;
-  backLabel?: string;
-}
-
-interface Personel {
-  id: number;
-  ad_soyad: string;
-  unvan?: string;
-  telefon?: string;
-  eposta?: string;
-}
-
-const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
-  IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,
-  IhtiyacTalepFormu: Templates.IhtiyacTalepFormu as TemplateComponentType,
-  LuzumMuzekkeresi: Templates.LuzumMuzekkeresi as TemplateComponentType,
-  LuzumMuzekkeresiOnayEki: Templates
-    .LuzumMuzekkeresiOnayEki as TemplateComponentType,
-  LuzumMuzekkeresiTeslimTesellum: Templates
-    .LuzumMuzekkeresiTeslimTesellum as TemplateComponentType,
-  HarcamaTalimati: Templates.HarcamaTalimati as TemplateComponentType,
-  KomisyonGorevlendirmeOnayi: Templates
-    .KomisyonGorevlendirmeOnayi as TemplateComponentType,
-  KomisyonGorevlendirmeOnayiEki: Templates
-    .KomisyonGorevlendirmeOnayiEki as TemplateComponentType,
-  HarcamaPusulasi: Templates.HarcamaPusulasi as TemplateComponentType,
-  FiyatArastirmaMektubu: Templates.FiyatArastirmaMektubu as TemplateComponentType,
-  BirimFiyatTeklifMektubu: Templates.BirimFiyatTeklifMektubu as TemplateComponentType,
-  ArastirmaMektubu: Templates.ArastirmaMektubu as TemplateComponentType,
-  PiyasaFiyatArastirmaTutanagi: Templates.PiyasaFiyatArastirmaTutanagi as TemplateComponentType,
-  PiyasaFiyatArastirmaGorevlendirmesi: Templates.PiyasaFiyatArastirmaGorevlendirmesi as TemplateComponentType,
-  YaklasikMaliyetCetveli: Templates.YaklasikMaliyetCetveli as TemplateComponentType,
-};
-
-class TemplateErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(
-    props: { children: React.ReactNode; fallback?: React.ReactNode },
-  ) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error("Template rendering error:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback || (
-          <div className="p-8 text-center text-amber-700 bg-amber-50 rounded-xl border border-amber-200 m-4">
-            ⚠️ Belge şablonu çizilirken bir hata oluştu. Değişkenleri kontrol
-            edip tekrar deneyiniz.
-          </div>
-        )
-      );
-    }
-    return this.props.children;
-  }
-}
+import React from "react";
+import { DocumentPreviewModalV2Props } from "./types";
+import { useDocumentPreviewData } from "./hooks/useDocumentPreviewData";
+import { DocumentPreviewHeader } from "./components/DocumentPreviewHeader";
+import { DocumentPreviewSidebar } from "./components/DocumentPreviewSidebar";
+import { DocumentPreviewCanvas } from "./components/DocumentPreviewCanvas";
 
 export function DocumentPreviewModalV2({
   isOpen,
@@ -114,1002 +13,120 @@ export function DocumentPreviewModalV2({
   onClose,
   isModal = false,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
-  const { activeDosyaId: storeDosyaId } = useWorkspaceStore();
-  const activeDosyaId = propDosyaId ||
-    storeDosyaId ||
-    Number(sessionStorage.getItem("workspace_dosya_id") || 0);
   const {
-    showLogoLeft,
-    showLogoRight,
-    subInstitutionType,
-    customSubInstitutionLabel,
-    customSubInstitutionKurumumuz,
-    customSubInstitutionKurumu,
-    customSubInstitutionKurumlari,
-  } = useSettingsStore();
-  const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>({});
-  const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
-  const [firmaListesi, setFirmaListesi] = useState<any[]>([]);
-  const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
-  const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
-    "portrait",
-  );
-  const [isEditingMode, setIsEditingMode] = useState(true);
-  const [previewScale, setPreviewScale] = useState(1);
-  const [isPrinting, setIsPrinting] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [downloadOpen, setDownloadOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [zoomMode, setZoomMode] = useState<"auto" | "manual">("auto");
-  const [manualZoom, setManualZoom] = useState(1.0);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-
-  const previewContainerRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const handleSaveToDb = async (): Promise<void> => {
-    if (!activeDosyaId || !documentId) return;
-    setIsSaving(true);
-    try {
-      const dataToSave = {
-        ...formData,
-        showLogoLeft: localShowLogoLeft,
-        showLogoRight: localShowLogoRight,
-        olurYazisi: formData.olurYazisi !== false,
-        orientation,
-      };
-      const jsonStr = JSON.stringify(dataToSave);
-      const sablonRes = await window.electron.ipcRenderer.invoke(
-        "db:query",
-        "SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1",
-        [`${documentId}.html`],
-      );
-      if (sablonRes.success && sablonRes.data.length > 0) {
-        const sablonId = sablonRes.data[0].id;
-        await window.electron.ipcRenderer.invoke(
-          "db:query",
-          `INSERT INTO DATA_DosyaSablonVeri (temin_dosya_id, sablon_id, veri_json, guncelleme_tarihi)
-           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-           ON CONFLICT(temin_dosya_id, sablon_id)
-           DO UPDATE SET veri_json = excluded.veri_json, guncelleme_tarihi = CURRENT_TIMESTAMP`,
-          [activeDosyaId, sablonId, jsonStr],
-        );
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2000);
-      }
-    } catch (e) {
-      console.error("Belge kaydetme hatası:", e);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // 1. Find template config in registry
-  const activeTemplateConf = TEMPLATE_REGISTRY.find((t) => t.id === documentId);
-
-  const ActiveComponent = activeTemplateConf
-    ? V2_TEMPLATES_MAP[activeTemplateConf.name]
-    : null;
-
-  // 2. Fetch data from DB & personnel list on open
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const loadInitialData = async (): Promise<void> => {
-      try {
-        // Fetch personnel list for signature dropdowns
-        const personelRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC",
-        );
-        if (personelRes.success) {
-          setPersonelListesi(personelRes.data);
-        }
-        let fileFirms: any[] = [];
-        if (propInvitedFirms && propInvitedFirms.length > 0) {
-          fileFirms = propInvitedFirms.map((f: any) => ({
-            temin_firma_id: f.temin_firma_id || f.id,
-            id: f.id || f.firma_id || f.temin_firma_id,
-            unvan: f.unvan || f.firma_adi || "İstekli Firma",
-            yetkili_ad_soyad: f.yetkili_ad_soyad || "",
-            telefon: f.telefon || "",
-            eposta: f.eposta || f.email || "",
-          }));
-        } else if (activeDosyaId) {
-          const dosyaFirmaRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            `SELECT 
-                 df.id as temin_firma_id,
-                 COALESCE(f.id, df.firma_id, df.id) as id,
-                 COALESCE(
-                   NULLIF(df.unvan, ''),
-                   NULLIF(f.unvan, ''),
-                   NULLIF(f.firma_adi, ''),
-                   NULLIF(df.firma_adi, ''),
-                   'İstekli Firma'
-                 ) as unvan,
-                 COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
-                 COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
-                 COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
-               FROM DATA_TeminFirma df
-               LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
-               WHERE df.temin_dosya_id = ?
-               ORDER BY df.id ASC`,
-            [activeDosyaId],
-          );
-          if (dosyaFirmaRes.success && dosyaFirmaRes.data.length > 0) {
-            fileFirms = dosyaFirmaRes.data.filter(
-              (f: any) => f.unvan && String(f.unvan).trim() !== "",
-            );
-          }
-        }
-
-        // Calculate totals for each firm in activeDosyaId (exact logic as PricesSummaryDashboard)
-        const itemsRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT id, miktar FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
-          [activeDosyaId],
-        );
-        const items = itemsRes.success ? itemsRes.data : [];
-
-        const bidsRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
-          [activeDosyaId],
-        );
-        const bids = bidsRes.success ? bidsRes.data : [];
-
-        fileFirms.forEach((firm: any) => {
-          let total = 0;
-          items.forEach((item: any) => {
-            const bid = bids.find(
-              (b: any) =>
-                b.temin_kalem_id === item.id &&
-                (b.temin_firma_id === firm.temin_firma_id ||
-                  b.temin_firma_id === firm.id),
-            );
-            if (bid && bid.birim_fiyat > 0) {
-              total += bid.birim_fiyat * (item.miktar || 0);
-            }
-          });
-          firm.total = total;
-        });
-
-        const nonZeroTotals = fileFirms.filter((f) => f.total > 0);
-        const lowestTotal = nonZeroTotals.length > 0
-          ? Math.min(...nonZeroTotals.map((f) => f.total))
-          : 0;
-
-        fileFirms.forEach((f) => {
-          if (f.total > 0 && f.total === lowestTotal) {
-            f.isWinner = true;
-            const formattedTotal = f.total.toLocaleString("tr-TR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            });
-            f.label = `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`;
-          } else if (f.total > 0) {
-            const formattedTotal = f.total.toLocaleString("tr-TR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            });
-            f.label = `🏢 ${f.unvan} (${formattedTotal} TL)`;
-          } else {
-            f.label = `🏢 ${f.unvan}`;
-          }
-        });
-
-        // Sort so winning firm comes first
-        fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0));
-
-        if (fileFirms.length === 0) {
-          const allTeminFirmsRes = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            `SELECT 
-               COALESCE(f.id, df.firma_id, df.id) as id,
-               COALESCE(
-                 NULLIF(df.unvan, ''),
-                 NULLIF(f.unvan, ''),
-                 NULLIF(f.firma_adi, ''),
-                 NULLIF(df.firma_adi, ''),
-                 'İstekli Firma'
-               ) as unvan,
-               COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
-               COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
-               COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
-             FROM DATA_TeminFirma df
-             LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
-             ORDER BY df.id DESC`,
-          );
-          if (allTeminFirmsRes.success && allTeminFirmsRes.data.length > 0) {
-            fileFirms = allTeminFirmsRes.data.filter(
-              (f: any) => f.unvan && String(f.unvan).trim() !== "",
-            );
-          }
-        }
-
-        const globalFirmaRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT id, unvan, yetkili_ad_soyad, telefon, eposta FROM TANIM_Firma WHERE aktif_mi = 1 AND unvan IS NOT NULL AND unvan != '' ORDER BY unvan ASC",
-        );
-        const globalFirms = globalFirmaRes.success ? globalFirmaRes.data : [];
-
-        const combinedFirms = [...fileFirms];
-        globalFirms.forEach((g: any) => {
-          if (
-            g.unvan && !combinedFirms.some((f: any) =>
-              f.unvan &&
-              String(f.unvan).trim().toLowerCase() ===
-                String(g.unvan).trim().toLowerCase()
-            )
-          ) {
-            combinedFirms.push(g);
-          }
-        });
-
-        setFirmaListesi(combinedFirms);
-
-        // Setup TemplateResolver
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const queryExecutor = async (
-          sql: string,
-          params: any[],
-        ): Promise<any[]> => {
-          const res = await window.electron.ipcRenderer.invoke(
-            "db:query",
-            sql,
-            params,
-          );
-          if (res && res.success) {
-            return res.data;
-          }
-          return [];
-        };
-
-        const mapping = getDefaultMappingForProcess(documentId || "");
-        const resolver = new TemplateResolver(queryExecutor);
-        // Resolve using the pre-defined mapping
-        const resolved = await resolver.resolve(
-          mapping,
-          activeDosyaId || 0,
-        );
-
-        // Fetch or load saved snapshot values if exists
-        const snapshotRes = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          "SELECT veri_json FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? AND sablon_id = (SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1)",
-          [activeDosyaId, `${documentId}.html`],
-        );
-
-        let finalData = { ...resolved };
-        if (snapshotRes.success && snapshotRes.data.length > 0) {
-          try {
-            const savedData = JSON.parse(snapshotRes.data[0].veri_json);
-            // Smart merge inspired by V1: do not let stale placeholders or old hardcoded antets overwrite fresh resolved data
-            for (const [key, val] of Object.entries(savedData)) {
-              if (val !== undefined && val !== null && val !== "") {
-                if (
-                  key === "antetSatirlari" && resolved.antetSatirlari &&
-                  Array.isArray(resolved.antetSatirlari) &&
-                  resolved.antetSatirlari.length > 0
-                ) {
-                  finalData.antetSatirlari = resolved.antetSatirlari;
-                  continue;
-                }
-                if (
-                  key === "ihtiyacKalemleri" &&
-                  resolved.ihtiyacKalemleri &&
-                  Array.isArray(resolved.ihtiyacKalemleri) &&
-                  resolved.ihtiyacKalemleri.length > 0 &&
-                  (!Array.isArray(val) || val.length === 0)
-                ) {
-                  finalData.ihtiyacKalemleri = resolved.ihtiyacKalemleri;
-                  continue;
-                }
-                if (
-                  key === "komisyon" &&
-                  resolved.komisyon &&
-                  Array.isArray(resolved.komisyon) &&
-                  resolved.komisyon.length > 0 &&
-                  (!Array.isArray(val) || val.length === 0 || val.every((c: any) => !c.adSoyad || String(c.adSoyad).includes("BELİRTİLMESİ")))
-                ) {
-                  finalData.komisyon = resolved.komisyon;
-                  continue;
-                }
-                const isSavedPlaceholder = typeof val === "string" &&
-                  val.includes("[Belirtilmedi");
-                const isSavedAcme = typeof val === "string" &&
-                  val.toUpperCase().includes("ACME");
-                const isSavedAntetPlaceholder = Array.isArray(val) &&
-                  val.some((s: any) => String(s).includes("[Belirtilmedi"));
-                const hasFreshRealValue = resolved[key] &&
-                  !String(resolved[key]).includes("[Belirtilmedi");
-
-                if (
-                  (isSavedPlaceholder || isSavedAcme ||
-                    isSavedAntetPlaceholder) && hasFreshRealValue
-                ) {
-                  continue;
-                }
-                finalData[key] = val;
-              }
-            }
-            if (savedData.showLogoLeft !== undefined) {
-              setLocalShowLogoLeft(Boolean(savedData.showLogoLeft));
-            }
-            if (savedData.showLogoRight !== undefined) {
-              setLocalShowLogoRight(Boolean(savedData.showLogoRight));
-            }
-            if (savedData.olurYazisi !== undefined) {
-              finalData.olurYazisi = savedData.olurYazisi;
-            }
-            if (savedData.orientation) {
-              setOrientation(savedData.orientation);
-            }
-          } catch (e) {
-            console.error("Failed to parse saved snapshot JSON", e);
-          }
-        }
-
-        if (
-          resolved.antetSatirlari && Array.isArray(resolved.antetSatirlari) &&
-          resolved.antetSatirlari.length > 0
-        ) {
-          finalData.antetSatirlari = resolved.antetSatirlari;
-        }
-
-        finalData.tarih = finalData.tarih || finalData.onayaSunulanTarih || "";
-        finalData.onayTarihi = finalData.onayTarihi || finalData.dosyaTarihi ||
-          "";
-
-        // Derive kurumumuz from institution type suffix (e.g. "Belediyemiz", "Müdürlüğümüz")
-        const suffixes = getInstitutionSuffixes(
-          subInstitutionType || "belediye",
-          {
-            label: customSubInstitutionLabel,
-            kurumumuz: customSubInstitutionKurumumuz,
-            kurumu: customSubInstitutionKurumu,
-            kurumlari: customSubInstitutionKurumlari,
-          },
-        );
-        finalData.firmaListesi = combinedFirms;
-        // Pre-populate default firm (lowest offer winner or first firm in list) as default teslimEden if not set
-        const defaultFirm = fileFirms.find((f: any) => f.isWinner) ||
-          fileFirms[0] || combinedFirms[0];
-        if (defaultFirm) {
-          if (!finalData.yukleniciFirma) {
-            finalData.yukleniciFirma = defaultFirm.unvan;
-          }
-          if (
-            !finalData.teslimEden_0_adSoyad ||
-            finalData.teslimEden_0_adSoyad === ""
-          ) {
-            finalData.teslimEden_0_adSoyad = defaultFirm.unvan;
-            finalData.teslimEden_0_unvan = defaultFirm.yetkili_ad_soyad
-              ? `Yetkili: ${defaultFirm.yetkili_ad_soyad}`
-              : "Yüklenici Firma / Yetkilisi";
-          }
-        }
-
-        setFormData(finalData);
-      } catch (err) {
-        console.error("Error loading V2 template data:", err);
-      }
-    };
-
-    loadInitialData();
-  }, [
+    activeTemplateConf,
+    ActiveComponent,
+    formData,
+    setFormData,
+    personelListesi,
+    firmaListesi,
+    localShowLogoLeft,
+    setLocalShowLogoLeft,
+    localShowLogoRight,
+    setLocalShowLogoRight,
+    orientation,
+    setOrientation,
+    isEditingMode,
+    setIsEditingMode,
+    previewScale,
+    isPrinting,
+    isSaving,
+    saveSuccess,
+    downloadOpen,
+    setDownloadOpen,
+    sidebarOpen,
+    setSidebarOpen,
+    zoomMode,
+    setZoomMode,
+    manualZoom,
+    setManualZoom,
+    isFullScreen,
+    setIsFullScreen,
+    previewContainerRef,
+    dropdownRef,
+    handleSaveToDb,
+    handlePrint,
+    handlePdf,
+    handleOpenPdfInNewTab,
+    handleRefreshFromDb,
+  } = useDocumentPreviewData({
     isOpen,
-    activeDosyaId,
     documentId,
-    propInvitedFirms,
-    subInstitutionType,
-    customSubInstitutionLabel,
-    customSubInstitutionKurumumuz,
-    customSubInstitutionKurumu,
-    customSubInstitutionKurumlari,
-  ]);
-
-  // 3. Document scaling logic based on preview container size or manual zoom
-  useEffect(() => {
-    if (zoomMode === "manual") {
-      setPreviewScale(manualZoom);
-      return;
-    }
-    if (!previewContainerRef.current || !isOpen) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const { width } = entries[0].contentRect;
-      const targetWidth = orientation === "landscape" ? 1131 : 800; // Base layout width
-      const PADDING = 64;
-      const availableWidth = width - PADDING;
-
-      if (availableWidth > 250 && availableWidth < targetWidth) {
-        setPreviewScale(availableWidth / targetWidth);
-      } else {
-        setPreviewScale(1);
-      }
-    });
-
-    observer.observe(previewContainerRef.current);
-    return () => observer.disconnect();
-  }, [isOpen, documentId, orientation, zoomMode, manualZoom]);
-
-  // 4. Dropdown closing logic
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDownloadOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    dosyaId: propDosyaId,
+    invitedFirms: propInvitedFirms,
+  });
 
   if (!isOpen) return null;
 
-  const getCompiledHtml = (): string => {
-    if (!ActiveComponent) return "";
-    const bodyHtml = renderToString(
-      React.createElement(ActiveComponent, {
-        data: {
-          ...formData,
-          tarih: formData.tarih || formData.onayaSunulanTarih || "",
-          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
-          solLogo: localShowLogoLeft ? formData.solLogo : null,
-          sagLogo: localShowLogoRight ? formData.sagLogo : null,
-          olurYazisi: formData.olurYazisi !== false,
-          orientation,
-        },
-        orientation,
-      }),
-    );
-    const styles = Array.from(
-      document.querySelectorAll("style, link[rel='stylesheet']"),
-    )
-      .map((el) => el.outerHTML)
-      .join("\n");
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>${activeTemplateConf?.name || "Belge"}</title>
-          ${styles}
-          <style>
-            @page {
-              size: A4 ${orientation};
-              margin: 0;
-            }
-            body {
-              background: white !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .document-container {
-              box-shadow: none !important;
-              margin: 0 !important;
-            }
-          </style>
-        </head>
-        <body>
-          ${bodyHtml}
-        </body>
-      </html>
-    `;
-  };
-
-  // 6. Action handlers
-  const handlePrint = async (): Promise<void> => {
-    setIsPrinting(true);
-    try {
-      const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("print-html", html, {
-        silent: false,
-      });
-    } catch (error) {
-      console.error("Yazdırma hatası:", error);
-    } finally {
-      setIsPrinting(false);
-    }
-  };
-
-  const handlePdf = async (): Promise<void> => {
-    setIsPrinting(true);
-    try {
-      const html = getCompiledHtml();
-      const titleForFile = activeTemplateConf?.name || "Belge";
-      await window.electron.ipcRenderer.invoke(
-        "export-pdf",
-        html,
-        null,
-        titleForFile,
-      );
-    } catch (error) {
-      console.error("PDF kaydetme hatası:", error);
-    } finally {
-      setIsPrinting(false);
-    }
-  };
-
-  const handleOpenPdfInNewTab = async (): Promise<void> => {
-    setIsPrinting(true);
-    try {
-      const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("open-pdf-external", html);
-    } catch (error) {
-      console.error("PDF önizleme hatası:", error);
-    } finally {
-      setIsPrinting(false);
-    }
-  };
-
-  const handleRefreshFromDb = async (): Promise<void> => {
-    const isConfirmed = window.confirm(
-      "Şablonu veritabanındaki güncel verilerle yenilemek istediğinize emin misiniz? Yaptığınız manuel değişiklikler silinecektir.",
-    );
-    if (!isConfirmed || !activeDosyaId) return;
-
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const queryExecutor = async (
-        sql: string,
-        params: any[],
-      ): Promise<any[]> => {
-        const res = await window.electron.ipcRenderer.invoke(
-          "db:query",
-          sql,
-          params,
-        );
-        if (res && res.success) {
-          return res.data;
-        }
-        return [];
-      };
-
-      const mapping = getDefaultMappingForProcess(documentId || "");
-      const resolver = new TemplateResolver(queryExecutor);
-      const resolved = await resolver.resolve(
-        mapping,
-        activeDosyaId,
-      );
-
-      const suffixes = getInstitutionSuffixes(
-        subInstitutionType || "belediye",
-        {
-          label: customSubInstitutionLabel,
-          kurumumuz: customSubInstitutionKurumumuz,
-          kurumu: customSubInstitutionKurumu,
-          kurumlari: customSubInstitutionKurumlari,
-        },
-      );
-
-      setFormData({
-        ...resolved,
-        tarih: resolved.tarih || resolved.onayaSunulanTarih || "",
-        onayTarihi: resolved.onayTarihi || resolved.dosyaTarihi || "",
-        kurumumuz: suffixes.kurumumuz,
-      });
-    } catch (e) {
-      console.error("Failed to refresh template resolution:", e);
-    }
-  };
-
   const mainContent = (
     <div
-      className={isFullScreen
-        ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none shadow-none flex flex-col bg-white dark:bg-slate-900 overflow-hidden animate-in fade-in duration-150"
-        : (isModal
+      className={
+        isFullScreen
+          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none shadow-none flex flex-col bg-white dark:bg-slate-900 overflow-hidden animate-in fade-in duration-150"
+          : isModal
           ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
-          : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm")}
+          : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
+      }
       onClick={(e) => (isModal || isFullScreen) && e.stopPropagation()}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4 shrink-0 select-none">
-        {/* Left: Back Button & Title */}
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer border border-slate-200 dark:border-slate-700 shrink-0"
-            title="İşlemler ve İhtiyaç Listesi Ekranına Dön"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
-            <span>İşlemlere Dön</span>
-          </button>
+      {/* Header Bar */}
+      <DocumentPreviewHeader
+        onClose={onClose}
+        documentTitle={
+          activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim()
+        }
+        zoomMode={zoomMode}
+        manualZoom={manualZoom}
+        previewScale={previewScale}
+        setZoomMode={setZoomMode}
+        setManualZoom={setManualZoom}
+        isFullScreen={isFullScreen}
+        setIsFullScreen={setIsFullScreen}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        isSaving={isSaving}
+        saveSuccess={saveSuccess}
+        handleSaveToDb={handleSaveToDb}
+        isPrinting={isPrinting}
+        handlePrint={handlePrint}
+        downloadOpen={downloadOpen}
+        setDownloadOpen={setDownloadOpen}
+        dropdownRef={dropdownRef}
+        handleRefreshFromDb={handleRefreshFromDb}
+        handlePdf={handlePdf}
+        handleOpenPdfInNewTab={handleOpenPdfInNewTab}
+      />
 
-          <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
-            <FileText className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2 truncate">
-              {activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim() ||
-                "Belge Düzenleyici"}
-              <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider shrink-0">
-                Akıllı Belge
-              </span>
-            </h2>
-          </div>
-        </div>
-
-        {/* Right: Actions (Zoom, FullScreen, Belge Ayarları, Save, Print, Options, Close) */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Zoom Controls (ZoomOut, Reset, ZoomIn) */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl p-0.5">
-            <button
-              onClick={() => {
-                setZoomMode("manual");
-                setManualZoom((prev) =>
-                  Math.max(0.4, Number((prev - 0.1).toFixed(1)))
-                );
-              }}
-              className="p-1 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
-              title="Uzaklaştır (%10)"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-
-            <button
-              onClick={() => {
-                setZoomMode("auto");
-                setManualZoom(1.0);
-              }}
-              className="px-2 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer min-w-[55px] text-center"
-              title="Otomatik Sığdır (Sıfırla)"
-            >
-              {zoomMode === "auto"
-                ? `% ${Math.round(previewScale * 100)}`
-                : `% ${Math.round(manualZoom * 100)}`}
-            </button>
-
-            <button
-              onClick={() => {
-                setZoomMode("manual");
-                setManualZoom((prev) =>
-                  Math.min(2.0, Number((prev + 0.1).toFixed(1)))
-                );
-              }}
-              className="p-1 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
-              title="Yakınlaştır (%10)"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Toggle Full Screen */}
-          <button
-            onClick={() => setIsFullScreen((v) => !v)}
-            className={`p-1.5 rounded-xl font-bold transition-all flex items-center justify-center text-xs cursor-pointer border ${
-              isFullScreen
-                ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800"
-                : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
-            }`}
-            title={isFullScreen ? "Tam Ekrandan Çık" : "Tam Ekran Önizleme"}
-          >
-            {isFullScreen
-              ? <Minimize2 className="w-4 h-4" />
-              : <Maximize2 className="w-4 h-4" />}
-          </button>
-
-          {/* Toggle Sidebar (Belge Ayarları) */}
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer border ${
-              sidebarOpen
-                ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
-                : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
-            }`}
-            title={sidebarOpen
-              ? "Belge Ayarlarını Gizle"
-              : "Belge Ayarlarını Göster"}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{sidebarOpen ? "Ayarlar Açık" : "Belge Ayarları"}</span>
-          </button>
-
-          {/* Main Save Button */}
-          <button
-            onClick={handleSaveToDb}
-            disabled={isSaving}
-            className={`px-4 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs ${
-              saveSuccess
-                ? "bg-emerald-600 text-white"
-                : "bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600"
-            }`}
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span>
-              {saveSuccess
-                ? "Kaydedildi!"
-                : isSaving
-                ? "Kaydediliyor..."
-                : "Kaydet"}
-            </span>
-          </button>
-
-          {/* Main Print Button */}
-          <button
-            onClick={handlePrint}
-            disabled={isPrinting}
-            className="px-4.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-blue-600/20 cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Yazdır</span>
-          </button>
-
-          {/* Options Dropdown (3-Dots Menu) */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDownloadOpen((v) => !v)}
-              disabled={isPrinting}
-              title="Diğer Seçenekler"
-              className="p-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-all flex items-center justify-center disabled:opacity-50 text-xs shadow-2xs cursor-pointer"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-            {downloadOpen && (
-              <div className="absolute top-full mt-2 right-0 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handleRefreshFromDb();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors"
-                >
-                  <RefreshCw className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                  <span>Güncel Verileri Al</span>
-                </button>
-
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handlePdf();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                >
-                  <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                  <span>PDF Olarak Kaydet</span>
-                </button>
-
-                <button
-                  onClick={async () => {
-                    setDownloadOpen(false);
-                    await handleOpenPdfInNewTab();
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-                >
-                  <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>Tarayıcıda Aç</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1" />
-
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Content area */}
+      {/* Main Area: Sidebar + Canvas */}
       <div className="flex-1 flex overflow-hidden min-h-0 relative">
-        {/* Left panel: Document Settings */}
-        <div
-          className={`bg-slate-50 dark:bg-slate-900/50 transition-all duration-200 flex flex-col shrink-0 h-full overflow-hidden ${
-            sidebarOpen
-              ? "w-72 border-r border-slate-200 dark:border-slate-800 opacity-100"
-              : "w-0 border-0 opacity-0 pointer-events-none hidden"
-          }`}
-        >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0">
-            <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
-                Belge Ayarları
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 rounded-lg transition-colors cursor-pointer"
-              title="Paneli Kapat"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          </div>
+        <DocumentPreviewSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          isEditingMode={isEditingMode}
+          setIsEditingMode={setIsEditingMode}
+          orientation={orientation}
+          setOrientation={setOrientation}
+          formData={formData}
+          setFormData={setFormData}
+          localShowLogoLeft={localShowLogoLeft}
+          setLocalShowLogoLeft={setLocalShowLogoLeft}
+          localShowLogoRight={localShowLogoRight}
+          setLocalShowLogoRight={setLocalShowLogoRight}
+        />
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
-            <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
-              💡 <strong>Canlı Düzenleme:</strong>{" "}
-              Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki A4
-              sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
-            </div>
-
-            {/* Toggles & Settings */}
-            <div className="space-y-3">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                Görünüm & Düzenleme Kontrolleri
-              </span>
-
-              {/* Metin Düzenleme Modu */}
-              <label className="flex items-center justify-between p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 rounded-xl cursor-pointer hover:border-blue-300 transition-colors">
-                <div className="flex items-center gap-2">
-                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                      Metin Düzenleme Modu
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                      {isEditingMode
-                        ? "Canlı düzenleme açık"
-                        : "Önizleme modu (Sabit Metin)"}
-                    </span>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={isEditingMode}
-                  onChange={(e) => setIsEditingMode(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                />
-              </label>
-
-              {/* Sayfa Yönü (Dikey / Yatay) */}
-              <div className="p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">
-                  Sayfa Yönü (Düzen)
-                </span>
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => setOrientation("portrait")}
-                    className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      orientation === "portrait"
-                        ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Dikey</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setOrientation("landscape")}
-                    className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      orientation === "landscape"
-                        ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5 rotate-90" />
-                    <span>Yatay</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* OLUR Bloğu Toggle */}
-              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  OLUR Bloğunu Göster
-                </span>
-                <input
-                  type="checkbox"
-                  checked={formData.olurYazisi !== false}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      olurYazisi: e.target.checked,
-                    }))}
-                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                />
-              </label>
-
-              {/* Sol Amblem */}
-              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  Sol Amblem / Logo
-                </span>
-                <input
-                  type="checkbox"
-                  checked={localShowLogoLeft}
-                  onChange={(e) => setLocalShowLogoLeft(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                />
-              </label>
-
-              {/* Sağ Amblem */}
-              <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                  Sağ Amblem / Logo
-                </span>
-                <input
-                  type="checkbox"
-                  checked={localShowLogoRight}
-                  onChange={(e) => setLocalShowLogoRight(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Right panel: Live A4 PDF Layout Preview */}
-        <div
-          ref={previewContainerRef}
-          className="flex-1 bg-slate-200/50 dark:bg-slate-955 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar min-h-0 min-w-0"
-        >
-          <div
-            className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out shrink-0"
-            style={{
-              transform: `scale(${previewScale})`,
-              width: orientation === "landscape" ? "1131px" : "800px",
-              minHeight: orientation === "landscape" ? "800px" : "1131px",
-            }}
-          >
-            {ActiveComponent
-              ? (
-                <TemplateErrorBoundary
-                  fallback={
-                    <div className="p-8 text-center text-red-500 font-semibold bg-red-50 dark:bg-red-950/20 border border-red-250 dark:border-red-900 rounded-xl m-4">
-                      ⚠️ Belge şablonu çizilirken bir hata oluştu. Değişkenleri
-                      kontrol edip tekrar deneyiniz.
-                    </div>
-                  }
-                >
-                  <TemplateEditProvider
-                    isEditing={isEditingMode}
-                    onFieldChange={(key, val) =>
-                      setFormData((prev) => ({ ...prev, [key]: val }))}
-                    personelListesi={personelListesi}
-                    firmaListesi={firmaListesi}
-                  >
-                    {React.createElement(ActiveComponent, {
-                      data: {
-                        ...formData,
-                        personelListesi: (formData as any).personelListesi ||
-                          personelListesi,
-                        firmaListesi: (formData as any).firmaListesi ||
-                          firmaListesi,
-                        tarih: formData.tarih || formData.onayaSunulanTarih ||
-                          "",
-                        onayTarihi: formData.onayTarihi ||
-                          formData.dosyaTarihi || "",
-                        solLogo: localShowLogoLeft ? formData.solLogo : null,
-                        sagLogo: localShowLogoRight ? formData.sagLogo : null,
-                        olurYazisi: formData.olurYazisi !== false,
-                        orientation,
-                      },
-                      orientation,
-                    })}
-                  </TemplateEditProvider>
-                </TemplateErrorBoundary>
-              )
-              : (
-                <div className="flex flex-col items-center justify-center h-full text-slate-400 mt-32">
-                  <FileText className="w-12 h-12 mb-3 opacity-20" />
-                  <p className="font-medium">
-                    Şablon Yüklenemedi veya Seçilmedi
-                  </p>
-                </div>
-              )}
-          </div>
-        </div>
+        <DocumentPreviewCanvas
+          previewContainerRef={previewContainerRef}
+          previewScale={previewScale}
+          orientation={orientation}
+          ActiveComponent={ActiveComponent}
+          isEditingMode={isEditingMode}
+          formData={formData}
+          setFormData={setFormData}
+          personelListesi={personelListesi}
+          firmaListesi={firmaListesi}
+          localShowLogoLeft={localShowLogoLeft}
+          localShowLogoRight={localShowLogoRight}
+        />
       </div>
     </div>
   );

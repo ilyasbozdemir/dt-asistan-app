@@ -65,7 +65,8 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
 
   // Tablo 2: Alım Yapılması Uygun Görülen Kişiler için en düşük teklifi veren firmanın dinamik tespiti
   const processedKalemler = (ihtiyacKalemleri || []).map((kalem) => {
-    const malzemeAdi = kalem.malzemeAdi || (kalem as any).kalem_adi || (kalem as any).kalemAdi || "";
+    const malzemeAdi = kalem.malzemeAdi || (kalem as any).kalem_adi ||
+      (kalem as any).kalemAdi || "";
     const ozelligi = kalem.ozelligi || (kalem as any).aciklama || "";
     const birimi = kalem.birimi || (kalem as any).birim || "";
     const miktar = kalem.miktar ?? "";
@@ -95,7 +96,8 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
       });
 
       if (minIdx !== -1 && displayFirmalar[minIdx]) {
-        enUygunFirmaAdi = displayFirmalar[minIdx].unvan || `Firma ${minIdx + 1}`;
+        enUygunFirmaAdi = displayFirmalar[minIdx].unvan ||
+          `Firma ${minIdx + 1}`;
         const tf = kalem.firmaTeklifleriDetay[minIdx];
         if (!enDusukFiyat) enDusukFiyat = tf.birimFiyat;
         if (!kalemToplamBedel) kalemToplamBedel = tf.tutar;
@@ -711,11 +713,24 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
             marginTop: "10px",
           }}
         >
-          4734 sayılı Kamu İhale Kanununun 22/d* maddesi uyarınca yapılacak
-          alımlara ilişkin yapılan piyasa araştırmasında gerçek/tüzel kişilerce
-          teklif edilen fiyatlar tarafımızca değerlendirilerek yukarıda adı ve
-          adresi belirtilen gerçek/tüzel kişilerden alım yapılması uygun
-          görülmüştür.
+          Yapılan fiyat araştırmasına göre, firmaların vermiş olduğu{" "}
+          <EditableField
+            name="hesaplamaEsasiText"
+            value={
+              data?.hesaplamaEsasiText ||
+              (String(
+                  data?.hesaplamaEsasi ||
+                    data?.hesaplama_esasi ||
+                    data?.yaklasikMaliyetEsasi ||
+                    data?.yaklasik_maliyet_hesaplamasi ||
+                    ""
+                ).toLowerCase().includes("ortalama")
+                ? "birim fiyatların ortalaması"
+                : "en düşük fiyatlar")
+            }
+          />{" "}
+          alınarak maliyet KDV hariç {genelToplam ?? "0,00"}{" "}
+          TL olarak tespit edilmiştir.
         </div>
 
         {aciklama && (

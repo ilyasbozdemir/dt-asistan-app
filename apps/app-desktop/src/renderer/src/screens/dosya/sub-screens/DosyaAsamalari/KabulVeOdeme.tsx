@@ -160,14 +160,7 @@ export function KabulVeOdeme(): React.JSX.Element {
   }
 
   if (previewData && previewModalOpen) {
-    const isV2 = isV2Template(previewData.dosyaAdi || previewData.title)
-    const isStarred = previewData?.title
-      ? activeStarredDocs.some(
-          (d) => normalizeForMatch(d) === normalizeForMatch(previewData.title || '')
-        )
-      : false
-
-    return isV2 ? (
+    return (
       <DocumentPreviewModalV2
         isOpen={previewModalOpen}
         documentId={
@@ -178,30 +171,6 @@ export function KabulVeOdeme(): React.JSX.Element {
         dosyaId={activeDosyaId || undefined}
         onClose={() => setPreviewModalOpen(false)}
         isModal={true}
-      />
-    ) : (
-      <DocumentPreviewModal
-        isOpen={previewModalOpen}
-        onClose={() => setPreviewModalOpen(false)}
-        title={previewData.title}
-        templateHtml={previewData.templateHtml}
-        masterHtml={masterHtml || ''}
-        baseContext={
-          previewData.snapshotContext || contextsByPath[previewData.processPath] || dosyaContext
-        }
-        placeholders={placeholders}
-        personelListesi={personelListesi}
-        onPrint={executePrint}
-        onExportPdf={executeExportPdf}
-        onExportDocx={executeExportDocx}
-        onExportUdf={executeExportUdf}
-        isStarred={isStarred}
-        onToggleStar={() => previewData?.title && toggleStar(previewData.title)}
-        isInline={true}
-        templateTestVerisi={previewData.templateTestVerisi}
-        dosyaAdi={previewData.dosyaAdi}
-        onRefreshSnapshot={refreshSnapshot}
-        onSaveSnapshot={saveSnapshot}
       />
     )
   }
