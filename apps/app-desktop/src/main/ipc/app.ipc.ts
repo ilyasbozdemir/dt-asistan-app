@@ -83,7 +83,12 @@ export function registerAppIpcHandlers(
   })
 
   // Register both app:get-initial-file and legacy get-initial-file
-  const initialFileHandler = () => initialFilePath
+  let initialFileConsumed = false
+  const initialFileHandler = (): string | null => {
+    if (initialFileConsumed) return null
+    initialFileConsumed = true
+    return initialFilePath
+  }
   ipcMain.handle('app:get-initial-file', initialFileHandler)
   ipcMain.handle('get-initial-file', initialFileHandler)
 
