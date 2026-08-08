@@ -85,9 +85,6 @@ export function DocumentPreviewHeader({
         <div className="min-w-0">
           <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2 truncate">
             {documentTitle || "Belge Düzenleyici"}
-            <span className="text-[9px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 font-extrabold uppercase tracking-wider shrink-0">
-              Akıllı Belge
-            </span>
           </h2>
         </div>
       </div>
@@ -146,11 +143,9 @@ export function DocumentPreviewHeader({
           }`}
           title={isFullScreen ? "Tam Ekrandan Çık" : "Tam Ekran Önizleme"}
         >
-          {isFullScreen ? (
-            <Minimize2 className="w-4 h-4" />
-          ) : (
-            <Maximize2 className="w-4 h-4" />
-          )}
+          {isFullScreen
+            ? <Minimize2 className="w-4 h-4" />
+            : <Maximize2 className="w-4 h-4" />}
         </button>
 
         {/* Toggle Sidebar */}
@@ -161,7 +156,9 @@ export function DocumentPreviewHeader({
               ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
               : "bg-white text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:bg-slate-50"
           }`}
-          title={sidebarOpen ? "Belge Ayarlarını Gizle" : "Belge Ayarlarını Göster"}
+          title={sidebarOpen
+            ? "Belge Ayarlarını Gizle"
+            : "Belge Ayarlarını Göster"}
         >
           <Sliders className="w-3.5 h-3.5" />
           <span>{sidebarOpen ? "Ayarlar Açık" : "Belge Ayarları"}</span>

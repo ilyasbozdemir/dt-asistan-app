@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   antetSatirlari: {
@@ -28,12 +28,12 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'onay_tarihi',
+    sutun: 'temin_tarihi',
     aciklama: 'Onay Tarihi'
   },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'dosya_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Dosya Tarihi'
   },
   genelToplam: {
@@ -43,12 +43,16 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   },
   baskanAdi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'onaylayan_personel_ad',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'ad_soyad',
     aciklama: 'Onaylayan Yetkili (Harcama Yetkilisi)'
   },
   baskanUnvan: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'onaylayan_personel_unvan',
+    sutun: 'onay_personel_id',
+    iliskiliTablo: 'TANIM_Personel',
+    iliskiliSutun: 'unvan',
     aciklama: 'Onaylayan Personel Ünvanı'
   },
   ihtiyacKalemleri: {
@@ -63,5 +67,27 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
       miktar: 'miktar'
     },
     aciklama: 'Yaklaşık Maliyet Malzeme Kalemleri'
+  },
+  firmalar: {
+    tablo: 'DATA_TeminFirma',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    aciklama: 'Firma Listesi'
+  },
+  komisyon: {
+    tablo: 'DATA_TeminKomisyon',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    altEslestirme: {
+      adSoyad: 'ad_soyad',
+      unvan: 'unvan',
+      gorevi: 'gorevi'
+    },
+    aciklama: 'Piyasa Fiyat Araştırma Görevlileri'
+  },
+  hesaplamaEsasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hesaplama_esasi',
+    aciklama: 'Hesaplama Esasi'
   }
 }

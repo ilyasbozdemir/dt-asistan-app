@@ -267,6 +267,22 @@ export const PiyasaFiyatArastirmaTutanagiMapping: ProcessMapping = {
     iliskiliTablo: 'TANIM_Personel',
     iliskiliSutun: 'unvan',
     aciklama: 'Harcama Yetkilisi Unvanı'
+  },
+  firmalar: {
+    tablo: 'DATA_TeminFirma',
+    sutun: '*',
+    iliskili_id: 'temin_dosya_id',
+    iliskiliTablo: 'TANIM_Firma',
+    iliskiliSutun: 'unvan',
+    altEslestirme: {
+      unvan: 'unvan'
+    },
+    aciklama: 'Firma Listesi'
+  },
+  hesaplamaEsasi: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'hesaplama_esasi',
+    aciklama: 'Hesaplama Esasi'
   }
 }
 
