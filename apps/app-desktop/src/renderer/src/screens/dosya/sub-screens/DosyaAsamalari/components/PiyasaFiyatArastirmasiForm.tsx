@@ -1,12 +1,12 @@
 import React from "react";
 import {
   ArrowLeft,
+  Award,
+  Calendar,
   Check,
   FileSpreadsheet,
   FileText,
   Save,
-  Award,
-  Calendar,
 } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
 import { PiyasaFiyatArastirmasiMatrixTab } from "./PiyasaFiyatArastirmasiMatrixTab";
@@ -105,9 +105,23 @@ export function PiyasaFiyatArastirmasiForm({
                 Teklif & Fiyat Giriş Paneli
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 flex-wrap">
-                <span>Yöntem: <strong className="text-slate-700 dark:text-slate-300">{hesaplamaEsasi}</strong></span>
+                <span>
+                  Yöntem:{" "}
+                  <strong className="text-slate-700 dark:text-slate-300">
+                    {hesaplamaEsasi}
+                  </strong>
+                </span>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span>Yaklaşık Maliyet: <strong className="font-mono text-emerald-600 dark:text-emerald-400">₺ {estimatedCostTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+                <span>
+                  Yaklaşık Maliyet:{" "}
+                  <strong className="font-mono text-emerald-600 dark:text-emerald-400">
+                    ₺{" "}
+                    {estimatedCostTotal.toLocaleString("tr-TR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </strong>
+                </span>
               </p>
             </div>
           </div>
@@ -152,7 +166,9 @@ export function PiyasaFiyatArastirmasiForm({
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
               <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Maliyet Cetveli Tarihi:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                Maliyet Cetveli Tarihi:
+              </span>
               <input
                 type="date"
                 value={maliyetCetveliTarihi}
@@ -163,7 +179,9 @@ export function PiyasaFiyatArastirmasiForm({
 
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
               <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Tutanak Tarihi:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">
+                Tutanak Tarihi:
+              </span>
               <input
                 type="date"
                 value={tutanakTarihi}
@@ -202,8 +220,11 @@ export function PiyasaFiyatArastirmasiForm({
                   className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-200 max-w-45 truncate"
                 >
                   <option value="">-- Firma Seç --</option>
-                  {invitedFirms.map((f) => (
-                    <option key={f.id} value={f.firma_id}>
+                  {invitedFirms.map((f, idx) => (
+                    <option
+                      key={`winner_firm_${f.id || f.firma_id}_${idx}`}
+                      value={f.firma_id}
+                    >
                       {f.unvan}
                     </option>
                   ))}
@@ -234,4 +255,3 @@ export function PiyasaFiyatArastirmasiForm({
     </div>
   );
 }
-

@@ -98,7 +98,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     aciklama: 'Teslim tesellüm kalemleri'
   },
   teslimAlanlar: {
-    tablo: 'DATA_TeminKomisyonUye',
+    tablo: 'DATA_TeminKomisyon',
     sutun: '*',
     iliskili_id: 'temin_dosya_id',
     altEslestirme: {
