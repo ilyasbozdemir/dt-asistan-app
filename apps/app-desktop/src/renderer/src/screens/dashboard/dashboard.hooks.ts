@@ -398,13 +398,22 @@ export function useAnnouncements() {
         if (response.ok) {
           const data = await response.json()
           if (Array.isArray(data)) {
-            remoteData = data
+            remoteData = data.map((item: any, idx: number) => ({
+              ...item,
+              id: `remote_${item.id || idx}`
+            }))
           }
         } else {
-          remoteData = fallbackAnnouncements as Announcement[]
+          remoteData = (fallbackAnnouncements as Announcement[]).map((item, idx) => ({
+            ...item,
+            id: `fallback_${item.id || idx}`
+          }))
         }
       } catch {
-        remoteData = fallbackAnnouncements as Announcement[]
+        remoteData = (fallbackAnnouncements as Announcement[]).map((item, idx) => ({
+          ...item,
+          id: `fallback_${item.id || idx}`
+        }))
       }
 
       // Fetch from local LOG_SystemLog

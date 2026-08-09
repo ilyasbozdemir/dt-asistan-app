@@ -209,7 +209,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
 
       {/* Stages List */}
       <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1.5">
-        {stagesToUseMapped.map((asama) => {
+        {stagesToUseMapped.map((asama, idx) => {
           const kategoriler = STAGE_KATEGORI[asama.asama_sira] || []
           let stageSablons = sablons.filter((s: any) => kategoriler.includes(s.kategori))
 
@@ -246,7 +246,7 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
           const isRouteActive = currentPath === stageRoute
 
           return (
-            <div key={asama.asama_sira} className="relative group">
+            <div key={`sidebar_asama_${asama.id || asama.asama_sira}_${idx}`} className="relative group">
               <button
                 onClick={() => {
                   if (stageSablons.length === 0 || isCollapsed) {
@@ -314,13 +314,13 @@ export function ActiveFileSidebar(): React.JSX.Element | null {
                   >
                     Aşamaya Git →
                   </Link>
-                  {stageSablons.map((sablon: any) => {
+                  {stageSablons.map((sablon: any, sIdx: number) => {
                     const { status, cleanName } = parseStatusAndName(sablon.ad)
                     const disabled = isSablonDisabled(cleanName)
 
                     return (
                       <button
-                        key={sablon.id || sablon.ad}
+                        key={`sidebar_sablon_${asama.asama_sira}_${sablon.id || sablon.ad}_${sIdx}`}
                         onClick={() => {
                           if (disabled) return
                           setOpenDropdown(null)
