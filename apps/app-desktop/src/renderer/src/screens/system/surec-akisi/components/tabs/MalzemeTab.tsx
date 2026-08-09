@@ -1,5 +1,5 @@
 import React from "react";
-import { Eye, Package, Plus, Printer, Trash2 } from "lucide-react";
+import { Eye, HelpCircle, Package, Plus, Printer, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Belge, Kalem } from "../../types";
 import { IlgiliBelgeCubugu } from "../IlgiliBelgeCubugu";
@@ -129,9 +129,27 @@ export const MalzemeTab: React.FC<MalzemeTabProps> = ({
                     <th className="px-6 py-3.5">Tür / Taşınır Kodu</th>
                     <th className="px-6 py-3.5 text-center">Miktar & Birim</th>
                     <th className="px-6 py-3.5 text-center">
-                      Yaklaşık Birim Fiyat
+                      <div className="flex items-center justify-center gap-1 font-bold">
+                        <span>Yaklaşık Birim Fiyat</span>
+                        <span
+                          className="cursor-help text-slate-400 hover:text-blue-500 transition-colors"
+                          title="Yaklaşık birim fiyat; dosya hazırlık aşamasında girilen birim fiyatlardan veya Piyasa Fiyat Araştırması (PFA) sürecinde firmaların sunduğu tekliflerin ortalaması/en düşüğünden otomatik hesaplanır."
+                        >
+                          <HelpCircle size={13} />
+                        </span>
+                      </div>
                     </th>
-                    <th className="px-6 py-3.5 text-right">Toplam Bedel</th>
+                    <th className="px-6 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1 font-bold">
+                        <span>Toplam Bedel</span>
+                        <span
+                          className="cursor-help text-slate-400 hover:text-blue-500 transition-colors"
+                          title="Toplam Bedel = Miktar × Yaklaşık Birim Fiyat"
+                        >
+                          <HelpCircle size={13} />
+                        </span>
+                      </div>
+                    </th>
                     <th className="px-4 py-3.5 text-center w-14">İşlem</th>
                   </tr>
                 </thead>
@@ -174,12 +192,26 @@ export const MalzemeTab: React.FC<MalzemeTabProps> = ({
                       <td className="px-6 py-4 text-center font-semibold">
                         {kalem.birimFiyat > 0
                           ? `${kalem.birimFiyat.toLocaleString("tr-TR")} ₺`
-                          : "—"}
+                          : (
+                            <span
+                              className="text-slate-400 italic text-[11px] font-normal cursor-help"
+                              title="Piyasa Fiyat Araştırması (PFA) firmalardan teklif alındıktan sonra bu alana işlenecektir."
+                            >
+                              — (PFA ile Belirlenir)
+                            </span>
+                          )}
                       </td>
                       <td className="px-6 py-4 font-black text-right text-slate-900 dark:text-slate-100">
                         {kalem.toplamBedel > 0
                           ? `${kalem.toplamBedel.toLocaleString("tr-TR")} ₺`
-                          : "—"}
+                          : (
+                            <span
+                              className="text-slate-400 italic text-[11px] font-normal cursor-help"
+                              title="Yaklaşık birim fiyat netleştikten sonra hesaplanır."
+                            >
+                              —
+                            </span>
+                          )}
                       </td>
                       <td className="px-4 py-4 text-center">
                         <button
@@ -203,7 +235,9 @@ export const MalzemeTab: React.FC<MalzemeTabProps> = ({
                       colSpan={2}
                       className="px-6 py-4 text-right text-blue-600 dark:text-blue-400 text-sm font-black"
                     >
-                      {toplamBedel.toLocaleString("tr-TR")} ₺
+                      {toplamBedel > 0
+                        ? `${toplamBedel.toLocaleString("tr-TR")} ₺`
+                        : "— (PFA Sonrası)"}
                     </td>
                   </tr>
                 </tbody>
