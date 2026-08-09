@@ -351,17 +351,6 @@ export function PiyasaFiyatArastirmasiDashboard({
                 handleDeleteDocument(belge.id);
               }
             }}
-            onCreate={() => {
-              setIsFormOpen(true);
-              setActiveFormTab("matrix");
-            }}
-            createButtonLabel="Teklif & Fiyat Girişi Yap"
-            onManage={() => {
-              if (setIsFirmModalOpen) {
-                setIsFirmModalOpen(true);
-              }
-            }}
-            manageButtonLabel="Firma Ekle"
           />
         )}
     </div>
