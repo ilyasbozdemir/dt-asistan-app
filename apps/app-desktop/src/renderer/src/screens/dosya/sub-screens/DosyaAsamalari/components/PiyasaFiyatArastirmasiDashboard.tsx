@@ -46,21 +46,14 @@ interface PiyasaFiyatArastirmasiDashboardProps {
 
 export function PiyasaFiyatArastirmasiDashboard({
   setIsFormOpen,
-  handleNewDocument,
   dashboardViewMode,
-  setDashboardViewMode,
   stageDocs,
   docViewMode,
   changeDocViewMode,
-  stageSablons,
   sablons,
-  activeStarredDocs,
-  ciktiLoading,
   handleOpenPreviewForSablon,
   quickPrint,
-  quickExport,
   quickOpenExternal,
-  isSablonDisabled,
   disableDocumentGuidance,
   invitedFirms,
   allPoolFirms,
@@ -69,9 +62,6 @@ export function PiyasaFiyatArastirmasiDashboard({
   items,
   bids,
   setActiveFormTab,
-  activeActionDropdown,
-  setActiveActionDropdown,
-  handleUpdateDocumentDate,
   setIsFirmModalOpen,
   handleDeleteDocument,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
@@ -363,16 +353,15 @@ export function PiyasaFiyatArastirmasiDashboard({
             }}
             onCreate={() => {
               setIsFormOpen(true);
-              setActiveFormTab(
-                invitedFirms && invitedFirms.length > 0 ? "matrix" : "firms",
-              );
+              setActiveFormTab("matrix");
             }}
             createButtonLabel="Teklif & Fiyat Girişi Yap"
             onManage={() => {
-              setIsFormOpen(true);
-              setActiveFormTab("firms");
+              if (setIsFirmModalOpen) {
+                setIsFirmModalOpen(true);
+              }
             }}
-            manageButtonLabel="Firmaları Yönet"
+            manageButtonLabel="Firma Ekle"
           />
         )}
     </div>
