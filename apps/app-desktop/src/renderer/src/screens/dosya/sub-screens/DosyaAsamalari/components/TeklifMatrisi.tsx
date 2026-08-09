@@ -187,6 +187,18 @@ export const TeklifMatrisi: React.FC<TeklifMatrisiProps> = ({
         </div>
       </div>
 
+      {invitedFirms.some((f) => !f.teklif_toplami || f.teklif_toplami === 0) && (
+        <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl p-3 px-4 flex items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-300 font-medium">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              <strong>Fiyat Girişi Devam Ediyor:</strong> Davet edilen bazı firmaların (Örn:{' '}
+              {invitedFirms.filter((f) => !f.teklif_toplami).map((f) => f.unvan).join(', ')}) henüz teklif fiyatları girilmedi. Tüm fiyatlar girildikten sonra kazanan firma netleşecektir.
+            </span>
+          </div>
+        </div>
+      )}
+
       {activeView === 'firm' && invitedFirms.length > 0 && selectedFirmId !== null ? (
         // FIRM-BASED ENTRY VIEW
         <div className="flex flex-col gap-4 animate-in fade-in duration-300">
