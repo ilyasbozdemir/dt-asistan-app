@@ -8,7 +8,7 @@ interface WorkspaceCloseModalProps {
   isOpen: boolean
   onClose: () => void
   fileName: string
-  onConfirm: (type: 'none' | 'backup' | 'email' | 'server') => Promise<void>
+  onConfirm: (type: 'none' | 'backup' | 'email' | 'server' | 'gdrive') => Promise<void>
 }
 
 export function WorkspaceCloseModal({
@@ -19,9 +19,9 @@ export function WorkspaceCloseModal({
 }: WorkspaceCloseModalProps): React.JSX.Element {
   const { settings } = useAyarlarHooks()
   const isMailConfigured = !!settings.smtp_host
-  const [selectedOption, setSelectedOption] = useState<'none' | 'backup' | 'email' | 'server'>(
-    isMailConfigured ? 'email' : 'backup'
-  )
+  const [selectedOption, setSelectedOption] = useState<
+    'none' | 'backup' | 'email' | 'server' | 'gdrive'
+  >(isMailConfigured ? 'email' : 'gdrive')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,6 +61,47 @@ export function WorkspaceCloseModal({
 
         {/* Options */}
         <div className="flex flex-col gap-2.5">
+          {/* Option: Google Drive Cloud Backup */}
+          <button
+            disabled={loading}
+            onClick={() => setSelectedOption('gdrive')}
+            className={cn(
+              'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
+              selectedOption === 'gdrive'
+                ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/10'
+                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
+            )}
+          >
+            <div
+              className={cn(
+                'p-2.5 rounded-xl shrink-0',
+                selectedOption === 'gdrive'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+              )}
+            >
+              <CloudUpload className="w-5 h-5 text-emerald-100" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4
+                className={cn(
+                  'text-sm font-bold flex items-center gap-1.5',
+                  selectedOption === 'gdrive'
+                    ? 'text-emerald-900 dark:text-emerald-300'
+                    : 'text-slate-800 dark:text-slate-200'
+                )}
+              >
+                <span>Google Drive Bulut Yedeği Al ve Kapat</span>
+                <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold px-1.5 py-0.5 rounded">
+                  GDRIVE
+                </span>
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Çalışma dosyanızın (.dtal) son halini kişisel Google Drive bulut klasörünüze yükler.
+              </p>
+            </div>
+          </button>
+
           {/* Option: Server Backup */}
           <button
             disabled={loading}

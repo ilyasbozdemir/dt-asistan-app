@@ -119,7 +119,7 @@ export function PageWrapper(): React.ReactNode {
   }, [])
 
   const handleConfirmClose = async (
-    type: 'none' | 'backup' | 'email' | 'server'
+    type: 'none' | 'backup' | 'email' | 'server' | 'gdrive'
   ): Promise<void> => {
     if (type === 'backup') {
       const res = await window.electron.ipcRenderer.invoke('workspace:backup')
@@ -136,6 +136,11 @@ export function PageWrapper(): React.ReactNode {
       const res = await window.electron.ipcRenderer.invoke('workspace:backup-server')
       if (!res?.success) {
         throw new Error(res?.error || 'Sunucuya yedekleme işlemi başarısız oldu.')
+      }
+    } else if (type === 'gdrive') {
+      const res = await window.electron.ipcRenderer.invoke('workspace:backup-gdrive')
+      if (!res?.success) {
+        throw new Error(res?.error || 'Google Drive bulut yedekleme işlemi başarısız oldu.')
       }
     }
 
