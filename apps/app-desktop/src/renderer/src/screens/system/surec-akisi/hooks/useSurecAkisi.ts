@@ -1,11 +1,20 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useWorkspaceStore } from '../../../../store/workspaceStore'
 import { useDosyalarHooks } from '../../../dosyalar/dosyalar.hooks'
 import { useCiktiMerkeziData } from '../../../dosya/CiktiMerkezi.hooks'
-import { Belge, TaranmisBelge, Kalem, FirmaItem, Komisyon, Stage } from '../types'
+import {
+  Belge,
+  TaranmisBelge,
+  Kalem,
+  FirmaItem,
+  Komisyon,
+  Stage,
+  StageWithStatus,
+  UseSurecAkisiReturn
+} from '../types'
 import { dosyaBoyutFormatla, belgeSonrakiDurum } from '../utils/helpers'
 
-export function useSurecAkisi() {
+export function useSurecAkisi(): UseSurecAkisiReturn {
   const { activeDosyaId } = useWorkspaceStore()
   const { dosyalar } = useDosyalarHooks()
 
@@ -14,26 +23,72 @@ export function useSurecAkisi() {
 
   const [selectedTab, setSelectedTab] = useState<string>('ozet')
 
-  // Real data binding with fallback
-  const kalemler: Kalem[] = useMemo(() => {
-    if (dosyaContext?.kalemler && dosyaContext.kalemler.length > 0) {
-      return dosyaContext.kalemler.map((k: any, idx: number) => ({
-        id: k.id || idx + 1,
-        malzemeAdi: k.malzeme_adi || k.kalem_adi || 'Malzeme Kalemi',
-        miktar: Number(k.miktar) || 1,
-        birim: k.birim || 'Adet',
-        birimFiyat: Number(k.birim_fiyat) || 0,
-        toplamBedel: Number(k.toplam_tutar) || (Number(k.miktar) || 1) * (Number(k.birim_fiyat) || 0),
-        tasinirKodu: k.tasinir_kodu || '150.01.01'
-      }))
+  const [dbKalemler, setDbKalemler] = useState<any[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    if (!activeDosyaId) {
+      Promise.resolve().then(() => {
+        if (isMounted) {
+          setDbKalemler([])
+        }
+      })
+      return
     }
-    return [
-      { id: 1, malzemeAdi: 'Bilgisayar (Masaüstü)', miktar: 5, birim: 'Adet', birimFiyat: 15000, toplamBedel: 75000, tasinirKodu: '150.01.01' },
-      { id: 2, malzemeAdi: 'Yazıcı (A4 Laser)', miktar: 3, birim: 'Adet', birimFiyat: 4000, toplamBedel: 12000, tasinirKodu: '150.02.05' },
-      { id: 3, malzemeAdi: 'Monitör (27 inç)', miktar: 5, birim: 'Adet', birimFiyat: 2500, toplamBedel: 12500, tasinirKodu: '150.01.03' },
-      { id: 4, malzemeAdi: 'Klavye Mekanik', miktar: 10, birim: 'Adet', birimFiyat: 600, toplamBedel: 6000, tasinirKodu: '150.01.04' }
-    ]
-  }, [dosyaContext?.kalemler])
+
+    window.electron.ipcRenderer
+      .invoke(
+        'db:query',
+        'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
+        [activeDosyaId]
+      )
+      .then((res: any) => {
+        if (isMounted) {
+          if (res.success && res.data) {
+            setDbKalemler(res.data)
+          } else {
+            setDbKalemler([])
+          }
+        }
+      })
+      .catch((err: any) => {
+        console.error('Failed to fetch dbKalemler in useSurecAkisi:', err)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [activeDosyaId])
+
+  // Real data binding with empty fallback
+  const kalemler: Kalem[] = useMemo(() => {
+    const rawList =
+      dbKalemler && dbKalemler.length > 0
+        ? dbKalemler
+        : dosyaContext?.kalemler && dosyaContext.kalemler.length > 0
+          ? dosyaContext.kalemler
+          : []
+
+    return rawList.map((k: any, idx: number) => {
+      const miktar = Number(k.miktar) || 1
+      const birimFiyat = Number(k.birim_fiyat ?? k.yaklasik_maliyet_birim_fiyat ?? 0)
+      const toplamBedel =
+        Number(k.toplam_tutar ?? k.yaklasik_maliyet_toplam_tutar) || miktar * birimFiyat
+
+      return {
+        id: k.id || idx + 1,
+        malzemeAdi: k.kalem_adi || k.malzeme_adi || 'Malzeme Kalemi',
+        miktar,
+        birim: k.birim || 'Adet',
+        birimFiyat,
+        toplamBedel,
+        tasinirKodu: k.tasinir_kodu || '—',
+        aciklama: k.aciklama || '',
+        tipi: k.tipi || 'Mal'
+      }
+    })
+  }, [dbKalemler, dosyaContext])
 
   const firmalar: FirmaItem[] = useMemo(() => {
     const raw = dosyaContext?.firmalar || dosyaContext?.istekliFirmalar
@@ -49,12 +104,8 @@ export function useSurecAkisi() {
         durumu: f.secildi_mi ? 'seçildi' : f.teklif_verdi_mi ? 'teklif' : 'reddedildi'
       }))
     }
-    return [
-      { id: 1, unvan: 'TEKNOLOJİ A.Ş.', telefon: '0312 555 1234', email: 'satis@teknoloji.com.tr', davetTarihi: '16.01.2024', teklifTarihi: '19.01.2024', teklifBedeli: 105500, durumu: 'seçildi' },
-      { id: 2, unvan: 'BİLGİSAYAR TİC. LTD.', telefon: '0216 555 5678', email: 'info@bilgisayar.com.tr', davetTarihi: '16.01.2024', teklifTarihi: '20.01.2024', teklifBedeli: 112000, durumu: 'teklif' },
-      { id: 3, unvan: 'SANAYİ ÜRÜNLERİ LTD.', telefon: '0312 555 9999', email: 'satis@sanayi.com.tr', davetTarihi: '16.01.2024', teklifTarihi: null, teklifBedeli: null, durumu: 'reddedildi' }
-    ]
-  }, [dosyaContext?.firmalar, dosyaContext?.istekliFirmalar])
+    return []
+  }, [dosyaContext])
 
   const komisyonlar: Komisyon[] = useMemo(() => {
     if (dosyaContext?.komisyonlar && dosyaContext.komisyonlar.length > 0) {
@@ -73,40 +124,25 @@ export function useSurecAkisi() {
         }))
       }))
     }
-    return [
-      {
-        id: 1,
-        tur: 'Piyasa Fiyat Araştırma Komisyonu',
-        dayanak: '4734 Sayılı Kanun md. 22 — Yaklaşık Maliyet Tespiti',
-        olusturmaTarihi: '15.01.2024',
-        durum: 'aktif',
-        uyeler: [
-          { id: 1, adSoyad: dosyaContext?.hazirlayanPersonelAdi || 'Ahmet YILMAZ', unvan: 'Fen İşleri Müdürü', gorev: 'Komisyon Başkanı', imza: 'imzaladı' },
-          { id: 2, adSoyad: 'Elif KAYA', unvan: 'Mühendis', gorev: 'Üye', imza: 'imzaladı' },
-          { id: 3, adSoyad: 'Zeynep ARSLAN', unvan: 'Muhasebe Yetkilisi Mutemedi', gorev: 'Raportör', imza: 'imzaladı' }
-        ]
-      },
-      {
-        id: 2,
-        tur: 'Muayene ve Kabul Komisyonu',
-        dayanak: 'Muayene ve Kabul Yönetmeliği',
-        olusturmaTarihi: '—',
-        durum: 'bekliyor',
-        uyeler: [
-          { id: 4, adSoyad: dosyaContext?.onaylayanPersonelAdi || 'Mehmet DEMİR', unvan: 'Ayniyat Saymanı', gorev: 'Komisyon Başkanı', imza: 'bekliyor' },
-          { id: 5, adSoyad: 'Selin TAN', unvan: 'Teknisyen', gorev: 'Üye', imza: 'bekliyor' },
-          { id: 6, adSoyad: 'Burak ÖZ', unvan: 'Mühendis', gorev: 'Üye', imza: 'bekliyor' }
-        ]
-      }
-    ]
-  }, [dosyaContext?.komisyonlar, dosyaContext?.hazirlayanPersonelAdi, dosyaContext?.onaylayanPersonelAdi])
+    return []
+  }, [dosyaContext])
 
   const [belgeler, setBelgeler] = useState<Belge[]>([
-    { id: 1, ad: 'Malzeme Talep Formu', asama: 'İhtiyaç Tespiti', durum: 'imzalandı', pdfDosyaAdi: 'talep_formu_imzali.pdf', pdfYuklenmeTarihi: '15.01.2024', pdfBoyut: '512 KB' },
-    { id: 2, ad: 'Komisyon Görevlendirme Yazısı', asama: 'İhtiyaç Tespiti', durum: 'imzalandı', pdfDosyaAdi: 'komisyon_onay.pdf', pdfYuklenmeTarihi: '16.01.2024', pdfBoyut: '640 KB' },
-    { id: 3, ad: 'Piyasa Araştırması Tutanağı', asama: 'Piyasa Araştırması', durum: 'imzalandı', pdfDosyaAdi: 'piyasa_tutanak_imzali.pdf', pdfYuklenmeTarihi: '19.01.2024', pdfBoyut: '1.2 MB' },
-    { id: 4, ad: 'Yaklaşık Maliyet Cetveli', asama: 'Onay Süreci', durum: 'oluşturuldu' },
-    { id: 5, ad: 'Doğrudan Temin Onay Belgesi', asama: 'Onay Süreci', durum: 'taslak' },
+    { id: 1, ad: 'Malzeme Talep Formu', asama: 'İhtiyaç Tespiti', durum: 'oluşturulmadı' },
+    {
+      id: 2,
+      ad: 'Komisyon Görevlendirme Yazısı',
+      asama: 'İhtiyaç Tespiti',
+      durum: 'oluşturulmadı'
+    },
+    {
+      id: 3,
+      ad: 'Piyasa Araştırması Tutanağı',
+      asama: 'Piyasa Araştırması',
+      durum: 'oluşturulmadı'
+    },
+    { id: 4, ad: 'Yaklaşık Maliyet Cetveli', asama: 'Onay Süreci', durum: 'oluşturulmadı' },
+    { id: 5, ad: 'Doğrudan Temin Onay Belgesi', asama: 'Onay Süreci', durum: 'oluşturulmadı' },
     { id: 6, ad: 'Sipariş Mektubu', asama: 'Onay Süreci', durum: 'oluşturulmadı' },
     { id: 7, ad: 'Muayene Kabul Tutanağı', asama: 'Teslim ve Kabul', durum: 'oluşturulmadı' },
     { id: 8, ad: 'Taşınır İşlem Fişi', asama: 'Teslim ve Kabul', durum: 'oluşturulmadı' },
@@ -118,10 +154,7 @@ export function useSurecAkisi() {
   const [previewBelge, setPreviewBelge] = useState<Belge | null>(null)
   const [selectedAsamaFilter, setSelectedAsamaFilter] = useState<string>('Tümü')
 
-  const [taranmisBelgeler, setTaranmisBelgeler] = useState<TaranmisBelge[]>([
-    { id: 1, ad: 'yaklasik_maliyet_imzali.pdf', boyut: '842 KB', tarih: '18.01.2024', bagliBelgeId: 4 },
-    { id: 2, ad: 'piyasa_tutanak_imzali.pdf', boyut: '1.2 MB', tarih: '19.01.2024', bagliBelgeId: 3 }
-  ])
+  const [taranmisBelgeler, setTaranmisBelgeler] = useState<TaranmisBelge[]>([])
   const [surukleniyor, setSurukleniyor] = useState<boolean>(false)
 
   const dosyalariEkle = (fileList: FileList | null, targetBelgeId?: number): void => {
@@ -166,12 +199,14 @@ export function useSurecAkisi() {
   const activeDosyaAny = activeDosya as any
 
   const dosya = {
-    dosyaNo: activeDosya?.temin_no || 'DT-2024-001',
-    teminTuru: activeDosyaAny?.alim_turu || activeDosya?.tur || 'Doğrudan Temin',
-    kanunMaddesi: '4734 Sayılı Kanun md. 22/d',
-    tarih: activeDosyaAny?.tarih || activeDosya?.dosya_acilis_tarihi || '15.01.2024',
-    sonTeklifTarihi: '20.01.2024',
-    durum: activeDosyaAny?.durum || 'Onay Süreci'
+    dosyaNo: activeDosya?.temin_no || activeDosyaAny?.dosya_no || '—',
+    teminTuru:
+      activeDosyaAny?.alim_turu || activeDosya?.tur || activeDosya?.ihale_tipi || 'Doğrudan Temin',
+    kanunMaddesi: activeDosyaAny?.kanun_maddesi || '4734 Sayılı Kanun md. 22/d',
+    tarih:
+      activeDosyaAny?.tarih || activeDosya?.dosya_acilis_tarihi || activeDosya?.temin_tarihi || '—',
+    sonTeklifTarihi: activeDosyaAny?.son_teklif_tarihi || '—',
+    durum: activeDosyaAny?.durum || 'Taslak'
   }
 
   const [expandedKomisyon, setExpandedKomisyon] = useState<number | null>(1)
@@ -181,26 +216,30 @@ export function useSurecAkisi() {
       id: 1,
       title: 'İhtiyaç Tespiti',
       tasks: [
-        { name: 'Malzeme Talep Formu', done: true, tab: 'malzeme' },
-        { name: 'Komisyonu Yönet', done: true, tab: 'komisyon' },
-        { name: 'Görevlendirme Yazısı', done: true, tab: 'belgeler' }
+        { name: 'Malzeme Talep Formu', done: kalemler.length > 0, tab: 'malzeme' },
+        { name: 'Komisyonu Yönet', done: komisyonlar.length > 0, tab: 'komisyon' },
+        { name: 'Görevlendirme Yazısı', done: false, tab: 'belgeler' }
       ]
     },
     {
       id: 2,
       title: 'Piyasa Araştırması',
       tasks: [
-        { name: 'İstekli Firmaları Yönet', done: true, tab: 'firmalar' },
-        { name: 'Araştırma Mektubu Gönder', done: true, tab: 'belgeler' },
-        { name: 'Fiyat Teklifi Al', done: true, tab: 'firmalar' },
-        { name: 'Karşılaştır', done: true, tab: 'firmalar' }
+        { name: 'İstekli Firmaları Yönet', done: firmalar.length > 0, tab: 'firmalar' },
+        { name: 'Araştırma Mektubu Gönder', done: false, tab: 'belgeler' },
+        {
+          name: 'Fiyat Teklifi Al',
+          done: firmalar.some((f) => f.durumu === 'teklif' || f.durumu === 'seçildi'),
+          tab: 'firmalar'
+        },
+        { name: 'Karşılaştır', done: firmalar.some((f) => f.durumu === 'seçildi'), tab: 'firmalar' }
       ]
     },
     {
       id: 3,
       title: 'Onay Süreci',
       tasks: [
-        { name: 'Yaklaşık Maliyet Cetveli', done: true, tab: 'belgeler' },
+        { name: 'Yaklaşık Maliyet Cetveli', done: false, tab: 'belgeler' },
         { name: 'Doğrudan Temin Onay Belgesi', done: false, tab: 'belgeler' },
         { name: 'Sipariş Ver', done: false, tab: 'belgeler' }
       ]
@@ -244,7 +283,7 @@ export function useSurecAkisi() {
     )
   }
 
-  const stagesWithStatus = stages.map((s) => {
+  const stagesWithStatus: StageWithStatus[] = stages.map((s) => {
     const total = s.tasks.length
     const doneCount = s.tasks.filter((t) => t.done).length
     const progress = Math.round((doneCount / total) * 100)
@@ -260,9 +299,10 @@ export function useSurecAkisi() {
   const belgeTamamlanan = belgeler.filter((b) => b.durum === 'imzalandı').length
   const pdfYuklenenSayisi = belgeler.filter((b) => b.pdfDosyaAdi || b.durum === 'imzalandı').length
 
-  const filteredBelgeler = selectedAsamaFilter === 'Tümü'
-    ? belgeler
-    : belgeler.filter((b) => b.asama === selectedAsamaFilter)
+  const filteredBelgeler =
+    selectedAsamaFilter === 'Tümü'
+      ? belgeler
+      : belgeler.filter((b) => b.asama === selectedAsamaFilter)
 
   return {
     activeDosya,

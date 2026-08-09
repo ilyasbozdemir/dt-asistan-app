@@ -96,7 +96,7 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
             <div>
               <div className="font-bold">Talep Eden Personel</div>
               <div className="text-slate-500 mt-1">
-                {dosyaContext?.hazirlayanPersonelAdi || "Ahmet YILMAZ"}
+                {dosyaContext?.hazirlayanPersonelAdi || '—'}
               </div>
               <div className="text-[10px] text-emerald-600 font-bold mt-2">
                 ✓ İmzalandı
@@ -105,7 +105,7 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
             <div>
               <div className="font-bold">Birim Amiri / Onaylayan</div>
               <div className="text-slate-500 mt-1">
-                {dosyaContext?.onaylayanPersonelAdi || "Mehmet DEMİR"}
+                {dosyaContext?.onaylayanPersonelAdi || '—'}
               </div>
               <div className="text-[10px] text-emerald-600 font-bold mt-2">
                 ✓ İmzalandı
