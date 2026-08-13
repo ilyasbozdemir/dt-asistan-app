@@ -1,2 +1,2 @@
 export * from './LuzumMuzekkeresi.schema';
-export * from './LuzumMuzekkeresi';
+export * from "./LuzumMuzekkeresi.template";

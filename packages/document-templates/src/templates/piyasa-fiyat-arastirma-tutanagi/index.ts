@@ -1,2 +1,2 @@
 export * from "./PiyasaFiyatArastirmaTutanagi.schema";
-export * from "./PiyasaFiyatArastirmaTutanagi";
+export * from "./PiyasaFiyatArastirmaTutanagi.template";

@@ -1,2 +1,2 @@
 export * from "./ArastirmaMektubu.schema";
-export * from "./ArastirmaMektubu";
+export * from "./ArastirmaMektubu.template";

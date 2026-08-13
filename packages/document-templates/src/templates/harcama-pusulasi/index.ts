@@ -1,2 +1,2 @@
 export * from "./HarcamaPusulasi.schema";
-export * from "./HarcamaPusulasi";
+export * from "./HarcamaPusulasi.template";

@@ -1,2 +1,2 @@
 export * from './IhtiyacListesi.schema';
-export * from './IhtiyacListesi';
+export * from "./IhtiyacListesi.template";

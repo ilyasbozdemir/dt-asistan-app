@@ -1,2 +1,2 @@
 export * from "./HarcamaTalimati.schema";
-export * from "./HarcamaTalimati";
+export * from "./HarcamaTalimati.template";

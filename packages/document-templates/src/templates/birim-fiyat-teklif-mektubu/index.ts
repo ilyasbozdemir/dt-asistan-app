@@ -1,2 +1,2 @@
 export * from "./BirimFiyatTeklifMektubu.schema";
-export * from "./BirimFiyatTeklifMektubu";
+export * from "./BirimFiyatTeklifMektubu.template";

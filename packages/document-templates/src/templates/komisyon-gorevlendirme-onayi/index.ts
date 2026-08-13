@@ -1,2 +1,2 @@
 export * from "./KomisyonGorevlendirmeOnayi.schema";
-export * from "./KomisyonGorevlendirmeOnayi";
+export * from "./KomisyonGorevlendirmeOnayi.template";
