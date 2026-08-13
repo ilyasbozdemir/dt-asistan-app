@@ -281,10 +281,12 @@ export function useDocumentPreviewData({
                   continue;
                 }
                 if (
-                  key === "komisyon" &&
-                  resolved.komisyon &&
-                  Array.isArray(resolved.komisyon) &&
-                  resolved.komisyon.length > 0 &&
+                  (key === "komisyon" ||
+                    key === "fiyatKomisyonu" ||
+                    key === "gorevlendirilenler") &&
+                  resolved[key] &&
+                  Array.isArray(resolved[key]) &&
+                  resolved[key].length > 0 &&
                   (!Array.isArray(val) ||
                     val.length === 0 ||
                     val.every(
@@ -292,7 +294,7 @@ export function useDocumentPreviewData({
                         !c.adSoyad || String(c.adSoyad).includes("BELİRTİLMESİ"),
                     ))
                 ) {
-                  finalData.komisyon = resolved.komisyon;
+                  finalData[key] = resolved[key];
                   continue;
                 }
                 const isSavedPlaceholder =

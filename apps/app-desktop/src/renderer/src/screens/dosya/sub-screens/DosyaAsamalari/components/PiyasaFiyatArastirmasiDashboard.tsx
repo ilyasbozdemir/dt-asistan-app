@@ -42,10 +42,13 @@ interface PiyasaFiyatArastirmasiDashboardProps {
   ) => void;
   setIsFirmModalOpen?: (val: boolean) => void;
   handleDeleteDocument?: (id: number) => void;
+  handleSaveToDosya?: (docType?: "maliyet" | "tutanak" | "save_only") => void;
+  getEstimatedCostTotal?: () => number;
 }
 
 export function PiyasaFiyatArastirmasiDashboard({
   setIsFormOpen,
+  handleNewDocument,
   dashboardViewMode,
   stageDocs,
   docViewMode,
@@ -64,6 +67,8 @@ export function PiyasaFiyatArastirmasiDashboard({
   setActiveFormTab,
   setIsFirmModalOpen,
   handleDeleteDocument,
+  handleSaveToDosya,
+  getEstimatedCostTotal,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
   const handleOpenSablonByDosyaAdi = (targetKey: string) => {
     if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
@@ -349,6 +354,16 @@ export function PiyasaFiyatArastirmasiDashboard({
             onDelete={(belge) => {
               if (handleDeleteDocument) {
                 handleDeleteDocument(belge.id);
+              }
+            }}
+            createButtonLabel="Yeni Tutanak / Cetvel Ekle"
+            onCreateBelge={(type) => {
+              const mode = type === "yaklasik-maliyet" ? "maliyet" : "tutanak";
+              const total = getEstimatedCostTotal ? getEstimatedCostTotal() : 0;
+              if (total > 0 && handleSaveToDosya) {
+                handleSaveToDosya(mode);
+              } else {
+                handleNewDocument(mode);
               }
             }}
           />

@@ -69,6 +69,7 @@ export function PiyasaFiyatArastirmasiForm({
   setSetLowestFirmAsWinner,
   manualWinnerFirmaId,
   setManualWinnerFirmaId,
+  formMode,
 }: PiyasaFiyatArastirmasiFormProps): React.JSX.Element {
   const estimatedCostTotal = getEstimatedCostTotal();
 
@@ -102,7 +103,11 @@ export function PiyasaFiyatArastirmasiForm({
               <h3 className="text-base font-black text-slate-850 dark:text-slate-100 flex items-center gap-2 leading-none">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0">
                 </span>
-                Teklif & Fiyat Giriş Paneli
+                {formMode === "maliyet"
+                  ? "Yaklaşık Maliyet Cetveli Oluşturma & Teklif Girişi"
+                  : formMode === "tutanak"
+                  ? "Piyasa Fiyat Araştırma Tutanağı Oluşturma & Teklif Girişi"
+                  : "Teklif & Fiyat Giriş Paneli"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 flex-wrap">
                 <span>
@@ -115,8 +120,7 @@ export function PiyasaFiyatArastirmasiForm({
                 <span>
                   Yaklaşık Maliyet:{" "}
                   <strong className="font-mono text-emerald-600 dark:text-emerald-400">
-                    ₺{" "}
-                    {estimatedCostTotal.toLocaleString("tr-TR", {
+                    ₺ {estimatedCostTotal.toLocaleString("tr-TR", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -132,31 +136,35 @@ export function PiyasaFiyatArastirmasiForm({
               type="button"
               onClick={() => handleSaveToDosya("save_only")}
               className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/80 dark:border-slate-700 h-10 shrink-0"
-              title="Yalnızca veritabanındaki teklifleri kaydeder"
+              title="Yalnızca veritabanındaki fiyat tekliflerini kaydeder"
             >
               <Save className="w-4 h-4 text-slate-500" />
               <span>Sadece Fiyatları Kaydet</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleSaveToDosya("maliyet")}
-              className="px-4 py-2 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
-              title="Yaklaşık Maliyet Cetveli resmi belgesini üretir ve önizlemesini açar"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
-              <span>Yaklaşık Maliyet Cetveli Üret</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSaveToDosya("tutanak")}
-              className="px-4 py-2 bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
-              title="Piyasa Fiyat Araştırma Tutanağı resmi belgesini üretir ve önizlemesini açar"
-            >
-              <FileText className="w-4 h-4 text-indigo-100" />
-              <span>Piyasa Araştırma Tutanağı Üret</span>
-            </button>
+            {formMode === "maliyet"
+              ? (
+                <button
+                  type="button"
+                  onClick={() => handleSaveToDosya("maliyet")}
+                  className="px-4 py-2 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
+                  title="Yaklaşık Maliyet Cetveli resmi belgesini üretir ve kaydeder"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
+                  <span>Yaklaşık Maliyet Cetveli Üret & Kaydet</span>
+                </button>
+              )
+              : (
+                <button
+                  type="button"
+                  onClick={() => handleSaveToDosya("tutanak")}
+                  className="px-4 py-2 bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
+                  title="Piyasa Fiyat Araştırma Tutanağı resmi belgesini üretir ve kaydeder"
+                >
+                  <FileText className="w-4 h-4 text-indigo-100" />
+                  <span>Piyasa Fiyat Araştırma Tutanağı Üret & Kaydet</span>
+                </button>
+              )}
           </div>
         </div>
 
@@ -164,31 +172,35 @@ export function PiyasaFiyatArastirmasiForm({
         <div className="bg-slate-50/80 dark:bg-slate-900/60 p-3 px-4 md:px-8 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-100 dark:border-slate-800/40">
           {/* Dates Group */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
-              <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                Maliyet Cetveli Tarihi:
-              </span>
-              <input
-                type="date"
-                value={maliyetCetveliTarihi}
-                onChange={(e) => setMaliyetCetveliTarihi(e.target.value)}
-                className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-100 w-28"
-              />
-            </div>
+            {formMode !== "tutanak" && (
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
+                <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  Maliyet Cetveli Tarihi:
+                </span>
+                <input
+                  type="date"
+                  value={maliyetCetveliTarihi}
+                  onChange={(e) => setMaliyetCetveliTarihi(e.target.value)}
+                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-100 w-28"
+                />
+              </div>
+            )}
 
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
-              <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-              <span className="text-slate-500 dark:text-slate-400 font-medium">
-                Tutanak Tarihi:
-              </span>
-              <input
-                type="date"
-                value={tutanakTarihi}
-                onChange={(e) => setTutanakTarihi(e.target.value)}
-                className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-100 w-28"
-              />
-            </div>
+            {formMode !== "maliyet" && (
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
+                <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  Tutanak Tarihi:
+                </span>
+                <input
+                  type="date"
+                  value={tutanakTarihi}
+                  onChange={(e) => setTutanakTarihi(e.target.value)}
+                  className="bg-transparent border-none text-xs font-extrabold focus:outline-none cursor-pointer text-slate-800 dark:text-slate-100 w-28"
+                />
+              </div>
+            )}
           </div>
 
           {/* Winner Firm Settings */}

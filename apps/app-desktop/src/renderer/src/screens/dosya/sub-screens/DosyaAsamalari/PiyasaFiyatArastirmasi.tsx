@@ -165,6 +165,8 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             handleUpdateDocumentDate={handleUpdateDocumentDate}
             handleDeleteDocument={handleDeleteDocument}
             setIsFirmModalOpen={setIsFirmModalOpen}
+            handleSaveToDosya={handleSaveToDosya}
+            getEstimatedCostTotal={getEstimatedCostTotal}
           />
         )
         : (

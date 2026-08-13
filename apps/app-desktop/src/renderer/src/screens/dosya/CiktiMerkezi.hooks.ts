@@ -137,21 +137,53 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
         // Komisyon üyelerini çek
         const komsRes = await window.electron.ipcRenderer.invoke(
           'db:query',
-          `SELECT tk.*, p.ad_soyad, p.unvan 
+          `SELECT tk.*, 
+                  COALESCE(NULLIF(tk.ad_soyad, ''), NULLIF(p.ad_soyad, ''), '') as ad_soyad, 
+                  COALESCE(NULLIF(tk.unvan, ''), NULLIF(p.unvan, ''), '') as unvan,
+                  COALESCE(NULLIF(tk.gorevi, ''), 'Üye') as gorevi
            FROM DATA_TeminKomisyon tk 
-           JOIN TANIM_Personel p ON tk.personel_id = p.id 
+           LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id 
            WHERE tk.temin_dosya_id = ?`,
           [activeDosyaId]
         )
-        const allCommission = komsRes.success ? komsRes.data : []
-        const commission = allCommission.filter((c: any) =>
-          c.komisyon_turu?.toLowerCase().includes('fiyat')
+        let allCommission = komsRes.success ? komsRes.data : []
+
+        if (!allCommission || allCommission.length === 0) {
+          const fallbackRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            `SELECT u.*, 
+                    p.ad_soyad as ad_soyad, 
+                    p.unvan as unvan, 
+                    COALESCE(g.ad, 'Üye') as gorevi
+             FROM TANIM_KomisyonUye u
+             JOIN TANIM_Komisyon k ON u.komisyon_id = k.id
+             LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
+             LEFT JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id
+             WHERE (k.aktif_mi = 1 OR k.aktif_mi IS NULL)`
+          )
+          if (fallbackRes.success && fallbackRes.data) {
+            allCommission = fallbackRes.data
+          }
+        }
+
+        let commission = allCommission.filter(
+          (c: any) =>
+            c.komisyon_turu?.toLowerCase().includes('fiyat') ||
+            c.komisyon_turu?.toLowerCase().includes('piyasa') ||
+            c.komisyon_turu?.toLowerCase().includes('araştırma')
         )
-        const muayeneKomisyonu = allCommission.filter(
+        if (commission.length === 0) {
+          commission = allCommission
+        }
+
+        let muayeneKomisyonu = allCommission.filter(
           (c: any) =>
             c.komisyon_turu?.toLowerCase().includes('muayene') ||
             c.komisyon_turu?.toLowerCase().includes('kabul')
         )
+        if (muayeneKomisyonu.length === 0) {
+          muayeneKomisyonu = allCommission
+        }
 
         const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
         setSettings(settings)

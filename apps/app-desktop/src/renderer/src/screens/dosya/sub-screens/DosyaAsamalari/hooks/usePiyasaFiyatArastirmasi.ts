@@ -549,7 +549,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
         [total, activeDosyaId]
       )
 
-      if (targetMode === 'tutanak') {
+      const effectiveMode = targetMode === 'save_only' ? (formMode || 'tutanak') : targetMode
+
+      if (effectiveMode === 'tutanak' || targetMode === 'tutanak') {
         // Tutanak tarihi güncelle
         await window.electron.ipcRenderer.invoke(
           'db:run',
@@ -587,19 +589,10 @@ export function usePiyasaFiyatArastirmasiLogic() {
         }
       }
 
-      if (targetMode === 'save_only') {
-        alert(
-          `Teklif ve fiyat verileri başarıyla kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
-            minimumFractionDigits: 2
-          })}`
-        )
-        return
-      }
-
       // 2. Resmi Belgeyi Üret
       const docName =
-        targetMode === 'maliyet' ? 'Yaklaşık Maliyet Cetveli' : 'Piyasa Fiyat Araştırma Tutanağı'
-      const docDate = targetMode === 'maliyet' ? maliyetCetveliTarihi : tutanakTarihi
+        effectiveMode === 'maliyet' ? 'Yaklaşık Maliyet Cetveli' : 'Piyasa Fiyat Araştırma Tutanağı'
+      const docDate = effectiveMode === 'maliyet' ? maliyetCetveliTarihi : tutanakTarihi
 
       const sablon = stageSablons.find((s) => {
         const lowerAd = s.ad.toLowerCase()
@@ -749,6 +742,51 @@ export function usePiyasaFiyatArastirmasiLogic() {
           maliyetCetveliTarihi = formattedDocDate
         }
 
+        // Komisyon üyelerini veritabanından çek (DATA_TeminKomisyon -> TANIM_KomisyonUye fallback)
+        let komisyonListesi: any[] = []
+        try {
+          const komsRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            `SELECT tk.*, 
+                    COALESCE(NULLIF(tk.ad_soyad, ''), NULLIF(p.ad_soyad, ''), '') as adSoyad,
+                    COALESCE(NULLIF(tk.unvan, ''), NULLIF(p.unvan, ''), '') as unvan,
+                    COALESCE(NULLIF(tk.gorevi, ''), NULLIF(k.ad, ''), 'Üye') as gorevi
+             FROM DATA_TeminKomisyon tk 
+             LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id 
+             LEFT JOIN TANIM_Komisyon k ON tk.komisyon_id = k.id
+             WHERE tk.temin_dosya_id = ?`,
+            [activeDosyaId]
+          )
+          if (komsRes.success && komsRes.data && komsRes.data.length > 0) {
+            komisyonListesi = komsRes.data
+          } else {
+            // Fallback: TANIM_KomisyonUye
+            const fallbackRes = await window.electron.ipcRenderer.invoke(
+              'db:query',
+              `SELECT u.*, 
+                      p.ad_soyad as adSoyad, 
+                      p.unvan as unvan, 
+                      COALESCE(g.ad, 'Üye') as gorevi
+               FROM TANIM_KomisyonUye u
+               JOIN TANIM_Komisyon k ON u.komisyon_id = k.id
+               LEFT JOIN TANIM_Personel p ON u.personel_id = p.id
+               LEFT JOIN TANIM_KomisyonGorevi g ON u.gorev_id = g.id
+               WHERE (k.aktif_mi = 1 OR k.aktif_mi IS NULL)`
+            )
+            if (fallbackRes.success && fallbackRes.data) {
+              komisyonListesi = fallbackRes.data
+            }
+          }
+        } catch (e) {
+          console.error('Komisyon çekme hatası:', e)
+        }
+
+        const formattedKomisyon = komisyonListesi.map((c: any) => ({
+          adSoyad: c.adSoyad || c.ad_soyad || '',
+          unvan: c.unvan || '',
+          gorevi: c.gorevi || 'Üye'
+        }))
+
         const mergedCtx = {
           ...baseCtx,
           tarih: formattedDocDate,
@@ -767,6 +805,9 @@ export function usePiyasaFiyatArastirmasiLogic() {
           ikinciAvantajliTeklifBedeli: calculatedTeklifler[1]?.teklifBedeli || '',
           items: needItems,
           kalemler: needItems,
+          komisyon: formattedKomisyon.length > 0 ? formattedKomisyon : (baseCtx.komisyon || []),
+          fiyatKomisyonu: formattedKomisyon.length > 0 ? formattedKomisyon : (baseCtx.fiyatKomisyonu || []),
+          gorevlendirilenler: formattedKomisyon.length > 0 ? formattedKomisyon : (baseCtx.gorevlendirilenler || []),
           yukleniciFirma:
             targetMode === 'tutanak'
               ? enAvantajliTeklifSahibi

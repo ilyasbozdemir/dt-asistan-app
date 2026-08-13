@@ -538,12 +538,51 @@ export function BelgeListesi({
       }
 
       {belgeler.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center dark:border-slate-800">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-12 text-center dark:border-slate-800">
           <FileText className="mx-auto h-8 w-8 text-slate-300" />
 
           <p className="mt-2 text-xs font-semibold text-slate-500">
-            Henüz belge bulunmuyor.
+            Henüz tutanak veya belge bulunmuyor.
           </p>
+
+          {onCreateBelge
+            ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {createButtonLabel}
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="center" className="w-64">
+                  {belgeTipleri.map((tip) => (
+                    <DropdownMenuItem
+                      key={tip.id}
+                      onClick={() => onCreateBelge(tip.id)}
+                    >
+                      <FileText className="mr-2 h-4 w-4 text-blue-500" />
+                      {tip.ad}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+            : onCreate
+            ? (
+              <button
+                type="button"
+                onClick={onCreate}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4" />
+                {createButtonLabel}
+              </button>
+            )
+            : null}
         </div>
       )}
     </div>

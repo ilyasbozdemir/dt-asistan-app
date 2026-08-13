@@ -408,6 +408,21 @@ export async function resolveTemplateData(
           }
         }
 
+        // 3. Fallback: Query TANIM_Personel if no commission table setup exists
+        if (members.length === 0) {
+          const pRows = await queryExecutor(
+            'SELECT ad_soyad, unvan FROM TANIM_Personel WHERE (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 3',
+            []
+          );
+          if (pRows && pRows.length > 0) {
+            members = pRows.map((p: any) => ({
+              resolved_ad_soyad: p.ad_soyad,
+              resolved_unvan: p.unvan,
+              gorev_adi: 'Görevli'
+            }));
+          }
+        }
+
         resolvedPayload[sablonDegiskeni] = members.map((m: any) => ({
           adSoyad: m.resolved_ad_soyad || m.ad_soyad || m.adSoyad || '',
           unvan: m.resolved_unvan || m.unvan || '',

@@ -33,6 +33,8 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
     ? data.fiyatKomisyonu
     : (data?.gorevlendirilenler && data.gorevlendirilenler.length > 0)
     ? data.gorevlendirilenler
+    : (data?.komisyonUyeleri && data.komisyonUyeleri.length > 0)
+    ? data.komisyonUyeleri
     : [];
 
   const displayFirmaToplamlari = (firmaToplamlari && firmaToplamlari.length > 0)
@@ -40,8 +42,13 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
     : (data?.firmaToplamlariDetay && data.firmaToplamlariDetay.length > 0)
     ? data.firmaToplamlariDetay
     : displayFirmalar.map((f: any) => ({
-        toplam: f.total ? f.total.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00"
-      }));
+      toplam: f.total
+        ? f.total.toLocaleString("tr-TR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+        : "0,00",
+    }));
 
   const firmalarColspan = Math.max(displayFirmalar.length, 1);
 
@@ -510,18 +517,50 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
               }}
             >
               <div style={{ fontWeight: "bold" }}>
-                {uye.adSoyad || uye.ad_soyad}
+                {uye.adSoyad || uye.ad_soyad || uye.ad || "Görevli Üye"}
               </div>
-              <div>{uye.unvan}</div>
-              {uye.gorevi && (
+              <div>{uye.unvan || uye.personel_unvan || ""}</div>
+              {(uye.gorevi || uye.gorev) && (
                 <div style={{ fontSize: "8.5pt", color: "#555" }}>
-                  {uye.gorevi}
+                  {uye.gorevi || uye.gorev}
                 </div>
               )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* OLUR / ONAY BLOĞU */}
+      {(data?.showOlurBlock ?? data?.olurGoster ?? true) && (
+        <div style={{ marginTop: "35px", pageBreakInside: "avoid" }}>
+          <div style={{ textAlign: "center", width: "260px", margin: "0 auto" }}>
+            <div style={{ fontWeight: "bold", fontSize: "11pt", marginBottom: "5px" }}>
+              <EditableField
+                name="olurBaslik"
+                value={data?.olurBaslik || "O L U R"}
+              />
+            </div>
+            <div style={{ fontSize: "9.5pt", marginBottom: "15px" }}>
+              <EditableField
+                name="olurTarihi"
+                value={data?.olurTarihi || data?.tarih || ""}
+              />
+            </div>
+            <div style={{ fontWeight: "bold", fontSize: "10pt" }}>
+              <EditableField
+                name="baskanAdi"
+                value={data?.baskanAdi || data?.onaylayanPersonelAdi || data?.onaylayan_ad_soyad || ""}
+              />
+            </div>
+            <div style={{ fontSize: "9.5pt", color: "#333" }}>
+              <EditableField
+                name="baskanUnvan"
+                value={data?.baskanUnvan || data?.onaylayanPersonelUnvan || data?.onaylayan_unvan || "Harcama Yetkilisi"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -10,7 +10,9 @@ interface DocumentPreviewSidebarProps {
   orientation: "portrait" | "landscape";
   setOrientation: (orientation: "portrait" | "landscape") => void;
   formData: Partial<IhtiyacListesiType>;
-  setFormData: React.Dispatch<React.SetStateAction<Partial<IhtiyacListesiType>>>;
+  setFormData: React.Dispatch<
+    React.SetStateAction<Partial<IhtiyacListesiType>>
+  >;
   localShowLogoLeft: boolean;
   setLocalShowLogoLeft: (show: boolean) => void;
   localShowLogoRight: boolean;
@@ -58,9 +60,9 @@ export function DocumentPreviewSidebar({
 
       <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
         <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
-          💡 <strong>Canlı Düzenleme:</strong> Belge üzerindeki metin, sayı,
-          tarih ve imza alanlarını sağdaki A4 sayfasında doğrudan tıklayarak
-          düzenleyebilirsiniz.
+          💡 <strong>Canlı Düzenleme:</strong>{" "}
+          Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki A4
+          sayfasında doğrudan tıklayarak düzenleyebilirsiniz.
         </div>
 
         {/* Toggles & Settings */}
