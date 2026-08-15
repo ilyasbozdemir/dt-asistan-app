@@ -1,3 +1,25 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+allowBuilds:
+  '@google/genai': true
+  better-sqlite3: true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+  protobufjs: true
+  puppeteer: true
+  sharp: true
+  unrs-resolver: true
+
+onlyBuiltDependencies:
+  - "@google/genai"
+  - "better-sqlite3"
+  - "electron"
+  - "electron-winstaller"
+  - "esbuild"
+  - "protobufjs"
+  - "puppeteer"
+  - "sharp"
+  - "unrs-resolver"

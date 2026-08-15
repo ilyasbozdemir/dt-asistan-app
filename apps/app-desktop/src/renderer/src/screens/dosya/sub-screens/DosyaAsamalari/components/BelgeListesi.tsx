@@ -1,4 +1,5 @@
 import {
+  Calculator,
   CalendarDays,
   CheckCircle2,
   ExternalLink,
@@ -143,6 +144,7 @@ interface BelgeListesiProps {
    */
   onCreate?: () => void;
   onCreateBelge?: (type: string) => void;
+  onFiyatGir?: () => void;
 
   /**
    * Yönet / Ayar butonu tetikleyicisi
@@ -180,6 +182,7 @@ export function BelgeListesi({
   onDelete,
   onCreate,
   onCreateBelge,
+  onFiyatGir,
   onManage,
   createButtonLabel = "Yeni Tutanak",
   manageButtonLabel = "Yönet",
@@ -362,6 +365,19 @@ export function BelgeListesi({
             ))}
           </div>
 
+          {/* Fiyat Gir Butonu */}
+          {onFiyatGir && (
+            <button
+              type="button"
+              onClick={onFiyatGir}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white transition-all hover:bg-emerald-700 cursor-pointer shadow-2xs"
+              title="Piyasa fiyat araştırması teklif fiyatlarını gir"
+            >
+              <Calculator className="h-3.5 w-3.5" />
+              Fiyat Gir
+            </button>
+          )}
+
           {/* Yönet / Ayarlar Butonu */}
           {onManage && (
             <button
@@ -433,23 +449,34 @@ export function BelgeListesi({
                   key={`belge_tbl_${belge.id || "b"}_${idx}`}
                   onClick={(e) => {
                     const target = e.target as HTMLElement;
-                    if (target.closest("button") || target.closest("[role='menuitem']")) return;
-                    if (onEdit) onEdit(belge);
-                    else if (onView) onView(belge);
+                    if (
+                      target.closest("button") ||
+                      target.closest("[role='menuitem']")
+                    ) return;
+                    if (onEdit) {
+                      onEdit(belge);
+                    } else if (onView) {
+                      onView(belge);
+                    }
                   }}
                   className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40 cursor-pointer"
                 >
                   <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">
                     <div className="flex items-center gap-2.5">
                       <FileText className="h-4 w-4 shrink-0 text-blue-500" />
-                      <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{getBelgeAdi(belge)}</span>
+                      <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        {getBelgeAdi(belge)}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                     {belge.belgeTarihi}
                   </td>
                   <td className="px-4 py-3">{getDurum(belge.durum)}</td>
-                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                  <td
+                    className="px-4 py-3 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Actions belge={belge} />
                   </td>
                 </tr>
@@ -466,7 +493,10 @@ export function BelgeListesi({
               key={`belge_lst_${belge.id || "b"}_${idx}`}
               onClick={(e) => {
                 const target = e.target as HTMLElement;
-                if (target.closest("button") || target.closest("[role='menuitem']")) return;
+                if (
+                  target.closest("button") ||
+                  target.closest("[role='menuitem']")
+                ) return;
                 if (onEdit) onEdit(belge);
                 else if (onView) onView(belge);
               }}
@@ -489,7 +519,10 @@ export function BelgeListesi({
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-3" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex shrink-0 items-center gap-3"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {getDurum(belge.durum)}
 
                 <Actions belge={belge} />
@@ -512,9 +545,13 @@ export function BelgeListesi({
               key={`belge_grd_${belge.id || "b"}_${idx}`}
               onClick={(e) => {
                 const target = e.target as HTMLElement;
-                if (target.closest("button") || target.closest("[role='menuitem']")) return;
-                if (onEdit) onEdit(belge);
-                else if (onView) onView(belge);
+                if (
+                  target.closest("button") ||
+                  target.closest("[role='menuitem']")
+                ) return;
+                if (onEdit) {
+                  onEdit(belge);
+                } else if (onView) onView(belge);
               }}
               className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 cursor-pointer"
             >

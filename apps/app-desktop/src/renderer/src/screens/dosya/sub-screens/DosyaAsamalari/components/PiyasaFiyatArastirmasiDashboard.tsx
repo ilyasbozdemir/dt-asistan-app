@@ -366,6 +366,7 @@ export function PiyasaFiyatArastirmasiDashboard({
               const mode = type === "yaklasik-maliyet" ? "maliyet" : "tutanak";
               handleNewDocument(mode);
             }}
+            onFiyatGir={() => handleNewDocument("tutanak")}
           />
         )}
     </div>
