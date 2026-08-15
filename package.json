@@ -14,7 +14,8 @@
     "typecheck:web": "pnpm --filter app-web build",
     "typecheck": "pnpm typecheck:desktop && pnpm typecheck:web",
     "format": "pnpm --filter app-desktop format",
-    "lint": "pnpm --filter app-desktop lint && pnpm --filter app-web lint"
+    "lint": "pnpm --filter app-desktop lint && pnpm --filter app-web lint",
+    "rebuild:electron": "npx @electron/rebuild -v 39.8.10 -f -w better-sqlite3"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

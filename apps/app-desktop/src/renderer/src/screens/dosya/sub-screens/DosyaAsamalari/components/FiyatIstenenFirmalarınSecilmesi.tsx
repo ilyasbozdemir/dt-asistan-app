@@ -507,18 +507,6 @@ export function FiyatIstenenFirmalarınSecilmesi({
               </span>
             )}
 
-            {addedFirms.length > 0 && onFiyatGir && (
-              <button
-                type="button"
-                onClick={onFiyatGir}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all cursor-pointer border-0 shadow-sm hover:shadow"
-                title="Piyasa fiyat araştırması teklif fiyatlarını gir"
-              >
-                <Calculator className="w-3.5 h-3.5" />
-                Fiyat Gir
-              </button>
-            )}
-
             <button
               type="button"
               disabled={!canAdd || availableFirms.length === 0}
