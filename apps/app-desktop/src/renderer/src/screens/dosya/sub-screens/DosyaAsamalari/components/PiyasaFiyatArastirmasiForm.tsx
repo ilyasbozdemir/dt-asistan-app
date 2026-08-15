@@ -4,11 +4,18 @@ import {
   Award,
   Calendar,
   Check,
+  ChevronDown,
   FileSpreadsheet,
   FileText,
   Save,
 } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@renderer/components/ui/DropdownMenu";
 import { PiyasaFiyatArastirmasiMatrixTab } from "./PiyasaFiyatArastirmasiMatrixTab";
 
 interface PiyasaFiyatArastirmasiFormProps {
@@ -72,13 +79,14 @@ export function PiyasaFiyatArastirmasiForm({
   formMode,
 }: PiyasaFiyatArastirmasiFormProps): React.JSX.Element {
   const estimatedCostTotal = getEstimatedCostTotal();
+  const isMaliyetMode = formMode === "maliyet";
 
   return (
     <div
       className={cn(
         isFormFullscreen
           ? "fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col animate-in fade-in duration-300"
-          : "w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm flex flex-col gap-6 animate-in fade-in duration-300 mt-4 overflow-hidden",
+          : "w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-sm flex flex-col animate-in fade-in duration-300 mt-4 overflow-hidden",
       )}
     >
       {/* Form Header */}
@@ -88,7 +96,7 @@ export function PiyasaFiyatArastirmasiForm({
           isFormFullscreen ? "sticky top-0 z-50 shadow-xs" : "",
         )}
       >
-        {/* Top Row: Title, Summary & Main Action Buttons */}
+        {/* Top Row: Title, Stats & Main Action Buttons */}
         <div className="p-4 md:px-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/60">
           <div className="flex items-center gap-4 shrink-0">
             <button
@@ -100,78 +108,125 @@ export function PiyasaFiyatArastirmasiForm({
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-left">
-              <h3 className="text-base font-black text-slate-850 dark:text-slate-100 flex items-center gap-2 leading-none">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-2xs flex items-center gap-1",
+                    isMaliyetMode
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-600"
+                      : "bg-gradient-to-r from-indigo-600 to-blue-600",
+                  )}
+                >
+                  {isMaliyetMode ? (
+                    <FileSpreadsheet className="w-3 h-3" />
+                  ) : (
+                    <FileText className="w-3 h-3" />
+                  )}
+                  {isMaliyetMode ? "Yaklaşık Maliyet" : "Piyasa Fiyat Araştırması"}
                 </span>
-                {formMode === "maliyet"
+
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                  {items.length} Kalem • {invitedFirms.length} Firma
+                </span>
+              </div>
+
+              <h3 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2 leading-tight mt-1">
+                {isMaliyetMode
                   ? "Yaklaşık Maliyet Cetveli Oluşturma & Teklif Girişi"
-                  : formMode === "tutanak"
-                  ? "Piyasa Fiyat Araştırma Tutanağı Oluşturma & Teklif Girişi"
-                  : "Teklif & Fiyat Giriş Paneli"}
+                  : "Piyasa Fiyat Araştırma Tutanağı Oluşturma & Teklif Girişi"}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 flex-wrap">
-                <span>
-                  Yöntem:{" "}
-                  <strong className="text-slate-700 dark:text-slate-300">
-                    {hesaplamaEsasi}
-                  </strong>
-                </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span>
-                  Yaklaşık Maliyet:{" "}
-                  <strong className="font-mono text-emerald-600 dark:text-emerald-400">
-                    ₺ {estimatedCostTotal.toLocaleString("tr-TR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </strong>
-                </span>
-              </p>
             </div>
           </div>
 
-          {/* Action Buttons: Direct Document Generation */}
-          <div className="flex items-center gap-2.5 w-full lg:w-auto justify-start lg:justify-end flex-wrap sm:flex-nowrap shrink-0">
-            <button
-              type="button"
-              onClick={() => handleSaveToDosya("save_only")}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/80 dark:border-slate-700 h-10 shrink-0"
-              title="Yalnızca veritabanındaki fiyat tekliflerini kaydeder"
-            >
-              <Save className="w-4 h-4 text-slate-500" />
-              <span>Sadece Fiyatları Kaydet</span>
-            </button>
+          {/* Stat Box & Split Action Context Menu Button */}
+          <div className="flex flex-wrap lg:flex-nowrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end shrink-0">
+            {/* Toplam Maliyet Rozeti */}
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 text-xs font-semibold">
+              <span className="text-slate-500 dark:text-slate-400">
+                Yaklaşık Maliyet:
+              </span>
+              <strong className="font-mono text-sm font-black text-emerald-700 dark:text-emerald-300">
+                ₺ {estimatedCostTotal.toLocaleString("tr-TR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </strong>
+            </div>
 
-            {formMode === "maliyet"
-              ? (
-                <button
-                  type="button"
-                  onClick={() => handleSaveToDosya("maliyet")}
-                  className="px-4 py-2 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
-                  title="Yaklaşık Maliyet Cetveli resmi belgesini üretir ve kaydeder"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
-                  <span>Yaklaşık Maliyet Cetveli Üret & Kaydet</span>
-                </button>
-              )
-              : (
-                <button
-                  type="button"
-                  onClick={() => handleSaveToDosya("tutanak")}
-                  className="px-4 py-2 bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0"
-                  title="Piyasa Fiyat Araştırma Tutanağı resmi belgesini üretir ve kaydeder"
-                >
-                  <FileText className="w-4 h-4 text-indigo-100" />
-                  <span>Piyasa Fiyat Araştırma Tutanağı Üret & Kaydet</span>
-                </button>
-              )}
+            {/* Split Action Dropdown Button */}
+            <div className="flex items-center shadow-md rounded-xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => handleSaveToDosya(isMaliyetMode ? "maliyet" : "tutanak")}
+                className={cn(
+                  "px-4 py-2.5 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0 active:scale-95 whitespace-nowrap",
+                  isMaliyetMode
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                    : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700",
+                )}
+                title="Fiyat tekliflerini kaydeder ve resmi belgeyi günceller"
+              >
+                {isMaliyetMode ? (
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-100 shrink-0" />
+                ) : (
+                  <FileText className="w-4 h-4 text-indigo-100 shrink-0" />
+                )}
+                <span>
+                  {isMaliyetMode ? "Kaydet & Cetvel Üret" : "Kaydet & Tutanak Üret"}
+                </span>
+              </button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "px-2.5 py-2.5 text-white text-xs font-bold transition-all flex items-center justify-center cursor-pointer h-10 shrink-0 border-l border-white/20 active:scale-95",
+                      isMaliyetMode
+                        ? "bg-teal-700 hover:bg-teal-800"
+                        : "bg-blue-700 hover:bg-blue-800",
+                    )}
+                    title="Diğer Kaydetme ve İşlem Seçenekleri"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuItem onClick={() => handleSaveToDosya("save_only")}>
+                    <Save className="mr-2 h-4 w-4 text-slate-500" />
+                    <span>Sadece Fiyatları Sakla (Taslak)</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => handleSaveToDosya("maliyet")}>
+                    <FileSpreadsheet className="mr-2 h-4 w-4 text-emerald-600" />
+                    <span>Yaklaşık Maliyet Cetvelini Güncelle</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => handleSaveToDosya("tutanak")}>
+                    <FileText className="mr-2 h-4 w-4 text-indigo-600" />
+                    <span>Piyasa Fiyat Araştırma Tutanağını Güncelle</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
         {/* Sub Settings Bar: Dates & Winner Selection Settings */}
-        <div className="bg-slate-50/80 dark:bg-slate-900/60 p-3 px-4 md:px-8 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-100 dark:border-slate-800/40">
-          {/* Dates Group */}
+        <div className="bg-slate-50/90 dark:bg-slate-900/80 p-3 px-4 md:px-8 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-100 dark:border-slate-800/40">
+          {/* Dates & Basis Info */}
           <div className="flex flex-wrap items-center gap-3">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
+              Hesaplama Yöntemi:{" "}
+              <strong className="text-slate-700 dark:text-slate-200 font-semibold">
+                {hesaplamaEsasi}
+              </strong>
+            </span>
+
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+
+            {/* Date Inputs */}
             {formMode !== "tutanak" && (
               <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs h-9">
                 <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

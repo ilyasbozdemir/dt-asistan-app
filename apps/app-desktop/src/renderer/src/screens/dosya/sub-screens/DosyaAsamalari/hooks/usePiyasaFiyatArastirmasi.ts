@@ -520,11 +520,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
   const handleNewDocument = (mode: 'maliyet' | 'tutanak'): void => {
     setFormMode(mode)
     const today = new Date().toISOString().split('T')[0]
-    setMaliyetCetveliTarihi(today)
-    setTutanakTarihi(today)
-    setBids({})
-    setManualWinnerFirmaId(null)
-    setSetLowestFirmAsWinner(true)
+    if (!maliyetCetveliTarihi) setMaliyetCetveliTarihi(today)
+    if (!tutanakTarihi) setTutanakTarihi(today)
     setSyncTutanak(true)
     setBelgeleriKaydet(true)
     setIsFormOpen(true)
@@ -823,15 +820,30 @@ export function usePiyasaFiyatArastirmasiLogic() {
         )
       }
 
-      // Yeni bir versiyon (tarihçeli belge) olarak ekle
-      await window.electron.ipcRenderer.invoke(
-        'db:run',
-        'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu, veri_json) VALUES (?, ?, ?, ?, ?)',
-        [activeDosyaId, docName, docDate || null, '', mergedCtxStr]
+      // 3. Varolan belge var mı kontrol et, varsa UPDATE et, yoksa INSERT et
+      const existingDocRes = await window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT id FROM DATA_TeminBelge WHERE temin_dosya_id = ? AND belge_adi = ? ORDER BY id DESC LIMIT 1',
+        [activeDosyaId, docName]
       )
 
+      if (existingDocRes.success && existingDocRes.data && existingDocRes.data.length > 0) {
+        const existingId = existingDocRes.data[0].id
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'UPDATE DATA_TeminBelge SET belge_tarihi = ?, veri_json = ? WHERE id = ?',
+          [docDate || null, mergedCtxStr, existingId]
+        )
+      } else {
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'INSERT INTO DATA_TeminBelge (temin_dosya_id, belge_adi, belge_tarihi, dosya_yolu, veri_json) VALUES (?, ?, ?, ?, ?)',
+          [activeDosyaId, docName, docDate || null, '', mergedCtxStr]
+        )
+      }
+
       alert(
-        `${docName} başarıyla üretildi ve kaydedildi: ₺ ${total.toLocaleString('tr-TR', {
+        `${docName} başarıyla üretildi ve güncellendi: ₺ ${total.toLocaleString('tr-TR', {
           minimumFractionDigits: 2
         })}`
       )

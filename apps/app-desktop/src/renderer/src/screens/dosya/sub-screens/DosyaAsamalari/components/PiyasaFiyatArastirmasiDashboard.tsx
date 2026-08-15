@@ -350,7 +350,12 @@ export function PiyasaFiyatArastirmasiDashboard({
             onView={handleOpenBelgePreview}
             onOpenExternal={handleOpenExternalForBelge}
             onPrint={handleQuickPrintForBelge}
-            onEdit={handleOpenBelgePreview}
+            onEdit={(belge) => {
+              const isMaliyet =
+                belge.belgeTipiId === "yaklasik-maliyet" ||
+                belge.belgeAdi?.toLowerCase().includes("maliyet");
+              handleNewDocument(isMaliyet ? "maliyet" : "tutanak");
+            }}
             onDelete={(belge) => {
               if (handleDeleteDocument) {
                 handleDeleteDocument(belge.id);
@@ -359,12 +364,7 @@ export function PiyasaFiyatArastirmasiDashboard({
             createButtonLabel="Yeni Tutanak / Cetvel Ekle"
             onCreateBelge={(type) => {
               const mode = type === "yaklasik-maliyet" ? "maliyet" : "tutanak";
-              const total = getEstimatedCostTotal ? getEstimatedCostTotal() : 0;
-              if (total > 0 && handleSaveToDosya) {
-                handleSaveToDosya(mode);
-              } else {
-                handleNewDocument(mode);
-              }
+              handleNewDocument(mode);
             }}
           />
         )}

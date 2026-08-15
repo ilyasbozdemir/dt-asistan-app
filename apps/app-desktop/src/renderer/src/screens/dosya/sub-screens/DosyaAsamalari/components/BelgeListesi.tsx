@@ -431,19 +431,25 @@ export function BelgeListesi({
               {belgeler.map((belge, idx) => (
                 <tr
                   key={`belge_tbl_${belge.id || "b"}_${idx}`}
-                  className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest("button") || target.closest("[role='menuitem']")) return;
+                    if (onEdit) onEdit(belge);
+                    else if (onView) onView(belge);
+                  }}
+                  className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/40 cursor-pointer"
                 >
                   <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-200">
                     <div className="flex items-center gap-2.5">
                       <FileText className="h-4 w-4 shrink-0 text-blue-500" />
-                      <span>{getBelgeAdi(belge)}</span>
+                      <span className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{getBelgeAdi(belge)}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                     {belge.belgeTarihi}
                   </td>
                   <td className="px-4 py-3">{getDurum(belge.durum)}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     <Actions belge={belge} />
                   </td>
                 </tr>
@@ -458,7 +464,13 @@ export function BelgeListesi({
           {belgeler.map((belge, idx) => (
             <div
               key={`belge_lst_${belge.id || "b"}_${idx}`}
-              className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-blue-200 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest("button") || target.closest("[role='menuitem']")) return;
+                if (onEdit) onEdit(belge);
+                else if (onView) onView(belge);
+              }}
+              className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-blue-200 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900 cursor-pointer"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
@@ -466,7 +478,7 @@ export function BelgeListesi({
                 </div>
 
                 <div className="min-w-0">
-                  <div className="truncate text-xs font-bold text-slate-700 dark:text-slate-200">
+                  <div className="truncate text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     {getBelgeAdi(belge)}
                   </div>
 
@@ -477,7 +489,7 @@ export function BelgeListesi({
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3" onClick={(e) => e.stopPropagation()}>
                 {getDurum(belge.durum)}
 
                 <Actions belge={belge} />
@@ -498,7 +510,13 @@ export function BelgeListesi({
           {belgeler.map((belge, idx) => (
             <div
               key={`belge_grd_${belge.id || "b"}_${idx}`}
-              className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest("button") || target.closest("[role='menuitem']")) return;
+                if (onEdit) onEdit(belge);
+                else if (onView) onView(belge);
+              }}
+              className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 cursor-pointer"
             >
               <div className="flex items-start justify-between">
                 <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-600">
@@ -509,7 +527,7 @@ export function BelgeListesi({
               </div>
 
               <div className="mt-4">
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {getBelgeAdi(belge)}
                 </h4>
 
