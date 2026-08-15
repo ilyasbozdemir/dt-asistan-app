@@ -24,6 +24,7 @@ export function useSurecAkisi(): UseSurecAkisiReturn {
   const [selectedTab, setSelectedTab] = useState<string>('ozet')
 
   const [dbKalemler, setDbKalemler] = useState<any[]>([])
+  const [dbFirmalar, setDbFirmalar] = useState<any[]>([])
 
   useEffect(() => {
     let isMounted = true
@@ -32,28 +33,94 @@ export function useSurecAkisi(): UseSurecAkisiReturn {
       Promise.resolve().then(() => {
         if (isMounted) {
           setDbKalemler([])
+          setDbFirmalar([])
         }
       })
       return
     }
 
-    window.electron.ipcRenderer
-      .invoke(
+    Promise.all([
+      // 1) Kalemler
+      window.electron.ipcRenderer.invoke(
         'db:query',
         'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC',
         [activeDosyaId]
+      ),
+      // 2) Main dossier (kazanan firma_id)
+      window.electron.ipcRenderer.invoke(
+        'db:query',
+        'SELECT firma_id FROM DATA_TeminDosyasi WHERE id = ?',
+        [activeDosyaId]
+      ),
+      // 3) Item bids sum per firm
+      window.electron.ipcRenderer.invoke(
+        'db:query',
+        `SELECT 
+          t.temin_firma_id, 
+          SUM(t.birim_fiyat * k.miktar) as hesaplanan_toplam
+         FROM DATA_TeminKalemTeklif t
+         JOIN DATA_TeminKalem k ON t.temin_kalem_id = k.id
+         WHERE t.temin_dosya_id = ?
+         GROUP BY t.temin_firma_id`,
+        [activeDosyaId]
+      ),
+      // 4) Firm list
+      window.electron.ipcRenderer.invoke(
+        'db:query',
+        `SELECT 
+          df.id as temin_firma_id,
+          df.firma_id,
+          COALESCE(NULLIF(df.unvan, ''), NULLIF(tf.unvan, ''), 'Firma ' || df.id) as unvan,
+          COALESCE(NULLIF(df.telefon, ''), NULLIF(tf.telefon, ''), '—') as telefon,
+          COALESCE(NULLIF(df.email, ''), NULLIF(tf.email, ''), '—') as email,
+          df.davet_tarihi,
+          df.teklif_tarihi,
+          df.teklif_toplami,
+          df.kazandi_mi,
+          df.teklif_verdi_mi,
+          df.teklif_durumu
+        FROM DATA_TeminFirma df
+        LEFT JOIN TANIM_Firma tf ON df.firma_id = tf.id
+        WHERE df.temin_dosya_id = ? AND (df.aktif_mi IS NULL OR df.aktif_mi = 1)
+        ORDER BY df.id ASC`,
+        [activeDosyaId]
       )
-      .then((res: any) => {
-        if (isMounted) {
-          if (res.success && res.data) {
-            setDbKalemler(res.data)
-          } else {
-            setDbKalemler([])
-          }
+    ])
+      .then(([kalemRes, dosyaRes, bidsRes, firmRes]: [any, any, any, any]) => {
+        if (!isMounted) return
+
+        if (kalemRes.success && kalemRes.data) {
+          setDbKalemler(kalemRes.data)
+        } else {
+          setDbKalemler([])
+        }
+
+        const kazananFirmaId =
+          dosyaRes.success && dosyaRes.data?.length > 0 ? dosyaRes.data[0].firma_id : null
+
+        const bidsMap = new Map<number, number>()
+        if (bidsRes.success && bidsRes.data) {
+          bidsRes.data.forEach((b: any) => {
+            if (b.temin_firma_id) {
+              bidsMap.set(b.temin_firma_id, Number(b.hesaplanan_toplam) || 0)
+            }
+          })
+        }
+
+        if (firmRes.success && firmRes.data) {
+          const processed = firmRes.data.map((f: any) => ({
+            ...f,
+            isKazanan: kazananFirmaId ? f.firma_id === kazananFirmaId : false,
+            kazananFirmaId,
+            bidsSum: bidsMap.get(f.temin_firma_id) ?? bidsMap.get(f.id)
+          }))
+          setDbFirmalar(processed)
+        } else {
+          setDbFirmalar([])
         }
       })
       .catch((err: any) => {
-        console.error('Failed to fetch dbKalemler in useSurecAkisi:', err)
+        console.error('Failed to fetch surec akisi data:', err)
       })
 
     return () => {
@@ -91,21 +158,63 @@ export function useSurecAkisi(): UseSurecAkisiReturn {
   }, [dbKalemler, dosyaContext])
 
   const firmalar: FirmaItem[] = useMemo(() => {
-    const raw = dosyaContext?.firmalar || dosyaContext?.istekliFirmalar
+    const raw =
+      dbFirmalar && dbFirmalar.length > 0
+        ? dbFirmalar
+        : (dosyaContext as any)?.firmalar || (dosyaContext as any)?.istekliFirmalar
+
     if (raw && raw.length > 0) {
-      return raw.map((f: any, idx: number) => ({
-        id: f.id || idx + 1,
-        unvan: f.unvan || f.firma_adi || 'Tedarikçi Firma',
-        telefon: f.telefon || '—',
-        email: f.email || '—',
-        davetTarihi: f.davet_tarihi || '—',
-        teklifTarihi: f.teklif_tarihi || null,
-        teklifBedeli: f.teklif_bedeli ? Number(f.teklif_bedeli) : null,
-        durumu: f.secildi_mi ? 'seçildi' : f.teklif_verdi_mi ? 'teklif' : 'reddedildi'
-      }))
+      return raw.map((f: any, idx: number) => {
+        const bidsSum = f.bidsSum
+        const teklifBedeli =
+          bidsSum && bidsSum > 0
+            ? bidsSum
+            : f.teklif_toplami ?? f.teklif_bedeli ?? f.teklifBedeli
+
+        const davetTarihi = f.davet_tarihi || f.davetTarihi || '—'
+        const teklifTarihi =
+          f.teklif_tarihi || f.teklifTarihi || (teklifBedeli ? 'Tamamlandı' : null)
+
+        let durumu: 'seçildi' | 'teklif' | 'bekliyor' | 'reddedildi' = 'bekliyor'
+
+        const isWinner =
+          f.isKazanan ||
+          f.secildi_mi === 1 ||
+          f.secildi_mi === true ||
+          f.teklif_durumu === 'Seçildi' ||
+          f.teklif_durumu === 'En Uygun Teklif'
+
+        if (isWinner) {
+          durumu = 'seçildi'
+        } else if (
+          f.teklif_verdi_mi === 1 ||
+          f.teklif_verdi_mi === true ||
+          f.teklif_durumu === 'Teklif Verildi' ||
+          (teklifBedeli !== null && teklifBedeli !== undefined && Number(teklifBedeli) > 0)
+        ) {
+          if (f.kazananFirmaId && f.firma_id !== f.kazananFirmaId) {
+            durumu = 'reddedildi'
+          } else {
+            durumu = 'teklif'
+          }
+        } else {
+          durumu = 'bekliyor'
+        }
+
+        return {
+          id: f.id || idx + 1,
+          unvan: f.unvan || f.firma_adi || f.ad || 'Tedarikçi Firma',
+          telefon: f.telefon || '—',
+          email: f.email || '—',
+          davetTarihi,
+          teklifTarihi,
+          teklifBedeli: teklifBedeli ? Number(teklifBedeli) : null,
+          durumu
+        }
+      })
     }
     return []
-  }, [dosyaContext])
+  }, [dbFirmalar, dosyaContext])
 
   const komisyonlar: Komisyon[] = useMemo(() => {
     if (dosyaContext?.komisyonlar && dosyaContext.komisyonlar.length > 0) {

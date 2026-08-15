@@ -31,15 +31,17 @@ export const getFirmaStatusBadge = (durumu: string): string =>
   ({
     seçildi: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
     teklif: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-    reddedildi: 'bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
-  }[durumu] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200')
+    bekliyor: 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    reddedildi: 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+  }[durumu] || 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200')
 
 export const getFirmaStatusLabel = (durumu: string): string =>
   ({
-    seçildi: '✓ Seçildi',
-    teklif: '◉ Teklif Bekleniyor',
-    reddedildi: '✗ Reddedildi'
-  }[durumu] || '◯ Bekleniyor')
+    seçildi: '✓ Kazanan / Yüklenici Firma',
+    teklif: '◉ Teklif Verildi',
+    bekliyor: '◯ Teklif Bekleniyor',
+    reddedildi: '✗ Seçilmedi / Elendi'
+  }[durumu] || '◯ Teklif Bekleniyor')
 
 export const getBelgeDurumBadge = (durum: string): string =>
   ({

@@ -29,10 +29,10 @@ export const FirmalarTab: React.FC<FirmalarTabProps> = ({
         <div>
           <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
             <Building2 size={18} className="text-blue-600 dark:text-blue-400" />
-            İstekli Firmaları Yönet ({firmalar.length} Firma)
+            Fiyat İstenen / İstekli Firmalar ({firmalar.length} Firma)
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Bu dosya için davet edilen, teklif veren ve değerlendirilen tedarikçiler
+            Bu dosya için fiyat teklifi istenen, teklif veren ve değerlendirilen tedarikçiler
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -69,16 +69,16 @@ export const FirmalarTab: React.FC<FirmalarTabProps> = ({
             <Building2 size={28} />
           </div>
           <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">
-            Henüz İstekli Firma Davet Edilmemiş
+            Henüz İstekli Firma Eklenmemiş
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
-            Piyasa fiyat araştırması sürecinde firmalara teklif davet mektubu göndermek ve teklifleri girmek için Firma Yönetimi modülünü kullanabilirsiniz.
+            Piyasa fiyat araştırması sürecinde firmalara fiyat sormak ve toplanan teklifleri girmek için Firma Yönetimi modülünü kullanabilirsiniz.
           </p>
           <button
             onClick={onNavigateFirmalar}
             className="mt-2 inline-flex items-center gap-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl px-4 py-2.5 shadow-sm transition-all cursor-pointer"
           >
-            <PlusCircle size={15} /> Firma Davet Et / Yönet <ArrowRight size={14} />
+            <PlusCircle size={15} /> Firma Ekle / Yönet <ArrowRight size={14} />
           </button>
         </div>
       ) : (
@@ -86,48 +86,50 @@ export const FirmalarTab: React.FC<FirmalarTabProps> = ({
           {firmalar.map((firma) => (
             <div
               key={firma.id}
-              className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg transition-shadow space-y-4"
+              className="bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg transition-shadow flex flex-col justify-between space-y-4"
             >
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-100 dark:bg-blue-950/50 rounded-2xl p-3 text-blue-600 dark:text-blue-400">
-                  <Building2 size={22} />
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 dark:bg-blue-950/50 rounded-2xl p-3 text-blue-600 dark:text-blue-400 shrink-0">
+                    <Building2 size={22} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={firma.unvan}>
+                      {firma.unvan}
+                    </h3>
+                    <span
+                      className={`inline-block text-[10px] px-2.5 py-0.5 rounded-lg border font-bold mt-1.5 ${getFirmaStatusBadge(
+                        firma.durumu
+                      )}`}
+                    >
+                      {getFirmaStatusLabel(firma.durumu)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
-                    {firma.unvan}
-                  </h3>
-                  <span
-                    className={`inline-block text-[10px] px-2.5 py-0.5 rounded-lg border font-bold mt-1.5 ${getFirmaStatusBadge(
-                      firma.durumu
-                    )}`}
-                  >
-                    {getFirmaStatusLabel(firma.durumu)}
-                  </span>
-                </div>
-              </div>
 
-              <div className="space-y-2 border-t border-slate-100 dark:border-slate-850 pt-4 text-xs">
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span className="text-slate-400">Telefon</span>
-                  <span className="font-semibold">{firma.telefon}</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span className="text-slate-400">E-Posta</span>
-                  <span className="font-semibold truncate max-w-[150px]">{firma.email}</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span className="text-slate-400">Davet Tarihi</span>
-                  <span className="font-semibold">{firma.davetTarihi}</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span className="text-slate-400">Teklif Tarihi</span>
-                  <span className="font-semibold">{firma.teklifTarihi || '—'}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-850">
-                  <span className="text-slate-500 font-bold">Teklif Bedeli</span>
-                  <span className="text-slate-900 dark:text-slate-100 font-black">
-                    {firma.teklifBedeli ? `${firma.teklifBedeli.toLocaleString('tr-TR')} ₺` : '—'}
-                  </span>
+                <div className="space-y-2 border-t border-slate-100 dark:border-slate-850 pt-4 text-xs">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="text-slate-400">Telefon</span>
+                    <span className="font-semibold">{firma.telefon}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="text-slate-400">E-Posta</span>
+                    <span className="font-semibold truncate max-w-[150px]">{firma.email}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="text-slate-400">Kayıt / Davet Tarihi</span>
+                    <span className="font-semibold">{firma.davetTarihi}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="text-slate-400">Teklif Tarihi</span>
+                    <span className="font-semibold">{firma.teklifTarihi || '—'}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-850">
+                    <span className="text-slate-500 font-bold">Teklif Bedeli</span>
+                    <span className="text-slate-900 dark:text-slate-100 font-black">
+                      {firma.teklifBedeli ? `${firma.teklifBedeli.toLocaleString('tr-TR')} ₺` : '—'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

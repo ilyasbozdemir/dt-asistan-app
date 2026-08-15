@@ -38,7 +38,7 @@ export interface FirmaItem {
   davetTarihi: string
   teklifTarihi: string | null
   teklifBedeli: number | null
-  durumu: 'seçildi' | 'teklif' | 'reddedildi'
+  durumu: 'seçildi' | 'teklif' | 'bekliyor' | 'reddedildi'
 }
 
 export interface Uye {
