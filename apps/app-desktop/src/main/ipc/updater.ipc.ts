@@ -15,8 +15,12 @@ export function registerUpdaterIpcHandlers(): void {
     })
   }
 
+  autoUpdater.allowPrerelease = true
+  autoUpdater.allowDowngrade = true
+
   if (!app.isPackaged) {
     autoUpdater.forceDevUpdateConfig = true
+    autoUpdater.logger = console
   }
 
   if (app.isPackaged || autoUpdater.forceDevUpdateConfig) {

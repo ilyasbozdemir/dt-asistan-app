@@ -88,7 +88,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
     }
   })
 
-  ipcMain.handle('workspace:backup-gdrive', async () => {
+  ipcMain.handle('workspace:backup-gdrive', async (_, args?: { token?: string }) => {
     try {
       const filePath = workspaceManager.getCurrentFilePath()
       if (!filePath) {
@@ -97,49 +97,196 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       workspaceManager.save()
 
       const db = workspaceManager.getDb()
-      let gdriveToken: { value?: string } | undefined
-      try {
-        gdriveToken = db
-          .prepare("SELECT value FROM settings WHERE key = 'gdriveAccessToken'")
-          .get() as { value?: string }
-      } catch {
-        // Table/setting check fallback
+      let token = args?.token
+      if (!token) {
+        try {
+          const row = db
+            .prepare("SELECT value FROM settings WHERE key = 'gdriveAccessToken'")
+            .get() as { value?: string }
+          token = row?.value
+        } catch {
+          // Table/setting check fallback
+        }
       }
 
       const fileName = basename(filePath)
+      const fileData = fs.readFileSync(filePath)
 
-      if (gdriveToken?.value) {
-        const fileData = fs.readFileSync(filePath)
-        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${gdriveToken.value}`,
-            'Content-Type': 'application/x-sqlite3'
-          },
-          body: fileData
+      if (token) {
+        // Construct multipart boundary for metadata + binary payload
+        const boundary = '--------------------------' + Date.now().toString(16)
+        const metadata = JSON.stringify({
+          name: fileName,
+          description: 'DT Asistan Çalışma Dosyası Yedeği'
         })
 
+        const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`
+        const fileHeaderPart = `--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`
+        const closingPart = `\r\n--${boundary}--`
+
+        const metadataBuffer = Buffer.from(metadataPart, 'utf-8')
+        const fileHeaderBuffer = Buffer.from(fileHeaderPart, 'utf-8')
+        const closingBuffer = Buffer.from(closingPart, 'utf-8')
+
+        const multipartBody = Buffer.concat([
+          metadataBuffer,
+          fileHeaderBuffer,
+          fileData,
+          closingBuffer
+        ])
+
+        const res = await fetch(
+          'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': `multipart/related; boundary=${boundary}`
+            },
+            body: multipartBody
+          }
+        )
+
         if (!res.ok) {
-          throw new Error(`Google Drive API Yükleme Hatası (${res.status}): ${await res.text()}`)
+          const errText = await res.text()
+          throw new Error(`Google Drive API Yükleme Hatası (${res.status}): ${errText}`)
         }
+
+        const uploadedFile = (await res.json()) as any
 
         return {
           success: true,
-          message: `${fileName} başarıyla Google Drive hesabınıza yedeklendi.`
+          message: `${fileName} başarıyla Google Drive hesabınıza yedeklendi.`,
+          fileId: uploadedFile.id
         }
       }
 
-      // If token is not yet configured, simulate successful cloud upload & guide user
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Fallback response if token not configured yet
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       return {
         success: true,
-        message: `${fileName} çalışma dosyanız Google Drive (Bulut Saklama) kopyası olarak hazırlandı. (Ayarlar > Google Drive menüsünden API yetkilendirmesi yapabilirsiniz)`
+        message: `${fileName} dosyanız Google Drive yedeği için hazırlandı. (Ayarlar > Google Drive alanından Access Token girdiğinizde doğrudan bulut senkronizasyonu aktif olacaktır.)`
       }
     } catch (error: any) {
       console.error('Google Drive backup error:', error)
       return { success: false, error: error.message }
     }
   })
+
+  ipcMain.handle('workspace:list-gdrive-files', async (_, args?: { token?: string }) => {
+    try {
+      let token = args?.token
+      if (!token) {
+        const db = workspaceManager.getDb()
+        try {
+          const row = db
+            .prepare("SELECT value FROM settings WHERE key = 'gdriveAccessToken'")
+            .get() as { value?: string }
+          token = row?.value
+        } catch {
+          // Fallback
+        }
+      }
+
+      if (!token) {
+        return {
+          success: false,
+          error: 'Google Drive API Access Token bulunamadı. Lütfen Ayarlar > Google Drive alanından token tanımlayın.'
+        }
+      }
+
+      const query = encodeURIComponent("trashed = false and (name contains '.dtal' or name contains '.db')")
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=modifiedTime%20desc`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      if (!res.ok) {
+        const errText = await res.text()
+        throw new Error(`Google Drive Dosyaları Listelenemedi (${res.status}): ${errText}`)
+      }
+
+      const data = (await res.json()) as any
+      return {
+        success: true,
+        files: data.files || []
+      }
+    } catch (error: any) {
+      console.error('Google Drive list error:', error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle(
+    'workspace:download-gdrive-file',
+    async (_, args: { fileId: string; fileName: string; token?: string }) => {
+      try {
+        let token = args.token
+        if (!token) {
+          const db = workspaceManager.getDb()
+          try {
+            const row = db
+              .prepare("SELECT value FROM settings WHERE key = 'gdriveAccessToken'")
+              .get() as { value?: string }
+            token = row?.value
+          } catch {
+            // Fallback
+          }
+        }
+
+        if (!token) {
+          return {
+            success: false,
+            error: 'Google Drive Access Token bulunamadı. Lütfen Ayarlar > Google Drive alanından token tanımlayın.'
+          }
+        }
+
+        const res = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${args.fileId}?alt=media`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        if (!res.ok) {
+          const errText = await res.text()
+          throw new Error(`Google Drive İndirme Hatası (${res.status}): ${errText}`)
+        }
+
+        const arrayBuffer = await res.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
+        // Select destination path or save to desktop/temp
+        const defaultPath = require('path').join(
+          require('os').homedir(),
+          'Desktop',
+          args.fileName.endsWith('.dtal') ? args.fileName : `${args.fileName}.dtal`
+        )
+
+        fs.writeFileSync(defaultPath, buffer)
+
+        // Open downloaded file as active workspace
+        closeAllSecondaryWindows()
+        const meta = workspaceManager.open(defaultPath, true)
+
+        return {
+          success: true,
+          message: `${args.fileName} Google Drive'dan başarıyla indirildi ve çalışma alanı olarak açıldı.`,
+          meta,
+          filePath: defaultPath
+        }
+      } catch (error: any) {
+        console.error('Google Drive download error:', error)
+        return { success: false, error: error.message }
+      }
+    }
+  )
 
   ipcMain.handle('workspace:backup-email', async () => {
     try {

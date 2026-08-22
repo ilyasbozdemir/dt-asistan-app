@@ -16,6 +16,7 @@ import { ArrowLeftToLine, Minus, Square, X } from 'lucide-react'
 import { routeComponents } from './routeComponents'
 import { FindInPage } from './FindInPage'
 import { WorkspaceCloseModal } from './WorkspaceCloseModal'
+import { GoogleDriveModal } from '../ui/GoogleDriveModal'
 
 
 export function PageWrapper(): React.ReactNode {
@@ -94,6 +95,7 @@ export function PageWrapper(): React.ReactNode {
 
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [isQuittingApp, setIsQuittingApp] = useState(false)
+  const [isGDriveModalOpen, setIsGDriveModalOpen] = useState(false)
 
   useEffect(() => {
     const handleQuitRequest = () => {
@@ -106,15 +108,21 @@ export function PageWrapper(): React.ReactNode {
       setIsCloseModalOpen(true)
     }
 
+    const handleOpenGDrive = () => {
+      setIsGDriveModalOpen(true)
+    }
+
     const removeQuitListener = window.electron?.ipcRenderer.on(
       'app:quit-request',
       handleQuitRequest
     )
     window.addEventListener('workspace-close-request', handleCloseRequest)
+    window.addEventListener('open-gdrive-modal', handleOpenGDrive)
 
     return () => {
       if (removeQuitListener) removeQuitListener()
       window.removeEventListener('workspace-close-request', handleCloseRequest)
+      window.removeEventListener('open-gdrive-modal', handleOpenGDrive)
     }
   }, [])
 
@@ -513,6 +521,10 @@ export function PageWrapper(): React.ReactNode {
         onClose={() => setIsCloseModalOpen(false)}
         fileName={fileName}
         onConfirm={handleConfirmClose}
+      />
+      <GoogleDriveModal
+        isOpen={isGDriveModalOpen}
+        onClose={() => setIsGDriveModalOpen(false)}
       />
     </div>
   )

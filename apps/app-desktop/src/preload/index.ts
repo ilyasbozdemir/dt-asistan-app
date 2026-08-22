@@ -23,6 +23,8 @@ const allowedChannels = new Set([
   'workspace:backup-server',
   'workspace:backup-email',
   'workspace:backup-gdrive',
+  'workspace:list-gdrive-files',
+  'workspace:download-gdrive-file',
   'workspace:upload-file',
   'workspace:open-file',
   // Document

@@ -19,11 +19,27 @@ export function WorkspaceCloseModal({
 }: WorkspaceCloseModalProps): React.JSX.Element {
   const { settings } = useAyarlarHooks()
   const isMailConfigured = !!settings.smtp_host
+  const isGDriveConfigured = !!settings.gdriveAccessToken
+  const isServerConfigured = !!settings.sync_server_url
+
+  const defaultOption = isGDriveConfigured
+    ? 'gdrive'
+    : isServerConfigured
+      ? 'server'
+      : isMailConfigured
+        ? 'email'
+        : 'backup'
+
   const [selectedOption, setSelectedOption] = useState<
     'none' | 'backup' | 'email' | 'server' | 'gdrive'
-  >(isMailConfigured ? 'email' : 'gdrive')
+  >(defaultOption)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Sync selectedOption with available configs when settings change
+  React.useEffect(() => {
+    setSelectedOption(defaultOption)
+  }, [isGDriveConfigured, isServerConfigured, isMailConfigured])
 
   const handleConfirm = async () => {
     setLoading(true)
@@ -38,6 +54,8 @@ export function WorkspaceCloseModal({
       setLoading(false)
     }
   }
+
+  const hasAnyCloudConfigured = isGDriveConfigured || isServerConfigured
 
   return (
     <Modal
@@ -54,134 +72,150 @@ export function WorkspaceCloseModal({
           </div>
         )}
 
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+        {/* Warning if no cloud or server is configured */}
+        {!hasAnyCloudConfigured && (
+          <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-900 dark:text-amber-300 text-xs space-y-1">
+            <div className="font-bold flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>Veri Güvenliği Tavsiyesi</span>
+            </div>
+            <p className="text-[11px] leading-relaxed opacity-90">
+              Bulut veya sunucu entegrasyonunuz henüz yoksa veri kaybı yaşamamak için <strong>hiç olmadı "Bilgisayara Yerel Yedek Kaydet ve Kapat"</strong> seçeneğini seçebilir veya <strong>Google Drive / API Sunucu</strong> entegrasyonlarından birini aktifleştirebilirsiniz. 😊
+            </p>
+          </div>
+        )}
+
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
           Kapatmadan önce veri kaybı veya dosya bozulması riskine karşı veri dosyanızın güncel bir
           yedek kopyasını almak ister misiniz?
         </p>
 
         {/* Options */}
         <div className="flex flex-col gap-2.5">
-          {/* Option: Google Drive Cloud Backup */}
-          <button
-            disabled={loading}
-            onClick={() => setSelectedOption('gdrive')}
-            className={cn(
-              'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
-              selectedOption === 'gdrive'
-                ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/10'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
-            )}
-          >
-            <div
+          {/* Option: Google Drive Cloud Backup (Only if configured) */}
+          {isGDriveConfigured && (
+            <button
+              disabled={loading}
+              onClick={() => setSelectedOption('gdrive')}
               className={cn(
-                'p-2.5 rounded-xl shrink-0',
+                'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
                 selectedOption === 'gdrive'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/10'
+                  : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
               )}
             >
-              <CloudUpload className="w-5 h-5 text-emerald-100" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4
+              <div
                 className={cn(
-                  'text-sm font-bold flex items-center gap-1.5',
+                  'p-2.5 rounded-xl shrink-0',
                   selectedOption === 'gdrive'
-                    ? 'text-emerald-900 dark:text-emerald-300'
-                    : 'text-slate-800 dark:text-slate-200'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                 )}
               >
-                <span>Google Drive Bulut Yedeği Al ve Kapat</span>
-                <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold px-1.5 py-0.5 rounded">
-                  GDRIVE
-                </span>
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Çalışma dosyanızın (.dtal) son halini kişisel Google Drive bulut klasörünüze yükler.
-              </p>
-            </div>
-          </button>
+                <CloudUpload className="w-5 h-5 text-emerald-100" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4
+                  className={cn(
+                    'text-xs font-bold flex items-center gap-1.5',
+                    selectedOption === 'gdrive'
+                      ? 'text-emerald-900 dark:text-emerald-300'
+                      : 'text-slate-800 dark:text-slate-200'
+                  )}
+                >
+                  <span>Google Drive Bulut Yedeği Al ve Kapat</span>
+                  <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold px-1.5 py-0.5 rounded">
+                    GDRIVE
+                  </span>
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                  Çalışma dosyanızın (.dtal) son halini kişisel Google Drive bulut klasörünüze yükler.
+                </p>
+              </div>
+            </button>
+          )}
 
-          {/* Option: Server Backup */}
-          <button
-            disabled={loading}
-            onClick={() => setSelectedOption('server')}
-            className={cn(
-              'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
-              selectedOption === 'server'
-                ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/10'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
-            )}
-          >
-            <div
+          {/* Option: Server Backup (Only if configured) */}
+          {isServerConfigured && (
+            <button
+              disabled={loading}
+              onClick={() => setSelectedOption('server')}
               className={cn(
-                'p-2.5 rounded-xl shrink-0',
+                'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
                 selectedOption === 'server'
-                  ? 'bg-indigo-500 text-white shadow-md'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/10'
+                  : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
               )}
             >
-              <CloudUpload className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4
+              <div
                 className={cn(
-                  'text-sm font-bold',
+                  'p-2.5 rounded-xl shrink-0',
                   selectedOption === 'server'
-                    ? 'text-indigo-900 dark:text-indigo-300'
-                    : 'text-slate-800 dark:text-slate-200'
+                    ? 'bg-indigo-500 text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                 )}
               >
-                Web Sunucusuna Yedekle ve Kapat
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Çalışma dosyanızı (.dtal) güvenli web sunucusuna yükler ve sürüm olarak saklar.
-              </p>
-            </div>
-          </button>
+                <CloudUpload className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4
+                  className={cn(
+                    'text-xs font-bold',
+                    selectedOption === 'server'
+                      ? 'text-indigo-900 dark:text-indigo-300'
+                      : 'text-slate-800 dark:text-slate-200'
+                  )}
+                >
+                  Web Sunucusuna Yedekle ve Kapat
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                  Çalışma dosyanızı (.dtal) güvenli web sunucusuna yükler ve sürüm olarak saklar.
+                </p>
+              </div>
+            </button>
+          )}
 
-          {/* Option: Email Backup */}
-          <button
-            disabled={loading}
-            onClick={() => setSelectedOption('email')}
-            className={cn(
-              'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
-              selectedOption === 'email'
-                ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/10'
-                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20',
-              !isMailConfigured && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            <div
+          {/* Option: Email Backup (Only if configured) */}
+          {isMailConfigured && (
+            <button
+              disabled={loading}
+              onClick={() => setSelectedOption('email')}
               className={cn(
-                'p-2.5 rounded-xl shrink-0',
+                'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
                 selectedOption === 'email'
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                  ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/10'
+                  : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
               )}
             >
-              <Mail className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4
+              <div
                 className={cn(
-                  'text-sm font-bold',
+                  'p-2.5 rounded-xl shrink-0',
                   selectedOption === 'email'
-                    ? 'text-blue-900 dark:text-blue-300'
-                    : 'text-slate-800 dark:text-slate-200'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                 )}
               >
-                E-Posta ile Yedekle ve Kapat
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                {isMailConfigured
-                  ? 'Dosyayı SMTP sunucunuz üzerinden kayıtlı yedek e-posta adresine ek olarak gönderir.'
-                  : 'Mail (SMTP) ayarları yapılandırılmadığı için kullanılamaz.'}
-              </p>
-            </div>
-          </button>
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4
+                  className={cn(
+                    'text-xs font-bold',
+                    selectedOption === 'email'
+                      ? 'text-blue-900 dark:text-blue-300'
+                      : 'text-slate-800 dark:text-slate-200'
+                  )}
+                >
+                  E-Posta ile Yedekle ve Kapat
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                  Dosyayı SMTP sunucunuz üzerinden kayıtlı yedek e-posta adresine ek olarak gönderir.
+                </p>
+              </div>
+            </button>
+          )}
 
-          {/* Option: Local Backup */}
+          {/* Option: Local Backup (Always available) */}
           <button
             disabled={loading}
             onClick={() => setSelectedOption('backup')}
@@ -205,22 +239,21 @@ export function WorkspaceCloseModal({
             <div className="flex-1 min-w-0">
               <h4
                 className={cn(
-                  'text-sm font-bold',
+                  'text-xs font-bold',
                   selectedOption === 'backup'
                     ? 'text-blue-900 dark:text-blue-300'
                     : 'text-slate-800 dark:text-slate-200'
                 )}
               >
-                Yedek Kaydet ve Kapat
+                Bilgisayara Yerel Yedek Kaydet ve Kapat
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Çalışma dosyanızın (.dtal) bir kopyasını bilgisayarınızda seçeceğiniz güvenli bir
-                klasöre kaydeder.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Çalışma dosyanızın (.dtal) bir kopyasını bilgisayarınızda seçeceğiniz bir klasöre kaydeder.
               </p>
             </div>
           </button>
 
-          {/* Option: No Backup */}
+          {/* Option: Direct Close (Always available) */}
           <button
             disabled={loading}
             onClick={() => setSelectedOption('none')}
@@ -244,7 +277,7 @@ export function WorkspaceCloseModal({
             <div className="flex-1 min-w-0">
               <h4
                 className={cn(
-                  'text-sm font-bold',
+                  'text-xs font-bold',
                   selectedOption === 'none'
                     ? 'text-amber-900 dark:text-amber-300'
                     : 'text-slate-800 dark:text-slate-200'
@@ -252,9 +285,8 @@ export function WorkspaceCloseModal({
               >
                 Yedeklemeden Doğrudan Kapat
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Dosyada yaptığınız son değişiklikler kaydedilir ancak ek bir yedek kopyası
-                oluşturulmaz.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Dosyada yaptığınız değişiklikler kaydedilir ancak ek bir bulut/yerel yedek kopyası oluşturulmaz.
               </p>
             </div>
           </button>

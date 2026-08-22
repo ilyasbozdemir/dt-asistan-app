@@ -74,6 +74,24 @@ export function Header(): React.JSX.Element {
         },
         { divider: true },
         {
+          label: 'Farklı Kurum Veri Dosyası Aç (.dtal)...',
+          onClick: async () => {
+            try {
+              const res = await window.electron?.ipcRenderer.invoke('dialog:showOpenDialog')
+              if (!res.canceled && res.filePath) {
+                const result = await useWorkspaceStore.getState().openWorkspace(res.filePath, false)
+                if (result.success) {
+                  window.location.reload()
+                } else {
+                  alert(`Kurum dosyası açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
+                }
+              }
+            } catch (e) {
+              console.error(e)
+            }
+          }
+        },
+        {
           label: 'Kurum Dosyasını Kapat (.dtal)',
           onClick: handleCloseWorkspace
         },
