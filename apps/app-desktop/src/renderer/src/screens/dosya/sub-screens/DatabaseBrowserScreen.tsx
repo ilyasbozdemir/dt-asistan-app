@@ -471,6 +471,7 @@ export function DatabaseBrowserScreen(): React.JSX.Element {
       icon={Database}
       description="Veritabanı tablolarındaki verileri inceleyin, hücre bazında Excel gibi anında güncelleyin veya yeni kayıt ekleyin."
       hideStepper
+      requireActiveDosya={false}
     >
       <div className="flex gap-6 h-[calc(100vh-240px)] min-h-[500px] mt-4 relative font-sans">
         {/* Sidebar: Tables List */}

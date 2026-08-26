@@ -19,6 +19,7 @@ interface SubScreenProps {
   description: string
   children?: React.ReactNode
   hideStepper?: boolean
+  requireActiveDosya?: boolean
   previewDocumentId?: string | null
   invitedFirms?: any[]
   onClosePreview?: () => void
@@ -30,6 +31,7 @@ export function SubScreen({
   description,
   children,
   hideStepper = false,
+  requireActiveDosya = true,
   previewDocumentId,
   invitedFirms,
   onClosePreview
@@ -93,7 +95,7 @@ export function SubScreen({
       {showStepper && activeDosyaId && <ProcessStepper currentRoute={currentPath} />}
 
       {/* ACTIVE DOSYA CONTEXT */}
-      {!activeDosyaId && (
+      {requireActiveDosya && !activeDosyaId && (
         <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm print:hidden">
           <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
           <div>
@@ -108,7 +110,7 @@ export function SubScreen({
       )}
 
       {/* CHILDREN VIEW */}
-      {activeDosyaId && children}
+      {(activeDosyaId || !requireActiveDosya) && children}
 
       {/* BASE PREVIEW MODAL */}
       {previewDocumentId && (

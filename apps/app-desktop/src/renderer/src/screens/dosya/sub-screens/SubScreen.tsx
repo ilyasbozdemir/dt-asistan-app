@@ -34,13 +34,15 @@ interface SubScreenProps {
   icon: React.ElementType
   description: string
   children?: React.ReactNode
+  requireActiveDosya?: boolean
 }
 
 export function SubScreen({
   title,
   icon: Icon,
   description,
-  children
+  children,
+  requireActiveDosya = true
 }: SubScreenProps): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore()
   const [activeDosya, setActiveDosya] = useState<any>(null)
@@ -90,7 +92,7 @@ export function SubScreen({
       </div>
 
       {/* ACTIVE DOSYA CONTEXT */}
-      {!activeDosyaId && (
+      {requireActiveDosya && !activeDosyaId && (
         <div className="bg-amber-50/50 dark:bg-amber-955/10 border border-amber-200 dark:border-amber-900/20 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-400 font-semibold shadow-sm">
           <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
           <div>
@@ -105,7 +107,7 @@ export function SubScreen({
       )}
 
       {/* CHILDREN VIEW */}
-      {activeDosyaId && children}
+      {(activeDosyaId || !requireActiveDosya) && children}
     </div>
   )
 }
