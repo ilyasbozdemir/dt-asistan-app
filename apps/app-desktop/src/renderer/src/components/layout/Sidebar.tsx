@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   BarChart3,
@@ -173,9 +173,9 @@ export function Sidebar(): React.JSX.Element {
   const isDosyaWindowMode = searchParams.get("mode") === "dosya_window" ||
     hashParams.get("mode") === "dosya_window";
 
-  React.useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+  useEffect(() => {
+    loadSettings()
+  }, [loadSettings])
 
   const getInitials = (name: string): string => {
     if (!name) return "SY";
