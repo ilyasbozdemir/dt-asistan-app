@@ -2,6 +2,7 @@ import { createRouter, createRoute, createRootRoute } from '@tanstack/react-rout
 import { PageWrapper } from './components/layout/PageWrapper'
 import { APP_ROUTES } from './constants/routeConstants'
 import DashboardScreen from './screens/dashboard/index.screen'
+import HarcamaMerkeziScreen from './screens/dashboard/HarcamaMerkeziScreen'
 import DosyalarScreen from './screens/dosyalar/index.screen'
 import FirmalarScreen from './screens/firmalar/index.screen'
 
@@ -26,7 +27,6 @@ import OlcuBirimleriScreen from './screens/olcubirimleri/index.screen'
 import YeniMalzemeScreen from './screens/malzemeler/yeni.screen'
 import YeniDosyaScreen from './screens/dosyalar/yeni.screen'
 import KomisyonDetayScreen from './screens/komisyonlar/detay.screen'
-import HakedisScreen from './screens/system/HakedisScreen'
 
 const rootRoute = createRootRoute({
   component: PageWrapper
@@ -36,6 +36,12 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.DASHBOARD,
   component: DashboardScreen
+})
+
+const harcamaMerkeziRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: APP_ROUTES.HARCAMA_MERKEZI,
+  component: HarcamaMerkeziScreen
 })
 
 const dosyalarRoute = createRoute({
@@ -294,11 +300,12 @@ const imzaliBelgelerRoute = createRoute({
 const hakedisRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.HAKEDIS,
-  component: HakedisScreen
+  component: HarcamaMerkeziScreen
 })
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  harcamaMerkeziRoute,
   dosyalarRoute,
   yeniDosyaRoute,
   firmalarRoute,

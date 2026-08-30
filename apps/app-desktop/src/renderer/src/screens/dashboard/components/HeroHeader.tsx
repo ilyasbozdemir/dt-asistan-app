@@ -7,6 +7,7 @@ import {
   ChevronRight,
   FileText,
   Info,
+  Landmark,
   Mail,
   Plus,
   ShieldAlert,
@@ -293,10 +294,18 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
             </div>
           )}
 
+          <Link to="/harcama-merkezi">
+            <Button
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-3.5 shadow-md shadow-indigo-500/10 flex items-center gap-1.5 cursor-pointer"
+            >
+              <Landmark className="w-4 h-4 text-indigo-200" />
+              Harcama & Hakediş Merkezi
+            </Button>
+          </Link>
           <Link to="/dosyalar/yeni">
             <Button className="bg-blue-600 hover:bg-blue-700 text-xs font-bold py-2 px-4 shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer">
               <Plus className="w-4 h-4" />
-              Yeni Temin Süreci Başlat
+              Yeni Temin Süreci
             </Button>
           </Link>
           <Link to="/mevzuat">
@@ -304,7 +313,7 @@ export const HeroHeader: React.FC<HeroHeaderProps> = ({
               variant="outline"
               className="text-xs font-semibold py-2 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
             >
-              Limitleri Gör
+              Limitler
             </Button>
           </Link>
         </div>

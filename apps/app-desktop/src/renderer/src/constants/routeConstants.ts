@@ -1,6 +1,7 @@
 export const APP_ROUTES = {
   // Main
   DASHBOARD: '/',
+  HARCAMA_MERKEZI: '/harcama-merkezi',
 
   // Dosyalar
   DOSYALAR: '/dosyalar',

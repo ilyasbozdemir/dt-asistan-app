@@ -14,9 +14,11 @@ import {
   FileCheck,
   FileText,
   FolderTree,
+  Hammer,
   HelpCircle,
   Home,
   Key,
+  Landmark,
   LayoutGrid,
   LogOut,
   Megaphone,
@@ -43,6 +45,7 @@ interface MenuItem {
   name: string
   path?: string
   icon: React.ElementType
+  badge?: string
   children?: SubItem[]
   onClick?: () => void
 }
@@ -55,12 +58,26 @@ interface MenuGroup {
 const menuGroups: MenuGroup[] = [
   {
     title: 'Ana Menü',
-    items: [{ name: 'Gösterge Paneli', path: '/', icon: Home }]
+    items: [
+      { name: 'Gösterge Paneli', path: '/', icon: Home },
+      {
+        name: 'Harcama & Hakediş Merkezi',
+        path: '/harcama-merkezi',
+        icon: Landmark,
+        badge: 'YENİ'
+      }
+    ]
   },
   {
     title: 'Süreç Yönetimi',
     items: [
       { name: 'Doğrudan Temin Dosyaları', path: '/dosyalar', icon: FileText },
+      {
+        name: 'Hakediş & Harcama İşlemleri',
+        path: '/hakedis',
+        icon: Hammer,
+        badge: 'YENİ'
+      },
       {
         name: 'Hızlı Dosya Ekle / Güncelle',
         path: '/hizli-dosya-ekle',
@@ -292,8 +309,13 @@ export function Sidebar(): React.JSX.Element {
                         >
                           <item.icon size={18} className="shrink-0" />
                           {!isCollapsed && (
-                            <span className="text-sm font-medium whitespace-nowrap flex-1">
-                              {item.name}
+                            <span className="text-sm font-medium whitespace-nowrap flex-1 flex items-center justify-between">
+                              <span>{item.name}</span>
+                              {item.badge && (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-500 border border-indigo-500/30">
+                                  {item.badge}
+                                </span>
+                              )}
                             </span>
                           )}
                         </Link>
