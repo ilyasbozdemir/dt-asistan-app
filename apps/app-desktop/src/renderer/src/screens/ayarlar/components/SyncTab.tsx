@@ -314,12 +314,13 @@ export const SyncTab: React.FC<SyncTabProps> = ({
                 {'// 1. Terminalde projenin ana klasörüne gidin ve derleyin'}
               </div>
               <div className="text-blue-600 dark:text-blue-450">
-                docker build -t dt-asistan-server ./web
+                docker build -t hakim-pro-server ./web
               </div>
-
-              <div className="text-slate-400 mt-2">{'// 2. Sunucuyu 3000 portundan çalıştırın'}</div>
-              <div className="text-blue-600 dark:text-blue-450">
-                docker run -p 3000:3000 --name dt-server -d dt-asistan-server
+              <div className="text-slate-400 dark:text-slate-500 mt-2">
+                # 2. İmajı 3000 portu üzerinden arka planda çalıştırın
+              </div>
+              <div className="text-blue-600 dark:text-blue-400">
+                docker run -p 3000:3000 --name hakim-server -d hakim-pro-server
               </div>
 
               <div className="text-slate-400 mt-2">

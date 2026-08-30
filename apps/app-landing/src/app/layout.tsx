@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DT Asistan - Yeni Nesil Süreç & Hakediş Yönetim Sistemi",
+  title: "HAKİM Pro - Yeni Nesil Süreç & Hakediş Yönetim Sistemi",
   description:
     "Masaüstünün yüksek performansı ile bulutun senkronizasyon gücünü birleştiren, kamu ve özel sektör için tasarlanmış yeni nesil iş asistanı.",
 };

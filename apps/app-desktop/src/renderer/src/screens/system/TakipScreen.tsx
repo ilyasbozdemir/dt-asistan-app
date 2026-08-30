@@ -291,7 +291,7 @@ export function TakipScreen(): React.JSX.Element {
       }
 
       if (deadlineMsg || missingCount > 0) {
-        const notification = new window.Notification('DT Asistan - Akıllı Hatırlatıcı', {
+        const notification = new window.Notification('HAKİM Pro - Akıllı Hatırlatıcı', {
           body: `${deadlineMsg}${
             missingCount > 0 ? `İmzası eksik ${missingCount} evrakınız bulunuyor.` : ''
           }`,

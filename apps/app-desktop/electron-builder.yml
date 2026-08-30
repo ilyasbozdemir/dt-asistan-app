@@ -1,24 +1,24 @@
-appId: dev.ilyasbozdemir.dtasistan
-productName: DT Asistan Lite
+appId: dev.ilyasbozdemir.hakimproapp
+productName: HAKİM Pro
 fileAssociations:
   - ext: dtal
-    name: DT Asistan Lite Proje Dosyası
-    description: DT Asistan Lite Proje Dosyası
+    name: HAKİM Pro Proje Dosyası
+    description: HAKİM Pro Proje Dosyası
     role: Editor
     icon: build/icon.png
   - ext: dta
     name: Doğrudan Temin Asistan Veri Dosyası (Eski)
-    description: DT Asistan Lite Veri Dosyası
+    description: HAKİM Pro Veri Dosyası
     role: Editor
     icon: build/icon.png
   - ext: dtm
     name: Doğrudan Temin Çalışma Dosyası Lite
-    description: DT Asistan Lite Çalışma Dosyası
+    description: HAKİM Pro Çalışma Dosyası
     role: Editor
     icon: build/icon.png
   - ext: dte
     name: Doğrudan Temin Veri Aktarım Dosyası Lite
-    description: DT Asistan Lite Veri Aktarım Dosyası
+    description: HAKİM Pro Veri Aktarım Dosyası
     role: Editor
     icon: build/icon.png
 directories:
@@ -43,7 +43,7 @@ extraResources:
       - '**/*'
 
 win:
-  executableName: DTAsistan
+  executableName: HAKIMPro
   icon: resources/icon.png
   target:
     - target: nsis
@@ -51,8 +51,8 @@ win:
         - x64
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: DT Asistan Lite
-  uninstallDisplayName: DT Asistan Lite
+  shortcutName: HAKİM Pro
+  uninstallDisplayName: HAKİM Pro
   createDesktopShortcut: always
   include: build/installer.nsh
 mac:

@@ -43,7 +43,7 @@ export default function ChangelogScreen(): React.JSX.Element {
             Güncellemeler & Yol Haritası
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-            DT Asistan uygulamasına gelen yenilikleri, düzeltmeleri takip edin ve planlanan gelecek
+            HAKİM Pro uygulamasına gelen yenilikleri, düzeltmeleri takip edin ve planlanan gelecek
             özellikleri inceleyin.
           </p>
         </div>

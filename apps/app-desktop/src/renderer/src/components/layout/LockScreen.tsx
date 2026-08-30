@@ -200,7 +200,7 @@ export default function LockScreen(): React.JSX.Element {
       >
         <div className="flex items-center gap-2 text-slate-400 dark:text-slate-655 text-xs font-semibold">
           <Lock className="w-3.5 h-3.5" />
-          <span>DT Asistan Giriş</span>
+          <span>HAKİM Pro Giriş</span>
         </div>
 
         <div

@@ -1,7 +1,7 @@
 {
   "name": "@dt/database",
   "version": "1.0.0",
-  "description": "Shared database models, schemas, and migrations for DT Asistan App",
+  "description": "Shared database models, schemas, and migrations for HAKİM Pro App",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

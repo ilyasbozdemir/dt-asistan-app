@@ -1,5 +1,5 @@
 import React from "react";
-import { IhtiyacListesiType } from "@dt-asistan/document-templates";
+import { IhtiyacListesiType } from "@hakim-pro-app/document-templates";
 
 export interface DocumentPreviewModalV2Props {
   isOpen: boolean;

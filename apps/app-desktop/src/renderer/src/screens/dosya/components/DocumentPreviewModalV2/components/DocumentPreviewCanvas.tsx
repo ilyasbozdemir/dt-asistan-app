@@ -4,7 +4,7 @@ import {
   IhtiyacListesiType,
   TemplateComponentType,
   TemplateEditProvider,
-} from "@dt-asistan/document-templates";
+} from "@hakim-pro-app/document-templates";
 import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { Personel } from "../types";
 

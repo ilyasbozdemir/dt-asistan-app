@@ -57,7 +57,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       const { filePath: destPath } = await dialog.showSaveDialog(win!, {
         title: 'Yedek Dosyasını Kaydet',
         defaultPath: basename(filePath),
-        filters: [{ name: 'DT Asistan Veri Dosyası', extensions: ['dtal'] }]
+        filters: [{ name: 'HAKİM Pro Veri Dosyası', extensions: ['dtal'] }]
       })
 
       if (!destPath) {
@@ -117,7 +117,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         const boundary = '--------------------------' + Date.now().toString(16)
         const metadata = JSON.stringify({
           name: fileName,
-          description: 'DT Asistan Çalışma Dosyası Yedeği'
+          description: 'HAKİM Pro Çalışma Dosyası Yedeği'
         })
 
         const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`
@@ -340,9 +340,9 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
       const fileName = basename(filePath)
       await transporter.sendMail({
-        from: `"DT Asistan Yedekleme" <${userRow.value}>`,
+        from: `"HAKİM Pro Yedekleme" <${userRow.value}>`,
         to: receiver,
-        subject: `DT Asistan Veritabanı Yedeği - ${fileName}`,
+        subject: `HAKİM Pro Veritabanı Yedeği - ${fileName}`,
         text: `Kurum dosyası yedeğiniz ektedir.\nDosya adı: ${fileName}\nTarih: ${new Date().toLocaleString('tr-TR')}`,
         attachments: [
           {

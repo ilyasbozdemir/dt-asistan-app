@@ -1,5 +1,5 @@
 {
-  "name": "@dt-asistan/pdf-generator",
+  "name": "@hakim-pro-app/pdf-generator",
   "version": "0.1.0",
   "main": "src/index.ts",
   "types": "src/index.ts",

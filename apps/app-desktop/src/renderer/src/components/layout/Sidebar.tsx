@@ -259,7 +259,7 @@ export function Sidebar(): React.JSX.Element {
             </span>
 
             <span className="text-sidebar-hover-text font-bold text-base tracking-wide whitespace-nowrap leading-tight mt-1 flex items-center gap-1.5 justify-center">
-              DT Asistan
+              HAKİM Pro
             </span>
           </div>
         )}

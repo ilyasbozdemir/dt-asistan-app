@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft, Edit3, FileText, Sliders } from "lucide-react";
-import { IhtiyacListesiType } from "@dt-asistan/document-templates";
+import { IhtiyacListesiType } from "@hakim-pro-app/document-templates";
 
 interface DocumentPreviewSidebarProps {
   sidebarOpen: boolean;

@@ -270,7 +270,7 @@ export function Header(): React.JSX.Element {
         {
           label: 'Hakkında...',
           onClick: () =>
-            alert('DT Asistan Lite\nDoğrudan Temin ve Satın Alma Süreçleri Yönetim Sistemi')
+            alert('HAKİM Pro\nKamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi')
         }
       ]
     }

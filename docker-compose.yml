@@ -3,10 +3,10 @@ version: "3.8"
 services:
   db:
     image: postgres:15-alpine
-    container_name: dt-asistan-postgres
+    container_name: hakim-pro-postgres
     restart: always
     environment:
-      POSTGRES_DB: dt_asistan
+      POSTGRES_DB: hakim_pro
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
     ports:
@@ -18,12 +18,12 @@ services:
     build:
       context: ./apps/app-web
       dockerfile: Dockerfile
-    container_name: dt-asistan-web
+    container_name: hakim-pro-web
     restart: always
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/dt_asistan?schema=public
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/hakim_pro?schema=public
       - NODE_ENV=production
     depends_on:
       - db

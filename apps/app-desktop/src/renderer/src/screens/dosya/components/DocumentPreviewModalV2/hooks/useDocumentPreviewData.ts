@@ -6,7 +6,7 @@ import {
   TEMPLATE_REGISTRY,
   TemplateComponentType,
   TemplateResolver,
-} from "@dt-asistan/document-templates";
+} from "@hakim-pro-app/document-templates";
 import { useWorkspaceStore } from "../../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../../store/settingsStore";
 import { getDefaultMappingForProcess } from "../../../../../constants/mappings";

@@ -504,7 +504,7 @@ if (!gotTheLock && !isMultiInstance) {
         }
       }
     ])
-    tray.setToolTip('DT Asistan')
+    tray.setToolTip('HAKİM Pro')
     tray.setContextMenu(contextMenu)
     tray.on('click', () => {
       const windows = BrowserWindow.getAllWindows()
@@ -649,7 +649,7 @@ if (!gotTheLock && !isMultiInstance) {
           minHeight: 600,
           show: false,
           autoHideMenuBar: true,
-          title: data.title || 'DT Asistan — Detay',
+          title: data.title || 'HAKİM Pro — Detay',
           icon: icon,
           webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
@@ -746,7 +746,7 @@ if (!gotTheLock && !isMultiInstance) {
           frame: false,
           titleBarStyle: 'hidden',
           titleBarOverlay: false,
-          title: data.title || 'DT Asistan',
+          title: data.title || 'HAKİM Pro',
           icon: icon,
           webPreferences: {
             preload: join(__dirname, '../preload/index.js'),

@@ -58,7 +58,7 @@ if (msgShortIdx !== -1 && args[msgShortIdx + 1]) {
 // ─── Yardım ───────────────────────────────────────────────
 if (flags.help) {
   console.log(`
-${c.bold('📦 DT Asistan - Release Script')}
+${c.bold('📦 HAKİM Pro - Release Script')}
 
 ${c.cyan('Kullanım:')}
   node scripts/release.js [seçenekler]
@@ -129,7 +129,7 @@ function bumpPatch(version) {
 
 // ─── Ana Akış ─────────────────────────────────────────────
 function main() {
-  console.log(`\n${c.bold('📦 DT Asistan - Release Script')}\n`)
+  console.log(`\n${c.bold('📦 HAKİM Pro - Release Script')}\n`)
 
   // 1. Mevcut versiyonu oku
   const pkg = readJSON('package.json')

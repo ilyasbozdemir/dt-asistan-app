@@ -32,7 +32,7 @@ export function PageWrapper(): React.ReactNode {
 
   useEffect(() => {
     const path = routerState.location.pathname
-    let title = 'DT Asistan'
+    let title = 'HAKİM Pro'
 
     if (path === '/') title += ' — Gösterge Paneli'
     else if (path.startsWith('/dosyalar')) title += ' — Doğrudan Teminler'

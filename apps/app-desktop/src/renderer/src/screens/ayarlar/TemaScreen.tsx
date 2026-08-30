@@ -543,7 +543,7 @@ Not: --sidebar-active-bg için rgba(r, g, b, opaklık) formatında (örn: rgba(0
     const dataUri = "data:application/json;charset=utf-8," +
       encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = "dt-asistan_temalar.json";
+    const exportFileDefaultName = "hakim-pro_temalar.json";
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);

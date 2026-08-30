@@ -1,5 +1,5 @@
 /**
- * DT Asistan — Desteklenen Dosya Formatları
+ * HAKİM Pro — Desteklenen Dosya Formatları
  *
  * Tüm uzantılar burada tanımlanır.
  * Yeni bir format eklemek için bu dosyaya bir kayıt eklemek yeterlidir;
@@ -20,8 +20,8 @@ export interface FileFormat {
 export const SUPPORTED_FORMATS: FileFormat[] = [
   {
     ext: 'dtal',
-    label: 'DT Asistan Lite Dosyası',
-    dialogName: 'DT Asistan Lite Dosyası',
+    label: 'HAKİM Pro Dosyası',
+    dialogName: 'HAKİM Pro Dosyası',
     isDefault: true
   },
   {
@@ -49,7 +49,7 @@ export const defaultFormat = SUPPORTED_FORMATS.find((f) => f.isDefault) ?? SUPPO
 
 /** Electron dialog filter listesi — tüm formatları tek grupta gösterir */
 export const allFormatsFilter = {
-  name: 'DT Asistan Dosyaları',
+  name: 'HAKİM Pro Dosyaları',
   extensions: allExtensions
 }
 

@@ -7,7 +7,7 @@ let dbInstance: Database.Database | null = null
 export function getDatabase(): Database.Database {
   if (dbInstance) return dbInstance
 
-  const dbPath = path.join(process.cwd(), 'dt_asistan_web.db')
+  const dbPath = path.join(process.cwd(), 'hakim_pro_web.db')
   const db = new Database(dbPath)
   db.pragma('journal_mode = WAL')
 
