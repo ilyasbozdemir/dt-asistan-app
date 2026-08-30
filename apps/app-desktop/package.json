@@ -1,7 +1,7 @@
 {
   "name": "app-desktop",
-  "version": "1.0.0-beta.77",
-  "description": "Doğrudan Temin ve Satın Alma Süreçleri Yönetim Sistemi",
+  "version": "1.0.0-beta.78",
+  "description": "HAKİM Pro - Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi",
   "main": "./out/main/index.js",
   "author": "ilyasbozdemir.dev",
   "homepage": "https://electron-vite.org",
