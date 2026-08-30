@@ -78,5 +78,5 @@ npmRebuild: true
 publish:
   provider: github
   owner: ilyasbozdemir
-  repo: dt-asistan-app
-  updaterCacheDirName: dt-asistan-app-updater
+  repo: hakim-pro-app
+  updaterCacheDirName: hakim-pro-app-updater

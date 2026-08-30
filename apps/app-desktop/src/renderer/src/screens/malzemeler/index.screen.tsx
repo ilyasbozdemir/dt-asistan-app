@@ -282,7 +282,7 @@ export default function MalzemelerScreen(): React.JSX.Element {
                 📣 Uygulama altyapımız bu kodları tamamen desteklemektedir. Hazır malzeme listesi ve
                 kodlarının varsayılan olarak eklenmesi için{' '}
                 <a
-                  href="https://github.com/ilyasbozdemir/dt-asistan-app"
+                  href="https://github.com/ilyasbozdemir/hakim-pro-app"
                   target="_blank"
                   rel="noreferrer"
                   className="underline font-semibold hover:text-blue-800 dark:hover:text-blue-200"

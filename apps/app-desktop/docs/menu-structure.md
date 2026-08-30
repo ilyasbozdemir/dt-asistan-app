@@ -1,4 +1,4 @@
-# Doğrudan Temin Masaüstü Uygulaması (dt-asistan-app) - Menü Yapısı (Taslak)
+# HAKİM Pro (hakim-pro-app) - Menü Yapısı (Taslak)
 
 Bu dosya uygulamanın sol menü/navigasyon yapısının taslağını içerir. Yeni arayüz
 geliştirilirken bu hiyerarşi temel alınacaktır.
