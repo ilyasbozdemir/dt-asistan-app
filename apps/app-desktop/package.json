@@ -16,6 +16,7 @@
     "dev:multi": "node scripts/dev-multi.js",
     "build": "pnpm --filter @dt/database build && node scripts/count-loc.js && npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win --x64",
     "build:mac": "electron-vite build && electron-builder --mac",

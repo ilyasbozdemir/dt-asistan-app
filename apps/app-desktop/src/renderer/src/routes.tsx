@@ -1,7 +1,7 @@
 import { createRouter, createRoute, createRootRoute } from '@tanstack/react-router'
 import { PageWrapper } from './components/layout/PageWrapper'
 import { APP_ROUTES } from './constants/routeConstants'
-import DashboardScreen from './screens/dashboard/index.screen'
+import DashboardScreen from './screens/dashboard/index2.screen'
 import HarcamaMerkeziScreen from './screens/dashboard/HarcamaMerkeziScreen'
 import DosyalarScreen from './screens/dosyalar/index.screen'
 import FirmalarScreen from './screens/firmalar/index.screen'

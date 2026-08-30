@@ -1,5 +1,5 @@
 import React from 'react'
-import DashboardScreen from '../../screens/dashboard/index.screen'
+import DashboardScreen from '../../screens/dashboard/index2.screen'
 import DosyalarScreen from '../../screens/dosyalar/index.screen'
 import FirmalarScreen from '../../screens/firmalar/index.screen'
 import PersonelScreen from '../../screens/personel/index.screen'
