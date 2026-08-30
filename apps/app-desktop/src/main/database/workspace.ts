@@ -785,20 +785,20 @@ export class DtmWorkspace {
       }
     }
 
-    // Otomatik uzantıyı .dtal yapma mantığı (Kullanıcı onaylı)
-    if (!filePath.toLowerCase().endsWith('.dtal')) {
+    // Otomatik uzantıyı .hkmp yapma mantığı (Eski formatlar için)
+    if (!filePath.toLowerCase().endsWith('.hkmp') && !filePath.toLowerCase().endsWith('.dtal')) {
       const response = dialog.showMessageBoxSync({
         type: 'question',
-        buttons: ['Evet, Güncelle', 'Hayır, Eski Uzantıda Bırak'],
+        buttons: ['Evet, HAKİM Pro (.hkmp) Formatına Yükselt', 'Hayır, Eski Uzantıda Bırak'],
         defaultId: 0,
         title: 'Eski Uzantı Tespit Edildi',
         message:
-          'Açtığınız dosyanın uzantısı eski formattadır (.dta veya .dtm). Uygulama verimliliği ve uyumluluğu için uzantının yeni .dtal formatına dönüştürülmesi önerilir.\n\nDosya uzantısı güncellensin mi?'
+          'Açtığınız dosya eski formattadır. Uygulama verimliliği ve tam uyumluluk için dosyanın yeni HAKİM Pro (.hkmp) formatına yükseltilmesi önerilir.\n\nDosya formatı güncellensin mi?'
       })
 
       if (response === 0) {
         const ext = path.extname(filePath)
-        const newFilePath = filePath.substring(0, filePath.length - ext.length) + '.dtal'
+        const newFilePath = filePath.substring(0, filePath.length - ext.length) + '.hkmp'
 
         const newLockPath = newFilePath + '.lock'
         try {
@@ -826,9 +826,9 @@ export class DtmWorkspace {
   }
 
   public createWorkspace(filePath: string, institutionName: string): WorkspaceMeta {
-    if (!filePath.toLowerCase().endsWith('.dtal')) {
+    if (!filePath.toLowerCase().endsWith('.hkmp') && !filePath.toLowerCase().endsWith('.dtal')) {
       const ext = path.extname(filePath)
-      filePath = filePath.substring(0, filePath.length - ext.length) + '.dtal'
+      filePath = (ext ? filePath.substring(0, filePath.length - ext.length) : filePath) + '.hkmp'
     }
     const lockPath = filePath + '.lock'
     if (fs.existsSync(lockPath)) {

@@ -1,24 +1,14 @@
 appId: dev.ilyasbozdemir.hakimproapp
 productName: HAKİM Pro
 fileAssociations:
-  - ext: dtal
+  - ext: hkmp
     name: HAKİM Pro Proje Dosyası
     description: HAKİM Pro Proje Dosyası
     role: Editor
     icon: build/icon.png
-  - ext: dta
-    name: Doğrudan Temin Asistan Veri Dosyası (Eski)
+  - ext: dtal
+    name: HAKİM Pro / DTAL Dosyası (Eski)
     description: HAKİM Pro Veri Dosyası
-    role: Editor
-    icon: build/icon.png
-  - ext: dtm
-    name: Doğrudan Temin Çalışma Dosyası Lite
-    description: HAKİM Pro Çalışma Dosyası
-    role: Editor
-    icon: build/icon.png
-  - ext: dte
-    name: Doğrudan Temin Veri Aktarım Dosyası Lite
-    description: HAKİM Pro Veri Aktarım Dosyası
     role: Editor
     icon: build/icon.png
 directories:

@@ -19,25 +19,15 @@ export interface FileFormat {
 
 export const SUPPORTED_FORMATS: FileFormat[] = [
   {
-    ext: 'dtal',
-    label: 'HAKİM Pro Dosyası',
-    dialogName: 'HAKİM Pro Dosyası',
+    ext: 'hkmp',
+    label: 'HAKİM Pro Proje Dosyası',
+    dialogName: 'HAKİM Pro Dosyası (*.hkmp)',
     isDefault: true
   },
   {
-    ext: 'dta',
-    label: 'Doğrudan Temin Asistan Veri Dosyası (Eski)',
-    dialogName: 'Eski DT Asistan Dosyası'
-  },
-  {
-    ext: 'dtm',
-    label: 'Doğrudan Temin Veri Dosyası (Eski)',
-    dialogName: 'Eski DT Asistan Dosyası'
-  },
-  {
-    ext: 'dte',
-    label: 'Doğrudan Temin Veri Aktarım Dosyası (Eski)',
-    dialogName: 'Eski DT Veri Aktarım Dosyası'
+    ext: 'dtal',
+    label: 'HAKİM Pro / DTAL Veri Dosyası (Eski)',
+    dialogName: 'HAKİM Pro / DTAL Dosyası (*.dtal)'
   }
 ]
 

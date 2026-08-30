@@ -57,7 +57,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       const { filePath: destPath } = await dialog.showSaveDialog(win!, {
         title: 'Yedek Dosyasını Kaydet',
         defaultPath: basename(filePath),
-        filters: [{ name: 'HAKİM Pro Veri Dosyası', extensions: ['dtal'] }]
+        filters: [{ name: 'HAKİM Pro Proje Dosyası (*.hkmp, *.dtal)', extensions: ['hkmp', 'dtal'] }]
       })
 
       if (!destPath) {
