@@ -1,46 +1,52 @@
-import React, { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
-  Scale,
-  ShieldCheck,
-  FileText,
-  Sparkles,
-  TrendingUp,
-  Coins,
-  Building2,
-  Users,
-  CheckCircle2,
+  Activity,
   AlertTriangle,
-  Clock,
   ArrowRight,
-  Plus,
+  BarChart3,
+  BookOpen,
   Bot,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Coins,
+  Database,
+  FileCheck,
+  FileSpreadsheet,
+  FileText,
+  Gavel,
+  Hammer,
   Landmark,
   Layers,
-  FileCheck,
-  Activity,
-  Zap,
-  ChevronRight,
-  PieChart,
-  BarChart3,
-  Database,
   Mail,
-  Search,
-  BookOpen,
+  PieChart,
+  Plus,
   Receipt,
-  FileSpreadsheet
-} from 'lucide-react'
+  Scale,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
 
-import { useSettingsStore } from '../../store/settingsStore'
-import { useWorkspaceStore } from '../../store/workspaceStore'
-import { useDashboardStats, useAnnouncements, useSmartAlerts } from './dashboard.hooks'
-import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
-import { useAyarlarHooks } from '../ayarlar/ayarlar.hooks'
-import { logActivity } from '../../utils/logger'
-import { Button } from '../../components/ui/Button'
-import { AITextGeneratorModal } from '../../components/ui/AITextGeneratorModal'
-import { TakipScreen } from '../system/TakipScreen'
+import { useSettingsStore } from "../../store/settingsStore";
+import { useWorkspaceStore } from "../../store/workspaceStore";
+import {
+  useAnnouncements,
+  useDashboardStats,
+  useSmartAlerts,
+} from "./dashboard.hooks";
+import { useDosyalarHooks } from "../dosyalar/dosyalar.hooks";
+import { useAyarlarHooks } from "../ayarlar/ayarlar.hooks";
+import { logActivity } from "../../utils/logger";
+import { Button } from "../../components/ui/Button";
+import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
+import { TakipScreen } from "../system/TakipScreen";
 
 export default function DashboardScreenV2(): React.JSX.Element {
   const {
@@ -55,289 +61,325 @@ export default function DashboardScreenV2(): React.JSX.Element {
     harcamaBirimAdi,
     adminName,
     adminTitle,
+    adminUsername,
     eButceKodu,
     say2000iKodu,
-    detsisKodu
-  } = useSettingsStore()
+    detsisKodu,
+  } = useSettingsStore();
 
-  const { activeDosyaId } = useWorkspaceStore()
-  const { stats, isLoading } = useDashboardStats()
-  const { announcements, isLoading: isAnnouncementsLoading } = useAnnouncements()
-  const { dosyalar } = useDosyalarHooks()
-  const { settings } = useAyarlarHooks()
-  const isMailConfigured = !!settings.smtp_host
+  const { activeDosyaId } = useWorkspaceStore();
+  const { stats, isLoading } = useDashboardStats();
+  const { announcements, isLoading: isAnnouncementsLoading } =
+    useAnnouncements();
+  const { dosyalar } = useDosyalarHooks();
+  const { settings } = useAyarlarHooks();
+  const isMailConfigured = !!settings.smtp_host;
 
-  const [showAIModal, setShowAIModal] = useState(false)
-  const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null)
-  const [activeHakimPillar, setActiveHakimPillar] = useState<'H' | 'A' | 'K' | 'I' | 'M'>('H')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null);
+  const [activeHakimPillar, setActiveHakimPillar] = useState<
+    "H" | "A" | "K" | "I" | "M"
+  >("H");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Zaman tabanlı karşılama
   const greeting = (() => {
-    const hours = new Date().getHours()
-    if (hours >= 6 && hours < 12) return 'Günaydın'
-    if (hours >= 12 && hours < 18) return 'İyi Günler'
-    if (hours >= 18 && hours < 23) return 'İyi Akşamlar'
-    return 'İyi Geceler'
-  })()
+    const hours = new Date().getHours();
+    if (hours >= 6 && hours < 12) return "Günaydın";
+    if (hours >= 12 && hours < 18) return "İyi Günler";
+    if (hours >= 18 && hours < 23) return "İyi Akşamlar";
+    return "İyi Geceler";
+  })();
 
-  const currentDate = new Intl.DateTimeFormat('tr-TR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(new Date())
+  const currentDate = new Intl.DateTimeFormat("tr-TR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
 
   // Kurum Türü Başlığı
   const getInstitutionTypeLabel = (type: string): string => {
     switch (type) {
-      case 'belediye':
-        return 'Belediye / Mahalli İdare'
-      case 'genel_butce':
-        return 'Bakanlık / Genel Bütçe'
-      case 'ozel_butce':
-        return 'Üniversite / Özel Bütçe'
-      case 'duzenleyici':
-        return 'Düzenleyici / Denetleyici Kurum'
-      case 'diger':
-        return 'Diğer Kurum'
+      case "belediye":
+        return "Belediye / Mahalli İdare";
+      case "genel_butce":
+        return "Bakanlık / Genel Bütçe";
+      case "ozel_butce":
+        return "Üniversite / Özel Bütçe";
+      case "duzenleyici":
+        return "Düzenleyici / Denetleyici Kurum";
+      case "diger":
+        return "Diğer Kurum";
       default:
-        return 'Kurum Tipi Belirtilmedi'
+        return "Kurum Tipi Belirtilmedi";
     }
-  }
-  const kurumTuruLabel = getInstitutionTypeLabel(institutionType || '')
+  };
+  const kurumTuruLabel = getInstitutionTypeLabel(institutionType || "");
 
   // Para Biçimlendirme
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-      maximumFractionDigits: 0
-    }).format(value || 0)
-  }
+    return new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency: "TRY",
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  };
 
   // 4734 Sayılı Kanun Madde 22/d KİK Eşik Değeri
-  const kikLimit = limitType === 'buyuksehir' ? 1021827 : 340391
-  const toplamHarcama = stats.toplamYaklasikMaliyet || 0
-  const limitDolulukOrani = Math.min(100, Math.round((toplamHarcama / (kikLimit * 10)) * 100))
+  const kikLimit = limitType === "buyuksehir" ? 1021827 : 340391;
+  const toplamHarcama = stats.toplamYaklasikMaliyet || 0;
+  const limitDolulukOrani = Math.min(
+    100,
+    Math.round((toplamHarcama / (kikLimit * 10)) * 100),
+  );
 
   // Bütçe / Harcama Tür Dağılımı
-  const totalCat = (stats.malYaklasikMaliyet || 0) + (stats.hizmetYaklasikMaliyet || 0) + (stats.yapimYaklasikMaliyet || 0) + (stats.danismanlikYaklasikMaliyet || 0) || 1
-  const malPct = Math.round(((stats.malYaklasikMaliyet || 0) / totalCat) * 100)
-  const hizmetPct = Math.round(((stats.hizmetYaklasikMaliyet || 0) / totalCat) * 100)
-  const yapimPct = Math.round(((stats.yapimYaklasikMaliyet || 0) / totalCat) * 100)
-  const danismanlikPct = Math.max(0, 100 - malPct - hizmetPct - yapimPct)
+  const totalCat =
+    (stats.malYaklasikMaliyet || 0) + (stats.hizmetYaklasikMaliyet || 0) +
+      (stats.yapimYaklasikMaliyet || 0) +
+      (stats.danismanlikYaklasikMaliyet || 0) || 1;
+  const malPct = Math.round(((stats.malYaklasikMaliyet || 0) / totalCat) * 100);
+  const hizmetPct = Math.round(
+    ((stats.hizmetYaklasikMaliyet || 0) / totalCat) * 100,
+  );
+  const yapimPct = Math.round(
+    ((stats.yapimYaklasikMaliyet || 0) / totalCat) * 100,
+  );
+  const danismanlikPct = Math.max(0, 100 - malPct - hizmetPct - yapimPct);
 
   // Asamalar Sorgusu
   const fetchAsamalar = async (): Promise<any[]> => {
     const res = await window.electron.ipcRenderer.invoke(
-      'db:query',
-      'SELECT * FROM TANIM_Asama WHERE aktif_mi = 1 ORDER BY asama_sira ASC'
-    )
-    if (!res.success) throw new Error(res.error)
-    return res.data
-  }
+      "db:query",
+      "SELECT * FROM TANIM_Asama WHERE aktif_mi = 1 ORDER BY asama_sira ASC",
+    );
+    if (!res.success) throw new Error(res.error);
+    return res.data;
+  };
 
   const { data: asamalar = [] } = useQuery<any[]>({
-    queryKey: ['asamalar_dashboard_v2'],
-    queryFn: fetchAsamalar
-  })
+    queryKey: ["asamalar_dashboard_v2"],
+    queryFn: fetchAsamalar,
+  });
 
   // Harcama Yetkilisi
-  const fetchHarcamaYetkilisi = async (): Promise<{ ad_soyad: string; unvan: string | null } | null> => {
+  const fetchHarcamaYetkilisi = async (): Promise<
+    { ad_soyad: string; unvan: string | null } | null
+  > => {
     const res = await window.electron.ipcRenderer.invoke(
-      'db:query',
+      "db:query",
       `SELECT p.ad_soyad, p.unvan 
        FROM TANIM_Roller r 
        LEFT JOIN TANIM_Personel p ON r.varsayilan_personel_id = p.id 
-       WHERE r.rol_kodu = 'harcama_yetkilisi'`
-    )
-    if (!res.success) throw new Error(res.error)
-    return res.data[0] || null
-  }
+       WHERE r.rol_kodu = 'harcama_yetkilisi'`,
+    );
+    if (!res.success) throw new Error(res.error);
+    return res.data[0] || null;
+  };
 
   const { data: harcamaYetkilisi = null } = useQuery({
-    queryKey: ['harcama_yetkilisi_dashboard_v2'],
-    queryFn: fetchHarcamaYetkilisi
-  })
+    queryKey: ["harcama_yetkilisi_dashboard_v2"],
+    queryFn: fetchHarcamaYetkilisi,
+  });
 
-  const smartAlerts = useSmartAlerts(settings, activeDosyaId, null)
+  const smartAlerts = useSmartAlerts(settings, activeDosyaId, null);
 
   useEffect(() => {
-    if (isLoading || isAnnouncementsLoading) return
+    if (isLoading || isAnnouncementsLoading) return;
 
-    const notifiedStr = localStorage.getItem('dta_notified_syslog_keys') || '[]'
-    let notifiedKeys: string[] = []
+    const notifiedStr = localStorage.getItem("dta_notified_syslog_keys") ||
+      "[]";
+    let notifiedKeys: string[] = [];
     try {
-      notifiedKeys = JSON.parse(notifiedStr)
+      notifiedKeys = JSON.parse(notifiedStr);
     } catch {
-      notifiedKeys = []
+      notifiedKeys = [];
     }
 
-    const newNotifiedKeys = [...notifiedKeys]
-    let hasNewLog = false
+    const newNotifiedKeys = [...notifiedKeys];
+    let hasNewLog = false;
 
     if (!isMailConfigured) {
-      const key = 'smtp_not_configured'
+      const key = "smtp_not_configured";
       if (!notifiedKeys.includes(key)) {
         logActivity(
-          'Mail (SMTP) Yapılandırılmamış',
-          'Posta sunucu ayarlarınız eksik. Bildirimler ve onay mailleri devre dışı kalabilir.',
-          'warning'
-        )
-        newNotifiedKeys.push(key)
-        hasNewLog = true
+          "Mail (SMTP) Yapılandırılmamış",
+          "Posta sunucu ayarlarınız eksik. Bildirimler ve onay mailleri devre dışı kalabilir.",
+          "warning",
+        );
+        newNotifiedKeys.push(key);
+        hasNewLog = true;
       }
     }
 
     smartAlerts.forEach((alert) => {
-      if (alert.type === 'error' || alert.type === 'warning') {
-        const key = `alert_${alert.id}`
+      if (alert.type === "error" || alert.type === "warning") {
+        const key = `alert_${alert.id}`;
         if (!notifiedKeys.includes(key)) {
-          logActivity(alert.title, alert.message, alert.type)
-          newNotifiedKeys.push(key)
-          hasNewLog = true
+          logActivity(alert.title, alert.message, alert.type);
+          newNotifiedKeys.push(key);
+          hasNewLog = true;
         }
       }
-    })
+    });
 
     if (hasNewLog) {
-      localStorage.setItem('dta_notified_syslog_keys', JSON.stringify(newNotifiedKeys))
+      localStorage.setItem(
+        "dta_notified_syslog_keys",
+        JSON.stringify(newNotifiedKeys),
+      );
     }
-  }, [smartAlerts, isMailConfigured, isLoading, isAnnouncementsLoading])
+  }, [smartAlerts, isMailConfigured, isLoading, isAnnouncementsLoading]);
 
   // Aşama Renk ve İsim Tanımlayıcı
-  const getAsamaDetails = (asamaSira: number): { name: string; color: string; badge: string } => {
-    const asama = asamalar.find((a: any) => a.asama_sira === asamaSira)
+  const getAsamaDetails = (
+    asamaSira: number,
+  ): { name: string; color: string; badge: string } => {
+    const asama = asamalar.find((a: any) => a.asama_sira === asamaSira);
     if (asama) {
       return {
         name: asama.asama_adi,
-        color: 'border-blue-500/20 text-blue-700 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/30',
-        badge: 'bg-blue-500'
-      }
+        color:
+          "border-blue-500/20 text-blue-700 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/30",
+        badge: "bg-blue-500",
+      };
     }
 
     switch (asamaSira) {
       case 1:
         return {
-          name: '1. İhtiyaç & Lüzum',
-          color: 'border-slate-500/20 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/40',
-          badge: 'bg-slate-500'
-        }
+          name: "1. İhtiyaç & Lüzum",
+          color:
+            "border-slate-500/20 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/40",
+          badge: "bg-slate-500",
+        };
       case 2:
         return {
-          name: '2. Piyasa Fiyat Araştırması',
-          color: 'border-amber-500/20 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30',
-          badge: 'bg-amber-500'
-        }
+          name: "2. Piyasa Fiyat Araştırması",
+          color:
+            "border-amber-500/20 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30",
+          badge: "bg-amber-500",
+        };
       case 3:
         return {
-          name: '3. Teklif Değerlendirme',
-          color: 'border-indigo-500/20 text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30',
-          badge: 'bg-indigo-500'
-        }
+          name: "3. Teklif Değerlendirme",
+          color:
+            "border-indigo-500/20 text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30",
+          badge: "bg-indigo-500",
+        };
       case 4:
         return {
-          name: '4. Karar & Onay Belgesi',
-          color: 'border-purple-500/20 text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30',
-          badge: 'bg-purple-500'
-        }
+          name: "4. Karar & Onay Belgesi",
+          color:
+            "border-purple-500/20 text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30",
+          badge: "bg-purple-500",
+        };
       case 5:
         return {
-          name: '5. Muayene Kabul & Ödeme',
-          color: 'border-emerald-500/20 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30',
-          badge: 'bg-emerald-500'
-        }
+          name: "5. Muayene Kabul & Ödeme",
+          color:
+            "border-emerald-500/20 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30",
+          badge: "bg-emerald-500",
+        };
       default:
         return {
-          name: 'Süreç İlerliyor',
-          color: 'border-slate-500/20 text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-900',
-          badge: 'bg-slate-400'
-        }
+          name: "Süreç İlerliyor",
+          color:
+            "border-slate-500/20 text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-900",
+          badge: "bg-slate-400",
+        };
     }
-  }
+  };
 
   // Filtrelenmiş Dosyalar
   const filteredDosyalar = dosyalar.filter((d) => {
-    if (!searchTerm.trim()) return true
-    const q = searchTerm.toLowerCase()
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
     return (
       d.temin_no?.toLowerCase().includes(q) ||
       d.konu?.toLowerCase().includes(q) ||
       d.harcama_birimi?.toLowerCase().includes(q)
-    )
-  })
+    );
+  });
 
   // Eğer açık aktif bir dosya varsa takip ekranını render et
   if (activeDosyaId) {
-    return <TakipScreen />
+    return <TakipScreen />;
   }
 
   // HAKİM Modülleri Bilgisi
   const hakimPillars = [
     {
-      key: 'H' as const,
-      letter: 'H',
-      title: 'Harcama & Bütçe Yönetimi',
-      subtitle: '4734 / 22-d ve 5018 Sayılı Mali Yönetim Disiplini',
+      key: "H" as const,
+      letter: "H",
+      title: "Harcama & Bütçe Yönetimi",
+      subtitle: "4734 / 22-d ve 5018 Sayılı Mali Yönetim Disiplini",
       icon: Coins,
-      gradient: 'from-blue-600 to-indigo-600',
+      gradient: "from-blue-600 to-indigo-600",
       badge: `${formatCurrency(stats.toplamYaklasikMaliyet)} Toplam Harcama`,
       description:
-        'KİK doğrudan temin eşik limitlerini, harcama birimi bütçe tertiplerini ve analitik bütçe kodlarını gerçek zamanlı kontrol altında tutar.',
-      statsText: `Yıllık KİK Eşik Sınırı: ${formatCurrency(kikLimit)} (${limitType === 'buyuksehir' ? 'Büyükşehir' : 'Normal'})`
+        "KİK doğrudan temin eşik limitlerini, harcama birimi bütçe tertiplerini ve analitik bütçe kodlarını gerçek zamanlı kontrol altında tutar.",
+      statsText: `Yıllık KİK Eşik Sınırı: ${formatCurrency(kikLimit)} (${
+        limitType === "buyuksehir" ? "Büyükşehir" : "Normal"
+      })`,
     },
     {
-      key: 'A' as const,
-      letter: 'A',
-      title: 'Akıllı Analiz & Yapay Zeka',
-      subtitle: 'HAKİM AI Karar Destek & Anomali Tespiti',
+      key: "A" as const,
+      letter: "A",
+      title: "Akıllı Analiz & Yapay Zeka",
+      subtitle: "HAKİM AI Karar Destek & Anomali Tespiti",
       icon: Sparkles,
-      gradient: 'from-purple-600 to-pink-600',
-      badge: 'Yapay Zeka Aktif',
+      gradient: "from-purple-600 to-pink-600",
+      badge: "Yapay Zeka Aktif",
       description:
-        'Piyasa fiyat tekliflerini analiz eder, standart sapma ve aşırı düşük teklif risklerini tespit eder, otomatik şartname ve gerekçe raporları üretir.',
-      statsText: `${stats.ihaleDosyaSayisi} Dosyada Akıllı Denetim & Form Doldurma`
+        "Piyasa fiyat tekliflerini analiz eder, standart sapma ve aşırı düşük teklif risklerini tespit eder, otomatik şartname ve gerekçe raporları üretir.",
+      statsText:
+        `${stats.ihaleDosyaSayisi} Dosyada Akıllı Denetim & Form Doldurma`,
     },
     {
-      key: 'K' as const,
-      letter: 'K',
-      title: 'Kamu İhale & Doğrudan Temin',
-      subtitle: 'Uçtan Uca 5 Aşamalı Dijital Dosya Yaşam Döngüsü',
+      key: "K" as const,
+      letter: "K",
+      title: "Kamu İhale & Doğrudan Temin",
+      subtitle: "Uçtan Uca 5 Aşamalı Dijital Dosya Yaşam Döngüsü",
       icon: Scale,
-      gradient: 'from-amber-500 to-orange-600',
+      gradient: "from-amber-500 to-orange-600",
       badge: `${stats.ihaleDosyaSayisi} Kayıtlı Dosya`,
       description:
-        'İhtiyaç lüzumundan piyasa araştırmasına, teklif mektubu dağıtımından onay belgesine kadar tüm doğrudan temin adımlarını kanuna uygun yürütür.',
-      statsText: `${stats.aktifDosyaSayisi || stats.ihaleDosyaSayisi} Aktif Süreç Devam Ediyor`
+        "İhtiyaç lüzumundan piyasa araştırmasına, teklif mektubu dağıtımından onay belgesine kadar tüm doğrudan temin adımlarını kanuna uygun yürütür.",
+      statsText: `${
+        stats.aktifDosyaSayisi || stats.ihaleDosyaSayisi
+      } Aktif Süreç Devam Ediyor`,
     },
     {
-      key: 'I' as const,
-      letter: 'İ',
-      title: 'İşlem, Evrak & E-İmza Entegrasyonu',
-      subtitle: 'Resmi Yazışma Standartları & EBYS Uyumluluğu',
+      key: "I" as const,
+      letter: "İ",
+      title: "İşlem, Evrak & E-İmza Entegrasyonu",
+      subtitle: "Resmi Yazışma Standartları & EBYS Uyumluluğu",
       icon: FileCheck,
-      gradient: 'from-emerald-600 to-teal-600',
-      badge: 'Baskıya & EBYS Hazır',
+      gradient: "from-emerald-600 to-teal-600",
+      badge: "Baskıya & EBYS Hazır",
       description:
-        'React TSX şablon motoruyla Onay Belgesi, Piyasa Araştırma Tutanağı, Muayene Kabul ve Ödeme Emri belgelerini tek tıkla mühürlü/imzalı PDF olarak üretir.',
-      statsText: `${stats.kayitliFirmaSayisi} İstekli Firma & Tedarikçi Havuzu`
+        "React TSX şablon motoruyla Onay Belgesi, Piyasa Araştırma Tutanağı, Muayene Kabul ve Ödeme Emri belgelerini tek tıkla mühürlü/imzalı PDF olarak üretir.",
+      statsText: `${stats.kayitliFirmaSayisi} İstekli Firma & Tedarikçi Havuzu`,
     },
     {
-      key: 'M' as const,
-      letter: 'M',
-      title: 'Mevzuat, Denetim & Hakediş Güvencesi',
-      subtitle: 'Sayıştay, KİK ve İç Denetim Uyum Kalkanı',
+      key: "M" as const,
+      letter: "M",
+      title: "Mevzuat, Denetim & Hakediş Güvencesi",
+      subtitle: "Sayıştay, KİK ve İç Denetim Uyum Kalkanı",
       icon: ShieldCheck,
-      gradient: 'from-rose-600 to-red-600',
-      badge: '%100 Mevzuat Uyum Skoru',
+      gradient: "from-rose-600 to-red-600",
+      badge: "%100 Mevzuat Uyum Skoru",
       description:
-        'Tüm süreçleri 4734, 4735 ve 5018 sayılı kanunlar, Sayıştay denetim kriterleri ve Kamu İhale Tebliğlerine göre anlık denetler, riskleri engeller.',
-      statsText: `${stats.kayitliPersonelSayisi} Yetkili & Komisyon Üyesi Kayıtlı`
-    }
-  ]
+        "Tüm süreçleri 4734, 4735 ve 5018 sayılı kanunlar, Sayıştay denetim kriterleri ve Kamu İhale Tebliğlerine göre anlık denetler, riskleri engeller.",
+      statsText:
+        `${stats.kayitliPersonelSayisi} Yetkili & Komisyon Üyesi Kayıtlı`,
+    },
+  ];
 
-  const currentPillar = hakimPillars.find((p) => p.key === activeHakimPillar) || hakimPillars[0]
+  const currentPillar = hakimPillars.find((p) => p.key === activeHakimPillar) ||
+    hakimPillars[0];
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-[1650px] mx-auto pb-12 animate-in fade-in slide-in-from-bottom-3 duration-500">
@@ -366,13 +408,18 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
             <div>
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
-                {greeting}, {adminName || 'Harcama Yetkilisi'}
+                {greeting}, {adminName || adminUsername || "Kullanıcı"}
                 <span className="text-sm font-semibold px-2.5 py-0.5 rounded-lg bg-white/10 text-slate-200 border border-white/10 hidden sm:inline-block">
-                  {adminTitle || 'Satın Alma Yöneticisi'}
+                  {adminTitle || "Sistem Kullanıcısı"}
                 </span>
               </h1>
               <p className="text-sm text-slate-300 mt-1 leading-relaxed">
-                <strong className="text-white font-semibold">{institutionName || 'T.C. Kamu Kurumu'}</strong> bünyesindeki doğrudan temin süreçleri, yaklaşık maliyet analizleri, KİK limit kontrolleri ve Sayıştay denetim kriterleri tek ekranda yönetiliyor.
+                <strong className="text-white font-semibold">
+                  {institutionName || "T.C. Kamu Kurumu"}
+                </strong>{" "}
+                bünyesindeki doğrudan temin süreçleri, yaklaşık maliyet
+                analizleri, KİK limit kontrolleri ve Sayıştay denetim kriterleri
+                tek ekranda yönetiliyor.
               </p>
             </div>
           </div>
@@ -380,13 +427,24 @@ export default function DashboardScreenV2(): React.JSX.Element {
           {/* Hızlı Aksiyon Butonları */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link to="/dosyalar/yeni">
-              <Button className="bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-5 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]">
+              <Button className="bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]">
                 <Plus className="w-4 h-4" />
-                Yeni Doğrudan Temin Başlat
+                Yeni Doğrudan Temin (22/d)
               </Button>
             </Link>
+
+            <Link to="/harcama-merkezi">
+              <Button className="bg-linear-to-r from-amber-500 via-orange-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-amber-500/25 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]">
+                <Gavel className="w-4 h-4" />
+                Açık İhale & Hakediş Başlat
+              </Button>
+            </Link>
+
             <Link to="/dosyalar">
-              <Button variant="outline" className="bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700 font-semibold py-3 px-4 rounded-2xl flex items-center gap-2 cursor-pointer">
+              <Button
+                variant="outline"
+                className="bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700 font-semibold py-3 px-3.5 rounded-2xl flex items-center gap-1.5 cursor-pointer"
+              >
                 <FileSpreadsheet className="w-4 h-4 text-blue-400" />
                 Tüm Dosyalar ({dosyalar.length})
               </Button>
@@ -400,10 +458,14 @@ export default function DashboardScreenV2(): React.JSX.Element {
             <div className="flex items-center gap-2.5 text-amber-200 text-xs font-medium">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
-                <strong>Sistem Uyarısı:</strong> {smartAlerts[0].title} — {smartAlerts[0].message}
+                <strong>Sistem Uyarısı:</strong> {smartAlerts[0].title} —{" "}
+                {smartAlerts[0].message}
               </span>
             </div>
-            <Link to={smartAlerts[0].actionLink as any} search={smartAlerts[0].actionSearch as any}>
+            <Link
+              to={smartAlerts[0].actionLink as any}
+              search={smartAlerts[0].actionSearch as any}
+            >
               <button className="text-xs font-bold text-amber-300 hover:text-amber-100 underline flex items-center gap-1 cursor-pointer shrink-0">
                 {smartAlerts[0].actionText} <ChevronRight className="w-3 h-3" />
               </button>
@@ -431,46 +493,50 @@ export default function DashboardScreenV2(): React.JSX.Element {
         {/* H - A - K - İ - M Buton Şeridi */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {hakimPillars.map((pillar) => {
-            const isSelected = activeHakimPillar === pillar.key
-            const Icon = pillar.icon
+            const isSelected = activeHakimPillar === pillar.key;
+            const Icon = pillar.icon;
             return (
               <button
                 key={pillar.key}
                 onClick={() => setActiveHakimPillar(pillar.key)}
                 className={`flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden ${
                   isSelected
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02] dark:bg-blue-950/80 dark:border-blue-700'
-                    : 'bg-slate-50/70 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? "bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02] dark:bg-blue-950/80 dark:border-blue-700"
+                    : "bg-slate-50/70 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-2">
                   <div
                     className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm ${
                       isSelected
-                        ? 'bg-white text-slate-900'
-                        : 'bg-blue-600 text-white dark:bg-blue-500'
+                        ? "bg-white text-slate-900"
+                        : "bg-blue-600 text-white dark:bg-blue-500"
                     }`}
                   >
                     {pillar.letter}
                   </div>
                   <Icon
                     className={`w-4 h-4 ${
-                      isSelected ? 'text-blue-300' : 'text-slate-400 dark:text-slate-500'
+                      isSelected
+                        ? "text-blue-300"
+                        : "text-slate-400 dark:text-slate-500"
                     }`}
                   />
                 </div>
                 <span className="text-xs font-black tracking-tight leading-tight">
-                  {pillar.title.split('&')[0]}
+                  {pillar.title.split("&")[0]}
                 </span>
                 <span
                   className={`text-[10px] mt-0.5 truncate ${
-                    isSelected ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'
+                    isSelected
+                      ? "text-slate-300"
+                      : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   {pillar.subtitle}
                 </span>
               </button>
-            )
+            );
           })}
         </div>
 
@@ -495,15 +561,16 @@ export default function DashboardScreenV2(): React.JSX.Element {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {activeHakimPillar === 'A' && (
+            {activeHakimPillar === "A" && (
               <Button
                 onClick={() => {
                   setSelectedFileForAI({
-                    temin_no: 'GENEL-ANALIZ',
-                    konu: 'Genel Doğrudan Temin Süreçleri ve Piyasa Fiyat Analizi',
-                    yaklasik_maliyet: stats.toplamYaklasikMaliyet
-                  })
-                  setShowAIModal(true)
+                    temin_no: "GENEL-ANALIZ",
+                    konu:
+                      "Genel Doğrudan Temin Süreçleri ve Piyasa Fiyat Analizi",
+                    yaklasik_maliyet: stats.toplamYaklasikMaliyet,
+                  });
+                  setShowAIModal(true);
                 }}
                 className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
@@ -511,7 +578,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 HAKİM AI Asistanını Aç
               </Button>
             )}
-            {activeHakimPillar === 'H' && (
+            {activeHakimPillar === "H" && (
               <Link to="/harcama-merkezi">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs">
                   <Coins className="w-3.5 h-3.5" />
@@ -519,7 +586,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 </Button>
               </Link>
             )}
-            {activeHakimPillar === 'K' && (
+            {activeHakimPillar === "K" && (
               <Link to="/dosyalar/yeni">
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs">
                   <Plus className="w-3.5 h-3.5" />
@@ -527,7 +594,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 </Button>
               </Link>
             )}
-            {activeHakimPillar === 'I' && (
+            {activeHakimPillar === "I" && (
               <Link to="/dosyalar">
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs">
                   <FileText className="w-3.5 h-3.5" />
@@ -535,7 +602,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 </Button>
               </Link>
             )}
-            {activeHakimPillar === 'M' && (
+            {activeHakimPillar === "M" && (
               <Link to="/mevzuat">
                 <Button className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs">
                   <BookOpen className="w-3.5 h-3.5" />
@@ -557,7 +624,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 Toplam Yaklaşık Maliyet
               </span>
               <div className="text-2xl font-black text-slate-900 dark:text-white">
-                {isLoading ? '...' : formatCurrency(stats.toplamYaklasikMaliyet)}
+                {isLoading
+                  ? "..."
+                  : formatCurrency(stats.toplamYaklasikMaliyet)}
               </div>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -565,7 +634,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">KİK Eşik Durumu:</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              KİK Eşik Durumu:
+            </span>
             <span className="font-bold text-blue-600 dark:text-blue-400">
               {formatCurrency(kikLimit)} / limit
             </span>
@@ -580,7 +651,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 Toplam Doğrudan Temin
               </span>
               <div className="text-2xl font-black text-slate-900 dark:text-white">
-                {isLoading ? '...' : stats.ihaleDosyaSayisi} <span className="text-sm font-bold text-slate-400">Dosya</span>
+                {isLoading ? "..." : stats.ihaleDosyaSayisi}{" "}
+                <span className="text-sm font-bold text-slate-400">Dosya</span>
               </div>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
@@ -588,7 +660,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">Aktif İşlemde:</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              Aktif İşlemde:
+            </span>
             <span className="font-bold text-amber-600 dark:text-amber-400">
               {stats.aktifDosyaSayisi || stats.ihaleDosyaSayisi} dosya açık
             </span>
@@ -603,7 +677,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 Tedarikçi & İstekli Havuzu
               </span>
               <div className="text-2xl font-black text-slate-900 dark:text-white">
-                {isLoading ? '...' : stats.kayitliFirmaSayisi} <span className="text-sm font-bold text-slate-400">Firma</span>
+                {isLoading ? "..." : stats.kayitliFirmaSayisi}{" "}
+                <span className="text-sm font-bold text-slate-400">Firma</span>
               </div>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -611,9 +686,13 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">Teklif Verenler:</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              Teklif Verenler:
+            </span>
             <span className="font-bold text-emerald-600 dark:text-emerald-400">
-              {stats.ihalelereKatilanFirmaSayisi || stats.kayitliFirmaSayisi} katılım
+              {stats.ihalelereKatilanFirmaSayisi || stats.kayitliFirmaSayisi}
+              {" "}
+              katılım
             </span>
           </div>
         </div>
@@ -634,7 +713,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">Görevli Personel:</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              Görevli Personel:
+            </span>
             <span className="font-bold text-slate-700 dark:text-slate-300">
               {stats.kayitliPersonelSayisi} yetkili tanımlı
             </span>
@@ -655,7 +736,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   Alım Türlerine Göre Maliyet Dağılımı
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  4734 Sayılı Kanun kapsamındaki Mal, Hizmet ve Yapım harcamaları
+                  4734 Sayılı Kanun kapsamındaki Mal, Hizmet ve Yapım
+                  harcamaları
                 </p>
               </div>
               <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl">
@@ -756,7 +838,10 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   />
                 </div>
                 <Link to="/dosyalar/yeni">
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl cursor-pointer">
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl cursor-pointer"
+                  >
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     Yeni
                   </Button>
@@ -764,83 +849,101 @@ export default function DashboardScreenV2(): React.JSX.Element {
               </div>
             </div>
 
-            {filteredDosyalar.length === 0 ? (
-              <div className="text-center py-12 px-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-700">
-                <FileText className="w-10 h-10 text-slate-400 mx-auto mb-2 opacity-60" />
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                  Henüz Kayıtlı Dosya Bulunmuyor
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-4">
-                  Yeni bir doğrudan temin dosyası başlatarak 5 aşamalı satın alma sürecinizi anında devreye alın.
-                </p>
-                <Link to="/dosyalar/yeni">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer">
-                    İlk Dosyayı Oluştur
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredDosyalar.slice(0, 6).map((dosya) => {
-                  const asamaInfo = getAsamaDetails((dosya as any).asama_sira || 1)
-                  return (
-                    <div
-                      key={dosya.id}
-                      className="p-4 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
-                    >
-                      <div className="space-y-1.5 max-w-xl">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md border border-blue-200/50 dark:border-blue-800/50">
-                            {dosya.temin_no || `#${dosya.id}`}
-                          </span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${asamaInfo.color}`}>
-                            {asamaInfo.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            {dosya.tur?.toUpperCase() || 'MAL'}
-                          </span>
-                        </div>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                          {dosya.konu || 'Konu belirtilmemiş'}
-                        </h4>
-                        <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-3">
-                          <span>Birim: {dosya.harcama_birimi || harcamaBirimAdi || 'Genel Birim'}</span>
-                          <span>•</span>
-                          <span>Tarih: {dosya.dosya_acilis_tarihi || 'Bugün'}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700">
-                        <div className="text-right">
-                          <div className="text-xs font-black text-slate-900 dark:text-white">
-                            {formatCurrency(dosya.yaklasik_maliyet || 0)}
+            {filteredDosyalar.length === 0
+              ? (
+                <div className="text-center py-12 px-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-700">
+                  <FileText className="w-10 h-10 text-slate-400 mx-auto mb-2 opacity-60" />
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Henüz Kayıtlı Dosya Bulunmuyor
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-4">
+                    Yeni bir doğrudan temin dosyası başlatarak 5 aşamalı satın
+                    alma sürecinizi anında devreye alın.
+                  </p>
+                  <Link to="/dosyalar/yeni">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer">
+                      İlk Dosyayı Oluştur
+                    </Button>
+                  </Link>
+                </div>
+              )
+              : (
+                <div className="space-y-3">
+                  {filteredDosyalar.slice(0, 6).map((dosya) => {
+                    const asamaInfo = getAsamaDetails(
+                      (dosya as any).asama_sira || 1,
+                    );
+                    return (
+                      <div
+                        key={dosya.id}
+                        className="p-4 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                      >
+                        <div className="space-y-1.5 max-w-xl">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md border border-blue-200/50 dark:border-blue-800/50">
+                              {dosya.temin_no || `#${dosya.id}`}
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${asamaInfo.color}`}
+                            >
+                              {asamaInfo.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {dosya.tur?.toUpperCase() || "MAL"}
+                            </span>
                           </div>
-                          <span className="text-[10px] text-slate-400">Yaklaşık Maliyet</span>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {dosya.konu || "Konu belirtilmemiş"}
+                          </h4>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-3">
+                            <span>
+                              Birim: {dosya.harcama_birimi || harcamaBirimAdi ||
+                                "Genel Birim"}
+                            </span>
+                            <span>•</span>
+                            <span>
+                              Tarih: {dosya.dosya_acilis_tarihi || "Bugün"}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedFileForAI(dosya)
-                              setShowAIModal(true)
-                            }}
-                            className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 transition-colors cursor-pointer"
-                            title="HAKİM AI Süreç Tavsiyesi Al"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                          </button>
-                          <Link to="/dosya" search={{ id: dosya.id } as any}>
-                            <Button size="sm" variant="outline" className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer">
-                              Aç <ArrowRight className="w-3 h-3 ml-1" />
-                            </Button>
-                          </Link>
+                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700">
+                          <div className="text-right">
+                            <div className="text-xs font-black text-slate-900 dark:text-white">
+                              {formatCurrency(dosya.yaklasik_maliyet || 0)}
+                            </div>
+                            <span className="text-[10px] text-slate-400">
+                              Yaklaşık Maliyet
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedFileForAI(dosya);
+                                setShowAIModal(true);
+                              }}
+                              className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 transition-colors cursor-pointer"
+                              title="HAKİM AI Süreç Tavsiyesi Al"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                            </button>
+                            <Link to="/dosya" search={{ id: dosya.id } as any}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer"
+                              >
+                                Aç <ArrowRight className="w-3 h-3 ml-1" />
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
           </div>
         </div>
 
@@ -854,7 +957,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
               </div>
               <div className="overflow-hidden">
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
-                  {institutionName || 'Kurum Adı Tanımlanmamış'}
+                  {institutionName || "Kurum Adı Tanımlanmamış"}
                 </h3>
                 <span className="text-xs text-blue-600 dark:text-blue-400 font-medium truncate block">
                   {kurumTuruLabel}
@@ -865,39 +968,55 @@ export default function DashboardScreenV2(): React.JSX.Element {
             {/* Bütçe & Analitik Kod Matrisi */}
             <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-slate-800/50">
-                <span className="text-slate-500 dark:text-slate-400">Limit Statüsü</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  Limit Statüsü
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white uppercase bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[10px]">
-                  {limitType === 'buyuksehir' ? 'Büyükşehir Kapsamı' : 'Normal İdare'}
+                  {limitType === "buyuksehir"
+                    ? "Büyükşehir Kapsamı"
+                    : "Normal İdare"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-slate-800/50">
-                <span className="text-slate-500 dark:text-slate-400">Harcama Birimi</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  Harcama Birimi
+                </span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[170px]">
-                  {harcamaBirimAdi || 'Belirtilmedi'}
+                  {harcamaBirimAdi || "Belirtilmedi"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-slate-800/50">
-                <span className="text-slate-500 dark:text-slate-400">Kurumsal / Fonk. Kod</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  Kurumsal / Fonk. Kod
+                </span>
                 <span className="font-mono text-slate-700 dark:text-slate-300">
-                  {kurumsalKod || '00.00'} / {fonksiyonelKod || '00.0'}
+                  {kurumsalKod || "00.00"} / {fonksiyonelKod || "00.0"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-slate-800/50">
-                <span className="text-slate-500 dark:text-slate-400">Muhasebe Birimi</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  Muhasebe Birimi
+                </span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[170px]">
-                  {muhasebeBirimAdi || 'Belirtilmedi'}
+                  {muhasebeBirimAdi || "Belirtilmedi"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-slate-500 dark:text-slate-400">Harcama Yetkilisi</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  Harcama Yetkilisi
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white">
-                  {harcamaYetkilisi?.ad_soyad || adminName || 'Tanımsız'}
+                  {harcamaYetkilisi?.ad_soyad || "Atanmamış"}
                 </span>
               </div>
             </div>
 
-            <Link to="/mevzuat" search={{ tab: 'mali' } as any}>
-              <Button variant="outline" size="sm" className="w-full text-xs font-bold py-2 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer">
+            <Link to="/mevzuat" search={{ tab: "mali" } as any}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs font-bold py-2 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer"
+              >
                 Mali Parametreleri Düzenle
               </Button>
             </Link>
@@ -922,18 +1041,21 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
 
             <p className="text-xs text-indigo-100 leading-relaxed mb-4">
-              Doğrudan temin lüzum yazıları, yaklaşık maliyet piyasa araştırması ve onay belgesi gerekçelerini mevzuata tam uyumlu olarak otomatik oluşturun.
+              Doğrudan temin lüzum yazıları, yaklaşık maliyet piyasa araştırması
+              ve onay belgesi gerekçelerini mevzuata tam uyumlu olarak otomatik
+              oluşturun.
             </p>
 
             <div className="space-y-2">
               <button
                 onClick={() => {
                   setSelectedFileForAI({
-                    temin_no: 'MEVZUAT-REHBERI',
-                    konu: '4734 Sayılı Kamu İhale Kanunu 22/d Maddesi Kapsamında Alım Esasları',
-                    yaklasik_maliyet: kikLimit
-                  })
-                  setShowAIModal(true)
+                    temin_no: "MEVZUAT-REHBERI",
+                    konu:
+                      "4734 Sayılı Kamu İhale Kanunu 22/d Maddesi Kapsamında Alım Esasları",
+                    yaklasik_maliyet: kikLimit,
+                  });
+                  setShowAIModal(true);
                 }}
                 className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
               >
@@ -944,11 +1066,12 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <button
                 onClick={() => {
                   setSelectedFileForAI({
-                    temin_no: 'DENETIM-KONTROL',
-                    konu: 'Sayıştay ve İç Denetim Standartlarına Göre Doğrudan Temin Dosya Hazırlığı',
-                    yaklasik_maliyet: stats.toplamYaklasikMaliyet
-                  })
-                  setShowAIModal(true)
+                    temin_no: "DENETIM-KONTROL",
+                    konu:
+                      "Sayıştay ve İç Denetim Standartlarına Göre Doğrudan Temin Dosya Hazırlığı",
+                    yaklasik_maliyet: stats.toplamYaklasikMaliyet,
+                  });
+                  setShowAIModal(true);
                 }}
                 className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
               >
@@ -971,22 +1094,27 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
 
             <div className="space-y-2.5 text-xs">
-              {announcements && announcements.length > 0 ? (
-                announcements.slice(0, 3).map((ann, idx) => (
-                  <div key={idx} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-                    <div className="font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
-                      {ann.title}
+              {announcements && announcements.length > 0
+                ? (
+                  announcements.slice(0, 3).map((ann, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                    >
+                      <div className="font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
+                        {ann.title}
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                        {ann.content}
+                      </p>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
-                      {ann.content}
-                    </p>
+                  ))
+                )
+                : (
+                  <div className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">
+                    Sistem güncel, aktif bildirim bulunmuyor.
                   </div>
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">
-                  Sistem güncel, aktif bildirim bulunmuyor.
-                </div>
-              )}
+                )}
             </div>
           </div>
         </div>
@@ -998,25 +1126,29 @@ export default function DashboardScreenV2(): React.JSX.Element {
           isOpen={true}
           isAdvisorMode={true}
           fieldName="HAKİM AI Karar Desteği"
-          title={`HAKİM AI Asistanı - ${selectedFileForAI.temin_no || 'Mevzuat Rehberi'}`}
-          initialPrompt={`Aşağıdaki konu ve bütçe detaylarına sahip kamu satın alma süreci için çalışıyorum:\n- Dosya/Konu: ${
-            selectedFileForAI.konu
-          }\n- Yaklaşık Maliyet: ${formatCurrency(
-            selectedFileForAI.yaklasik_maliyet || 0
-          )}\n\nLütfen 4734 Sayılı Kamu İhale Kanunu ve ilgili mevzuata göre dikkat edilmesi gereken hususlar, piyasa araştırması esasları ve sonraki adımlar hakkında uzman tavsiyesi sun.`}
+          title={`HAKİM AI Asistanı - ${
+            selectedFileForAI.temin_no || "Mevzuat Rehberi"
+          }`}
+          initialPrompt={`Aşağıdaki konu ve bütçe detaylarına sahip kamu satın alma süreci için çalışıyorum:\n- Dosya/Konu: ${selectedFileForAI.konu}\n- Yaklaşık Maliyet: ${
+            formatCurrency(
+              selectedFileForAI.yaklasik_maliyet || 0,
+            )
+          }\n\nLütfen 4734 Sayılı Kamu İhale Kanunu ve ilgili mevzuata göre dikkat edilmesi gereken hususlar, piyasa araştırması esasları ve sonraki adımlar hakkında uzman tavsiyesi sun.`}
           placeholderMappings={{
-            '[DOSYA_NO]': selectedFileForAI.temin_no || 'Belirtilmemiş',
-            '[DOSYA_KONU]': selectedFileForAI.konu || 'Belirtilmemiş',
-            '[DOSYA_MALIYET]': formatCurrency(selectedFileForAI.yaklasik_maliyet || 0)
+            "[DOSYA_NO]": selectedFileForAI.temin_no || "Belirtilmemiş",
+            "[DOSYA_KONU]": selectedFileForAI.konu || "Belirtilmemiş",
+            "[DOSYA_MALIYET]": formatCurrency(
+              selectedFileForAI.yaklasik_maliyet || 0,
+            ),
           }}
           onClose={() => setShowAIModal(false)}
           onApply={(text) => {
-            console.log('HAKİM AI Yanıtı:', text)
-            setShowAIModal(false)
+            console.log("HAKİM AI Yanıtı:", text);
+            setShowAIModal(false);
           }}
           systemInstruction="Sen yetkin bir HAKİM Pro Doğrudan Temin, Harcama ve Kamu İhale (4734 ve 5018 Sayılı Kanunlar) mevzuat uzmanı ve karar destek asistanısın. Kullanıcıya net, Sayıştay denetim standartlarına uygun, pratik ve yasal tavsiyeler ver. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen metin içinde belirli bir Kurum Adı, Belediye, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele)."
         />
       )}
     </div>
-  )
+  );
 }
