@@ -281,7 +281,7 @@ export async function resolveTemplateData(
         if (rule.tablo === 'DATA_TeminKalem') {
           try {
             const firmQuery = `SELECT df.id as temin_firma_id,
-                                      COALESCE(NULLIF(df.unvan, ''), NULLIF(f.unvan, ''), NULLIF(f.firma_adi, ''), NULLIF(df.firma_adi, ''), 'İstekli Firma') as unvan
+                                      COALESCE(NULLIF(df.unvan, ''), NULLIF(f.unvan, ''), 'İstekli Firma') as unvan
                                FROM DATA_TeminFirma df
                                LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
                                WHERE df.temin_dosya_id = ?

@@ -6,7 +6,7 @@ export const HarcamaTalimatiMapping: ProcessMapping = {
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'onay_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Onay Tarihi'
   },
   idareAdi: {
@@ -16,7 +16,7 @@ export const HarcamaTalimatiMapping: ProcessMapping = {
   },
   gerekce: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'isin_gerekcesi',
+    sutun: 'isin_aciklamasi',
     aciklama: 'Alımın Gerekçesi'
   },
   isAdi: {

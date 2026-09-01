@@ -23,7 +23,7 @@ export const KomisyonGorevlendirmeOnayiMapping: ProcessMapping = {
   },
   alimTuru: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'alim_turu',
+    sutun: 'tur',
     aciklama: 'Alım Türü'
   },
   evrakSayisi: {
@@ -31,12 +31,12 @@ export const KomisyonGorevlendirmeOnayiMapping: ProcessMapping = {
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'onay_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Onay Tarihi'
   },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'dosya_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Dosya Tarihi'
   },
   isAdi: {
