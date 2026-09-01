@@ -35,6 +35,9 @@ export function useDocumentPreviewData({
     Number(sessionStorage.getItem("workspace_dosya_id") || 0);
 
   const {
+    logoLeft,
+    logoRight,
+    institutionLogo,
     showLogoLeft,
     showLogoRight,
     subInstitutionType,
@@ -245,6 +248,22 @@ export function useDocumentPreviewData({
         finalData.onayTarihi =
           finalData.onayTarihi || finalData.dosyaTarihi || "";
 
+        const resolvedSolLogo =
+          payloadData.solLogo ||
+          resolved.solLogo ||
+          logoLeft ||
+          institutionLogo ||
+          null;
+        const resolvedSagLogo =
+          payloadData.sagLogo || resolved.sagLogo || logoRight || null;
+
+        if (resolvedSolLogo) {
+          finalData.solLogo = resolvedSolLogo;
+        }
+        if (resolvedSagLogo) {
+          finalData.sagLogo = resolvedSagLogo;
+        }
+
         const suffixes = getInstitutionSuffixes(subInstitutionType || "belediye", {
           label: customSubInstitutionLabel,
           kurumumuz: customSubInstitutionKurumumuz,
@@ -380,6 +399,8 @@ export function useDocumentPreviewData({
           }
         }
 
+        setLocalShowLogoLeft(showLogoLeft);
+        setLocalShowLogoRight(showLogoRight);
         setFormData(finalData);
       } catch (err) {
         console.error("Error loading V2 template data:", err);
@@ -392,6 +413,11 @@ export function useDocumentPreviewData({
     activeDosyaId,
     documentId,
     propInvitedFirms,
+    showLogoLeft,
+    showLogoRight,
+    logoLeft,
+    logoRight,
+    institutionLogo,
     subInstitutionType,
     customSubInstitutionLabel,
     customSubInstitutionKurumumuz,
@@ -495,8 +521,12 @@ export function useDocumentPreviewData({
             ...formData,
             tarih: formData.tarih || formData.onayaSunulanTarih || "",
             onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
-            solLogo: localShowLogoLeft ? formData.solLogo : null,
-            sagLogo: localShowLogoRight ? formData.sagLogo : null,
+            solLogo: localShowLogoLeft
+              ? formData.solLogo || logoLeft || institutionLogo || null
+              : null,
+            sagLogo: localShowLogoRight
+              ? formData.sagLogo || logoRight || null
+              : null,
             olurYazisi: formData.olurYazisi !== false,
             orientation,
           },

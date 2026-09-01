@@ -253,8 +253,18 @@ export function registerDocumentIpcHandlers(): void {
         'SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC'
       ).all()
 
-      // 2. Fetch institution
+      // 2. Fetch institution and app settings
       const kurum = db.prepare('SELECT * FROM TANIM_Kurum LIMIT 1').get() || {}
+      let settingsMap: Record<string, string> = {}
+      try {
+        const settingsRows = db.prepare('SELECT key, value FROM settings').all()
+        settingsRows.forEach((r: any) => {
+          if (r.key) settingsMap[r.key] = r.value
+        })
+      } catch {}
+
+      const solLogo = (kurum as any)?.logo_sol || (kurum as any)?.logo_url || settingsMap.logoLeft || settingsMap.institutionLogo || null
+      const sagLogo = (kurum as any)?.logo_sag || settingsMap.logoRight || null
 
       // 3. Fetch file details
       const dosya = dosyaId ? db.prepare('SELECT * FROM DATA_TeminDosyasi WHERE id = ?').get(dosyaId) || {} : {}
@@ -367,6 +377,9 @@ export function registerDocumentIpcHandlers(): void {
         data: {
           dosya,
           kurum,
+          solLogo,
+          sagLogo,
+          settings: settingsMap,
           personelListesi,
           firmaListesi: combinedFirms,
           fileFirms,

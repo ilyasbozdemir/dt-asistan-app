@@ -28,6 +28,8 @@ const allowedChannels = new Set([
   'workspace:upload-file',
   'workspace:open-file',
   // Document
+  'belge:get-document-payload',
+  'get-document-payload',
   'belge:export-docx',
   'export-docx',
   'belge:export-udf',
