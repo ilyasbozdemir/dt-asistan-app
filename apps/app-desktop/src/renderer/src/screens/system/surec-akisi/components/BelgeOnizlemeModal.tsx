@@ -1,6 +1,7 @@
 import React from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Modal } from "../../../../components/ui/Modal";
-import { FileCheck2, Printer, Upload } from "lucide-react";
+import { FileCheck2, FileText, Printer, Upload } from "lucide-react";
 import { Belge, FirmaItem, Kalem, Komisyon } from "../types";
 import { getBelgeDurumBadge, getBelgeDurumLabel } from "../utils/helpers";
 
@@ -28,6 +29,8 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
   dosyaContext,
   onDosyalariEkle,
 }) => {
+  const navigate = useNavigate();
+
   if (!previewBelge) return null;
 
   const belgeOnizlemeIcerigi = (belge: Belge) => {
@@ -96,7 +99,7 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
             <div>
               <div className="font-bold">Talep Eden Personel</div>
               <div className="text-slate-500 mt-1">
-                {dosyaContext?.hazirlayanPersonelAdi || '—'}
+                {dosyaContext?.hazirlayanPersonelAdi || "—"}
               </div>
               <div className="text-[10px] text-emerald-600 font-bold mt-2">
                 ✓ İmzalandı
@@ -105,7 +108,7 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
             <div>
               <div className="font-bold">Birim Amiri / Onaylayan</div>
               <div className="text-slate-500 mt-1">
-                {dosyaContext?.onaylayanPersonelAdi || '—'}
+                {dosyaContext?.onaylayanPersonelAdi || "—"}
               </div>
               <div className="text-[10px] text-emerald-600 font-bold mt-2">
                 ✓ İmzalandı
@@ -401,18 +404,55 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
     );
   };
 
+  const navigate = useNavigate();
+
+  const handleOpenOfficialTemplate = () => {
+    onClose();
+    const adLower = (previewBelge.ad || "").toLowerCase();
+    if (
+      adLower.includes("talep") ||
+      adLower.includes("ihtiyaç") ||
+      adLower.includes("onay")
+    ) {
+      navigate({ to: "/dosya/hazirlik-ve-ihtiyac" as any });
+    } else if (
+      adLower.includes("piyasa") ||
+      adLower.includes("fiyat") ||
+      adLower.includes("teklif")
+    ) {
+      navigate({ to: "/dosya/piyasa-fiyat-arastirmasi" as any });
+    } else if (adLower.includes("maliyet")) {
+      navigate({ to: "/dosya/firmalar-maliyet/yaklasik" as any });
+    } else if (
+      adLower.includes("siparis") ||
+      adLower.includes("sözleşme") ||
+      adLower.includes("sozlesme")
+    ) {
+      navigate({ to: "/dosya/siparis-ve-sozlesme" as any });
+    } else if (
+      adLower.includes("muayene") ||
+      adLower.includes("kabul") ||
+      adLower.includes("ödeme") ||
+      adLower.includes("odeme")
+    ) {
+      navigate({ to: "/dosya/kabul-ve-odeme" as any });
+    } else {
+      navigate({ to: "/cikti-merkezi" as any });
+    }
+  };
+
   return (
     <Modal
       isOpen={Boolean(previewBelge)}
       onClose={onClose}
-      title={`Resmi Belge Önizleme & Yazdırma: ${previewBelge.ad}`}
+      title={`Resmi Belge Önizleme: ${previewBelge.ad}`}
       description={`${previewBelge.asama} Aşaması — İhale/Temin Kodu: ${dosya.dosyaNo}`}
       className="max-w-4xl"
     >
       <div className="p-6 bg-white dark:bg-slate-955 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner max-h-[70vh] overflow-y-auto custom-scrollbar">
         {belgeOnizlemeIcerigi(previewBelge)}
       </div>
-      <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4">
         <div className="flex items-center gap-2">
           <span
             className={`text-[10px] px-2.5 py-1 rounded-lg border font-bold ${
@@ -426,8 +466,8 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
               : getBelgeDurumLabel(previewBelge.durum)}
           </span>
         </div>
-        <div className="flex gap-2">
-          <label className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-emerald-500/20">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-emerald-500/20 transition-all">
             <Upload size={14} /> İmzalı PDF Yükle
             <input
               type="file"
@@ -437,16 +477,24 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
             />
           </label>
           <button
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+            onClick={handleOpenOfficialTemplate}
+            className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+            title="Belgeyi resmi şablon motorunda açar ve düzenleme imkanı sağlar"
           >
-            Kapat
+            <FileText size={14} /> Şablonda Aç
           </button>
           <button
-            onClick={() => window.print()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20"
+            onClick={handleOpenOfficialTemplate}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20 transition-all"
+            title="Resmi kamu şablonu çıktısını hazırlar"
           >
             <Printer size={14} /> Resmi Belgeyi Yazdır
+          </button>
+          <button
+            onClick={onClose}
+            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+          >
+            Kapat
           </button>
         </div>
       </div>
