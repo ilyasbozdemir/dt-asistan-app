@@ -455,33 +455,97 @@ export async function resolveTemplateData(
     // 4. Single table columns or JSON array of strings
     if (rule.tablo && rule.sutun && rule.sutun !== '*') {
       try {
+        const effectiveRule = { ...rule };
+        // Smart normalization for DATA_TeminDosyasi columns
+        if (effectiveRule.tablo === 'DATA_TeminDosyasi') {
+          if (effectiveRule.sutun === 'hazirlayan_personel_ad') {
+            effectiveRule.sutun = 'hazirlayan_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'ad_soyad';
+          } else if (effectiveRule.sutun === 'hazirlayan_personel_unvan') {
+            effectiveRule.sutun = 'hazirlayan_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'unvan';
+          } else if (effectiveRule.sutun === 'hazirlayan_telefon') {
+            effectiveRule.sutun = 'hazirlayan_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'telefon';
+          } else if (effectiveRule.sutun === 'onaylayan_personel_ad') {
+            effectiveRule.sutun = 'onay_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'ad_soyad';
+          } else if (effectiveRule.sutun === 'onaylayan_personel_unvan') {
+            effectiveRule.sutun = 'onay_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'unvan';
+          } else if (effectiveRule.sutun === 'talep_eden_personel_ad') {
+            effectiveRule.sutun = 'talep_eden_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'ad_soyad';
+          } else if (effectiveRule.sutun === 'talep_eden_personel_unvan') {
+            effectiveRule.sutun = 'talep_eden_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'unvan';
+          } else if (effectiveRule.sutun === 'talep_eden_telefon') {
+            effectiveRule.sutun = 'talep_eden_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'telefon';
+          } else if (effectiveRule.sutun === 'sunan_personel_ad') {
+            effectiveRule.sutun = 'sunan_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'ad_soyad';
+          } else if (effectiveRule.sutun === 'sunan_personel_unvan') {
+            effectiveRule.sutun = 'sunan_personel_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'unvan';
+          } else if (effectiveRule.sutun === 'sunan_telefon' || effectiveRule.sutun === 'irtibat_telefon') {
+            effectiveRule.sutun = 'irtibat_yetkilisi_id';
+            effectiveRule.iliskiliTablo = 'TANIM_Personel';
+            effectiveRule.iliskiliSutun = 'telefon';
+          } else if (effectiveRule.sutun === 'isin_suresi') {
+            effectiveRule.sutun = 'teslim_tarihi';
+          } else if (effectiveRule.sutun === 'ihale_usulu') {
+            effectiveRule.sutun = 'ihale_sekli';
+          } else if (effectiveRule.sutun === 'odenek_tutari') {
+            effectiveRule.sutun = 'yaklasik_maliyet';
+          } else if (effectiveRule.sutun === 'butce_tertibi') {
+            effectiveRule.sutun = 'ekonomik_kod';
+          } else if (effectiveRule.sutun === 'alim_turu') {
+            effectiveRule.sutun = 'tur';
+          } else if (effectiveRule.sutun === 'onay_tarihi' || effectiveRule.sutun === 'dosya_tarihi') {
+            effectiveRule.sutun = 'dosya_acilis_tarihi';
+          } else if (effectiveRule.sutun === 'isin_gerekcesi') {
+            effectiveRule.sutun = 'isin_aciklamasi';
+          }
+        }
+
         let query = '';
         let params: any[] = [];
         
-        if (rule.iliskiliTablo && rule.iliskiliSutun) {
-          query = `SELECT p.${rule.iliskiliSutun} AS res_val FROM ${rule.tablo} d LEFT JOIN ${rule.iliskiliTablo} p ON d.${rule.sutun} = p.id WHERE d.id = ? LIMIT 1`;
+        if (effectiveRule.iliskiliTablo && effectiveRule.iliskiliSutun) {
+          query = `SELECT p.${effectiveRule.iliskiliSutun} AS res_val FROM ${effectiveRule.tablo} d LEFT JOIN ${effectiveRule.iliskiliTablo} p ON d.${effectiveRule.sutun} = p.id WHERE d.id = ? LIMIT 1`;
           params = [activeDosyaId];
-        } else if (rule.iliskili_id) {
-          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ? LIMIT 1`;
+        } else if (effectiveRule.iliskili_id) {
+          query = `SELECT ${effectiveRule.sutun} AS res_val FROM ${effectiveRule.tablo} WHERE ${effectiveRule.iliskili_id} = ? LIMIT 1`;
           params = [activeDosyaId];
-        } else if (rule.tablo.toLowerCase().startsWith('data_')) {
-          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} WHERE id = ? LIMIT 1`;
+        } else if (effectiveRule.tablo && effectiveRule.tablo.toLowerCase().startsWith('data_')) {
+          query = `SELECT ${effectiveRule.sutun} AS res_val FROM ${effectiveRule.tablo} WHERE id = ? LIMIT 1`;
           params = [activeDosyaId];
         } else {
-          query = `SELECT ${rule.sutun} AS res_val FROM ${rule.tablo} LIMIT 1`;
+          query = `SELECT ${effectiveRule.sutun} AS res_val FROM ${effectiveRule.tablo} LIMIT 1`;
         }
 
         const res = await queryExecutor(query, params);
         let rawValue = res?.[0]?.res_val;
 
         // Personnel signature auto-fallback if no specific personnel is selected on active file
-        if (rule.iliskiliTablo === 'TANIM_Personel' && (!rawValue || String(rawValue).trim() === '')) {
+        if (effectiveRule.iliskiliTablo === 'TANIM_Personel' && (!rawValue || String(rawValue).trim() === '')) {
           try {
             let pQuery = '';
             if (sablonDegiskeni.toLowerCase().includes('onay') || sablonDegiskeni.toLowerCase().includes('yetkili')) {
-              pQuery = `SELECT ${rule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (unvan LIKE '%Harcama Yetkilisi%' OR unvan LIKE '%Müdür%' OR unvan LIKE '%Başkan%' OR varsayilan = 1) AND (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
+              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (unvan LIKE '%Harcama Yetkilisi%' OR unvan LIKE '%Müdür%' OR unvan LIKE '%Başkan%' OR varsayilan = 1) AND (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
             } else {
-              pQuery = `SELECT ${rule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (varsayilan = 1 OR aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
+              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (varsayilan = 1 OR aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
             }
             const pRes = await queryExecutor(pQuery, []);
             if (pRes?.[0]?.res_val) {
