@@ -25,7 +25,7 @@ interface IhtiyacTalepFormuProps {
   lastPageLimit?: number;
 }
 
-export function getDynamicAltNotlar(data: any): string {
+function getDynamicAltNotlar(data: any): string {
   if (data?.altNotlar) return data.altNotlar;
 
   const birimAdi =
