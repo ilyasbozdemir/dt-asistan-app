@@ -194,6 +194,17 @@ export function DocumentPreviewHeader({
           <span>Yazdır</span>
         </button>
 
+        <button
+          onClick={async () => {
+            setDownloadOpen(false);
+            await handleOpenPdfInNewTab();
+          }}
+          className="px-4.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-indigo-600/20 cursor-pointer"
+        >
+          <Eye className="w-4 h-4" />
+          <span>Tarayıcıda Aç</span>
+        </button>
+
         {/* Options Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -227,17 +238,6 @@ export function DocumentPreviewHeader({
               >
                 <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                 <span>PDF Olarak Kaydet</span>
-              </button>
-
-              <button
-                onClick={async () => {
-                  setDownloadOpen(false);
-                  await handleOpenPdfInNewTab();
-                }}
-                className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
-              >
-                <Eye className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                <span>Tarayıcıda Aç</span>
               </button>
             </div>
           )}

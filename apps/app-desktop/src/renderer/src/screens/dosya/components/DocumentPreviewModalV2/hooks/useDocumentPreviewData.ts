@@ -5,6 +5,7 @@ import {
   IhtiyacListesiType,
   TEMPLATE_REGISTRY,
   TemplateComponentType,
+  TemplateEditProvider,
   TemplateResolver,
 } from "@hakim-pro-app/document-templates";
 import { useWorkspaceStore } from "../../../../../store/workspaceStore";
@@ -481,18 +482,27 @@ export function useDocumentPreviewData({
   const getCompiledHtml = (): string => {
     if (!ActiveComponent) return "";
     const bodyHtml = renderToString(
-      React.createElement(ActiveComponent, {
-        data: {
-          ...formData,
-          tarih: formData.tarih || formData.onayaSunulanTarih || "",
-          onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
-          solLogo: localShowLogoLeft ? formData.solLogo : null,
-          sagLogo: localShowLogoRight ? formData.sagLogo : null,
-          olurYazisi: formData.olurYazisi !== false,
-          orientation,
+      React.createElement(
+        TemplateEditProvider,
+        {
+          isEditing: false,
+          onFieldChange: undefined,
+          personelListesi: [],
+          firmaListesi: [],
         },
-        orientation,
-      }),
+        React.createElement(ActiveComponent, {
+          data: {
+            ...formData,
+            tarih: formData.tarih || formData.onayaSunulanTarih || "",
+            onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
+            solLogo: localShowLogoLeft ? formData.solLogo : null,
+            sagLogo: localShowLogoRight ? formData.sagLogo : null,
+            olurYazisi: formData.olurYazisi !== false,
+            orientation,
+          },
+          orientation,
+        }),
+      ),
     );
     const styles = Array.from(
       document.querySelectorAll("style, link[rel='stylesheet']"),

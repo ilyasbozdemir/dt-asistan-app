@@ -8,18 +8,18 @@ export interface TemplateEditContextType {
 }
 
 export const TemplateEditContext = createContext<TemplateEditContextType>({
-  isEditing: true,
+  isEditing: false,
 });
 
 export const useTemplateEdit = () => useContext(TemplateEditContext);
 
 export interface TemplateEditProviderProps extends TemplateEditContextType {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function TemplateEditProvider({
   children,
-  isEditing = true,
+  isEditing = false,
   onFieldChange,
   personelListesi,
   firmaListesi,

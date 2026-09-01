@@ -77,7 +77,7 @@ export function DocumentPreviewSidebar({
               <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
               <div>
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                  Metin Düzenleme Modu
+                  Belge Düzenleme Modu
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                   {isEditingMode
@@ -135,7 +135,8 @@ export function DocumentPreviewSidebar({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-              2. sayfada imzanın tek başına kalmaması için 1. sayfadaki satır sayısını azaltabilir veya araya boşluk ekleyebilirsiniz.
+              2. sayfada imzanın tek başına kalmaması için 1. sayfadaki satır
+              sayısını azaltabilir veya araya boşluk ekleyebilirsiniz.
             </p>
 
             {/* 1. Sayfa Kalem Limiti Slider */}
@@ -154,7 +155,10 @@ export function DocumentPreviewSidebar({
                   onClick={() =>
                     setFormData((prev: any) => ({
                       ...prev,
-                      firstPageLimit: Math.max(1, (prev.firstPageLimit ?? 10) - 1),
+                      firstPageLimit: Math.max(
+                        1,
+                        (prev.firstPageLimit ?? 10) - 1,
+                      ),
                     }))}
                   className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
                   title="1. sayfadan satır azalt (İkinci sayfaya aktar)"

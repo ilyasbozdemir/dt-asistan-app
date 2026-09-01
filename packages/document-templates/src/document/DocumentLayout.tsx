@@ -58,6 +58,9 @@ export const DocumentLayout = React.forwardRef<
           padding: 0;
           background: white;
         }
+        .screen-page-badge {
+          display: none !important;
+        }
       }
     `;
 
@@ -73,7 +76,7 @@ export const DocumentLayout = React.forwardRef<
           maxWidth: docWidth,
           height: docHeight,
           minHeight: docHeight,
-          margin: "0 auto",
+          margin: totalPages && totalPages > 1 && !isLastPage ? "0 auto 40px auto" : "0 auto",
           padding:
             `${margins.top}cm ${margins.right}cm ${margins.bottom}cm ${margins.left}cm`,
           fontFamily: GLOBAL_THEME.typography.fontFamily,
@@ -85,9 +88,34 @@ export const DocumentLayout = React.forwardRef<
           pageBreakAfter: isLastPage ? "avoid" : "always",
           pageBreakInside: "avoid",
           boxSizing: "border-box",
+          boxShadow: totalPages && totalPages > 1 ? "0 4px 20px -2px rgba(0,0,0,0.12)" : undefined,
         }}
       >
         <style dangerouslySetInnerHTML={{ __html: dynamicPrintStyles }} />
+
+        {/* ON SCREEN PAGE BADGE */}
+        {pageNumber !== undefined && totalPages !== undefined && totalPages > 1 && (
+          <div
+            className="screen-page-badge"
+            style={{
+              position: "absolute",
+              top: "-28px",
+              left: "12px",
+              padding: "3px 12px",
+              fontSize: "11px",
+              fontWeight: "600",
+              color: "#475569",
+              backgroundColor: "#f8fafc",
+              borderRadius: "6px",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              userSelect: "none",
+              zIndex: 10,
+            }}
+          >
+            📄 Sayfa {pageNumber} / {totalPages}
+          </div>
+        )}
 
         {/* HEADER */}
         {!hideHeader && <DocumentHeader data={data} />}
