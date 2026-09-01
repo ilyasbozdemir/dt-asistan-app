@@ -127,6 +127,118 @@ export function DocumentPreviewSidebar({
             </div>
           </div>
 
+          {/* Sayfa Bölme & İmza Dengeleme (Yetim İmza Önleme) */}
+          <div className="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <span>📄 Sayfa Bölme & İmza Dengesi</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+              2. sayfada imzanın tek başına kalmaması için 1. sayfadaki satır sayısını azaltabilir veya araya boşluk ekleyebilirsiniz.
+            </p>
+
+            {/* 1. Sayfa Kalem Limiti Slider */}
+            <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                  1. Sayfa Satır Limiti:
+                </span>
+                <strong className="text-blue-600 dark:text-blue-400 font-mono text-xs">
+                  {formData.firstPageLimit ?? "Otomatik"}
+                </strong>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      firstPageLimit: Math.max(1, (prev.firstPageLimit ?? 10) - 1),
+                    }))}
+                  className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  title="1. sayfadan satır azalt (İkinci sayfaya aktar)"
+                >
+                  -
+                </button>
+                <input
+                  type="range"
+                  min="1"
+                  max="25"
+                  value={formData.firstPageLimit ?? 10}
+                  onChange={(e) =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      firstPageLimit: Number(e.target.value),
+                    }))}
+                  className="flex-1 accent-blue-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      firstPageLimit: (prev.firstPageLimit ?? 10) + 1,
+                    }))}
+                  className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  title="1. sayfaya satır ekle"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Newline / Boşluk Satırı Ekleme */}
+            <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                  Ekstra Boş Satır (Newline):
+                </span>
+                <span className="text-slate-500 font-mono text-[11px]">
+                  {Math.round(((formData as any).ekstraBosluk || 0) / 24)} Satır
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      ekstraBosluk: Math.max(0, (prev.ekstraBosluk || 0) - 24),
+                    }))}
+                  className="flex-1 py-1 px-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  - Satır Sil
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      ekstraBosluk: (prev.ekstraBosluk || 0) + 24,
+                    }))}
+                  className="flex-1 py-1 px-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 border border-blue-200/60 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                >
+                  + Satır Ekle
+                </button>
+                {((formData as any).ekstraBosluk || 0) > 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        ekstraBosluk: 0,
+                      }))}
+                    className="py-1 px-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-xs font-bold cursor-pointer"
+                    title="Boşluğu Sıfırla"
+                  >
+                    Sıfırla
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* OLUR Bloğu Toggle */}
           <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">

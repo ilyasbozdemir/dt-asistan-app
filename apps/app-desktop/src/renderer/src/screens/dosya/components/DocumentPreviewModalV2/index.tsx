@@ -60,21 +60,18 @@ export function DocumentPreviewModalV2({
 
   const mainContent = (
     <div
-      className={
-        isFullScreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none shadow-none flex flex-col bg-white dark:bg-slate-900 overflow-hidden animate-in fade-in duration-150"
-          : isModal
-          ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
-          : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
-      }
+      className={isFullScreen
+        ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none shadow-none flex flex-col bg-white dark:bg-slate-900 overflow-hidden animate-in fade-in duration-150"
+        : isModal
+        ? "bg-white dark:bg-slate-900 w-full max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
+        : "bg-white dark:bg-slate-900 w-full h-full min-h-[85vh] rounded-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"}
       onClick={(e) => (isModal || isFullScreen) && e.stopPropagation()}
     >
       {/* Header Bar */}
       <DocumentPreviewHeader
         onClose={onClose}
-        documentTitle={
-          activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim()
-        }
+        documentTitle={activeTemplateConf?.name.replace(/([A-Z])/g, " $1")
+          .trim()}
         zoomMode={zoomMode}
         manualZoom={manualZoom}
         previewScale={previewScale}

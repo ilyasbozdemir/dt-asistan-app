@@ -506,6 +506,16 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
 }) => {
   const displayTarih = onayaSunulanTarih || tarih;
 
+  // Sanitize dosyaKonusu if it contains accidental JSON string keys or quotes
+  let cleanKonu = dosyaKonusu;
+  if (typeof cleanKonu === "string") {
+    const jsonMatch = cleanKonu.match(/"?[a-zA-Z0-9_]+"?\s*:\s*"([^"]+)"/);
+    if (jsonMatch) {
+      cleanKonu = jsonMatch[1];
+    }
+    cleanKonu = cleanKonu.replace(/^["']|["',]+$/g, "").trim();
+  }
+
   return (
     <div
       style={{
@@ -556,7 +566,7 @@ export const MetadataBlock: React.FC<MetadataBlockProps> = ({
                     textAlign: "justify",
                   }}
                 >
-                  <EditableField name="dosyaKonusu" value={dosyaKonusu} />
+                  <EditableField name="dosyaKonusu" value={cleanKonu} />
                 </td>
               </tr>
             )}

@@ -404,8 +404,6 @@ export const BelgeOnizlemeModal: React.FC<BelgeOnizlemeModalProps> = ({
     );
   };
 
-  const navigate = useNavigate();
-
   const handleOpenOfficialTemplate = () => {
     onClose();
     const adLower = (previewBelge.ad || "").toLowerCase();

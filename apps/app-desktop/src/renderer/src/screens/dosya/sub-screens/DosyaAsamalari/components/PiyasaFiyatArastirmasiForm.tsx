@@ -117,12 +117,12 @@ export function PiyasaFiyatArastirmasiForm({
                       : "bg-gradient-to-r from-indigo-600 to-blue-600",
                   )}
                 >
-                  {isMaliyetMode ? (
-                    <FileSpreadsheet className="w-3 h-3" />
-                  ) : (
-                    <FileText className="w-3 h-3" />
-                  )}
-                  {isMaliyetMode ? "Yaklaşık Maliyet" : "Piyasa Fiyat Araştırması"}
+                  {isMaliyetMode
+                    ? <FileSpreadsheet className="w-3 h-3" />
+                    : <FileText className="w-3 h-3" />}
+                  {isMaliyetMode
+                    ? "Yaklaşık Maliyet"
+                    : "Piyasa Fiyat Araştırması"}
                 </span>
 
                 <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
@@ -157,7 +157,8 @@ export function PiyasaFiyatArastirmasiForm({
             <div className="flex items-center shadow-md rounded-xl overflow-hidden">
               <button
                 type="button"
-                onClick={() => handleSaveToDosya(isMaliyetMode ? "maliyet" : "tutanak")}
+                onClick={() =>
+                  handleSaveToDosya(isMaliyetMode ? "maliyet" : "tutanak")}
                 className={cn(
                   "px-4 py-2.5 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer h-10 shrink-0 border-0 active:scale-95 whitespace-nowrap",
                   isMaliyetMode
@@ -166,13 +167,15 @@ export function PiyasaFiyatArastirmasiForm({
                 )}
                 title="Fiyat tekliflerini kaydeder ve resmi belgeyi günceller"
               >
-                {isMaliyetMode ? (
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-100 shrink-0" />
-                ) : (
-                  <FileText className="w-4 h-4 text-indigo-100 shrink-0" />
-                )}
+                {isMaliyetMode
+                  ? (
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-100 shrink-0" />
+                  )
+                  : <FileText className="w-4 h-4 text-indigo-100 shrink-0" />}
                 <span>
-                  {isMaliyetMode ? "Kaydet & Cetvel Üret" : "Kaydet & Tutanak Üret"}
+                  {isMaliyetMode
+                    ? "Kaydet & Cetvel Üret"
+                    : "Kaydet & Tutanak Üret"}
                 </span>
               </button>
 
@@ -193,17 +196,23 @@ export function PiyasaFiyatArastirmasiForm({
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuItem onClick={() => handleSaveToDosya("save_only")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSaveToDosya("save_only")}
+                  >
                     <Save className="mr-2 h-4 w-4 text-slate-500" />
                     <span>Sadece Fiyatları Sakla (Taslak)</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={() => handleSaveToDosya("maliyet")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSaveToDosya("maliyet")}
+                  >
                     <FileSpreadsheet className="mr-2 h-4 w-4 text-emerald-600" />
                     <span>Yaklaşık Maliyet Cetvelini Güncelle</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={() => handleSaveToDosya("tutanak")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSaveToDosya("tutanak")}
+                  >
                     <FileText className="mr-2 h-4 w-4 text-indigo-600" />
                     <span>Piyasa Fiyat Araştırma Tutanağını Güncelle</span>
                   </DropdownMenuItem>

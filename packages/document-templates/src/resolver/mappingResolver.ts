@@ -225,8 +225,24 @@ export function formatDateTR(dateVal: any): string {
 export async function resolveTemplateData(
   mapping: ProcessMapping,
   activeDosyaId: number,
-  queryExecutor: (sql: string, params: any[]) => Promise<any[]>
+  rawQueryExecutor: (sql: string, params: any[]) => Promise<any[]>
 ): Promise<Record<string, any>> {
+  const queryCache = new Map<string, Promise<any[]>>();
+  const queryExecutor = (sql: string, params: any[]): Promise<any[]> => {
+    const key = `${sql}__${JSON.stringify(params)}`;
+    if (!queryCache.has(key)) {
+      queryCache.set(key, rawQueryExecutor(sql, params));
+    }
+    return queryCache.get(key)!;
+  };
+
+  // Pre-fetch main tables in parallel
+  if (activeDosyaId) {
+    queryExecutor('SELECT * FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1', [activeDosyaId]);
+    queryExecutor('SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ?', [activeDosyaId]);
+    queryExecutor('SELECT * FROM TANIM_Kurum LIMIT 1', []);
+  }
+
   const resolvedPayload: Record<string, any> = {};
 
   for (const [sablonDegiskeni, rule] of Object.entries(mapping)) {

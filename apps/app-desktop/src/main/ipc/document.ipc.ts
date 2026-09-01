@@ -239,4 +239,145 @@ export function registerDocumentIpcHandlers(): void {
       return { success: false, error: err.message }
     }
   })
+
+  // 11. Complete Document & Stage Data Resolver (Direct Fast Electron SQLite Query)
+  handleDoc('belge:get-document-payload', 'get-document-payload', async (_, payload: { dosyaId?: number; documentId?: string }) => {
+    try {
+      const { workspaceManager } = require('../database/workspace')
+      const db = workspaceManager.getDb()
+      const dosyaId = Number(payload?.dosyaId || 0)
+      const documentId = payload?.documentId || ''
+
+      // 1. Fetch active personnel list
+      const personelListesi = db.prepare(
+        'SELECT id, ad_soyad, unvan, telefon, eposta FROM TANIM_Personel WHERE aktif_mi = 1 ORDER BY ad_soyad ASC'
+      ).all()
+
+      // 2. Fetch institution
+      const kurum = db.prepare('SELECT * FROM TANIM_Kurum LIMIT 1').get() || {}
+
+      // 3. Fetch file details
+      const dosya = dosyaId ? db.prepare('SELECT * FROM DATA_TeminDosyasi WHERE id = ?').get(dosyaId) || {} : {}
+
+      // 4. Fetch items
+      const items = dosyaId ? db.prepare('SELECT id, kalem_adi, aciklama, birim, miktar, tasinir_kodu, kdv_orani FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC').all(dosyaId) : []
+
+      // 5. Fetch invited firms
+      let fileFirms: any[] = []
+      if (dosyaId) {
+        fileFirms = db.prepare(`
+          SELECT 
+            df.id as temin_firma_id,
+            COALESCE(f.id, df.firma_id, df.id) as id,
+            COALESCE(NULLIF(df.unvan, ''), NULLIF(f.unvan, ''), NULLIF(f.firma_adi, ''), NULLIF(df.firma_adi, ''), 'İstekli Firma') as unvan,
+            COALESCE(NULLIF(f.yetkili_ad_soyad, ''), NULLIF(df.yetkili_ad_soyad, '')) as yetkili_ad_soyad,
+            COALESCE(NULLIF(f.telefon, ''), NULLIF(df.telefon, '')) as telefon,
+            COALESCE(NULLIF(f.eposta, ''), NULLIF(df.email, '')) as eposta
+          FROM DATA_TeminFirma df
+          LEFT JOIN TANIM_Firma f ON df.firma_id = f.id
+          WHERE df.temin_dosya_id = ?
+          ORDER BY df.id ASC
+        `).all(dosyaId)
+      }
+
+      // 6. Fetch global firms for fallback/selection
+      const globalFirms = db.prepare(
+        "SELECT id, unvan, yetkili_ad_soyad, telefon, eposta FROM TANIM_Firma WHERE aktif_mi = 1 AND unvan IS NOT NULL AND unvan != '' ORDER BY unvan ASC"
+      ).all()
+
+      // 7. Fetch bids
+      const bids = dosyaId ? db.prepare(
+        'SELECT temin_kalem_id, temin_firma_id, birim_fiyat FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?'
+      ).all(dosyaId) : []
+
+      // 8. Fetch commissions
+      const komisyonlar = dosyaId ? db.prepare(`
+        SELECT tk.*, 
+               COALESCE(NULLIF(tk.ad_soyad, ''), NULLIF(p.ad_soyad, ''), '') as resolved_ad_soyad,
+               COALESCE(NULLIF(tk.unvan, ''), NULLIF(p.unvan, ''), '') as resolved_unvan,
+               COALESCE(k.ad, tk.komisyon_turu) as komisyon_turu_adi
+        FROM DATA_TeminKomisyon tk
+        LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id
+        LEFT JOIN TANIM_Komisyon k ON tk.komisyon_id = k.id
+        WHERE tk.temin_dosya_id = ?
+      `).all(dosyaId) : []
+
+      // 9. Fetch saved snapshot if exists
+      let savedSnapshot: any = null
+      if (dosyaId && documentId) {
+        const snapRow = db.prepare(`
+          SELECT veri_json FROM DATA_DosyaSablonVeri 
+          WHERE temin_dosya_id = ? AND sablon_id = (SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1)
+        `).get(dosyaId, `${documentId}.html`)
+        if (snapRow?.veri_json) {
+          try {
+            savedSnapshot = JSON.parse(snapRow.veri_json)
+          } catch {}
+        }
+      }
+
+      // Calculate firm totals & winner
+      fileFirms.forEach((firm: any) => {
+        let total = 0
+        items.forEach((item: any) => {
+          const bid = bids.find(
+            (b: any) =>
+              b.temin_kalem_id === item.id &&
+              (b.temin_firma_id === firm.temin_firma_id || b.temin_firma_id === firm.id)
+          )
+          if (bid && bid.birim_fiyat > 0) {
+            total += bid.birim_fiyat * (item.miktar || 0)
+          }
+        })
+        firm.total = total
+      })
+
+      const nonZeroTotals = fileFirms.filter((f) => f.total > 0)
+      const lowestTotal = nonZeroTotals.length > 0 ? Math.min(...nonZeroTotals.map((f) => f.total)) : 0
+
+      fileFirms.forEach((f) => {
+        if (f.total > 0 && f.total === lowestTotal) {
+          f.isWinner = true
+          const formattedTotal = f.total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          f.label = `🏆 ${f.unvan} (${formattedTotal} TL - En Düşük Teklif)`
+        } else if (f.total > 0) {
+          const formattedTotal = f.total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          f.label = `🏢 ${f.unvan} (${formattedTotal} TL)`
+        } else {
+          f.label = `🏢 ${f.unvan}`
+        }
+      })
+
+      fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0))
+
+      const combinedFirms = [...fileFirms]
+      globalFirms.forEach((g: any) => {
+        if (
+          g.unvan &&
+          !combinedFirms.some(
+            (f: any) => f.unvan && String(f.unvan).trim().toLowerCase() === String(g.unvan).trim().toLowerCase()
+          )
+        ) {
+          combinedFirms.push(g)
+        }
+      })
+
+      return {
+        success: true,
+        data: {
+          dosya,
+          kurum,
+          personelListesi,
+          firmaListesi: combinedFirms,
+          fileFirms,
+          items,
+          bids,
+          komisyonlar,
+          savedSnapshot
+        }
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  })
 }
