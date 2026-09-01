@@ -9,6 +9,7 @@ import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { Personel } from "../types";
 
 interface DocumentPreviewCanvasProps {
+  isLoading?: boolean;
   previewContainerRef: React.RefObject<HTMLDivElement | null>;
   previewScale: number;
   orientation: "portrait" | "landscape";
@@ -23,6 +24,7 @@ interface DocumentPreviewCanvasProps {
 }
 
 export function DocumentPreviewCanvas({
+  isLoading,
   previewContainerRef,
   previewScale,
   orientation,
@@ -48,7 +50,17 @@ export function DocumentPreviewCanvas({
           minHeight: orientation === "landscape" ? "800px" : "1131px",
         }}
       >
-        {ActiveComponent ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[600px] text-slate-500 py-36 gap-3">
+            <div className="w-9 h-9 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Belge Verileri Yükleniyor...
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Dosya ve mevzuat değişkenleri şablona aktarılıyor
+            </span>
+          </div>
+        ) : ActiveComponent ? (
           <TemplateErrorBoundary
             fallback={
               <div className="p-8 text-center text-red-500 font-semibold bg-red-50 dark:bg-red-950/20 border border-red-250 dark:border-red-900 rounded-xl m-4">

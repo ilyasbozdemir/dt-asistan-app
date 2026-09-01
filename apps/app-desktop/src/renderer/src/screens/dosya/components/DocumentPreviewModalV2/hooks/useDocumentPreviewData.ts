@@ -76,6 +76,7 @@ export function useDocumentPreviewData({
 
   const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
   const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
+  const [isLoading, setIsLoading] = useState(true);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">(
     "portrait",
   );
@@ -103,6 +104,7 @@ export function useDocumentPreviewData({
     if (!isOpen) return;
 
     let isMounted = true;
+    setIsLoading(true);
 
     const loadInitialData = async (): Promise<void> => {
       try {
@@ -404,6 +406,10 @@ export function useDocumentPreviewData({
         setFormData(finalData);
       } catch (err) {
         console.error("Error loading V2 template data:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -662,6 +668,7 @@ export function useDocumentPreviewData({
   };
 
   return {
+    isLoading,
     activeDosyaId,
     activeTemplateConf,
     ActiveComponent,

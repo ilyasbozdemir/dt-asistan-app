@@ -14,6 +14,7 @@ export function DocumentPreviewModalV2({
   isModal = false,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const {
+    isLoading,
     activeTemplateConf,
     ActiveComponent,
     formData,
@@ -112,6 +113,7 @@ export function DocumentPreviewModalV2({
         />
 
         <DocumentPreviewCanvas
+          isLoading={isLoading}
           previewContainerRef={previewContainerRef}
           previewScale={previewScale}
           orientation={orientation}
