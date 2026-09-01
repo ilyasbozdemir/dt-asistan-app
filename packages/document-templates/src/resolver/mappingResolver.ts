@@ -32,12 +32,12 @@ export async function resolveEvrakSayisi(
     }
 
     const dosyaRes = await queryExecutor(
-      'SELECT temin_no, alim_turu, tur FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
+      'SELECT temin_no, tur FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
       [activeDosyaId]
     );
 
     const dosyaSayisi = dosyaRes?.[0]?.temin_no || '';
-    const rawTur = (dosyaRes?.[0]?.alim_turu || dosyaRes?.[0]?.tur || 'mal').toLowerCase();
+    const rawTur = (dosyaRes?.[0]?.tur || 'mal').toLowerCase();
 
     let sdpAltKodu = '01';
     if (rawTur.includes('hizmet') || rawTur.includes('danismanlik')) {
@@ -514,11 +514,11 @@ export async function resolveTemplateData(
         if ((sablonDegiskeni === 'aciklama' || sablonDegiskeni === 'isinAciklamasi') && (!rawValue || String(rawValue).trim() === '')) {
           try {
             const dosyaRes = await queryExecutor(
-              'SELECT isin_aciklamasi, konu, isin_gerekcesi FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
+              'SELECT isin_aciklamasi, konu FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
               [activeDosyaId]
             );
             if (dosyaRes?.[0]) {
-              rawValue = dosyaRes[0].isin_aciklamasi || dosyaRes[0].konu || dosyaRes[0].isin_gerekcesi || '';
+              rawValue = dosyaRes[0].isin_aciklamasi || dosyaRes[0].konu || '';
             }
           } catch (e) {}
         }
