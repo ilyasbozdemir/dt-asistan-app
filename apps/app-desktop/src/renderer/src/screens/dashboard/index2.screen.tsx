@@ -40,6 +40,7 @@ import { logActivity } from "../../utils/logger";
 import { Button } from "../../components/ui/Button";
 import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
 import { TakipScreen } from "../system/TakipScreen";
+import { cn } from "../../utils/cn";
 
 export default function DashboardScreenV2(): React.JSX.Element {
   const {
@@ -218,14 +219,13 @@ export default function DashboardScreenV2(): React.JSX.Element {
   // Aşama Renk ve İsim Tanımlayıcı
   const getAsamaDetails = (
     asamaSira: number,
-  ): { name: string; color: string; badge: string } => {
+  ): { name: string; color: string } => {
     const asama = asamalar.find((a: any) => a.asama_sira === asamaSira);
     if (asama) {
       return {
         name: asama.asama_adi,
         color:
-          "border-blue-500/20 text-blue-700 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-950/40",
-        badge: "bg-blue-500",
+          "border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60",
       };
     }
 
@@ -234,43 +234,37 @@ export default function DashboardScreenV2(): React.JSX.Element {
         return {
           name: "1. İhtiyaç & Lüzum",
           color:
-            "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800/50",
-          badge: "bg-slate-500",
+            "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60",
         };
       case 2:
         return {
           name: "2. Piyasa Fiyat Araştırması",
           color:
-            "border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/80 dark:bg-amber-950/40",
-          badge: "bg-amber-500",
+            "border-amber-200 dark:border-amber-800/80 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60",
         };
       case 3:
         return {
           name: "3. Teklif Değerlendirme",
           color:
-            "border-indigo-300 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/40",
-          badge: "bg-indigo-500",
+            "border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60",
         };
       case 4:
         return {
           name: "4. Karar & Onay Belgesi",
           color:
-            "border-purple-300 dark:border-purple-500/30 text-purple-700 dark:text-purple-400 bg-purple-50/80 dark:bg-purple-950/40",
-          badge: "bg-purple-500",
+            "border-purple-200 dark:border-purple-800/80 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60",
         };
       case 5:
         return {
           name: "5. Muayene Kabul & Ödeme",
           color:
-            "border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/40",
-          badge: "bg-emerald-500",
+            "border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60",
         };
       default:
         return {
           name: "Süreç İlerliyor",
           color:
-            "border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-slate-900",
-          badge: "bg-slate-400",
+            "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-slate-900",
         };
     }
   };
@@ -297,7 +291,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
       key: "H" as const,
       letter: "H",
       title: "Harcama & Bütçe Yönetimi",
-      subtitle: "4734 / 22-d ve 5018 Sayılı Mali Yönetim Disiplini",
+      subtitle: "4734 / 22-d ve 5018 Sayılı Mali Yönetim",
       icon: Coins,
       badge: `${formatCurrency(stats.toplamYaklasikMaliyet)} Toplam Harcama`,
       description:
@@ -334,7 +328,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
     {
       key: "I" as const,
       letter: "İ",
-      title: "İşlem, Evrak & E-İmza Entegrasyonu",
+      title: "İşlem, Evrak & E-İmza",
       subtitle: "Resmi Yazışma Standartları & EBYS Uyumluluğu",
       icon: FileCheck,
       badge: "Baskıya & EBYS Hazır",
@@ -345,7 +339,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
     {
       key: "M" as const,
       letter: "M",
-      title: "Mevzuat, Denetim & Hakediş Güvencesi",
+      title: "Mevzuat & Denetim Güvencesi",
       subtitle: "Sayıştay, KİK ve İç Denetim Uyum Kalkanı",
       icon: ShieldCheck,
       badge: "%100 Mevzuat Uyum Skoru",
@@ -360,13 +354,12 @@ export default function DashboardScreenV2(): React.JSX.Element {
     hakimPillars[0];
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-[1650px] mx-auto pb-12 animate-in fade-in slide-in-from-bottom-3 duration-500">
+    <div className="flex flex-col gap-6 w-full max-w-[1650px] mx-auto pb-12 animate-in fade-in slide-in-from-bottom-3 duration-500 text-slate-800 dark:text-slate-100">
       {/* 1. HAKİM PRO KOMUTA MERKEZİ HERO HEADER */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-blue-950 text-white p-7 md:p-9 shadow-xl border border-slate-800/80">
-        {/* Dekoratif Gradient Işıkları */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-950 text-white p-7 md:p-8 shadow-xl border border-slate-800">
+        {/* Dekoratif Glow Işıkları */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-600/25 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -ml-20 -mb-20 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-3xl">
@@ -375,7 +368,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
                 HAKİM Pro • Komuta & Karar Destek Merkezi
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                 4734 / 22-d & 5018 Mevzuat Uyumlu
               </span>
@@ -389,7 +382,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   {adminTitle || "Sistem Kullanıcısı"}
                 </span>
               </h1>
-              <p className="text-sm text-slate-300 mt-1 leading-relaxed">
+              <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
                 <strong className="text-white font-semibold">
                   {institutionName || "T.C. Kamu Kurumu"}
                 </strong>{" "}
@@ -403,34 +396,40 @@ export default function DashboardScreenV2(): React.JSX.Element {
           {/* Hızlı Aksiyon Butonları */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link to="/dosyalar/yeni">
-              <Button className="bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]">
+              <button
+                type="button"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer transition-transform hover:scale-[1.02] text-xs"
+              >
                 <Plus className="w-4 h-4" />
-                Yeni Doğrudan Temin (22/d)
-              </Button>
+                <span>Yeni Doğrudan Temin (22/d)</span>
+              </button>
             </Link>
 
             <Link to="/harcama-merkezi">
-              <Button className="bg-linear-to-r from-amber-500 via-orange-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-amber-500/25 flex items-center gap-2 cursor-pointer transition-all hover:scale-[1.02]">
+              <button
+                type="button"
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-amber-500/20 flex items-center gap-2 cursor-pointer transition-transform hover:scale-[1.02] text-xs"
+              >
                 <Gavel className="w-4 h-4" />
-                Açık İhale & Hakediş Başlat
-              </Button>
+                <span>Açık İhale & Hakediş Başlat</span>
+              </button>
             </Link>
 
             <Link to="/dosyalar">
-              <Button
-                variant="outline"
-                className="bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700 font-semibold py-3 px-3.5 rounded-2xl flex items-center gap-1.5 cursor-pointer"
+              <button
+                type="button"
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 cursor-pointer text-xs"
               >
                 <FileSpreadsheet className="w-4 h-4 text-blue-400" />
-                Tüm Dosyalar ({dosyalar.length})
-              </Button>
+                <span>Tüm Dosyalar ({dosyalar.length})</span>
+              </button>
             </Link>
           </div>
         </div>
 
         {/* Akıllı Durum Uyarıları (Smart Alerts) */}
         {smartAlerts.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-950/25 -mx-7 md:-mx-9 -mb-7 md:-mb-9 px-7 md:px-9 py-3.5 border-amber-500/20">
+          <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-950/30 -mx-7 md:-mx-8 -mb-7 md:-mb-8 px-7 md:px-8 py-3.5 border-t-amber-500/20">
             <div className="flex items-center gap-2.5 text-amber-200 text-xs font-medium">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
@@ -451,10 +450,10 @@ export default function DashboardScreenV2(): React.JSX.Element {
       </div>
 
       {/* 2. HAKİM 5 TEMEL DİREK (PILLARS) İNTERAKTİF NAVİGASYON MATRİSİ */}
-      <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-none">
+      <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm border border-blue-100 dark:border-blue-900/50">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm border border-blue-100 dark:border-blue-900/50">
               🏛️
             </div>
             <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
@@ -475,45 +474,50 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <button
                 key={pillar.key}
                 onClick={() => setActiveHakimPillar(pillar.key)}
-                className={`flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden ${
+                className={cn(
+                  "flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden",
                   isSelected
-                    ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20 scale-[1.02]"
-                    : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs hover:border-blue-300 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
-                }`}
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/25 scale-[1.02]"
+                    : "bg-slate-50 hover:bg-slate-100/80 text-slate-800 border-slate-200/90 dark:bg-slate-800/60 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700/80",
+                )}
               >
                 <div className="flex items-center justify-between w-full mb-2">
                   <div
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm shadow-xs ${
+                    className={cn(
+                      "w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm shadow-xs",
                       isSelected
                         ? "bg-white text-blue-600 font-black"
-                        : "bg-blue-600 text-white"
-                    }`}
+                        : "bg-blue-600 text-white dark:bg-blue-500",
+                    )}
                   >
                     {pillar.letter}
                   </div>
                   <Icon
-                    className={`w-4 h-4 ${
+                    className={cn(
+                      "w-4 h-4",
                       isSelected
                         ? "text-white"
-                        : "text-slate-400 dark:text-slate-400"
-                    }`}
+                        : "text-slate-400 dark:text-slate-400",
+                    )}
                   />
                 </div>
                 <span
-                  className={`text-xs font-black tracking-tight leading-tight ${
+                  className={cn(
+                    "text-xs font-extrabold tracking-tight leading-tight",
                     isSelected
                       ? "text-white"
-                      : "text-slate-800 dark:text-slate-100"
-                  }`}
+                      : "text-slate-900 dark:text-slate-100",
+                  )}
                 >
                   {pillar.title.split("&")[0]}
                 </span>
                 <span
-                  className={`text-[10px] mt-0.5 truncate font-medium ${
+                  className={cn(
+                    "text-[10px] mt-0.5 truncate font-medium",
                     isSelected
                       ? "text-blue-100"
-                      : "text-slate-500 dark:text-slate-400"
-                  }`}
+                      : "text-slate-500 dark:text-slate-400",
+                  )}
                 >
                   {pillar.subtitle}
                 </span>
@@ -523,8 +527,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
         </div>
 
         {/* Seçili Pillar Detay Kartı */}
-        <div className="mt-4 p-4 md:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1 max-w-3xl">
+        <div className="mt-4 p-4 md:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-3xl">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
                 {currentPillar.letter} SÜTUNU: {currentPillar.title}
@@ -536,7 +540,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
             <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
               {currentPillar.description}
             </p>
-            <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-1">
+            <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
               <Activity className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>{currentPillar.statsText}</span>
             </div>
@@ -544,7 +548,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
           <div className="flex items-center gap-2 shrink-0">
             {activeHakimPillar === "A" && (
-              <Button
+              <button
+                type="button"
                 onClick={() => {
                   setSelectedFileForAI({
                     temin_no: "GENEL-ANALIZ",
@@ -556,40 +561,52 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 }}
                 className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <Sparkles className="w-3.5 h-3.5 text-white" />
+                <Sparkles className="w-3.5 h-3.5" />
                 <span>HAKİM AI Asistanını Aç</span>
-              </Button>
+              </button>
             )}
             {activeHakimPillar === "H" && (
               <Link to="/harcama-merkezi">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm">
-                  <Coins className="w-3.5 h-3.5 text-white" />
+                <button
+                  type="button"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Coins className="w-3.5 h-3.5" />
                   <span>Harcama Merkezini İncele</span>
-                </Button>
+                </button>
               </Link>
             )}
             {activeHakimPillar === "K" && (
               <Link to="/dosyalar/yeni">
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm">
-                  <Plus className="w-3.5 h-3.5 text-white" />
+                <button
+                  type="button"
+                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
                   <span>Yeni Temin Oluştur</span>
-                </Button>
+                </button>
               </Link>
             )}
             {activeHakimPillar === "I" && (
               <Link to="/dosyalar">
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm">
-                  <FileText className="w-3.5 h-3.5 text-white" />
+                <button
+                  type="button"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <FileText className="w-3.5 h-3.5" />
                   <span>Evrak Şablonları & Dosyalar</span>
-                </Button>
+                </button>
               </Link>
             )}
             {activeHakimPillar === "M" && (
               <Link to="/mevzuat">
-                <Button className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm">
-                  <BookOpen className="w-3.5 h-3.5 text-white" />
+                <button
+                  type="button"
+                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
                   <span>Mevzuat & KİK Parametreleri</span>
-                </Button>
+                </button>
               </Link>
             )}
           </div>
@@ -599,7 +616,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
       {/* 3. ANA KPI & METRİK KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Kart 1: Toplam Yaklaşık Maliyet & Bütçe */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-blue-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -615,18 +632,18 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <Coins className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
               KİK Eşik Durumu:
             </span>
-            <span className="font-bold text-blue-600 dark:text-blue-400">
+            <span className="font-bold text-blue-600 dark:text-blue-400 font-mono">
               {formatCurrency(kikLimit)} / limit
             </span>
           </div>
         </div>
 
         {/* Kart 2: Dosya & Süreç Hacmi */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-amber-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-amber-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -641,8 +658,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <Scale className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
               Aktif İşlemde:
             </span>
             <span className="font-bold text-amber-600 dark:text-amber-400">
@@ -652,7 +669,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
         </div>
 
         {/* Kart 3: İstekli Firma & Piyasa Katılımı */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-emerald-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-emerald-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -667,8 +684,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <Building2 className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
               Teklif Verenler:
             </span>
             <span className="font-bold text-emerald-600 dark:text-emerald-400">
@@ -680,7 +697,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
         </div>
 
         {/* Kart 4: Personel & Mevzuat Uyum Skoru */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none hover:border-rose-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-rose-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -694,11 +711,11 @@ export default function DashboardScreenV2(): React.JSX.Element {
               <Users className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
               Görevli Personel:
             </span>
-            <span className="font-bold text-slate-700 dark:text-slate-300">
+            <span className="font-bold text-slate-800 dark:text-slate-200">
               {stats.kayitliPersonelSayisi} yetkili tanımlı
             </span>
           </div>
@@ -710,7 +727,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
         {/* SOL TARAF: SATIN ALMA TÜR DAĞILIMI & AKTİF DOSYALAR (8 Kolon) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Alım Türlerine Göre Dağılım Barı */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -722,7 +739,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   harcamaları
                 </p>
               </div>
-              <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700">
+              <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-700 font-mono">
                 {formatCurrency(totalCat)}
               </span>
             </div>
@@ -753,42 +770,42 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
             {/* Dağılım İstatistik Kutuları */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40">
+              <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50">
                 <div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-400 font-bold mb-1">
                   <span>Mal Alımı</span>
                   <span>%{malPct}</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">
+                <div className="text-sm font-black text-slate-900 dark:text-white font-mono">
                   {formatCurrency(stats.malYaklasikMaliyet)}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-900/40">
+              <div className="p-3.5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50">
                 <div className="flex items-center justify-between text-xs text-indigo-700 dark:text-indigo-400 font-bold mb-1">
                   <span>Hizmet Alımı</span>
                   <span>%{hizmetPct}</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">
+                <div className="text-sm font-black text-slate-900 dark:text-white font-mono">
                   {formatCurrency(stats.hizmetYaklasikMaliyet)}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40">
+              <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
                 <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 font-bold mb-1">
                   <span>Yapım İşi</span>
                   <span>%{yapimPct}</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">
+                <div className="text-sm font-black text-slate-900 dark:text-white font-mono">
                   {formatCurrency(stats.yapimYaklasikMaliyet)}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-900/40">
+              <div className="p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50">
                 <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-400 font-bold mb-1">
                   <span>Danışmanlık</span>
                   <span>%{danismanlikPct}</span>
                 </div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">
+                <div className="text-sm font-black text-slate-900 dark:text-white font-mono">
                   {formatCurrency(stats.danismanlikYaklasikMaliyet)}
                 </div>
               </div>
@@ -796,7 +813,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
           </div>
 
           {/* AKTİF SÜREÇLER & DOĞRUDAN TEMİN PİPELİNE */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -816,24 +833,24 @@ export default function DashboardScreenV2(): React.JSX.Element {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Dosya no veya konu ara..."
-                    className="pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                    className="pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <Link to="/dosyalar/yeni">
-                  <Button
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl cursor-pointer"
+                  <button
+                    type="button"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl cursor-pointer flex items-center gap-1 shadow-xs"
                   >
-                    <Plus className="w-3.5 h-3.5 mr-1" />
-                    Yeni
-                  </Button>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Yeni</span>
+                  </button>
                 </Link>
               </div>
             </div>
 
             {filteredDosyalar.length === 0
               ? (
-                <div className="text-center py-12 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800/30 border border-dashed border-slate-200 dark:border-slate-700">
+                <div className="text-center py-12 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700">
                   <FileText className="w-10 h-10 text-slate-400 mx-auto mb-2 opacity-60" />
                   <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
                     Henüz Kayıtlı Dosya Bulunmuyor
@@ -843,9 +860,12 @@ export default function DashboardScreenV2(): React.JSX.Element {
                     alma sürecinizi anında devreye alın.
                   </p>
                   <Link to="/dosyalar/yeni">
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer">
+                    <button
+                      type="button"
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer"
+                    >
                       İlk Dosyayı Oluştur
-                    </Button>
+                    </button>
                   </Link>
                 </div>
               )
@@ -858,11 +878,11 @@ export default function DashboardScreenV2(): React.JSX.Element {
                     return (
                       <div
                         key={dosya.id}
-                        className="p-4 rounded-2xl bg-slate-50/80 hover:bg-white dark:bg-slate-800/40 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group shadow-xs dark:shadow-none"
+                        className="p-4 rounded-2xl bg-slate-50 hover:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 hover:border-blue-400 dark:hover:border-blue-600 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group shadow-xs hover:shadow-sm"
                       >
                         <div className="space-y-1.5 max-w-xl">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60">
+                            <span className="text-[11px] font-mono font-black text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/80 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">
                               {dosya.temin_no || `#${dosya.id}`}
                             </span>
                             <span
@@ -870,7 +890,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                             >
                               {asamaInfo.name}
                             </span>
-                            <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800">
+                            <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800">
                               {dosya.tur?.toUpperCase() || "MAL"}
                             </span>
                           </div>
@@ -908,19 +928,19 @@ export default function DashboardScreenV2(): React.JSX.Element {
                                 setSelectedFileForAI(dosya);
                                 setShowAIModal(true);
                               }}
-                              className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 transition-colors cursor-pointer border border-purple-200/50 dark:border-purple-800/40"
+                              className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 transition-colors cursor-pointer border border-purple-200 dark:border-purple-800"
                               title="HAKİM AI Süreç Tavsiyesi Al"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
                             <Link to="/takip">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs font-bold py-1.5 px-3 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400"
+                              <button
+                                type="button"
+                                className="text-xs font-bold py-1.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer flex items-center gap-1 transition-colors"
                               >
-                                Aç <ArrowRight className="w-3 h-3 ml-1" />
-                              </Button>
+                                <span>Aç</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
                             </Link>
                           </div>
                         </div>
@@ -935,7 +955,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
         {/* SAĞ TARAF: KURUM KİMLİK KARTI & DUYURULAR & SİSTEM KONTROLÜ (4 Kolon) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           {/* Kurumsal Mali Kimlik & Bütçe Kartı */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none space-y-4">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-black shadow-md shadow-blue-500/20">
                 <Landmark className="w-5 h-5" />
@@ -952,17 +972,17 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
             {/* Bütçe & Analitik Kod Matrisi */}
             <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs font-medium">
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/50">
+              <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-500 dark:text-slate-400">
                   Limit Statüsü
                 </span>
-                <span className="font-bold text-slate-900 dark:text-white uppercase bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[10px] border border-slate-200/60 dark:border-slate-700">
+                <span className="font-bold text-slate-900 dark:text-white uppercase bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700">
                   {limitType === "buyuksehir"
                     ? "Büyükşehir Kapsamı"
                     : "Normal İdare"}
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/50">
+              <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-500 dark:text-slate-400">
                   Harcama Birimi
                 </span>
@@ -970,15 +990,15 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   {harcamaBirimAdi || "Belirtilmedi"}
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/50">
+              <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-500 dark:text-slate-400">
                   Kurumsal / Fonk. Kod
                 </span>
-                <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                   {kurumsalKod || "00.00"} / {fonksiyonelKod || "00.0"}
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/50">
+              <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-500 dark:text-slate-400">
                   Muhasebe Birimi
                 </span>
@@ -986,7 +1006,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   {muhasebeBirimAdi || "Belirtilmedi"}
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1">
+              <div className="flex items-center justify-between py-1.5">
                 <span className="text-slate-500 dark:text-slate-400">
                   Harcama Yetkilisi
                 </span>
@@ -997,22 +1017,21 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
 
             <Link to="/mevzuat" search={{ tab: "mali" } as any}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs font-bold py-2 rounded-xl border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400"
+              <button
+                type="button"
+                className="w-full text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
               >
                 Mali Parametreleri Düzenle
-              </Button>
+              </button>
             </Link>
           </div>
 
           {/* HAKİM Akıllı Asistan & Mevzuat Bülteni */}
-          <div className="p-6 rounded-3xl bg-linear-to-br from-indigo-950 via-slate-900 to-slate-900 text-white shadow-md border border-indigo-800/40 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900 dark:bg-slate-950 text-white shadow-md border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 -mr-10 -mt-10 w-36 h-36 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
                 <Bot className="w-4 h-4 text-purple-300" />
               </div>
               <div>
@@ -1025,7 +1044,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
               </div>
             </div>
 
-            <p className="text-xs text-indigo-100 leading-relaxed mb-4">
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
               Doğrudan temin lüzum yazıları, yaklaşık maliyet piyasa araştırması
               ve onay belgesi gerekçelerini mevzuata tam uyumlu olarak otomatik
               oluşturun.
@@ -1042,7 +1061,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   });
                   setShowAIModal(true);
                 }}
-                className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
+                className="w-full text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
               >
                 <span>💡 22/d Eşik Limit ve KDV Kuralları</span>
                 <ChevronRight className="w-3.5 h-3.5 text-purple-300" />
@@ -1058,7 +1077,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                   });
                   setShowAIModal(true);
                 }}
-                className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
+                className="w-full text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-purple-100 transition-colors flex items-center justify-between cursor-pointer"
               >
                 <span>🛡️ Sayıştay Denetim Kontrol Listesi</span>
                 <ChevronRight className="w-3.5 h-3.5 text-purple-300" />
@@ -1067,13 +1086,13 @@ export default function DashboardScreenV2(): React.JSX.Element {
           </div>
 
           {/* Sistem Duyuruları ve Güncellemeler */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-none">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
                 Sürüm & Mevzuat Bülteni
               </h4>
-              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200/60 dark:border-blue-900/40">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900/40">
                 v1.0.0-beta.79
               </span>
             </div>
