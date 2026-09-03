@@ -5,6 +5,7 @@ export interface TemplateEditContextType {
   onFieldChange?: (key: string, value: any) => void;
   personelListesi?: any[];
   firmaListesi?: any[];
+  firstPageLimit?: number | null;
 }
 
 export const TemplateEditContext = createContext<TemplateEditContextType>({
@@ -23,12 +24,20 @@ export function TemplateEditProvider({
   onFieldChange,
   personelListesi,
   firmaListesi,
+  firstPageLimit,
 }: TemplateEditProviderProps) {
   return (
     <TemplateEditContext.Provider
-      value={{ isEditing, onFieldChange, personelListesi, firmaListesi }}
+      value={{
+        isEditing,
+        onFieldChange,
+        personelListesi,
+        firmaListesi,
+        firstPageLimit,
+      }}
     >
       {children}
     </TemplateEditContext.Provider>
   );
 }
+

@@ -12,13 +12,21 @@ export const TableRowSplitDivider: React.FC<TableRowSplitDividerProps> = ({
   colSpan = 7,
   currentSplitIndex,
 }) => {
-  const { isEditing, onFieldChange } = useTemplateEdit();
+  const { isEditing, onFieldChange, firstPageLimit: contextLimit } = useTemplateEdit();
   const [isHovered, setIsHovered] = useState(false);
 
-  // If not editing, don't show the interactive hover line
-  if (!isEditing && !currentSplitIndex) return null;
+  const activeSplitIndex =
+    currentSplitIndex !== undefined
+      ? currentSplitIndex
+      : contextLimit !== undefined && contextLimit !== null
+      ? Number(contextLimit)
+      : null;
 
-  const isCurrentSplit = currentSplitIndex === rowIndex;
+  // If not editing, don't show the interactive hover line
+  if (!isEditing && !activeSplitIndex) return null;
+
+  const isCurrentSplit = activeSplitIndex === rowIndex;
+
 
   if (isCurrentSplit) {
     return (

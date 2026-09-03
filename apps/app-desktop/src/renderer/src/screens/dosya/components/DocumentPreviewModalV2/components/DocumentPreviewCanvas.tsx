@@ -75,7 +75,9 @@ export function DocumentPreviewCanvas({
                 setFormData((prev) => ({ ...prev, [key]: val }))}
               personelListesi={personelListesi}
               firmaListesi={firmaListesi}
+              firstPageLimit={formData.firstPageLimit}
             >
+
               {React.createElement(ActiveComponent, {
                 data: {
                   ...formData,
