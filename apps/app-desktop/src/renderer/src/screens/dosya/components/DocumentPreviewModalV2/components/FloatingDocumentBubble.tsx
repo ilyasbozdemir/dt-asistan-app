@@ -96,8 +96,9 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
         position: "fixed",
         left: `${position.x}px`,
         top: `${position.y}px`,
-        zIndex: 9999,
+        zIndex: 60,
       }}
+
       className={`group select-none transition-shadow duration-200 ${
         isDragging ? "cursor-grabbing opacity-95 scale-102" : "cursor-grab"
       }`}
