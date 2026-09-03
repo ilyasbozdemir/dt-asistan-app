@@ -5,7 +5,9 @@ import {
   DateEditableField,
   MetadataBlock,
 } from "../../document/ApprovalSignature";
+import { TableRowSplitDivider } from "../../document/TableRowSplitDivider";
 import { ArastirmaMektubuType } from "./ArastirmaMektubu.schema";
+
 
 interface ArastirmaMektubuProps {
   data?: Partial<ArastirmaMektubuType> & Record<string, any>;
@@ -114,65 +116,75 @@ export function ArastirmaMektubu({
 
   const renderTableRows = (rowItems: typeof items, startIndex = 0) => (
     <tbody>
-      {rowItems.length > 0
-        ? (
-          rowItems.map((item, idx) => (
-            <tr key={idx}>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  textAlign: "center",
-                }}
-              >
-                {item.siraNo || startIndex + idx + 1}
-              </td>
-              <td style={{ border: "1px solid #000", padding: "6px" }}>
-                {item.malzemeAdi}
-              </td>
-              <td style={{ border: "1px solid #000", padding: "6px" }}>
-                {item.ozelligi || "-"}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  textAlign: "center",
-                }}
-              >
-                {item.birimi || "-"}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  textAlign: "right",
-                }}
-              >
-                {item.miktar}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  textAlign: "right",
-                }}
-              >
-                {item.birimFiyat ? `${item.birimFiyat} ₺` : ""}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  textAlign: "right",
-                }}
-              >
-                {item.tutar ? `${item.tutar} ₺` : ""}
-              </td>
-            </tr>
-          ))
-        )
-        : (
+      {rowItems.length > 0 ? (
+        rowItems.map((item, idx) => {
+          const rowNum = startIndex + idx + 1;
+          return (
+            <React.Fragment key={idx}>
+              <tr>
+                <td
+                  style={{
+                    border: "1px solid #000",
+                    padding: "6px",
+                    textAlign: "center",
+                  }}
+                >
+                  {item.siraNo || rowNum}
+                </td>
+                <td style={{ border: "1px solid #000", padding: "6px" }}>
+                  {item.malzemeAdi}
+                </td>
+                <td style={{ border: "1px solid #000", padding: "6px" }}>
+                  {item.ozelligi || "-"}
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #000",
+                    padding: "6px",
+                    textAlign: "center",
+                  }}
+                >
+                  {item.birimi || "-"}
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #000",
+                    padding: "6px",
+                    textAlign: "right",
+                  }}
+                >
+                  {item.miktar}
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #000",
+                    padding: "6px",
+                    textAlign: "right",
+                  }}
+                >
+                  {item.birimFiyat ? `${item.birimFiyat} ₺` : ""}
+                </td>
+                <td
+                  style={{
+                    border: "1px solid #000",
+                    padding: "6px",
+                    textAlign: "right",
+                  }}
+                >
+                  {item.tutar ? `${item.tutar} ₺` : ""}
+                </td>
+              </tr>
+              {/* On-Hover & Active Split Row Divider */}
+              <TableRowSplitDivider
+                rowIndex={rowNum}
+                colSpan={7}
+                currentSplitIndex={firstPageLimit}
+              />
+            </React.Fragment>
+          );
+        })
+      ) : (
+
           <tr>
             <td
               colSpan={7}
