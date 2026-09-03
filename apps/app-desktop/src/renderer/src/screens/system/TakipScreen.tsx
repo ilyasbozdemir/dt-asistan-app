@@ -246,6 +246,20 @@ export function TakipScreen(): React.JSX.Element {
           }
         ]
 
+  const STAGE_ROUTES: Record<number, string> = {
+    1: '/dosya/hazirlik-ve-ihtiyac',
+    2: '/dosya/piyasa-fiyat-arastirmasi',
+    3: '/dosya/siparis-ve-sozlesme',
+    4: '/dosya/kabul-ve-odeme'
+  }
+
+  const STAGE_SHORT_LABELS: Record<number, string> = {
+    1: 'Hazırlık',
+    2: 'Araştırma',
+    3: 'Sözleşme',
+    4: 'Muayene & Kabul & Ödeme'
+  }
+
   const currentAsamaSira = activeDosya?.durum_asama_id || 1
 
   // Format Currency Helper
@@ -431,136 +445,168 @@ export function TakipScreen(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Process Navigation Grid (Drill down options) */}
+              {/* 4 Ana Süreç Aşaması Kartları */}
               <div>
-                <h4 className="text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider mb-3 select-none">
-                  Süreç Adımları Hızlı Erişim Paneli
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {/* İhtiyaç ve Hazırlık */}
+                <div className="flex items-center justify-between mb-3 select-none">
+                  <h4 className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Layers className="w-3.5 h-3.5 text-blue-500" />
+                    Doğrudan Temin Süreç Aşamaları
+                  </h4>
+                  <span className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                    4 Temel Aşama
+                  </span>
+                </div>
+
+                {/* 4 Aşama Responsive Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+                  {/* 1. Aşama: İhtiyaç ve Hazırlık */}
                   <Link
                     to="/dosya/hazirlik-ve-ihtiyac"
-                    className="group p-4 bg-slate-50/50 hover:bg-blue-50/40 dark:bg-slate-900/50 dark:hover:bg-blue-950/10 border border-slate-200/60 hover:border-blue-200 dark:border-slate-800 dark:hover:border-blue-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                    className="group relative p-4 bg-white dark:bg-slate-900/90 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border border-slate-200/80 hover:border-blue-400/60 dark:border-slate-800 dark:hover:border-blue-500/40 rounded-2xl transition-all duration-200 flex flex-col justify-between min-h-[120px] cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-450 flex items-center justify-center">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">
+                          1. Aşama
+                        </span>
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <FileText className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         İhtiyaç & Hazırlık
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        Malzeme Girişi & Başlangıç Onayı
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
+                        Malzeme Kalemleri, Lüzum Müzekkeresi & Başlangıç Onayı
                       </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                      <span>Aşamaya Git</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
 
-                  {/* Yaklaşık Maliyet */}
-                  <Link
-                    to="/dosya/firmalar-maliyet/yaklasik"
-                    className="group p-4 bg-slate-50/50 hover:bg-indigo-50/40 dark:bg-slate-900/50 dark:hover:bg-indigo-950/10 border border-slate-200/60 hover:border-indigo-200 dark:border-slate-800 dark:hover:border-indigo-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-405 flex items-center justify-center">
-                        <Calculator className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                        Yaklaşık Maliyet Cetveli
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        Fiyat Girişleri & Maliyet Tespiti
-                      </span>
-                    </div>
-                  </Link>
-
-                  {/* Piyasa Fiyat Araştırması */}
+                  {/* 2. Aşama: Piyasa Fiyat Araştırması */}
                   <Link
                     to="/dosya/piyasa-fiyat-arastirmasi"
-                    className="group p-4 bg-slate-50/50 hover:bg-emerald-50/40 dark:bg-slate-900/50 dark:hover:bg-emerald-950/10 border border-slate-200/60 hover:border-emerald-200 dark:border-slate-800 dark:hover:border-emerald-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                    className="group relative p-4 bg-white dark:bg-slate-900/90 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 border border-slate-200/80 hover:border-emerald-400/60 dark:border-slate-800 dark:hover:border-emerald-500/40 rounded-2xl transition-all duration-200 flex flex-col justify-between min-h-[120px] cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 flex items-center justify-center">
-                        <FileSpreadsheet className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                        Teklifler & Araştırma
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                          2. Aşama
+                        </span>
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <FileSpreadsheet className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        Piyasa Fiyat Araştırması
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        Firma Teklifleri & Karar Tutanağı
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
+                        Firma Teklifleri, Teklif Cetveli & Fiyat Tutanağı
                       </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <span>Aşamaya Git</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
 
-                  {/* Sipariş ve Sözleşme */}
+                  {/* 3. Aşama: Sipariş ve Sözleşme */}
                   <Link
                     to="/dosya/siparis-ve-sozlesme"
-                    className="group p-4 bg-slate-50/50 hover:bg-amber-50/40 dark:bg-slate-900/50 dark:hover:bg-amber-950/10 border border-slate-200/60 hover:border-amber-200 dark:border-slate-800 dark:hover:border-amber-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                    className="group relative p-4 bg-white dark:bg-slate-900/90 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 border border-slate-200/80 hover:border-amber-400/60 dark:border-slate-800 dark:hover:border-amber-500/40 rounded-2xl transition-all duration-200 flex flex-col justify-between min-h-[120px] cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-450 flex items-center justify-center">
-                        <FileCheck className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                        Onay Belgesi & Sözleşme
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40">
+                          3. Aşama
+                        </span>
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <FileCheck className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                        Sipariş & Sözleşme
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        Sipariş Mektubu & Sözleşme Hazırlama
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
+                        Temin Onay Belgesi, Sipariş Mektubu & Sözleşme
                       </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                      <span>Aşamaya Git</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
 
-                  {/* Kabul ve Ödeme */}
+                  {/* 4. Aşama: Muayene Kabul ve Ödeme */}
                   <Link
                     to="/dosya/kabul-ve-odeme"
-                    className="group p-4 bg-slate-50/50 hover:bg-purple-50/40 dark:bg-slate-900/50 dark:hover:bg-purple-950/10 border border-slate-200/60 hover:border-purple-200 dark:border-slate-800 dark:hover:border-purple-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                    className="group relative p-4 bg-white dark:bg-slate-900/90 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 border border-slate-200/80 hover:border-purple-400/60 dark:border-slate-800 dark:hover:border-purple-500/40 rounded-2xl transition-all duration-200 flex flex-col justify-between min-h-[120px] cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-650 dark:text-purple-400 flex items-center justify-center">
-                        <Coins className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                        Kabul, Ödeme & Hakediş
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/40">
+                          4. Aşama
+                        </span>
+                        <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-650 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Coins className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                        Muayene, Kabul & Ödeme
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        Muayene Kabul, TİF & Ödeme Emri
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
+                        Muayene Kabul Tutanağı, TİF & Ödeme Emri Belgesi
                       </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                      <span>Aşamaya Git</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
+                </div>
 
-                  {/* Çıktı Merkezi */}
+                {/* Hızlı İşlemler & Ek Modüller */}
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/60 overflow-x-auto pb-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 select-none">
+                    Hızlı Araçlar:
+                  </span>
                   <Link
                     to="/dosya/cikti-merkezi"
-                    className="group p-4 bg-slate-50/50 hover:bg-pink-50/40 dark:bg-slate-900/50 dark:hover:bg-pink-950/10 border border-slate-200/60 hover:border-pink-200 dark:border-slate-800 dark:hover:border-pink-900/40 rounded-2xl transition-all flex flex-col justify-between min-h-[96px] cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700/60 text-xs font-bold transition-all shrink-0 cursor-pointer"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center">
-                        <Printer className="w-4 h-4" />
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                        Dosya Çıktı Merkezi
-                      </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">
-                        İndeks, Sırtlıklar & Tüm Çıktılar
-                      </span>
-                    </div>
+                    <Printer className="w-3.5 h-3.5 text-blue-500" />
+                    Dosya Çıktı Merkezi
+                  </Link>
+                  <Link
+                    to="/dosya/klasor-ve-kapaklar"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                    Klasör & Kapaklar
+                  </Link>
+                  <Link
+                    to="/dosya/firmalar-maliyet/yaklasik"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    <Calculator className="w-3.5 h-3.5 text-indigo-500" />
+                    Yaklaşık Maliyet Cetveli
+                  </Link>
+                  <Link
+                    to="/dosya/fatura-ve-irsaliye"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    <ClipboardList className="w-3.5 h-3.5 text-emerald-500" />
+                    Fatura & İrsaliye
+                  </Link>
+                  <Link
+                    to="/dosya/imzali-belgeler"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-xs font-bold transition-all shrink-0 cursor-pointer"
+                  >
+                    <FileCheck className="w-3.5 h-3.5 text-purple-500" />
+                    İmzalı Belgeler
                   </Link>
                 </div>
               </div>
@@ -591,47 +637,54 @@ export function TakipScreen(): React.JSX.Element {
                 {stages.map((asama, idx) => {
                   const isCompleted = asama.asama_sira < currentAsamaSira
                   const isActive = asama.asama_sira === currentAsamaSira
+                  const route = STAGE_ROUTES[asama.asama_sira] || '/dosya/hazirlik-ve-ihtiyac'
+                  const shortLabel = STAGE_SHORT_LABELS[asama.asama_sira] || asama.asama_adi
 
                   return (
-                    <div
+                    <Link
+                      to={route}
                       key={asama.id ? `stepper-stage-${asama.id}-${idx}` : `stepper-sira-${asama.asama_sira}-${idx}`}
-                      className="flex md:flex-col items-start md:items-center text-left md:text-center flex-1 relative z-10 gap-3 md:gap-2 group"
+                      className="flex md:flex-col items-start md:items-center text-left md:text-center flex-1 relative z-10 gap-3 md:gap-2 group cursor-pointer hover:-translate-y-0.5 transition-transform"
+                      title={`${asama.asama_sira}. Aşama: ${shortLabel} Ekranına Git`}
                     >
                       {/* Step node */}
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                        className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm ${
                           isCompleted
-                            ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20'
+                            ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20 group-hover:bg-emerald-600'
                             : isActive
-                              ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20 scale-110'
-                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400'
+                              ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20 scale-110 group-hover:bg-blue-700'
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500'
                         }`}
                       >
                         {isCompleted ? (
                           <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
                         ) : (
-                          <span className="text-xs font-bold">{asama.asama_sira}</span>
+                          <span className="text-xs font-black">{asama.asama_sira}</span>
                         )}
                       </div>
 
                       {/* Step Labels */}
                       <div className="flex flex-col md:items-center mt-1">
+                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400 dark:text-slate-500">
+                          {asama.asama_sira}. Aşama
+                        </span>
                         <span
-                          className={`text-xs font-extrabold transition-colors duration-300 ${
+                          className={`text-xs font-extrabold transition-colors duration-200 mt-0.5 ${
                             isActive
-                              ? 'text-blue-600 dark:text-blue-450'
+                              ? 'text-blue-600 dark:text-blue-400'
                               : isCompleted
                                 ? 'text-emerald-600 dark:text-emerald-500'
-                                : 'text-slate-400 dark:text-slate-500'
+                                : 'text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400'
                           }`}
                         >
-                          {asama.asama_adi}
+                          {shortLabel}
                         </span>
-                        <p className="text-[10px] text-slate-450 mt-1 max-w-[160px] line-clamp-2 md:block hidden">
+                        <p className="text-[10px] text-slate-450 dark:text-slate-400 mt-0.5 max-w-[160px] line-clamp-2 md:block hidden">
                           {asama.aciklama}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   )
                 })}
               </div>
