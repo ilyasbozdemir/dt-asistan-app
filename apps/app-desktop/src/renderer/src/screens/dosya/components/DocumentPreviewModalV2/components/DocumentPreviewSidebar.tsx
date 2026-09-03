@@ -128,50 +128,80 @@ export function DocumentPreviewSidebar({
           </div>
 
           {/* Sayfa Bölme & İmza Dengeleme (Yetim İmza Önleme) */}
-          <div className="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+          <div className="p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                <span>📄 Sayfa Bölme & İmza Dengesi</span>
+                <span>✂️ Sayfa Bölme & Denge</span>
               </span>
+              {formData.firstPageLimit ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      firstPageLimit: null,
+                    }))}
+                  className="text-[10px] font-bold text-red-600 dark:text-red-400 hover:underline cursor-pointer flex items-center gap-0.5"
+                  title="Bölmeyi kaldır, tek sayfaya al"
+                >
+                  <span>{formData.firstPageLimit}. Satır</span>
+                  <span>✕</span>
+                </button>
+              ) : (
+                <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md">
+                  Otomatik
+                </span>
+              )}
             </div>
+
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-              Tabloyu istediğiniz satırdan 2. sayfaya bölebilir, imzanın tek başına kalmasını önleyebilirsiniz.
+              Tabloyu satırdan 2. sayfaya aktararak imzanın tek başına kalmasını önleyin.
             </p>
 
-            {/* Satırdan Bölme Ayarı */}
-            <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-300 font-medium">
-                  1. Sayfada Kalacak Satır:
+            {/* Hızlı Satır Seçim Grid */}
+            <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
+                <span>1. Sayfada Kalacak:</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400 font-mono">
+                  {formData.firstPageLimit ? `${formData.firstPageLimit} Satır (Kalanı Sayfa 2)` : "Tümü (Tek Sayfa)"}
                 </span>
-                <strong className="text-blue-600 dark:text-blue-400 font-mono text-xs">
-                  {formData.firstPageLimit ? `${formData.firstPageLimit}. Satırdan Sonra Böl` : "Otomatik"}
-                </strong>
               </div>
 
-              {/* Hızlı Satır Seçim Butonları */}
-              <div className="flex items-center gap-1">
-                {[3, 5, 7, 10, 15].map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev: any) => ({
-                        ...prev,
-                        firstPageLimit: count,
-                      }))}
-                    className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition-colors cursor-pointer border ${
-                      formData.firstPageLimit === count
-                        ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                        : "bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    {count}. Satır
-                  </button>
-                ))}
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { label: "Otomatik", val: null },
+                  { label: "3. Satır", val: 3 },
+                  { label: "5. Satır", val: 5 },
+                  { label: "7. Satır", val: 7 },
+                  { label: "10. Satır", val: 10 },
+                  { label: "15. Satır", val: 15 },
+                ].map((item, idx) => {
+                  const isActive = item.val === null
+                    ? !formData.firstPageLimit
+                    : formData.firstPageLimit === item.val;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          firstPageLimit: item.val,
+                        }))}
+                      className={`py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer border ${
+                        isActive
+                          ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                          : "bg-slate-50 dark:bg-slate-850 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
+              {/* Slider & Stepper */}
+              <div className="flex items-center gap-1.5 pt-1">
                 <button
                   type="button"
                   onClick={() =>
@@ -182,8 +212,8 @@ export function DocumentPreviewSidebar({
                         (prev.firstPageLimit ?? 10) - 1,
                       ),
                     }))}
-                  className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
-                  title="1. sayfadan satır azalt (İkinci sayfaya aktar)"
+                  className="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-md text-xs font-bold cursor-pointer shrink-0"
+                  title="1. sayfadan satır azalt"
                 >
                   -
                 </button>
@@ -197,7 +227,7 @@ export function DocumentPreviewSidebar({
                       ...prev,
                       firstPageLimit: Number(e.target.value),
                     }))}
-                  className="flex-1 accent-blue-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                  className="flex-1 accent-blue-600 cursor-pointer h-1 bg-slate-200 dark:bg-slate-800 rounded-lg"
                 />
                 <button
                   type="button"
@@ -206,7 +236,7 @@ export function DocumentPreviewSidebar({
                       ...prev,
                       firstPageLimit: (prev.firstPageLimit ?? 10) + 1,
                     }))}
-                  className="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-md text-xs font-bold cursor-pointer shrink-0"
                   title="1. sayfaya satır ekle"
                 >
                   +
@@ -214,18 +244,17 @@ export function DocumentPreviewSidebar({
               </div>
             </div>
 
-
             {/* Newline / Boşluk Satırı Ekleme */}
             <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-300 font-medium">
-                  Ekstra Boş Satır (Newline):
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-600 dark:text-slate-400">
+                  Ekstra Boşluk:
                 </span>
-                <span className="text-slate-500 font-mono text-[11px]">
+                <span className="text-slate-600 dark:text-slate-300 font-mono text-[11px] font-bold">
                   {Math.round(((formData as any).ekstraBosluk || 0) / 24)} Satır
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() =>
@@ -233,9 +262,9 @@ export function DocumentPreviewSidebar({
                       ...prev,
                       ekstraBosluk: Math.max(0, (prev.ekstraBosluk || 0) - 24),
                     }))}
-                  className="flex-1 py-1 px-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                  className="flex-1 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-md text-[11px] font-semibold cursor-pointer transition-colors"
                 >
-                  - Satır Sil
+                  - Satır
                 </button>
                 <button
                   type="button"
@@ -244,9 +273,9 @@ export function DocumentPreviewSidebar({
                       ...prev,
                       ekstraBosluk: (prev.ekstraBosluk || 0) + 24,
                     }))}
-                  className="flex-1 py-1 px-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 border border-blue-200/60 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                  className="flex-1 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 border border-blue-200/60 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 rounded-md text-[11px] font-bold cursor-pointer transition-colors"
                 >
-                  + Satır Ekle
+                  + Satır
                 </button>
                 {((formData as any).ekstraBosluk || 0) > 0 && (
                   <button
@@ -256,10 +285,10 @@ export function DocumentPreviewSidebar({
                         ...prev,
                         ekstraBosluk: 0,
                       }))}
-                    className="py-1 px-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-xs font-bold cursor-pointer"
+                    className="py-1 px-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md text-[10px] font-bold cursor-pointer"
                     title="Boşluğu Sıfırla"
                   >
-                    Sıfırla
+                    ✕
                   </button>
                 )}
               </div>
@@ -267,6 +296,7 @@ export function DocumentPreviewSidebar({
           </div>
 
           {/* OLUR Bloğu Toggle */}
+
           <label className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               OLUR Bloğunu Göster

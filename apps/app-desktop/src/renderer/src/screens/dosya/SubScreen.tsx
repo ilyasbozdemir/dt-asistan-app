@@ -4,7 +4,7 @@ import { useTabStore } from '../../store/tabStore'
 import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 import { ProcessStepper } from './components/ProcessStepper'
-import DocumentPreviewModalV2 from './components/DocumentPreviewModalV2'
+import { useGlobalDocumentPreviewStore } from '../../store/globalDocumentPreviewStore'
 
 const STEPPER_ROUTES = [
   'hazirlik-ve-ihtiyac',
@@ -21,8 +21,10 @@ interface SubScreenProps {
   hideStepper?: boolean
   requireActiveDosya?: boolean
   previewDocumentId?: string | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   invitedFirms?: any[]
   onClosePreview?: () => void
+
 }
 
 export function SubScreen({
@@ -38,10 +40,29 @@ export function SubScreen({
 }: SubScreenProps): React.JSX.Element {
   const { activeTabPath } = useTabStore()
   const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
+  const { openDocument, closeDocument } = useGlobalDocumentPreviewStore()
+
+  useEffect(() => {
+    if (!previewDocumentId && onClosePreview) {
+      closeDocument()
+    }
+  }, [previewDocumentId, onClosePreview, closeDocument])
+
+
 
   useEffect(() => {
     document.title = `${title} - Doğrudan Temin`
   }, [title])
+
+  useEffect(() => {
+    if (previewDocumentId) {
+      openDocument({
+        documentId: previewDocumentId.replace('.html', ''),
+        dosyaId: activeDosyaId || undefined,
+        invitedFirms
+      })
+    }
+  }, [previewDocumentId, activeDosyaId, invitedFirms, openDocument])
 
   useEffect(() => {
     if (!activeDosyaId) return
@@ -111,18 +132,7 @@ export function SubScreen({
 
       {/* CHILDREN VIEW */}
       {(activeDosyaId || !requireActiveDosya) && children}
-
-      {/* BASE PREVIEW MODAL */}
-      {previewDocumentId && (
-        <DocumentPreviewModalV2
-          isOpen={Boolean(previewDocumentId)}
-          documentId={previewDocumentId.replace('.html', '')}
-          dosyaId={activeDosyaId || undefined}
-          invitedFirms={invitedFirms}
-          onClose={onClosePreview || (() => {})}
-          isModal={true}
-        />
-      )}
     </div>
   )
 }
+
