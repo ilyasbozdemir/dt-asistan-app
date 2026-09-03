@@ -105,10 +105,9 @@ export function DosyalarTableView({
                     group.files.map((dosya) => (
                       <tr
                         key={dosya.id}
-                        onClick={() => setActiveDosyaId(dosya.id)}
-                        onDoubleClick={() => {
+                        onClick={() => {
                           setActiveDosyaId(dosya.id)
-                          navigate({ to: '/dosya' })
+                          navigate({ to: '/takip' })
                         }}
                         className={cn(
                           'group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors',

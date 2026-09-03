@@ -103,10 +103,9 @@ export function DosyalarGridView({
               group.files.map((dosya) => (
                 <div
                   key={dosya.id}
-                  onClick={() => setActiveDosyaId(dosya.id)}
-                  onDoubleClick={() => {
+                  onClick={() => {
                     setActiveDosyaId(dosya.id)
-                    navigate({ to: '/dosya' })
+                    navigate({ to: '/takip' })
                   }}
                   className={cn(
                     'bg-white dark:bg-slate-900 border rounded-2xl cursor-pointer hover:shadow-lg transition-all flex flex-col group relative min-h-[180px] h-full',
