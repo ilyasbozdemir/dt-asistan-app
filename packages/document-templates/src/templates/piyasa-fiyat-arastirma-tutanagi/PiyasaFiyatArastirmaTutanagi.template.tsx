@@ -6,7 +6,9 @@ import {
   DateEditableField,
   EditableOlurPlaceholder,
 } from "../../document/ApprovalSignature";
+import { TableRowSplitDivider } from "../../document/TableRowSplitDivider";
 import { PiyasaFiyatArastirmaTutanagiData } from "./PiyasaFiyatArastirmaTutanagi.schema";
+
 
 interface Props {
   data?: Partial<PiyasaFiyatArastirmaTutanagiData> & Record<string, any>;
@@ -345,7 +347,9 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
           </thead>
           <tbody>
             {processedKalemler.map((kalem, idx) => (
-              <tr key={idx}>
+              <React.Fragment key={idx}>
+                <tr>
+
                 <td
                   style={{
                     border: "1px solid #000",
@@ -427,7 +431,14 @@ export const PiyasaFiyatArastirmaTutanagi: React.FC<Props> = ({
                   );
                 })}
               </tr>
-            ))}
+              <TableRowSplitDivider
+                rowIndex={idx + 1}
+                colSpan={5 + displayFirmalar.length * 2}
+                currentSplitIndex={data?.firstPageLimit ? Number(data.firstPageLimit) : null}
+              />
+            </React.Fragment>
+          ))}
+
 
             {processedKalemler.length > 0 && (
               <tr style={{ fontWeight: "bold", backgroundColor: "#fafafa" }}>

@@ -1,6 +1,8 @@
 import React from "react";
 import { EditableField } from "../../document/EditableField";
+import { TableRowSplitDivider } from "../../document/TableRowSplitDivider";
 import { YaklasikMaliyetCetveliData } from "./YaklasikMaliyetCetveli.schema";
+
 
 interface Props {
   data?: Partial<YaklasikMaliyetCetveliData> & Record<string, any>;
@@ -316,92 +318,103 @@ export const YaklasikMaliyetCetveli: React.FC<Props> = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-          {ihtiyacKalemleri.map((kalem, idx) => (
-            <tr key={idx}>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "center",
-                }}
-              >
-                {kalem.siraNo ?? idx + 1}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "left",
-                }}
-              >
-                {kalem.malzemeAdi}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "left",
-                }}
-              >
-                {kalem.ozelligi}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "center",
-                }}
-              >
-                {kalem.birimi}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "center",
-                }}
-              >
-                {kalem.miktar}
-              </td>
-              {(kalem.firmaTeklifleri || []).map((ft, fIdx) => (
-                <td
-                  key={fIdx}
-                  style={{
-                    border: "1px solid #000",
-                    padding: "6px 4px",
-                    textAlign: "right",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {ft.fiyat}
-                </td>
-              ))}
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "right",
-                  whiteSpace: "nowrap",
-                  backgroundColor: "#f0f0f0",
-                  fontWeight: "bold",
-                }}
-              >
-                {kalem.enDusukFiyat}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px 4px",
-                  textAlign: "right",
-                  whiteSpace: "nowrap",
-                  backgroundColor: "#e6e6e6",
-                  fontWeight: "bold",
-                }}
-              >
-                {kalem.toplamBedel}
-              </td>
-            </tr>
-          ))}
+          {ihtiyacKalemleri.map((kalem, idx) => {
+            const rowNum = idx + 1;
+            return (
+              <React.Fragment key={idx}>
+                <tr>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {kalem.siraNo ?? rowNum}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "left",
+                    }}
+                  >
+                    {kalem.malzemeAdi}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "left",
+                    }}
+                  >
+                    {kalem.ozelligi}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {kalem.birimi}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {kalem.miktar}
+                  </td>
+                  {(kalem.firmaTeklifleri || []).map((ft, fIdx) => (
+                    <td
+                      key={fIdx}
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px 4px",
+                        textAlign: "right",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {ft.fiyat}
+                    </td>
+                  ))}
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "right",
+                      whiteSpace: "nowrap",
+                      backgroundColor: "#f0f0f0",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {kalem.enDusukFiyat}
+                  </td>
+                  <td
+                    style={{
+                      border: "1px solid #000",
+                      padding: "6px 4px",
+                      textAlign: "right",
+                      whiteSpace: "nowrap",
+                      backgroundColor: "#e6e6e6",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {kalem.toplamBedel}
+                  </td>
+                </tr>
+                <TableRowSplitDivider
+                  rowIndex={rowNum}
+                  colSpan={7 + displayFirmalar.length}
+                  currentSplitIndex={data?.firstPageLimit ? Number(data.firstPageLimit) : null}
+                />
+              </React.Fragment>
+            );
+          })}
+
 
           {ihtiyacKalemleri.length > 0 && (
             <tr style={{ fontWeight: "bold" }}>

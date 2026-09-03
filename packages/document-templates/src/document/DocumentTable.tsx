@@ -1,6 +1,8 @@
 import React from 'react'
 import { GLOBAL_THEME } from '../theme.config'
 
+import { TableRowSplitDivider } from './TableRowSplitDivider'
+
 interface ColumnDef<T> {
   key: keyof T | string
   label: string
@@ -14,6 +16,8 @@ interface DocumentTableProps<T> {
   data: T[]
   emptyMessage?: string
   striped?: boolean
+  startIndex?: number
+  currentSplitIndex?: number | null
 }
 
 export const DocumentTable = React.forwardRef<
@@ -21,7 +25,14 @@ export const DocumentTable = React.forwardRef<
   DocumentTableProps<any>
 >(
   (
-    { columns, data, emptyMessage = 'Veri bulunamadı', striped = false },
+    {
+      columns,
+      data,
+      emptyMessage = 'Veri bulunamadı',
+      striped = false,
+      startIndex = 0,
+      currentSplitIndex
+    },
     ref
   ) => {
     const borderColor = GLOBAL_THEME.colors.border
@@ -78,44 +89,57 @@ export const DocumentTable = React.forwardRef<
               </td>
             </tr>
           ) : (
-            data.map((row, rowIdx) => (
-              <tr
-                key={rowIdx}
-                style={{
-                  backgroundColor: striped && rowIdx % 2 === 0 ? '#f9f9f9' : 'transparent',
-                  pageBreakInside: 'avoid'
-                }}
-              >
-                {columns.map((col) => {
-                  const value = col.key !== 'custom' ? (row as any)[col.key] : null
-                  const rendered = col.render
-                    ? col.render(value, row, rowIdx)
-                    : value !== undefined && value !== null
-                      ? String(value)
-                      : '-'
+            data.map((row, rowIdx) => {
+              const rowNum = (startIndex ?? 0) + rowIdx + 1
+              return (
+                <React.Fragment key={rowIdx}>
+                  <tr
+                    style={{
+                      backgroundColor:
+                        striped && rowIdx % 2 === 0 ? '#f9f9f9' : 'transparent',
+                      pageBreakInside: 'avoid'
+                    }}
+                  >
+                    {columns.map((col) => {
+                      const value =
+                        col.key !== 'custom' ? (row as any)[col.key] : null
+                      const rendered = col.render
+                        ? col.render(value, row, rowIdx)
+                        : value !== undefined && value !== null
+                          ? String(value)
+                          : '-'
 
-                  return (
-                    <td
-                      key={String(col.key)}
-                      style={{
-                        border: `1px solid ${borderColor}`,
-                        padding: GLOBAL_THEME.table.cellPadding,
-                        textAlign: col.align || 'left',
-                        pageBreakInside: 'avoid'
-                      }}
-                    >
-                      {rendered}
-                    </td>
-                  )
-                })}
-              </tr>
-            ))
+                      return (
+                        <td
+                          key={String(col.key)}
+                          style={{
+                            border: `1px solid ${borderColor}`,
+                            padding: GLOBAL_THEME.table.cellPadding,
+                            textAlign: col.align || 'left',
+                            pageBreakInside: 'avoid'
+                          }}
+                        >
+                          {rendered}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                  {/* Satırdan Bölme Çizgisi */}
+                  <TableRowSplitDivider
+                    rowIndex={rowNum}
+                    colSpan={columns.length}
+                    currentSplitIndex={currentSplitIndex}
+                  />
+                </React.Fragment>
+              )
+            })
           )}
         </tbody>
       </table>
     )
   }
 )
+
 
 DocumentTable.displayName = 'DocumentTable'
 

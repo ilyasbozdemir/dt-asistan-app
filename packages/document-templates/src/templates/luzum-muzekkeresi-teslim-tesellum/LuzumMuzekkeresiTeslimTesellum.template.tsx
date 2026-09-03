@@ -266,7 +266,10 @@ export function LuzumMuzekkeresiTeslimTesellum({
               data={pageItems}
               emptyMessage="Kalem bulunamadı"
               striped={false}
+              startIndex={pageIdx === 0 ? 0 : limits.firstPage + (pageIdx - 1) * limits.middle}
+              currentSplitIndex={limits.firstPage ? Number(limits.firstPage) : null}
             />
+
 
             {isLastPage && (
               <div

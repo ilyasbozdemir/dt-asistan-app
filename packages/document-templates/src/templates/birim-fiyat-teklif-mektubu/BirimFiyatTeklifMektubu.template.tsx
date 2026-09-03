@@ -2,7 +2,9 @@ import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { EditableField } from "../../document/EditableField";
 import { DateEditableField } from "../../document/ApprovalSignature";
+import { TableRowSplitDivider } from "../../document/TableRowSplitDivider";
 import { BirimFiyatTeklifMektubuType } from "./BirimFiyatTeklifMektubu.schema";
+
 
 interface BirimFiyatTeklifMektubuProps {
   data?: Partial<BirimFiyatTeklifMektubuType> & Record<string, any>;
@@ -153,18 +155,29 @@ export function BirimFiyatTeklifMektubu({
           </thead>
           <tbody>
             {items.length > 0 ? (
-              items.map((item, idx) => (
-                <tr key={idx}>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.siraNo || idx + 1}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px" }}>{item.malzemeAdi}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px" }}>{item.ozelligi || "-"}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.birimi || "-"}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.miktar}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.birimFiyat ? `${item.birimFiyat} ₺` : ""}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.tutar ? `${item.tutar} ₺` : ""}</td>
-                </tr>
-              ))
+              items.map((item, idx) => {
+                const rowNum = idx + 1;
+                return (
+                  <React.Fragment key={idx}>
+                    <tr>
+                      <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.siraNo || rowNum}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px" }}>{item.malzemeAdi}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px" }}>{item.ozelligi || "-"}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.birimi || "-"}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.miktar}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.birimFiyat ? `${item.birimFiyat} ₺` : ""}</td>
+                      <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.tutar ? `${item.tutar} ₺` : ""}</td>
+                    </tr>
+                    <TableRowSplitDivider
+                      rowIndex={rowNum}
+                      colSpan={7}
+                      currentSplitIndex={data.firstPageLimit ? Number(data.firstPageLimit) : null}
+                    />
+                  </React.Fragment>
+                );
+              })
             ) : (
+
               <tr>
                 <td colSpan={7} style={{ border: "1px solid #000", padding: "8px", textAlign: "center", fontStyle: "italic" }}>
                   Kalem bulunamadı

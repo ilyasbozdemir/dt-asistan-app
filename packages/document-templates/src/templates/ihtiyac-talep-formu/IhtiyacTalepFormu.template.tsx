@@ -197,7 +197,10 @@ export function IhtiyacTalepFormu({
               data={pageItems}
               emptyMessage="Kalem bulunamadı"
               striped={false}
+              startIndex={pageIdx === 0 ? 0 : limits.firstPage + (pageIdx - 1) * limits.middle}
+              currentSplitIndex={fLimit ? Number(fLimit) : null}
             />
+
 
             {isLastPage && (
               <div style={{ marginTop: "16px" }}>

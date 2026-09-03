@@ -83,11 +83,12 @@ ${c.cyan('Örnekler:')}
 
 // ─── Yardımcı Fonksiyonlar ────────────────────────────────
 const ROOT = path.resolve(__dirname, '..')
+const GIT_ROOT = path.resolve(__dirname, '../..')
 
 function exec(cmd, opts = {}) {
   try {
     return execSync(cmd, {
-      cwd: ROOT,
+      cwd: opts.cwd || GIT_ROOT,
       encoding: 'utf-8',
       stdio: opts.silent ? 'pipe' : 'inherit',
       ...opts
@@ -99,6 +100,7 @@ function exec(cmd, opts = {}) {
     process.exit(1)
   }
 }
+
 
 function execSilent(cmd) {
   return exec(cmd, { silent: true, ignoreError: true }).trim()
