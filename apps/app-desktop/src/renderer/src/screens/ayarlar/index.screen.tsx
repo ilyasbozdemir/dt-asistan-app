@@ -15,8 +15,9 @@ import { DeveloperTab } from './components/DeveloperTab'
 import { AiTab } from './components/AiTab'
 import { SyncTab } from './components/SyncTab'
 import { GenelTab } from './components/GenelTab'
+import { SupabaseTab } from './components/SupabaseTab'
 
-type TabType = 'genel' | 'smtp' | 'tema' | 'developer' | 'ai' | 'archive' | 'sync'
+type TabType = 'genel' | 'smtp' | 'tema' | 'developer' | 'ai' | 'archive' | 'sync' | 'supabase'
 
 export default function AyarlarScreen(): React.ReactNode {
   const { settings, isLoadingSettings, saveSettings, importSmtp, exportSmtp } = useAyarlarHooks()
@@ -33,7 +34,8 @@ export default function AyarlarScreen(): React.ReactNode {
       tabParam === 'developer' ||
       tabParam === 'ai' ||
       tabParam === 'archive' ||
-      tabParam === 'sync'
+      tabParam === 'sync' ||
+      tabParam === 'supabase'
     ) {
       return tabParam
     }
@@ -50,11 +52,13 @@ export default function AyarlarScreen(): React.ReactNode {
       currentTabParam === 'developer' ||
       currentTabParam === 'ai' ||
       currentTabParam === 'archive' ||
-      currentTabParam === 'sync'
+      currentTabParam === 'sync' ||
+      currentTabParam === 'supabase'
     ) {
       setActiveTab(currentTabParam)
     }
   }, [currentTabParam])
+
 
   const [saving, setSaving] = useState(false)
 
@@ -474,10 +478,12 @@ export default function AyarlarScreen(): React.ReactNode {
                     handleSaveTab={handleSaveTab}
                   />
                 )}
+
+                {activeTab === 'supabase' && <SupabaseTab />}
               </div>
 
               {/* SEKMEYİ KAYDET BUTONU */}
-              {activeTab !== 'archive' && activeTab !== 'sync' && (
+              {activeTab !== 'archive' && activeTab !== 'sync' && activeTab !== 'supabase' && (
                 <div className="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">
                   <Button
                     onClick={() => handleSaveTab(activeTab)}
@@ -488,6 +494,7 @@ export default function AyarlarScreen(): React.ReactNode {
                   </Button>
                 </div>
               )}
+
             </>
           )}
         </div>

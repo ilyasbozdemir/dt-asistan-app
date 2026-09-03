@@ -390,151 +390,136 @@ export function useAnnouncements() {
   const loadAnnouncements = useCallback(async () => {
     setIsLoading(true)
     try {
-      let remoteData: Announcement[] = []
-      try {
-        const response = await fetch(
-          'https://raw.githubusercontent.com/ilyas-bozdemir/dt-desktop-app/main/docs/announcements.json'
-        )
-        if (response.ok) {
-          const data = await response.json()
-          if (Array.isArray(data)) {
-            remoteData = data.map((item: any, idx: number) => ({
-              ...item,
-              id: `remote_${item.id || idx}`
-            }))
-          }
-        } else {
-          remoteData = (fallbackAnnouncements as Announcement[]).map((item, idx) => ({
-            ...item,
-            id: `fallback_${item.id || idx}`
-          }))
-        }
-      } catch {
-        remoteData = (fallbackAnnouncements as Announcement[]).map((item, idx) => ({
-          ...item,
-          id: `fallback_${item.id || idx}`
-        }))
-      }
+      const remoteData: Announcement[] = (fallbackAnnouncements as Announcement[]).map((item, idx) => ({
+        ...item,
+        id: `fallback_${item.id || idx}`
+      }))
 
       // Fetch from local LOG_SystemLog
       let localLogs: Announcement[] = []
       try {
-        const logRes = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          'SELECT id, title, message, type, created_at FROM LOG_SystemLog ORDER BY created_at DESC LIMIT 50'
-        )
-        if (logRes.success && logRes.data) {
-          localLogs = logRes.data.map((row: any) => ({
-            id: `syslog_${row.id}`,
-            title: row.title,
-            content: row.message,
-            date: new Date(row.created_at).toLocaleDateString('tr-TR', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric'
-            }),
-            _rawDate: new Date(row.created_at).getTime(),
-            type: row.type as 'info' | 'success' | 'warning' | 'error'
-          }))
+        if (window.electron) {
+          const logRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            'SELECT id, title, message, type, created_at FROM LOG_SystemLog ORDER BY created_at DESC LIMIT 50'
+          )
+          if (logRes?.success && logRes.data) {
+            localLogs = logRes.data.map((row: any) => ({
+              id: `syslog_${row.id}`,
+              title: row.title || 'Sistem Bildirimi',
+              content: row.message || '',
+              date: row.created_at
+                ? new Date(row.created_at).toLocaleDateString('tr-TR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  })
+                : '',
+              _rawDate: row.created_at ? new Date(row.created_at).getTime() : 0,
+              type: (row.type as 'info' | 'success' | 'warning' | 'error') || 'info'
+            }))
+          }
         }
-      } catch (logErr) {
-        console.warn('Failed to fetch system logs:', logErr)
+      } catch {
+        // quiet fallback
       }
 
       // Fetch recent files to generate smart notifications
       let fileNotifications: Announcement[] = []
       try {
-        const filesRes = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          `SELECT d.id, d.temin_no, d.konu, d.yaklasik_maliyet, d.durum_asama_id, d.created_at, d.status,
-                  f.unvan as firma_adi, b.birim_adi
-           FROM DATA_TeminDosyasi d
-           LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
-           LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
-           WHERE d.is_deleted = 0
-           ORDER BY d.created_at DESC LIMIT 15`
-        )
-        if (filesRes.success && filesRes.data) {
-          fileNotifications = filesRes.data.map((row: any) => {
-            const dateObj = new Date(row.created_at)
-            const dateStr = dateObj.toLocaleDateString('tr-TR', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric'
-            })
-            const formattedMaliyet = new Intl.NumberFormat('tr-TR', {
-              style: 'currency',
-              currency: 'TRY'
-            }).format(row.yaklasik_maliyet || 0)
+        if (window.electron) {
+          const filesRes = await window.electron.ipcRenderer.invoke(
+            'db:query',
+            `SELECT d.id, d.temin_no, d.konu, d.yaklasik_maliyet, d.durum_asama_id, d.created_at, d.status,
+                    f.unvan as firma_adi, b.ad as birim_adi
+             FROM DATA_TeminDosyasi d
+             LEFT JOIN TANIM_Firma f ON d.firma_id = f.id
+             LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
+             WHERE d.is_deleted = 0
+             ORDER BY d.created_at DESC LIMIT 15`
+          )
+          if (filesRes?.success && filesRes.data) {
+            fileNotifications = filesRes.data.map((row: any) => {
+              const dateObj = new Date(row.created_at)
+              const dateStr = dateObj.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+              })
+              const formattedMaliyet = new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: 'TRY'
+              }).format(row.yaklasik_maliyet || 0)
 
-            let title = 'Temin Dosyası Güncellemesi'
-            let content = `"${row.konu || 'Konu Belirtilmedi'}" (${row.temin_no || 'No Yok'}) dosyası işlem görüyor.`
-            let type: 'info' | 'success' | 'warning' | 'error' = 'info'
+              let title = 'Temin Dosyası Güncellemesi'
+              let content = `"${row.konu || 'Konu Belirtilmedi'}" (${row.temin_no || 'No Yok'}) dosyası işlem görüyor.`
+              let type: 'info' | 'success' | 'warning' | 'error' = 'info'
 
-            if (row.status === 'iptal') {
-              title = 'Dosya İptal Edildi'
-              content = `"${row.konu}" (${row.temin_no}) dosyası iptal edildi.`
-              type = 'error'
-            } else if (row.status === 'tamamlandi') {
-              title = 'Dosya Tamamlandı'
-              content = `"${row.konu}" (${row.temin_no}) dosyası başarıyla sonuçlandırıldı.`
-              type = 'success'
-            } else {
-              switch (row.durum_asama_id) {
-                case 1:
-                  title = 'Yeni Dosya Açıldı'
-                  content = `"${row.konu}" (${row.temin_no}) dosyası İhtiyaç Tespiti aşamasında oluşturuldu. Maliyet: ${formattedMaliyet}.`
-                  type = 'info'
-                  break
-                case 2:
-                  title = 'Piyasa Fiyat Araştırması'
-                  if (row.firma_adi) {
-                    title = 'Firma Belirlendi'
-                    content = `"${row.konu}" (${row.temin_no}) dosyası için piyasa fiyat araştırması tamamlandı. Firma: ${row.firma_adi}.`
-                    type = 'success'
-                  } else {
-                    content = `"${row.konu}" (${row.temin_no}) dosyası için teklif toplama/fiyat araştırması yapılıyor.`
+              if (row.status === 'iptal') {
+                title = 'Dosya İptal Edildi'
+                content = `"${row.konu}" (${row.temin_no}) dosyası iptal edildi.`
+                type = 'error'
+              } else if (row.status === 'tamamlandi') {
+                title = 'Dosya Tamamlandı'
+                content = `"${row.konu}" (${row.temin_no}) dosyası başarıyla sonuçlandırıldı.`
+                type = 'success'
+              } else {
+                switch (row.durum_asama_id) {
+                  case 1:
+                    title = 'Yeni Dosya Açıldı'
+                    content = `"${row.konu}" (${row.temin_no}) dosyası İhtiyaç Tespiti aşamasında oluşturuldu. Maliyet: ${formattedMaliyet}.`
                     type = 'info'
-                  }
-                  break
-                case 3:
-                  title = 'Sipariş & Sözleşme'
-                  content = `"${row.konu}" (${row.temin_no}) dosyası Sipariş & Sözleşme aşamasında onay bekliyor.`
-                  type = 'warning'
-                  break
-                case 4:
-                  title = 'Muayene & Kabul & Ödeme İşlemleri'
-                  content = `"${row.konu}" (${row.temin_no}) dosyası teslim ve faturalandırma aşamasına sevk edildi.`
-                  type = 'success'
-                  break
-                default:
-                  if (row.yaklasik_maliyet > 500000) {
-                    title = 'Yüksek Limitli Doğrudan Temin'
-                    content = `"${row.konu}" (${row.temin_no}) dosyası yüksek maliyet limitine sahip: ${formattedMaliyet}.`
+                    break
+                  case 2:
+                    title = 'Piyasa Fiyat Araştırması'
+                    if (row.firma_adi) {
+                      title = 'Firma Belirlendi'
+                      content = `"${row.konu}" (${row.temin_no}) dosyası için piyasa fiyat araştırması tamamlandı. Firma: ${row.firma_adi}.`
+                      type = 'success'
+                    } else {
+                      content = `"${row.konu}" (${row.temin_no}) dosyası için teklif toplama/fiyat araştırması yapılıyor.`
+                      type = 'info'
+                    }
+                    break
+                  case 3:
+                    title = 'Sipariş & Sözleşme'
+                    content = `"${row.konu}" (${row.temin_no}) dosyası Sipariş & Sözleşme aşamasında onay bekliyor.`
                     type = 'warning'
-                  }
-                  break
+                    break
+                  case 4:
+                    title = 'Muayene & Kabul & Ödeme İşlemleri'
+                    content = `"${row.konu}" (${row.temin_no}) dosyası teslim ve faturalandırma aşamasına sevk edildi.`
+                    type = 'success'
+                    break
+                  default:
+                    if (row.yaklasik_maliyet > 500000) {
+                      title = 'Yüksek Limitli Doğrudan Temin'
+                      content = `"${row.konu}" (${row.temin_no}) dosyası yüksek maliyet limitine sahip: ${formattedMaliyet}.`
+                      type = 'warning'
+                    }
+                    break
+                }
               }
-            }
 
-            return {
-              id: `file_${row.id}_${row.durum_asama_id || 0}_${row.status}`,
-              title,
-              content,
-              date: dateStr,
-              _rawDate: dateObj.getTime(),
-              type
-            }
-          })
+              return {
+                id: `file_${row.id}_${row.durum_asama_id || 0}_${row.status}`,
+                title,
+                content,
+                date: dateStr,
+                _rawDate: dateObj.getTime(),
+                type
+              }
+            })
+          }
         }
-      } catch (fileErr) {
-        console.warn('Failed to fetch file notifications:', fileErr)
+      } catch {
+        // quiet fallback
       }
 
       // Merge and sort
       const merged = [...remoteData, ...localLogs, ...fileNotifications].sort((a: any, b: any) => {
-        const timeA = a._rawDate || new Date(a.date.split('.').reverse().join('-')).getTime() || 0
-        const timeB = b._rawDate || new Date(b.date.split('.').reverse().join('-')).getTime() || 0
+        const timeA = a._rawDate || 0
+        const timeB = b._rawDate || 0
         return timeB - timeA
       })
 
@@ -550,6 +535,7 @@ export function useAnnouncements() {
 
   return { announcements, isLoading, refetch: loadAnnouncements }
 }
+
 
 export interface SmartAlert {
   id: string

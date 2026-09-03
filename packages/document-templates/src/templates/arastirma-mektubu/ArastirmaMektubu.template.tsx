@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { EditableField } from "../../document/EditableField";
-import { DateEditableField, MetadataBlock } from "../../document/ApprovalSignature";
+import {
+  DateEditableField,
+  MetadataBlock,
+} from "../../document/ApprovalSignature";
 import { ArastirmaMektubuType } from "./ArastirmaMektubu.schema";
 
 interface ArastirmaMektubuProps {
@@ -18,6 +21,10 @@ export function ArastirmaMektubu({
   const items = data.ihtiyacKalemleri || [];
   const komisyon = data.gorevlendirilenler || [];
 
+  useEffect(() => {
+    console.log(data);
+  });
+
   return (
     <DocumentLayout
       data={data as any}
@@ -27,7 +34,15 @@ export function ArastirmaMektubu({
       pageNumber={1}
       totalPages={1}
     >
-      <div style={{ width: "100%", fontSize: "12pt", color: "#000", fontFamily: "'Times New Roman', Times, serif", lineHeight: 1.5 }}>
+      <div
+        style={{
+          width: "100%",
+          fontSize: "12pt",
+          color: "#000",
+          fontFamily: "'Times New Roman', Times, serif",
+          lineHeight: 1.5,
+        }}
+      >
         <MetadataBlock
           evrakSayisi={data.evrakSayisi || data.detsisNo}
           tarih={data.dosyaTarihi || data.tarih}
@@ -35,25 +50,68 @@ export function ArastirmaMektubu({
           showBorder={false}
         />
 
-        <div style={{ marginTop: "15px", marginBottom: "10px", fontWeight: "bold", textIndent: "40px" }}>
-          <EditableField name="sayinIlgili" value={data.sayinIlgili} placeholder="Sayın İlgili," />
+        <div
+          style={{
+            marginTop: "15px",
+            marginBottom: "10px",
+            fontWeight: "bold",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <EditableField
+            name="sayinIlgili"
+            value={data.sayinIlgili}
+            placeholder="Sayın İlgili,"
+          />
         </div>
 
-        <div style={{ textIndent: "40px", textAlign: "justify", marginBottom: "20px", lineHeight: 1.5 }}>
-          {data.aciklamaMetni ? (
-            <EditableField name="aciklamaMetni" value={data.aciklamaMetni} multiline placeholder="Açıklama Metni" />
-          ) : (
-            "Aşağıda cins ve miktarları belirtilen mal/hizmet kalemlerinin yaklaşık maliyet tespiti için piyasa araştırması yapılmaktadır, birim fiyatlarını KDV hariç bildirmenizi rica ederim/ederiz."
-          )}
+        <div
+          style={{
+            textIndent: "40px",
+            textAlign: "justify",
+            marginBottom: "20px",
+            lineHeight: 1.5,
+          }}
+        >
+          {data.aciklamaMetni
+            ? (
+              <EditableField
+                name="aciklamaMetni"
+                value={data.aciklamaMetni}
+                multiline
+                placeholder="Açıklama Metni"
+              />
+            )
+            : (
+              "Aşağıda cins ve miktarları belirtilen mal/hizmet kalemlerinin yaklaşık maliyet tespiti için piyasa araştırması yapılmaktadır, birim fiyatlarını KDV hariç bildirmenizi rica ederim/ederiz."
+            )}
         </div>
 
         {/* KOMİSYON ÜYELERİ TABLOSU */}
         {komisyon.length > 0 && (
-          <table style={{ width: "100%", borderCollapse: "collapse", margin: "20px 0", textAlign: "center" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              margin: "20px 0",
+              textAlign: "center",
+            }}
+          >
             <tbody>
               <tr>
                 {komisyon.map((uye, idx) => (
-                  <td key={idx} style={{ verticalAlign: "top", fontSize: "10pt", padding: "5px", lineHeight: 1.3, width: `${100 / komisyon.length}%` }}>
+                  <td
+                    key={idx}
+                    style={{
+                      verticalAlign: "top",
+                      fontSize: "10pt",
+                      padding: "5px",
+                      lineHeight: 1.3,
+                      width: `${100 / komisyon.length}%`,
+                    }}
+                  >
                     <strong>{uye.komisyonGorevi}</strong>
                     <br />
                     {uye.adSoyad}
@@ -67,46 +125,193 @@ export function ArastirmaMektubu({
         )}
 
         {/* MALZEME/HİZMET LİSTESİ TABLOSU */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px", fontSize: "10pt" }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginTop: "20px",
+            fontSize: "10pt",
+          }}
+        >
           <thead>
             <tr>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "5%", textAlign: "center", fontWeight: "bold" }}>Sıra</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "35%", textAlign: "left", fontWeight: "bold" }}>Malzeme/Hizmet Adı</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "25%", textAlign: "left", fontWeight: "bold" }}>Özelliği</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "10%", textAlign: "center", fontWeight: "bold" }}>Birimi</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "10%", textAlign: "center", fontWeight: "bold" }}>Miktarı</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "15%", textAlign: "center", fontWeight: "bold" }}>Birim Fiyatı</th>
-              <th style={{ border: "1px solid #000", padding: "6px", width: "15%", textAlign: "center", fontWeight: "bold" }}>Tutarı</th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "5%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Sıra
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "35%",
+                  textAlign: "left",
+                  fontWeight: "bold",
+                }}
+              >
+                Malzeme/Hizmet Adı
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "25%",
+                  textAlign: "left",
+                  fontWeight: "bold",
+                }}
+              >
+                Özelliği
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "10%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Birimi
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "10%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Miktarı
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "15%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Birim Fiyatı
+              </th>
+              <th
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  width: "15%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Tutarı
+              </th>
             </tr>
           </thead>
           <tbody>
-            {items.length > 0 ? (
-              items.map((item, idx) => (
-                <tr key={idx}>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.siraNo || idx + 1}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px" }}>{item.malzemeAdi}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px" }}>{item.ozelligi || "-"}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "center" }}>{item.birimi || "-"}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.miktar}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.birimFiyat ? `${item.birimFiyat} ₺` : ""}</td>
-                  <td style={{ border: "1px solid #000", padding: "6px", textAlign: "right" }}>{item.tutar ? `${item.tutar} ₺` : ""}</td>
+            {items.length > 0
+              ? (
+                items.map((item, idx) => (
+                  <tr key={idx}>
+                    <td
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {item.siraNo || idx + 1}
+                    </td>
+                    <td style={{ border: "1px solid #000", padding: "6px" }}>
+                      {item.malzemeAdi}
+                    </td>
+                    <td style={{ border: "1px solid #000", padding: "6px" }}>
+                      {item.ozelligi || "-"}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {item.birimi || "-"}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px",
+                        textAlign: "right",
+                      }}
+                    >
+                      {item.miktar}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px",
+                        textAlign: "right",
+                      }}
+                    >
+                      {item.birimFiyat ? `${item.birimFiyat} ₺` : ""}
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid #000",
+                        padding: "6px",
+                        textAlign: "right",
+                      }}
+                    >
+                      {item.tutar ? `${item.tutar} ₺` : ""}
+                    </td>
+                  </tr>
+                ))
+              )
+              : (
+                <tr>
+                  <td
+                    colSpan={7}
+                    style={{
+                      border: "1px solid #000",
+                      padding: "8px",
+                      textAlign: "center",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Kalem bulunamadı
+                  </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} style={{ border: "1px solid #000", padding: "8px", textAlign: "center", fontStyle: "italic" }}>
-                  Kalem bulunamadı
-                </td>
-              </tr>
-            )}
+              )}
           </tbody>
         </table>
 
         {/* FİRMA YETKİLİSİ İMZA ALANI */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: "30px", fontSize: "11pt", lineHeight: 1.8 }}>
-          <div style={{ fontStyle: "italic", color: "#333" }}>Para Birimi: Türk Lirası (TL)</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginTop: "30px",
+            fontSize: "11pt",
+            lineHeight: 1.8,
+          }}
+        >
+          <div style={{ fontStyle: "italic", color: "#333" }}>
+            Para Birimi: Türk Lirası (TL)
+          </div>
           <div style={{ textAlign: "right", marginLeft: "auto" }}>
-            Tarih: <DateEditableField name="tarih" value={data.tarih || data.dosyaTarihi} placeholder=".…../.…../20…" />
+            Tarih:{" "}
+            <DateEditableField
+              name="tarih"
+              value={data.tarih || data.dosyaTarihi}
+              placeholder=".…../.…../20…"
+            />
             <br />
             Kaşe:
             <br />
