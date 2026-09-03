@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { DocumentPreviewModalV2Props } from "./types";
 import { useDocumentPreviewData } from "./hooks/useDocumentPreviewData";
 import { DocumentPreviewHeader } from "./components/DocumentPreviewHeader";
 import { DocumentPreviewSidebar } from "./components/DocumentPreviewSidebar";
 import { DocumentPreviewCanvas } from "./components/DocumentPreviewCanvas";
+import { FloatingDocumentBubble } from "./components/FloatingDocumentBubble";
 
 export function DocumentPreviewModalV2({
   isOpen,
@@ -13,6 +14,8 @@ export function DocumentPreviewModalV2({
   onClose,
   isModal = false,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
+  const [isBalloon, setIsBalloon] = useState(false);
+
   const {
     isLoading,
     activeTemplateConf,
@@ -59,6 +62,25 @@ export function DocumentPreviewModalV2({
 
   if (!isOpen) return null;
 
+  const docTitle = activeTemplateConf?.name.replace(/([A-Z])/g, " $1").trim();
+
+  // If in floating balloon mode, render only the floating bubble
+  if (isBalloon) {
+    return (
+      <FloatingDocumentBubble
+        documentTitle={docTitle}
+        onExpand={() => setIsBalloon(false)}
+        onClose={() => {
+          setIsBalloon(false);
+          onClose();
+        }}
+        onPrint={handlePrint}
+        onPdf={handlePdf}
+        isPrinting={isPrinting}
+      />
+    );
+  }
+
   const mainContent = (
     <div
       className={isFullScreen
@@ -71,8 +93,7 @@ export function DocumentPreviewModalV2({
       {/* Header Bar */}
       <DocumentPreviewHeader
         onClose={onClose}
-        documentTitle={activeTemplateConf?.name.replace(/([A-Z])/g, " $1")
-          .trim()}
+        documentTitle={docTitle}
         zoomMode={zoomMode}
         manualZoom={manualZoom}
         previewScale={previewScale}
@@ -93,6 +114,7 @@ export function DocumentPreviewModalV2({
         handleRefreshFromDb={handleRefreshFromDb}
         handlePdf={handlePdf}
         handleOpenPdfInNewTab={handleOpenPdfInNewTab}
+        onToggleBalloon={() => setIsBalloon(true)}
       />
 
       {/* Main Area: Sidebar + Canvas */}
@@ -145,3 +167,4 @@ export function DocumentPreviewModalV2({
 }
 
 export default DocumentPreviewModalV2;
+

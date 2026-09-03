@@ -135,21 +135,43 @@ export function DocumentPreviewSidebar({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-              2. sayfada imzanın tek başına kalmaması için 1. sayfadaki satır
-              sayısını azaltabilir veya araya boşluk ekleyebilirsiniz.
+              Tabloyu istediğiniz satırdan 2. sayfaya bölebilir, imzanın tek başına kalmasını önleyebilirsiniz.
             </p>
 
-            {/* 1. Sayfa Kalem Limiti Slider */}
-            <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            {/* Satırdan Bölme Ayarı */}
+            <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-300 font-medium">
-                  1. Sayfa Satır Limiti:
+                  1. Sayfada Kalacak Satır:
                 </span>
                 <strong className="text-blue-600 dark:text-blue-400 font-mono text-xs">
-                  {formData.firstPageLimit ?? "Otomatik"}
+                  {formData.firstPageLimit ? `${formData.firstPageLimit}. Satırdan Sonra Böl` : "Otomatik"}
                 </strong>
               </div>
-              <div className="flex items-center gap-2">
+
+              {/* Hızlı Satır Seçim Butonları */}
+              <div className="flex items-center gap-1">
+                {[3, 5, 7, 10, 15].map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        firstPageLimit: count,
+                      }))}
+                    className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition-colors cursor-pointer border ${
+                      formData.firstPageLimit === count
+                        ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                        : "bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {count}. Satır
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() =>
@@ -191,6 +213,7 @@ export function DocumentPreviewSidebar({
                 </button>
               </div>
             </div>
+
 
             {/* Newline / Boşluk Satırı Ekleme */}
             <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/80">

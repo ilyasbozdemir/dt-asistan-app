@@ -17,6 +17,8 @@ import { routeComponents } from './routeComponents'
 import { FindInPage } from './FindInPage'
 import { WorkspaceCloseModal } from './WorkspaceCloseModal'
 import { GoogleDriveModal } from '../ui/GoogleDriveModal'
+import { GlobalDocumentPreviewHost } from './GlobalDocumentPreviewHost'
+
 
 
 export function PageWrapper(): React.ReactNode {
@@ -526,6 +528,8 @@ export function PageWrapper(): React.ReactNode {
         isOpen={isGDriveModalOpen}
         onClose={() => setIsGDriveModalOpen(false)}
       />
+      <GlobalDocumentPreviewHost />
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { DocumentLayout } from "../../document/DocumentLayout";
 import { EditableField } from "../../document/EditableField";
 import {
@@ -20,19 +20,184 @@ export function ArastirmaMektubu({
 }: ArastirmaMektubuProps) {
   const items = data.ihtiyacKalemleri || [];
   const komisyon = data.gorevlendirilenler || [];
+  const firstPageLimit = data.firstPageLimit
+    ? Number(data.firstPageLimit)
+    : null;
 
-  useEffect(() => {
-    console.log(data);
-  });
+  const isMultiPage = firstPageLimit !== null && items.length > firstPageLimit;
+  const page1Items = isMultiPage ? items.slice(0, firstPageLimit) : items;
+  const page2Items = isMultiPage ? items.slice(firstPageLimit) : [];
 
-  return (
+  const renderTableHead = () => (
+    <thead>
+      <tr style={{ backgroundColor: "#f2f2f2" }}>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "5%",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          Sıra
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "35%",
+            textAlign: "left",
+            fontWeight: "bold",
+          }}
+        >
+          Malzeme/Hizmet Adı
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "25%",
+            textAlign: "left",
+            fontWeight: "bold",
+          }}
+        >
+          Özelliği
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "10%",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          Birimi
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "10%",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          Miktarı
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "15%",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          Birim Fiyatı
+        </th>
+        <th
+          style={{
+            border: "1px solid #000",
+            padding: "6px",
+            width: "15%",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          Tutarı
+        </th>
+      </tr>
+    </thead>
+  );
+
+  const renderTableRows = (rowItems: typeof items, startIndex = 0) => (
+    <tbody>
+      {rowItems.length > 0
+        ? (
+          rowItems.map((item, idx) => (
+            <tr key={idx}>
+              <td
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  textAlign: "center",
+                }}
+              >
+                {item.siraNo || startIndex + idx + 1}
+              </td>
+              <td style={{ border: "1px solid #000", padding: "6px" }}>
+                {item.malzemeAdi}
+              </td>
+              <td style={{ border: "1px solid #000", padding: "6px" }}>
+                {item.ozelligi || "-"}
+              </td>
+              <td
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  textAlign: "center",
+                }}
+              >
+                {item.birimi || "-"}
+              </td>
+              <td
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  textAlign: "right",
+                }}
+              >
+                {item.miktar}
+              </td>
+              <td
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  textAlign: "right",
+                }}
+              >
+                {item.birimFiyat ? `${item.birimFiyat} ₺` : ""}
+              </td>
+              <td
+                style={{
+                  border: "1px solid #000",
+                  padding: "6px",
+                  textAlign: "right",
+                }}
+              >
+                {item.tutar ? `${item.tutar} ₺` : ""}
+              </td>
+            </tr>
+          ))
+        )
+        : (
+          <tr>
+            <td
+              colSpan={7}
+              style={{
+                border: "1px solid #000",
+                padding: "8px",
+                textAlign: "center",
+                fontStyle: "italic",
+              }}
+            >
+              Kalem bulunamadı
+            </td>
+          </tr>
+        )}
+    </tbody>
+  );
+
+  const renderPage1 = (isSinglePage: boolean) => (
     <DocumentLayout
       data={data as any}
       hideFooter={false}
       pageSize={pageSize}
       orientation={orientation}
       pageNumber={1}
-      totalPages={1}
+      totalPages={isSinglePage ? 1 : 2}
     >
       <div
         style={{
@@ -133,171 +298,89 @@ export function ArastirmaMektubu({
             fontSize: "10pt",
           }}
         >
-          <thead>
-            <tr>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "5%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Sıra
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "35%",
-                  textAlign: "left",
-                  fontWeight: "bold",
-                }}
-              >
-                Malzeme/Hizmet Adı
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "25%",
-                  textAlign: "left",
-                  fontWeight: "bold",
-                }}
-              >
-                Özelliği
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "10%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Birimi
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "10%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Miktarı
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "15%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Birim Fiyatı
-              </th>
-              <th
-                style={{
-                  border: "1px solid #000",
-                  padding: "6px",
-                  width: "15%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Tutarı
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length > 0
-              ? (
-                items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "6px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.siraNo || idx + 1}
-                    </td>
-                    <td style={{ border: "1px solid #000", padding: "6px" }}>
-                      {item.malzemeAdi}
-                    </td>
-                    <td style={{ border: "1px solid #000", padding: "6px" }}>
-                      {item.ozelligi || "-"}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "6px",
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.birimi || "-"}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "6px",
-                        textAlign: "right",
-                      }}
-                    >
-                      {item.miktar}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "6px",
-                        textAlign: "right",
-                      }}
-                    >
-                      {item.birimFiyat ? `${item.birimFiyat} ₺` : ""}
-                    </td>
-                    <td
-                      style={{
-                        border: "1px solid #000",
-                        padding: "6px",
-                        textAlign: "right",
-                      }}
-                    >
-                      {item.tutar ? `${item.tutar} ₺` : ""}
-                    </td>
-                  </tr>
-                ))
-              )
-              : (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{
-                      border: "1px solid #000",
-                      padding: "8px",
-                      textAlign: "center",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Kalem bulunamadı
-                  </td>
-                </tr>
-              )}
-          </tbody>
+          {renderTableHead()}
+          {renderTableRows(page1Items, 0)}
         </table>
 
-        {/* FİRMA YETKİLİSİ İMZA ALANI */}
+        {/* EĞER TEK SAYFAYSA İMZA ALANINI BURADA GÖSTER */}
+        {isSinglePage && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginTop: "30px",
+              fontSize: "11pt",
+              lineHeight: 1.8,
+            }}
+          >
+            <div style={{ fontStyle: "italic", color: "#333" }}>
+              Para Birimi: Türk Lirası (TL)
+            </div>
+            <div style={{ textAlign: "right", marginLeft: "auto" }}>
+              Tarih:{" "}
+              <DateEditableField
+                name="tarih"
+                value={data.tarih || data.dosyaTarihi}
+                placeholder=".…../.…../20…"
+              />
+              <br />
+              Kaşe:
+              <br />
+              <br />
+              İmza:
+            </div>
+          </div>
+        )}
+      </div>
+    </DocumentLayout>
+  );
+
+  const renderPage2 = () => (
+    <DocumentLayout
+      data={data as any}
+      hideFooter={false}
+      pageSize={pageSize}
+      orientation={orientation}
+      pageNumber={2}
+      totalPages={2}
+      hideHeader={true}
+    >
+      <div
+        style={{
+          width: "100%",
+          fontSize: "12pt",
+          color: "#000",
+          fontFamily: "'Times New Roman', Times, serif",
+          lineHeight: 1.5,
+        }}
+      >
+        <div
+          style={{ fontWeight: "bold", fontSize: "11pt", marginBottom: "10px" }}
+        >
+          Piyasa Fiyat Araştırma Mektubu (Devamı)
+        </div>
+
+        {/* TABLO DEVAMI */}
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginTop: "10px",
+            fontSize: "10pt",
+          }}
+        >
+          {renderTableHead()}
+          {renderTableRows(page2Items, firstPageLimit || 0)}
+        </table>
+
+        {/* 2. SAYFA FİRMA YETKİLİSİ İMZA ALANI */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            marginTop: "30px",
+            marginTop: "35px",
             fontSize: "11pt",
             lineHeight: 1.8,
           }}
@@ -321,5 +404,16 @@ export function ArastirmaMektubu({
         </div>
       </div>
     </DocumentLayout>
+  );
+
+  if (!isMultiPage) {
+    return renderPage1(true);
+  }
+
+  return (
+    <>
+      {renderPage1(false)}
+      {renderPage2()}
+    </>
   );
 }

@@ -14,6 +14,7 @@ import {
   X,
   ZoomIn,
   ZoomOut,
+  Layers,
 } from "lucide-react";
 
 interface DocumentPreviewHeaderProps {
@@ -39,7 +40,9 @@ interface DocumentPreviewHeaderProps {
   handleRefreshFromDb: () => Promise<void>;
   handlePdf: () => Promise<void>;
   handleOpenPdfInNewTab: () => Promise<void>;
+  onToggleBalloon?: () => void;
 }
+
 
 export function DocumentPreviewHeader({
   onClose,
@@ -64,7 +67,9 @@ export function DocumentPreviewHeader({
   handleRefreshFromDb,
   handlePdf,
   handleOpenPdfInNewTab,
+  onToggleBalloon,
 }: DocumentPreviewHeaderProps): React.JSX.Element {
+
   return (
     <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4 shrink-0 select-none">
       {/* Left: Back Button & Title */}
@@ -133,6 +138,18 @@ export function DocumentPreviewHeader({
           </button>
         </div>
 
+        {/* Toggle Floating Balloon Mode */}
+        {onToggleBalloon && (
+          <button
+            type="button"
+            onClick={onToggleBalloon}
+            className="p-1.5 rounded-xl font-bold transition-all flex items-center justify-center text-xs cursor-pointer border bg-blue-50/80 hover:bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800"
+            title="Yüzen Balon Moduna Al (Ekranın köşesine küçült)"
+          >
+            <Layers className="w-4 h-4" />
+          </button>
+        )}
+
         {/* Toggle Full Screen */}
         <button
           onClick={() => setIsFullScreen((v) => !v)}
@@ -147,6 +164,7 @@ export function DocumentPreviewHeader({
             ? <Minimize2 className="w-4 h-4" />
             : <Maximize2 className="w-4 h-4" />}
         </button>
+
 
         {/* Toggle Sidebar */}
         <button
