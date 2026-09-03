@@ -13,6 +13,7 @@ import {
 import { cn } from '../../../utils/cn'
 import { DurumBadge, TurBadge } from './Badges'
 import { DosyaActionMenu } from './DosyaActionMenu'
+import { DosyaHizliIcerikPopover } from './DosyaHizliIcerikPopover'
 import { useNavigate } from '@tanstack/react-router'
 
 export interface DosyalarGridViewProps {
@@ -148,6 +149,7 @@ export function DosyalarGridView({
                           status={dosya.status}
                         />
                         <TurBadge tur={dosya.tur} />
+                        <DosyaHizliIcerikPopover dosya={dosya} />
                         <DosyaActionMenu
                           dosya={dosya}
                           openMenuId={openMenuId}

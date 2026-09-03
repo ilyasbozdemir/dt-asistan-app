@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronRight, FolderOpen } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { TurBadge } from './Badges'
 import { DosyaActionMenu } from './DosyaActionMenu'
+import { DosyaHizliIcerikPopover } from './DosyaHizliIcerikPopover'
 import { useNavigate } from '@tanstack/react-router'
 
 export interface DosyalarTableViewProps {
@@ -164,21 +165,24 @@ export function DosyalarTableView({
                             : formatDate(dosya.created_at)}
                         </td>
                         <td className="p-3.5 text-right pr-5">
-                          <DosyaActionMenu
-                            dosya={dosya}
-                            openMenuId={openMenuId}
-                            setOpenMenuId={setOpenMenuId}
-                            selectedDosyaIds={selectedDosyaIds}
-                            menuClassName="right-full mr-2 top-0 mt-0 w-48 text-left z-50 inline-block"
-                            handleOpenInNewWindow={handleOpenInNewWindow}
-                            handleUpdateStatus={handleUpdateStatus}
-                            handleEkapGonder={handleEkapGonder}
-                            handleKilidiAc={handleKilidiAc}
-                            handleOpenAI={handleOpenAI}
-                            handleDelete={handleDelete}
-                            handleHardDelete={handleHardDelete}
-                            handleOpenMaliyetAyarlari={handleOpenMaliyetAyarlari}
-                          />
+                          <div className="flex items-center justify-end gap-1">
+                            <DosyaHizliIcerikPopover dosya={dosya} />
+                            <DosyaActionMenu
+                              dosya={dosya}
+                              openMenuId={openMenuId}
+                              setOpenMenuId={setOpenMenuId}
+                              selectedDosyaIds={selectedDosyaIds}
+                              menuClassName="right-full mr-2 top-0 mt-0 w-48 text-left z-50 inline-block"
+                              handleOpenInNewWindow={handleOpenInNewWindow}
+                              handleUpdateStatus={handleUpdateStatus}
+                              handleEkapGonder={handleEkapGonder}
+                              handleKilidiAc={handleKilidiAc}
+                              handleOpenAI={handleOpenAI}
+                              handleDelete={handleDelete}
+                              handleHardDelete={handleHardDelete}
+                              handleOpenMaliyetAyarlari={handleOpenMaliyetAyarlari}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}
