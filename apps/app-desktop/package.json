@@ -1,6 +1,6 @@
 {
   "name": "app-desktop",
-  "version": "1.0.0-beta.82",
+  "version": "1.0.0-beta.83",
   "description": "HAKİM Pro - Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi",
   "main": "./out/main/index.js",
   "author": "ilyasbozdemir.dev",
