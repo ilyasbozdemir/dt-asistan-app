@@ -1,13 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Download,
   FileText,
+  Layers,
   Maximize2,
   Printer,
-  Download,
   X,
-  GripHorizontal,
-  Sparkles,
-  Layers
 } from "lucide-react";
 
 interface FloatingDocumentBubbleProps {
@@ -28,17 +26,23 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
   isPrinting = false,
 }) => {
   // Position state (default: bottom-right offset)
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [position, setPosition] = useState<{ x: number; y: number }>(() => {
+    const defaultX = typeof window !== "undefined"
+      ? window.innerWidth - 380
+      : 20;
+    const defaultY = typeof window !== "undefined"
+      ? window.innerHeight - 100
+      : 20;
+    return {
+      x: Math.max(20, defaultX),
+      y: Math.max(20, defaultY),
+    };
+  });
   const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null);
+  const dragRef = useRef<
+    { startX: number; startY: number; posX: number; posY: number } | null
+  >(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
-
-  // Initialize position on mount
-  useEffect(() => {
-    const defaultX = window.innerWidth - 380;
-    const defaultY = window.innerHeight - 100;
-    setPosition({ x: Math.max(20, defaultX), y: Math.max(20, defaultY) });
-  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Only drag from handle or card background, not buttons
@@ -48,8 +52,8 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
     dragRef.current = {
       startX: e.clientX,
       startY: e.clientY,
-      posX: position?.x || (window.innerWidth - 380),
-      posY: position?.y || (window.innerHeight - 100),
+      posX: position.x,
+      posY: position.y,
     };
   };
 
@@ -58,16 +62,16 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
       if (!isDragging || !dragRef.current) return;
       const dx = e.clientX - dragRef.current.startX;
       const dy = e.clientY - dragRef.current.startY;
-      
+
       const newX = Math.min(
         Math.max(10, dragRef.current.posX + dx),
-        window.innerWidth - 360
+        window.innerWidth - 360,
       );
       const newY = Math.min(
         Math.max(10, dragRef.current.posY + dy),
-        window.innerHeight - 80
+        window.innerHeight - 80,
       );
-      
+
       setPosition({ x: newX, y: newY });
     };
 
@@ -86,8 +90,6 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
     };
   }, [isDragging]);
 
-  if (!position) return null;
-
   return (
     <div
       ref={bubbleRef}
@@ -98,7 +100,6 @@ export const FloatingDocumentBubble: React.FC<FloatingDocumentBubbleProps> = ({
         top: `${position.y}px`,
         zIndex: 60,
       }}
-
       className={`group select-none transition-shadow duration-200 ${
         isDragging ? "cursor-grabbing opacity-95 scale-102" : "cursor-grab"
       }`}
