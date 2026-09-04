@@ -9,6 +9,7 @@ import {
 import { buildDocumentContext, formatDateString } from './CiktiMerkezi.contextBuilder'
 import { filterContextForTemplate } from './CiktiMerkezi.mediator'
 import { defaultTemplatesByPath } from '../sablonlar/components/defaultTemplates'
+import { useAppEventListener } from '../../utils/appEvents'
 export interface UseCiktiMerkeziDataResult {
   sablons: Sablon[]
   loading: boolean
@@ -426,6 +427,22 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
       }
     },
     [activeDosyaId]
+  )
+
+  // Listen to realtime socket/broadcast events across all screens
+  useAppEventListener(
+    [
+      'items:changed',
+      'bids:changed',
+      'documents:changed',
+      'dossier:updated',
+      'status:changed',
+      'print_queue:updated',
+      'workspace:refreshed'
+    ],
+    () => {
+      loadData(true)
+    }
   )
 
   useEffect(() => {

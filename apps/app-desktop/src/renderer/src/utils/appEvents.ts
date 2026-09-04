@@ -63,6 +63,19 @@ function getBroadcastChannel(): BroadcastChannel | null {
   return broadcastChannel
 }
 
+// Subscribe to Electron IPC data-changed events across all windows
+if (typeof window !== 'undefined' && window.electron?.ipcRenderer) {
+  try {
+    window.electron.ipcRenderer.on('app:data-changed', (_event: any, msg: AppEventMessage) => {
+      if (msg && msg.type && msg.senderId !== SENDER_ID) {
+        handleIncomingEvent(msg, false)
+      }
+    })
+  } catch (e) {
+    console.warn('IPC listener registration error:', e)
+  }
+}
+
 // Internal dispatcher when an event is received (locally or remotely)
 function handleIncomingEvent(msg: AppEventMessage, isLocalOrigin: boolean): void {
   // 1. Dispatch custom DOM event in current window for reactive hooks
@@ -159,7 +172,10 @@ export function useAppEventListener(
   callback: (event: AppEventMessage) => void
 ): void {
   const callbackRef = useRef(callback)
-  callbackRef.current = callback
+
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
 
   useEffect(() => {
     // Ensure channel is initialized

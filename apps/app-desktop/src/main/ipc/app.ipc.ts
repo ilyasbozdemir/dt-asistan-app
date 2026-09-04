@@ -1,4 +1,4 @@
-import { ipcMain, app } from 'electron'
+import { ipcMain, app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import fs from 'fs'
 import { manifests } from '@dt/database'
@@ -55,6 +55,16 @@ export function registerAppIpcHandlers(
   setForceQuit: () => void,
   initialFilePath: string | null
 ): void {
+  // Realtime multi-window / tab data event relay
+  ipcMain.on('app:data-changed', (event, msg) => {
+    const windows = BrowserWindow.getAllWindows()
+    for (const win of windows) {
+      if (!win.isDestroyed() && win.webContents.id !== event.sender.id) {
+        win.webContents.send('app:data-changed', msg)
+      }
+    }
+  })
+
   ipcMain.handle('app:get-version', () => {
     return app.getVersion()
   })

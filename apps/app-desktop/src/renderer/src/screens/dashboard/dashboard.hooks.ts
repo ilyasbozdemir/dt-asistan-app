@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { useState, useEffect, useCallback } from 'react'
 import fallbackAnnouncements from '../../constants/announcements.fallback.json'
+import { useAppEventListener } from '../../utils/appEvents'
 
 export interface DashboardStats {
   ihaleDosyaSayisi: number
@@ -263,6 +264,22 @@ export function useDashboardStats() {
       setIsLoading(false)
     }
   }, [])
+
+  // Realtime event synchronization across all screens
+  useAppEventListener(
+    [
+      'dossier:created',
+      'dossier:updated',
+      'dossier:deleted',
+      'items:changed',
+      'bids:changed',
+      'status:changed',
+      'workspace:refreshed'
+    ],
+    () => {
+      loadStats()
+    }
+  )
 
   useEffect(() => {
     loadStats()
@@ -528,6 +545,20 @@ export function useAnnouncements() {
       setIsLoading(false)
     }
   }, [])
+
+  // Realtime updates for system notifications & file updates
+  useAppEventListener(
+    [
+      'dossier:created',
+      'dossier:updated',
+      'dossier:deleted',
+      'status:changed',
+      'workspace:refreshed'
+    ],
+    () => {
+      loadAnnouncements()
+    }
+  )
 
   useEffect(() => {
     loadAnnouncements()
