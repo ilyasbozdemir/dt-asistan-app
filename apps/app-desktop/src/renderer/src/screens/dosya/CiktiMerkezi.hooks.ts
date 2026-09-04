@@ -39,6 +39,30 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
       if (!activeDosyaId) return
       if (!isBackgroundRefresh) setLoading(true)
       try {
+        // 1. Single-shot ultra fast server-side resolution via Node.js
+        if (window.electron?.ipcRenderer) {
+          try {
+            const fastRes = await window.electron.ipcRenderer.invoke('belge:get-all-cikti-data', {
+              dosyaId: activeDosyaId
+            })
+            if (fastRes && fastRes.success && fastRes.data) {
+              const d = fastRes.data
+              if (d.sablons) setSablons(d.sablons)
+              if (d.masterHtml) setMasterHtml(d.masterHtml)
+              if (d.dosyaContext) setDosyaContext(d.dosyaContext)
+              if (d.placeholders) setPlaceholders(d.placeholders)
+              if (d.personelListesi) setPersonelListesi(d.personelListesi)
+              if (d.settings) setSettings(d.settings)
+              if (d.activeDosya) setActiveDosya(d.activeDosya)
+              if (d.contextsByPath) setContextsByPath(d.contextsByPath)
+              setLoading(false)
+              return
+            }
+          } catch {
+            // Fallback to manual resolution if IPC fails
+          }
+        }
+
         // Master HTML'i al
         const mHtml = await window.electron.ipcRenderer.invoke(
           'template:read-system',

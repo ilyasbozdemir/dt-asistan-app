@@ -28,6 +28,8 @@ const allowedChannels = new Set([
   'workspace:upload-file',
   'workspace:open-file',
   // Document
+  'belge:get-all-cikti-data',
+  'get-all-cikti-data',
   'belge:get-document-payload',
   'get-document-payload',
   'belge:export-docx',
