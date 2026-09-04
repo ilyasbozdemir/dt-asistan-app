@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
+import { useNavigate, useRouterState } from '@tanstack/react-router'
 import { TeminDosyasi, useDosyalarHooks } from './dosyalar.hooks'
 import { useTabStore } from '../../store/tabStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -96,7 +96,7 @@ export interface UseYeniDosyaScreenReturn {
 export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const navigate = useNavigate()
   const routerState = useRouterState()
-  const search: any = useSearch({ strict: false }) || {}
+  const search: any = (routerState?.location?.search as any) || {}
   const { dosyalar, addDosya, updateDosya } = useDosyalarHooks()
   const { updateTabLabel } = useTabStore()
   const { institutionName, limitType } = useSettingsStore()
