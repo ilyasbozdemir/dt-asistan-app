@@ -1,5 +1,5 @@
-import React from 'react'
-import { Copy, FileText, Loader2, Search, Sparkles } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { AlertTriangle, Copy, FileText, Loader2, RefreshCw, Search, Sparkles } from 'lucide-react'
 import { cn } from '../../../../../utils/cn'
 import { YeniDosyaTabProps } from '../../../types'
 
@@ -8,6 +8,9 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
     formData,
     setFormData,
     birimler,
+    dosyalar = [],
+    isEdit,
+    editId,
     isDescLoading,
     showKonuSuggestions,
     setShowKonuSuggestions,
@@ -26,13 +29,41 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
     kurum
   } = props
 
+  const targetYear = useMemo(() => {
+    return (
+      formData.butce_yili ||
+      (formData.dosya_acilis_tarihi
+        ? new Date(formData.dosya_acilis_tarihi).getFullYear()
+        : new Date().getFullYear())
+    )
+  }, [formData.butce_yili, formData.dosya_acilis_tarihi])
+
+  // Temin No Mükerrerlik (Benzersizlik) Kontrolü (Aynı bütçe yılı içinde benzersiz olmalıdır)
+  const isDuplicateTeminNo = useMemo(() => {
+    if (!formData.temin_no?.trim() || !dosyalar || dosyalar.length === 0) return false
+    const currentTeminNo = formData.temin_no.trim()
+    return dosyalar.some((d) => {
+      if (d.is_deleted) return false
+      if (isEdit && d.id === editId) return false
+      const dYear =
+        d.butce_yili || (d.dosya_acilis_tarihi ? new Date(d.dosya_acilis_tarihi).getFullYear() : 0)
+      return (dYear === targetYear || !dYear) && d.temin_no?.trim() === currentTeminNo
+    })
+  }, [formData.temin_no, dosyalar, isEdit, editId, targetYear])
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-        <FileText className="text-blue-500 w-5 h-5" />
-        <h2 className="text-base font-bold text-slate-800 dark:text-white">
-          Genel Bilgiler & İdari Antet Yapısı
-        </h2>
+      <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <FileText className="text-blue-500 w-5 h-5" />
+          <h2 className="text-base font-bold text-slate-800 dark:text-white">
+            Genel Bilgiler & İdari Antet Yapısı
+          </h2>
+        </div>
+        <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+          Temin Formatı: <strong>{targetYear}/[Sıra No]</strong> (Yıllık Benzersiz)
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -113,18 +144,77 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
               </span>
             )}
           </label>
-          <input
-            type="text"
-            value={formData.temin_no || ''}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                temin_no: e.target.value
-              })
-            }
-            placeholder="Örn: 2026/5"
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-200 font-bold"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={formData.temin_no || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  temin_no: e.target.value
+                })
+              }
+              onBlur={(e) => {
+                let val = e.target.value.trim()
+                if (!val) return
+                // Çift yıl temizliği (Örn: "2026/2026/1" -> "2026/1")
+                const doubleMatch = val.match(/^(\d{4})[/-]\1[/-](\d+)$/)
+                if (doubleMatch) {
+                  val = `${doubleMatch[1]}/${doubleMatch[2]}`
+                } else if (/^\d+$/.test(val)) {
+                  // Sadece sayı girildiyse (Örn: "5" -> "2026/5")
+                  val = `${targetYear}/${val}`
+                }
+                setFormData({
+                  ...formData,
+                  temin_no: val
+                })
+              }}
+              placeholder={`Örn: ${targetYear}/1`}
+              className={cn(
+                'w-full pl-3.5 pr-24 py-2.5 bg-slate-50 dark:bg-slate-950 border rounded-xl text-xs focus:outline-none focus:ring-1 text-slate-800 dark:text-slate-200 font-bold',
+                isDuplicateTeminNo
+                  ? 'border-amber-400 dark:border-amber-600 focus:ring-amber-500 bg-amber-50/20'
+                  : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500'
+              )}
+            />
+            {getNextTeminNo && (
+              <button
+                type="button"
+                title="Sıradaki benzersiz numarayı getir"
+                onClick={() => {
+                  const nextNo = getNextTeminNo(targetYear)
+                  setFormData({ ...formData, temin_no: nextNo })
+                }}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold px-2 py-1 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer border-none"
+              >
+                <RefreshCw size={11} /> Sıradaki No
+              </button>
+            )}
+          </div>
+
+          {isDuplicateTeminNo && (
+            <div className="flex items-center justify-between gap-2 mt-1.5 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-[11px] text-amber-800 dark:text-amber-200 animate-in fade-in duration-200">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span className="truncate">
+                  <strong>{formData.temin_no}</strong> numarası {targetYear} yılında zaten kullanımda!
+                </span>
+              </div>
+              {getNextTeminNo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextNo = getNextTeminNo(targetYear)
+                    setFormData({ ...formData, temin_no: nextNo })
+                  }}
+                  className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold text-[10px] transition-colors shrink-0 cursor-pointer"
+                >
+                  Sıradakini Ata
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -167,7 +257,7 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
           {(exactMatchCount ?? 0) > 0 && (
             <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1.5 flex items-center gap-1 animate-in fade-in duration-200">
               ⚠️ Bu isimde daha önce {exactMatchCount} adet dosya açılmış. Kaydedildiğinde otomatik
-              olarak "({(exactMatchCount ?? 0) + 1})" son eki eklenecektir.
+              olarak &quot;({(exactMatchCount ?? 0) + 1})&quot; son eki eklenecektir.
             </p>
           )}
           {showKonuSuggestions && (matchedSuggestions ?? []).length > 0 && (
@@ -431,12 +521,12 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
                 } else {
                   seciliBirimYerleri = seciliBirim.ihtiyac_yeri_eki.split(',').map((s) => s.trim())
                 }
-              } catch (e) {
+              } catch {
                 seciliBirimYerleri = [seciliBirim.ihtiyac_yeri_eki]
               }
             }
 
-            let tumBirimYerleri: string[] = []
+            const tumBirimYerleri: string[] = []
             if (birimler) {
               birimler.forEach((b) => {
                 if (b.ihtiyac_yeri_eki) {
@@ -449,7 +539,7 @@ export function GenelBilgilerVeIdariAntetSection(props: YeniDosyaTabProps): Reac
                     } else {
                       tumBirimYerleri.push(...b.ihtiyac_yeri_eki.split(',').map((s) => s.trim()))
                     }
-                  } catch (e) {
+                  } catch {
                     tumBirimYerleri.push(b.ihtiyac_yeri_eki)
                   }
                 }

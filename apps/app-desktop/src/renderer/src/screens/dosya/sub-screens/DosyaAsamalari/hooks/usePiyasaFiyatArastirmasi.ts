@@ -40,6 +40,7 @@ export interface BiddingKalem {
 import { useTabStore } from '../../../../../store/tabStore'
 import { formatDateString } from '../../../CiktiMerkezi.contextBuilder'
 import { paraYaziyaCevir } from '../../../../../constants/sayiEslesmeleri'
+import { emitAppEvent, useAppEventListener } from '../../../../../utils/appEvents'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function usePiyasaFiyatArastirmasiLogic() {
@@ -300,6 +301,13 @@ export function usePiyasaFiyatArastirmasiLogic() {
     loadData()
   }, [activeDosyaId, activeTabPath, loadData])
 
+  useAppEventListener(
+    ['items:changed', 'dossier:updated', 'workspace:refreshed'],
+    () => {
+      loadData()
+    }
+  )
+
   const handleBulkAddFirms = async (): Promise<void> => {
     const targetDosyaId = activeDosyaId || Number(sessionStorage.getItem('workspace_dosya_id') || 0)
     if (!targetDosyaId || selectedFirmIds.length === 0) {
@@ -338,6 +346,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
       setSelectedFirmIds([])
       setIsFirmModalOpen(false)
       await loadData()
+      emitAppEvent('bids:changed', { dosyaId: targetDosyaId })
+      emitAppEvent('dossier:updated', { dosyaId: targetDosyaId })
     } catch (err: any) {
       alert('Hata: ' + err.message)
     }
@@ -374,6 +384,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
         ]
       )
       await loadData()
+      emitAppEvent('bids:changed', { dosyaId: targetDosyaId })
+      emitAppEvent('dossier:updated', { dosyaId: targetDosyaId })
     } catch (err: any) {
       alert('Hata: ' + err.message)
     }
@@ -400,6 +412,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
       )
       if (res.success) {
         await loadData()
+        emitAppEvent('bids:changed', { dosyaId: activeDosyaId })
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
       }
     } catch (err: any) {
       alert('Hata: ' + err.message)
@@ -437,6 +451,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
         `UPDATE DATA_TeminFirma SET teklif_toplami = ?, teklif_verdi_mi = 1, teklif_durumu = 'Teklif Verildi' WHERE id = ?`,
         [total, teminFirmaId]
       )
+
+      emitAppEvent('bids:changed', { dosyaId: activeDosyaId })
 
       const resInvited = await window.electron.ipcRenderer.invoke(
         'db:query',
@@ -857,6 +873,10 @@ export function usePiyasaFiyatArastirmasiLogic() {
       if (resBelgelerNew.success && resBelgelerNew.data) {
         setSavedDocuments(resBelgelerNew.data)
       }
+
+      emitAppEvent('documents:changed', { dosyaId: activeDosyaId, payload: { docName } })
+      emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
+      emitAppEvent('bids:changed', { dosyaId: activeDosyaId })
 
       setIsFormOpen(false)
 

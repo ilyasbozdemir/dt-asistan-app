@@ -10,6 +10,7 @@ import { DosyalarStats } from "./components/DosyalarStats";
 import { DosyalarFilterBar } from "./components/DosyalarFilterBar";
 import { DosyalarList } from "./components/DosyalarList";
 import { Sliders } from "lucide-react";
+import { formatDosyaNo } from "../../utils/formatDosyaNo";
 
 export default function DosyalarScreen(): React.ReactNode {
   const {
@@ -352,14 +353,7 @@ export default function DosyalarScreen(): React.ReactNode {
     return new Date(val).toLocaleDateString("tr-TR");
   };
 
-  const getDosyaNoLabel = (d: any) => {
-    if (!d || !d.temin_no) return "NO BELİRSİZ";
-    const yil = d.butce_yili ||
-      (d.dosya_acilis_tarihi
-        ? new Date(d.dosya_acilis_tarihi).getFullYear()
-        : new Date(d.created_at).getFullYear());
-    return `${yil}/${d.temin_no}`;
-  };
+  const getDosyaNoLabel = (d: any) => formatDosyaNo(d);
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 p-4 md:p-6 overflow-hidden gap-4">

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { ThemeProvider } from './components/providers/ThemeProvider'
 import { router } from './routes'
+import { setGlobalQueryClient } from './utils/appEvents'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,6 +13,8 @@ const queryClient = new QueryClient({
     }
   }
 })
+
+setGlobalQueryClient(queryClient)
 
 function App(): React.JSX.Element {
   return (

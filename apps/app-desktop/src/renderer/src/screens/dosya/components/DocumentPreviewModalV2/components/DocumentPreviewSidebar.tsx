@@ -1,10 +1,14 @@
 import React from "react";
-import { ChevronLeft, Edit3, FileText, Sliders } from "lucide-react";
+import { ChevronLeft, Edit3, FileText, Layers, Sliders } from "lucide-react";
 import { IhtiyacListesiType } from "@hakim-pro-app/document-templates";
+import { TemplateOptionItem } from "../templateResolver";
 
 interface DocumentPreviewSidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  selectedDocId?: string;
+  onSelectTemplate?: (id: string) => void;
+  templateOptions?: TemplateOptionItem[];
   isEditingMode: boolean;
   setIsEditingMode: (editing: boolean) => void;
   orientation: "portrait" | "landscape";
@@ -22,6 +26,9 @@ interface DocumentPreviewSidebarProps {
 export function DocumentPreviewSidebar({
   sidebarOpen,
   setSidebarOpen,
+  selectedDocId,
+  onSelectTemplate,
+  templateOptions = [],
   isEditingMode,
   setIsEditingMode,
   orientation,
@@ -59,6 +66,29 @@ export function DocumentPreviewSidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar min-h-0">
+        {/* Şablon Seçimi */}
+        {templateOptions && templateOptions.length > 0 && onSelectTemplate && (
+          <div className="space-y-1.5 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                Aktif Belge Şablonu
+              </span>
+            </div>
+            <select
+              value={selectedDocId || "ihtiyac-listesi"}
+              onChange={(e) => onSelectTemplate(e.target.value)}
+              className="w-full text-xs font-medium bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-2.5 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              {templateOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
           💡 <strong>Canlı Düzenleme:</strong>{" "}
           Belge üzerindeki metin, sayı, tarih ve imza alanlarını sağdaki A4

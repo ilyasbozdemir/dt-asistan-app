@@ -20,6 +20,7 @@ import { GenelBilgilerTab } from './tabs/GenelBilgilerTab'
 import { IhtiyacListesiTab } from './tabs/IhtiyacListesiTab'
 import { useYeniDosyaScreen } from './yeni.hooks'
 import { getEmptyFormData, getMockFormData } from './yeni.config'
+import { formatDosyaNo } from '../../utils/formatDosyaNo'
 
 export default function YeniDosyaScreen(): React.JSX.Element {
   const {
@@ -109,7 +110,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
               {isEdit ? 'Dosya Düzenle' : 'Yeni Doğrudan Temin'}
             </h1>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 hidden md:block">
-              {isEdit ? `Dosya ID: #${editId}` : 'Yeni kayıt oluşturuluyor'}
+              {isEdit ? formatDosyaNo({ ...formData, id: editId }) : (formData.temin_no ? formatDosyaNo(formData) : 'Yeni kayıt oluşturuluyor')}
             </p>
           </div>
         </div>
@@ -522,11 +523,13 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     formData={formData}
                     setFormData={setFormData}
                     isEdit={isEdit}
+                    editId={editId}
                     birimler={birimler}
                     kurum={kurum}
                     personeller={personeller}
                     kodSozlugu={kodSozlugu}
                     dosyalar={dosyalar}
+                    getNextTeminNo={getNextTeminNo}
                     isDescLoading={isDescLoading}
                     showKonuSuggestions={showKonuSuggestions}
                     setShowKonuSuggestions={setShowKonuSuggestions}
@@ -565,10 +568,12 @@ export default function YeniDosyaScreen(): React.JSX.Element {
                     formData={formData}
                     setFormData={setFormData}
                     isEdit={isEdit}
+                    editId={editId}
                     birimler={birimler}
                     personeller={personeller}
                     kodSozlugu={kodSozlugu}
                     dosyalar={dosyalar}
+                    getNextTeminNo={getNextTeminNo}
                   />
                 )}
               </>
@@ -576,7 +581,7 @@ export default function YeniDosyaScreen(): React.JSX.Element {
             {/* TAB CONTINUATION ACTION BUTTONS */}
             <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-5 mt-6">
               <div className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold uppercase tracking-wider">
-                {isEdit ? `Dosya ID: #${editId}` : 'Yeni Kayıt Yapılıyor'}
+                {isEdit ? formatDosyaNo({ ...formData, id: editId }) : (formData.temin_no ? formatDosyaNo(formData) : 'Yeni Kayıt Yapılıyor')}
               </div>
 
               <div className="flex gap-3">

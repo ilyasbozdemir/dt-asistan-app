@@ -13,7 +13,7 @@ export function startServer(port: number = 3000): { success: boolean; error?: st
 
     httpServer = http.createServer((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/plain' })
-      res.end('HAKİM Pro EBYS Server Running')
+      res.end('TEMİN 360 EBYS Server Running')
     })
 
     io = new SocketIOServer(httpServer, {

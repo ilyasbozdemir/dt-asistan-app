@@ -1,14 +1,14 @@
-appId: dev.ilyasbozdemir.hakimproapp
-productName: HAKİM Pro
+appId: dev.ilyasbozdemir.temin360
+productName: TEMİN 360
 fileAssociations:
   - ext: hkmp
-    name: HAKİM Pro Proje Dosyası
-    description: HAKİM Pro Proje Dosyası
+    name: TEMİN 360 Proje Dosyası
+    description: TEMİN 360 Proje Dosyası
     role: Editor
     icon: build/icon.png
   - ext: dtal
-    name: HAKİM Pro / DTAL Dosyası (Eski)
-    description: HAKİM Pro Veri Dosyası
+    name: TEMİN 360 / DTAL Dosyası (Eski)
+    description: TEMİN 360 Veri Dosyası
     role: Editor
     icon: build/icon.png
 directories:
@@ -33,7 +33,7 @@ extraResources:
       - '**/*'
 
 win:
-  executableName: HAKIMPro
+  executableName: TEMIN360
   icon: resources/icon.png
   target:
     - target: nsis
@@ -41,8 +41,8 @@ win:
         - x64
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: HAKİM Pro
-  uninstallDisplayName: HAKİM Pro
+  shortcutName: TEMİN 360
+  uninstallDisplayName: TEMİN 360
   createDesktopShortcut: always
   include: build/installer.nsh
 mac:

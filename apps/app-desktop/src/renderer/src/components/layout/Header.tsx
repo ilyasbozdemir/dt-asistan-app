@@ -270,7 +270,7 @@ export function Header(): React.JSX.Element {
         {
           label: 'Hakkında...',
           onClick: () =>
-            alert('HAKİM Pro\nKamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi')
+            alert('TEMİN 360\nKamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi')
         }
       ]
     }

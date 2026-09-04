@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText } from "lucide-react";
+import { FileText, Layers } from "lucide-react";
 import {
   IhtiyacListesiType,
   TemplateComponentType,
@@ -7,6 +7,7 @@ import {
 } from "@hakim-pro-app/document-templates";
 import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { Personel } from "../types";
+import { TemplateOptionItem } from "../templateResolver";
 
 interface DocumentPreviewCanvasProps {
   isLoading?: boolean;
@@ -21,6 +22,8 @@ interface DocumentPreviewCanvasProps {
   firmaListesi: any[];
   localShowLogoLeft: boolean;
   localShowLogoRight: boolean;
+  onSelectTemplate?: (id: string) => void;
+  templateOptions?: TemplateOptionItem[];
 }
 
 export function DocumentPreviewCanvas({
@@ -36,6 +39,8 @@ export function DocumentPreviewCanvas({
   firmaListesi,
   localShowLogoLeft,
   localShowLogoRight,
+  onSelectTemplate,
+  templateOptions = [],
 }: DocumentPreviewCanvasProps): React.JSX.Element {
   return (
     <div
@@ -77,7 +82,6 @@ export function DocumentPreviewCanvas({
               firmaListesi={firmaListesi}
               firstPageLimit={formData.firstPageLimit}
             >
-
               {React.createElement(ActiveComponent, {
                 data: {
                   ...formData,
@@ -99,12 +103,42 @@ export function DocumentPreviewCanvas({
             </TemplateEditProvider>
           </TemplateErrorBoundary>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400 mt-32">
-            <FileText className="w-12 h-12 mb-3 opacity-20" />
-            <p className="font-medium">Şablon Yüklenemedi veya Seçilmedi</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-600 dark:text-slate-300 py-20 px-8 text-center max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 border border-indigo-200 dark:border-indigo-800 shadow-sm">
+              <Layers className="w-8 h-8" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-1">
+              Görüntülenecek Belge Şablonunu Seçin
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+              Önizlemek veya düzenlemek istediğiniz belge şablonunu seçerek hemen çalışmaya başlayabilirsiniz.
+            </p>
+            {templateOptions && templateOptions.length > 0 && onSelectTemplate && (
+              <div className="grid grid-cols-1 gap-2 w-full max-w-md text-left">
+                {templateOptions.slice(0, 6).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onSelectTemplate(opt.id)}
+                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-slate-900 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all cursor-pointer group"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                        {opt.title}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {opt.categoryLabel}
+                      </span>
+                    </div>
+                    <FileText className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
+

@@ -1,13 +1,10 @@
 /**
- * HAKİM Pro — Desteklenen Dosya Formatları
- *
- * Tüm uzantılar burada tanımlanır.
- * Yeni bir format eklemek için bu dosyaya bir kayıt eklemek yeterlidir;
- * dialog filtreleri, argv kontrolü ve electron-builder config otomatik güncellenir.
+ * TEMİN 360 — Desteklenen Dosya Formatları
+ * .hkmp ve .dtal SQLite veritabanı dosyalarıdır.
  */
 
 export interface FileFormat {
-  /** Uzantı (nokta olmadan, örn: 'dtm') */
+  /** Uzantı (nokta olmadan, örn: 'hkmp') */
   ext: string
   /** Kullanıcıya gösterilecek açıklama */
   label: string
@@ -20,18 +17,18 @@ export interface FileFormat {
 export const SUPPORTED_FORMATS: FileFormat[] = [
   {
     ext: 'hkmp',
-    label: 'HAKİM Pro Proje Dosyası',
-    dialogName: 'HAKİM Pro Dosyası (*.hkmp)',
+    label: 'TEMİN 360 Proje Dosyası',
+    dialogName: 'TEMİN 360 Dosyası (*.hkmp)',
     isDefault: true
   },
   {
     ext: 'dtal',
-    label: 'HAKİM Pro / DTAL Veri Dosyası (Eski)',
-    dialogName: 'HAKİM Pro / DTAL Dosyası (*.dtal)'
+    label: 'TEMİN 360 / DTAL Veri Dosyası (Eski)',
+    dialogName: 'TEMİN 360 / DTAL Dosyası (*.dtal)'
   }
 ]
 
-/** Tüm desteklenen uzantıları ['dtm', 'dta', ...] olarak döner */
+/** Tüm desteklenen uzantıları ['hkmp', 'dtal'] olarak döner */
 export const allExtensions = SUPPORTED_FORMATS.map((f) => f.ext)
 
 /** Varsayılan uzantı (yeni dosya oluştururken kullanılır) */
@@ -39,7 +36,7 @@ export const defaultFormat = SUPPORTED_FORMATS.find((f) => f.isDefault) ?? SUPPO
 
 /** Electron dialog filter listesi — tüm formatları tek grupta gösterir */
 export const allFormatsFilter = {
-  name: 'HAKİM Pro Dosyaları',
+  name: 'TEMİN 360 Dosyaları',
   extensions: allExtensions
 }
 

@@ -789,11 +789,11 @@ export class DtmWorkspace {
     if (!filePath.toLowerCase().endsWith('.hkmp') && !filePath.toLowerCase().endsWith('.dtal')) {
       const response = dialog.showMessageBoxSync({
         type: 'question',
-        buttons: ['Evet, HAKİM Pro (.hkmp) Formatına Yükselt', 'Hayır, Eski Uzantıda Bırak'],
+        buttons: ['Evet, TEMİN 360 (.hkmp) Formatına Yükselt', 'Hayır, Eski Uzantıda Bırak'],
         defaultId: 0,
-        title: 'Eski Uzantı Tespit Edildi',
+        title: 'Dosya Formatı Güncelleme',
         message:
-          'Açtığınız dosya eski formattadır. Uygulama verimliliği ve tam uyumluluk için dosyanın yeni HAKİM Pro (.hkmp) formatına yükseltilmesi önerilir.\n\nDosya formatı güncellensin mi?'
+          'Açtığınız dosya eski formattadır. Uygulama verimliliği ve tam uyumluluk için dosyanın yeni TEMİN 360 (.hkmp) formatına yükseltilmesi önerilir.\n\nDosya formatı güncellensin mi?'
       })
 
       if (response === 0) {

@@ -10,6 +10,7 @@ import {
   Building2,
   CheckCircle2,
   ChevronRight,
+  ClipboardCheck,
   Coins,
   FileCheck,
   FileSpreadsheet,
@@ -37,6 +38,7 @@ import {
 import { useDosyalarHooks } from "../dosyalar/dosyalar.hooks";
 import { useAyarlarHooks } from "../ayarlar/ayarlar.hooks";
 import { logActivity } from "../../utils/logger";
+import { formatDosyaNo } from "../../utils/formatDosyaNo";
 import { Button } from "../../components/ui/Button";
 import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
 import { TakipScreen } from "../system/TakipScreen";
@@ -66,9 +68,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
   const [showAIModal, setShowAIModal] = useState(false);
   const [selectedFileForAI, setSelectedFileForAI] = useState<any>(null);
-  const [activeHakimPillar, setActiveHakimPillar] = useState<
-    "H" | "A" | "K" | "I" | "M"
-  >("H");
+  const [activePillar, setActivePillar] = useState<
+    "T" | "E" | "M" | "I" | "N"
+  >("T");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Zaman tabanlı karşılama
@@ -285,15 +287,37 @@ export default function DashboardScreenV2(): React.JSX.Element {
     return <TakipScreen />;
   }
 
-  // HAKİM Modülleri Bilgisi
-  const hakimPillars = [
+  // TEMİN 360 Modülleri Bilgisi
+  const teminPillars = [
     {
-      key: "H" as const,
-      letter: "H",
-      title: "Harcama & Bütçe Yönetimi",
-      subtitle: "4734 / 22-d ve 5018 Sayılı Mali Yönetim",
+      key: "T" as const,
+      letter: "T",
+      title: "Teklif & Piyasa Fiyat Araştırması",
+      subtitle: "Piyasa Araştırma Tutanağı & Teklif Havuzu",
       icon: Coins,
-      badge: `${formatCurrency(stats.toplamYaklasikMaliyet)} Toplam Harcama`,
+      badge: `${formatCurrency(stats.toplamYaklasikMaliyet)} Toplam Alım`,
+      description:
+        "Tedarikçi teklif mektuplarını toplar, yaklaşık maliyet cetvellerini otomatik hesaplar ve piyasa fiyat araştırma tutanaklarını kanuna tam uyumlu üretir.",
+      statsText: `${stats.kayitliFirmaSayisi} İstekli Firma & Tedarikçi Havuzu`,
+    },
+    {
+      key: "E" as const,
+      letter: "E",
+      title: "Evrak, Şartname & E-İmza",
+      subtitle: "Resmi Yazışma Standartları & EBYS Uyumluluğu",
+      icon: FileCheck,
+      badge: "Baskıya & EBYS Hazır",
+      description:
+        "React TSX şablon motoruyla Onay Belgesi, İhtiyaç Belgesi, Piyasa Araştırma Tutanağı ve Ödeme Emri evraklarını tek tıkla mühürlü/imzalı PDF olarak üretir.",
+      statsText: "25+ Resmi Kamu Evrak ve Tutanak Şablonu",
+    },
+    {
+      key: "M" as const,
+      letter: "M",
+      title: "Maliyet, Bütçe & Harcama Yönetimi",
+      subtitle: "4734 / 22-d ve 5018 Sayılı Mali Yönetim",
+      icon: Scale,
+      badge: "%100 Mevzuat Uyum Skoru",
       description:
         "KİK doğrudan temin eşik limitlerini, harcama birimi bütçe tertiplerini ve analitik bütçe kodlarını gerçek zamanlı kontrol altında tutar.",
       statsText: `Yıllık KİK Eşik Sınırı: ${formatCurrency(kikLimit)} (${
@@ -301,23 +325,11 @@ export default function DashboardScreenV2(): React.JSX.Element {
       })`,
     },
     {
-      key: "A" as const,
-      letter: "A",
-      title: "Akıllı Analiz & Yapay Zeka",
-      subtitle: "HAKİM AI Karar Destek & Anomali Tespiti",
-      icon: Sparkles,
-      badge: "Yapay Zeka Aktif",
-      description:
-        "Piyasa fiyat tekliflerini analiz eder, standart sapma ve aşırı düşük teklif risklerini tespit eder, otomatik şartname ve gerekçe raporları üretir.",
-      statsText:
-        `${stats.ihaleDosyaSayisi} Dosyada Akıllı Denetim & Form Doldurma`,
-    },
-    {
-      key: "K" as const,
-      letter: "K",
-      title: "Kamu İhale & Doğrudan Temin",
+      key: "I" as const,
+      letter: "İ",
+      title: "İhale, Doğrudan Temin & Sözleşme",
       subtitle: "Uçtan Uca 4 Aşamalı Dijital Dosya Yaşam Döngüsü",
-      icon: Scale,
+      icon: FileText,
       badge: `${stats.ihaleDosyaSayisi} Kayıtlı Dosya`,
       description:
         "İhtiyaç lüzumundan piyasa araştırmasına, teklif mektubu dağıtımından onay belgesine kadar tüm doğrudan temin adımlarını kanuna uygun yürütür.",
@@ -326,36 +338,25 @@ export default function DashboardScreenV2(): React.JSX.Element {
       } Aktif Süreç Devam Ediyor`,
     },
     {
-      key: "I" as const,
-      letter: "İ",
-      title: "İşlem, Evrak & E-İmza",
-      subtitle: "Resmi Yazışma Standartları & EBYS Uyumluluğu",
-      icon: FileCheck,
-      badge: "Baskıya & EBYS Hazır",
-      description:
-        "React TSX şablon motoruyla Onay Belgesi, Piyasa Araştırma Tutanağı, Muayene Kabul ve Ödeme Emri belgelerini tek tıkla mühürlü/imzalı PDF olarak üretir.",
-      statsText: `${stats.kayitliFirmaSayisi} İstekli Firma & Tedarikçi Havuzu`,
-    },
-    {
-      key: "M" as const,
-      letter: "M",
-      title: "Mevzuat & Denetim Güvencesi",
-      subtitle: "Sayıştay, KİK ve İç Denetim Uyum Kalkanı",
+      key: "N" as const,
+      letter: "N",
+      title: "Netice, Hakediş & Muayene Kabul",
+      subtitle: "Muayene Komisyonu, Hakediş & Ödeme Emri",
       icon: ShieldCheck,
-      badge: "%100 Mevzuat Uyum Skoru",
+      badge: "Sayıştay Güvenceli",
       description:
-        "Tüm süreçleri 4734, 4735 ve 5018 sayılı kanunlar, Sayıştay denetim kriterleri ve Kamu İhale Tebliğlerine göre anlık denetler, riskleri engeller.",
+        "Mal/hizmet ve yapım işleri için ara ve kesin hakediş raporları hazırlar, KDV tevkifatı ve damga vergisi kesintilerini hesaplar, muhasebe ödeme emrine bağlar.",
       statsText:
         `${stats.kayitliPersonelSayisi} Yetkili & Komisyon Üyesi Kayıtlı`,
     },
   ];
 
-  const currentPillar = hakimPillars.find((p) => p.key === activeHakimPillar) ||
-    hakimPillars[0];
+  const currentPillar = teminPillars.find((p) => p.key === activePillar) ||
+    teminPillars[0];
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-[1650px] mx-auto pb-12 animate-in fade-in slide-in-from-bottom-3 duration-500 text-slate-800 dark:text-slate-100">
-      {/* 1. HAKİM PRO KOMUTA MERKEZİ HERO HEADER */}
+      {/* 1. TEMİN 360 KOMUTA MERKEZİ HERO HEADER */}
       <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-950 text-white p-7 md:p-8 shadow-xl border border-slate-800">
         {/* Dekoratif Glow Işıkları */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-600/25 rounded-full blur-3xl pointer-events-none" />
@@ -366,7 +367,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-blue-500/20 text-blue-300 border border-blue-400/30">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                HAKİM Pro • Komuta & Karar Destek Merkezi
+                TEMİN 360 • Komuta & Karar Destek Merkezi
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
@@ -393,32 +394,49 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Hızlı Aksiyon Butonları */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link to="/dosyalar/yeni">
+          {/* Hızlı Aksiyon Butonları - Responsive & Kristal Netliğinde Kontrast */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-stretch lg:items-center gap-2.5 w-full lg:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedFileForAI({
+                  temin_no: "GENEL-ASISTAN",
+                  konu:
+                    "Kamu Satın Alma, Doğrudan Temin ve Hakediş Karar Desteği",
+                  yaklasik_maliyet: stats.toplamYaklasikMaliyet,
+                });
+                setShowAIModal(true);
+              }}
+              className="bg-linear-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-purple-900/30 border border-purple-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
+            >
+              <Sparkles className="w-4 h-4 text-purple-200 animate-spin" />
+              <span className="font-extrabold tracking-wide">TEMİN 360 AI Desteği</span>
+            </button>
+
+            <Link to="/dosyalar/yeni" className="w-full sm:w-auto">
               <button
                 type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2 cursor-pointer transition-transform hover:scale-[1.02] text-xs"
+                className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-900/30 border border-blue-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Plus className="w-4 h-4" />
-                <span>Yeni Doğrudan Temin (22/d)</span>
+                <span className="font-extrabold tracking-wide">Yeni Temin Dosyası (22. md)</span>
               </button>
             </Link>
 
-            <Link to="/harcama-merkezi">
+            <Link to="/harcama-merkezi" className="w-full sm:w-auto">
               <button
                 type="button"
-                className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-amber-500/20 flex items-center gap-2 cursor-pointer transition-transform hover:scale-[1.02] text-xs"
+                className="w-full bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-amber-900/30 border border-amber-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Gavel className="w-4 h-4" />
-                <span>Açık İhale & Hakediş Başlat</span>
+                <span className="font-extrabold tracking-wide">Harcama & Hakediş</span>
               </button>
             </Link>
 
-            <Link to="/dosyalar">
+            <Link to="/dosyalar" className="w-full sm:w-auto">
               <button
                 type="button"
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 cursor-pointer text-xs"
+                className="w-full bg-slate-800/90 hover:bg-slate-700 text-slate-100 hover:text-white border border-slate-700/90 font-bold py-2.5 px-3.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <FileSpreadsheet className="w-4 h-4 text-blue-400" />
                 <span>Tüm Dosyalar ({dosyalar.length})</span>
@@ -429,12 +447,12 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
         {/* Akıllı Durum Uyarıları (Smart Alerts) */}
         {smartAlerts.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-950/30 -mx-7 md:-mx-8 -mb-7 md:-mb-8 px-7 md:px-8 py-3.5 border-t-amber-500/20">
+          <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-950/40 -mx-7 md:-mx-8 -mb-7 md:-mb-8 px-7 md:px-8 py-3.5 border-t-amber-500/30">
             <div className="flex items-center gap-2.5 text-amber-200 text-xs font-medium">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
-                <strong>Sistem Uyarısı:</strong> {smartAlerts[0].title} —{" "}
-                {smartAlerts[0].message}
+                <strong className="text-amber-300 font-bold">Sistem Uyarısı:</strong> {smartAlerts[0].title} —{" "}
+                <span className="text-slate-200">{smartAlerts[0].message}</span>
               </span>
             </div>
             <Link
@@ -449,55 +467,61 @@ export default function DashboardScreenV2(): React.JSX.Element {
         )}
       </div>
 
-      {/* 2. HAKİM 5 TEMEL DİREK (PILLARS) İNTERAKTİF NAVİGASYON MATRİSİ */}
+      {/* 2. TEMİN 360 5 TEMEL DİREK (PILLARS) İNTERAKTİF NAVİGASYON MATRİSİ */}
       <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm border border-blue-100 dark:border-blue-900/50">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm border border-blue-200 dark:border-blue-900/60 shadow-xs">
               🏛️
             </div>
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
-              HAKİM Entegre Kamu Satın Alma Mimarisi
-            </h2>
+            <div>
+              <h2 className="text-base md:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                TEMİN 360 Entegre Kamu Satın Alma & Hakediş Mimarisi
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Uçtan uca doğrudan temin ve hakediş yaşam döngüsü kontrol paneli
+              </p>
+            </div>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline-block">
-            Modül detayını görmek için aşağıdaki harflere tıklayın
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 hidden sm:inline-block bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+            Modül seçmek için harflere tıklayın
           </span>
         </div>
 
-        {/* H - A - K - İ - M Buton Şeridi */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {hakimPillars.map((pillar) => {
-            const isSelected = activeHakimPillar === pillar.key;
+        {/* T - E - M - İ - N Buton Şeridi */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {teminPillars.map((pillar) => {
+            const isSelected = activePillar === pillar.key;
             const Icon = pillar.icon;
             return (
               <button
                 key={pillar.key}
-                onClick={() => setActiveHakimPillar(pillar.key)}
+                type="button"
+                onClick={() => setActivePillar(pillar.key)}
                 className={cn(
-                  "flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden",
+                  "flex flex-col text-left p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden group",
                   isSelected
-                    ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/25 scale-[1.02]"
-                    : "bg-slate-50 hover:bg-slate-100/80 text-slate-800 border-slate-200/90 dark:bg-slate-800/60 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700/80",
+                    ? "bg-linear-to-br from-blue-600 to-indigo-700 text-white border-blue-500 shadow-lg shadow-blue-500/25 scale-[1.02] ring-2 ring-blue-400/40"
+                    : "bg-slate-50 hover:bg-slate-100/90 text-slate-800 border-slate-200/90 dark:bg-slate-800/70 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600",
                 )}
               >
                 <div className="flex items-center justify-between w-full mb-2">
                   <div
                     className={cn(
-                      "w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm shadow-xs",
+                      "w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm shadow-xs transition-colors",
                       isSelected
-                        ? "bg-white text-blue-600 font-black"
-                        : "bg-blue-600 text-white dark:bg-blue-500",
+                        ? "bg-white text-blue-700 font-black shadow-md"
+                        : "bg-blue-600 text-white dark:bg-blue-500 group-hover:scale-105",
                     )}
                   >
                     {pillar.letter}
                   </div>
                   <Icon
                     className={cn(
-                      "w-4 h-4",
+                      "w-4 h-4 transition-colors",
                       isSelected
                         ? "text-white"
-                        : "text-slate-400 dark:text-slate-400",
+                        : "text-slate-400 dark:text-slate-400 group-hover:text-blue-500",
                     )}
                   />
                 </div>
@@ -527,85 +551,78 @@ export default function DashboardScreenV2(): React.JSX.Element {
         </div>
 
         {/* Seçili Pillar Detay Kartı */}
-        <div className="mt-4 p-4 md:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="mt-4 p-4 md:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
           <div className="space-y-1.5 max-w-3xl">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest">
                 {currentPillar.letter} SÜTUNU: {currentPillar.title}
               </span>
-              <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-blue-600 text-white shadow-xs">
+              <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold bg-blue-600 text-white shadow-xs border border-blue-400/30">
                 {currentPillar.badge}
               </span>
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+            <p className="text-xs md:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
               {currentPillar.description}
             </p>
-            <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
+            <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
               <Activity className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>{currentPillar.statsText}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {activeHakimPillar === "A" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedFileForAI({
-                    temin_no: "GENEL-ANALIZ",
-                    konu:
-                      "Genel Doğrudan Temin Süreçleri ve Piyasa Fiyat Analizi",
-                    yaklasik_maliyet: stats.toplamYaklasikMaliyet,
-                  });
-                  setShowAIModal(true);
-                }}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>HAKİM AI Asistanını Aç</span>
-              </button>
-            )}
-            {activeHakimPillar === "H" && (
-              <Link to="/harcama-merkezi">
+          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            {activePillar === "T" && (
+              <Link to="/dosyalar" className="w-full md:w-auto">
                 <button
                   type="button"
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
                 >
                   <Coins className="w-3.5 h-3.5" />
-                  <span>Harcama Merkezini İncele</span>
+                  <span>Piyasa Fiyat Araştırmaları</span>
                 </button>
               </Link>
             )}
-            {activeHakimPillar === "K" && (
-              <Link to="/dosyalar/yeni">
+            {activePillar === "E" && (
+              <Link to="/taslakyonetim" className="w-full md:w-auto">
                 <button
                   type="button"
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Yeni Temin Oluştur</span>
-                </button>
-              </Link>
-            )}
-            {activeHakimPillar === "I" && (
-              <Link to="/dosyalar">
-                <button
-                  type="button"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span>Evrak Şablonları & Dosyalar</span>
+                  <span>Evrak Şablonları & Taslaklar</span>
                 </button>
               </Link>
             )}
-            {activeHakimPillar === "M" && (
-              <Link to="/mevzuat">
+            {activePillar === "M" && (
+              <Link to="/harcama-merkezi" className="w-full md:w-auto">
                 <button
                   type="button"
-                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="w-full md:w-auto bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
                 >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>Mevzuat & KİK Parametreleri</span>
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Harcama & KİK Limit Takibi</span>
+                </button>
+              </Link>
+            )}
+            {activePillar === "I" && (
+              <Link to="/dosyalar/yeni" className="w-full md:w-auto">
+                <button
+                  type="button"
+                  className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Yeni Doğrudan Temin Başlat</span>
+                </button>
+              </Link>
+            )}
+            {activePillar === "N" && (
+              <Link to="/hakedis" className="w-full md:w-auto">
+                <button
+                  type="button"
+                  className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
+                >
+                  <ClipboardCheck className="w-3.5 h-3.5" />
+                  <span>Hakediş & Kabul Merkezi</span>
                 </button>
               </Link>
             )}
@@ -883,7 +900,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                         <div className="space-y-1.5 max-w-xl">
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] font-mono font-black text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/80 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">
-                              {dosya.temin_no || `#${dosya.id}`}
+                              {formatDosyaNo(dosya)}
                             </span>
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${asamaInfo.color}`}
@@ -899,8 +916,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                           </h4>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-3 font-medium">
                             <span>
-                              Birim:{" "}
-                              {dosya.harcama_birimi || harcamaBirimAdi ||
+                              Birim: {dosya.harcama_birimi || harcamaBirimAdi ||
                                 "Genel Birim"}
                             </span>
                             <span>•</span>
@@ -929,7 +945,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                                 setShowAIModal(true);
                               }}
                               className="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 transition-colors cursor-pointer border border-purple-200 dark:border-purple-800"
-                              title="HAKİM AI Süreç Tavsiyesi Al"
+                              title="TEMİN 360 AI Süreç Tavsiyesi Al"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
@@ -1026,7 +1042,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </Link>
           </div>
 
-          {/* HAKİM Akıllı Asistan & Mevzuat Bülteni */}
+          {/* TEMİN 360 Akıllı Asistan & Mevzuat Bülteni */}
           <div className="p-6 rounded-3xl bg-slate-900 dark:bg-slate-950 text-white shadow-md border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 right-0 -mr-10 -mt-10 w-36 h-36 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
 
@@ -1036,7 +1052,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
               </div>
               <div>
                 <h4 className="text-xs font-black uppercase tracking-wider text-purple-200">
-                  HAKİM AI Karar Desteği
+                  TEMİN 360 AI Karar Desteği
                 </h4>
                 <span className="text-[10px] text-purple-300/80">
                   4734 Sayılı Kanun & KİK Mevzuatı
@@ -1045,9 +1061,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              Doğrudan temin lüzum yazıları, yaklaşık maliyet piyasa araştırması
-              ve onay belgesi gerekçelerini mevzuata tam uyumlu olarak otomatik
-              oluşturun.
+              Doğrudan temin lüzum yazıları, yaklaşık maliyet piyasa
+              araştırması, hakediş raporları ve onay belgesi gerekçelerini
+              mevzuata tam uyumlu olarak otomatik oluşturun.
             </p>
 
             <div className="space-y-2">
@@ -1093,7 +1109,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 Sürüm & Mevzuat Bülteni
               </h4>
               <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900/40">
-                v1.0.0-beta.79
+                v1.0.0-beta.83
               </span>
             </div>
 
@@ -1124,13 +1140,13 @@ export default function DashboardScreenV2(): React.JSX.Element {
         </div>
       </div>
 
-      {/* 5. HAKİM AI ASİSTAN MODALI */}
+      {/* 5. TEMİN 360 AI ASİSTAN MODALI */}
       {showAIModal && selectedFileForAI && (
         <AITextGeneratorModal
           isOpen={true}
           isAdvisorMode={true}
-          fieldName="HAKİM AI Karar Desteği"
-          title={`HAKİM AI Asistanı - ${
+          fieldName="TEMİN 360 AI Karar Desteği"
+          title={`TEMİN 360 AI Asistanı - ${
             selectedFileForAI.temin_no || "Mevzuat Rehberi"
           }`}
           initialPrompt={`Aşağıdaki konu ve bütçe detaylarına sahip kamu satın alma süreci için çalışıyorum:\n- Dosya/Konu: ${selectedFileForAI.konu}\n- Yaklaşık Maliyet: ${
@@ -1147,10 +1163,10 @@ export default function DashboardScreenV2(): React.JSX.Element {
           }}
           onClose={() => setShowAIModal(false)}
           onApply={(text) => {
-            console.log("HAKİM AI Yanıtı:", text);
+            console.log("TEMİN 360 AI Yanıtı:", text);
             setShowAIModal(false);
           }}
-          systemInstruction="Sen yetkin bir HAKİM Pro Doğrudan Temin, Harcama ve Kamu İhale (4734 ve 5018 Sayılı Kanunlar) mevzuat uzmanı ve karar destek asistanısın. Kullanıcıya net, Sayıştay denetim standartlarına uygun, pratik ve yasal tavsiyeler ver. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen metin içinde belirli bir Kurum Adı, Belediye, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele)."
+          systemInstruction="Sen yetkin bir TEMİN 360 Kamu Satın Alma, Doğrudan Temin, Harcama ve Hakediş (4734 ve 5018 Sayılı Kanunlar) mevzuat uzmanı ve karar destek asistanısın. Kullanıcıya net, Sayıştay denetim standartlarına uygun, pratik ve yasal tavsiyeler ver. ÖNEMLİ GİZLİLİK KURALI: Eğer kullanıcıdan gelen metin içinde belirli bir Kurum Adı, Belediye, Kişi Adı-Soyadı, TC No veya açık adres geçiyorsa; cevabında bu özel isimleri asla açıkça kullanma, '[İlgili Kurum]' veya '[İlgili Kişi]' şeklinde sansürle (maskele)."
         />
       )}
     </div>

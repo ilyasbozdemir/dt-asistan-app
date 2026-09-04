@@ -137,7 +137,7 @@ export function Footer(): React.JSX.Element {
             <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-start">
               <div>
                 <h4 className="text-slate-800 dark:text-white font-bold text-sm">
-                  HAKİM Pro (Harcama, İhale & Hakediş)
+                  TEMİN 360 (Kamu Temin, Harcama & Hakediş)
                 </h4>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Sürüm {packageJson.version} •{" "}

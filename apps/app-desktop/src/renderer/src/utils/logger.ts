@@ -20,7 +20,7 @@ export async function logActivity(
     // Trigger HTML5 desktop notification for success, warning, or error severity logs
     if (type === 'success' || type === 'warning' || type === 'error') {
       try {
-        const notification = new window.Notification(`HAKİM Pro - ${title}`, {
+        const notification = new window.Notification(`TEMİN 360 - ${title}`, {
           body: message,
           icon: '/icon.png'
         })

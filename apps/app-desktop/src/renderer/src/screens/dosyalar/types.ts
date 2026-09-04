@@ -28,6 +28,7 @@ export interface YeniDosyaTabProps {
   formData: Partial<TeminDosyasi>
   setFormData: React.Dispatch<React.SetStateAction<Partial<TeminDosyasi>>>
   isEdit: boolean
+  editId?: number | null
 
   // Shared Data
   birimler: DBBirim[]

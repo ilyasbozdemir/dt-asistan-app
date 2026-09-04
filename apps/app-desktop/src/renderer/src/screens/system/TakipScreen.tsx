@@ -31,12 +31,35 @@ import { useDosyalarHooks } from '../dosyalar/dosyalar.hooks'
 import { Button } from '../../components/ui/Button'
 import { useEffect, useState } from 'react'
 import { logActivity } from '../../utils/logger'
+import { emitAppEvent, useAppEventListener } from '../../utils/appEvents'
 
 export function TakipScreen(): React.JSX.Element {
   const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
   const { dosyalar, deleteDosya, hardDeleteDosya } = useDosyalarHooks()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
+  // Real-time Event Listener for complete synchronization across panels & stages
+  useAppEventListener(
+    [
+      'items:changed',
+      'bids:changed',
+      'dossier:updated',
+      'dossier:created',
+      'dossier:deleted',
+      'status:changed',
+      'documents:changed',
+      'workspace:refreshed'
+    ],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['takip_kalemler'] })
+      queryClient.invalidateQueries({ queryKey: ['takip_firmalar'] })
+      queryClient.invalidateQueries({ queryKey: ['takip_belgeler'] })
+      queryClient.invalidateQueries({ queryKey: ['takip_asamalar'] })
+      queryClient.invalidateQueries({ queryKey: ['takip_tum_belgeler'] })
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    }
+  )
 
   // 1. Fetch active dossier details
   const activeDosya = dosyalar.find((d) => d.id === activeDosyaId)
@@ -133,6 +156,8 @@ export function TakipScreen(): React.JSX.Element {
       if (res.success) {
         setSaveMessage('Dosya bilgileri başarıyla güncellendi.')
         await queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
+        emitAppEvent('status:changed', { dosyaId: activeDosyaId, payload: { status } })
         setTimeout(() => setSaveMessage(''), 3000)
       } else {
         setSaveMessage('Güncelleme hatası: ' + res.error)
@@ -305,7 +330,7 @@ export function TakipScreen(): React.JSX.Element {
       }
 
       if (deadlineMsg || missingCount > 0) {
-        const notification = new window.Notification('HAKİM Pro - Akıllı Hatırlatıcı', {
+        const notification = new window.Notification('TEMİN 360 - Akıllı Hatırlatıcı', {
           body: `${deadlineMsg}${
             missingCount > 0 ? `İmzası eksik ${missingCount} evrakınız bulunuyor.` : ''
           }`,
@@ -479,6 +504,17 @@ export function TakipScreen(): React.JSX.Element {
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
                         Malzeme Kalemleri, Lüzum Müzekkeresi & Başlangıç Onayı
                       </span>
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md border ${
+                            kalemler.length > 0
+                              ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-900/50'
+                              : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                          }`}
+                        >
+                          📦 {kalemler.length > 0 ? `${kalemler.length} Kalem Eklendi` : 'Kalem Eklenmedi'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                       <span>Aşamaya Git</span>
@@ -506,6 +542,17 @@ export function TakipScreen(): React.JSX.Element {
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
                         Firma Teklifleri, Teklif Cetveli & Fiyat Tutanağı
                       </span>
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md border ${
+                            firmalar.length > 0
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-900/50'
+                              : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                          }`}
+                        >
+                          💼 {firmalar.length > 0 ? `${firmalar.length} Firma Teklifi` : 'Teklif Bekleniyor'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                       <span>Aşamaya Git</span>
@@ -533,6 +580,17 @@ export function TakipScreen(): React.JSX.Element {
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
                         Temin Onay Belgesi, Sipariş Mektubu & Sözleşme
                       </span>
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md border ${
+                            activeDosya.firma_id
+                              ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900/50'
+                              : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                          }`}
+                        >
+                          📝 {activeDosya.firma_id ? 'Yüklenici Belirlendi' : 'Karar / Sözleşme'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-amber-600 dark:text-amber-400">
                       <span>Aşamaya Git</span>
@@ -560,6 +618,17 @@ export function TakipScreen(): React.JSX.Element {
                       <span className="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight mt-1">
                         Muayene Kabul Tutanağı, TİF & Ödeme Emri Belgesi
                       </span>
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md border ${
+                            activeDosya.status === 'tamamlandi'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-900/50'
+                              : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                          }`}
+                        >
+                          🏁 {activeDosya.status === 'tamamlandi' ? 'Süreç Tamamlandı' : 'Kabul & Ödeme'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 dark:border-slate-800/60 text-[10px] font-bold text-purple-600 dark:text-purple-400">
                       <span>Aşamaya Git</span>
@@ -772,10 +841,22 @@ export function TakipScreen(): React.JSX.Element {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Malzemeler */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
-                <h3 className="text-xs font-bold text-slate-855 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                  📦 Malzeme / Hizmet Kalemleri
-                </h3>
-                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                  <h3 className="text-xs font-bold text-slate-855 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                    <span>📦</span> Malzeme / Hizmet Kalemleri
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-extrabold">
+                      {kalemler.length} Kalem
+                    </span>
+                  </h3>
+                  <Link
+                    to="/dosya/hazirlik-ve-ihtiyac"
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1 hover:underline"
+                  >
+                    <span>Yönet & Ekle</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </div>
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-inner max-h-[240px] overflow-y-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
                       <tr>
@@ -797,14 +878,20 @@ export function TakipScreen(): React.JSX.Element {
                             {item.miktar}
                           </td>
                           <td className="p-3 text-center text-slate-500 dark:text-slate-400">
-                            {item.olcu_birimi || 'Adet'}
+                            {item.olcu_birimi || item.birim || 'Adet'}
                           </td>
                         </tr>
                       ))}
                       {kalemler.length === 0 && (
                         <tr>
                           <td colSpan={3} className="p-6 text-center text-slate-400 italic">
-                            Dosyada henüz kayıtlı malzeme bulunmuyor.
+                            Dosyada henüz kayıtlı malzeme bulunmuyor.{' '}
+                            <Link
+                              to="/dosya/hazirlik-ve-ihtiyac"
+                              className="text-blue-600 underline font-semibold ml-1"
+                            >
+                              Kalem eklemek için tıklayın.
+                            </Link>
                           </td>
                         </tr>
                       )}
@@ -815,10 +902,22 @@ export function TakipScreen(): React.JSX.Element {
 
               {/* Tedarikçiler */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
-                <h3 className="text-xs font-bold text-slate-855 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                  💼 Teklif Veren İstekliler / Firmalar
-                </h3>
-                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                  <h3 className="text-xs font-bold text-slate-855 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                    <span>💼</span> Teklif Veren İstekliler / Firmalar
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-extrabold">
+                      {firmalar.length} Firma
+                    </span>
+                  </h3>
+                  <Link
+                    to="/dosya/piyasa-fiyat-arastirmasi"
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 flex items-center gap-1 hover:underline"
+                  >
+                    <span>Teklifleri Yönet</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </div>
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-inner max-h-[240px] overflow-y-auto">
                   <table className="w-full border-collapse text-left text-xs">
                     <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-655 dark:text-slate-400">
                       <tr>
@@ -842,7 +941,13 @@ export function TakipScreen(): React.JSX.Element {
                       {firmalar.length === 0 && (
                         <tr>
                           <td colSpan={2} className="p-6 text-center text-slate-400 italic">
-                            Dosyada henüz kayıtlı firma teklifi bulunmuyor.
+                            Dosyada henüz kayıtlı firma teklifi bulunmuyor.{' '}
+                            <Link
+                              to="/dosya/piyasa-fiyat-arastirmasi"
+                              className="text-emerald-600 underline font-semibold ml-1"
+                            >
+                              Firma davet etmek için tıklayın.
+                            </Link>
                           </td>
                         </tr>
                       )}

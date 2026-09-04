@@ -193,7 +193,7 @@ export default function LauncherScreen(): React.ReactNode {
       >
         <div className="flex items-center gap-2 text-slate-400 dark:text-slate-600 text-xs font-semibold">
           <FolderOpen className="w-3.5 h-3.5" />
-          <span>HAKİM Pro Başlatıcı</span>
+          <span>TEMİN 360 Başlatıcı</span>
         </div>
 
         <div
@@ -248,7 +248,7 @@ export default function LauncherScreen(): React.ReactNode {
               <FolderOpen className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-              HAKİM Pro&apos;ya Hoş Geldiniz
+              TEMİN 360&apos;a Hoş Geldiniz
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">
               Çalışmaya başlamak için yeni bir kurum/çalışma alanı dosyası (.dtal) oluşturun veya

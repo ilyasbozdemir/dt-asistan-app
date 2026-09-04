@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { emitAppEvent, useAppEventListener } from '../../../../../utils/appEvents'
 
 export interface UseMalzemeListesiReturn {
   items: any[]
@@ -116,6 +117,12 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
     loadData()
   }, [activeDosyaId])
 
+  useAppEventListener(['items:changed', 'dossier:updated'], (e) => {
+    if (e.payload?.dosyaId === activeDosyaId) {
+      loadData()
+    }
+  })
+
   const handleAiAçiklama = async (): Promise<void> => {
     const name = kalemAdi.trim() || searchQuery.trim()
     if (!name) return
@@ -204,7 +211,9 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
         setKdvOrani(20)
         setAciklama('')
         setIsAddModalOpen(false)
-        loadData()
+        await loadData()
+        emitAppEvent('items:changed', { dosyaId: activeDosyaId })
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
       } else {
         alert('Kalem eklenirken hata: ' + res.error)
       }
@@ -222,7 +231,9 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
         [id]
       )
       if (res.success) {
-        loadData()
+        await loadData()
+        emitAppEvent('items:changed', { dosyaId: activeDosyaId })
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
       }
     } catch (err: any) {
       alert(err.message)
@@ -245,7 +256,9 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
       )
       if (res.success) {
         setEditingId(null)
-        loadData()
+        await loadData()
+        emitAppEvent('items:changed', { dosyaId: activeDosyaId })
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
       } else {
         alert(res.error)
       }
@@ -283,7 +296,9 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
       setItemMiktarlar({})
       setLibSearchQuery('')
       setIsAddModalOpen(false)
-      loadData()
+      await loadData()
+      emitAppEvent('items:changed', { dosyaId: activeDosyaId })
+      emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
     } catch (err: any) {
       alert('Eklenirken hata: ' + err.message)
     }

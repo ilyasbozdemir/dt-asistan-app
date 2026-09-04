@@ -157,7 +157,7 @@ export default function HarcamaMerkeziScreen(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-[1600px] mx-auto pb-12 animate-in fade-in duration-300">
-      {/* 1. TOP HERO BANNER: KAMU HARCAMA & HAKEDİŞ MERKEZİ (HAKİM PRO) */}
+      {/* 1. TOP HERO BANNER: KAMU HARCAMA & HAKEDİŞ MERKEZİ (TEMİN 360) */}
       <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 text-white shadow-2xl p-8 md:p-10">
         {/* Glow Effects */}
         <div className="absolute -right-20 -top-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -168,7 +168,7 @@ export default function HarcamaMerkeziScreen(): React.JSX.Element {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center gap-1.5 uppercase tracking-wider">
                 <Landmark className="w-3.5 h-3.5" />{" "}
-                HAKİM Pro • Harcama & Hakediş Merkezi
+                TEMİN 360 • Harcama & Hakediş Merkezi
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />{" "}
@@ -679,7 +679,7 @@ export default function HarcamaMerkeziScreen(): React.JSX.Element {
             </h4>
             <p className="text-slate-300 leading-relaxed">
               Beton kırım raporları, boru sızdırmazlık testleri ve şantiye
-              ataşman defterleri hakedişin ayrılmaz ekidir. HAKİM Pro dizi
+              ataşman defterleri hakedişin ayrılmaz ekidir. TEMİN 360 dizi
               pusulasında tüm ekleri eksiksiz numaralandırır.
             </p>
           </div>

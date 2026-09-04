@@ -104,6 +104,7 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const [validationError, setValidationError] = useState<string | null>(null)
   const [isDescLoading, setIsDescLoading] = useState(false)
   const [showKonuSuggestions, setShowKonuSuggestions] = useState(false)
+  const [showKopyalaModal, setShowKopyalaModal] = useState(false)
 
   // Get query params
   const searchParams = new URLSearchParams(window.location.search)
@@ -240,14 +241,22 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
             })
           }
         } else {
-          // Yeni dosya açılırken varsayılan personelleri set et
+          // Yeni dosya açılırken varsayılan personelleri set et ve URL parametrelerini işle
           const findDefaultId = (rolKodu: string) => {
             const found = roller.find((r: any) => r.rol_kodu === rolKodu)
             return found?.varsayilan_personel_id || null
           }
 
+          const qParams = new URLSearchParams(window.location.search)
+          const urlTur = qParams.get('tur')
+          const isKopyala = qParams.get('kopyala') === '1'
+          if (isKopyala) {
+            setShowKopyalaModal(true)
+          }
+
           setFormData((prev) => ({
             ...prev,
+            tur: (urlTur as any) || prev.tur || 'mal',
             onay_personel_id:
               findDefaultId('harcama_yetkilisi') ||
               findDefaultId('onaylayan') ||
@@ -273,29 +282,33 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
     loadData()
   }, [isEdit, editId])
 
-  // Yıla göre sıradaki Doğrudan Temin Numarasını Hesaplama
+  // Yıla göre sıradaki Doğrudan Temin Numarasını Hesaplama (Örn: 2026/1, 2026/2)
   const getNextTeminNo = (year: number) => {
     const yearStr = year.toString()
     // Sadece aktif yılın silinmemiş dosyalarını filtrele
     const yearDosyalar = dosyalar.filter(
       (d) =>
         !d.is_deleted &&
-        d.temin_no &&
-        (d.temin_no.includes(yearStr) || (d.created_at && d.created_at.startsWith(yearStr)))
+        (d.butce_yili === year ||
+          (d.temin_no && d.temin_no.includes(yearStr)) ||
+          (d.created_at && d.created_at.startsWith(yearStr)) ||
+          (d.dosya_acilis_tarihi && d.dosya_acilis_tarihi.startsWith(yearStr)))
     )
 
     let maxSeq = 0
     yearDosyalar.forEach((d) => {
-      const no = d.temin_no!
-      // Sayı dizisindeki son rakam grubunu bul (Örn: 2026/5 -> 5, DT-003 -> 3, 4 -> 4)
-      const match = no.match(/(\d+)(?!.*\d)/)
-      if (match) {
-        const seq = parseInt(match[1], 10)
-        if (!isNaN(seq) && seq > maxSeq) {
-          // Eğer bulunan sayı aktif yılı temsil etmiyorsa sıraya dahil et
-          if (seq !== year) {
-            maxSeq = seq
+      const raw = (d.temin_no || '').trim()
+      if (!raw) return
+
+      // Parçala: "2026/2026/1", "DT-2026/2", "2026/3", "4"
+      const parts = raw.split(/[/_ -]+/)
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const num = parseInt(parts[i], 10)
+        if (!isNaN(num) && num !== year && num > 0) {
+          if (num > maxSeq) {
+            maxSeq = num
           }
+          break
         }
       }
     })
@@ -308,19 +321,16 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
     if (!isEdit && !formData.temin_no && !loadingDb) {
       const year = formData.dosya_acilis_tarihi
         ? new Date(formData.dosya_acilis_tarihi).getFullYear()
-        : new Date().getFullYear()
+        : formData.butce_yili || new Date().getFullYear()
       setFormData((prev) => ({
         ...prev,
         temin_no: getNextTeminNo(year)
       }))
     }
-  }, [isEdit, formData.temin_no, loadingDb, dosyalar, formData.dosya_acilis_tarihi])
+  }, [isEdit, formData.temin_no, loadingDb, dosyalar, formData.dosya_acilis_tarihi, formData.butce_yili])
 
   // Active Tab (Stepper)
   const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac'>('genel')
-
-  // Kopyalama (Şablon) State
-  const [showKopyalaModal, setShowKopyalaModal] = useState(false)
 
   const handleCopyDosya = (eskiDosya: TeminDosyasi) => {
     setFormData({
@@ -582,8 +592,31 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
       finalMaliyet = Number((finalMaliyet / (1 + kdvRate / 100)).toFixed(2))
     }
 
+    let finalTeminNo = (formData.temin_no || '').trim()
+    const targetYear = formData.butce_yili || new Date().getFullYear()
+
+    if (!finalTeminNo) {
+      finalTeminNo = getNextTeminNo(targetYear)
+    } else {
+      // Çift yıl temizliği (Örn: "2026/2026/1" -> "2026/1")
+      const doubleMatch = finalTeminNo.match(/^(\d{4})[/-]\1[/-](\d+)$/)
+      if (doubleMatch) {
+        finalTeminNo = `${doubleMatch[1]}/${doubleMatch[2]}`
+      }
+      // Yeni kayıt ise ve numara başka bir aktif dosyada varsa sıradakini ver
+      if (!isEdit) {
+        const isDuplicate = dosyalar.some(
+          (d) => !d.is_deleted && d.temin_no && d.temin_no === finalTeminNo
+        )
+        if (isDuplicate) {
+          finalTeminNo = getNextTeminNo(targetYear)
+        }
+      }
+    }
+
     const payload = {
       ...formData,
+      temin_no: finalTeminNo,
       konu: finalKonu,
       tekrar_no: nextTekrarNo,
       yaklasik_maliyet: finalMaliyet,

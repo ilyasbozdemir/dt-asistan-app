@@ -34,7 +34,7 @@ export function PageWrapper(): React.ReactNode {
 
   useEffect(() => {
     const path = routerState.location.pathname
-    let title = 'HAKİM Pro'
+    let title = 'TEMİN 360'
 
     if (path === '/') title += ' — Gösterge Paneli'
     else if (path.startsWith('/dosyalar')) title += ' — Doğrudan Teminler'
@@ -57,6 +57,33 @@ export function PageWrapper(): React.ReactNode {
 
     document.title = title
   }, [routerState.location.pathname])
+
+  // Global Güvenlik Koruması: Radix UI / Modal veya Popover'ların kapanışında body üzerinde takılı kalan pointer-events: none veya aria-hidden kilitlerini temizler
+  useEffect(() => {
+    const ensureInteractivity = () => {
+      if (document.body.style.pointerEvents === 'none') {
+        const hasActiveModal = document.querySelector(
+          '[data-radix-portal] [role="dialog"], [role="dialog"], .fixed.inset-0.z-\\[100\\], .fixed.inset-0.z-\\[200\\], .fixed.inset-0.z-\\[9999\\]'
+        )
+        if (!hasActiveModal) {
+          document.body.style.pointerEvents = 'auto'
+        }
+      }
+    }
+
+    ensureInteractivity()
+    const interval = setInterval(ensureInteractivity, 1000)
+    window.addEventListener('mouseup', ensureInteractivity)
+    window.addEventListener('keydown', ensureInteractivity)
+    window.addEventListener('focus', ensureInteractivity)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('mouseup', ensureInteractivity)
+      window.removeEventListener('keydown', ensureInteractivity)
+      window.removeEventListener('focus', ensureInteractivity)
+    }
+  }, [routerState.location.href])
 
   const {
     activeFilePath,

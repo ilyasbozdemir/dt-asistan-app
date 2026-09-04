@@ -18,6 +18,9 @@ export function DocumentPreviewModalV2({
 
   const {
     isLoading,
+    selectedDocId,
+    setSelectedDocId,
+    templateOptions,
     activeTemplateConf,
     ActiveComponent,
     formData,
@@ -115,6 +118,9 @@ export function DocumentPreviewModalV2({
         handlePdf={handlePdf}
         handleOpenPdfInNewTab={handleOpenPdfInNewTab}
         onToggleBalloon={() => setIsBalloon(true)}
+        dosyaId={propDosyaId}
+        docKey={selectedDocId}
+        orientation={orientation}
       />
 
       {/* Main Area: Sidebar + Canvas */}
@@ -122,6 +128,9 @@ export function DocumentPreviewModalV2({
         <DocumentPreviewSidebar
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          selectedDocId={selectedDocId}
+          onSelectTemplate={setSelectedDocId}
+          templateOptions={templateOptions}
           isEditingMode={isEditingMode}
           setIsEditingMode={setIsEditingMode}
           orientation={orientation}
@@ -147,6 +156,8 @@ export function DocumentPreviewModalV2({
           firmaListesi={firmaListesi}
           localShowLogoLeft={localShowLogoLeft}
           localShowLogoRight={localShowLogoRight}
+          onSelectTemplate={setSelectedDocId}
+          templateOptions={templateOptions}
         />
       </div>
     </div>

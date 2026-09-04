@@ -1,21 +1,26 @@
 import React from "react";
 import {
   ArrowLeft,
+  CheckCircle2,
   Download,
   Eye,
   FileText,
+  ListPlus,
   Maximize2,
   Minimize2,
   MoreVertical,
   Printer,
   RefreshCw,
   Save,
+  Send,
   Sliders,
   X,
   ZoomIn,
   ZoomOut,
   Layers,
 } from "lucide-react";
+import { usePrintQueueStore } from "../../../../../store/printQueueStore";
+import { useWorkspaceStore } from "../../../../../store/workspaceStore";
 
 interface DocumentPreviewHeaderProps {
   onClose: () => void;
@@ -41,8 +46,10 @@ interface DocumentPreviewHeaderProps {
   handlePdf: () => Promise<void>;
   handleOpenPdfInNewTab: () => Promise<void>;
   onToggleBalloon?: () => void;
+  dosyaId?: number | null;
+  docKey?: string | null;
+  orientation?: "portrait" | "landscape";
 }
-
 
 export function DocumentPreviewHeader({
   onClose,
@@ -68,7 +75,39 @@ export function DocumentPreviewHeader({
   handlePdf,
   handleOpenPdfInNewTab,
   onToggleBalloon,
+  dosyaId: propDosyaId,
+  docKey,
+  orientation,
 }: DocumentPreviewHeaderProps): React.JSX.Element {
+  const { activeDosyaId: workspaceDosyaId } = useWorkspaceStore();
+  const targetDosyaId = propDosyaId || workspaceDosyaId;
+
+  const { isInQueue, toggleReadyToPrint, markAsPrinted, getDocumentStatus } =
+    usePrintQueueStore();
+
+  const isQueued = targetDosyaId && docKey
+    ? isInQueue(targetDosyaId, docKey)
+    : false;
+  const docStatus = targetDosyaId && docKey
+    ? getDocumentStatus(targetDosyaId, docKey)
+    : "draft";
+
+  const handleToggleQueue = () => {
+    if (!targetDosyaId || !docKey) {
+      alert("Belge kuyruğa eklenemedi: Dosya veya şablon tanımlanamadı.");
+      return;
+    }
+    toggleReadyToPrint(targetDosyaId, docKey, documentTitle || docKey, {
+      orientation,
+    });
+  };
+
+  const onPrintClick = async () => {
+    if (targetDosyaId && docKey) {
+      markAsPrinted(targetDosyaId, docKey);
+    }
+    await handlePrint();
+  };
 
   return (
     <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 gap-4 shrink-0 select-none">
@@ -88,9 +127,22 @@ export function DocumentPreviewHeader({
           <FileText className="w-4 h-4" />
         </div>
         <div className="min-w-0">
-          <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2 truncate">
-            {documentTitle || "Belge Düzenleyici"}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-850 dark:text-slate-100 truncate">
+              {documentTitle || "Belge Düzenleyici"}
+            </h2>
+            {isQueued && (
+              <span className="inline-flex items-center gap-1 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 px-1.5 py-0.5 rounded-full animate-in fade-in">
+                <CheckCircle2 size={10} className="text-emerald-600 dark:text-emerald-400" />
+                Yazdırmaya Hazır
+              </span>
+            )}
+            {docStatus === "printed" && !isQueued && (
+              <span className="text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 px-1.5 py-0.5 rounded-full">
+                Yazdırıldı
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -165,7 +217,6 @@ export function DocumentPreviewHeader({
             : <Maximize2 className="w-4 h-4" />}
         </button>
 
-
         {/* Toggle Sidebar */}
         <button
           onClick={() => setSidebarOpen((v) => !v)}
@@ -186,11 +237,12 @@ export function DocumentPreviewHeader({
         <button
           onClick={handleSaveToDb}
           disabled={isSaving}
-          className={`px-4 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs ${
+          className={`px-3.5 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs ${
             saveSuccess
               ? "bg-emerald-600 text-white"
               : "bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600"
           }`}
+          title="Belgedeki düzenlemeleri veri tabanına kaydeder"
         >
           <Save className="w-3.5 h-3.5" />
           <span>
@@ -202,11 +254,40 @@ export function DocumentPreviewHeader({
           </span>
         </button>
 
-        {/* Print Button */}
+        {/* Send to Print Queue / Ready Flag Button */}
+        {targetDosyaId && docKey && (
+          <button
+            type="button"
+            onClick={handleToggleQueue}
+            className={`px-3.5 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs border ${
+              isQueued
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-emerald-500/20"
+                : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800/60"
+            }`}
+            title={isQueued
+              ? "Belge yazdırma merkezine gönderildi. Kuyruktan çıkarmak için tıklayın."
+              : "Belgeyi Çıktı & Yazdırma Merkezindeki yazdırma listesine ekler."}
+          >
+            {isQueued ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <span>Yazdırmaya Hazır ✓</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-3.5 h-3.5" />
+                <span>Yazdırma Sırasına Gönder</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Direct Print Button */}
         <button
-          onClick={handlePrint}
+          onClick={onPrintClick}
           disabled={isPrinting}
-          className="px-4.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-blue-600/20 cursor-pointer"
+          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-blue-600/20 cursor-pointer"
+          title="Doğrudan Yazıcıya Gönder"
         >
           <Printer className="w-3.5 h-3.5" />
           <span>Yazdır</span>
@@ -217,10 +298,10 @@ export function DocumentPreviewHeader({
             setDownloadOpen(false);
             await handleOpenPdfInNewTab();
           }}
-          className="px-4.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-indigo-600/20 cursor-pointer"
+          className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-2xs shadow-indigo-600/20 cursor-pointer"
         >
           <Eye className="w-4 h-4" />
-          <span>Tarayıcıda Aç</span>
+          <span>Önizle</span>
         </button>
 
         {/* Options Dropdown */}
@@ -273,3 +354,4 @@ export function DocumentPreviewHeader({
     </div>
   );
 }
+

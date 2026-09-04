@@ -3,8 +3,6 @@ import { renderToString } from "react-dom/server";
 import React from "react";
 import {
   IhtiyacListesiType,
-  TEMPLATE_REGISTRY,
-  TemplateComponentType,
   TemplateEditProvider,
   TemplateResolver,
 } from "@hakim-pro-app/document-templates";
@@ -13,7 +11,10 @@ import { useSettingsStore } from "../../../../../store/settingsStore";
 import { getDefaultMappingForProcess } from "../../../../../constants/mappings";
 import { getInstitutionSuffixes } from "../../../../../utils/kurumHelper";
 import { Personel } from "../types";
-import { V2_TEMPLATES_MAP } from "../constants";
+import {
+  resolveTemplateConfig,
+  TEMPLATE_OPTIONS,
+} from "../templateResolver";
 
 interface UseDocumentPreviewDataParams {
   isOpen: boolean;
@@ -32,7 +33,20 @@ export function useDocumentPreviewData({
   const activeDosyaId =
     propDosyaId ||
     storeDosyaId ||
-    Number(sessionStorage.getItem("workspace_dosya_id") || 0);
+    Number(sessionStorage.getItem("workspace_dosya_id") || 0) ||
+    Number(localStorage.getItem("active_dosya_id") || 0);
+
+  const [selectedDocId, setSelectedDocId] = useState<string>(
+    () => documentId || "ihtiyac-listesi",
+  );
+  const [prevPropDocId, setPrevPropDocId] = useState<string | null>(documentId);
+
+  if (documentId !== prevPropDocId) {
+    setPrevPropDocId(documentId);
+    if (documentId) {
+      setSelectedDocId(documentId);
+    }
+  }
 
   const {
     logoLeft,
@@ -94,10 +108,11 @@ export function useDocumentPreviewData({
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const activeTemplateConf = TEMPLATE_REGISTRY.find((t) => t.id === documentId);
-  const ActiveComponent = activeTemplateConf
-    ? V2_TEMPLATES_MAP[activeTemplateConf.name]
-    : null;
+  const {
+    config: activeTemplateConf,
+    component: ActiveComponent,
+    resolvedId,
+  } = resolveTemplateConfig(selectedDocId);
 
   // 1. Load Data from DB in Parallel
   useEffect(() => {
@@ -112,6 +127,7 @@ export function useDocumentPreviewData({
           sql: string,
           params: any[],
         ): Promise<any[]> => {
+          if (!window.electron?.ipcRenderer) return [];
           const res = await window.electron.ipcRenderer.invoke(
             "db:query",
             sql,
@@ -123,15 +139,17 @@ export function useDocumentPreviewData({
           return [];
         };
 
-        const mapping = getDefaultMappingForProcess(documentId || "");
+        const mapping = getDefaultMappingForProcess(resolvedId);
         const resolver = new TemplateResolver(queryExecutor);
 
         // Fetch complete pre-computed document payload via single native Electron IPC handler + resolver in parallel
         const [payloadRes, resolved] = await Promise.all([
-          window.electron.ipcRenderer.invoke("belge:get-document-payload", {
-            dosyaId: activeDosyaId,
-            documentId,
-          }),
+          window.electron?.ipcRenderer
+            ? window.electron.ipcRenderer.invoke("belge:get-document-payload", {
+                dosyaId: activeDosyaId,
+                documentId: resolvedId,
+              })
+            : Promise.resolve({ success: false, data: {} }),
           resolver.resolve(mapping, activeDosyaId || 0),
         ]);
 
@@ -417,7 +435,8 @@ export function useDocumentPreviewData({
   }, [
     isOpen,
     activeDosyaId,
-    documentId,
+    selectedDocId,
+    resolvedId,
     propInvitedFirms,
     showLogoLeft,
     showLogoRight,
@@ -454,7 +473,7 @@ export function useDocumentPreviewData({
 
     observer.observe(previewContainerRef.current);
     return () => observer.disconnect();
-  }, [isOpen, documentId, orientation, zoomMode, manualZoom]);
+  }, [isOpen, selectedDocId, orientation, zoomMode, manualZoom]);
 
   // 3. Dropdown outside click handler
   useEffect(() => {
@@ -474,7 +493,7 @@ export function useDocumentPreviewData({
 
   // 4. Save handler
   const handleSaveToDb = async (): Promise<void> => {
-    if (!activeDosyaId || !documentId) return;
+    if (!activeDosyaId || !resolvedId) return;
     setIsSaving(true);
     try {
       const dataToSave = {
@@ -487,8 +506,8 @@ export function useDocumentPreviewData({
       const jsonStr = JSON.stringify(dataToSave);
       const sablonRes = await window.electron.ipcRenderer.invoke(
         "db:query",
-        "SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? LIMIT 1",
-        [`${documentId}.html`],
+        "SELECT id FROM TANIM_Sablon WHERE dosya_adi = ? OR dosya_adi = ? LIMIT 1",
+        [`${resolvedId}.html`, `${selectedDocId}.html`],
       );
       if (sablonRes.success && sablonRes.data.length > 0) {
         const sablonId = sablonRes.data[0].id;
@@ -518,21 +537,19 @@ export function useDocumentPreviewData({
         TemplateEditProvider,
         {
           isEditing: false,
-          onFieldChange: undefined,
-          personelListesi: [],
-          firmaListesi: [],
+          personelListesi,
+          firmaListesi,
+          firstPageLimit: formData.firstPageLimit,
         },
         React.createElement(ActiveComponent, {
           data: {
             ...formData,
+            personelListesi,
+            firmaListesi,
             tarih: formData.tarih || formData.onayaSunulanTarih || "",
             onayTarihi: formData.onayTarihi || formData.dosyaTarihi || "",
-            solLogo: localShowLogoLeft
-              ? formData.solLogo || logoLeft || institutionLogo || null
-              : null,
-            sagLogo: localShowLogoRight
-              ? formData.sagLogo || logoRight || null
-              : null,
+            solLogo: localShowLogoLeft ? formData.solLogo : null,
+            sagLogo: localShowLogoRight ? formData.sagLogo : null,
             olurYazisi: formData.olurYazisi !== false,
             orientation,
           },
@@ -540,92 +557,110 @@ export function useDocumentPreviewData({
         }),
       ),
     );
-    const styles = Array.from(
-      document.querySelectorAll("style, link[rel='stylesheet']"),
-    )
-      .map((el) => el.outerHTML)
-      .join("\n");
 
     return `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>${activeTemplateConf?.name || "Belge"}</title>
-          ${styles}
+          <title>${activeTemplateConf?.name || "Belge Önizleme"}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @page {
               size: A4 ${orientation};
-              margin: 0;
+              margin: 10mm;
             }
             body {
-              background: white !important;
-              margin: 0 !important;
-              padding: 0 !important;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #000;
+              margin: 0;
+              padding: 0;
+              background-color: #fff;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-            .document-container {
-              box-shadow: none !important;
-              margin: 0 !important;
+            @media print {
+              body {
+                background: white !important;
+                padding: 0 !important;
+              }
+              .page-break {
+                page-break-before: always;
+              }
             }
           </style>
         </head>
         <body>
-          ${bodyHtml}
+          <div class="a4-document-root ${orientation}">
+            ${bodyHtml}
+          </div>
         </body>
       </html>
     `;
   };
 
-  // 6. Print & PDF Action Handlers
+  // 6. Print handler
   const handlePrint = async (): Promise<void> => {
     setIsPrinting(true);
     try {
-      const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("print-html", html, {
-        silent: false,
+      const htmlContent = getCompiledHtml();
+      await window.electron.ipcRenderer.invoke("app:print-html", {
+        html: htmlContent,
+        orientation,
       });
-    } catch (error) {
-      console.error("Yazdırma hatası:", error);
+    } catch (e) {
+      console.error("Yazdırma hatası:", e);
     } finally {
       setIsPrinting(false);
     }
   };
 
+  // 7. PDF Export
   const handlePdf = async (): Promise<void> => {
     setIsPrinting(true);
     try {
-      const html = getCompiledHtml();
-      const titleForFile = activeTemplateConf?.name || "Belge";
-      await window.electron.ipcRenderer.invoke(
-        "export-pdf",
-        html,
-        null,
-        titleForFile,
-      );
-    } catch (error) {
-      console.error("PDF kaydetme hatası:", error);
+      const htmlContent = getCompiledHtml();
+      const defaultFilename = `${activeTemplateConf?.name || "Belge"}_${
+        new Date().toISOString().slice(0, 10)
+      }.pdf`;
+
+      const res = await window.electron.ipcRenderer.invoke("app:save-pdf-as", {
+        html: htmlContent,
+        orientation,
+        defaultFilename,
+      });
+      if (res && res.success) {
+        alert("PDF başarıyla kaydedildi.");
+      }
+    } catch (e) {
+      console.error("PDF kaydetme hatası:", e);
     } finally {
       setIsPrinting(false);
+      setDownloadOpen(false);
     }
   };
 
+  // 8. Open PDF in New Tab / External Viewer
   const handleOpenPdfInNewTab = async (): Promise<void> => {
     setIsPrinting(true);
     try {
-      const html = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("open-pdf-external", html);
-    } catch (error) {
-      console.error("PDF önizleme hatası:", error);
+      const htmlContent = getCompiledHtml();
+      await window.electron.ipcRenderer.invoke("app:open-pdf-preview", {
+        html: htmlContent,
+        orientation,
+      });
+    } catch (e) {
+      console.error("PDF önizleme penceresi açılırken hata:", e);
     } finally {
       setIsPrinting(false);
+      setDownloadOpen(false);
     }
   };
 
+  // 9. Reset and refresh data from database
   const handleRefreshFromDb = async (): Promise<void> => {
-    const isConfirmed = window.confirm(
-      "Şablonu veritabanındaki güncel verilerle yenilemek istediğinize emin misiniz? Yaptığınız manuel değişiklikler silinecektir.",
+    const isConfirmed = confirm(
+      "Belge üzerindeki tüm verileri veritabanındaki güncel değerlerle sıfırlamak istiyor musunuz? Canlı düzenlemeleriniz kaybolabilir.",
     );
     if (!isConfirmed || !activeDosyaId) return;
 
@@ -645,7 +680,7 @@ export function useDocumentPreviewData({
         return [];
       };
 
-      const mapping = getDefaultMappingForProcess(documentId || "");
+      const mapping = getDefaultMappingForProcess(resolvedId);
       const resolver = new TemplateResolver(queryExecutor);
       const resolved = await resolver.resolve(mapping, activeDosyaId);
 
@@ -670,6 +705,10 @@ export function useDocumentPreviewData({
   return {
     isLoading,
     activeDosyaId,
+    selectedDocId,
+    setSelectedDocId,
+    resolvedId,
+    templateOptions: TEMPLATE_OPTIONS,
     activeTemplateConf,
     ActiveComponent,
     formData,

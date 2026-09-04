@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { emitAppEvent, useAppEventListener } from '../../utils/appEvents'
 
 export interface TeminDosyasi {
   id: number
@@ -84,6 +85,13 @@ const fetchDosyalar = async (): Promise<TeminDosyasi[]> => {
 export function useDosyalarHooks() {
   const queryClient = useQueryClient()
 
+  useAppEventListener(
+    ['dossier:created', 'dossier:updated', 'dossier:deleted', 'status:changed', 'workspace:refreshed'],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    }
+  )
+
   const { data: dosyalar = [], isLoading: isLoadingDosyalar } = useQuery({
     queryKey: ['temin_dosyalari'],
     queryFn: fetchDosyalar
@@ -109,7 +117,11 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      const insertedId = (data as { lastInsertRowid?: number })?.lastInsertRowid
+      emitAppEvent('dossier:created', { dosyaId: insertedId })
+    }
   })
 
   const updateDosyaMutation = useMutation({
@@ -129,7 +141,10 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      emitAppEvent('dossier:updated', { dosyaId: variables.id, payload: variables })
+    }
   })
 
   const deleteDosyaMutation = useMutation({
@@ -143,7 +158,10 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      emitAppEvent('dossier:deleted', { dosyaId: id })
+    }
   })
 
   const hardDeleteDosyaMutation = useMutation({
@@ -157,7 +175,10 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      emitAppEvent('dossier:deleted', { dosyaId: id })
+    }
   })
 
   const bulkDeleteDosyalarMutation = useMutation({
@@ -173,7 +194,10 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      emitAppEvent('dossier:deleted', {})
+    }
   })
 
   const bulkHardDeleteDosyalarMutation = useMutation({
@@ -189,7 +213,10 @@ export function useDosyalarHooks() {
       if (!res.success) throw new Error(res.error)
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      emitAppEvent('dossier:deleted', {})
+    }
   })
 
   return {

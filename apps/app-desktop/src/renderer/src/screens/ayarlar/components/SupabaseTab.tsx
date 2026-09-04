@@ -144,7 +144,7 @@ export const SupabaseTab: React.FC = () => {
             </span>
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            HAKİM Pro verilerini kendi kurum içi sunucunuzda (Docker Self-Hosted) veya resmi Supabase bulutunda barındırabilir,
+            TEMİN 360 verilerini kendi kurum içi sunucunuzda (Docker Self-Hosted) veya resmi Supabase bulutunda barındırabilir,
             ihaleleri ve resmi evrakları merkezi olarak senkronize edebilirsiniz.
           </p>
         </div>
