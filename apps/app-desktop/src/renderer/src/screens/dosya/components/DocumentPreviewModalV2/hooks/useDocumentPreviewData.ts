@@ -8,6 +8,7 @@ import {
 } from "@hakim-pro-app/document-templates";
 import { useWorkspaceStore } from "../../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../../store/settingsStore";
+import { usePrintQueueStore } from "../../../../../store/printQueueStore";
 import { getDefaultMappingForProcess } from "../../../../../constants/mappings";
 import { getInstitutionSuffixes } from "../../../../../utils/kurumHelper";
 import { Personel } from "../types";
@@ -519,6 +520,7 @@ export function useDocumentPreviewData({
            DO UPDATE SET veri_json = excluded.veri_json, guncelleme_tarihi = CURRENT_TIMESTAMP`,
           [activeDosyaId, sablonId, jsonStr],
         );
+        usePrintQueueStore.getState().invalidateReadyStatus(activeDosyaId, resolvedId, "Belge içeriği güncellendi");
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
       }

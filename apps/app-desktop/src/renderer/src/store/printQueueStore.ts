@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { emitAppEvent } from '../utils/appEvents'
 
-export type PrintStatus = 'draft' | 'saved' | 'ready_to_print' | 'printed'
+export type PrintStatus = 'draft' | 'modified' | 'ready_to_print' | 'printed'
 
 export interface QueuedDocument {
   id: string // e.g. `${dosyaId}_${docKey}`
@@ -14,6 +14,7 @@ export interface QueuedDocument {
   orientation?: 'portrait' | 'landscape'
   addedAt: string
   lastPrintedAt?: string
+  lastModifiedAt?: string
   notes?: string
 }
 
@@ -27,11 +28,13 @@ export interface PrintQueueState {
     title: string,
     extra?: Partial<QueuedDocument>
   ) => boolean
-  updateStatus: (dosyaId: number, docKey: string, status: PrintStatus) => void
+  updateStatus: (dosyaId: number, docKey: string, status: PrintStatus, notes?: string) => void
+  invalidateReadyStatus: (dosyaId: number, docKey: string, reason?: string) => void
   markAsPrinted: (dosyaId: number, docKey: string) => void
   clearQueueForDosya: (dosyaId: number) => void
   getQueueForDosya: (dosyaId: number | null | undefined) => QueuedDocument[]
   getReadyCountForDosya: (dosyaId: number | null | undefined) => number
+  getPrintedCountForDosya: (dosyaId: number | null | undefined) => number
   isInQueue: (dosyaId: number | null | undefined, docKey: string) => boolean
   getDocumentStatus: (dosyaId: number | null | undefined, docKey: string) => PrintStatus
 }
@@ -96,12 +99,38 @@ export const usePrintQueueStore = create<PrintQueueState>()(
         return isNowInQueue
       },
 
-      updateStatus: (dosyaId, docKey, status) => {
+      updateStatus: (dosyaId, docKey, status, notes) => {
         const id = `${dosyaId}_${docKey}`
         set((state) => ({
-          items: state.items.map((i) => (i.id === id ? { ...i, status } : i))
+          items: state.items.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  status,
+                  notes: notes !== undefined ? notes : i.notes,
+                  lastModifiedAt: new Date().toISOString()
+                }
+              : i
+          )
         }))
-        emitAppEvent('print_queue:updated' as any, { dosyaId, docKey, status })
+        emitAppEvent('print_queue:updated', { dosyaId, docKey, status })
+      },
+
+      invalidateReadyStatus: (dosyaId, docKey, reason) => {
+        const id = `${dosyaId}_${docKey}`
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === id && i.status === 'ready_to_print'
+              ? {
+                  ...i,
+                  status: 'modified',
+                  notes: reason || 'Düzenleme yapıldı, yeniden kontrol ediniz.',
+                  lastModifiedAt: new Date().toISOString()
+                }
+              : i
+          )
+        }))
+        emitAppEvent('print_queue:updated', { dosyaId, docKey, status: 'modified' })
       },
 
       markAsPrinted: (dosyaId, docKey) => {
@@ -117,14 +146,14 @@ export const usePrintQueueStore = create<PrintQueueState>()(
               : i
           )
         }))
-        emitAppEvent('print_queue:updated' as any, { dosyaId, docKey, status: 'printed' })
+        emitAppEvent('print_queue:updated', { dosyaId, docKey, status: 'printed' })
       },
 
       clearQueueForDosya: (dosyaId) => {
         set((state) => ({
           items: state.items.filter((i) => i.dosyaId !== dosyaId)
         }))
-        emitAppEvent('print_queue:updated' as any, { dosyaId })
+        emitAppEvent('print_queue:updated', { dosyaId })
       },
 
       getQueueForDosya: (dosyaId) => {
@@ -135,6 +164,11 @@ export const usePrintQueueStore = create<PrintQueueState>()(
       getReadyCountForDosya: (dosyaId) => {
         if (!dosyaId) return 0
         return get().items.filter((i) => i.dosyaId === dosyaId && i.status === 'ready_to_print').length
+      },
+
+      getPrintedCountForDosya: (dosyaId) => {
+        if (!dosyaId) return 0
+        return get().items.filter((i) => i.dosyaId === dosyaId && i.status === 'printed').length
       },
 
       isInQueue: (dosyaId, docKey) => {
@@ -156,3 +190,4 @@ export const usePrintQueueStore = create<PrintQueueState>()(
     }
   )
 )
+

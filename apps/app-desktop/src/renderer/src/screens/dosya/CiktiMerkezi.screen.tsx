@@ -44,6 +44,9 @@ const getSablonGroup = (sablon: Sablon): string => {
   return SABLON_DOSYAADI_KATEGORI[dosyaAdiNoExt] || "Genel";
 };
 
+import { usePrintQueueStore } from "../../store/printQueueStore";
+import { useGlobalDocumentPreviewStore } from "../../store/globalDocumentPreviewStore";
+
 export function CiktiMerkeziScreen(): React.JSX.Element {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } =
     useWorkspaceStore();
@@ -54,9 +57,17 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     dosyaContext,
     activeDosya,
     contextsByPath,
-    personelListesi,
   } = useCiktiMerkeziData(activeDosyaId);
   const { logDocument } = useDocumentLogger();
+  const {
+    getReadyCountForDosya,
+    getPrintedCountForDosya,
+    getDocumentStatus,
+    toggleReadyToPrint,
+    markAsPrinted,
+  } = usePrintQueueStore();
+  const { openDocument } = useGlobalDocumentPreviewStore();
+
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [processing, setProcessing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -65,6 +76,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
   );
   const [previewSablon, setPreviewSablon] = useState<Sablon | null>(null);
   const [isPrintManagerOpen, setIsPrintManagerOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "ready" | "starred" | "printed"
+  >("all");
+
+  const readyCount = getReadyCountForDosya(activeDosyaId);
+  const printedCount = getPrintedCountForDosya(activeDosyaId);
   const [toast, setToast] = useState<
     {
       message: string;
@@ -276,16 +293,37 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
 
   const groupedSablons = useMemo((): Record<string, Sablon[]> => {
     const groups: Record<string, Sablon[]> = {};
-    sablons.forEach((s) => {
+    
+    // Filter sablons based on statusFilter
+    const filteredSablons = sablons.filter((s) => {
+      const docKey = (s.dosya_adi || "").replace(/\.html$/, "");
+      const st = activeDosyaId ? getDocumentStatus(activeDosyaId, docKey) : "draft";
+
+      if (statusFilter === "ready") {
+        return st === "ready_to_print";
+      }
+      if (statusFilter === "printed") {
+        return st === "printed";
+      }
+      if (statusFilter === "starred") {
+        return activeStarredDocs.some(
+          (d) => normalizeForMatch(d) === normalizeForMatch(s.ad),
+        );
+      }
+      return true;
+    });
+
+    filteredSablons.forEach((s) => {
       const cat = getSablonGroup(s);
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(s);
     });
     return groups;
-  }, [sablons]);
+  }, [sablons, statusFilter, activeDosyaId, getDocumentStatus, activeStarredDocs]);
 
   const toggleGroup = (cat: string) => {
-    const groupIds = groupedSablons[cat].map((s) => s.id);
+    const groupItems = groupedSablons[cat] || [];
+    const groupIds = groupItems.map((s) => s.id);
     const validIds = groupIds.filter(
       (id) => !getMissingRequirement(sablons.find((s) => s.id === id)!),
     );
@@ -371,6 +409,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
         // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
         const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, "_").trim();
         const fileBase = `${safeName}_${activeDosyaId}`;
+        const docKey = (sablon.dosya_adi || "").replace(/\.html$/, "");
 
         if (action === "pdf") {
           await window.electron.ipcRenderer.invoke(
@@ -399,13 +438,16 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
             silent: true,
           }); // Silent true for batch printing
           await logDocument(sablon.ad, "Yazdırıldı");
+          if (activeDosyaId) {
+            markAsPrinted(activeDosyaId, docKey);
+          }
         }
       }
 
       if (action === "print") {
         setIsPrintManagerOpen(false);
         showToast(
-          "Belgeler başarıyla yazdırma kuyruğuna gönderildi.",
+          "Belgeler başarıyla yazdırıldı ve 'Yazdırıldı' olarak işaretlendi.",
           "success",
         );
       } else {
@@ -427,7 +469,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm flex flex-col md:flex-row min-h-[500px] mt-4 overflow-hidden">
         {/* SOL: BELGE LİSTESİ */}
         <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
               <Layers className="w-5 h-5 text-blue-500" />
               Dosya Belgeleri
@@ -460,6 +502,87 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
             </div>
           </div>
 
+          {/* DURUM FİLTRELEME SEKMELERİ */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-800/60 rounded-2xl mb-4 text-xs font-semibold overflow-x-auto border border-slate-200/60 dark:border-slate-800">
+            <button
+              onClick={() => setStatusFilter("all")}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 ${
+                statusFilter === "all"
+                  ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs font-bold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-blue-500" />
+              Tüm Belgeler
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300">
+                {sablons.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setStatusFilter("ready")}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 ${
+                statusFilter === "ready"
+                  ? "bg-emerald-500 text-white shadow-xs font-bold"
+                  : "text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Yazdırmaya Hazır
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  statusFilter === "ready"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300"
+                }`}
+              >
+                {readyCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setStatusFilter("starred")}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 ${
+                statusFilter === "starred"
+                  ? "bg-amber-500 text-white shadow-xs font-bold"
+                  : "text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+              }`}
+            >
+              <span>⭐</span>
+              Hızlı Erişim
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  statusFilter === "starred"
+                    ? "bg-amber-600 text-white"
+                    : "bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300"
+                }`}
+              >
+                {activeStarredDocs.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setStatusFilter("printed")}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 ${
+                statusFilter === "printed"
+                  ? "bg-blue-600 text-white shadow-xs font-bold"
+                  : "text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+              }`}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Yazdırılanlar
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  statusFilter === "printed"
+                    ? "bg-blue-700 text-white"
+                    : "bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300"
+                }`}
+              >
+                {printedCount}
+              </span>
+            </button>
+          </div>
+
           {/* BELGE PAKETLERİ VE TASLAKLAR */}
           <CiktiPresetManager
             presets={presets}
@@ -478,6 +601,14 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
             )
             : (
               <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+                {Object.keys(groupedSablons).length === 0 && (
+                  <div className="py-12 text-center text-slate-400 text-sm">
+                    {statusFilter === "ready" && "Yazdırmaya hazır olarak işaretlenmiş belge bulunamadı."}
+                    {statusFilter === "starred" && "Hızlı erişim için yıldızlanmış belge bulunamadı."}
+                    {statusFilter === "printed" && "Bu dosyada henüz yazdırılan belge bulunamadı."}
+                    {statusFilter === "all" && "Kayıtlı belge şablonu bulunamadı."}
+                  </div>
+                )}
                 {Object.entries(groupedSablons).map(([kategori, items]) => {
                   const isExpanded = expandedCategories.has(kategori);
                   return (
@@ -503,7 +634,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                               : <Square className="w-4 h-4 text-slate-400" />}
                           </button>
                           <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            {kategori}
+                            {kategori} ({items.length})
                           </h4>
                         </div>
                         <div>
@@ -518,6 +649,10 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
                           {items.map((sablon) => {
                             const missingMsg = getMissingRequirement(sablon);
+                            const docKey = (sablon.dosya_adi || "").replace(/\.html$/, "");
+                            const docStatus = activeDosyaId
+                              ? getDocumentStatus(activeDosyaId, docKey)
+                              : "draft";
 
                             return (
                               <div
@@ -550,17 +685,34 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                   className="flex-1 min-w-0"
                                   title={missingMsg || sablon.ad}
                                 >
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p
+                                      className={`text-xs font-bold truncate ${
+                                        missingMsg
+                                          ? "text-slate-500 line-through"
+                                          : ""
+                                      }`}
+                                    >
+                                      {sablon.ad}
+                                    </p>
+                                    {docStatus === "ready_to_print" && (
+                                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300/50">
+                                        <CheckCircle2 className="w-2.5 h-2.5" /> Hazır
+                                      </span>
+                                    )}
+                                    {docStatus === "modified" && (
+                                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-300/50">
+                                        Kontrol Bekliyor
+                                      </span>
+                                    )}
+                                    {docStatus === "printed" && (
+                                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-300/50">
+                                        <Printer className="w-2.5 h-2.5" /> Yazdırıldı
+                                      </span>
+                                    )}
+                                  </div>
                                   <p
-                                    className={`text-xs font-bold truncate ${
-                                      missingMsg
-                                        ? "text-slate-500 line-through"
-                                        : ""
-                                    }`}
-                                  >
-                                    {sablon.ad}
-                                  </p>
-                                  <p
-                                    className="text-[10px] text-slate-500 truncate"
+                                    className="text-[10px] text-slate-500 truncate mt-0.5"
                                     title={sablon.dosya_adi}
                                   >
                                     {sablon.dosya_adi}
@@ -568,6 +720,29 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
                                 </div>
 
                                 <div className="flex items-center gap-1 shrink-0">
+                                  {/* Quick toggle ready to print button */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (activeDosyaId) {
+                                        toggleReadyToPrint(activeDosyaId, docKey, sablon.ad);
+                                      }
+                                    }}
+                                    className={`p-1 rounded-lg border transition-all ${
+                                      docStatus === "ready_to_print"
+                                        ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:border-emerald-800 hover:bg-emerald-100"
+                                        : "text-slate-400 hover:text-emerald-600 hover:border-emerald-300 border-slate-200 dark:border-slate-800"
+                                    }`}
+                                    title={
+                                      docStatus === "ready_to_print"
+                                        ? "Yazdırmaya hazır işaretini kaldır"
+                                        : "Yazdırmaya hazır olarak işaretle"
+                                    }
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                  </button>
+
                                   <BelgeAksiyonlari
                                     onPreview={() => setPreviewSablon(sablon)}
                                     onQuickPrint={() =>
@@ -672,6 +847,14 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           onClose={() => setPreviewSablon(null)}
           onToggleStar={toggleStar}
           srcDoc={renderHtml(previewSablon)}
+          onPrintSingle={async (id) => {
+            await handleAction("print", [id]);
+          }}
+          onOpenAdvancedEditor={(sab) => {
+            setPreviewSablon(null);
+            const key = (sab.dosya_adi || "").replace(/\.html$/, "");
+            openDocument(key);
+          }}
         />
       )}
 

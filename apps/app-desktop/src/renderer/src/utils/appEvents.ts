@@ -10,6 +10,7 @@ export type AppEventType =
   | 'status:changed'
   | 'documents:changed'
   | 'workspace:refreshed'
+  | 'print_queue:updated'
 
 export interface AppEventPayload {
   dosyaId?: number | null
