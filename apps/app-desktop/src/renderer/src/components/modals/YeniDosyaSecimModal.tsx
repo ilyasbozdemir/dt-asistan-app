@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from '@tanstack/react-router'
 import {
   Package,
@@ -119,9 +120,9 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
     }
   ]
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] overflow-y-auto p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] overflow-y-auto p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-200"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onClick={onClose}
     >
@@ -305,6 +306,7 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
         dosyalar={dosyalar}
         onSelect={handleExecuteClone}
       />
-    </div>
+    </div>,
+    document.body
   )
 }

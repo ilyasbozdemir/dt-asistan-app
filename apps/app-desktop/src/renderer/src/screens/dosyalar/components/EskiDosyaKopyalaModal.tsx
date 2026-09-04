@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Search, FileText, Calendar, Copy, ChevronRight } from 'lucide-react'
 import { TeminDosyasi } from '../dosyalar.hooks'
 import { cn } from '../../../utils/cn'
@@ -30,9 +31,16 @@ export function EskiDosyaKopyalaModal({
     )
   })
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] overflow-y-auto p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-200"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-3xl my-auto max-h-[88vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* HEADER */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
           <div>
@@ -143,6 +151,7 @@ export function EskiDosyaKopyalaModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
