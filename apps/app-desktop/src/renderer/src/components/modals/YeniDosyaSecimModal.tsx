@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
   Package,
@@ -14,6 +14,9 @@ import {
   Zap
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
+import { useDosyalarHooks, TeminDosyasi } from '../../screens/dosyalar/dosyalar.hooks'
+import { EskiDosyaKopyalaModal } from '../../screens/dosyalar/components/EskiDosyaKopyalaModal'
+import { cloneDosyaWithItems } from '../../utils/cloneDosya'
 
 export interface YeniDosyaSecimModalProps {
   isOpen: boolean
@@ -22,6 +25,9 @@ export interface YeniDosyaSecimModalProps {
 
 export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProps): React.JSX.Element | null {
   const navigate = useNavigate()
+  const { dosyalar, addDosya } = useDosyalarHooks()
+  const [showKopyalaModal, setShowKopyalaModal] = useState(false)
+  const [isCloning, setIsCloning] = useState(false)
 
   if (!isOpen) return null
 
@@ -39,11 +45,30 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
   }
 
   const handleSelectKopyala = () => {
-    onClose()
-    navigate({
-      to: '/dosyalar/yeni',
-      search: { kopyala: '1' } as any
-    })
+    setShowKopyalaModal(true)
+  }
+
+  const handleExecuteClone = async (eskiDosya: TeminDosyasi) => {
+    try {
+      setIsCloning(true)
+      setShowKopyalaModal(false)
+      const res = await cloneDosyaWithItems(eskiDosya, dosyalar, addDosya)
+      if (res.success && res.newId) {
+        onClose()
+        alert(
+          `"${eskiDosya.konu}" dosyasından ${res.clonedItemCount || 0} adet malzeme/hizmet kalemi ve tüm veriler başarıyla kopyalandı.\nYeni Dosya Numarası: ${res.nextTeminNo}`
+        )
+        navigate({
+          to: `/dosyalar/yeni?id=${res.newId}` as any
+        })
+      } else {
+        alert('Kopyalama sırasında hata oluştu: ' + (res.error || 'Bilinmeyen hata'))
+      }
+    } catch (err: any) {
+      alert('Kopyalama sırasında hata: ' + err.message)
+    } finally {
+      setIsCloning(false)
+    }
   }
 
   const handleSelectImport = () => {
@@ -96,16 +121,16 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] overflow-y-auto p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-200"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+        className="w-full max-w-3xl my-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/60 dark:bg-slate-950/50">
+        <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/80 shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
@@ -131,7 +156,7 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
         </div>
 
         {/* Body Content */}
-        <div className="p-6 overflow-y-auto max-h-[75vh] custom-scrollbar space-y-6">
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
           {/* Bölüm 1: Doğrudan Temin Türleri */}
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -272,6 +297,14 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
           </button>
         </div>
       </div>
+
+      {/* Eski Dosya Kopyala Modal */}
+      <EskiDosyaKopyalaModal
+        isOpen={showKopyalaModal}
+        onClose={() => setShowKopyalaModal(false)}
+        dosyalar={dosyalar}
+        onSelect={handleExecuteClone}
+      />
     </div>
   )
 }

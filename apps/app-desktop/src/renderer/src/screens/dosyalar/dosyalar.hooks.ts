@@ -103,8 +103,25 @@ export function useDosyalarHooks() {
         throw new Error(
           'Bu özellik sadece masaüstü uygulamasında çalışır (Tarayıcı desteklenmiyor).'
         )
+      
+      let validColumns: string[] = []
+      try {
+        const pragmaRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'PRAGMA table_info(DATA_TeminDosyasi)'
+        )
+        if (pragmaRes?.success && Array.isArray(pragmaRes.data)) {
+          validColumns = pragmaRes.data.map((col: any) => col.name)
+        }
+      } catch (e) {
+        console.warn('Pragma table info failed', e)
+      }
+
       const columns = Object.keys(dosya).filter(
-        (k) => k !== 'id' && dosya[k as keyof TeminDosyasi] !== undefined
+        (k) =>
+          k !== 'id' &&
+          dosya[k as keyof TeminDosyasi] !== undefined &&
+          (validColumns.length === 0 || validColumns.includes(k))
       )
       const placeholders = columns.map(() => '?').join(', ')
       const values = columns.map((k) => dosya[k as keyof TeminDosyasi])
@@ -127,8 +144,25 @@ export function useDosyalarHooks() {
   const updateDosyaMutation = useMutation({
     mutationFn: async (dosya: Partial<TeminDosyasi> & { id: number }) => {
       if (!window.electron) throw new Error('Bu özellik sadece masaüstü uygulamasında çalışır.')
+      
+      let validColumns: string[] = []
+      try {
+        const pragmaRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'PRAGMA table_info(DATA_TeminDosyasi)'
+        )
+        if (pragmaRes?.success && Array.isArray(pragmaRes.data)) {
+          validColumns = pragmaRes.data.map((col: any) => col.name)
+        }
+      } catch (e) {
+        console.warn('Pragma table info failed', e)
+      }
+
       const columns = Object.keys(dosya).filter(
-        (k) => k !== 'id' && dosya[k as keyof TeminDosyasi] !== undefined
+        (k) =>
+          k !== 'id' &&
+          dosya[k as keyof TeminDosyasi] !== undefined &&
+          (validColumns.length === 0 || validColumns.includes(k))
       )
       const setClause = columns.map((k) => `${k} = ?`).join(', ')
       const values = columns.map((k) => dosya[k as keyof TeminDosyasi])

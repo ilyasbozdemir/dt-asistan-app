@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { useNavigate, useRouterState } from '@tanstack/react-router'
+import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
 import { TeminDosyasi, useDosyalarHooks } from './dosyalar.hooks'
 import { useTabStore } from '../../store/tabStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -96,6 +96,7 @@ export interface UseYeniDosyaScreenReturn {
 export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const navigate = useNavigate()
   const routerState = useRouterState()
+  const search: any = useSearch({ strict: false }) || {}
   const { dosyalar, addDosya, updateDosya } = useDosyalarHooks()
   const { updateTabLabel } = useTabStore()
   const { institutionName, limitType } = useSettingsStore()
@@ -108,8 +109,8 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
 
   // Get query params
   const searchParams = new URLSearchParams(window.location.search)
-  const editIdStr = searchParams.get('id')
-  const editId = editIdStr ? parseInt(editIdStr, 10) : null
+  const editIdRaw = search?.id || searchParams.get('id')
+  const editId = editIdRaw ? parseInt(String(editIdRaw), 10) : null
   const isEdit = editId !== null && !isNaN(editId)
   const initialHrefRef = useRef(routerState.location.href)
 
@@ -248,8 +249,8 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
           }
 
           const qParams = new URLSearchParams(window.location.search)
-          const urlTur = qParams.get('tur')
-          const isKopyala = qParams.get('kopyala') === '1'
+          const urlTur = search?.tur || qParams.get('tur')
+          const isKopyala = search?.kopyala === '1' || search?.kopyala === true || qParams.get('kopyala') === '1'
           if (isKopyala) {
             setShowKopyalaModal(true)
           }
@@ -333,50 +334,58 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac'>('genel')
 
   const handleCopyDosya = (eskiDosya: TeminDosyasi) => {
-    setFormData({
-      ...formData,
-      konu: eskiDosya.konu,
-      isin_aciklamasi: eskiDosya.isin_aciklamasi,
-      birim_id: eskiDosya.birim_id,
-      antet_ek_satir: eskiDosya.antet_ek_satir,
-      sunulacak_makam: eskiDosya.sunulacak_makam,
-      ihtiyac_yeri: eskiDosya.ihtiyac_yeri,
-      e_butce: eskiDosya.e_butce,
-      fonksiyonel_kod: eskiDosya.fonksiyonel_kod,
-      muhasebe_birimi: eskiDosya.muhasebe_birimi,
-      harcama_birimi: eskiDosya.harcama_birimi,
-      finansman_kodu: eskiDosya.finansman_kodu,
-      ekonomik_kod: eskiDosya.ekonomik_kod,
-      ihale_tipi: eskiDosya.ihale_tipi,
-      tur: eskiDosya.tur,
-      ihale_sekli: eskiDosya.ihale_sekli,
-      teklif_sozlesme_turu: eskiDosya.teklif_sozlesme_turu,
-      alt_yuklenici_olacak_mi: eskiDosya.alt_yuklenici_olacak_mi,
-      kismi_teklif_verilecek_mi: eskiDosya.kismi_teklif_verilecek_mi,
-      fiyat_farki_dayanagi: eskiDosya.fiyat_farki_dayanagi,
-      yatirim_proje_no: eskiDosya.yatirim_proje_no,
-      avans_verilecek_mi: eskiDosya.avans_verilecek_mi,
-      yillara_yaygin: eskiDosya.yillara_yaygin,
-      sozlesme_yapilacak_mi: eskiDosya.sozlesme_yapilacak_mi,
-      yaklasik_maliyet_hesaplamasi: eskiDosya.yaklasik_maliyet_hesaplamasi,
-      kdv: eskiDosya.kdv,
-      hesaplama_esasi: eskiDosya.hesaplama_esasi,
-      komisyon_takdiri: eskiDosya.komisyon_takdiri,
-      tibbi_cihaz_alimi_mi: eskiDosya.tibbi_cihaz_alimi_mi,
-      yaklasik_maliyet: eskiDosya.yaklasik_maliyet,
-      butce_kodu: eskiDosya.butce_kodu,
-      irtibat_yetkilisi_id: eskiDosya.irtibat_yetkilisi_id,
-      hazirlayan_personel_id: eskiDosya.hazirlayan_personel_id,
-      onay_personel_id: eskiDosya.onay_personel_id,
-      notlar: eskiDosya.notlar,
-      temin_no: '',
+    const targetYear = formData.dosya_acilis_tarihi
+      ? new Date(formData.dosya_acilis_tarihi).getFullYear()
+      : formData.butce_yili || new Date().getFullYear()
+    const nextNo = getNextTeminNo(targetYear)
+
+    setFormData((prev) => ({
+      ...prev,
+      konu: eskiDosya.konu ? `${eskiDosya.konu} (Kopya)` : '',
+      isin_aciklamasi: eskiDosya.isin_aciklamasi || '',
+      birim_id: eskiDosya.birim_id || null,
+      antet_ek_satir: eskiDosya.antet_ek_satir || '',
+      sunulacak_makam: eskiDosya.sunulacak_makam || '',
+      ihtiyac_yeri: eskiDosya.ihtiyac_yeri || '',
+      e_butce: eskiDosya.e_butce || '',
+      fonksiyonel_kod: eskiDosya.fonksiyonel_kod || '',
+      muhasebe_birimi: eskiDosya.muhasebe_birimi || '',
+      harcama_birimi: eskiDosya.harcama_birimi || '',
+      finansman_kodu: eskiDosya.finansman_kodu || '1',
+      ekonomik_kod: eskiDosya.ekonomik_kod || '',
+      ihale_tipi: eskiDosya.ihale_tipi || 'Doğrudan Temin',
+      tur: eskiDosya.tur || 'mal',
+      ihale_sekli: eskiDosya.ihale_sekli || '22/d*',
+      teklif_sozlesme_turu: eskiDosya.teklif_sozlesme_turu || 'Birim Fiyat',
+      alt_yuklenici_olacak_mi: eskiDosya.alt_yuklenici_olacak_mi || 0,
+      kismi_teklif_verilecek_mi: eskiDosya.kismi_teklif_verilecek_mi || 0,
+      fiyat_farki_dayanagi: eskiDosya.fiyat_farki_dayanagi || 'Fiyat Farkı Ödenmeyecek',
+      yatirim_proje_no: eskiDosya.yatirim_proje_no || '',
+      avans_verilecek_mi: eskiDosya.avans_verilecek_mi || 0,
+      yillara_yaygin: eskiDosya.yillara_yaygin || 0,
+      sozlesme_yapilacak_mi: eskiDosya.sozlesme_yapilacak_mi || 0,
+      yaklasik_maliyet_hesaplamasi: eskiDosya.yaklasik_maliyet_hesaplamasi || '',
+      kdv: eskiDosya.kdv || '20',
+      hesaplama_esasi: eskiDosya.hesaplama_esasi || '',
+      komisyon_takdiri: eskiDosya.komisyon_takdiri || 'Sadece araştırma fiyatları dikkate alınacak',
+      tibbi_cihaz_alimi_mi: eskiDosya.tibbi_cihaz_alimi_mi || 0,
+      yaklasik_maliyet: eskiDosya.yaklasik_maliyet || 0,
+      butce_kodu: eskiDosya.butce_kodu || '',
+      irtibat_yetkilisi_id: eskiDosya.irtibat_yetkilisi_id || null,
+      hazirlayan_personel_id: eskiDosya.hazirlayan_personel_id || null,
+      onay_personel_id: eskiDosya.onay_personel_id || null,
+      talep_eden_personel_id: eskiDosya.talep_eden_personel_id || null,
+      sunan_personel_id: eskiDosya.sunan_personel_id || null,
+      notlar: eskiDosya.notlar || '',
+      temin_no: nextNo,
+      butce_yili: targetYear,
       dosya_acilis_tarihi: new Date().toISOString().split('T')[0],
       son_teklif_verme_tarihi: '',
       teslim_tarihi: ''
-    })
+    }))
     setShowKopyalaModal(false)
     alert(
-      `"${eskiDosya.konu}" başlıklı dosyadan veriler başarıyla kopyalandı. Lütfen yeni dosya numarasını ve tarihlerini kontrol edin.`
+      `"${eskiDosya.konu}" başlıklı dosyadan veriler başarıyla aktarıldı.\nYeni Dosya Numarası: ${nextNo}`
     )
   }
 
