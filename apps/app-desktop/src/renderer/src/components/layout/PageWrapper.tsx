@@ -58,30 +58,88 @@ export function PageWrapper(): React.ReactNode {
     document.title = title
   }, [routerState.location.pathname])
 
-  // Global Güvenlik Koruması: Radix UI / Modal veya Popover'ların kapanışında body üzerinde takılı kalan pointer-events: none veya aria-hidden kilitlerini temizler
+  // Global Güvenlik Koruması: Radix UI / Modal veya Popover'ların kapanışında body üzerinde takılı kalan pointer-events: none, aria-hidden veya inert kilitlerini anında temizler
   useEffect(() => {
     const ensureInteractivity = () => {
-      if (document.body.style.pointerEvents === 'none') {
-        const hasActiveModal = document.querySelector(
-          '[data-radix-portal] [role="dialog"], [role="dialog"], .fixed.inset-0.z-\\[100\\], .fixed.inset-0.z-\\[200\\], .fixed.inset-0.z-\\[9999\\]'
-        )
-        if (!hasActiveModal) {
+      // Aktif açık bir modal/dialog olup olmadığını kontrol et
+      const hasActiveModal = document.querySelector(
+        '[role="dialog"], [data-radix-portal] [role="dialog"], .fixed.inset-0.z-\\[99999\\], .fixed.inset-0.z-\\[100\\], .fixed.inset-0.z-\\[200\\], .fixed.inset-0.z-\\[9999\\]'
+      )
+
+      if (!hasActiveModal) {
+        // Body ve Html pointer-events kilidini kaldır
+        if (document.body.style.pointerEvents === 'none') {
           document.body.style.pointerEvents = 'auto'
+        }
+        if (document.documentElement.style.pointerEvents === 'none') {
+          document.documentElement.style.pointerEvents = 'auto'
+        }
+
+        // #root üzerindeki aria-hidden ve inert kilitlerini kaldır
+        const root = document.getElementById('root')
+        if (root) {
+          if (root.getAttribute('aria-hidden') === 'true') {
+            root.removeAttribute('aria-hidden')
+          }
+          if (root.hasAttribute('inert')) {
+            root.removeAttribute('inert')
+          }
+        }
+
+        // Kalan gizli aria-hidden etiketlerini temizle
+        document.querySelectorAll('[data-aria-hidden="true"]').forEach((el) => {
+          el.removeAttribute('data-aria-hidden')
+          el.removeAttribute('aria-hidden')
+        })
+      }
+    }
+
+    // İlk çalıştırma ve periyodik kontrol
+    ensureInteractivity()
+    const interval = setInterval(ensureInteractivity, 500)
+
+    // DOM değişikliklerini (style/attribute eklemelerini) anında izle
+    const observer = new MutationObserver(() => {
+      ensureInteractivity()
+    })
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['style', 'aria-hidden', 'inert', 'class']
+    })
+
+    // Kullanıcı etkileşimlerinde (capture phase) kilidi aç
+    const handleUserInteraction = (e: Event) => {
+      ensureInteractivity()
+      // Tıklanan eleman bir input/textarea ise odaklanmasını garantile
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        const isReadOnly = (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) && e.target.readOnly
+        if (document.activeElement !== e.target && !e.target.disabled && !isReadOnly) {
+          e.target.focus()
         }
       }
     }
 
-    ensureInteractivity()
-    const interval = setInterval(ensureInteractivity, 1000)
-    window.addEventListener('mouseup', ensureInteractivity)
-    window.addEventListener('keydown', ensureInteractivity)
-    window.addEventListener('focus', ensureInteractivity)
+    window.addEventListener('pointerdown', handleUserInteraction, true)
+    window.addEventListener('mousedown', handleUserInteraction, true)
+    window.addEventListener('click', handleUserInteraction, true)
+    window.addEventListener('focusin', handleUserInteraction, true)
+    window.addEventListener('keydown', ensureInteractivity, true)
+    window.addEventListener('focus', ensureInteractivity, true)
 
     return () => {
       clearInterval(interval)
-      window.removeEventListener('mouseup', ensureInteractivity)
-      window.removeEventListener('keydown', ensureInteractivity)
-      window.removeEventListener('focus', ensureInteractivity)
+      observer.disconnect()
+      window.removeEventListener('pointerdown', handleUserInteraction, true)
+      window.removeEventListener('mousedown', handleUserInteraction, true)
+      window.removeEventListener('click', handleUserInteraction, true)
+      window.removeEventListener('focusin', handleUserInteraction, true)
+      window.removeEventListener('keydown', ensureInteractivity, true)
+      window.removeEventListener('focus', ensureInteractivity, true)
     }
   }, [routerState.location.href])
 
