@@ -20,10 +20,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { cn } from "../../utils/cn";
 import { YeniDosyaSecimModal } from "../modals/YeniDosyaSecimModal";
 import { formatDosyaNo } from "../../utils/formatDosyaNo";
+import { DosyaDataInspectorModal } from "../../screens/dosyalar/components/DosyaDataInspectorModal";
 
 export function TeminSelector(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [showYeniDosyaModal, setShowYeniDosyaModal] = useState(false);
+  const [showInspector, setShowInspector] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "temin" | "hakedis">(
     "all",
@@ -174,15 +176,15 @@ export function TeminSelector(): React.JSX.Element {
                 )
                 : null}
 
-              {/* Dosya Detay / Takip Ekranını Aç */}
+              {/* Dosya Detay / Veri Denetçisi (Inspector) Modalını Aç */}
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  addTab('/takip');
-                  navigate({ to: '/takip' });
+                  setShowInspector(true);
                 }}
                 className="p-1.5 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
-                title="Dosya Detay ve Takip Ekranına Git"
+                title="Dosya Verilerini İncele (Sekmeli Görünüm & Denetçi)"
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -414,6 +416,14 @@ export function TeminSelector(): React.JSX.Element {
         isOpen={showYeniDosyaModal}
         onClose={() => setShowYeniDosyaModal(false)}
       />
+
+      {selectedDosya && (
+        <DosyaDataInspectorModal
+          isOpen={showInspector}
+          onClose={() => setShowInspector(false)}
+          dosya={selectedDosya}
+        />
+      )}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   X,
   Code,
@@ -7,15 +7,18 @@ import {
   Check,
   Building2,
   Users,
-  Coins,
   FileSpreadsheet,
   FileCode,
   Search,
   ExternalLink,
-  Layers
+  Layers,
+  Edit,
+  FileText
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { useGlobalDocumentPreviewStore } from '../../../store/globalDocumentPreviewStore'
+import { useTabStore } from '../../../store/tabStore'
+import { useNavigate } from '@tanstack/react-router'
 
 interface DosyaDataInspectorModalProps {
   isOpen: boolean
@@ -46,44 +49,40 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
     komisyon: [],
     sablonVeri: []
   })
-  const [loadingSub, setLoadingSub] = useState(false)
+  const [, setLoadingSub] = useState(false)
 
   const { openDocument } = useGlobalDocumentPreviewStore()
+  const { addTab } = useTabStore()
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (isOpen && dosya?.id && window.electron) {
-      loadSubData(dosya.id)
-    }
-  }, [isOpen, dosya?.id])
-
-  const loadSubData = async (dosyaId: number) => {
+  const loadSubData = useCallback(async (dosyaId: number) => {
     setLoadingSub(true)
     try {
       const [kRes, fRes, tRes, komRes, sRes] = await Promise.all([
         window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT * FROM DATA_TeminKalem WHERE temin_id = ? ORDER BY sira_no ASC',
-          [dosyaId]
+          'SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? OR temin_id = ? ORDER BY id ASC',
+          [dosyaId, dosyaId]
         ),
         window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT tf.*, f.unvan, f.vergi_no, f.telefon FROM DATA_TeminFirma tf LEFT JOIN TANIM_Firma f ON tf.firma_id = f.id WHERE tf.temin_id = ?',
-          [dosyaId]
+          'SELECT tf.*, f.unvan, f.vergi_no, f.telefon, f.yetkili FROM DATA_TeminFirma tf LEFT JOIN TANIM_Firma f ON tf.firma_id = f.id WHERE tf.temin_dosya_id = ? OR tf.temin_id = ?',
+          [dosyaId, dosyaId]
         ),
         window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT * FROM DATA_TeminKalemTeklif WHERE temin_id = ?',
-          [dosyaId]
+          'SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ? OR temin_id = ?',
+          [dosyaId, dosyaId]
         ),
         window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT tk.*, p.ad_soyad, p.unvan as personel_unvan, kg.ad as gorev_adi FROM DATA_TeminKomisyon tk LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id LEFT JOIN TANIM_KomisyonGorevi kg ON tk.gorev_kod = kg.kod WHERE tk.temin_id = ? ORDER BY tk.sira ASC',
-          [dosyaId]
+          'SELECT tk.*, p.ad_soyad, p.unvan as personel_unvan, kg.ad as gorev_adi FROM DATA_TeminKomisyon tk LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id LEFT JOIN TANIM_KomisyonGorevi kg ON tk.gorev_kod = kg.kod WHERE tk.temin_dosya_id = ? OR tk.temin_id = ? ORDER BY tk.id ASC',
+          [dosyaId, dosyaId]
         ),
         window.electron.ipcRenderer.invoke(
           'db:query',
-          'SELECT * FROM DATA_DosyaSablonVeri WHERE temin_id = ?',
-          [dosyaId]
+          'SELECT * FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? OR temin_id = ?',
+          [dosyaId, dosyaId]
         )
       ])
 
@@ -99,7 +98,13 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
     } finally {
       setLoadingSub(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (isOpen && dosya?.id && window.electron) {
+      loadSubData(dosya.id)
+    }
+  }, [isOpen, dosya?.id, loadSubData])
 
   if (!isOpen || !dosya) return null
 
@@ -144,14 +149,31 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
                 <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
                   {dosya.temin_no ? `DT-${dosya.butce_yili || '2026'}/${dosya.temin_no}` : `ID: #${dosya.id}`}
                 </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50">
+                  BETA
+                </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Doğrudan temin dosyasının tüm ham verileri, idari ayarları ve ilişkili kayıtları
+                Doğrudan temin dosyasının tüm ham verileri, idari ayarları ve ilişkili kayıtları (Salt Okunur)
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Üstte Düzenle Butonu */}
+            <button
+              onClick={() => {
+                onClose()
+                addTab(`/dosyalar/yeni?id=${dosya.id}`)
+                navigate({ to: `/dosyalar/yeni?id=${dosya.id}` })
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-600 hover:text-white transition-all text-xs font-bold cursor-pointer shadow-xs"
+              title="Dosyayı Düzenleme Formunda Aç"
+            >
+              <Edit className="w-3.5 h-3.5" />
+              Dosyayı Düzenle
+            </button>
+
             <Button
               variant="outline"
               size="sm"
@@ -163,7 +185,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
             </Button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -175,7 +197,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
           <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
             <button
               onClick={() => setActiveTab('keyvalue')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'keyvalue'
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -187,7 +209,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
 
             <button
               onClick={() => setActiveTab('kalemler')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'kalemler'
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -199,7 +221,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
 
             <button
               onClick={() => setActiveTab('firmalar')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'firmalar'
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -211,7 +233,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
 
             <button
               onClick={() => setActiveTab('komisyon')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'komisyon'
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -221,9 +243,23 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
               Komisyon ({subData.komisyon.length})
             </button>
 
+            {subData.sablonVeri.length > 0 && (
+              <button
+                onClick={() => setActiveTab('sablonveri')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                  activeTab === 'sablonveri'
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Şablon Değişkenleri ({subData.sablonVeri.length})
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('rawjson')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'rawjson'
                   ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -318,7 +354,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
                           <td className="p-2.5 font-bold text-slate-400">{item.sira_no || idx + 1}</td>
                           <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-200">{item.kalem_adi}</td>
                           <td className="p-2.5">{item.miktar}</td>
-                          <td className="p-2.5">{item.olcu_birimi}</td>
+                          <td className="p-2.5">{item.olcu_birimi || item.birim || 'Adet'}</td>
                           <td className="p-2.5">%{item.kdv_orani || 20}</td>
                           <td className="p-2.5 font-mono">{Number(item.yaklasik_maliyet_birim || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</td>
                           <td className="p-2.5 font-mono font-bold text-blue-600">{Number(item.yaklasik_maliyet_toplam || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</td>
@@ -360,7 +396,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
                         )}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        Vergi No: {f.vergi_no || '-'} | Tel: {f.telefon || '-'}
+                        Yetkili: {f.yetkili || '-'} | Vergi No: {f.vergi_no || '-'} | Tel: {f.telefon || '-'}
                       </p>
                       <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                         <span className="text-slate-500">Toplam Teklif:</span>
@@ -411,7 +447,33 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
             </div>
           )}
 
-          {/* TAB 5: Raw JSON */}
+          {/* TAB 5: Sablon Veri */}
+          {activeTab === 'sablonveri' && (
+            <div className="space-y-3">
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-[10px] uppercase">
+                      <th className="p-2.5">Şablon ID</th>
+                      <th className="p-2.5">Değişken Adı</th>
+                      <th className="p-2.5">Değer</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {subData.sablonVeri.map((s, idx) => (
+                      <tr key={s.id || idx}>
+                        <td className="p-2.5 font-mono text-slate-400">{s.sablon_id || '-'}</td>
+                        <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-200">{s.veri_anahtari || s.key}</td>
+                        <td className="p-2.5 font-mono">{String(s.veri_degeri || s.value || '')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: Raw JSON */}
           {activeTab === 'rawjson' && (
             <div className="relative">
               <pre className="p-4 bg-slate-950 text-slate-100 rounded-xl font-mono text-xs overflow-auto max-h-[60vh] border border-slate-800 leading-relaxed select-all">
@@ -424,6 +486,19 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
         {/* Footer */}
         <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onClose()
+                addTab('/takip')
+                navigate({ to: '/takip' })
+              }}
+              className="text-xs gap-1.5 font-bold"
+            >
+              <Layers className="w-3.5 h-3.5 text-blue-500" />
+              Süreç Takip Paneline Git
+            </Button>
             <Button
               variant="outline"
               size="sm"
