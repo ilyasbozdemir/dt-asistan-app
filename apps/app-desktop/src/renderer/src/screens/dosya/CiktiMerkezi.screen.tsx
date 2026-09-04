@@ -853,7 +853,11 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           onOpenAdvancedEditor={(sab) => {
             setPreviewSablon(null);
             const key = (sab.dosya_adi || "").replace(/\.html$/, "");
-            openDocument(key);
+            openDocument({
+              documentId: key,
+              dosyaId: activeDosyaId || undefined,
+              documentTitle: sab.ad,
+            });
           }}
         />
       )}

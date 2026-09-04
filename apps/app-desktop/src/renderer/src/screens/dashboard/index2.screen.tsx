@@ -1109,7 +1109,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 Sürüm & Mevzuat Bülteni
               </h4>
               <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900/40">
-                v1.0.0-beta.84
+                v1.0.0-beta.85
               </span>
             </div>
 

@@ -372,6 +372,129 @@ export function registerDocumentIpcHandlers(): void {
         }
       })
 
+      // Complete Node.js Server-side Document Context Pre-computation
+      const winnerFirm = fileFirms.find((f: any) => f.isWinner) || fileFirms[0] || combinedFirms[0] || {}
+
+      const ihtiyacKalemleri = items.map((kalem: any, idx: number) => {
+        const miktarNum = Number(kalem.miktar || 0)
+        let minPrice = Infinity
+        let bestFirmName = ''
+
+        const teklifler = fileFirms.map((firm: any) => {
+          const bid = bids.find(
+            (b: any) =>
+              b.temin_kalem_id === kalem.id &&
+              (b.temin_firma_id === firm.temin_firma_id || b.temin_firma_id === firm.id)
+          )
+          const priceNum = bid ? Number(bid.birim_fiyat || 0) : 0
+          if (priceNum > 0 && priceNum < minPrice) {
+            minPrice = priceNum
+            bestFirmName = firm.unvan || ''
+          }
+          const formattedPrice =
+            priceNum > 0
+              ? priceNum.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : ''
+          const itemTotalNum = priceNum * miktarNum
+          const formattedTutar =
+            itemTotalNum > 0
+              ? itemTotalNum.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : ''
+
+          return {
+            firmaId: firm.id,
+            firmaUnvan: firm.unvan,
+            birimFiyat: priceNum,
+            fiyat: formattedPrice,
+            tutar: formattedTutar
+          }
+        })
+
+        const validMinPrice = minPrice !== Infinity ? minPrice : 0
+        const itemCostNum = validMinPrice * miktarNum
+
+        return {
+          ...kalem,
+          siraNo: idx + 1,
+          malzemeAdi: kalem.kalem_adi || '',
+          ozelligi: kalem.aciklama || '',
+          birimi: kalem.birim || '',
+          miktar: miktarNum,
+          enUygunFirmaAdi: bestFirmName,
+          enDusukFiyat:
+            validMinPrice > 0
+              ? validMinPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : '-',
+          toplamBedel:
+            itemCostNum > 0
+              ? itemCostNum.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : '-',
+          firmaTeklifleri: teklifler,
+          firmaTeklifleriDetay: teklifler
+        }
+      })
+
+      const firmaTotals = fileFirms.map((firm: any) => ({
+        firmaId: firm.id,
+        unvan: firm.unvan,
+        toplam:
+          firm.total > 0
+            ? firm.total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '0,00'
+      }))
+
+      let grandTotalNum = 0
+      if (winnerFirm && winnerFirm.total > 0) {
+        grandTotalNum = winnerFirm.total
+      } else {
+        grandTotalNum = ihtiyacKalemleri.reduce((sum: number, k: any) => {
+          const raw = String(k.toplamBedel).replace(/\./g, '').replace(/,/g, '.')
+          const n = parseFloat(raw)
+          return sum + (isNaN(n) ? 0 : n)
+        }, 0)
+      }
+
+      const formattedGrandTotal =
+        grandTotalNum > 0
+          ? grandTotalNum.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : '0,00'
+
+      const kurumAdi = (kurum as any)?.ad || settingsMap.institutionName || 'T.C. KAMU KURUMU'
+      const harcamaBirimi =
+        (dosya as any)?.harcama_birimi || settingsMap.spendingUnit || (dosya as any)?.konu || 'HARCAMA BİRİMİ'
+      const antetSatirlari = ['T.C.', String(kurumAdi).toUpperCase(), String(harcamaBirimi).toUpperCase()]
+
+      const resolvedContext = {
+        kurumAdi,
+        harcamaBirimi,
+        antetSatirlari,
+        solLogo,
+        sagLogo,
+        dosyaNo: (dosya as any)?.temin_no || '',
+        konu: (dosya as any)?.konu || '',
+        isinAdi: (dosya as any)?.konu || '',
+        isinTanimi: (dosya as any)?.isin_aciklamasi || (dosya as any)?.konu || '',
+        yaklasikMaliyet: (dosya as any)?.yaklasik_maliyet
+          ? Number((dosya as any).yaklasik_maliyet).toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })
+          : formattedGrandTotal,
+        genelToplam: formattedGrandTotal,
+        yukleniciFirma: winnerFirm.unvan || '',
+        yukleniciYetkili: winnerFirm.yetkili_ad_soyad || '',
+        ihtiyacKalemleri,
+        firmaListesi: combinedFirms,
+        firmalar: fileFirms,
+        firmaToplamlari: firmaTotals,
+        firmaToplamlariDetay: firmaTotals,
+        komisyon: komisyonlar.map((k: any) => ({
+          adSoyad: k.resolved_ad_soyad || k.ad_soyad || '',
+          unvan: k.resolved_unvan || k.unvan || '',
+          gorevi: k.gorevi || 'Üye'
+        }))
+      }
+
       return {
         success: true,
         data: {
@@ -386,7 +509,8 @@ export function registerDocumentIpcHandlers(): void {
           items,
           bids,
           komisyonlar,
-          savedSnapshot
+          savedSnapshot,
+          resolvedContext
         }
       }
     } catch (err: any) {
