@@ -49,16 +49,16 @@ export function YeniDosyaSecimModal({ isOpen, onClose }: YeniDosyaSecimModalProp
     setShowKopyalaModal(true)
   }
 
-  const handleExecuteClone = async (eskiDosya: TeminDosyasi) => {
+  const handleExecuteClone = async (
+    eskiDosya: TeminDosyasi,
+    options: import('../../utils/cloneDosya').CloneDosyaCustomOptions
+  ) => {
     try {
       setIsCloning(true)
       setShowKopyalaModal(false)
-      const res = await cloneDosyaWithItems(eskiDosya, dosyalar, addDosya)
+      const res = await cloneDosyaWithItems(eskiDosya, dosyalar, addDosya, options)
       if (res.success && res.newId) {
         onClose()
-        alert(
-          `"${eskiDosya.konu}" dosyasından ${res.clonedItemCount || 0} adet malzeme/hizmet kalemi ve tüm veriler başarıyla kopyalandı.\nYeni Dosya Numarası: ${res.nextTeminNo}`
-        )
         navigate({
           to: `/dosyalar/yeni?id=${res.newId}` as any
         })

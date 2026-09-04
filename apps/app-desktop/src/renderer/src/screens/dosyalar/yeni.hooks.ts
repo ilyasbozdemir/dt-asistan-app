@@ -8,6 +8,7 @@ import { DBBirim, DBPersonel, DBKodSozlugu } from './types'
 import { buildAIFormContext } from './yeni.config'
 import { AIFilledValues } from '../../components/ui/AIFormFillModal'
 import { logActivity } from '../../utils/logger'
+import { cloneDosyaWithItems, CloneDosyaCustomOptions } from '../../utils/cloneDosya'
 
 export interface UseYeniDosyaScreenReturn {
   navigate: ReturnType<typeof useNavigate>
@@ -43,7 +44,7 @@ export interface UseYeniDosyaScreenReturn {
   filteredBirimler: DBBirim[]
   filteredPersoneller: DBPersonel[]
   handleCopyKonuToAciklama: () => void
-  handleCopyDosya: (eskiDosya: TeminDosyasi) => void
+  handleCopyDosya: (eskiDosya: TeminDosyasi, options?: CloneDosyaCustomOptions) => Promise<void> | void
   showAIModal: boolean
   setShowAIModal: React.Dispatch<React.SetStateAction<boolean>>
   showAiMenu: boolean
@@ -333,7 +334,23 @@ export function useYeniDosyaScreen(): UseYeniDosyaScreenReturn {
   // Active Tab (Stepper)
   const [activeTab, setActiveTab] = useState<'genel' | 'ihtiyac'>('genel')
 
-  const handleCopyDosya = (eskiDosya: TeminDosyasi) => {
+  const handleCopyDosya = async (
+    eskiDosya: TeminDosyasi,
+    options?: CloneDosyaCustomOptions
+  ) => {
+    if (options) {
+      const res = await cloneDosyaWithItems(eskiDosya, dosyalar, addDosya, options)
+      setShowKopyalaModal(false)
+      if (res.success && res.newId) {
+        navigate({
+          to: `/dosyalar/yeni?id=${res.newId}` as any
+        })
+      } else {
+        alert('Kopyalama sırasında hata oluştu: ' + (res.error || 'Bilinmeyen hata'))
+      }
+      return
+    }
+
     const targetYear = formData.dosya_acilis_tarihi
       ? new Date(formData.dosya_acilis_tarihi).getFullYear()
       : formData.butce_yili || new Date().getFullYear()
