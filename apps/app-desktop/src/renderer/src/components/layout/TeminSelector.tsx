@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Building,
   ChevronDown,
+  Edit,
   Eye,
   FileText,
   FolderClosed,
@@ -13,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore";
+import { useTabStore } from "../../store/tabStore";
 import { useDosyalarHooks } from "../../screens/dosyalar/dosyalar.hooks";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "../../utils/cn";
@@ -30,6 +32,7 @@ export function TeminSelector(): React.JSX.Element {
 
   const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore();
   const { dosyalar, isLoadingDosyalar } = useDosyalarHooks();
+  const { addTab } = useTabStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -175,12 +178,26 @@ export function TeminSelector(): React.JSX.Element {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate({ to: "/takip" });
+                  addTab('/takip');
+                  navigate({ to: '/takip' });
                 }}
                 className="p-1.5 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
                 title="Dosya Detay ve Takip Ekranına Git"
               >
                 <Eye className="w-4 h-4" />
+              </button>
+
+              {/* Dosyayı Düzenle */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addTab(`/dosyalar/yeni?id=${selectedDosya.id}`);
+                  navigate({ to: `/dosyalar/yeni?id=${selectedDosya.id}` });
+                }}
+                className="p-1.5 text-slate-400 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
+                title="Dosya Formunu Düzenle"
+              >
+                <Edit className="w-4 h-4" />
               </button>
 
               <button
