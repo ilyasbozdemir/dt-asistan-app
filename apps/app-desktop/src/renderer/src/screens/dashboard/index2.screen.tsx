@@ -354,22 +354,38 @@ export default function DashboardScreenV2(): React.JSX.Element {
   const currentPillar = teminPillars.find((p) => p.key === activePillar) ||
     teminPillars[0];
 
-  function getDtFileText(type: string): string {
-    switch (type) {
-      case "1":
-        return "İhtiyaç ve Lüzum";
-      case "2":
-        return "Piyasa ve Teklif";
-      case "3":
-        return "Yaklaşık Maliyet";
-      case "4":
-        return "Karar & Onay";
-      case "5":
-        return "Kabul & Ödeme";
-      default:
-        return "Süreç İlerliyor";
+  function getDtFileText(type?: string | null): string {
+    if (!type) return "Mal Alımı";
+    const t = type.toLowerCase().trim();
+    if (t === "mal") return "Mal Alımı";
+    if (t === "hizmet") return "Hizmet Alımı";
+    if (t === "yapim_isi" || t === "yapim" || t.includes("yapım")) {
+      return "Yapım İşi / Onarım";
     }
+    if (t === "danismanlik" || t.includes("danışman")) return "Danışmanlık";
+    if (t === "hakedis" || t.includes("hakediş")) return "Hakediş";
+    if (t === "ihale") return "İhale";
     return type;
+  }
+
+  function getDtFileColor(type?: string | null): string {
+    const t = (type || "").toLowerCase().trim();
+    if (t === "mal") {
+      return "text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200/80 dark:border-blue-800/60";
+    }
+    if (t === "hizmet") {
+      return "text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/60 border-violet-200/80 dark:border-violet-800/60";
+    }
+    if (t === "yapim_isi" || t === "yapim" || t.includes("yapım")) {
+      return "text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border-amber-200/80 dark:border-amber-800/60";
+    }
+    if (t === "danismanlik" || t.includes("danışman")) {
+      return "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border-purple-200/80 dark:border-purple-800/60";
+    }
+    if (t === "hakedis" || t.includes("hakediş")) {
+      return "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200/80 dark:border-emerald-800/60";
+    }
+    return "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700";
   }
 
   return (
@@ -947,7 +963,12 @@ export default function DashboardScreenV2(): React.JSX.Element {
                             >
                               {asamaInfo.name}
                             </span>
-                            <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800">
+                            <span
+                              className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-md border",
+                                getDtFileColor(dosya.tur),
+                              )}
+                            >
                               {getDtFileText(dosya.tur)}
                             </span>
                           </div>
