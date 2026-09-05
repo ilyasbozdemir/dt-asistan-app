@@ -25,6 +25,8 @@ import { CiktiPresetManager } from "./components/CiktiPresetManager";
 import { CiktiSidebar } from "./components/CiktiSidebar";
 import { CiktiPreviewModal } from "./components/CiktiPreviewModal";
 import { buildExportFileName, buildBatchZipFileName } from "../../utils/exportFileName";
+import { usePrintQueueStore } from "../../store/printQueueStore";
+import { useGlobalDocumentPreviewStore } from "../../store/globalDocumentPreviewStore";
 
 const normalizeForMatch = (str: string) => {
   return str
@@ -44,9 +46,6 @@ const getSablonGroup = (sablon: Sablon): string => {
   const dosyaAdiNoExt = (sablon.dosya_adi || "").replace(/\.html$/, "");
   return SABLON_DOSYAADI_KATEGORI[dosyaAdiNoExt] || "Genel";
 };
-
-import { usePrintQueueStore } from "../../store/printQueueStore";
-import { useGlobalDocumentPreviewStore } from "../../store/globalDocumentPreviewStore";
 
 export function CiktiMerkeziScreen(): React.JSX.Element {
   const { activeDosyaId, activeStarredDocs, setActiveStarredDocs } =
