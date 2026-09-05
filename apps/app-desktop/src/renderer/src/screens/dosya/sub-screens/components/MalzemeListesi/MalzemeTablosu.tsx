@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   Edit2,
+  FileSpreadsheet,
   History as HistoryIcon,
   Package,
   Plus,
@@ -15,6 +16,7 @@ import { MalzemeTabloPopover } from "./components/MalzemeTabloPopover";
 import { useSettingsStore } from "../../../../../store/settingsStore";
 import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
 import { normalizeForMatch } from "../../DosyaAsamalari/useDosyaAsamasiSablonsV2";
+import { exportDogrudanTeminMasterExcel } from "../../../../../services/excelExportService";
 
 export function MalzemeTablosu({
   state,
@@ -568,6 +570,54 @@ export function MalzemeTablosu({
     activeDosya?.ihale_tipi === "Hakediş";
   const isHizmet = activeDosya?.tur === "hizmet";
 
+  const [isExportingMasterExcel, setIsExportingMasterExcel] = useState(false);
+
+  const handleExportMasterExcel = async (): Promise<void> => {
+    if (!activeDosyaId) return;
+    try {
+      setIsExportingMasterExcel(true);
+      const firmalarRes = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        `SELECT f.*, tf.id as temin_firma_id, tf.kazandi_mi, tf.teklif_toplami 
+         FROM DATA_TeminFirma tf 
+         JOIN TANIM_Firma f ON tf.firma_id = f.id 
+         WHERE tf.temin_id = ?`,
+        [activeDosyaId],
+      );
+
+      const tekliflerRes = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_id = ?",
+        [activeDosyaId],
+      );
+
+      const komisyonRes = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT * FROM DATA_TeminKomisyon WHERE temin_dosya_id = ?",
+        [activeDosyaId],
+      );
+
+      const kurumRes = await (window as any).electron.ipcRenderer.invoke(
+        "db:query",
+        "SELECT * FROM TANIM_Kurum LIMIT 1",
+      );
+
+      await exportDogrudanTeminMasterExcel({
+        dosya: activeDosya,
+        kalemler: items,
+        firmalar: firmalarRes.success ? firmalarRes.data : [],
+        teklifler: tekliflerRes.success ? tekliflerRes.data : [],
+        komisyon: komisyonRes.success ? komisyonRes.data : [],
+        kurum: kurumRes.success ? kurumRes.data?.[0] : null,
+        sablons: sablons,
+      });
+    } catch (err: any) {
+      alert("Master Excel raporu hazırlanırken hata oluştu: " + err.message);
+    } finally {
+      setIsExportingMasterExcel(false);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px]">
       <div className="flex items-center justify-between mb-4">
@@ -583,6 +633,16 @@ export function MalzemeTablosu({
           </span>
         </h3>
         <div className="flex items-center gap-2 relative">
+          <button
+            onClick={handleExportMasterExcel}
+            disabled={isExportingMasterExcel}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+            title="Tüm Doğrudan Temin Sürecini, Şablonları ve Kalemleri Excel (XLSX) Formatında İndir"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            {isExportingMasterExcel ? "Hazırlanıyor..." : "Master Excel İndir"}
+          </button>
+
           <button
             onClick={() => handleOpenSablonByDosyaAdi("son-alim-fiyat-cetveli")}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
@@ -631,6 +691,7 @@ export function MalzemeTablosu({
             totalCount={items.length}
             onSelectAll={handleToggleSelectAll}
             onDeleteSelected={handleDeleteSelected}
+            onExportMasterExcel={handleExportMasterExcel}
             onExcelImport={handleExcelImport}
             onDownloadTemplate={handleDownloadTemplate}
             onExportToLibrary={handleExportToLibrary}

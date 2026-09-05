@@ -27,6 +27,7 @@ export interface MalzemeTabloPopoverProps {
   totalCount?: number;
   onSelectAll?: () => void;
   onDeleteSelected?: () => void;
+  onExportMasterExcel?: () => void;
   onExcelImport?: () => void;
   onKomisyonSettings?: () => void;
   onIstekliFirmaSettings?: () => void;

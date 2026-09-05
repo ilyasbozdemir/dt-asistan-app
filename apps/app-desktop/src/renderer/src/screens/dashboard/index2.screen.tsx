@@ -410,7 +410,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
               className="bg-linear-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-purple-900/30 border border-purple-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
             >
               <Sparkles className="w-4 h-4 text-purple-200 animate-spin" />
-              <span className="font-extrabold tracking-wide">TEMİN 360 AI Desteği</span>
+              <span className="font-extrabold tracking-wide">
+                TEMİN 360 AI Desteği
+              </span>
             </button>
 
             <Link to="/dosyalar/yeni" className="w-full sm:w-auto">
@@ -419,7 +421,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-900/30 border border-blue-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Plus className="w-4 h-4" />
-                <span className="font-extrabold tracking-wide">Yeni Temin Dosyası (22. md)</span>
+                <span className="font-extrabold tracking-wide">
+                  Yeni Temin Dosyası (22. md)
+                </span>
               </button>
             </Link>
 
@@ -429,7 +433,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 className="w-full bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-amber-900/30 border border-amber-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Gavel className="w-4 h-4" />
-                <span className="font-extrabold tracking-wide">Harcama & Hakediş</span>
+                <span className="font-extrabold tracking-wide">
+                  Harcama & Hakediş
+                </span>
               </button>
             </Link>
 
@@ -451,7 +457,10 @@ export default function DashboardScreenV2(): React.JSX.Element {
             <div className="flex items-center gap-2.5 text-amber-200 text-xs font-medium">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
-                <strong className="text-amber-300 font-bold">Sistem Uyarısı:</strong> {smartAlerts[0].title} —{" "}
+                <strong className="text-amber-300 font-bold">
+                  Sistem Uyarısı:
+                </strong>{" "}
+                {smartAlerts[0].title} —{" "}
                 <span className="text-slate-200">{smartAlerts[0].message}</span>
               </span>
             </div>
@@ -909,6 +918,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
                             </span>
                             <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800">
                               {dosya.tur?.toUpperCase() || "MAL"}
+                              &nbsp;
+                              {dosya.tur}
                             </span>
                           </div>
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">

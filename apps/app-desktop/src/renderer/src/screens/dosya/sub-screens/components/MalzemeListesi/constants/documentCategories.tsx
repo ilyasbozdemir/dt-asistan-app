@@ -354,6 +354,13 @@ export function buildTableActionItems(
       onClick: onDeleteSelected,
     },
     {
+      id: "exportMasterExcel",
+      label: "Master Excel Çıktısı Al (.xlsx)",
+      icon: FileSpreadsheet,
+      iconColorClass: "text-emerald-600 font-semibold",
+      onClick: (props as any).onExportMasterExcel,
+    },
+    {
       id: "excelImport",
       label: "Excel'den İçe Aktar",
       icon: FileSpreadsheet,
