@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Building,
   ChevronDown,
@@ -6,36 +6,71 @@ import {
   Eye,
   FileText,
   FolderClosed,
+  Gavel,
+  Layers,
   LogOut,
   Plus,
   Search,
+  Sparkles,
   TrendingUp,
   X,
-  Zap,
-} from "lucide-react";
-import { useWorkspaceStore } from "../../store/workspaceStore";
-import { useTabStore } from "../../store/tabStore";
-import { useDosyalarHooks } from "../../screens/dosyalar/dosyalar.hooks";
-import { useNavigate } from "@tanstack/react-router";
-import { cn } from "../../utils/cn";
-import { YeniDosyaSecimModal } from "../modals/YeniDosyaSecimModal";
-import { formatDosyaNo } from "../../utils/formatDosyaNo";
-import { DosyaDataInspectorModal } from "../../screens/dosyalar/components/DosyaDataInspectorModal";
+  Zap
+} from 'lucide-react'
+import { useWorkspaceStore } from '../../store/workspaceStore'
+import { useTabStore } from '../../store/tabStore'
+import { useDosyalarHooks } from '../../screens/dosyalar/dosyalar.hooks'
+import { useNavigate } from '@tanstack/react-router'
+import { cn } from '../../utils/cn'
+import { YeniDosyaSecimModal } from '../modals/YeniDosyaSecimModal'
+import { formatDosyaNo } from '../../utils/formatDosyaNo'
+import { DosyaDataInspectorModal } from '../../screens/dosyalar/components/DosyaDataInspectorModal'
 
 export function TeminSelector(): React.JSX.Element {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showYeniDosyaModal, setShowYeniDosyaModal] = useState(false);
-  const [showInspector, setShowInspector] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "temin" | "hakedis">(
-    "all",
-  );
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [showYeniDosyaModal, setShowYeniDosyaModal] = useState(false)
+  const [showInspector, setShowInspector] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore();
-  const { dosyalar, isLoadingDosyalar } = useDosyalarHooks();
-  const { addTab } = useTabStore();
-  const navigate = useNavigate();
+  // Global Tedarik / Satınalma Modu ('dogrudan_temin' vs 'ihale')
+  const [procurementMode, setProcurementMode] = useState<'dogrudan_temin' | 'ihale'>(() => {
+    return (
+      (localStorage.getItem('temin_procurement_mode') as 'dogrudan_temin' | 'ihale') ||
+      'dogrudan_temin'
+    )
+  })
+
+  // Alt Kategori Filtresi
+  const [subFilter, setSubFilter] = useState<string>('mode_default')
+
+  const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore()
+  const { dosyalar, isLoadingDosyalar } = useDosyalarHooks()
+  const { addTab } = useTabStore()
+  const navigate = useNavigate()
+
+  // Global mod değişimini dinle (Header veya diğer bileşenlerden tetiklenen)
+  useEffect(() => {
+    const handleModeEvent = (e: Event): void => {
+      const customEvent = e as CustomEvent<{ mode: 'dogrudan_temin' | 'ihale' }>
+      if (customEvent.detail?.mode) {
+        setProcurementMode(customEvent.detail.mode)
+        setSubFilter('mode_default')
+      }
+    }
+    window.addEventListener('procurement-mode-change', handleModeEvent)
+    return () => window.removeEventListener('procurement-mode-change', handleModeEvent)
+  }, [])
+
+  const setGlobalMode = (mode: 'dogrudan_temin' | 'ihale'): void => {
+    setProcurementMode(mode)
+    setSubFilter('mode_default')
+    localStorage.setItem('temin_procurement_mode', mode)
+    window.dispatchEvent(
+      new CustomEvent('procurement-mode-change', {
+        detail: { mode }
+      })
+    )
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
@@ -43,367 +78,574 @@ export function TeminSelector(): React.JSX.Element {
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
-  const selectedDosya = dosyalar.find((d) => d.id === activeDosyaId);
+  const selectedDosya = dosyalar.find((d) => d.id === activeDosyaId)
 
-  const isHakedisCheck = (d: any) =>
-    d.tur === "hakedis" ||
-    d.ihale_sekli?.toLowerCase().includes("hakedis") ||
-    d.ihale_tipi === "Hakediş";
+  // İhale veya Hakediş kontrolü
+  const isIhaleOrHakedis = (d: any): boolean =>
+    d.tur === 'hakedis' ||
+    d.tur === 'ihale' ||
+    d.ihale_sekli?.toLowerCase().includes('hakedis') ||
+    d.ihale_sekli?.toLowerCase().includes('açık') ||
+    d.ihale_sekli?.toLowerCase().includes('pazarlık') ||
+    d.ihale_tipi === 'Hakediş' ||
+    d.ihale_tipi === 'Açık İhale' ||
+    d.ihale_tipi === 'Pazarlık' ||
+    d.temin_no?.toUpperCase().startsWith('İH-') ||
+    d.temin_no?.toUpperCase().startsWith('IH-')
 
+  const isDt = procurementMode === 'dogrudan_temin'
+
+  // Dinamik filtreleme
   const filteredDosyalar = dosyalar.filter((d) => {
-    if (d.is_deleted === 1) return false;
-    if (filterType === "temin" && isHakedisCheck(d)) return false;
-    if (filterType === "hakedis" && !isHakedisCheck(d)) return false;
+    if (d.is_deleted === 1) return false
 
-    const q = searchQuery.toLowerCase();
+    const isIhale = isIhaleOrHakedis(d)
+
+    if (subFilter === 'mode_default') {
+      if (isDt && isIhale) return false
+      if (!isDt && !isIhale) return false
+    } else if (subFilter === 'dt_all') {
+      if (isIhale) return false
+    } else if (subFilter === 'dt_mal') {
+      if (isIhale || d.tur !== 'mal') return false
+    } else if (subFilter === 'dt_hizmet') {
+      if (isIhale || (d.tur !== 'hizmet' && d.tur !== 'yapim_isi')) return false
+    } else if (subFilter === 'ihale_all') {
+      if (!isIhale) return false
+    } else if (subFilter === 'ihale_acik') {
+      if (!isIhale || (!d.ihale_tipi?.includes('Açık') && !d.ihale_sekli?.toLowerCase().includes('açık'))) return false
+    } else if (subFilter === 'ihale_pazarlik') {
+      if (!isIhale || (!d.ihale_tipi?.includes('Pazarlık') && !d.ihale_sekli?.toLowerCase().includes('pazarlık'))) return false
+    } else if (subFilter === 'ihale_hakedis') {
+      if (d.tur !== 'hakedis' && !d.ihale_sekli?.toLowerCase().includes('hakedis') && d.ihale_tipi !== 'Hakediş') return false
+    }
+    // subFilter === 'all' ise tüm silinmemiş dosyaları göster
+
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) return true
+
     return (
       d.konu?.toLowerCase().includes(q) ||
       d.temin_no?.toLowerCase().includes(q) ||
-      String(d.id).includes(q)
-    );
-  });
+      String(d.id).includes(q) ||
+      d.isin_aciklamasi?.toLowerCase().includes(q)
+    )
+  })
 
   const handleSelect = (id: number): void => {
-    setActiveDosyaId(id);
-    setIsOpen(false);
-    navigate({ to: "/takip" });
-  };
+    setActiveDosyaId(id)
+    setIsOpen(false)
+    navigate({ to: '/takip' })
+  }
 
   const handleCloseDosya = (): void => {
-    setActiveDosyaId(null);
-    setIsOpen(false);
-    navigate({ to: "/" });
-  };
+    setActiveDosyaId(null)
+    setIsOpen(false)
+    navigate({ to: '/' })
+  }
 
   const handleCreateYeniDosya = (e: React.MouseEvent): void => {
-    e.stopPropagation();
-    setIsOpen(false);
-    setShowYeniDosyaModal(true);
-  };
+    e.stopPropagation()
+    setIsOpen(false)
+    setShowYeniDosyaModal(true)
+  }
 
   const turLabel: Record<string, string> = {
-    mal: "Mal",
-    hizmet: "Hizmet",
-    yapim_isi: "Yapım",
-    danismanlik: "Danış.",
-    hakedis: "Hakediş",
-  };
+    mal: 'Mal Alımı',
+    hizmet: 'Hizmet',
+    yapim_isi: 'Yapım İşi',
+    danismanlik: 'Danışmanlık',
+    hakedis: 'Hakediş',
+    ihale: 'İhale'
+  }
 
   const turColor: Record<string, string> = {
-    mal: "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300",
+    mal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
     hizmet:
-      "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
+      'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
     yapim_isi:
-      "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300",
+      'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
     danismanlik:
-      "bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-300",
+      'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300 border-pink-200 dark:border-pink-800',
     hakedis:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  };
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    ihale:
+      'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+  }
 
   const formatMoney = (val: number): string =>
     val
-      ? val.toLocaleString("tr-TR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-      : "0,00";
+      ? val.toLocaleString('tr-TR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : '0,00'
 
-  const getDosyaNoLabel = (d: any): string => formatDosyaNo(d);
+  const getDosyaNoLabel = (d: any): string => formatDosyaNo(d)
+
+  // Seçili dosyanın İhale mi DT mi olduğunu tespit et
+  const selectedIsIhale = selectedDosya ? isIhaleOrHakedis(selectedDosya) : false
 
   return (
     <>
       <div className="relative" ref={containerRef}>
-        {selectedDosya
-          ? (
+        {selectedDosya ? (
+          <div
+            onClick={() => setIsOpen(!isOpen)}
+            className={`group flex items-center gap-3 px-4 py-1.5 rounded-2xl bg-white dark:bg-slate-850 border transition-all duration-200 shadow-2xs hover:shadow-xs min-w-70 max-w-[850px] w-auto cursor-pointer select-none ${
+              selectedIsIhale
+                ? 'border-indigo-200 dark:border-indigo-800/80 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20'
+                : 'border-blue-200 dark:border-blue-800/80 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/40 dark:hover:bg-blue-950/20'
+            }`}
+            title="Dosya Değiştir"
+          >
             <div
-              onClick={() => setIsOpen(!isOpen)}
-              className="group flex items-center gap-3 px-5 py-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-200 shadow-sm hover:shadow-md min-w-[500px] max-w-[1000px] w-auto cursor-pointer select-none"
-              title="Dosya Değiştir"
+              className={`p-1.5 rounded-xl shrink-0 transition-transform group-hover:scale-105 ${
+                selectedIsIhale
+                  ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                  : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+              }`}
             >
-              <div
-                className={`p-1.5 rounded-xl shrink-0 ${
-                  isHakedisCheck(selectedDosya)
-                    ? "bg-emerald-500/10 text-emerald-600"
-                    : "bg-blue-500/10 text-blue-600"
-                }`}
-              >
+              {selectedIsIhale ? (
+                <Gavel className="w-4 h-4" />
+              ) : (
                 <FileText className="w-4 h-4" />
-              </div>
-
-              <div className="flex-1 min-w-0 text-left">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span
-                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                      isHakedisCheck(selectedDosya)
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-                    }`}
-                  >
-                    {getDosyaNoLabel(selectedDosya)}
-                  </span>
-                  {selectedDosya.tur && (
-                    <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ${
-                        turColor[selectedDosya.tur] ??
-                          "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      {turLabel[selectedDosya.tur] ?? selectedDosya.tur}
-                    </span>
-                  )}
-                </div>
-                <div className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate leading-tight group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                  {selectedDosya.konu}
-                </div>
-              </div>
-
-              {selectedDosya.yaklasik_maliyet
-                ? (
-                  <div className="flex items-center gap-1 shrink-0 px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap tracking-tight">
-                      ₺{formatMoney(selectedDosya.yaklasik_maliyet)}
-                    </span>
-                  </div>
-                )
-                : null}
-
-              {/* Dosya Detay / Veri Denetçisi (Inspector) Modalını Aç */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowInspector(true);
-                }}
-                className="p-1.5 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
-                title="Dosya Verilerini İncele (Sekmeli Görünüm & Denetçi)"
-              >
-                <Eye className="w-4 h-4" />
-              </button>
-
-              {/* Dosyayı Düzenle */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addTab(`/dosyalar/yeni?id=${selectedDosya.id}`);
-                  navigate({ to: `/dosyalar/yeni?id=${selectedDosya.id}` });
-                }}
-                className="p-1.5 text-slate-400 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
-                title="Dosya Formunu Düzenle"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseDosya();
-                }}
-                className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-650 dark:hover:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/10 rounded-lg transition-all shrink-0 active:scale-90"
-                title="Dosyayı Kapat"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 shrink-0">
-              </span>
-
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0",
-                  isOpen && "rotate-180",
-                )}
-              />
+              )}
             </div>
-          )
-          : (
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-2xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm font-medium border border-dashed border-slate-200 dark:border-slate-700 min-w-[500px] justify-center"
-              title="Dosya Seçmek İçin Tıkla"
-            >
-              <FileText className="w-4 h-4" />
-              Çalışmak İstediğiniz Temin veya Hakediş Dosyasını Seçin...
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 text-slate-400 transition-transform duration-200 ml-2",
-                  isOpen && "rotate-180",
-                )}
-              />
-            </button>
-          )}
 
-        {isOpen && (
-          <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[880px] max-w-[90vw] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 z-[60] animate-in fade-in slide-in-from-top-2 duration-200">
-            {/* Filter Tabs: All / Temin / Hakedis */}
-            <div className="flex items-center justify-between gap-2 p-1.5 border-b border-slate-100 dark:border-slate-800 mb-2">
-              <div className="flex items-center gap-1 text-xs font-semibold">
-                <button
-                  onClick={() => setFilterType("all")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    filterType === "all"
-                      ? "bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 font-bold"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            <div className="flex-1 min-w-0 text-left">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span
+                  className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                    selectedIsIhale
+                      ? 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/40'
+                      : 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/40'
                   }`}
                 >
-                  Tüm Dosyalar ({dosyalar.filter((d) => d.is_deleted !== 1)
-                    .length})
-                </button>
+                  {getDosyaNoLabel(selectedDosya)}
+                </span>
+                {selectedDosya.tur && (
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide border ${
+                      turColor[selectedDosya.tur] ??
+                      'bg-slate-100 text-slate-600 border-slate-200'
+                    }`}
+                  >
+                    {turLabel[selectedDosya.tur] ?? selectedDosya.tur}
+                  </span>
+                )}
+              </div>
+              <div
+                className={`text-xs font-bold truncate leading-tight transition-colors ${
+                  selectedIsIhale
+                    ? 'text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300'
+                    : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-300'
+                }`}
+              >
+                {selectedDosya.konu}
+              </div>
+            </div>
+
+            {selectedDosya.yaklasik_maliyet ? (
+              <div className="flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40">
+                <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 font-mono whitespace-nowrap">
+                  ₺{formatMoney(selectedDosya.yaklasik_maliyet)}
+                </span>
+              </div>
+            ) : null}
+
+            {/* Dosya Detay / Veri Denetçisi (Inspector) Modalını Aç */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowInspector(true)
+              }}
+              className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
+              title="Dosya Verilerini İncele (Sekmeli Görünüm & Denetçi)"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Dosyayı Düzenle */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                addTab(`/dosyalar/yeni?id=${selectedDosya.id}`)
+                navigate({ to: `/dosyalar/yeni?id=${selectedDosya.id}` })
+              }}
+              className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
+              title="Dosya Formunu Düzenle"
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCloseDosya()
+              }}
+              className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all shrink-0 active:scale-90 cursor-pointer"
+              title="Dosyayı Kapat"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="w-px h-4 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+            <ChevronDown
+              className={cn(
+                'w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0',
+                isOpen && 'rotate-180'
+              )}
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`flex items-center gap-2 px-5 py-1.5 rounded-2xl transition-all text-xs font-semibold border border-dashed min-w-70 justify-center cursor-pointer shadow-2xs ${
+              isDt
+                ? 'bg-blue-50/40 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-800 hover:bg-blue-50 hover:border-blue-400'
+                : 'bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 hover:border-indigo-400'
+            }`}
+            title="Dosya Seçmek İçin Tıkla"
+          >
+            {isDt ? <FileText className="w-4 h-4 text-blue-500" /> : <Gavel className="w-4 h-4 text-indigo-500" />}
+            <span>
+              {isDt
+                ? 'Çalışmak İstediğiniz Doğrudan Temin Dosyasını Seçin (KİK Md. 22)...'
+                : 'Çalışmak İstediğiniz İhale veya Hakediş Dosyasını Seçin (KİK Md. 19/21)...'}
+            </span>
+            <ChevronDown
+              className={cn(
+                'w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ml-1.5',
+                isOpen && 'rotate-180'
+              )}
+            />
+          </button>
+        )}
+
+        {/* AÇILIR DOSYA SEÇİM POPUP MODALI */}
+        {isOpen && (
+          <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[860px] max-w-[92vw] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 z-60 animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* 1. ÜST SEGMENT MOD SEÇİCİ & YENİ DOSYA EKLE BUTONU */}
+            <div className="flex items-center justify-between gap-3 p-1.5 bg-slate-100/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800 mb-2.5">
+              <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setFilterType("temin")}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
-                    filterType === "temin"
-                      ? "bg-blue-600 text-white font-bold"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  onClick={() => setGlobalMode('dogrudan_temin')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isDt
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 hover:text-slate-900'
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  Doğrudan Temin ({dosyalar.filter((d) =>
-                    d.is_deleted !== 1 && !isHakedisCheck(d)
-                  ).length})
+                  <span>Doğrudan Temin (KİK 22)</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    isDt ? 'bg-blue-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrHakedis(d)).length}
+                  </span>
                 </button>
+
                 <button
-                  onClick={() => setFilterType("hakedis")}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
-                    filterType === "hakedis"
-                      ? "bg-emerald-600 text-white font-bold"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  onClick={() => setGlobalMode('ihale')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    !isDt
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 hover:text-slate-900'
                   }`}
                 >
-                  <Building className="w-3.5 h-3.5" />
-                  Hakediş Dosyaları ({dosyalar.filter((d) =>
-                    d.is_deleted !== 1 && isHakedisCheck(d)
-                  ).length})
+                  <Gavel className="w-3.5 h-3.5" />
+                  <span>İhale Süreçleri & Hakediş (Md. 19/21)</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    !isDt ? 'bg-indigo-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrHakedis(d)).length}
+                  </span>
                 </button>
               </div>
 
               <button
                 onClick={handleCreateYeniDosya}
-                className="px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 hover:bg-blue-100 rounded-lg text-xs font-bold transition-all flex items-center gap-1"
-                title="Yeni Dosya Ekle"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                  isDt
+                    ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60 border border-blue-200/60 dark:border-blue-800/40'
+                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900/60 border border-indigo-200/60 dark:border-indigo-800/40'
+                }`}
+                title="Yeni Dosya Tanımla"
               >
-                <Plus className="w-3.5 h-3.5" /> Yeni Dosya
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isDt ? 'Yeni Doğrudan Temin' : 'Yeni İhale Dosyası'}</span>
               </button>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative flex items-center p-1.5 mb-2">
+            {/* 2. ALT FİLTRELEME ETİKETLERİ */}
+            <div className="flex items-center gap-1 px-1 mb-2 text-[11px] font-semibold overflow-x-auto custom-scrollbar pb-1">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] mr-1 flex items-center gap-1">
+                <Layers className="w-3 h-3" /> Filtre:
+              </span>
+
+              {isDt ? (
+                <>
+                  <button
+                    onClick={() => setSubFilter('mode_default')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'mode_default'
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Tüm Doğrudan Teminler ({dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrHakedis(d)).length})
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('dt_mal')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'dt_mal'
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Mal Alımları (22/d)
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('dt_hizmet')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'dt_hizmet'
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Hizmet & Yapım İşleri
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('all')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'all'
+                        ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Tüm Arşiv (Hepsi)
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setSubFilter('mode_default')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'mode_default'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Tüm İhale & Hakediş ({dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrHakedis(d)).length})
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('ihale_acik')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'ihale_acik'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Açık İhale (Md. 19)
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('ihale_pazarlik')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'ihale_pazarlik'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Pazarlık Usulü (Md. 21)
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('ihale_hakedis')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'ihale_hakedis'
+                        ? 'bg-emerald-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <Building className="w-3 h-3 inline mr-1" />
+                    Hakediş Dosyaları
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('all')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'all'
+                        ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    Tüm Arşiv (Hepsi)
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* 3. ARAMA ÇUBUĞU */}
+            <div className="relative flex items-center px-1 mb-2">
               <Search className="absolute left-3.5 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Dosya no, konu veya anahtar kelime ara..."
+                placeholder={
+                  isDt
+                    ? 'Doğrudan temin no, alım konusu veya birim ara...'
+                    : 'İhale kayıt no, iş konusu, hakediş no veya birim ara...'
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={`w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border rounded-xl text-xs focus:outline-none focus:ring-2 transition-all ${
+                  isDt
+                    ? 'border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:ring-blue-500/20'
+                    : 'border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20'
+                }`}
                 autoFocus
               />
             </div>
 
-            <div className="max-h-80 overflow-y-auto custom-scrollbar space-y-0.5 p-1">
-              {isLoadingDosyalar
-                ? (
-                  <div className="p-6 text-center text-sm text-slate-500">
-                    Yükleniyor...
-                  </div>
-                )
-                : filteredDosyalar.length === 0
-                ? (
-                  <div className="p-8 text-center text-sm text-slate-400 flex flex-col items-center gap-3">
-                    <FolderClosed className="w-8 h-8 opacity-40" />
-                    <span>Kriterlere uygun dosya bulunamadı.</span>
-                    <button
-                      onClick={handleCreateYeniDosya}
-                      className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
-                    >
-                      <Plus className="w-4 h-4" /> Yeni Dosya Tanımla
-                    </button>
-                  </div>
-                )
-                : (
-                  filteredDosyalar.map((dosya) => (
+            {/* 4. DOSYA LİSTESİ */}
+            <div className="max-h-80 overflow-y-auto custom-scrollbar space-y-1 p-1">
+              {isLoadingDosyalar ? (
+                <div className="p-8 text-center text-xs text-slate-500 font-medium">
+                  Veritabanı taranıyor...
+                </div>
+              ) : filteredDosyalar.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-400 flex flex-col items-center gap-3">
+                  <FolderClosed className="w-8 h-8 opacity-40" />
+                  <span>
+                    {isDt
+                      ? 'Bu kriterlere uygun Doğrudan Temin dosyası bulunamadı.'
+                      : 'Bu kriterlere uygun İhale veya Hakediş dosyası bulunamadı.'}
+                  </span>
+                  <button
+                    onClick={handleCreateYeniDosya}
+                    className={`mt-2 px-4 py-2 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer ${
+                      isDt ? 'bg-blue-600 hover:bg-blue-500' : 'bg-indigo-600 hover:bg-indigo-500'
+                    }`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    {isDt ? 'Yeni Doğrudan Temin Oluştur' : 'Yeni İhale Dosyası Oluştur'}
+                  </button>
+                </div>
+              ) : (
+                filteredDosyalar.map((dosya) => {
+                  const itemIsIhale = isIhaleOrHakedis(dosya)
+                  const isActive = activeDosyaId === dosya.id
+                  return (
                     <div
                       key={dosya.id}
                       onClick={() => handleSelect(dosya.id)}
-                      className={cn(
-                        "group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-transparent cursor-pointer",
-                        activeDosyaId === dosya.id &&
-                          "bg-blue-50/70 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30",
-                      )}
+                      className={`group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all border cursor-pointer ${
+                        isActive
+                          ? itemIsIhale
+                            ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800/80 shadow-2xs'
+                            : 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800/80 shadow-2xs'
+                          : 'bg-white dark:bg-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200/60 dark:border-slate-800'
+                      }`}
                     >
-                      <FileText
-                        className={cn(
-                          "w-5 h-5 shrink-0",
-                          activeDosyaId === dosya.id
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-slate-400",
+                      <div
+                        className={`p-2 rounded-xl shrink-0 ${
+                          isActive
+                            ? itemIsIhale
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-blue-600 text-white'
+                            : itemIsIhale
+                              ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400'
+                              : 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400'
+                        }`}
+                      >
+                        {itemIsIhale ? (
+                          <Gavel className="w-4 h-4" />
+                        ) : (
+                          <FileText className="w-4 h-4" />
                         )}
-                      />
+                      </div>
+
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex items-center gap-1.5 mb-0.5">
                           <span
-                            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                              isHakedisCheck(dosya)
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                : "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                              itemIsIhale
+                                ? 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/40'
+                                : 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/40'
                             }`}
                           >
                             {getDosyaNoLabel(dosya)}
                           </span>
+
                           {dosya.tur && (
                             <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide ${
+                              className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide border ${
                                 turColor[dosya.tur] ??
-                                  "bg-slate-100 text-slate-500"
+                                'bg-slate-100 text-slate-600 border-slate-200'
                               }`}
                             >
                               {turLabel[dosya.tur] ?? dosya.tur}
                             </span>
                           )}
-                        </div>
-                        <div
-                          className={cn(
-                            "text-sm font-bold truncate",
-                            activeDosyaId === dosya.id
-                              ? "text-blue-700 dark:text-blue-300"
-                              : "text-slate-700 dark:text-slate-200",
+
+                          {itemIsIhale ? (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200/50">
+                              İhale / Hakediş
+                            </span>
+                          ) : (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/50">
+                              KİK Md. 22
+                            </span>
                           )}
+                        </div>
+
+                        <div
+                          className={`text-xs font-bold truncate ${
+                            isActive
+                              ? itemIsIhale
+                                ? 'text-indigo-900 dark:text-indigo-200 font-extrabold'
+                                : 'text-blue-900 dark:text-blue-200 font-extrabold'
+                              : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'
+                          }`}
                         >
                           {dosya.konu}
                         </div>
                       </div>
-                      {dosya.yaklasik_maliyet
-                        ? (
-                          <div className="flex items-center gap-1 shrink-0 px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30">
-                            <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 font-mono whitespace-nowrap tracking-tight">
-                              ₺{formatMoney(dosya.yaklasik_maliyet)}
-                            </span>
-                          </div>
-                        )
-                        : null}
+
+                      {dosya.yaklasik_maliyet ? (
+                        <div className="flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40">
+                          <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 font-mono whitespace-nowrap">
+                            ₺{formatMoney(dosya.yaklasik_maliyet)}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
-                  ))
-                )}
+                  )
+                })
+              )}
             </div>
 
+            {/* 5. ALT BİLGİ & KAPATMA */}
             {activeDosyaId && (
-              <div className="border-t border-slate-100 dark:border-slate-800/80 mt-2 pt-2 flex justify-between items-center text-xs">
-                <span className="text-slate-450 dark:text-slate-500 font-medium">
-                  Aktif dosya işlemlerini sonlandırmak için kapatabilirsiniz.
+              <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2 flex justify-between items-center text-xs px-1">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  Aktif dosya işlemlerini tamamladıktan sonra kapatabilirsiniz.
                 </span>
                 <button
                   onClick={handleCloseDosya}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-650 dark:text-red-405 hover:text-white hover:bg-red-600 dark:hover:bg-red-650 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-red-650 dark:text-red-405 hover:text-white hover:bg-red-600 bg-red-500/10 border border-red-500/20 rounded-lg transition-all cursor-pointer active:scale-95 shrink-0"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-3 h-3" />
                   Dosyayı Kapat
                 </button>
               </div>
@@ -425,5 +667,5 @@ export function TeminSelector(): React.JSX.Element {
         />
       )}
     </>
-  );
+  )
 }
