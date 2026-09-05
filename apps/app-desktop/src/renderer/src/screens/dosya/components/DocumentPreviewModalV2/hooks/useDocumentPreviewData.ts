@@ -626,13 +626,19 @@ export function useDocumentPreviewData({
         new Date().toISOString().slice(0, 10)
       }.pdf`;
 
-      const res = await window.electron.ipcRenderer.invoke("app:save-pdf-as", {
-        html: htmlContent,
-        orientation,
-        defaultFilename,
-      });
-      if (res && res.success) {
-        alert("PDF başarıyla kaydedildi.");
+      try {
+        const res = await window.electron.ipcRenderer.invoke("app:save-pdf-as", {
+          html: htmlContent,
+          orientation,
+          defaultFilename,
+        });
+        if (res && res.success) {
+          alert("PDF başarıyla kaydedildi.");
+          return;
+        }
+      } catch {
+        // Fallback: Doğrudan harici PDF oluşturucu kanalını çalıştır
+        await window.electron.ipcRenderer.invoke("belge:open-pdf-external", htmlContent);
       }
     } catch (e) {
       console.error("PDF kaydetme hatası:", e);
@@ -647,10 +653,15 @@ export function useDocumentPreviewData({
     setIsPrinting(true);
     try {
       const htmlContent = getCompiledHtml();
-      await window.electron.ipcRenderer.invoke("app:open-pdf-preview", {
-        html: htmlContent,
-        orientation,
-      });
+      try {
+        await window.electron.ipcRenderer.invoke("app:open-pdf-preview", {
+          html: htmlContent,
+          orientation,
+        });
+      } catch {
+        // Fallback: Standart harici PDF önizleme kanalını çağır
+        await window.electron.ipcRenderer.invoke("belge:open-pdf-external", htmlContent);
+      }
     } catch (e) {
       console.error("PDF önizleme penceresi açılırken hata:", e);
     } finally {
