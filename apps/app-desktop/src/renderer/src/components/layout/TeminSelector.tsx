@@ -7,6 +7,7 @@ import {
   FileText,
   FolderClosed,
   Gavel,
+  Hammer,
   Layers,
   LogOut,
   Plus,
@@ -87,8 +88,8 @@ export function TeminSelector(): React.JSX.Element {
 
   const selectedDosya = dosyalar.find((d) => d.id === activeDosyaId)
 
-  // İhale veya Hakediş kontrolü
-  const isIhaleOrHakedis = (d: any): boolean =>
+  // İhale veya Yapım/Hakediş kontrolü
+  const isIhaleOrYapim = (d: any): boolean =>
     d.tur === 'hakedis' ||
     d.tur === 'ihale' ||
     d.ihale_sekli?.toLowerCase().includes('hakedis') ||
@@ -106,7 +107,7 @@ export function TeminSelector(): React.JSX.Element {
   const filteredDosyalar = dosyalar.filter((d) => {
     if (d.is_deleted === 1) return false
 
-    const isIhale = isIhaleOrHakedis(d)
+    const isIhale = isIhaleOrYapim(d)
 
     if (subFilter === 'mode_default') {
       if (isDt && isIhale) return false
@@ -123,8 +124,12 @@ export function TeminSelector(): React.JSX.Element {
       if (!isIhale || (!d.ihale_tipi?.includes('Açık') && !d.ihale_sekli?.toLowerCase().includes('açık'))) return false
     } else if (subFilter === 'ihale_pazarlik') {
       if (!isIhale || (!d.ihale_tipi?.includes('Pazarlık') && !d.ihale_sekli?.toLowerCase().includes('pazarlık'))) return false
-    } else if (subFilter === 'ihale_hakedis') {
-      if (d.tur !== 'hakedis' && !d.ihale_sekli?.toLowerCase().includes('hakedis') && d.ihale_tipi !== 'Hakediş') return false
+    } else if (subFilter === 'ihale_yapim') {
+      const isYapim = d.tur === 'yapim_isi' || d.tur === 'hakedis' || d.ihale_sekli?.toLowerCase().includes('yapım') || d.ihale_sekli?.toLowerCase().includes('hakedis') || d.ihale_tipi === 'Hakediş'
+      if (!isYapim) return false
+    } else if (subFilter === 'ihale_hizmet') {
+      const isHizmet = d.tur === 'hizmet' || d.ihale_sekli?.toLowerCase().includes('hizmet')
+      if (!isHizmet) return false
     }
     // subFilter === 'all' ise tüm silinmemiş dosyaları göster
 
@@ -191,7 +196,7 @@ export function TeminSelector(): React.JSX.Element {
   const getDosyaNoLabel = (d: any): string => formatDosyaNo(d)
 
   // Seçili dosyanın İhale mi DT mi olduğunu tespit et
-  const selectedIsIhale = selectedDosya ? isIhaleOrHakedis(selectedDosya) : false
+  const selectedIsIhale = selectedDosya ? isIhaleOrYapim(selectedDosya) : false
 
   return (
     <>
@@ -322,7 +327,7 @@ export function TeminSelector(): React.JSX.Element {
             <span>
               {isDt
                 ? 'Çalışmak İstediğiniz Doğrudan Temin Dosyasını Seçin (KİK Md. 22)...'
-                : 'Çalışmak İstediğiniz İhale veya Hakediş Dosyasını Seçin (KİK Md. 19/21)...'}
+                : 'Çalışmak İstediğiniz İhale veya Yapım İşi Dosyasını Seçin (KİK Md. 19 / 21)...'}
             </span>
             <ChevronDown
               className={cn(
@@ -352,7 +357,7 @@ export function TeminSelector(): React.JSX.Element {
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                     isDt ? 'bg-blue-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}>
-                    {dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrHakedis(d)).length}
+                    {dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrYapim(d)).length}
                   </span>
                 </button>
 
@@ -365,11 +370,11 @@ export function TeminSelector(): React.JSX.Element {
                   }`}
                 >
                   <Gavel className="w-3.5 h-3.5" />
-                  <span>İhale Süreçleri & Hakediş (Md. 19/21)</span>
+                  <span>İhale Süreçleri (KİK 19/21)</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                     !isDt ? 'bg-indigo-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}>
-                    {dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrHakedis(d)).length}
+                    {dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrYapim(d)).length}
                   </span>
                 </button>
               </div>
@@ -404,7 +409,7 @@ export function TeminSelector(): React.JSX.Element {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    Tüm Doğrudan Teminler ({dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrHakedis(d)).length})
+                    Tüm Doğrudan Teminler ({dosyalar.filter((d) => d.is_deleted !== 1 && !isIhaleOrYapim(d)).length})
                   </button>
                   <button
                     onClick={() => setSubFilter('dt_mal')}
@@ -424,7 +429,7 @@ export function TeminSelector(): React.JSX.Element {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    Hizmet & Yapım İşleri
+                    Hizmet & Onarım İşleri
                   </button>
                   <button
                     onClick={() => setSubFilter('all')}
@@ -447,7 +452,7 @@ export function TeminSelector(): React.JSX.Element {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    Tüm İhale & Hakediş ({dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrHakedis(d)).length})
+                    Tüm İhale Dosyaları ({dosyalar.filter((d) => d.is_deleted !== 1 && isIhaleOrYapim(d)).length})
                   </button>
                   <button
                     onClick={() => setSubFilter('ihale_acik')}
@@ -470,15 +475,26 @@ export function TeminSelector(): React.JSX.Element {
                     Pazarlık Usulü (Md. 21)
                   </button>
                   <button
-                    onClick={() => setSubFilter('ihale_hakedis')}
+                    onClick={() => setSubFilter('ihale_yapim')}
                     className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                      subFilter === 'ihale_hakedis'
+                      subFilter === 'ihale_yapim'
                         ? 'bg-emerald-600 text-white font-bold'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
+                    <Hammer className="w-3 h-3 inline mr-1" />
+                    Yapım & Hakediş
+                  </button>
+                  <button
+                    onClick={() => setSubFilter('ihale_hizmet')}
+                    className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      subFilter === 'ihale_hizmet'
+                        ? 'bg-purple-600 text-white font-bold'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
                     <Building className="w-3 h-3 inline mr-1" />
-                    Hakediş Dosyaları
+                    Hizmet İhaleleri
                   </button>
                   <button
                     onClick={() => setSubFilter('all')}
@@ -502,7 +518,7 @@ export function TeminSelector(): React.JSX.Element {
                 placeholder={
                   isDt
                     ? 'Doğrudan temin no, alım konusu veya birim ara...'
-                    : 'İhale kayıt no, iş konusu, hakediş no veya birim ara...'
+                    : 'İhale kayıt no, iş konusu, yapım/hakediş veya birim ara...'
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -527,7 +543,7 @@ export function TeminSelector(): React.JSX.Element {
                   <span>
                     {isDt
                       ? 'Bu kriterlere uygun Doğrudan Temin dosyası bulunamadı.'
-                      : 'Bu kriterlere uygun İhale veya Hakediş dosyası bulunamadı.'}
+                      : 'Bu kriterlere uygun İhale veya Yapım İşi dosyası bulunamadı.'}
                   </span>
                   <button
                     onClick={handleCreateYeniDosya}
@@ -541,7 +557,7 @@ export function TeminSelector(): React.JSX.Element {
                 </div>
               ) : (
                 filteredDosyalar.map((dosya) => {
-                  const itemIsIhale = isIhaleOrHakedis(dosya)
+                  const itemIsIhale = isIhaleOrYapim(dosya)
                   const isActive = activeDosyaId === dosya.id
                   return (
                     <div
@@ -598,7 +614,7 @@ export function TeminSelector(): React.JSX.Element {
 
                           {itemIsIhale ? (
                             <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200/50">
-                              İhale / Hakediş
+                              İhale / Yapım
                             </span>
                           ) : (
                             <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/50">
