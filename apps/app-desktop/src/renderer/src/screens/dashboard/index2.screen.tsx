@@ -354,6 +354,24 @@ export default function DashboardScreenV2(): React.JSX.Element {
   const currentPillar = teminPillars.find((p) => p.key === activePillar) ||
     teminPillars[0];
 
+  function getDtFileText(type: string): string {
+    switch (type) {
+      case "1":
+        return "İhtiyaç ve Lüzum";
+      case "2":
+        return "Piyasa ve Teklif";
+      case "3":
+        return "Yaklaşık Maliyet";
+      case "4":
+        return "Karar & Onay";
+      case "5":
+        return "Kabul & Ödeme";
+      default:
+        return "Süreç İlerliyor";
+    }
+    return type;
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-[1650px] mx-auto pb-12 animate-in fade-in slide-in-from-bottom-3 duration-500 text-slate-800 dark:text-slate-100">
       {/* 1. TEMİN 360 KOMUTA MERKEZİ HERO HEADER */}
@@ -377,15 +395,26 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
 
             <div>
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
-                {greeting}, {adminName || adminUsername || "Kullanıcı"}
-                <span className="text-sm font-semibold px-2.5 py-0.5 rounded-lg bg-white/10 text-slate-200 border border-white/10 hidden sm:inline-block">
-                  {adminTitle || "Sistem Kullanıcısı"}
+              <div className="text-xs font-bold tracking-wider uppercase text-blue-400 mb-1">
+                {greeting},
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white">
+                  {adminName && !adminName.includes("YÖNETİCİ")
+                    ? adminName
+                    : (adminUsername || "İdare Yöneticisi")}
+                </h1>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white/10 text-slate-200 border border-white/10 shadow-xs">
+                  {adminTitle && !adminTitle.includes("YÖNETİCİ")
+                    ? adminTitle
+                    : "Harcama Yetkilisi / Şube Müdürü"}
                 </span>
-              </h1>
-              <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
+              </div>
+              <p className="text-sm text-slate-300 mt-2 leading-relaxed max-w-2xl">
                 <strong className="text-white font-semibold">
-                  {institutionName || "T.C. Kamu Kurumu"}
+                  {institutionName && !institutionName.includes("KURUM")
+                    ? institutionName
+                    : "Kurum İdaresi"}
                 </strong>{" "}
                 bünyesindeki doğrudan temin süreçleri, yaklaşık maliyet
                 analizleri, KİK limit kontrolleri ve Sayıştay denetim kriterleri
@@ -394,8 +423,8 @@ export default function DashboardScreenV2(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Hızlı Aksiyon Butonları - Responsive & Kristal Netliğinde Kontrast */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-stretch lg:items-center gap-2.5 w-full lg:w-auto shrink-0">
+          {/* Hızlı Aksiyon Butonları - Düzenli 2x2 Grid / Alt Alta & Dengeli Alan */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full lg:w-[390px] shrink-0">
             <button
               type="button"
               onClick={() => {
@@ -407,30 +436,30 @@ export default function DashboardScreenV2(): React.JSX.Element {
                 });
                 setShowAIModal(true);
               }}
-              className="bg-linear-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-purple-900/30 border border-purple-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
+              className="w-full bg-linear-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-2.5 px-3.5 rounded-xl shadow-md shadow-purple-900/30 border border-purple-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
             >
               <Sparkles className="w-4 h-4 text-purple-200 animate-spin" />
               <span className="font-extrabold tracking-wide">
-                TEMİN 360 AI Desteği
+                TEMİN 360 AI
               </span>
             </button>
 
-            <Link to="/dosyalar/yeni" className="w-full sm:w-auto">
+            <Link to="/dosyalar/yeni" className="w-full">
               <button
                 type="button"
-                className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-900/30 border border-blue-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
+                className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-2.5 px-3.5 rounded-xl shadow-md shadow-blue-900/30 border border-blue-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Plus className="w-4 h-4" />
                 <span className="font-extrabold tracking-wide">
-                  Yeni Temin Dosyası (22. md)
+                  + Yeni Temin (22)
                 </span>
               </button>
             </Link>
 
-            <Link to="/harcama-merkezi" className="w-full sm:w-auto">
+            <Link to="/harcama-merkezi" className="w-full">
               <button
                 type="button"
-                className="w-full bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-amber-900/30 border border-amber-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
+                className="w-full bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-3.5 rounded-xl shadow-md shadow-amber-900/30 border border-amber-400/30 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <Gavel className="w-4 h-4" />
                 <span className="font-extrabold tracking-wide">
@@ -439,13 +468,15 @@ export default function DashboardScreenV2(): React.JSX.Element {
               </button>
             </Link>
 
-            <Link to="/dosyalar" className="w-full sm:w-auto">
+            <Link to="/dosyalar" className="w-full">
               <button
                 type="button"
-                className="w-full bg-slate-800/90 hover:bg-slate-700 text-slate-100 hover:text-white border border-slate-700/90 font-bold py-2.5 px-3.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
+                className="w-full bg-slate-800/90 hover:bg-slate-700 text-slate-100 hover:text-white border border-slate-700/90 font-bold py-2.5 px-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
               >
                 <FileSpreadsheet className="w-4 h-4 text-blue-400" />
-                <span>Tüm Dosyalar ({dosyalar.length})</span>
+                <span className="font-bold">
+                  Tüm Dosyalar ({dosyalar.length})
+                </span>
               </button>
             </Link>
           </div>
@@ -917,9 +948,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
                               {asamaInfo.name}
                             </span>
                             <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800">
-                              {dosya.tur?.toUpperCase() || "MAL"}
-                              &nbsp;
-                              {dosya.tur}
+                              {getDtFileText(dosya.tur)}
                             </span>
                           </div>
                           <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
