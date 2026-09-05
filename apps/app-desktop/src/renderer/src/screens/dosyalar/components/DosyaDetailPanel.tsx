@@ -346,9 +346,15 @@ export function DosyaDetailPanel({
                 ? 'Mal Alımı'
                 : selectedDosya.tur === 'hizmet'
                   ? 'Hizmet Alımı'
-                  : selectedDosya.tur === 'yapim_isi'
-                    ? 'Yapım İşi'
-                    : 'Danışmanlık'
+                  : selectedDosya.tur === 'yapim_isi' || selectedDosya.tur === 'yapim'
+                    ? 'Yapım İşi / Onarım'
+                    : selectedDosya.tur === 'danismanlik'
+                      ? 'Danışmanlık'
+                      : selectedDosya.tur === 'hakedis'
+                        ? 'Hakediş'
+                        : selectedDosya.tur === 'ihale'
+                          ? 'İhale'
+                          : selectedDosya.tur || 'Mal Alımı'
             }
           />
           <DetailField
