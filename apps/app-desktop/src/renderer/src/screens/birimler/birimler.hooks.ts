@@ -132,30 +132,36 @@ export function useBirimlerHooks() {
     mutationFn: async (id: number) => {
       const getRes = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT birim_adi FROM TANIM_Birim WHERE id = ?',
+        'SELECT id, birim_adi FROM TANIM_Birim WHERE id = ?',
         [id]
       )
       if (getRes.data && getRes.data.length > 0) {
-        const checkRes = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          'SELECT COUNT(*) as count FROM TANIM_Personel WHERE birim = ?',
-          [getRes.data[0].birim_adi]
+        const birimAdi = getRes.data[0].birim_adi
+        // Birime bağlı personellerin birim alanını güvenle temizle
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'UPDATE TANIM_Personel SET birim = "" WHERE birim = ?',
+          [birimAdi]
         )
-        if (checkRes.data && checkRes.data[0].count > 0) {
-          throw new Error(
-            `Bu birime bağlı ${checkRes.data[0].count} personel var. Önce personellerin birimini değiştirin.`
-          )
-        }
+        // Birime bağlı temin dosyalarının birim_id alanını güvenle boşa çıkar
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'UPDATE DATA_TeminDosyasi SET birim_id = NULL WHERE birim_id = ?',
+          [id]
+        )
       }
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         'DELETE FROM TANIM_Birim WHERE id = ?',
         [id]
       )
-      if (!res.success) throw new Error(res.error)
+      if (!res.success) throw new Error(res.error || 'Birim silinemedi')
       return res
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['birimler'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['birimler'] })
+      queryClient.invalidateQueries({ queryKey: ['personeller_list'] })
+    }
   })
 
   return {
