@@ -63,7 +63,7 @@ export const devSeedService = {
       details.ambarCount = 2
 
       // 7. Mevcut Açık Doğrudan Temin Dosyalarına Kalem, Teklif ve Komisyon Ekle
-      const enrichedCount = await this.enrichExistingDosyalar(firmaIds, personelIds)
+      const enrichedCount = await this.enrichExistingDosyalar(firmaIds, personelIds, birimIds)
       details.dosyalarEnrichedCount = enrichedCount
 
       return {
@@ -528,50 +528,87 @@ export const devSeedService = {
   },
 
   /**
-   * Mevcut açık Doğrudan Temin Dosyalarını zenginleştirir (Kalemler, Teklifler, Komisyonlar, vb.)
+   * Mevcut açık Doğrudan Temin Dosyalarını 3 farklı birimde (Mal Alımı, Hizmet Alımı, Yapım İşi) zenginleştirir.
    */
-  async enrichExistingDosyalar(firmaIds: number[], personelIds: number[]): Promise<number> {
+  async enrichExistingDosyalar(
+    firmaIds: number[],
+    personelIds: number[],
+    birimIds: number[] = []
+  ): Promise<number> {
     const dosyalarRes = await window.electron.ipcRenderer.invoke(
       'db:query',
       'SELECT * FROM DATA_TeminDosyasi WHERE is_deleted = 0 ORDER BY id ASC'
     )
     let dosyalar = dosyalarRes.success && Array.isArray(dosyalarRes.data) ? dosyalarRes.data : []
 
+    // 3 Temel Doğrudan Temin Dosyası Şablonu (Farklı Birimler + Farklı Alım Türleri)
+    const predefinedDosyalar = [
+      {
+        temin_no: 'DT-2026/1',
+        konu: '2026 Yılı 1. Çeyrek Kırtasiye ve Büro Tüketim Malzemeleri Alımı',
+        isin_aciklamasi:
+          'Birimlerimizin acil kırtasiye, kağıt ve sarf malzeme ihtiyacı için 4734 sayılı KİK 22/d doğrudan temin usulü mal alımı.',
+        tur: 'mal',
+        birim_id: birimIds[0] || null, // İdari ve Mali İşler Şube Müdürlüğü
+        ihtiyac_yeri: 'İdari ve Mali İşler Şube Müdürlüğü / Merkez Bina Ambarı',
+        butce_kodu: '03.2.1.01 Kırtasiye ve Büro Malzemesi Alımları',
+        butce_yili: 2026,
+        butce_tipi: 'Genel Bütçe',
+        ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
+        ihale_tipi: 'Doğrudan Temin'
+      },
+      {
+        temin_no: 'DT-2026/2',
+        konu: 'Hizmet Binası İklimlendirme ve Klimalar Periyodik Bakım, Onarım ve Gaz Dolumu Hizmet Alımı',
+        isin_aciklamasi:
+          'Hizmet binasındaki iklimlendirme sistemlerinin mevsimlik bakım, filtre değişimi, gaz dolumu ve onarımı hizmet alımı.',
+        tur: 'hizmet',
+        birim_id: birimIds[1] || birimIds[0] || null, // Destek Hizmetleri Şube Müdürlüğü
+        ihtiyac_yeri: 'Destek Hizmetleri Şube Müdürlüğü / Hizmet Binası Katları',
+        butce_kodu: '03.5.2.02 Makine Teçhizat Bakım ve Onarım Giderleri',
+        butce_yili: 2026,
+        butce_tipi: 'Genel Bütçe',
+        ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
+        ihale_tipi: 'Doğrudan Temin'
+      },
+      {
+        temin_no: 'DT-2026/3',
+        konu: 'Hizmet Binası Zemin Kat Islak Hacim, Boya, Alçı ve Asma Tavan Tadilatı Yapım İşi',
+        isin_aciklamasi:
+          'Zemin kat ortak kullanım alanları ve ıslak hacimlerin komple seramik kaplama, iç cephe boya/alçı ve asma tavan yapım işi.',
+        tur: 'yapim_isi',
+        birim_id: birimIds[4] || birimIds[birimIds.length - 1] || null, // Teknik ve Bakım Onarım Birimi
+        ihtiyac_yeri: 'Teknik ve Bakım Onarım Birimi / Hizmet Binası Zemin Kat',
+        butce_kodu: '03.8.2.01 Hizmet Binası Küçük Onarım Giderleri',
+        butce_yili: 2026,
+        butce_tipi: 'Genel Bütçe',
+        ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
+        ihale_tipi: 'Doğrudan Temin'
+      }
+    ]
+
     // Veritabanında hiç dosya yoksa, otomatik 3 adet örnek Doğrudan Temin dosyası aç
     if (dosyalar.length === 0) {
-      const defaultDosyalar = [
-        {
-          temin_no: 'DT-2026/1',
-          konu: '2026 Yılı 1. Çeyrek Kırtasiye ve Büro Tüketim Malzemeleri Alımı',
-          isin_aciklamasi: 'Birimlerimizin acil kırtasiye ve kağıt ihtiyacı için doğrudan temin usulü alım.',
-          tur: 'Mal',
-          butce_yili: 2026,
-          butce_tipi: 'Genel Bütçe'
-        },
-        {
-          temin_no: 'DT-2026/2',
-          konu: 'Bilgi İşlem Birimi İçin Masaüstü Bilgisayar ve Monitör Alımı',
-          isin_aciklamasi: 'Mevzuata uygun olarak bilgisayar ve çevre birimleri temini.',
-          tur: 'Mal',
-          butce_yili: 2026,
-          butce_tipi: 'Genel Bütçe'
-        },
-        {
-          temin_no: 'DT-2026/3',
-          konu: 'Hizmet Binası Klimaları Yıllık Periyodik Bakım ve Onarım Hizmeti',
-          isin_aciklamasi: 'Bina içi iklimlendirme sistemlerinin mevsimlik periyodik bakımı.',
-          tur: 'Hizmet',
-          butce_yili: 2026,
-          butce_tipi: 'Genel Bütçe'
-        }
-      ]
-
-      for (const d of defaultDosyalar) {
+      for (const d of predefinedDosyalar) {
         await window.electron.ipcRenderer.invoke(
           'db:run',
-          `INSERT INTO DATA_TeminDosyasi (temin_no, konu, isin_aciklamasi, tur, butce_yili, butce_tipi, status, is_deleted, created_at, updated_at) 
-           VALUES (?, ?, ?, ?, ?, ?, 'Devam Ediyor', 0, datetime('now'), datetime('now'))`,
-          [d.temin_no, d.konu, d.isin_aciklamasi, d.tur, d.butce_yili, d.butce_tipi]
+          `INSERT INTO DATA_TeminDosyasi (
+            temin_no, konu, isin_aciklamasi, tur, birim_id, ihtiyac_yeri, butce_kodu, butce_yili, butce_tipi, 
+            ihale_sekli, ihale_tipi, durum_asama_id, status, is_deleted, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2, 'devam_ediyor', 0, datetime('now'), datetime('now'))`,
+          [
+            d.temin_no,
+            d.konu,
+            d.isin_aciklamasi,
+            d.tur,
+            d.birim_id,
+            d.ihtiyac_yeri,
+            d.butce_kodu,
+            d.butce_yili,
+            d.butce_tipi,
+            d.ihale_sekli,
+            d.ihale_tipi
+          ]
         )
       }
 
@@ -587,12 +624,12 @@ export const devSeedService = {
     }
     let enrichedCount = 0
 
-    // Örnek kalem paketleri
+    // 3 Ayrı Alım Türüne Özel Kalem Paketleri
     const samplePackages = [
-      // Paket 1: Ofis & Kırtasiye Alımı
+      // Paket 1: Mal Alımı (Kırtasiye & Büro Tüketim)
       [
         {
-          ad: 'A4 80 gr/m² Beyaz Fotokopi Kağıdı',
+          ad: 'A4 80 gr/m² Beyaz Fotokopi Kağıdı (500 Yaprak / Paket)',
           tip: 'Mal',
           birim: 'Paket',
           miktar: 50,
@@ -625,49 +662,13 @@ export const devSeedService = {
           f3: 110
         }
       ],
-      // Paket 2: Bilişim & Donanım Alımı
+      // Paket 2: Hizmet Alımı (İklimlendirme, Bakım ve Gaz Dolumu)
       [
         {
-          ad: 'Masaüstü İş İstasyonu Bilgisayar Seti (Intel i7, 32GB RAM)',
-          tip: 'Mal',
-          birim: 'Set',
-          miktar: 3,
-          kdv: 20,
-          tkod: '255.02.01.01',
-          f1: 42000,
-          f2: 44500,
-          f3: 41200
-        },
-        {
-          ad: '27 inç IPS QHD Monitör',
-          tip: 'Mal',
-          birim: 'Adet',
-          miktar: 3,
-          kdv: 20,
-          tkod: '255.02.01.02',
-          f1: 7500,
-          f2: 7800,
-          f3: 7200
-        },
-        {
-          ad: 'Kablosuz Klavye & Optik Mouse Seti',
-          tip: 'Set',
-          birim: 'Set',
-          miktar: 5,
-          kdv: 20,
-          tkod: '255.02.01.03',
-          f1: 950,
-          f2: 1100,
-          f3: 900
-        }
-      ],
-      // Paket 3: Hizmet & Bakım Onarım
-      [
-        {
-          ad: 'Klima Periyodik Bakım, Filtre Temizliği ve Gaz Dolumu',
+          ad: 'Split ve Salon Tipi Klima Periyodik Bakım ve Filtre Temizliği',
           tip: 'Hizmet',
           birim: 'Adet',
-          miktar: 12,
+          miktar: 16,
           kdv: 20,
           tkod: '150.08.01.01',
           f1: 850,
@@ -675,15 +676,62 @@ export const devSeedService = {
           f3: 800
         },
         {
-          ad: 'Yangın Tüpleri Yıllık Kontrol ve Dolum Hizmeti',
+          ad: 'R410A / R32 Soğutucu Gaz Dolumu ve Kaçak Kontrolü',
           tip: 'Hizmet',
           birim: 'Adet',
-          miktar: 20,
+          miktar: 12,
           kdv: 20,
-          tkod: '150.08.03.01',
-          f1: 450,
-          f2: 500,
-          f3: 420
+          tkod: '150.08.01.02',
+          f1: 1400,
+          f2: 1550,
+          f3: 1350
+        },
+        {
+          ad: 'Sistem Odası Hassas Kontrollü Klima Yıllık Bakım Hizmeti',
+          tip: 'Hizmet',
+          birim: 'Adet',
+          miktar: 2,
+          kdv: 20,
+          tkod: '150.08.01.03',
+          f1: 4500,
+          f2: 4800,
+          f3: 4200
+        }
+      ],
+      // Paket 3: Yapım İşi (Islak Hacim Seramik, Alçı-Boya ve Asma Tavan)
+      [
+        {
+          ad: 'İç Cephe Alçı Sıva Tamiratı ve Silikonlu Mat Boya Yapım İşi',
+          tip: 'Yapım',
+          birim: 'm²',
+          miktar: 350,
+          kdv: 20,
+          tkod: '252.01.01.01',
+          f1: 160,
+          f2: 180,
+          f3: 150
+        },
+        {
+          ad: 'Zemin ve Duvar Seramik Kaplama Söküm ve Yeniden Yapım İşi',
+          tip: 'Yapım',
+          birim: 'm²',
+          miktar: 85,
+          kdv: 20,
+          tkod: '252.01.02.01',
+          f1: 650,
+          f2: 700,
+          f3: 600
+        },
+        {
+          ad: 'Akustik Taşyünü Asma Tavan ve T-24 Taşıyıcı Karkas İmalatı',
+          tip: 'Yapım',
+          birim: 'm²',
+          miktar: 120,
+          kdv: 20,
+          tkod: '252.01.03.01',
+          f1: 420,
+          f2: 460,
+          f3: 390
         }
       ]
     ]
@@ -692,6 +740,35 @@ export const devSeedService = {
       const dosya = dosyalar[i]
       const pkgIndex = i % samplePackages.length
       const pkg = samplePackages[pkgIndex]
+      const predef = predefinedDosyalar[pkgIndex] || predefinedDosyalar[0]
+
+      // Dosya üst bilgilerini tanımlı alım türü ve birim ile güncelle
+      await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `UPDATE DATA_TeminDosyasi SET 
+          tur = ?,
+          birim_id = COALESCE(?, birim_id),
+          konu = ?,
+          isin_aciklamasi = ?,
+          ihtiyac_yeri = ?,
+          butce_kodu = ?,
+          ihale_sekli = ?,
+          ihale_tipi = ?,
+          durum_asama_id = 2,
+          status = 'devam_ediyor'
+        WHERE id = ?`,
+        [
+          predef.tur,
+          predef.birim_id,
+          predef.konu,
+          predef.isin_aciklamasi,
+          predef.ihtiyac_yeri,
+          predef.butce_kodu,
+          predef.ihale_sekli,
+          predef.ihale_tipi,
+          dosya.id
+        ]
+      )
 
       // Dosya kalemlerini kontrol et
       const existingKalemler = await window.electron.ipcRenderer.invoke(
@@ -886,11 +963,12 @@ export const devSeedService = {
         }
       }
 
-      // Dosya Üst Bilgilerini Güncelle (Maliyet, Harcama Yetkilisi, Birim, vb.)
+      // Dosya Maliyet ve Personel Bilgilerini Güncelle
       const winningFirmaId =
         teminFirmaIds.length > 2 ? teminFirmaIds[2].firma_id : firmaIds[0] || 1
       const harcamaYetkilisiId = personelIds[0] || 1
       const gerceklestirmeId = personelIds[1] || 2
+      const irtibatId = personelIds[2] || personelIds[0] || 1
 
       await window.electron.ipcRenderer.invoke(
         'db:run',
@@ -901,9 +979,8 @@ export const devSeedService = {
           onay_personel_id = ?,
           hazirlayan_personel_id = ?,
           talep_eden_personel_id = ?,
-          ihale_sekli = '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-          ihale_tipi = 'Doğrudan Temin',
-          butce_kodu = '03.2.1.01 Kırtasiye ve Büro Malzemesi Alımları',
+          sunan_personel_id = ?,
+          irtibat_yetkilisi_id = ?,
           teslim_tarihi = date('now', '+15 days'),
           son_teklif_verme_tarihi = date('now', '+3 days')
         WHERE id = ?`,
@@ -914,6 +991,8 @@ export const devSeedService = {
           harcamaYetkilisiId,
           gerceklestirmeId,
           gerceklestirmeId,
+          harcamaYetkilisiId,
+          irtibatId,
           dosya.id
         ]
       )
@@ -924,3 +1003,4 @@ export const devSeedService = {
     return enrichedCount
   }
 }
+
