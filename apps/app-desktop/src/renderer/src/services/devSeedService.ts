@@ -23,10 +23,54 @@ export interface SeedResult {
 
 export const devSeedService = {
   /**
-   * Tek tıkla tüm sistemi ve ilişkili tüm tabloları eksiksiz test verisiyle doldurur.
+   * Önceki test verilerini (hareketler, teklifler, kalemler, dosyalar ve gerektiğinde tanımlar)
+   * tamamen temizler; böylece tohumlama sıfırdan, çakışmasız ve güncel ilişkilerle yeniden yüklenir.
    */
-  async seedAll(): Promise<SeedResult> {
+  async cleanExistingSeedData(): Promise<void> {
+    const runSql = async (sql: string, params: unknown[] = []): Promise<void> => {
+      try {
+        await window.electron.ipcRenderer.invoke('db:run', sql, params)
+      } catch (e) {
+        console.warn('[devSeedService] Clean step warning for SQL:', sql, e)
+      }
+    }
+
+    // 1. DATA (Hareket / Süreç) tablolarını temizle
+    await runSql('DELETE FROM DATA_TeminKalemTeklif')
+    await runSql('DELETE FROM DATA_TeminKalem')
+    await runSql('DELETE FROM DATA_TeminFirma')
+    await runSql('DELETE FROM DATA_TeminKomisyon')
+    await runSql('DELETE FROM DATA_TeminEkSurec')
+    await runSql('DELETE FROM DATA_TeminDosyasi')
+    await runSql('DELETE FROM DATA_HakedisKalem')
+    await runSql('DELETE FROM DATA_HakedisKesinti')
+    await runSql('DELETE FROM DATA_Hakedis')
+
+    // 2. TANIM tablolarını temizle
+    await runSql('DELETE FROM TANIM_Kalem')
+    await runSql('DELETE FROM TANIM_Firma')
+    await runSql('DELETE FROM TANIM_Ambar')
+    await runSql('DELETE FROM TANIM_Komisyon')
+    await runSql('DELETE FROM TANIM_Birim')
+    await runSql('DELETE FROM TANIM_Personel')
+    await runSql('DELETE FROM TANIM_KikLimit')
+
+    // 3. SQLite AUTOINCREMENT sayaçlarını sıfırla (ID'ler temiz 1'den başlasın)
+    await runSql(
+      "DELETE FROM sqlite_sequence WHERE name IN ('DATA_TeminDosyasi', 'DATA_TeminKalem', 'DATA_TeminFirma', 'DATA_TeminKalemTeklif', 'DATA_TeminKomisyon', 'TANIM_Birim', 'TANIM_Personel', 'TANIM_Firma', 'TANIM_Kalem', 'TANIM_Ambar', 'TANIM_Komisyon', 'TANIM_KikLimit')"
+    )
+  },
+
+  /**
+   * Tek tıkla tüm sistemi ve ilişkili tüm tabloları eksiksiz test verisiyle doldurur.
+   * cleanFirst: true olduğunda önce eski kayıtları tamamen siler, sıfırdan oluşturur.
+   */
+  async seedAll(cleanFirst = true): Promise<SeedResult> {
     try {
+      if (cleanFirst) {
+        await this.cleanExistingSeedData()
+      }
+
       const details: SeedResult['details'] = {
         kurumUpdated: false,
         birimlerCount: 0,
@@ -66,7 +110,7 @@ export const devSeedService = {
       details.kalemlerCount = kalemIds.length
 
       // 7. Komisyon ve Ambar Tanımlarını Doldur
-      await this.seedKomisyonlarVeAmbarlar(personelIds)
+      await this.seedKomisyonlarVeAmbarlar()
       details.komisyonlarCount = 3
       details.ambarCount = 4
 
@@ -76,7 +120,7 @@ export const devSeedService = {
 
       return {
         success: true,
-        message: 'Tüm sistem (Kurum, Birimler, Personeller, Firmalar, Kalemler, Komisyonlar, Ambarlar ve Dosyalar) eksiksiz tohumlandı!',
+        message: 'Tüm sistem (Kurum, Birimler, Personeller, Firmalar, Kalemler, Komisyonlar, Ambarlar ve Dosyalar) tertemiz sıfırlanıp eksiksiz tohumlandı!',
         details
       }
     } catch (error: unknown) {
@@ -536,7 +580,6 @@ export const devSeedService = {
     const p7 = personelIds[7] || 7 // Mustafa Çelik (Bilgisayar Müh)
     const p9 = personelIds[9] || 9 // Emre Karaca (Biyomedikal Müh)
     const p11 = personelIds[11] || 11 // Murat Can Yurt (İnşaat Müh)
-    const p12 = personelIds[12] || 12 // Burak Erdem (Tekniker)
     const p13 = personelIds[13] || 13 // Dr. Serdar Tekin (Acil Sağlık Müdürü)
     const p14 = personelIds[14] || 14 // Onur Karataş (Lojistik)
 
@@ -1080,7 +1123,7 @@ export const devSeedService = {
   /**
    * Komisyon ve Ambar tanımlarını ekler
    */
-  async seedKomisyonlarVeAmbarlar(_personelIds: number[] = []): Promise<void> {
+  async seedKomisyonlarVeAmbarlar(): Promise<void> {
     // 1. Ambarlar
     const ambarlar = [
       {
@@ -1140,419 +1183,199 @@ export const devSeedService = {
    * 5 Ayrı Alım Türü ve Birim için Doğrudan Temin Dosyalarını tüm kalem, teklif, firma ve komisyonlarıyla eksiksiz doldurur.
    */
   async enrichExistingDosyalar(
-    firmaIds: number[],
-    personelIds: number[],
+    firmaIds: number[] = [],
+    personelIds: number[] = [],
     birimIds: number[] = []
   ): Promise<number> {
+    const runSql = async (sql: string, params: unknown[] = []): Promise<void> => {
+      try {
+        await window.electron.ipcRenderer.invoke('db:run', sql, params)
+      } catch (e) {
+        console.warn('[devSeedService] SQL execution warning:', sql, e)
+      }
+    }
+
+    // Gerekli tanımlar eksikse otomatik getir veya tohumla
+    if (!firmaIds || firmaIds.length === 0) {
+      const fRes = await window.electron.ipcRenderer.invoke('db:query', 'SELECT id FROM TANIM_Firma ORDER BY id')
+      if (fRes.success && fRes.data && fRes.data.length > 0) {
+        firmaIds = fRes.data.map((r: { id: number }) => r.id)
+      } else {
+        firmaIds = await this.seedFirmalar()
+      }
+    }
+
+    if (!personelIds || personelIds.length === 0) {
+      const pRes = await window.electron.ipcRenderer.invoke('db:query', 'SELECT id FROM TANIM_Personel ORDER BY id')
+      if (pRes.success && pRes.data && pRes.data.length > 0) {
+        personelIds = pRes.data.map((r: { id: number }) => r.id)
+      } else {
+        personelIds = await this.seedPersonel()
+      }
+    }
+
+    if (!birimIds || birimIds.length === 0) {
+      const bRes = await window.electron.ipcRenderer.invoke('db:query', 'SELECT id FROM TANIM_Birim ORDER BY id')
+      if (bRes.success && bRes.data && bRes.data.length > 0) {
+        birimIds = bRes.data.map((r: { id: number }) => r.id)
+      } else {
+        birimIds = await this.seedBirimler(personelIds)
+      }
+    }
+
+    // 1. Önceki tüm dosya ve alt ilişkili süreç/hareket verilerini tamamen temizle
+    await runSql('DELETE FROM DATA_TeminKalemTeklif')
+    await runSql('DELETE FROM DATA_TeminKalem')
+    await runSql('DELETE FROM DATA_TeminFirma')
+    await runSql('DELETE FROM DATA_TeminKomisyon')
+    await runSql('DELETE FROM DATA_TeminEkSurec')
+    await runSql('DELETE FROM DATA_HakedisKalem')
+    await runSql('DELETE FROM DATA_HakedisKesinti')
+    await runSql('DELETE FROM DATA_Hakedis')
+    await runSql('DELETE FROM DATA_TeminDosyasi')
+    await runSql(
+      "DELETE FROM sqlite_sequence WHERE name IN ('DATA_TeminDosyasi', 'DATA_TeminKalem', 'DATA_TeminFirma', 'DATA_TeminKalemTeklif', 'DATA_TeminKomisyon', 'DATA_Hakedis')"
+    )
+
+    const currentYear = new Date().getFullYear()
+    const dy = currentYear
+
     const predefinedDosyalar = [
       {
-        temin_no: 'DT-2026/01',
-        konu: '2026 Yılı 1. Çeyrek Kırtasiye, Kağıt ve Büro Tüketim Malzemeleri Alımı',
-        isin_aciklamasi:
-          'Birimlerimizin acil kırtasiye, fotokopi kağıdı ve yazıcı sarf malzeme ihtiyacının 4734 sayılı KİK 22/d doğrudan temin usulü ile karşılanması işi.',
+        temin_no: `DT-${dy}/01`,
+        konu: `${dy} Yılı 1. Çeyrek Kırtasiye, Kağıt ve Büro Tüketim Malzemeleri Alımı`,
+        isin_aciklamasi: 'Birimlerimizin acil kırtasiye ihtiyacının 4734 sayılı KİK 22/d doğrudan temin usulü ile karşılanması işi.',
         tur: 'mal',
-        birim_id: birimIds[0] || 1, // Destek Hizmetleri Başkanlığı
+        birim_id: birimIds[0] || 1,
         ihtiyac_yeri: 'Destek Hizmetleri Başkanlığı / Merkez Bina Ana Ambarı',
         butce_kodu: '03.2.1.01 Kırtasiye ve Büro Malzemesi Alımları',
-        butce_yili: 2026,
+        butce_yili: dy,
         butce_tipi: 'Genel Bütçe',
         ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-        ihale_tipi: 'Doğrudan Temin',
-        durum_asama_id: 2,
-        status: 'devam_ediyor'
+        ihale_tipi: 'Doğrudan Temin'
       },
       {
-        temin_no: 'DT-2026/02',
-        konu: 'Hizmet Binası İklimlendirme ve Klimalar Periyodik Bakım, Onarım ve Gaz Dolumu Hizmet Alımı',
-        isin_aciklamasi:
-          'Hizmet binasındaki tüm iklimlendirme sistemlerinin mevsimlik periyodik bakımı, filtre değişimi, gaz dolumu ve onarımı hizmet alımı.',
+        temin_no: `DT-${dy}/02`,
+        konu: 'Hizmet Binası İklimlendirme ve Klimalar Periyodik Bakım Hizmet Alımı',
+        isin_aciklamasi: 'Hizmet binasındaki tüm iklimlendirme sistemlerinin mevsimlik periyodik bakımı hizmet alımı.',
         tur: 'hizmet',
-        birim_id: birimIds[1] || birimIds[0] || 1, // İdari ve Mali İşler Şube Müdürlüğü
+        birim_id: birimIds[1] || birimIds[0] || 1,
         ihtiyac_yeri: 'İdari ve Mali İşler Şube Müdürlüğü / Hizmet Binası Katları',
         butce_kodu: '03.5.2.02 Makine Teçhizat Bakım ve Onarım Giderleri',
-        butce_yili: 2026,
+        butce_yili: dy,
         butce_tipi: 'Genel Bütçe',
         ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-        ihale_tipi: 'Doğrudan Temin',
-        durum_asama_id: 2,
-        status: 'devam_ediyor'
+        ihale_tipi: 'Doğrudan Temin'
       },
       {
-        temin_no: 'DT-2026/03',
-        konu: 'Hizmet Binası Zemin Kat Islak Hacim, Boya, Alçı ve Asma Tavan Tadilatı Yapım İşi',
-        isin_aciklamasi:
-          'Zemin kat ortak kullanım alanları ve ıslak hacimlerin komple seramik kaplama, iç cephe boya/alçı ve taşyünü asma tavan yapım işi.',
+        temin_no: `DT-${dy}/03`,
+        konu: 'Hizmet Binası Zemin Kat Islak Hacim Tadilatı Yapım İşi',
+        isin_aciklamasi: 'Zemin kat ortak kullanım alanları ve ıslak hacimlerin komple seramik kaplama ve tadilat yapım işi.',
         tur: 'yapim_isi',
-        birim_id: birimIds[4] || birimIds[0] || 1, // İnşaat ve Teknik Hizmetler Birimi
+        birim_id: birimIds[2] || birimIds[0] || 1,
         ihtiyac_yeri: 'İnşaat ve Teknik Hizmetler Birimi / Hizmet Binası Zemin Kat',
         butce_kodu: '03.8.2.01 Hizmet Binası Küçük Onarım Giderleri',
-        butce_yili: 2026,
+        butce_yili: dy,
         butce_tipi: 'Genel Bütçe',
         ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-        ihale_tipi: 'Doğrudan Temin',
-        durum_asama_id: 2,
-        status: 'devam_ediyor'
-      },
-      {
-        temin_no: 'DT-2026/04',
-        konu: 'Bilgi İşlem Şube Müdürlüğü Yüksek Performanslı İş İstasyonu ve QHD Monitör Donanım Alımı',
-        isin_aciklamasi:
-          'Veri analizi ve CBS yazılımlarının çalıştırılması amacıyla 6 adet yüksek performanslı bilgisayar seti ve monitör alımı.',
-        tur: 'mal',
-        birim_id: birimIds[2] || birimIds[0] || 1, // Bilgi İşlem Şube Müdürlüğü
-        ihtiyac_yeri: 'Bilgi İşlem Şube Müdürlüğü / Sistem Odası',
-        butce_kodu: '03.7.1.01 Büro ve İşyeri Makine ve Teçhizat Alımları',
-        butce_yili: 2026,
-        butce_tipi: 'Genel Bütçe',
-        ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-        ihale_tipi: 'Doğrudan Temin',
-        durum_asama_id: 2,
-        status: 'devam_ediyor'
-      },
-      {
-        temin_no: 'DT-2026/05',
-        konu: 'Tıbbi Cihaz ve Biyomedikal Ekipmanlar Yıllık Periyodik Metroloji ve Kalibrasyon Hizmet Alımı',
-        isin_aciklamasi:
-          'Bağlı birimlerdeki tıbbi cihazların uluslararası izlenebilir standartlarda kalibrasyon ve test hizmeti alımı.',
-        tur: 'hizmet',
-        birim_id: birimIds[3] || birimIds[0] || 1, // Tıbbi Cihaz Birimi
-        ihtiyac_yeri: 'Tıbbi Cihaz ve Biyomedikal Hizmetler Birimi',
-        butce_kodu: '03.5.1.08 Tıbbi Cihaz Bakım ve Kalibrasyon Hizmetleri',
-        butce_yili: 2026,
-        butce_tipi: 'Genel Bütçe',
-        ihale_sekli: '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)',
-        ihale_tipi: 'Doğrudan Temin',
-        durum_asama_id: 2,
-        status: 'devam_ediyor'
+        ihale_tipi: 'Doğrudan Temin'
       }
     ]
 
-    // 5 Dosyaya Özel Kalem Paketleri
     const samplePackages = [
-      // Paket 1: Mal Alımı (Kırtasiye & Büro)
       [
-        {
-          ad: 'A4 80 gr/m² Beyaz Fotokopi Kağıdı (500 Yaprak / Paket)',
-          ozelligi: '1. hamur yüksek beyazlık derecesine sahip fotokopi kağıdı',
-          tip: 'Mal',
-          birim: 'Paket',
-          miktar: 100,
-          kdv: 20,
-          tkod: '150.01.01.01',
-          f1: 185,
-          f2: 195,
-          f3: 175
-        },
-        {
-          ad: 'Siyah Lazer Toner Kartuşu (Yüksek Kapasiteli)',
-          ozelligi: 'Orijinal veya ISO standartlarına uygun muadil toner kartuşu',
-          tip: 'Mal',
-          birim: 'Adet',
-          miktar: 12,
-          kdv: 20,
-          tkod: '150.01.02.04',
-          f1: 1250,
-          f2: 1320,
-          f3: 1190
-        },
-        {
-          ad: 'Masaüstü Zımba Makinesi ve Tel Seti',
-          ozelligi: '24/6 ve 26/6 tel uyumlu metal gövde zımba makinesi ve 1000 adet tel seti',
-          tip: 'Mal',
-          birim: 'Kutu',
-          miktar: 25,
-          kdv: 20,
-          tkod: '150.01.03.01',
-          f1: 130,
-          f2: 145,
-          f3: 120
-        }
+        { ad: 'A4 80 gr/m² Fotokopi Kağıdı', ozelligi: '1. hamur beyazlık', tip: 'Mal', birim: 'Paket', miktar: 100, kdv: 20, tkod: '150.01.01.01', f1: 185, f2: 195, f3: 175 },
+        { ad: 'Siyah Lazer Toner', ozelligi: 'Yüksek kapasiteli', tip: 'Mal', birim: 'Adet', miktar: 12, kdv: 20, tkod: '150.01.02.04', f1: 1250, f2: 1320, f3: 1190 }
       ],
-      // Paket 2: Hizmet Alımı (İklimlendirme)
       [
-        {
-          ad: 'Split ve Salon Tipi Klimalar Periyodik Bakım ve Filtre Temizliği',
-          ozelligi: 'Bina içi klimaların antibakteriyel temizliği ve mevsimlik periyodik bakımı',
-          tip: 'Hizmet',
-          birim: 'Adet',
-          miktar: 24,
-          kdv: 20,
-          tkod: '150.08.01.01',
-          f1: 850,
-          f2: 920,
-          f3: 800
-        },
-        {
-          ad: 'R410A / R32 Soğutucu Gaz Dolumu ve Kaçak Kontrolü',
-          ozelligi: 'Orijinal saf soğutucu gaz dolumu ve azot sızdırmazlık kaçak testi',
-          tip: 'Hizmet',
-          birim: 'Adet',
-          miktar: 18,
-          kdv: 20,
-          tkod: '150.08.01.02',
-          f1: 1400,
-          f2: 1550,
-          f3: 1350
-        },
-        {
-          ad: 'Sistem Odası Hassas Kontrollü Klima Yıllık Bakım Hizmeti',
-          ozelligi: '7/24 kesintisiz çalışan hassas kontrollü klima ünitesi periyodik bakımı',
-          tip: 'Hizmet',
-          birim: 'Adet',
-          miktar: 2,
-          kdv: 20,
-          tkod: '150.08.01.03',
-          f1: 4500,
-          f2: 4900,
-          f3: 4200
-        }
+        { ad: 'Klimalar Periyodik Bakım', ozelligi: 'Antibakteriyel', tip: 'Hizmet', birim: 'Adet', miktar: 24, kdv: 20, tkod: '150.08.01.01', f1: 850, f2: 920, f3: 800 },
+        { ad: 'R410A / R32 Soğutucu Gaz Dolumu', ozelligi: 'Orijinal gaz', tip: 'Hizmet', birim: 'Kg', miktar: 15, kdv: 20, tkod: '150.08.01.03', f1: 650, f2: 700, f3: 600 }
       ],
-      // Paket 3: Yapım İşi (Tadilat)
       [
-        {
-          ad: 'İç Cephe Alçı Sıva Tamiratı ve Silikonlu Mat Boya Yapım İşi',
-          ozelligi: 'Duvar ve tavan yüzey tamiratları, astar ve çift kat silikonlu iç cephe boyası uygulaması',
-          tip: 'Yapım',
-          birim: 'm²',
-          miktar: 450,
-          kdv: 20,
-          tkod: '252.01.01.01',
-          f1: 165,
-          f2: 185,
-          f3: 150
-        },
-        {
-          ad: 'Zemin ve Duvar Seramik Kaplama Söküm ve Yeniden Yapım İşi',
-          ozelligi: '1. sınıf kaymaz porselen seramik kaplama ve antibakteriyel derz dolgu işi',
-          tip: 'Yapım',
-          birim: 'm²',
-          miktar: 110,
-          kdv: 20,
-          tkod: '252.01.02.01',
-          f1: 680,
-          f2: 740,
-          f3: 630
-        },
-        {
-          ad: 'Akustik Taşyünü Asma Tavan ve T-24 Taşıyıcı Karkas İmalatı',
-          ozelligi: '60x60 cm akustik taşyünü paneller ve galvaniz taşıyıcı profil montajı',
-          tip: 'Yapım',
-          birim: 'm²',
-          miktar: 150,
-          kdv: 20,
-          tkod: '252.01.03.01',
-          f1: 430,
-          f2: 475,
-          f3: 395
-        }
-      ],
-      // Paket 4: Mal Alımı (Bilgi İşlem)
-      [
-        {
-          ad: 'Masaüstü İş İstasyonu Bilgisayar Seti (i7 14700, 32GB RAM, 1TB SSD)',
-          ozelligi: 'Kurumsal kullanım için yüksek performanslı masaüstü bilgisayar kasası ve donanım aksesuarları',
-          tip: 'Mal',
-          birim: 'Set',
-          miktar: 6,
-          kdv: 20,
-          tkod: '255.02.01.01',
-          f1: 48500,
-          f2: 51200,
-          f3: 46800
-        },
-        {
-          ad: '27 inç IPS QHD Profesyonel Pivot Monitör',
-          ozelligi: 'Pivot özellikli, HDMI ve DisplayPort girişli IPS panel monitör',
-          tip: 'Mal',
-          birim: 'Adet',
-          miktar: 6,
-          kdv: 20,
-          tkod: '255.02.01.02',
-          f1: 9200,
-          f2: 9800,
-          f3: 8750
-        }
-      ],
-      // Paket 5: Hizmet Alımı (Tıbbi Cihaz Kalibrasyon)
-      [
-        {
-          ad: 'Defibrilatör ve EKG Cihazları Güvenlik ve Enerji Kalibrasyonu',
-          ozelligi: 'TÜRKAK akreditasyonlu kuruluş tarafından sertifikalı kalibrasyon ölçüm hizmeti',
-          tip: 'Hizmet',
-          birim: 'Adet',
-          miktar: 15,
-          kdv: 20,
-          tkod: '150.08.04.01',
-          f1: 2200,
-          f2: 2450,
-          f3: 2050
-        },
-        {
-          ad: 'Hasta Başı Monitörleri NIBP, SpO2 ve Sıcaklık Kalibrasyonu',
-          ozelligi: 'Hayati parametre ölçüm sensörleri doğrulama ve periyodik kalibrasyon hizmeti',
-          tip: 'Hizmet',
-          birim: 'Adet',
-          miktar: 20,
-          kdv: 20,
-          tkod: '150.08.04.02',
-          f1: 1850,
-          f2: 2100,
-          f3: 1750
-        }
+        { ad: '60x60 Taşyünü Asma Tavan', ozelligi: 'Akustik', tip: 'Yapım İşi', birim: 'm²', miktar: 180, kdv: 20, tkod: '150.07.01.01', f1: 420, f2: 450, f3: 390 },
+        { ad: 'İç Cephe Silikonlu Boya', ozelligi: 'Çift kat astar', tip: 'Yapım İşi', birim: 'm²', miktar: 350, kdv: 20, tkod: '150.07.02.01', f1: 180, f2: 200, f3: 165 },
+        { ad: 'Kaymaz Zemin Seramiği', ozelligi: 'Porselen', tip: 'Yapım İşi', birim: 'm²', miktar: 75, kdv: 20, tkod: '150.07.03.01', f1: 650, f2: 720, f3: 610 }
       ]
     ]
 
     let enrichedCount = 0
 
-    // Dosyaları aç veya güncelle
+    // 3 Dosyayı sıfırdan oluştur: mal, hizmet, yapim_isi
     for (let i = 0; i < predefinedDosyalar.length; i++) {
       const predef = predefinedDosyalar[i]
       const pkg = samplePackages[i]
 
-      // Dosya var mı kontrol et
-      const exDosya = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT id FROM DATA_TeminDosyasi WHERE temin_no = ? LIMIT 1',
-        [predef.temin_no]
+      // Dosya Ekle
+      const insRes = await window.electron.ipcRenderer.invoke(
+        'db:run',
+        `INSERT INTO DATA_TeminDosyasi (
+          temin_no, konu, isin_aciklamasi, tur, birim_id, ihtiyac_yeri, butce_kodu, butce_yili, butce_tipi, 
+          ihale_sekli, ihale_tipi, durum_asama_id, status, is_deleted, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2, 'devam_ediyor', 0, datetime('now'), datetime('now'))`,
+        [
+          predef.temin_no,
+          predef.konu,
+          predef.isin_aciklamasi,
+          predef.tur,
+          predef.birim_id,
+          predef.ihtiyac_yeri,
+          predef.butce_kodu,
+          predef.butce_yili,
+          predef.butce_tipi,
+          predef.ihale_sekli,
+          predef.ihale_tipi
+        ]
       )
+      const dosyaId = Number(insRes.lastInsertRowid)
 
-      let dosyaId: number
-
-      if (exDosya.success && exDosya.data && exDosya.data.length > 0) {
-        dosyaId = exDosya.data[0].id
-        await window.electron.ipcRenderer.invoke(
+      // Kalemleri ekle
+      const dosyaKalemIds: number[] = []
+      for (const item of pkg) {
+        const kRes = await window.electron.ipcRenderer.invoke(
           'db:run',
-          `UPDATE DATA_TeminDosyasi SET 
-            konu = ?, isin_aciklamasi = ?, tur = ?, birim_id = ?, ihtiyac_yeri = ?, butce_kodu = ?, 
-            butce_yili = ?, butce_tipi = ?, ihale_sekli = ?, ihale_tipi = ?, durum_asama_id = 2, status = 'devam_ediyor'
-          WHERE id = ?`,
-          [
-            predef.konu,
-            predef.isin_aciklamasi,
-            predef.tur,
-            predef.birim_id,
-            predef.ihtiyac_yeri,
-            predef.butce_kodu,
-            predef.butce_yili,
-            predef.butce_tipi,
-            predef.ihale_sekli,
-            predef.ihale_tipi,
-            dosyaId
-          ]
+          `INSERT INTO DATA_TeminKalem (
+            temin_dosya_id, kalem_adi, tipi, birim, miktar, kdv_orani, tasinir_kodu, aciklama
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod, item.ozelligi || item.ad]
         )
-      } else {
-        const insRes = await window.electron.ipcRenderer.invoke(
-          'db:run',
-          `INSERT INTO DATA_TeminDosyasi (
-            temin_no, konu, isin_aciklamasi, tur, birim_id, ihtiyac_yeri, butce_kodu, butce_yili, butce_tipi, 
-            ihale_sekli, ihale_tipi, durum_asama_id, status, is_deleted, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2, 'devam_ediyor', 0, datetime('now'), datetime('now'))`,
-          [
-            predef.temin_no,
-            predef.konu,
-            predef.isin_aciklamasi,
-            predef.tur,
-            predef.birim_id,
-            predef.ihtiyac_yeri,
-            predef.butce_kodu,
-            predef.butce_yili,
-            predef.butce_tipi,
-            predef.ihale_sekli,
-            predef.ihale_tipi
-          ]
-        )
-        dosyaId = Number(insRes.lastInsertRowid)
-      }
-
-      // Kalemleri kontrol et ve ekle
-      const existingKalemler = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT id, kalem_adi FROM DATA_TeminKalem WHERE temin_dosya_id = ?',
-        [dosyaId]
-      )
-
-      let dosyaKalemIds: number[] = []
-
-      if (!existingKalemler.success || !existingKalemler.data || existingKalemler.data.length === 0) {
-        for (const item of pkg) {
-          const kRes = await window.electron.ipcRenderer.invoke(
-            'db:run',
-            `INSERT INTO DATA_TeminKalem (
-              temin_dosya_id, kalem_adi, tipi, birim, miktar, kdv_orani, tasinir_kodu, aciklama
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod, item.ozelligi || item.ad]
-          )
-          if (kRes.success && kRes.lastInsertRowid) {
-            dosyaKalemIds.push(Number(kRes.lastInsertRowid))
-          }
-        }
-      } else {
-        dosyaKalemIds = existingKalemler.data.map((r: { id: number }) => r.id)
-        // Mevcut kalemlerin açıklama (özelliği) alanlarını zenginleştir
-        for (let ki = 0; ki < existingKalemler.data.length; ki++) {
-          const ek = existingKalemler.data[ki]
-          const matchingPkgItem = pkg[ki] || pkg.find((p) => p.ad === ek.kalem_adi)
-          if (matchingPkgItem?.ozelligi) {
-            await window.electron.ipcRenderer.invoke(
-              'db:run',
-              'UPDATE DATA_TeminKalem SET aciklama = ? WHERE id = ? AND (aciklama IS NULL OR aciklama = "" OR aciklama = kalem_adi)',
-              [matchingPkgItem.ozelligi, ek.id]
-            )
-          }
+        if (kRes.success && kRes.lastInsertRowid) {
+          dosyaKalemIds.push(Number(kRes.lastInsertRowid))
         }
       }
 
-      // İstekli Firmaları Bağla
-      const existingTeminFirmalar = await window.electron.ipcRenderer.invoke(
+      // İstekli Firmaları Bağla (3 firma seçilir)
+      const selectedFirmaIds = [
+        firmaIds[i % firmaIds.length],
+        firmaIds[(i + 1) % firmaIds.length],
+        firmaIds[(i + 2) % firmaIds.length]
+      ].filter(Boolean)
+
+      const firmalarData = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT id, firma_id FROM DATA_TeminFirma WHERE temin_dosya_id = ?',
-        [dosyaId]
+        `SELECT id, unvan, vergi_no, telefon, email, ilgili_adi FROM TANIM_Firma WHERE id IN (${selectedFirmaIds.join(',')})`
       )
 
+      const fDataList = firmalarData.data || []
       const teminFirmaIds: { id: number; firma_id: number; teklifTotal: number }[] = []
 
-      if (!existingTeminFirmalar.success || !existingTeminFirmalar.data || existingTeminFirmalar.data.length === 0) {
-        // 3 istekli firma seç (dosyaya göre döngülü firma seçimi)
-        const selectedFirmalar = [
-          firmaIds[i % firmaIds.length],
-          firmaIds[(i + 1) % firmaIds.length],
-          firmaIds[(i + 2) % firmaIds.length]
-        ].filter(Boolean)
-
-        const firmalarData = await window.electron.ipcRenderer.invoke(
-          'db:query',
-          `SELECT id, unvan, vergi_no, telefon, email, ilgili_adi FROM TANIM_Firma WHERE id IN (${selectedFirmalar.join(',')})`
+      for (let fi = 0; fi < fDataList.length; fi++) {
+        const f = fDataList[fi]
+        const isWinner = fi === 2 // 3. firma en avantajlı teklifi verecek
+        const fRes = await window.electron.ipcRenderer.invoke(
+          'db:run',
+          `INSERT INTO DATA_TeminFirma (
+            temin_dosya_id, firma_id, unvan, vergi_no, ilgili_kisi, telefon, email, davet_edildi_mi, teklif_verdi_mi, kazandi_mi, teklif_durumu, para_birimi
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, 'Teklif Alındı', 'TRY')`,
+          [dosyaId, f.id, f.unvan, f.vergi_no, f.ilgili_adi, f.telefon, f.email, isWinner ? 1 : 0]
         )
 
-        const fDataList = firmalarData.data || []
-
-        for (let fi = 0; fi < fDataList.length; fi++) {
-          const f = fDataList[fi]
-          const isWinner = fi === 2 // 3. firma en düşük teklifi versin
-          const fRes = await window.electron.ipcRenderer.invoke(
-            'db:run',
-            `INSERT INTO DATA_TeminFirma (
-              temin_dosya_id, firma_id, unvan, vergi_no, ilgili_kisi, telefon, email, davet_edildi_mi, teklif_verdi_mi, kazandi_mi, teklif_durumu, para_birimi
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?, 'Teklif Alındı', 'TRY')`,
-            [dosyaId, f.id, f.unvan, f.vergi_no, f.ilgili_adi, f.telefon, f.email, isWinner ? 1 : 0]
-          )
-
-          if (fRes.success && fRes.lastInsertRowid) {
-            teminFirmaIds.push({
-              id: Number(fRes.lastInsertRowid),
-              firma_id: f.id,
-              teklifTotal: 0
-            })
-          }
-        }
-      } else {
-        teminFirmaIds.push(
-          ...existingTeminFirmalar.data.map((r: { id: number; firma_id: number }) => ({
-            id: r.id,
-            firma_id: r.firma_id,
+        if (fRes.success && fRes.lastInsertRowid) {
+          teminFirmaIds.push({
+            id: Number(fRes.lastInsertRowid),
+            firma_id: f.id,
             teklifTotal: 0
-          }))
-        )
+          })
+        }
       }
 
       // Teklifleri Hesapla ve Doldur
@@ -1561,14 +1384,9 @@ export const devSeedService = {
 
       for (let ki = 0; ki < dosyaKalemIds.length; ki++) {
         const dKalemId = dosyaKalemIds[ki]
-        const sampleItem = pkg[ki % pkg.length]
-        const miktar = sampleItem ? sampleItem.miktar : 1
-
-        const prices = [
-          sampleItem ? sampleItem.f1 : 100,
-          sampleItem ? sampleItem.f2 : 110,
-          sampleItem ? sampleItem.f3 : 95
-        ]
+        const sampleItem = pkg[ki]
+        const miktar = sampleItem.miktar
+        const prices = [sampleItem.f1, sampleItem.f2, sampleItem.f3]
 
         approxCostTotal += ((prices[0] + prices[1] + prices[2]) / 3) * miktar
         winningTotal += prices[2] * miktar
@@ -1578,21 +1396,13 @@ export const devSeedService = {
           const unitPrice = prices[fi % prices.length]
           tf.teklifTotal += unitPrice * miktar
 
-          const exTeklif = await window.electron.ipcRenderer.invoke(
-            'db:query',
-            'SELECT id FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ? AND temin_kalem_id = ? AND temin_firma_id = ?',
-            [dosyaId, dKalemId, tf.id]
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            `INSERT INTO DATA_TeminKalemTeklif (
+              temin_dosya_id, temin_kalem_id, temin_firma_id, birim_fiyat, kdv_tutari, teklif_verildi_mi
+            ) VALUES (?, ?, ?, ?, ?, 1)`,
+            [dosyaId, dKalemId, tf.id, unitPrice, unitPrice * 0.2]
           )
-
-          if (!exTeklif.success || !exTeklif.data || exTeklif.data.length === 0) {
-            await window.electron.ipcRenderer.invoke(
-              'db:run',
-              `INSERT INTO DATA_TeminKalemTeklif (
-                temin_dosya_id, temin_kalem_id, temin_firma_id, birim_fiyat, kdv_tutari, teklif_verildi_mi
-              ) VALUES (?, ?, ?, ?, ?, 1)`,
-              [dosyaId, dKalemId, tf.id, unitPrice, unitPrice * 0.2]
-            )
-          }
         }
       }
 
@@ -1608,74 +1418,30 @@ export const devSeedService = {
       }
 
       // Komisyon Üyelerini Ata
-      const existingKomisyon = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT id FROM DATA_TeminKomisyon WHERE temin_dosya_id = ?',
-        [dosyaId]
-      )
+      const p1 = personelIds[2] || 1
+      const p2 = personelIds[3] || 2
+      const p3 = personelIds[4] || 3
 
-      if (!existingKomisyon.success || !existingKomisyon.data || existingKomisyon.data.length === 0) {
-        const p1 = personelIds[2] || 1
-        const p2 = personelIds[3] || 2
-        const p3 = personelIds[4] || 3
+      const komisyonMembers = [
+        { kom_id: 1, p_id: p1, ad: 'Ayşe Kaya Demir', unvan: 'Şube Müdürü', gorev: 'Komisyon Başkanı', rol: 'Asil' },
+        { kom_id: 1, p_id: p2, ad: 'Mustafa Çelik', unvan: 'Mühendis', gorev: 'Üye', rol: 'Asil' },
+        { kom_id: 1, p_id: p3, ad: 'Fatma Şahin Korkmaz', unvan: 'Uzman', gorev: 'Üye', rol: 'Asil' },
+        { kom_id: 2, p_id: personelIds[5] || 4, ad: 'Emre Karaca', unvan: 'Biyomedikal Mühendisi', gorev: 'Muayene Kabul Başkanı', rol: 'Asil' },
+        { kom_id: 2, p_id: personelIds[6] || 5, ad: 'Zeynep Aktaş', unvan: 'Taşınır Kayıt Yetkilisi', gorev: 'Üye', rol: 'Asil' }
+      ]
 
-        const komisyonMembers = [
-          {
-            kom_id: 1,
-            p_id: p1,
-            ad: 'Ayşe Kaya Demir',
-            unvan: 'Şube Müdürü',
-            gorev: 'Komisyon Başkanı',
-            rol: 'Asil'
-          },
-          {
-            kom_id: 1,
-            p_id: p2,
-            ad: 'Mustafa Çelik',
-            unvan: 'Mühendis',
-            gorev: 'Üye',
-            rol: 'Asil'
-          },
-          {
-            kom_id: 1,
-            p_id: p3,
-            ad: 'Fatma Şahin Korkmaz',
-            unvan: 'Uzman',
-            gorev: 'Üye',
-            rol: 'Asil'
-          },
-          {
-            kom_id: 2,
-            p_id: personelIds[5] || 4,
-            ad: 'Emre Karaca',
-            unvan: 'Biyomedikal Mühendisi',
-            gorev: 'Muayene Kabul Başkanı',
-            rol: 'Asil'
-          },
-          {
-            kom_id: 2,
-            p_id: personelIds[6] || 5,
-            ad: 'Zeynep Aktaş',
-            unvan: 'Taşınır Kayıt Yetkilisi',
-            gorev: 'Üye',
-            rol: 'Asil'
-          }
-        ]
-
-        for (const km of komisyonMembers) {
-          await window.electron.ipcRenderer.invoke(
-            'db:run',
-            `INSERT INTO DATA_TeminKomisyon (
-              temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [dosyaId, km.kom_id, km.p_id, km.ad, km.unvan, km.gorev, km.rol]
-          )
-        }
+      for (const km of komisyonMembers) {
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          `INSERT INTO DATA_TeminKomisyon (
+            temin_dosya_id, komisyon_id, personel_id, ad_soyad, unvan, gorev, rol
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [dosyaId, km.kom_id, km.p_id, km.ad, km.unvan, km.gorev, km.rol]
+        )
       }
 
       // Dosya Maliyet, Yüklenici ve Personel Bilgilerini Güncelle
-      const winningFirmaId =
-        teminFirmaIds.length > 2 ? teminFirmaIds[2].firma_id : firmaIds[0] || 1
+      const winningFirmaId = teminFirmaIds.length > 2 ? teminFirmaIds[2].firma_id : (firmaIds[0] || 1)
       const harcamaYetkilisiId = personelIds[1] || personelIds[0] || 1
       const gerceklestirmeId = personelIds[2] || 2
       const irtibatId = personelIds[9] || personelIds[3] || 1

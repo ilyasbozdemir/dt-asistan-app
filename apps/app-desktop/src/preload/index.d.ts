@@ -17,6 +17,8 @@ declare global {
         provider: string,
         apiKey: string
       ) => Promise<{ success: boolean; data?: string; error?: string }>
+      getAppVersion?: () => Promise<string>
+      setDevVersion?: (mode: boolean, version: string) => Promise<void>
     }
   }
 }

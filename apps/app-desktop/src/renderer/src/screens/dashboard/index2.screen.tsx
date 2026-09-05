@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  BookOpen,
   Bot,
   Building2,
   CheckCircle2,
@@ -39,12 +38,12 @@ import { useDosyalarHooks } from "../dosyalar/dosyalar.hooks";
 import { useAyarlarHooks } from "../ayarlar/ayarlar.hooks";
 import { logActivity } from "../../utils/logger";
 import { formatDosyaNo } from "../../utils/formatDosyaNo";
-import { Button } from "../../components/ui/Button";
 import { AITextGeneratorModal } from "../../components/ui/AITextGeneratorModal";
 import { TakipScreen } from "../system/TakipScreen";
 import { cn } from "../../utils/cn";
 
 export default function DashboardScreenV2(): React.JSX.Element {
+  const navigate = useNavigate();
   const {
     institutionName,
     limitType,
@@ -58,7 +57,7 @@ export default function DashboardScreenV2(): React.JSX.Element {
     adminUsername,
   } = useSettingsStore();
 
-  const { activeDosyaId } = useWorkspaceStore();
+  const { activeDosyaId, setActiveDosyaId } = useWorkspaceStore();
   const { stats, isLoading } = useDashboardStats();
   const { announcements, isLoading: isAnnouncementsLoading } =
     useAnnouncements();
@@ -948,10 +947,16 @@ export default function DashboardScreenV2(): React.JSX.Element {
                     const asamaInfo = getAsamaDetails(
                       (dosya as any).durum_asama_id || 1,
                     );
+                    const handleOpenThisDosya = () => {
+                      setActiveDosyaId(dosya.id);
+                      navigate({ to: "/takip" });
+                    };
+
                     return (
                       <div
                         key={dosya.id}
-                        className="p-4 rounded-2xl bg-slate-50 hover:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 hover:border-blue-400 dark:hover:border-blue-600 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group shadow-xs hover:shadow-sm"
+                        onClick={handleOpenThisDosya}
+                        className="p-4 rounded-2xl bg-slate-50 hover:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 hover:border-blue-400 dark:hover:border-blue-600 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group shadow-xs hover:shadow-sm cursor-pointer"
                       >
                         <div className="space-y-1.5 max-w-xl">
                           <div className="flex items-center gap-2">
@@ -1001,7 +1006,9 @@ export default function DashboardScreenV2(): React.JSX.Element {
 
                           <div className="flex items-center gap-1.5">
                             <button
-                              onClick={() => {
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSelectedFileForAI(dosya);
                                 setShowAIModal(true);
                               }}
@@ -1010,15 +1017,17 @@ export default function DashboardScreenV2(): React.JSX.Element {
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                             </button>
-                            <Link to="/takip">
-                              <button
-                                type="button"
-                                className="text-xs font-bold py-1.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer flex items-center gap-1 transition-colors"
-                              >
-                                <span>Aç</span>
-                                <ArrowRight className="w-3 h-3" />
-                              </button>
-                            </Link>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenThisDosya();
+                              }}
+                              className="text-xs font-bold py-1.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer flex items-center gap-1 transition-colors group-hover:border-blue-300 dark:group-hover:border-blue-700"
+                            >
+                              <span>Aç</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                       </div>

@@ -129,8 +129,8 @@ export default function AyarlarScreen(): React.ReactNode {
         const ver = settings.devUpdateVersion || ''
         setDevUpdateTestMode(mode)
         setDevUpdateVersion(ver)
-        if ((window as any).api?.setDevVersion) {
-          ;(window as any).api.setDevVersion(mode, ver)
+        if (window.api?.setDevVersion) {
+          window.api.setDevVersion(mode, ver)
           window.dispatchEvent(new Event('app-version-changed'))
           window.electron?.ipcRenderer.invoke('updater:check')
         }
@@ -330,8 +330,8 @@ export default function AyarlarScreen(): React.ReactNode {
       } else if (tab === 'developer') {
         dataToSave.devUpdateTestMode = devUpdateTestMode ? 'true' : 'false'
         dataToSave.devUpdateVersion = devUpdateVersion
-        if ((window as any).api?.setDevVersion) {
-          ;(window as any).api.setDevVersion(devUpdateTestMode, devUpdateVersion)
+        if (window.api?.setDevVersion) {
+          window.api.setDevVersion(devUpdateTestMode, devUpdateVersion)
           window.dispatchEvent(new Event('app-version-changed'))
           window.electron?.ipcRenderer.invoke('updater:check')
         }

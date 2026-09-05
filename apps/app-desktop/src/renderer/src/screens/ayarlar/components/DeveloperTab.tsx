@@ -5,16 +5,14 @@ import {
   Database,
   FileSpreadsheet,
   Loader2,
-  Package,
   RefreshCw,
-  Sparkles,
-  Users
+  Sparkles
 } from 'lucide-react'
 import { devSeedService, SeedResult } from '../../../services/devSeedService'
 import { useQueryClient } from '@tanstack/react-query'
 
 interface DeveloperTabProps {
-  isPackaged: boolean
+  isPackaged?: boolean
   devUpdateTestMode: boolean
   setDevUpdateTestMode: (val: boolean) => void
   devUpdateVersion: string
@@ -23,7 +21,6 @@ interface DeveloperTabProps {
 }
 
 export const DeveloperTab: React.FC<DeveloperTabProps> = ({
-  isPackaged,
   devUpdateTestMode,
   setDevUpdateTestMode,
   devUpdateVersion,
@@ -34,11 +31,11 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
   const [seeding, setSeeding] = useState(false)
   const [seedResult, setSeedResult] = useState<SeedResult | null>(null)
 
-  const handleSeedAll = async (): Promise<void> => {
+  const handleSeedAll = async (cleanFirst = true): Promise<void> => {
     setSeeding(true)
     setSeedResult(null)
     try {
-      const result = await devSeedService.seedAll()
+      const result = await devSeedService.seedAll(cleanFirst)
       setSeedResult(result)
       queryClient.clear()
     } catch (err: any) {
@@ -62,7 +59,7 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
       const birimIds = await devSeedService.seedBirimler(pIds)
       const fIds = await devSeedService.seedFirmalar()
       const kIds = await devSeedService.seedKalemler()
-      await devSeedService.seedKomisyonlarVeAmbarlar(pIds)
+      await devSeedService.seedKomisyonlarVeAmbarlar()
 
       setSeedResult({
         success: true,
@@ -120,9 +117,9 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
     <div className="space-y-6">
       {/* 1. TEST VERİLERİ VE SEEDER BÖLÜMÜ */}
       <div className="bg-gradient-to-br from-indigo-50/70 via-blue-50/40 to-slate-50 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 border border-indigo-100/80 dark:border-indigo-900/40 rounded-2xl p-5 shadow-xs">
-        <div className="flex items-center justify-between pb-3 border-b border-indigo-100/60 dark:border-indigo-900/40">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-indigo-100/60 dark:border-indigo-900/40 gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-xs">
+            <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-xs shrink-0">
               <Database className="w-5 h-5" />
             </div>
             <div>
@@ -133,28 +130,31 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
                 </span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Kurum, Birim, Personel, Firma, Kalemler ve mevcut 3 açık Doğrudan Temin dosyasını gerçekçi verilerle doldurun.
+                Önceki test verilerini temizleyip sıfırdan tüm Kurum, Birim, Personel, Firma, Kalem ve 5 adet komple Dosya sürecini yükler.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={handleSeedAll}
-            disabled={seeding}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 rounded-xl shadow-md transition-all cursor-pointer"
-          >
-            {seeding ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Veriler Yazılıyor...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                <span>Tek Tıkla Tümünü Doldur (Full Seed)</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleSeedAll(true)}
+              disabled={seeding}
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 rounded-xl shadow-md transition-all cursor-pointer"
+              title="Önceki tüm test kayıtlarını siler ve sıfırdan 5 tam süreç dosyası ile tohumlar"
+            >
+              {seeding ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Sıfırlanıyor & Yazılıyor...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Sıfırla & Baştan Tohumla (Clean Seed)</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Sonuç Bildirimi */}
@@ -273,8 +273,8 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
               onChange={(e) => {
                 const mode = e.target.checked
                 setDevUpdateTestMode(mode)
-                if ((window as any).api?.setDevVersion) {
-                  ;(window as any).api.setDevVersion(mode, devUpdateVersion)
+                if (window.api?.setDevVersion) {
+                  window.api.setDevVersion(mode, devUpdateVersion)
                   window.dispatchEvent(new Event('app-version-changed'))
                   window.electron?.ipcRenderer.invoke('updater:check')
                 }
@@ -299,8 +299,8 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
                 onChange={(e) => {
                   const ver = e.target.value
                   setDevUpdateVersion(ver)
-                  if ((window as any).api?.setDevVersion) {
-                    ;(window as any).api.setDevVersion(devUpdateTestMode, ver)
+                  if (window.api?.setDevVersion) {
+                    window.api.setDevVersion(devUpdateTestMode, ver)
                     window.dispatchEvent(new Event('app-version-changed'))
                     window.electron?.ipcRenderer.invoke('updater:check')
                   }
