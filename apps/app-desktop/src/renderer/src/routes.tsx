@@ -13,6 +13,7 @@ import FirmalarScreen from "./screens/firmalar/index.screen";
 import { MevzuatScreen } from "./screens/system/MevzuatScreen";
 import ChangelogScreen from "./screens/system/ChangelogScreen";
 import ImportScreen from "./screens/system/ImportScreen";
+import HizliDosyaEkleScreen from "./screens/system/HizliDosyaEkle.screen";
 import YardimScreen from "./screens/system/YardimScreen";
 import AyarlarScreen from "./screens/ayarlar/index.screen";
 import TemaScreen from "./screens/ayarlar/TemaScreen";
@@ -165,6 +166,12 @@ const importRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: APP_ROUTES.IMPORT,
   component: ImportScreen,
+});
+
+const hizliDosyaEkleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: APP_ROUTES.HIZLI_DOSYA_EKLE,
+  component: HizliDosyaEkleScreen,
 });
 
 const ayarlarRoute = createRoute({
@@ -327,6 +334,7 @@ const routeTree = rootRoute.addChildren([
   mevzuatRoute,
   changelogRoute,
   importRoute,
+  hizliDosyaEkleRoute,
   ayarlarRoute,
   temaRoute,
   birimlerRoute,

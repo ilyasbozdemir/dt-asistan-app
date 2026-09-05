@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { useSettingsStore } from './settingsStore'
+import { APP_ROUTES } from '@renderer/constants/routeConstants'
 
 export interface TabItem {
   path: string
@@ -19,18 +20,18 @@ interface TabState {
 
 export function getTabLabel(fullPath: string): string {
   const path = fullPath.split('?')[0]
-  if (path === '/') return 'Gösterge Paneli'
-  if (path === '/dosyalar/yeni') return 'Yeni Doğrudan Temin Dosyası'
-  if (path.startsWith('/dosyalar')) return 'Doğrudan Temin'
-  if (path.startsWith('/firmalar')) return 'Firmalar'
-  if (path.startsWith('/personel')) return 'Personel Yönetimi'
-  if (path.startsWith('/mevzuat')) return 'Mevzuat & Limitler'
-  if (path.startsWith('/ayarlar')) return 'Ayarlar'
-  if (path.startsWith('/birimler')) return 'Birim Yönetimi'
-  if (path.startsWith('/ambar')) return 'Ambar Tanımları'
-  if (path.startsWith('/malzemeler/yeni')) return 'Yeni Kayıt (Mal/Hizmet/Yapım İşi)'
-  if (path.startsWith('/malzemeler')) return 'Kayıtlı Mal / Hizmet / Yapım İşleri Listesi'
-  if (path.startsWith('/kurum')) {
+  if (path === APP_ROUTES.DASHBOARD) return 'Gösterge Paneli'
+  if (path === APP_ROUTES.YENI_DOSYA) return 'Yeni Doğrudan Temin Dosyası'
+  if (path.startsWith(APP_ROUTES.DOSYALAR)) return 'Doğrudan Temin'
+  if (path.startsWith(APP_ROUTES.FIRMALAR)) return 'Firmalar'
+  if (path.startsWith(APP_ROUTES.PERSONEL)) return 'Personel Yönetimi'
+  if (path.startsWith(APP_ROUTES.MEVZUAT)) return 'Mevzuat & Limitler'
+  if (path.startsWith(APP_ROUTES.AYARLAR)) return 'Ayarlar'
+  if (path.startsWith(APP_ROUTES.BIRIMLER)) return 'Birim Yönetimi'
+  if (path.startsWith(APP_ROUTES.AMBAR)) return 'Ambar Tanımları'
+  if (path.startsWith(APP_ROUTES.YENI_MALZEME)) return 'Yeni Kayıt (Mal/Hizmet/Yapım İşi)'
+  if (path.startsWith(APP_ROUTES.MALZEMELER)) return 'Kayıtlı Mal / Hizmet / Yapım İşleri Listesi'
+  if (path.startsWith(APP_ROUTES.KURUM)) {
     const query = fullPath.split('?')[1] || ''
     const searchParams = new URLSearchParams(query)
     const tab = searchParams.get('tab')
@@ -39,24 +40,24 @@ export function getTabLabel(fullPath: string): string {
     if (tab === 'logolar') return 'Kurum Logoları'
     return 'İdari Bilgiler'
   }
-  if (path.startsWith('/olcubirimleri')) return 'Ölçü Birimleri'
-  if (path.startsWith('/profil')) return 'Kullanıcı Profili'
-  if (path.startsWith('/dosya/hazirlik-ve-ihtiyac')) return '1. İhtiyaç Listesi & Maliyet & Onay'
-  if (path.startsWith('/dosya/piyasa-fiyat-arastirmasi'))
+  if (path.startsWith(APP_ROUTES.OLCU_BIRIMLERI)) return 'Ölçü Birimleri'
+  if (path.startsWith(APP_ROUTES.PROFIL)) return 'Kullanıcı Profili'
+  if (path.startsWith(APP_ROUTES.HAZIRLIK_VE_IHTIYAC)) return '1. İhtiyaç Listesi & Maliyet & Onay'
+  if (path.startsWith(APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI))
     return '2. Teklifler & Piyasa Fiyat Araştırması'
-  if (path.startsWith('/dosya/siparis-ve-sozlesme')) return '3. Sipariş & Sözleşme'
-  if (path.startsWith('/dosya/kabul-ve-odeme')) return '4. Muayene & Kabul & Ödeme İşlemleri'
-  if (path.startsWith('/dosya/klasor-ve-kapaklar')) return '5. Klasör & Kapaklar'
+  if (path.startsWith(APP_ROUTES.SIPARIS_VE_SOZLESME)) return '3. Sipariş & Sözleşme'
+  if (path.startsWith(APP_ROUTES.KABUL_VE_ODEME)) return '4. Muayene & Kabul & Ödeme İşlemleri'
+  if (path.startsWith(APP_ROUTES.KLASOR_VE_KAPAKLAR)) return '5. Klasör & Kapaklar'
   if (path.startsWith('/dosya/malzemeler/liste')) return 'İhtiyaç Listesi'
   if (path.startsWith('/dosya/malzemeler/son-alim')) return 'Son Alım Fiyat Cetveli'
   if (path.startsWith('/dosya/luzum/talep-formu')) return 'İhtiyaç Talep Formu'
-  if (path.startsWith('/dosya/luzum/belge')) return '"dosyaKonusu": "LÜZUM MÜZEKKERESİ",'
+  if (path.startsWith('/dosya/luzum/belge')) return 'Lüzum Müzekkeresi'
   if (path.startsWith('/dosya/luzum/onay-eki')) return 'Onay Eki'
   if (path.startsWith('/dosya/onay/butce-sorgu')) return 'Bütçe Sorgusu'
   if (path.startsWith('/dosya/komisyon/fiyat-arastirma')) return 'Fiyat Araştırma Komisyonu'
   if (path.startsWith('/dosya/komisyon/fiyat-muayene')) return 'Fiyat Araştırma & Muayene'
   if (path.startsWith('/dosya/firmalar-maliyet/istekliler')) return 'İstekli Firmalar'
-  if (path.startsWith('/dosya/firmalar-maliyet/yaklasik')) return 'Yaklaşık Maliyet'
+  if (path.startsWith(APP_ROUTES.YAKLASIK_MALIYET)) return 'Yaklaşık Maliyet'
   if (path.startsWith('/dosya/firmalar-maliyet/tutanak')) return 'Piyasa Araştırma Tutanağı'
   if (path.startsWith('/dosya/komisyon/onay-eki')) return 'Komisyon Atama Onay Eki'
   if (path.startsWith('/dosya/onay/dt-onay')) return 'Doğrudan Temin Onay Belgesi'
@@ -65,33 +66,36 @@ export function getTabLabel(fullPath: string): string {
   if (path.startsWith('/dosya/luzum/teslim-tesellum')) return 'Teslim Tesellüm'
   if (path.startsWith('/dosya/harcama/talimat')) return 'Harcama Talimatı'
   if (path.startsWith('/dosya/harcama/pusula')) return 'Harcama Pusulası'
-  if (path.startsWith('/dosya/cikti-merkezi')) return 'Çıktı & Üretim Merkezi'
-  if (path.startsWith('/dosya/veritabani')) return 'Dosya Veritabanı Gezgini'
-  if (path.startsWith('/hakedis')) return 'Hakediş & Süreç Yönetimi'
-  if (path.startsWith('/dosya')) return 'Dosya Detayları'
-  if (path.startsWith('/takip')) return 'Takip & Durum'
-  if (path.startsWith('/raporlar')) return 'Raporlar'
-  if (path.startsWith('/tema')) return 'Tema Ayarları'
-  if (path.startsWith('/tasinirkod')) return 'Taşınır Kodları'
-  if (path.startsWith('/okaskod')) return 'OKAS Kodları'
-  if (path.startsWith('/sablonlar')) return 'Şablon Yönetimi'
-  if (path.startsWith('/degiskenler')) return 'Şablon Değişkenleri'
-  if (path.startsWith('/komisyonlar/detay')) return 'Komisyon Detayı'
-  if (path.startsWith('/komisyonlar')) return 'Komisyon Yönetimi'
-  if (path.startsWith('/komisyon-gorevleri')) return 'Görev Tanımları'
-  if (path.startsWith('/taslakyonetim')) return 'Süreç Taslakları'
-  if (path.startsWith('/changelog')) return 'Sürüm Notları'
-  if (path.startsWith('/yardim')) return 'Yardım & Kılavuzlar'
-  if (path.startsWith('/import')) return 'Toplu Veri İçe Aktarma'
-  if (path.startsWith('/hizli-dosya-ekle')) return 'Hızlı Dosya Ekle'
-  if (path.startsWith('/cikti-merkezi')) return 'Çıktı & Üretim Merkezi'
-  if (path.startsWith('/surec-akisi')) return 'Doğrudan Temin'
+  if (path.startsWith(APP_ROUTES.DOSYA_CIKTI_MERKEZI)) return 'Çıktı & Üretim Merkezi'
+  if (path.startsWith(APP_ROUTES.DOSYA_VERITABANI)) return 'Dosya Veritabanı Gezgini'
+  if (path.startsWith(APP_ROUTES.FATURA_VE_IRSALIYE)) return 'Fatura & İrsaliye'
+  if (path.startsWith(APP_ROUTES.IMZALI_BELGELER)) return 'İmzalı Belgeler'
+  if (path.startsWith(APP_ROUTES.HAKEDIS)) return 'Hakediş & Süreç Yönetimi'
+  if (path.startsWith(APP_ROUTES.HARCAMA_MERKEZI)) return 'Harcama Merkezi & İhale'
+  if (path.startsWith(APP_ROUTES.DOSYA_DETAY)) return 'Dosya Detayları'
+  if (path.startsWith(APP_ROUTES.TAKIP)) return 'Takip & Durum'
+  if (path.startsWith(APP_ROUTES.RAPORLAR)) return 'Raporlar'
+  if (path.startsWith(APP_ROUTES.TEMA)) return 'Tema Ayarları'
+  if (path.startsWith(APP_ROUTES.TASINIR_KOD)) return 'Taşınır Kodları'
+  if (path.startsWith(APP_ROUTES.OKAS_KOD)) return 'OKAS Kodları'
+  if (path.startsWith(APP_ROUTES.SABLONLAR)) return 'Şablon Yönetimi'
+  if (path.startsWith(APP_ROUTES.DEGISKENLER)) return 'Şablon Değişkenleri'
+  if (path.startsWith(APP_ROUTES.KOMISYON_DETAY)) return 'Komisyon Detayı'
+  if (path.startsWith(APP_ROUTES.KOMISYONLAR)) return 'Komisyon Yönetimi'
+  if (path.startsWith(APP_ROUTES.KOMISYON_GOREVLERI)) return 'Görev Tanımları'
+  if (path.startsWith(APP_ROUTES.TASLAK_YONETIM)) return 'Süreç Taslakları'
+  if (path.startsWith(APP_ROUTES.CHANGELOG)) return 'Sürüm Notları'
+  if (path.startsWith(APP_ROUTES.YARDIM)) return 'Yardım & Kılavuzlar'
+  if (path.startsWith(APP_ROUTES.IMPORT)) return 'Toplu Veri İçe Aktarma'
+  if (path.startsWith(APP_ROUTES.HIZLI_DOSYA_EKLE)) return 'Hızlı Dosya Ekle'
+  if (path.startsWith(APP_ROUTES.CIKTI_MERKEZI_DASHBOARD)) return 'Çıktı & Üretim Merkezi'
+  if (path.startsWith(APP_ROUTES.DT_SUREC_AKISI)) return 'Doğrudan Temin'
   return 'Yeni Sekme'
 }
 
 export const useTabStore = create<TabState>((set, get) => ({
-  tabs: [{ path: '/', label: 'Gösterge Paneli' }],
-  activeTabPath: '/',
+  tabs: [{ path: APP_ROUTES.DASHBOARD, label: 'Gösterge Paneli' }],
+  activeTabPath: APP_ROUTES.DASHBOARD,
 
   addTab: (path) => {
     if (!path || path.startsWith('/launcher') || path.startsWith('/lockscreen')) return
@@ -101,20 +105,24 @@ export const useTabStore = create<TabState>((set, get) => ({
     // Check if the new path belongs to the Kurum family
     const cleanPath = path.split('?')[0]
     const isKurumFamily = [
-      '/birimler',
-      '/personel',
-      '/komisyonlar',
-      '/komisyon-gorevleri',
-      '/kurum'
-    ].includes(cleanPath)
+      APP_ROUTES.BIRIMLER,
+      APP_ROUTES.PERSONEL,
+      APP_ROUTES.KOMISYONLAR,
+      APP_ROUTES.KOMISYON_GOREVLERI,
+      APP_ROUTES.KURUM
+    ].includes(cleanPath as any)
 
     if (isKurumFamily) {
       // Find if there is already a tab in the Kurum family
       const existingKurumIndex = tabs.findIndex((t) => {
         const tClean = t.path.split('?')[0]
-        return ['/birimler', '/personel', '/komisyonlar', '/komisyon-gorevleri', '/kurum'].includes(
-          tClean
-        )
+        return [
+          APP_ROUTES.BIRIMLER,
+          APP_ROUTES.PERSONEL,
+          APP_ROUTES.KOMISYONLAR,
+          APP_ROUTES.KOMISYON_GOREVLERI,
+          APP_ROUTES.KURUM
+        ].includes(tClean as any)
       })
 
       if (existingKurumIndex > -1) {
@@ -134,22 +142,22 @@ export const useTabStore = create<TabState>((set, get) => ({
 
     const { unifiedStepperMode } = useSettingsStore.getState()
     const isDosyaAsamasiPath = [
-      '/dosya/hazirlik-ve-ihtiyac',
-      '/dosya/piyasa-fiyat-arastirmasi',
-      '/dosya/siparis-ve-sozlesme',
-      '/dosya/kabul-ve-odeme',
-      '/dosya/klasor-ve-kapaklar'
+      APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
+      APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI,
+      APP_ROUTES.SIPARIS_VE_SOZLESME,
+      APP_ROUTES.KABUL_VE_ODEME,
+      APP_ROUTES.KLASOR_VE_KAPAKLAR
     ].some((p) => cleanPath.startsWith(p))
 
     if (unifiedStepperMode && isDosyaAsamasiPath) {
       const existingDosyaIndex = tabs.findIndex((t) => {
         const tClean = t.path.split('?')[0]
         return [
-          '/dosya/hazirlik-ve-ihtiyac',
-          '/dosya/piyasa-fiyat-arastirmasi',
-          '/dosya/siparis-ve-sozlesme',
-          '/dosya/kabul-ve-odeme',
-          '/dosya/klasor-ve-kapaklar'
+          APP_ROUTES.HAZIRLIK_VE_IHTIYAC,
+          APP_ROUTES.PIYASA_FIYAT_ARASTIRMASI,
+          APP_ROUTES.SIPARIS_VE_SOZLESME,
+          APP_ROUTES.KABUL_VE_ODEME,
+          APP_ROUTES.KLASOR_VE_KAPAKLAR
         ].some((p) => tClean.startsWith(p))
       })
 
@@ -181,7 +189,7 @@ export const useTabStore = create<TabState>((set, get) => ({
   },
 
   closeTab: (path) => {
-    if (path === '/') return null
+    if (path === APP_ROUTES.DASHBOARD) return null
 
     const { tabs, activeTabPath } = get()
     const newTabs = tabs.filter((t) => t.path !== path)
@@ -194,8 +202,8 @@ export const useTabStore = create<TabState>((set, get) => ({
         const nextIndex = Math.max(0, index - 1)
         nextPath = newTabs[nextIndex].path
       } else {
-        nextPath = '/'
-        newTabs.push({ path: '/', label: 'Gösterge Paneli' })
+        nextPath = APP_ROUTES.DASHBOARD
+        newTabs.push({ path: APP_ROUTES.DASHBOARD, label: 'Gösterge Paneli' })
       }
     }
 
@@ -214,14 +222,19 @@ export const useTabStore = create<TabState>((set, get) => ({
   },
 
   clearTabs: () => {
-    set({ tabs: [{ path: '/', label: 'Gösterge Paneli' }], activeTabPath: '/' })
+    set({
+      tabs: [{ path: APP_ROUTES.DASHBOARD, label: 'Gösterge Paneli' }],
+      activeTabPath: APP_ROUTES.DASHBOARD
+    })
   },
 
   clearDosyaTabs: () => {
     const { tabs, activeTabPath } = get()
-    const newTabs = tabs.filter((t) => !t.path.startsWith('/dosya/') && t.path !== '/dosya')
+    const newTabs = tabs.filter(
+      (t) => !t.path.startsWith(`${APP_ROUTES.DOSYA_DETAY}/`) && t.path !== APP_ROUTES.DOSYA_DETAY
+    )
     if (newTabs.length === 0) {
-      newTabs.push({ path: '/', label: 'Gösterge Paneli' })
+      newTabs.push({ path: APP_ROUTES.DASHBOARD, label: 'Gösterge Paneli' })
     }
     const isActiveTabCleared = !newTabs.some((t) => t.path === activeTabPath)
     set({
