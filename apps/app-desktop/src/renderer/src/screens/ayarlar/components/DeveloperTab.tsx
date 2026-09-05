@@ -56,19 +56,23 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
     setSeedResult(null)
     try {
       await devSeedService.seedKurum()
-      const birimIds = await devSeedService.seedBirimler()
+      await devSeedService.seedSettings()
+      await devSeedService.seedKikLimitleri()
       const pIds = await devSeedService.seedPersonel()
-      await devSeedService.seedFirmalar()
-      await devSeedService.seedKalemler()
-      await devSeedService.seedKomisyonlarVeAmbarlar()
+      const birimIds = await devSeedService.seedBirimler(pIds)
+      const fIds = await devSeedService.seedFirmalar()
+      const kIds = await devSeedService.seedKalemler()
+      await devSeedService.seedKomisyonlarVeAmbarlar(pIds)
 
       setSeedResult({
         success: true,
-        message: 'Kurum, Birimler, Personeller, Firmalar ve Kalem Havuzu başarıyla oluşturuldu!',
+        message: 'Kurum, Ayarlar, Birimler, Personeller, Firmalar, Kalemler ve Komisyonlar başarıyla oluşturuldu!',
         details: {
           kurumUpdated: true,
           birimlerCount: birimIds.length,
-          personelCount: pIds.length
+          personelCount: pIds.length,
+          firmalarCount: fIds.length,
+          kalemlerCount: kIds.length
         }
       })
       queryClient.clear()
@@ -86,25 +90,17 @@ export const DeveloperTab: React.FC<DeveloperTabProps> = ({
     setSeeding(true)
     setSeedResult(null)
     try {
-      const fRes = await window.electron.ipcRenderer.invoke('db:query', 'SELECT id FROM TANIM_Firma')
-      const pRes = await window.electron.ipcRenderer.invoke('db:query', 'SELECT id FROM TANIM_Personel')
+      await devSeedService.seedKurum()
+      await devSeedService.seedSettings()
+      const pIds = await devSeedService.seedPersonel()
+      const birimIds = await devSeedService.seedBirimler(pIds)
+      const fIds = await devSeedService.seedFirmalar()
+      await devSeedService.seedKalemler()
 
-      let fIds = fRes.success && fRes.data ? fRes.data.map((r: any) => r.id) : []
-      let pIds = pRes.success && pRes.data ? pRes.data.map((r: any) => r.id) : []
-
-      if (fIds.length === 0 || pIds.length === 0) {
-        // Otomatik önce tanımları oluştur
-        await devSeedService.seedKurum()
-        await devSeedService.seedBirimler()
-        pIds = await devSeedService.seedPersonel()
-        fIds = await devSeedService.seedFirmalar()
-        await devSeedService.seedKalemler()
-      }
-
-      const count = await devSeedService.enrichExistingDosyalar(fIds, pIds)
+      const count = await devSeedService.enrichExistingDosyalar(fIds, pIds, birimIds)
       setSeedResult({
         success: true,
-        message: `${count} adet açık temin dosyasına malzeme kalemleri, firma teklifleri ve komisyonlar başarıyla eklendi!`,
+        message: `${count} adet Doğrudan Temin dosyası malzeme kalemleri, istekli firma teklifleri ve komisyonlarıyla eksiksiz dolduruldu!`,
         details: {
           dosyalarEnrichedCount: count
         }
