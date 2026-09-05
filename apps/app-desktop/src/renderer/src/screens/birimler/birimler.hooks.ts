@@ -130,26 +130,34 @@ export function useBirimlerHooks() {
 
   const deleteBirimMutation = useMutation({
     mutationFn: async (id: number) => {
-      const getRes = await window.electron.ipcRenderer.invoke(
-        'db:query',
-        'SELECT id, birim_adi FROM TANIM_Birim WHERE id = ?',
-        [id]
-      )
-      if (getRes.data && getRes.data.length > 0) {
-        const birimAdi = getRes.data[0].birim_adi
-        // Birime bağlı personellerin birim alanını güvenle temizle
-        await window.electron.ipcRenderer.invoke(
-          'db:run',
-          'UPDATE TANIM_Personel SET birim = "" WHERE birim = ?',
-          [birimAdi]
-        )
-        // Birime bağlı temin dosyalarının birim_id alanını güvenle boşa çıkar
-        await window.electron.ipcRenderer.invoke(
-          'db:run',
-          'UPDATE DATA_TeminDosyasi SET birim_id = NULL WHERE birim_id = ?',
+      try {
+        const getRes = await window.electron.ipcRenderer.invoke(
+          'db:query',
+          'SELECT id, birim_adi, ad FROM TANIM_Birim WHERE id = ?',
           [id]
         )
+        if (getRes?.data && getRes.data.length > 0) {
+          const birimRow = getRes.data[0]
+          const birimAdi = birimRow.birim_adi || birimRow.ad
+          if (birimAdi) {
+            // Birime bağlı personellerin birim alanını güvenle temizle
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'UPDATE TANIM_Personel SET birim = NULL WHERE birim = ? OR birim = ?',
+              [birimAdi, birimRow.ad || birimAdi]
+            )
+          }
+          // Birime bağlı temin dosyalarının birim_id alanını güvenle boşa çıkar
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            'UPDATE DATA_TeminDosyasi SET birim_id = NULL WHERE birim_id = ?',
+            [id]
+          )
+        }
+      } catch (cleanupErr) {
+        console.warn('Silme öncesi bağlı kayıtları temizleme uyarısı:', cleanupErr)
       }
+
       const res = await window.electron.ipcRenderer.invoke(
         'db:run',
         'DELETE FROM TANIM_Birim WHERE id = ?',
@@ -161,6 +169,7 @@ export function useBirimlerHooks() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['birimler'] })
       queryClient.invalidateQueries({ queryKey: ['personeller_list'] })
+      queryClient.invalidateQueries({ queryKey: ['personeller'] })
     }
   })
 

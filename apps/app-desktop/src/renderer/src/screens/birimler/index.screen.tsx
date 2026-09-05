@@ -136,17 +136,14 @@ export default function BirimlerScreen({
   const handleDeleteBirim = async (e: React.MouseEvent, id: number): Promise<void> => {
     e.stopPropagation()
     const targetBirim = birimler.find((b) => b.id === id)
-    const personelCount = targetBirim?.personel_sayisi || 0
-    const confirmMsg =
-      personelCount > 0
-        ? `"${targetBirim?.birim_adi || 'Bu birimi'}" silmek istediğinize emin misiniz?\n\nBu birime bağlı ${personelCount} personelin birim bilgisi temizlenecektir.`
-        : `"${targetBirim?.birim_adi || 'Bu birimi'}" silmek istediğinize emin misiniz?`
+    const birimAdi = targetBirim?.birim_adi || (targetBirim as any)?.ad || 'Bu birimi'
 
-    if (confirm(confirmMsg)) {
+    if (confirm(`"${birimAdi}" birimini silmek istediğinize emin misiniz?`)) {
       try {
         await deleteBirim(id)
       } catch (err: any) {
-        alert(err?.message || 'Silme sırasında hata oluştu!')
+        console.error('Birim silme hatası:', err)
+        alert('Birim silinemedi: ' + (err?.message || 'Bilinmeyen hata'))
       }
     }
   }
