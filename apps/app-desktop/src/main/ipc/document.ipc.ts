@@ -193,6 +193,41 @@ export function registerDocumentIpcHandlers(): void {
     }
   })
 
+  // 5.1 Save PDF As
+  handleDoc('app:save-pdf-as', 'save-pdf-as', async (_, payload: any) => {
+    try {
+      const html = typeof payload === 'string' ? payload : (payload?.html || payload?.htmlContent || '')
+      const defaultFilename = (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName)) || 'Belge.pdf'
+
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'PDF Olarak Kaydet',
+        defaultPath: defaultFilename.endsWith('.pdf') ? defaultFilename : `${defaultFilename}.pdf`,
+        filters: [{ name: 'PDF Dosyası', extensions: ['pdf'] }]
+      })
+      if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+      const pdfBuffer = await renderPdfBuffer(html)
+      fs.writeFileSync(filePath, pdfBuffer)
+      return { success: true, filePath }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  // 5.2 Open PDF Preview in New Tab / Window
+  handleDoc('app:open-pdf-preview', 'open-pdf-preview', async (_, payload: any) => {
+    try {
+      const html = typeof payload === 'string' ? payload : (payload?.html || payload?.htmlContent || '')
+      const pdfBuffer = await renderPdfBuffer(html)
+      const tempPath = join(app.getPath('temp'), `temin360_preview_${Date.now()}.pdf`)
+      fs.writeFileSync(tempPath, pdfBuffer)
+      await shell.openPath(tempPath)
+      return { success: true, tempPath }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  })
+
   // 6. Export HTML
   handleDoc('belge:export-html', 'export-html', async (_, htmlContent: string, options?: { paperSize?: string }, fileName?: string) => {
     try {
