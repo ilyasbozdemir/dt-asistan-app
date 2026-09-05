@@ -508,20 +508,28 @@ export const devSeedService = {
    */
   async seedKomisyonlarVeAmbarlar(): Promise<void> {
     const ambarlar = [
-      { kod: 'AMB-01', ad: 'Merkez Ana Malzeme ve Tüketim Ambarı', yer: 'Hizmet Binası B1 Katı' },
-      { kod: 'AMB-02', ad: 'Bilgi İşlem ve Teknik Donanım Ambarı', yer: 'Hizmet Binası 3. Kat' }
+      {
+        ad: 'Merkez Ana Malzeme ve Tüketim Ambarı',
+        aciklama: 'Hizmet Binası B1 Katı',
+        tasinir_kodu: 'AMB-01'
+      },
+      {
+        ad: 'Bilgi İşlem ve Teknik Donanım Ambarı',
+        aciklama: 'Hizmet Binası 3. Kat',
+        tasinir_kodu: 'AMB-02'
+      }
     ]
     for (const amb of ambarlar) {
       const ex = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT id FROM TANIM_Ambar WHERE ambar_kodu = ? OR ambar_adi = ? LIMIT 1',
-        [amb.kod, amb.ad]
+        'SELECT id FROM TANIM_Ambar WHERE ambar_adi = ? LIMIT 1',
+        [amb.ad]
       )
       if (!ex.success || !ex.data || ex.data.length === 0) {
         await window.electron.ipcRenderer.invoke(
           'db:run',
-          `INSERT INTO TANIM_Ambar (ambar_kodu, ambar_adi, ambar_yeri, aktif_mi) VALUES (?, ?, ?, 1)`,
-          [amb.kod, amb.ad, amb.yer]
+          `INSERT INTO TANIM_Ambar (ambar_adi, aciklama, tasinir_kodu, aktif_mi) VALUES (?, ?, ?, 1)`,
+          [amb.ad, amb.aciklama, amb.tasinir_kodu]
         )
       }
     }
