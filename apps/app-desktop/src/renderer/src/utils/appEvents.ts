@@ -9,8 +9,11 @@ export type AppEventType =
   | 'dossier:deleted'
   | 'status:changed'
   | 'documents:changed'
+  | 'settings:changed'
+  | 'workspace:changed'
   | 'workspace:refreshed'
   | 'print_queue:updated'
+  | 'theme:changed'
 
 export interface AppEventPayload {
   dosyaId?: number | null
@@ -30,8 +33,8 @@ export interface AppEventMessage {
 }
 
 const SENDER_ID = `win_${Math.random().toString(36).substring(2, 9)}`
-const BROADCAST_CHANNEL_NAME = 'hakim_pro_realtime_events'
-const CUSTOM_EVENT_NAME = 'hakim_pro_app_event'
+const BROADCAST_CHANNEL_NAME = 'temin360_realtime_events'
+const CUSTOM_EVENT_NAME = 'temin360_app_event'
 
 let globalQueryClient: QueryClient | null = null
 let broadcastChannel: BroadcastChannel | null = null
@@ -95,6 +98,7 @@ function handleIncomingEvent(msg: AppEventMessage, isLocalOrigin: boolean): void
         globalQueryClient.invalidateQueries({ queryKey: ['takip_kalemler', dosyaId] })
       }
       globalQueryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      globalQueryClient.invalidateQueries({ queryKey: ['dosyalar'] })
       globalQueryClient.invalidateQueries({ queryKey: ['cikti_merkezi_data'] })
     } else if (msg.type === 'bids:changed') {
       globalQueryClient.invalidateQueries({ queryKey: ['takip_firmalar'] })
@@ -102,6 +106,7 @@ function handleIncomingEvent(msg: AppEventMessage, isLocalOrigin: boolean): void
         globalQueryClient.invalidateQueries({ queryKey: ['takip_firmalar', dosyaId] })
       }
       globalQueryClient.invalidateQueries({ queryKey: ['temin_dosyalari'] })
+      globalQueryClient.invalidateQueries({ queryKey: ['dosyalar'] })
       globalQueryClient.invalidateQueries({ queryKey: ['cikti_merkezi_data'] })
     } else if (msg.type === 'documents:changed') {
       globalQueryClient.invalidateQueries({ queryKey: ['takip_belgeler'] })
@@ -124,6 +129,11 @@ function handleIncomingEvent(msg: AppEventMessage, isLocalOrigin: boolean): void
         globalQueryClient.invalidateQueries({ queryKey: ['takip_belgeler', dosyaId] })
       }
       globalQueryClient.invalidateQueries({ queryKey: ['cikti_merkezi_data'] })
+    } else if (msg.type === 'settings:changed') {
+      globalQueryClient.invalidateQueries({ queryKey: ['settings'] })
+      globalQueryClient.invalidateQueries({ queryKey: ['kurum'] })
+      globalQueryClient.invalidateQueries({ queryKey: ['birimler'] })
+      globalQueryClient.invalidateQueries({ queryKey: ['personeller'] })
     } else {
       globalQueryClient.invalidateQueries()
     }
