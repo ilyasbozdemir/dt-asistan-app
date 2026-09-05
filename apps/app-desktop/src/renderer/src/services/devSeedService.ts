@@ -740,9 +740,9 @@ export const devSeedService = {
         tel: '0312 444 10 20',
         ep: 'satis@anadolubilisim.com.tr',
         adr: 'Kızılay Mah. Gazi Mustafa Kemal Bulv. No:84/A Çankaya / Ankara',
-        iban: 'TR42 0006 4000 0011 2233 4455 66',
-        banka: 'Türkiye İş Bankası Kızılay Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 148920'
+        hesap_no: 'TR42 0006 4000 0011 2233 4455 66',
+        banka: 'Türkiye İş Bankası',
+        sube: 'Kızılay Şubesi'
       },
       {
         unvan: 'Boğaziçi Kırtasiye Ofis ve Büro Malzemeleri Pazarlama A.Ş.',
@@ -753,9 +753,9 @@ export const devSeedService = {
         tel: '0312 310 40 50',
         ep: 'kurumsal@bogazicikirtasiye.com.tr',
         adr: 'Rüzgarlı Cad. İpek Sok. No:12 Altındağ / Ankara',
-        iban: 'TR15 0001 5001 5800 7300 1234 56',
-        banka: 'VakıfBank Ulus Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 120485'
+        hesap_no: 'TR15 0001 5001 5800 7300 1234 56',
+        banka: 'VakıfBank',
+        sube: 'Ulus Şubesi'
       },
       {
         unvan: 'Marmara Medikal Sağlık ve Laboratuvar Ürünleri Ltd. Şti.',
@@ -766,9 +766,9 @@ export const devSeedService = {
         tel: '0312 395 70 80',
         ep: 'ihale@marmaramedikal.com.tr',
         adr: 'Ostim OSB 1200. Cadde No:45 Yenimahalle / Ankara',
-        iban: 'TR88 0001 0002 3456 7890 1234 56',
-        banka: 'Ziraat Bankası Ostim Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 201948'
+        hesap_no: 'TR88 0001 0002 3456 7890 1234 56',
+        banka: 'Ziraat Bankası',
+        sube: 'Ostim Şubesi'
       },
       {
         unvan: 'Başkent İnşaat, Tadilat ve Mühendislik Hizmetleri Tic. Ltd. Şti.',
@@ -779,9 +779,9 @@ export const devSeedService = {
         tel: '0312 284 30 00',
         ep: 'proje@baskentinsaat.com.tr',
         adr: 'Mustafa Kemal Mah. 2118. Cad. No:14 Çankaya / Ankara',
-        iban: 'TR62 0006 2000 0001 2987 6543 21',
-        banka: 'Garanti BBVA Çukurambar Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 178234'
+        hesap_no: 'TR62 0006 2000 0001 2987 6543 21',
+        banka: 'Garanti BBVA',
+        sube: 'Çukurambar Şubesi'
       },
       {
         unvan: 'Ege Teknik Endüstriyel Hırdavat ve Temizlik Malzemeleri A.Ş.',
@@ -792,9 +792,9 @@ export const devSeedService = {
         tel: '0312 270 90 90',
         ep: 'info@egeteknik.com.tr',
         adr: 'İvedik OSB Ağaç İşleri Sanayi Sitesi 1354. Cadde No:8 Yenimahalle / Ankara',
-        iban: 'TR33 0006 7010 0000 0098 7654 32',
-        banka: 'Yapı Kredi İvedik Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 154890'
+        hesap_no: 'TR33 0006 7010 0000 0098 7654 32',
+        banka: 'Yapı Kredi',
+        sube: 'İvedik Şubesi'
       },
       {
         unvan: 'Güneş İklimlendirme Soğutma Havalandırma San. ve Tic. Ltd. Şti.',
@@ -805,9 +805,9 @@ export const devSeedService = {
         tel: '0312 341 55 66',
         ep: 'servis@gunesiklimlendirme.com.tr',
         adr: 'Kazım Karabekir Cad. No:110 Altındağ / Ankara',
-        iban: 'TR54 0001 2009 8760 0012 3456 78',
-        banka: 'Halkbank Dışkapı Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 198450'
+        hesap_no: 'TR54 0001 2009 8760 0012 3456 78',
+        banka: 'Halkbank',
+        sube: 'Dışkapı Şubesi'
       },
       {
         unvan: 'Atlas Kurumsal Tedarik ve Dağıtım Hizmetleri A.Ş.',
@@ -818,9 +818,9 @@ export const devSeedService = {
         tel: '0312 472 80 80',
         ep: 'satis@atlaskurumsal.com.tr',
         adr: 'Turan Güneş Bulv. No:52/B Çankaya / Ankara',
-        iban: 'TR77 0006 4000 0022 3344 5566 77',
-        banka: 'İş Bankası Yıldız Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 220914'
+        hesap_no: 'TR77 0006 4000 0022 3344 5566 77',
+        banka: 'Türkiye İş Bankası',
+        sube: 'Yıldız Şubesi'
       },
       {
         unvan: 'Dinamik Laboratuvar ve Tıbbi Sarf Ticaret Ltd. Şti.',
@@ -831,9 +831,9 @@ export const devSeedService = {
         tel: '0312 231 99 00',
         ep: 'teklif@dinamikmedikal.com.tr',
         adr: 'Strazburg Cad. No:28/4 Sıhhiye / Çankaya / Ankara',
-        iban: 'TR91 0001 5001 5800 7300 9988 77',
-        banka: 'VakıfBank Sıhhiye Şubesi',
-        sicil: 'Ankara Tic. Sic. No: 184560'
+        hesap_no: 'TR91 0001 5001 5800 7300 9988 77',
+        banka: 'VakıfBank',
+        sube: 'Sıhhiye Şubesi'
       }
     ]
 
@@ -849,19 +849,19 @@ export const devSeedService = {
           'db:run',
           `UPDATE TANIM_Firma SET 
             unvan = ?, firma_kodu = ?, ilgili_adi = ?, vergi_no = ?, vergi_dairesi = ?, 
-            telefon = ?, email = ?, adres = ?, il = ?, ilce = ?, iban = ?, banka_adi = ?, 
-            ticaret_sicil_no = ?, aktif_mi = 1, kalite_skoru = 5, deneyim_skoru = 5 
+            telefon = ?, email = ?, adres = ?, il = ?, ilce = ?, hesap_no = ?, banka_adi = ?, 
+            sube_kodu_adi = ?, aktif_mi = 1, kalite_skoru = 5, deneyim_skoru = 5 
           WHERE id = ?`,
-          [f.unvan, f.kod, f.ilgili, f.vno, f.vd, f.tel, f.ep, f.adr, 'Ankara', 'Çankaya', f.iban, f.banka, f.sicil, existing.data[0].id]
+          [f.unvan, f.kod, f.ilgili, f.vno, f.vd, f.tel, f.ep, f.adr, 'Ankara', 'Çankaya', f.hesap_no, f.banka, f.sube, existing.data[0].id]
         )
         ids.push(existing.data[0].id)
       } else {
         const res = await window.electron.ipcRenderer.invoke(
           'db:run',
           `INSERT INTO TANIM_Firma (
-            unvan, firma_kodu, ilgili_adi, vergi_no, vergi_dairesi, telefon, email, adres, il, ilce, iban, banka_adi, ticaret_sicil_no, aktif_mi, kalite_skoru, deneyim_skoru
+            unvan, firma_kodu, ilgili_adi, vergi_no, vergi_dairesi, telefon, email, adres, il, ilce, hesap_no, banka_adi, sube_kodu_adi, aktif_mi, kalite_skoru, deneyim_skoru
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 5, 5)`,
-          [f.unvan, f.kod, f.ilgili, f.vno, f.vd, f.tel, f.ep, f.adr, 'Ankara', 'Çankaya', f.iban, f.banka, f.sicil]
+          [f.unvan, f.kod, f.ilgili, f.vno, f.vd, f.tel, f.ep, f.adr, 'Ankara', 'Çankaya', f.hesap_no, f.banka, f.sube]
         )
         if (res.success && res.lastInsertRowid) {
           ids.push(Number(res.lastInsertRowid))
@@ -884,7 +884,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.01.01.01',
         okas: '30197630-1',
-        aciklama: '1. hamur yüksek beyazlık derecesine sahip fotokopi kağıdı'
+        ozelligi: '1. hamur yüksek beyazlık derecesine sahip fotokopi kağıdı'
       },
       {
         barkod: '8690001002',
@@ -894,7 +894,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.01.02.04',
         okas: '30125100-2',
-        aciklama: 'Orijinal veya ISO standartlarına uygun muadil toner kartuşu'
+        ozelligi: 'Orijinal veya ISO standartlarına uygun muadil toner kartuşu'
       },
       {
         barkod: '8690001003',
@@ -904,7 +904,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '255.02.01.01',
         okas: '30213000-5',
-        aciklama: 'Kurumsal kullanım için yüksek performanslı masaüstü bilgisayar kasası ve aksesuarları'
+        ozelligi: 'Kurumsal kullanım için yüksek performanslı masaüstü bilgisayar kasası ve aksesuarları'
       },
       {
         barkod: '8690001004',
@@ -914,7 +914,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '255.02.01.02',
         okas: '30231300-0',
-        aciklama: 'Pivot özellikli, HDMI ve DisplayPort girişli IPS panel monitör'
+        ozelligi: 'Pivot özellikli, HDMI ve DisplayPort girişli IPS panel monitör'
       },
       {
         barkod: '8690001005',
@@ -924,7 +924,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '255.03.01.01',
         okas: '39112000-0',
-        aciklama: 'Ayarlanabilir bel destekli, nefes alabilir file sırtlı ofis çalışma koltuğu'
+        ozelligi: 'Ayarlanabilir bel destekli, nefes alabilir file sırtlı ofis çalışma koltuğu'
       },
       {
         barkod: '8690001006',
@@ -934,7 +934,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.08.01.01',
         okas: '50730000-1',
-        aciklama: 'Bina içi klimaların antibakteriyel temizliği ve mevsimlik periyodik bakımı'
+        ozelligi: 'Bina içi klimaların antibakteriyel temizliği ve mevsimlik periyodik bakımı'
       },
       {
         barkod: '8690001007',
@@ -944,7 +944,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '260.01.01.01',
         okas: '48218000-9',
-        aciklama: '7/24 teknik destek ve güncel güvenlik tehdit veri tabanı aboneliği'
+        ozelligi: '7/24 teknik destek ve güncel güvenlik tehdit veri tabanı aboneliği'
       },
       {
         barkod: '8690001008',
@@ -954,7 +954,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '252.01.01.01',
         okas: '45442110-1',
-        aciklama: 'Duvar ve tavan yüzey tamiratları, astar ve çift kat silikonlu iç cephe boyası uygulaması'
+        ozelligi: 'Duvar ve tavan yüzey tamiratları, astar ve çift kat silikonlu iç cephe boyası uygulaması'
       },
       {
         barkod: '8690001009',
@@ -964,7 +964,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.05.01.01',
         okas: '39831200-8',
-        aciklama: '5 litrelik antibakteriyel sıvı sabun ve genel yüzey temizlik solüsyonu'
+        ozelligi: '5 litrelik antibakteriyel sıvı sabun ve genel yüzey temizlik solüsyonu'
       },
       {
         barkod: '8690001010',
@@ -974,7 +974,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.08.03.01',
         okas: '24111900-4',
-        aciklama: 'Tıbbi medikal oksijen dolumu, hidrostatik basınç testi ve vana kontrolleri'
+        ozelligi: 'Tıbbi medikal oksijen dolumu, hidrostatik basınç testi ve vana kontrolleri'
       },
       {
         barkod: '8690001011',
@@ -984,7 +984,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '150.08.04.01',
         okas: '50421000-2',
-        aciklama: 'TÜRKAK akreditasyonlu kuruluş tarafından sertifikalı kalibrasyon ölçüm hizmeti'
+        ozelligi: 'TÜRKAK akreditasyonlu kuruluş tarafından sertifikalı kalibrasyon ölçüm hizmeti'
       },
       {
         barkod: '8690001012',
@@ -994,7 +994,7 @@ export const devSeedService = {
         kdv: 20,
         tkod: '252.01.03.01',
         okas: '45421146-9',
-        aciklama: '60x60 cm akustik taşyünü paneller ve galvaniz taşıyıcı profil montajı'
+        ozelligi: '60x60 cm akustik taşyünü paneller ve galvaniz taşıyıcı profil montajı'
       }
     ]
 
@@ -1009,18 +1009,18 @@ export const devSeedService = {
         await window.electron.ipcRenderer.invoke(
           'db:run',
           `UPDATE TANIM_Kalem SET 
-            kalem_adi = ?, tipi = ?, birim = ?, kdv_orani = ?, tasinir_kodu = ?, okas_kodu = ?, aciklama = ?, aktif_mi = 1 
+            kalem_adi = ?, tipi = ?, birim = ?, kdv_orani = ?, tasinir_kodu = ?, okas_kodu = ?, ozelligi = ?, aktif_mi = 1 
           WHERE id = ?`,
-          [k.ad, k.tip, k.birim, k.kdv, k.tkod, k.okas, k.aciklama, existing.data[0].id]
+          [k.ad, k.tip, k.birim, k.kdv, k.tkod, k.okas, k.ozelligi, existing.data[0].id]
         )
         ids.push(existing.data[0].id)
       } else {
         const res = await window.electron.ipcRenderer.invoke(
           'db:run',
           `INSERT INTO TANIM_Kalem (
-            barkod_id, kalem_adi, tipi, birim, kdv_orani, tasinir_kodu, okas_kodu, aciklama, aktif_mi
+            barkod_id, kalem_adi, tipi, birim, kdv_orani, tasinir_kodu, okas_kodu, ozelligi, aktif_mi
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-          [k.barkod, k.ad, k.tip, k.birim, k.kdv, k.tkod, k.okas, k.aciklama]
+          [k.barkod, k.ad, k.tip, k.birim, k.kdv, k.tkod, k.okas, k.ozelligi]
         )
         if (res.success && res.lastInsertRowid) {
           ids.push(Number(res.lastInsertRowid))
@@ -1033,7 +1033,7 @@ export const devSeedService = {
   /**
    * Komisyon ve Ambar tanımlarını ekler
    */
-  async seedKomisyonlarVeAmbarlar(personelIds: number[] = []): Promise<void> {
+  async seedKomisyonlarVeAmbarlar(_personelIds: number[] = []): Promise<void> {
     // 1. Ambarlar
     const ambarlar = [
       {
@@ -1075,16 +1075,16 @@ export const devSeedService = {
 
     // 2. Komisyonlar
     const komisyonlar = [
-      { id: 1, ad: 'Piyasa Fiyat Araştırması Komisyonu', tur: 'piyasa_arastirma' },
-      { id: 2, ad: 'Muayene ve Kabul Komisyonu', tur: 'muayene_kabul' },
-      { id: 3, ad: 'Doğrudan Temin Değerlendirme Komisyonu', tur: 'ihale_komisyonu' }
+      { id: 1, ad: 'Piyasa Fiyat Araştırması Komisyonu', aciklama: 'Piyasa Fiyat Araştırma ve Teklif Değerlendirme Komisyonu' },
+      { id: 2, ad: 'Muayene ve Kabul Komisyonu', aciklama: 'Taşınır Mal Muayene, Kabul ve Muayene Raporu Komisyonu' },
+      { id: 3, ad: 'Doğrudan Temin Değerlendirme Komisyonu', aciklama: 'Teklif ve Şartname İnceleme Komisyonu' }
     ]
 
     for (const k of komisyonlar) {
       await window.electron.ipcRenderer.invoke(
         'db:run',
-        `INSERT INTO TANIM_Komisyon (id, ad, komisyon_turu, aktif_mi) VALUES (?, ?, ?, 1) ON CONFLICT(id) DO UPDATE SET ad = excluded.ad, komisyon_turu = excluded.komisyon_turu`,
-        [k.id, k.ad, k.tur]
+        `INSERT INTO TANIM_Komisyon (id, ad, aciklama, aktif_mi) VALUES (?, ?, ?, 1) ON CONFLICT(id) DO UPDATE SET ad = excluded.ad, aciklama = excluded.aciklama`,
+        [k.id, k.ad, k.aciklama]
       )
     }
   },
@@ -1418,9 +1418,9 @@ export const devSeedService = {
           const kRes = await window.electron.ipcRenderer.invoke(
             'db:run',
             `INSERT INTO DATA_TeminKalem (
-              temin_dosya_id, kalem_adi, tipi, birim, miktar, kdv_orani, tasinir_kodu
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod]
+              temin_dosya_id, kalem_adi, tipi, birim, miktar, kdv_orani, tasinir_kodu, aciklama
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod, item.ad]
           )
           if (kRes.success && kRes.lastInsertRowid) {
             dosyaKalemIds.push(Number(kRes.lastInsertRowid))
