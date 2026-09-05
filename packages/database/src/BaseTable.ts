@@ -1,19 +1,25 @@
 import { auditColumns, auditColumnsNoRef } from './audit'
-import { TableSchema } from './types'
 
 /**
- * 🛡️ Kozmik Tablo Fabrikası
- * Tablo tanımlarını alır, audit kolonlarını (istisnalar hariç) otomatik enjekte eder.
+ * 🛡️ Kozmik Tablo Fabrikası (Base Table & Audit Inheritance)
+ * Tablo tanımlarını alır, audit / denetim kolonlarını (istisnalar hariç) otomatik enjekte eder.
  */
-export const defineTable = (schema: TableSchema): TableSchema => {
-  // 1. Audit istenmiyorsa (Finansal/Sistem) direkt dön
+export const defineTable = (schema: any): any => {
+  if (!schema || !schema.columns) return schema
+  // 1. Audit istenmiyorsa (hasAudit: false) direkt dön
   if (schema.hasAudit === false) return schema
 
-  // 2. TANIM_Personel için dairesel referans içermeyen audit kolonlarını kullan
-  const columnsToAdd = schema.name === 'TANIM_Personel' ? auditColumnsNoRef : auditColumns
+  // 2. Kolon listesini al
+  const baseAuditCols = schema.name === 'TANIM_Personel' ? auditColumnsNoRef : auditColumns
+
+  const existingColNames = new Set((schema.columns || []).map((c: any) => c.name?.toLowerCase()))
+  const columnsToAdd = baseAuditCols.filter(
+    (auditCol: any) => !existingColNames.has(auditCol.name.toLowerCase())
+  )
 
   return {
     ...schema,
     columns: [...schema.columns, ...columnsToAdd]
   }
 }
+

@@ -171,8 +171,7 @@ export async function resolveAntetSatirlari(
           `SELECT d.antet_ek_satir as dosya_antet, 
                   b.antet_ek_satir as birim_antet, 
                   b.birim_adi, 
-                  d.harcama_birimi,
-                  d.birim_adi as dosya_birim_adi
+                  d.harcama_birimi
            FROM DATA_TeminDosyasi d 
            LEFT JOIN TANIM_Birim b ON d.birim_id = b.id 
            WHERE d.id = ? LIMIT 1`,
@@ -184,7 +183,6 @@ export async function resolveAntetSatirlari(
             row.dosya_antet ||
             row.birim_antet ||
             row.birim_adi ||
-            row.dosya_birim_adi ||
             row.harcama_birimi ||
             ''
           ).trim();
@@ -294,8 +292,29 @@ export async function resolveTemplateData(
     // 3. Array of objects (e.g. ihtiyacKalemleri)
     if (rule.tablo && rule.sutun === '*' && rule.altEslestirme && rule.iliskili_id) {
       try {
-        const query = `SELECT * FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ?`;
-        const rows = await queryExecutor(query, [activeDosyaId]);
+        let rows: any[] = [];
+        if (rule.tablo === 'DATA_TeminKalem') {
+          try {
+            const tkQuery = `
+              SELECT tk.*, 
+                     COALESCE(NULLIF(tk.aciklama, ''), tanim.ozelligi, '') as aciklama,
+                     COALESCE(NULLIF(tk.aciklama, ''), tanim.ozelligi, '') as ozelligi
+              FROM DATA_TeminKalem tk
+              LEFT JOIN TANIM_Kalem tanim ON (
+                tk.kalem_adi = tanim.kalem_adi 
+                OR (tk.barkod_id IS NOT NULL AND tk.barkod_id != '' AND tk.barkod_id = tanim.barkod_id)
+                OR (tk.tasinir_kodu IS NOT NULL AND tk.tasinir_kodu != '' AND tk.tasinir_kodu = tanim.tasinir_kodu)
+              )
+              WHERE tk.temin_dosya_id = ?
+              ORDER BY tk.id ASC
+            `;
+            rows = await queryExecutor(tkQuery, [activeDosyaId]);
+          } catch {
+            rows = await queryExecutor(`SELECT * FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ?`, [activeDosyaId]);
+          }
+        } else {
+          rows = await queryExecutor(`SELECT * FROM ${rule.tablo} WHERE ${rule.iliskili_id} = ?`, [activeDosyaId]);
+        }
         
         let firms: any[] = [];
         let bidsMap: Record<string, number> = {};
@@ -335,7 +354,11 @@ export async function resolveTemplateData(
         resolvedPayload[sablonDegiskeni] = rows.map((row: any, idx: number) => {
           const item: Record<string, any> = { siraNo: idx + 1 };
           for (const [templateKey, dbColumn] of Object.entries(rule.altEslestirme!)) {
-            item[templateKey] = row[dbColumn] ?? '';
+            item[templateKey] = row[dbColumn] ?? row[templateKey] ?? '';
+          }
+
+          if (!item.ozelligi || item.ozelligi === '') {
+            item.ozelligi = row.aciklama || row.ozelligi || '';
           }
 
           if (rule.tablo === 'DATA_TeminKalem' && firms && firms.length > 0) {
@@ -478,6 +501,13 @@ export async function resolveTemplateData(
     if (rule.tablo && rule.sutun && rule.sutun !== '*') {
       try {
         const effectiveRule = { ...rule };
+        // Smart normalization for TANIM_Kurum columns
+        if (effectiveRule.tablo === 'TANIM_Kurum') {
+          if (effectiveRule.sutun === 'ust_idari_birim') {
+            effectiveRule.sutun = 'ust_kurum_adi';
+          }
+        }
+
         // Smart normalization for DATA_TeminDosyasi columns
         if (effectiveRule.tablo === 'DATA_TeminDosyasi') {
           if (effectiveRule.sutun === 'hazirlayan_personel_ad') {
@@ -500,6 +530,14 @@ export async function resolveTemplateData(
             effectiveRule.sutun = 'onay_personel_id';
             effectiveRule.iliskiliTablo = 'TANIM_Personel';
             effectiveRule.iliskiliSutun = 'unvan';
+          } else if (effectiveRule.sutun === 'onaylayan_personel_id') {
+            effectiveRule.sutun = 'onay_personel_id';
+          } else if (effectiveRule.sutun === 'kazanan_firma_id') {
+            effectiveRule.sutun = 'firma_id';
+          } else if (effectiveRule.sutun === 'olusturma_tarihi') {
+            effectiveRule.sutun = 'dosya_acilis_tarihi';
+          } else if (effectiveRule.sutun === 'temin_no_clean') {
+            effectiveRule.sutun = 'temin_no';
           } else if (effectiveRule.sutun === 'talep_eden_personel_ad') {
             effectiveRule.sutun = 'talep_eden_personel_id';
             effectiveRule.iliskiliTablo = 'TANIM_Personel';
@@ -565,9 +603,9 @@ export async function resolveTemplateData(
           try {
             let pQuery = '';
             if (sablonDegiskeni.toLowerCase().includes('onay') || sablonDegiskeni.toLowerCase().includes('yetkili')) {
-              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (unvan LIKE '%Harcama Yetkilisi%' OR unvan LIKE '%Müdür%' OR unvan LIKE '%Başkan%' OR varsayilan = 1) AND (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
+              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (unvan LIKE '%Harcama Yetkilisi%' OR unvan LIKE '%Müdür%' OR unvan LIKE '%Başkan%') AND (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
             } else {
-              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (varsayilan = 1 OR aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
+              pQuery = `SELECT ${effectiveRule.iliskiliSutun} AS res_val FROM TANIM_Personel WHERE (aktif_mi = 1 OR aktif_mi IS NULL) ORDER BY id ASC LIMIT 1`;
             }
             const pRes = await queryExecutor(pQuery, []);
             if (pRes?.[0]?.res_val) {
@@ -690,7 +728,24 @@ async function resolveFormula(
     const parts = path.split('.');
     
     if (parts.length === 2) {
-      const [table, column] = parts;
+      let [table, column] = parts;
+      
+      // Column normalization in formulas
+      if (table === 'TANIM_Kurum' && column === 'ust_idari_birim') {
+        column = 'ust_kurum_adi';
+      }
+      if (table === 'DATA_TeminDosyasi') {
+        if (column === 'temin_no_clean') {
+          column = 'temin_no';
+        } else if (column === 'olusturma_tarihi') {
+          column = 'dosya_acilis_tarihi';
+        } else if (column === 'onaylayan_personel_id') {
+          column = 'onay_personel_id';
+        } else if (column === 'kazanan_firma_id') {
+          column = 'firma_id';
+        }
+      }
+
       try {
         let query = `SELECT ${column} FROM ${table} LIMIT 1`;
         let params: any[] = [];
@@ -702,6 +757,9 @@ async function resolveFormula(
         
         const res = await queryExecutor(query, params);
         let val = res?.[0]?.[column] ?? '';
+        if (parts[1] === 'temin_no_clean' && typeof val === 'string') {
+          val = val.replace(/[^0-9]/g, '') || val;
+        }
         if (column === 'detsis_kodu' && (!val || String(val).trim() === '')) {
           val = '0000000000';
         }

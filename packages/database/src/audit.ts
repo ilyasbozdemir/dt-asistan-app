@@ -1,19 +1,41 @@
-import { TableColumn } from './types'
-
-export const auditColumns: TableColumn[] = [
-  { name: 'createdBy', type: 'INTEGER', constraints: ['REFERENCES TANIM_Personel(id)'] },
-  { name: 'createdAt', type: 'DATETIME', constraints: ['DEFAULT CURRENT_TIMESTAMP'] },
-  { name: 'updatedBy', type: 'INTEGER', constraints: ['REFERENCES TANIM_Personel(id)'] },
-  { name: 'updatedAt', type: 'DATETIME', constraints: ['DEFAULT CURRENT_TIMESTAMP'] },
-  { name: 'isActive', type: 'INTEGER', constraints: ['DEFAULT 1'] },
-  { name: 'isDeleted', type: 'INTEGER', constraints: ['DEFAULT 0'] }
+export const auditColumns: any[] = [
+  {
+    name: 'created_by',
+    type: 'INTEGER',
+    default: 'NULL',
+    description: 'Kaydı Oluşturan Personel / Kullanıcı ID'
+  },
+  {
+    name: 'created_at',
+    type: 'DATETIME',
+    default: 'CURRENT_TIMESTAMP',
+    description: 'Oluşturulma Zamanı'
+  },
+  {
+    name: 'updated_by',
+    type: 'INTEGER',
+    default: 'NULL',
+    description: 'Son Güncelleyen Personel / Kullanıcı ID'
+  },
+  {
+    name: 'updated_at',
+    type: 'DATETIME',
+    default: 'CURRENT_TIMESTAMP',
+    description: 'Son Güncellenme Zamanı'
+  },
+  {
+    name: 'is_active',
+    type: 'INTEGER',
+    default: 1,
+    description: 'Aktiflik Durumu (1: Aktif, 0: Pasif)'
+  },
+  {
+    name: 'is_deleted',
+    type: 'INTEGER',
+    default: 0,
+    description: 'Silinme Durumu (1: Silinmiş, 0: Normal)'
+  }
 ]
 
-export const auditColumnsNoRef: TableColumn[] = [
-  { name: 'createdBy', type: 'INTEGER' },
-  { name: 'createdAt', type: 'DATETIME', constraints: ['DEFAULT CURRENT_TIMESTAMP'] },
-  { name: 'updatedBy', type: 'INTEGER' },
-  { name: 'updatedAt', type: 'DATETIME', constraints: ['DEFAULT CURRENT_TIMESTAMP'] },
-  { name: 'isActive', type: 'INTEGER', constraints: ['DEFAULT 1'] },
-  { name: 'isDeleted', type: 'INTEGER', constraints: ['DEFAULT 0'] }
-]
+export const auditColumnsNoRef = auditColumns
+

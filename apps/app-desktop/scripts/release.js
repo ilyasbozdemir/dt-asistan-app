@@ -83,7 +83,7 @@ ${c.cyan('Örnekler:')}
 
 // ─── Yardımcı Fonksiyonlar ────────────────────────────────
 const ROOT = path.resolve(__dirname, '..')
-const GIT_ROOT = path.resolve(__dirname, '../..')
+const GIT_ROOT = path.resolve(__dirname, '../../..')
 
 function exec(cmd, opts = {}) {
   try {
@@ -101,18 +101,17 @@ function exec(cmd, opts = {}) {
   }
 }
 
-
 function execSilent(cmd) {
   return exec(cmd, { silent: true, ignoreError: true }).trim()
 }
 
 function readJSON(filePath) {
-  const full = path.join(ROOT, filePath)
+  const full = path.isAbsolute(filePath) ? filePath : path.join(ROOT, filePath)
   return JSON.parse(fs.readFileSync(full, 'utf-8'))
 }
 
 function writeJSON(filePath, data) {
-  const full = path.join(ROOT, filePath)
+  const full = path.isAbsolute(filePath) ? filePath : path.join(ROOT, filePath)
   fs.writeFileSync(full, JSON.stringify(data, null, 2) + '\n', 'utf-8')
 }
 
@@ -167,7 +166,7 @@ function main() {
 
   // 3. versions.json güncelle
   if (!flags.skipVersions) {
-    const versionsPath = '../../packages/database/versions.json'
+    const versionsPath = path.join(GIT_ROOT, 'packages/database/versions.json')
     let versions = []
     try {
       versions = readJSON(versionsPath)

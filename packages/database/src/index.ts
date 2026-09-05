@@ -37,48 +37,51 @@ import { DATA_AmbarStok } from './tables/DATA_AmbarStok'
 import { LOG_SystemLog } from './tables/LOG_SystemLog'
 import { DATA_DosyaSablonVeri } from './tables/DATA_DosyaSablonVeri'
 import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
+import { defineTable } from './BaseTable'
+
+const rawTables = [
+  TANIM_Kurum,
+  TANIM_Mevzuat,
+  TANIM_Birim,
+  TANIM_Personel,
+  TANIM_Roller,
+  TANIM_Asama,
+  TANIM_Firma,
+  TANIM_FirmaIletisimNotu,
+  TANIM_Ambar,
+  TANIM_TasinirKod,
+  TANIM_OkasKod,
+  TANIM_Kalem,
+  TANIM_OlcuBirimi,
+  TANIM_AlimTuru,
+  TANIM_Sablon,
+  TANIM_Placeholder,
+  TANIM_AlimTuru_Sablon,
+  TANIM_SurecTaslak,
+  SABLON_Placeholder,
+  TANIM_KodSozlugu,
+  TANIM_KomisyonGorevi,
+  TANIM_Komisyon,
+  TANIM_KomisyonUye,
+  TANIM_Komisyon_Sablon,
+  TANIM_KikLimitDonemleri,
+  DATA_TeminDosyasi,
+  DATA_TeminKalem,
+  DATA_TeminFirma,
+  DATA_TeminKalemTeklif,
+  DATA_TeminKomisyon,
+  DATA_TeminBelge,
+  DATA_TIF,
+  DATA_TIF_Kalem,
+  DATA_AmbarStok,
+  DATA_DosyaSablonVeri,
+  LOG_SystemLog
+]
 
 export const schema = {
   database: 'DOGRUDAN_TEMIN_DB',
   app_title: 'TEMİN 360',
-  tables: [
-    TANIM_Kurum,
-    TANIM_Mevzuat,
-    TANIM_Birim,
-    TANIM_Personel,
-    TANIM_Roller,
-    TANIM_Asama,
-    TANIM_Firma,
-    TANIM_FirmaIletisimNotu,
-    TANIM_Ambar,
-    TANIM_TasinirKod,
-    TANIM_OkasKod,
-    TANIM_Kalem,
-    TANIM_OlcuBirimi,
-    TANIM_AlimTuru,
-    TANIM_Sablon,
-    TANIM_Placeholder,
-    TANIM_AlimTuru_Sablon,
-    TANIM_SurecTaslak,
-    SABLON_Placeholder,
-    TANIM_KodSozlugu,
-    TANIM_KomisyonGorevi,
-    TANIM_Komisyon,
-    TANIM_KomisyonUye,
-    TANIM_Komisyon_Sablon,
-    TANIM_KikLimitDonemleri,
-    DATA_TeminDosyasi,
-    DATA_TeminKalem,
-    DATA_TeminFirma,
-    DATA_TeminKalemTeklif,
-    DATA_TeminKomisyon,
-    DATA_TeminBelge,
-    DATA_TIF,
-    DATA_TIF_Kalem,
-    DATA_AmbarStok,
-    DATA_DosyaSablonVeri,
-    LOG_SystemLog
-  ]
+  tables: rawTables.map(defineTable)
 }
 
 export function initializeDatabase(db: Database.Database, institutionName: string, currentAppVersion: string = '1.0.0'): void {
@@ -97,6 +100,7 @@ export function initializeDatabase(db: Database.Database, institutionName: strin
     INSERT OR REPLACE INTO settings (key, value) VALUES ('appTitle', '${schema.app_title}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('adminName', 'İlyas BOZDEMİR');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('adminTitle', 'Sistem Yöneticisi');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('activeKurumId', '1');
     INSERT OR IGNORE INTO settings (key, value) VALUES ('rates', '[{"id":"1","ad":"Damga Vergisi","oran":"9,48","tur":"binde","hesapKodu":""},{"id":"2","ad":"Karar Pulu","oran":"5,69","tur":"binde","hesapKodu":""},{"id":"3","ad":"KDV (Genel)","oran":"20","tur":"yuzde","hesapKodu":""},{"id":"4","ad":"KDV (İndirimli)","oran":"10","tur":"yuzde","hesapKodu":""},{"id":"5","ad":"KDV (Özel)","oran":"1","tur":"yuzde","hesapKodu":""}]');
     CREATE INDEX IF NOT EXISTS idx_tasinirkod_tam_kod ON TANIM_TasinirKod(tam_kod);
     CREATE INDEX IF NOT EXISTS idx_tasinirkod_hesap ON TANIM_TasinirKod(hesap_kodu);
