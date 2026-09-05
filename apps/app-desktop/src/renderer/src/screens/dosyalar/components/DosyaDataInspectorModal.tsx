@@ -7,23 +7,23 @@ import {
   Building2,
   Users,
   FileSpreadsheet,
-  FileCode,
-  ExternalLink,
   Layers,
   Edit,
   FileText,
-  Calendar,
   DollarSign,
   Briefcase,
+  ExternalLink,
+  Info,
   ShieldCheck,
   Tag,
-  Info,
-  CheckCircle2
+  CheckCircle2,
+  FileCheck
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { useGlobalDocumentPreviewStore } from '../../../store/globalDocumentPreviewStore'
 import { useTabStore } from '../../../store/tabStore'
 import { useNavigate } from '@tanstack/react-router'
+import { exportDogrudanTeminMasterExcel } from '../../../services/excelExportService'
 
 interface DosyaDataInspectorModalProps {
   isOpen: boolean
@@ -31,14 +31,14 @@ interface DosyaDataInspectorModalProps {
   dosya: any
 }
 
-type TabType = 'kunye' | 'kalemler' | 'firmalar' | 'komisyon' | 'rawjson'
+type TabType = 'genel' | 'kunye' | 'kalemler' | 'firmalar' | 'komisyon' | 'rawjson'
 
 export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = ({
   isOpen,
   onClose,
   dosya
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('kunye')
+  const [activeTab, setActiveTab] = useState<TabType>('genel')
   const [copied, setCopied] = useState(false)
   const [fullDosya, setFullDosya] = useState<any>(dosya)
   const [subData, setSubData] = useState<{
@@ -197,32 +197,32 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
+        className="bg-white dark:bg-slate-900 w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col border border-slate-200/80 dark:border-slate-800 overflow-hidden ring-1 ring-slate-900/10 dark:ring-white/10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER (Kompakt & Net) */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0 font-black text-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950 shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shrink-0 font-black text-sm tracking-wider">
               DT
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
+                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                   {d.temin_no ? `DT-${d.butce_yili || '2026'}/${d.temin_no}` : `#${d.id}`}
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-md">
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate max-w-lg">
                   {d.konu || 'Dosya Künyesi'}
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                   {statusLabelMap[d.status] || 'Devam Ediyor'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-slate-500 truncate mt-0.5">
                 Birim: <strong className="text-slate-700 dark:text-slate-300">{d.birim_adi || d.harcama_birimi || 'Belirtilmemiş'}</strong> • Tür: <strong className="text-slate-700 dark:text-slate-300">{turLabelMap[d.tur] || 'Mal'}</strong> • Bütçe Yılı: <strong className="text-slate-700 dark:text-slate-300">{d.butce_yili || '2026'}</strong>
               </p>
             </div>
@@ -231,11 +231,27 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => {
+                exportDogrudanTeminMasterExcel({
+                  dosya: d,
+                  kalemler: subData.kalemler,
+                  firmalar: subData.firmalar,
+                  teklifler: subData.teklifler,
+                  komisyon: subData.komisyon
+                })
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all text-xs font-bold cursor-pointer shadow-xs active:scale-95"
+              title="Master Excel İndir (.xlsx)"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              Master Excel
+            </button>
+            <button
+              onClick={() => {
                 onClose()
                 addTab(`/dosyalar/yeni?id=${d.id}`)
                 navigate({ to: `/dosyalar/yeni?id=${d.id}` })
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-all text-xs font-bold cursor-pointer shadow-xs active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white transition-all text-xs font-bold cursor-pointer shadow-xs active:scale-95"
               title="Dosya Düzenleme Formuna Git"
             >
               <Edit className="w-3.5 h-3.5" />
@@ -243,7 +259,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -251,61 +267,68 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
         </div>
 
         {/* TAB BAR (Kompakt & Sabit) */}
-        <div className="flex items-center justify-between px-5 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 gap-2 overflow-x-auto">
+        <div className="flex items-center justify-between px-6 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 gap-2 overflow-x-auto">
           <div className="flex items-center gap-1.5 text-xs font-semibold">
             <button
+              onClick={() => setActiveTab('genel')}
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'genel'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Genel Bakış
+            </button>
+            <button
               onClick={() => setActiveTab('kunye')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'kunye'
-                  ? 'bg-blue-600 text-white font-bold'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              Dosya Künyesi & Bilgileri
+              Dosya Künyesi & Bütçe
             </button>
-
             <button
               onClick={() => setActiveTab('kalemler')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'kalemler'
-                  ? 'bg-blue-600 text-white font-bold'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               İhtiyaç Listesi ({subData.kalemler.length})
             </button>
-
             <button
               onClick={() => setActiveTab('firmalar')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'firmalar'
-                  ? 'bg-blue-600 text-white font-bold'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Building2 className="w-3.5 h-3.5" />
               Firmalar & Teklifler ({subData.firmalar.length})
             </button>
-
             <button
               onClick={() => setActiveTab('komisyon')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'komisyon'
-                  ? 'bg-blue-600 text-white font-bold'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
               Komisyon ({subData.komisyon.length})
             </button>
-
             <button
               onClick={() => setActiveTab('rawjson')}
-              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'rawjson'
-                  ? 'bg-slate-800 text-white font-bold'
+                  ? 'bg-slate-800 text-white font-bold shadow-xs'
                   : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
@@ -326,7 +349,130 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
         </div>
 
         {/* MODAL BODY (Kaydırılabilir & Dengeli Yerleşim) */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          {/* TAB 0: GENEL BAKIŞ (360 DERECE TÜM VERİLERİ ORTAYA ALAN GÖRÜNÜM) */}
+          {activeTab === 'genel' && (
+            <div className="space-y-5 text-xs">
+              {/* ÜST KPI KARTLARI */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20">
+                  <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">Yaklaşık Maliyet</span>
+                  <span className="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
+                    ₺{formatMoney(toplamYaklasikMaliyet)}
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">KDV Hariç Toplam</span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20">
+                  <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">İhtiyaç Kalemleri</span>
+                  <span className="text-base font-black text-blue-600 dark:text-blue-400 font-mono mt-0.5 block">
+                    {subData.kalemler.length} Kalem
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">Malzeme / Hizmet</span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20">
+                  <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">İstekli Firmalar</span>
+                  <span className="text-base font-black text-purple-600 dark:text-purple-400 font-mono mt-0.5 block">
+                    {subData.firmalar.length} Firma
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">{subData.teklifler.length} Birim Teklif</span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20">
+                  <span className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider">Komisyon / Görevli</span>
+                  <span className="text-base font-black text-amber-600 dark:text-amber-400 font-mono mt-0.5 block">
+                    {subData.komisyon.length} Üye
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">Piyasa / Muayene</span>
+                </div>
+              </div>
+
+              {/* HIZLI ÖZET VE DETAY MATRİSİ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* SOL: Dosya & Süreç Özeti */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
+                  <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-blue-600" />
+                      Temel Dosya Bilgileri
+                    </span>
+                    <button
+                      onClick={() => setActiveTab('kunye')}
+                      className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-semibold cursor-pointer"
+                    >
+                      Tümünü Gör →
+                    </button>
+                  </div>
+                  <div className="p-4 space-y-2.5 text-xs divide-y divide-slate-100 dark:divide-slate-800/60">
+                    <div className="flex justify-between items-center pt-1 first:pt-0">
+                      <span className="text-slate-500">Dosya No:</span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{d.temin_no ? `DT-${d.butce_yili || '2026'}/${d.temin_no}` : `#${d.id}`}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-slate-500">Harcama Birimi:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-xs">{d.birim_adi || d.harcama_birimi || 'Belirtilmemiş'}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-slate-500">KİK Maddesi / Usul:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{d.ihale_sekli || '4734 Sayılı KİK Md. 22/d'}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-slate-500">Bütçe Kodu / Yılı:</span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{d.butce_yili || '2026'} / {d.butce_kodu || d.ekonomik_kod || '03.2'}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-slate-500">Sözleşme Durumu:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{d.sozlesme_yapilacak_mi ? 'Sözleşme Yapılacak' : 'Sözleşme Yapılmayacak'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SAĞ: İhtiyaç Listesi Hızlı Önizleme */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
+                  <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                      İhtiyaç Kalemleri ({subData.kalemler.length})
+                    </span>
+                    <button
+                      onClick={() => setActiveTab('kalemler')}
+                      className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-semibold cursor-pointer"
+                    >
+                      Detaylı Tablo →
+                    </button>
+                  </div>
+                  <div className="p-3">
+                    {subData.kalemler.length === 0 ? (
+                      <div className="p-6 text-center text-slate-400 text-xs italic">
+                        Henüz kalem eklenmemiş.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {subData.kalemler.slice(0, 4).map((k, idx) => (
+                          <div key={k.id || idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                            <div className="min-w-0 pr-2">
+                              <span className="font-bold text-slate-800 dark:text-slate-200 block truncate text-xs">{k.kalem_adi}</span>
+                              <span className="text-[10px] text-slate-400">{k.miktar} {k.olcu_birimi || k.birim || 'Adet'}</span>
+                            </div>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs whitespace-nowrap">
+                              ₺{formatMoney(k.yaklasik_maliyet_toplam)}
+                            </span>
+                          </div>
+                        ))}
+                        {subData.kalemler.length > 4 && (
+                          <div className="text-center pt-1 text-[11px] text-slate-400">
+                            +{subData.kalemler.length - 4} diğer kalem daha mevcut
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: KÜNYE (RESMİ DOSYA ÖZET FİŞİ) */}
           {activeTab === 'kunye' && (
             <div className="space-y-4 text-xs">
