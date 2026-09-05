@@ -18,9 +18,9 @@ export interface MasterExcelExportData {
 export const KIK_2026_ESIK_DEGER_TL = 1021827.0
 
 /**
- * Generates and downloads a multi-sheet, enterprise-grade Doğrudan Temin Master Excel Workbook.
- * Everything is interconnected with live Excel formulas (=SUM, =MIN, =IF, cross-sheet references)
- * and includes official printable A4 formatted document sheets with signature boxes.
+ * Generates and downloads an official, multi-sheet Doğrudan Temin Master Excel Workbook
+ * formatted in official Turkish State Bureaucracy style (Times New Roman, subtle elegant grays,
+ * sharp borders, live Excel formulas, and printable A4 document sheets with signature boxes).
  */
 export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData): Promise<void> {
   const {
@@ -40,87 +40,77 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   workbook.modified = new Date()
 
   // -------------------------------------------------------------------------
-  // COLOR & STYLE CONSTANTS
+  // RESMİ KURUMSAL TİPOGRAFİ VE STİL SABİTLERİ (Times New Roman & Resmi Tonlar)
   // -------------------------------------------------------------------------
-  const primaryHeaderFill: ExcelJS.Fill = {
+  const FONT_FAMILY = 'Times New Roman'
+
+  // Başlık ve Vurgu Dolguları (Sade, Kurumsal Koyu Gri / Lacivert ve Soft Gri)
+  const headerFillOfficial: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FF0F172A' } // Slate 900
-  }
-  const accentHeaderFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FF1D4ED8' } // Blue 700
-  }
-  const emeraldHeaderFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FF065F46' } // Emerald 800
-  }
-  const amberHeaderFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFB45309' } // Amber 700
-  }
-  const purpleHeaderFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FF6D28D9' } // Purple 700
+    fgColor: { argb: 'FF1F2937' } // Koyu Kurumsal Slate (Gri/Siyah)
   }
 
-  const softBlueFill: ExcelJS.Fill = {
+  const subHeaderFillOfficial: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FFEFF6FF' } // Blue 50
+    fgColor: { argb: 'FF374151' } // Orta Koyu Slate
   }
-  const softGreenFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFECFDF5' } // Emerald 50
-  }
-  const softAmberFill: ExcelJS.Fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFFFFBEB' } // Amber 50
-  }
+
   const softGrayFill: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FFF1F5F9' } // Slate 100
+    fgColor: { argb: 'FFF3F4F6' } // Açık Soft Gri
   }
+
   const zebraFill: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FFF8FAFC' } // Slate 50
+    fgColor: { argb: 'FFFAFAFA' } // Çok Hafif Kırık Beyaz
   }
 
-  const whiteHeaderFont: Partial<ExcelJS.Font> = {
-    name: 'Segoe UI',
-    size: 11,
-    bold: true,
-    color: { argb: 'FFFFFFFF' }
+  const softHighlightFill: ExcelJS.Fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE5E7EB' } // Vurgulu Satır Grisi
   }
 
+  // Kenarlıklar
   const thinBorder: Partial<ExcelJS.Borders> = {
-    top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-    left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-    bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-    right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+    top: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+    left: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+    bottom: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+    right: { style: 'thin', color: { argb: 'FF9CA3AF' } }
+  }
+
+  const mediumBorder: Partial<ExcelJS.Borders> = {
+    top: { style: 'medium', color: { argb: 'FF1F2937' } },
+    left: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+    bottom: { style: 'medium', color: { argb: 'FF1F2937' } },
+    right: { style: 'thin', color: { argb: 'FF9CA3AF' } }
   }
 
   const doubleBottomBorder: Partial<ExcelJS.Borders> = {
-    top: { style: 'thin', color: { argb: 'FF94A3B8' } },
-    left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
-    bottom: { style: 'double', color: { argb: 'FF0F172A' } },
-    right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+    top: { style: 'thin', color: { argb: 'FF4B5563' } },
+    left: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+    bottom: { style: 'double', color: { argb: 'FF000000' } },
+    right: { style: 'thin', color: { argb: 'FF9CA3AF' } }
+  }
+
+  const boxBorder: Partial<ExcelJS.Borders> = {
+    top: { style: 'medium', color: { argb: 'FF1F2937' } },
+    left: { style: 'medium', color: { argb: 'FF1F2937' } },
+    bottom: { style: 'medium', color: { argb: 'FF1F2937' } },
+    right: { style: 'medium', color: { argb: 'FF1F2937' } }
   }
 
   const dosyaNoStr = formatDosyaNo(dosya)
-  const kurumAdi = kurum?.ad || kurum?.kurum_adi || 'T.C. KAMU İDARESİ'
-  const birimAdi =
-    dosya?.birim_adi || dosya?.harcama_birimi || kurum?.birim_adi || 'Satınalma / İhale Birimi'
+  const kurumAdi = (kurum?.ad || kurum?.kurum_adi || 'T.C. KAMU İDARESİ').toUpperCase()
+  const birimAdi = (
+    dosya?.birim_adi || dosya?.harcama_birimi || kurum?.birim_adi || 'Satınalma / Destek Hizmetleri Birimi'
+  ).toUpperCase()
   const dosyaKonusu = dosya?.konu || dosya?.isin_adi || 'Doğrudan Temin Alım İşi'
-  const ihaleSekli = dosya?.ihale_sekli || '4734 Sayılı KİK Md. 22/d (Doğrudan Temin)'
+  const ihaleSekli = dosya?.ihale_sekli || '4734 Sayılı KİK Madde 22/d (Doğrudan Temin)'
   const turLabel =
     dosya?.tur === 'yapim_isi' || dosya?.tur === 'yapim'
       ? 'Yapım İşi / Onarım'
@@ -144,15 +134,14 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
         ]
 
   const kalemCount = kalemler.length > 0 ? kalemler.length : 1
-  const kalemlerSheetName = '📦 Kalemler & Maliyet'
+  const kalemlerSheetName = 'Kalemler & Maliyet'
   const kalemEndRow = 4 + kalemCount
   const kalemTotalRow = kalemEndRow + 1
 
   // =========================================================================
-  // SAYFA 1: 📊 GENEL KONTROL & BÜTÇE DASHBOARD
+  // SAYFA 1: SÜREÇ TAKİBİ & GENEL BÜTÇE KONTROLÜ
   // =========================================================================
-  const wsDash = workbook.addWorksheet('📊 Süreç Takibi & Özet', {
-    properties: { tabColor: { argb: 'FF2563EB' } },
+  const wsDash = workbook.addWorksheet('Süreç Takibi & Özet', {
     views: [{ showGridLines: true }]
   })
 
@@ -169,27 +158,27 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   // Header Banner
   wsDash.mergeCells('B2:F2')
   const titleCell = wsDash.getCell('B2')
-  titleCell.value = `${kurumAdi.toUpperCase()} - ${birimAdi.toUpperCase()}`
-  titleCell.font = { name: 'Segoe UI', size: 13, bold: true, color: { argb: 'FFFFFFFF' } }
+  titleCell.value = `${kurumAdi} - ${birimAdi}`
+  titleCell.font = { name: FONT_FAMILY, size: 13, bold: true, color: { argb: 'FFFFFFFF' } }
   titleCell.alignment = { vertical: 'middle', horizontal: 'center' }
-  titleCell.fill = primaryHeaderFill
+  titleCell.fill = headerFillOfficial
 
   wsDash.mergeCells('B3:F3')
   const subTitleCell = wsDash.getCell('B3')
-  subTitleCell.value = `4734 SAYILI KİK DOĞRUDAN TEMİN MASTER RAPORU & CANLI FORMÜL YÖNETİMİ`
-  subTitleCell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF93C5FD' } }
+  subTitleCell.value = `4734 SAYILI KAMU İHALE KANUNU DOĞRUDAN TEMİN MASTER DOSYA RAPORU`
+  subTitleCell.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FFE5E7EB' } }
   subTitleCell.alignment = { vertical: 'middle', horizontal: 'center' }
-  subTitleCell.fill = primaryHeaderFill
+  subTitleCell.fill = subHeaderFillOfficial
 
-  wsDash.getRow(2).height = 28
+  wsDash.getRow(2).height = 26
   wsDash.getRow(3).height = 20
 
   // 1. Dosya Kimlik Kartı
   wsDash.mergeCells('B5:F5')
   const infoHeader = wsDash.getCell('B5')
-  infoHeader.value = '📋 1. DOSYA VE TEMİN GENEL BİLGİLERİ'
-  infoHeader.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
-  infoHeader.fill = accentHeaderFill
+  infoHeader.value = '1. DOSYA VE DOĞRUDAN TEMİN GENEL BİLGİLERİ'
+  infoHeader.font = { name: FONT_FAMILY, size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
+  infoHeader.fill = subHeaderFillOfficial
   infoHeader.alignment = { vertical: 'middle', indent: 1 }
   wsDash.getRow(5).height = 24
 
@@ -225,22 +214,22 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   for (const r of infoRows) {
     wsDash.getRow(curRow).height = 21
     wsDash.getCell(`B${curRow}`).value = r[0]
-    wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF475569' } }
-    wsDash.getCell(`B${curRow}`).fill = softBlueFill
+    wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FF1F2937' } }
+    wsDash.getCell(`B${curRow}`).fill = softGrayFill
     wsDash.getCell(`B${curRow}`).border = thinBorder
 
     wsDash.getCell(`C${curRow}`).value = r[1]
-    wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: r[0].includes('No') || r[0].includes('Konu') }
+    wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: r[0].includes('No') || r[0].includes('Konu') }
     wsDash.getCell(`C${curRow}`).border = thinBorder
 
     wsDash.getCell(`D${curRow}`).value = r[2]
-    wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF475569' } }
-    wsDash.getCell(`D${curRow}`).fill = softBlueFill
+    wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FF1F2937' } }
+    wsDash.getCell(`D${curRow}`).fill = softGrayFill
     wsDash.getCell(`D${curRow}`).border = thinBorder
 
     wsDash.mergeCells(`E${curRow}:F${curRow}`)
     wsDash.getCell(`E${curRow}`).value = r[3]
-    wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: r[2].includes('Kalem') || r[2].includes('Türü') }
+    wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: r[2].includes('Kalem') || r[2].includes('Türü') }
     wsDash.getCell(`E${curRow}`).border = thinBorder
     wsDash.getCell(`F${curRow}`).border = thinBorder
     curRow++
@@ -250,183 +239,181 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   curRow += 1
   wsDash.mergeCells(`B${curRow}:F${curRow}`)
   const esikHeader = wsDash.getCell(`B${curRow}`)
-  esikHeader.value = '⚖️ 2. 2026 YILI KİK BÜTÇE LİMİTİ & EŞİK DEĞER KONTROLÜ (Md. 22/d)'
-  esikHeader.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
-  esikHeader.fill = amberHeaderFill
+  esikHeader.value = '2. 2026 YILI KİK BÜTÇE LİMİTİ VE EŞİK DEĞER KONTROLÜ (Md. 22/d)'
+  esikHeader.font = { name: FONT_FAMILY, size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
+  esikHeader.fill = subHeaderFillOfficial
   esikHeader.alignment = { vertical: 'middle', indent: 1 }
   wsDash.getRow(curRow).height = 24
 
   curRow++
   const esikValRow = curRow
-  // Row 13: Eşik Değeri & Yaklaşık Maliyet Toplamı (Formula connected to Kalemler sheet)
   wsDash.getRow(curRow).height = 22
-  wsDash.getCell(`B${curRow}`).value = '2026 Güncel Md. 22/d Eşik Değeri:'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`B${curRow}`).fill = softAmberFill
+  wsDash.getCell(`B${curRow}`).value = '2026 Yılı KİK Md. 22/d Parasal Sınırı:'
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = KIK_2026_ESIK_DEGER_TL
   wsDash.getCell(`C${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
   wsDash.getCell(`D${curRow}`).value = 'Dosya Yaklaşık Maliyet Toplamı:'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`D${curRow}`).fill = softAmberFill
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = { formula: `'${kalemlerSheetName}'!J${kalemTotalRow}` }
   wsDash.getCell(`E${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF1E293B' } }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // Row 14: Kalan Limit & Kullanım Oranı
+  // Kalan Limit & Kullanım Oranı
   wsDash.getRow(curRow).height = 22
   wsDash.getCell(`B${curRow}`).value = 'Kalan Eşik Değer Limiti:'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`B${curRow}`).fill = softAmberFill
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = { formula: `MAX(0, C${esikValRow} - E${esikValRow})` }
   wsDash.getCell(`C${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
   wsDash.getCell(`D${curRow}`).value = 'Eşik Değer Kullanım Oranı (%):'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`D${curRow}`).fill = softAmberFill
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = { formula: `E${esikValRow}/C${esikValRow}` }
   wsDash.getCell(`E${curRow}`).numFmt = '0.00%'
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // Row 15: Mevzuat Uygunluk Durumu (IF Formula)
+  // Mevzuat Uygunluk Durumu
   wsDash.getRow(curRow).height = 22
   wsDash.getCell(`B${curRow}`).value = 'Mevzuat Uygunluk Durumu:'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`B${curRow}`).fill = softAmberFill
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = {
-    formula: `IF(E${esikValRow}<=C${esikValRow}, "✅ Eşik Değer Altında (Doğrudan Temin Uygun)", "⚠️ Eşik Değer Aşımı (İhale Usulü Gereklidir)")`
+    formula: `IF(E${esikValRow}<=C${esikValRow}, "Eşik Değer Altında (Doğrudan Temin Usulü Uygundur)", "Eşik Değer Aşımı (İhale Usulü Gereklidir)")`
   }
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF047857' } }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 9, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
-  wsDash.getCell(`D${curRow}`).value = 'Tevkifat Matrisi Uygulaması:'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF92400E' } }
-  wsDash.getCell(`D${curRow}`).fill = softAmberFill
+  wsDash.getCell(`D${curRow}`).value = 'Tevkifat Uygulama Durumu:'
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = `KDV Tevkifatı: ${tevkifatOraniText}`
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // 3. Finansal Göstergeler & Canlı Tevkifat Matrisi
+  // 3. Finansal Göstergeler & KDV Tevkifat Matrisi
   curRow += 1
   wsDash.mergeCells(`B${curRow}:F${curRow}`)
   const finHeader = wsDash.getCell(`B${curRow}`)
-  finHeader.value = '💰 3. FİNANSAL GÖSTERGELER & KDV TEVKİFAT MATRİSİ (CANLI FORMÜLLÜ)'
-  finHeader.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
-  finHeader.fill = emeraldHeaderFill
+  finHeader.value = '3. FİNANSAL GÖSTERGELER VE KDV TEVKİFAT MATRİSİ (CANLI FORMÜLLÜ)'
+  finHeader.font = { name: FONT_FAMILY, size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
+  finHeader.fill = subHeaderFillOfficial
   finHeader.alignment = { vertical: 'middle', indent: 1 }
   wsDash.getRow(curRow).height = 24
 
   curRow++
   const finStartRow = curRow
 
-  // Row 18: Yaklaşık Maliyet & KDV
   wsDash.getRow(curRow).height = 22
   wsDash.getCell(`B${curRow}`).value = 'Yaklaşık Maliyet (KDV Hariç):'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`B${curRow}`).fill = softGreenFill
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = { formula: `'${kalemlerSheetName}'!J${kalemTotalRow}` }
   wsDash.getCell(`C${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF0F172A' } }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
   wsDash.getCell(`D${curRow}`).value = 'Hesaplanan KDV Tutarı (%20):'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`D${curRow}`).fill = softGreenFill
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = { formula: `C${finStartRow} * 0.20` }
   wsDash.getCell(`E${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // Row 19: Tevkifat Oranı & Tevkifat Tutarı
+  // Tevkifat Oranı & Kesilecek Tevkifat
   wsDash.getRow(curRow).height = 22
-  wsDash.getCell(`B${curRow}`).value = 'Tevkifat Oranı & Çarpanı:'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`B${curRow}`).fill = softGreenFill
+  wsDash.getCell(`B${curRow}`).value = 'Tevkifat Oranı:'
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = tevkifatOraniText
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
   wsDash.getCell(`D${curRow}`).value = 'Kesilecek Tevkifat Tutarı:'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`D${curRow}`).fill = softGreenFill
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = { formula: `E${finStartRow} * ${tevkifatCarpani}` }
   wsDash.getCell(`E${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // Row 20: KDV Dahil Toplam & Net Ödenecek
+  // KDV Dahil Toplam & Net Ödenecek
   wsDash.getRow(curRow).height = 22
   wsDash.getCell(`B${curRow}`).value = 'KDV Dahil Toplam Tutar:'
-  wsDash.getCell(`B${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`B${curRow}`).fill = softGreenFill
+  wsDash.getCell(`B${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`B${curRow}`).fill = softGrayFill
   wsDash.getCell(`B${curRow}`).border = thinBorder
 
   wsDash.getCell(`C${curRow}`).value = { formula: `C${finStartRow} + E${finStartRow}` }
   wsDash.getCell(`C${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`C${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF0F172A' } }
+  wsDash.getCell(`C${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsDash.getCell(`C${curRow}`).border = thinBorder
 
   wsDash.getCell(`D${curRow}`).value = 'Yükleniciye Ödenecek Net Tutar:'
-  wsDash.getCell(`D${curRow}`).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
-  wsDash.getCell(`D${curRow}`).fill = softGreenFill
+  wsDash.getCell(`D${curRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsDash.getCell(`D${curRow}`).fill = softGrayFill
   wsDash.getCell(`D${curRow}`).border = thinBorder
 
   wsDash.mergeCells(`E${curRow}:F${curRow}`)
   wsDash.getCell(`E${curRow}`).value = { formula: `C${curRow} - E${curRow - 1}` }
   wsDash.getCell(`E${curRow}`).numFmt = '#,##0.00 "₺"'
-  wsDash.getCell(`E${curRow}`).font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF065F46' } }
+  wsDash.getCell(`E${curRow}`).font = { name: FONT_FAMILY, size: 11, bold: true }
   wsDash.getCell(`E${curRow}`).border = thinBorder
   wsDash.getCell(`F${curRow}`).border = thinBorder
   curRow++
 
-  // 4. Doğrudan Temin 6 Aşamalı Süreç Takip Tablosu
+  // 4. Doğrudan Temin Süreç Adımları
   curRow += 1
   wsDash.mergeCells(`B${curRow}:F${curRow}`)
   const stHeader = wsDash.getCell(`B${curRow}`)
-  stHeader.value = '⚡ 4. DOĞRUDAN TEMİN MEVZUAT ADIMLARI & SÜREÇ İLERLEME DURUMU'
-  stHeader.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
-  stHeader.fill = purpleHeaderFill
+  stHeader.value = '4. DOĞRUDAN TEMİN MEVZUAT SÜREÇ ADIMLARI VE İLERLEME DURUMU'
+  stHeader.font = { name: FONT_FAMILY, size: 11, bold: true, color: { argb: 'FFFFFFFF' } }
+  stHeader.fill = subHeaderFillOfficial
   stHeader.alignment = { vertical: 'middle', indent: 1 }
   wsDash.getRow(curRow).height = 24
 
@@ -437,19 +424,19 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   procCols.forEach((pc, i) => {
     const c = wsDash.getCell(`${procColCells[i]}${curRow}`)
     c.value = pc
-    c.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF334155' } }
-    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }
+    c.font = { name: FONT_FAMILY, size: 10, bold: true }
+    c.fill = softHighlightFill
     c.border = thinBorder
     c.alignment = { vertical: 'middle', horizontal: i === 0 ? 'center' : 'left' }
   })
 
   const processSteps = [
-    ['1', 'İhtiyaç Tespiti & Lüzum', 'KİK Md. 22', 'İhtiyaç Listesi, Lüzum Müzekkeresi, Talep Formu', '✅ Tamamlandı'],
-    ['2', 'Harcama Yetkilisi Onayı', 'KİK Md. 22 & KİK Tebliği', 'Doğrudan Temin Onay Belgesi, Bütçe Blokesi', '✅ Tamamlandı'],
-    ['3', 'Piyasa Fiyat Araştırması', 'KİK Md. 22/d & Tebliğ', 'Fiyat Araştırma Görevlendirmesi, Teklif Mektupları Dağıtımı', '✅ Tamamlandı'],
-    ['4', 'Yaklaşık Maliyet & Fiyat Tespiti', 'KİK Tebliği Md. 22', 'Piyasa Fiyat Araştırma Tutanağı, Yaklaşık Maliyet Cetveli', '✅ Tamamlandı'],
-    ['5', 'Sipariş / Sözleşme İşlemleri', '4734 / Borçlar Kanunu', 'Sözleşme Tasarısı, Sipariş Mektubu, Taahhütname', '✅ Tamamlandı'],
-    ['6', 'Muayene Kabul & Ödeme', 'Muayene ve Kabul Yön.', 'Muayene ve Kabul Tutanağı, Taşınır Kod Fişi, Fatura Ödeme', '⏳ İşlemde / Hazır']
+    ['1', 'İhtiyaç Tespiti & Lüzum', '4734 Sayılı KİK Md. 22', 'İhtiyaç Listesi, Lüzum Müzekkeresi, Talep Formu', 'Tamamlandı'],
+    ['2', 'Harcama Yetkilisi Onayı', 'KİK Md. 22 & Tebliğ', 'Doğrudan Temin Onay Belgesi, Harcama Talimatı', 'Tamamlandı'],
+    ['3', 'Piyasa Fiyat Araştırması', 'KİK Md. 22/d', 'Görevlendirme Oluru, Teklif İsteme Mektubu', 'Tamamlandı'],
+    ['4', 'Yaklaşık Maliyet & Fiyat Tespiti', 'KİK Tebliği Md. 22', 'Piyasa Fiyat Araştırma Tutanağı, Fiyat Karşılaştırma', 'Tamamlandı'],
+    ['5', 'Sipariş / Sözleşme İşlemleri', '4734 / Borçlar Kanunu', 'Sözleşme Tasarısı, Sipariş Mektubu, Taahhütname', 'Tamamlandı'],
+    ['6', 'Muayene Kabul & Ödeme', 'Muayene ve Kabul Yön.', 'Muayene ve Kabul Tutanağı, Taşınır İşlem Fişi', 'İşlemde / Hazır']
   ]
 
   for (const step of processSteps) {
@@ -458,20 +445,16 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     step.forEach((val, i) => {
       const c = wsDash.getCell(`${procColCells[i]}${curRow}`)
       c.value = val
-      c.font = { name: 'Segoe UI', size: 9, bold: i === 0 || i === 4 }
+      c.font = { name: FONT_FAMILY, size: 10, bold: i === 0 || i === 4 }
       c.border = thinBorder
       c.alignment = { vertical: 'middle', horizontal: i === 0 ? 'center' : 'left' }
-      if (i === 4 && val.includes('Tamamlandı')) {
-        c.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF047857' } }
-      }
     })
   }
 
   // =========================================================================
-  // SAYFA 2: 📦 KALEMLER & MALİYET CETVELİ (MASTER DATA)
+  // SAYFA 2: KALEMLER & MALİYET CETVELİ (MASTER VERİ TABLOSU)
   // =========================================================================
   const wsKalem = workbook.addWorksheet(kalemlerSheetName, {
-    properties: { tabColor: { argb: 'FF0284C7' } },
     views: [{ state: 'frozen', ySplit: 4, showGridLines: true }]
   })
 
@@ -493,16 +476,16 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   wsKalem.mergeCells('A1:K1')
   const kTitle = wsKalem.getCell('A1')
   kTitle.value = `${dosyaNoStr} - İHTİYAÇ, MALZEME VE İMALAT LİSTESİ CETVELİ`
-  kTitle.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
-  kTitle.fill = primaryHeaderFill
+  kTitle.font = { name: FONT_FAMILY, size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
+  kTitle.fill = headerFillOfficial
   kTitle.alignment = { vertical: 'middle', horizontal: 'center' }
   wsKalem.getRow(1).height = 26
 
   wsKalem.mergeCells('A2:K2')
   const kSub = wsKalem.getCell('A2')
   kSub.value = `İşin Adı: ${dosyaKonusu} | Alım Türü: ${turLabel} | İdare: ${kurumAdi}`
-  kSub.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF94A3B8' } }
-  kSub.fill = primaryHeaderFill
+  kSub.font = { name: FONT_FAMILY, size: 10, color: { argb: 'FFE5E7EB' } }
+  kSub.fill = subHeaderFillOfficial
   kSub.alignment = { vertical: 'middle', horizontal: 'center' }
   wsKalem.getRow(2).height = 20
 
@@ -525,8 +508,8 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   kalemHeaders.forEach((h, idx) => {
     const c = kHeaderRow.getCell(idx + 1)
     c.value = h
-    c.font = whiteHeaderFont
-    c.fill = accentHeaderFill
+    c.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+    c.fill = subHeaderFillOfficial
     c.border = thinBorder
     c.alignment = {
       vertical: 'middle',
@@ -557,15 +540,13 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' }
 
     row.getCell(3).value = k.tasinir_kodu || k.poz_no || '-'
-    row.getCell(3).font = { name: 'Consolas', size: 9 }
     row.getCell(3).alignment = { vertical: 'middle', horizontal: 'left' }
 
     row.getCell(4).value = k.okas_kodu || '-'
-    row.getCell(4).font = { name: 'Consolas', size: 9 }
     row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' }
 
     row.getCell(5).value = k.kalem_adi || k.adi || ''
-    row.getCell(5).font = { name: 'Segoe UI', size: 10, bold: true }
+    row.getCell(5).font = { name: FONT_FAMILY, size: 10, bold: true }
 
     row.getCell(6).value = k.birim || 'Adet'
     row.getCell(6).alignment = { vertical: 'middle', horizontal: 'center' }
@@ -589,13 +570,14 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
       result: Number(k.miktar || 0) * birimFiyat
     }
     row.getCell(10).numFmt = '#,##0.00 "₺"'
-    row.getCell(10).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF0F172A' } }
+    row.getCell(10).font = { name: FONT_FAMILY, size: 10, bold: true }
     row.getCell(10).alignment = { vertical: 'middle', horizontal: 'right' }
 
     row.getCell(11).value = k.aciklama || ''
 
     for (let c = 1; c <= 11; c++) {
       const cell = row.getCell(c)
+      cell.font = cell.font || { name: FONT_FAMILY, size: 10 }
       cell.border = thinBorder
       if (isZebra) cell.fill = zebraFill
     }
@@ -609,17 +591,17 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   wsKalem.mergeCells(`A${kalemTotalRow}:I${kalemTotalRow}`)
   const totLabel = wsKalem.getCell(`A${kalemTotalRow}`)
   totLabel.value = 'GENEL YAKLAŞIK MALİYET TOPLAMI (KDV HARİÇ):'
-  totLabel.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF1E293B' } }
+  totLabel.font = { name: FONT_FAMILY, size: 10, bold: true }
   totLabel.alignment = { vertical: 'middle', horizontal: 'right' }
-  totLabel.fill = softAmberFill
+  totLabel.fill = softHighlightFill
 
   const totFormula = wsKalem.getCell(`J${kalemTotalRow}`)
   totFormula.value = {
     formula: `SUM(J5:J${kalemTotalRow - 1})`
   }
   totFormula.numFmt = '#,##0.00 "₺"'
-  totFormula.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFB45309' } }
-  totFormula.fill = softAmberFill
+  totFormula.font = { name: FONT_FAMILY, size: 11, bold: true }
+  totFormula.fill = softHighlightFill
   totFormula.alignment = { vertical: 'middle', horizontal: 'right' }
 
   for (let c = 1; c <= 11; c++) {
@@ -627,10 +609,9 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   }
 
   // =========================================================================
-  // SAYFA 3: 🏷️ TEKLİFLER & PİYASA FİYAT ARAŞTIRMASI MATRİSİ
+  // SAYFA 3: TEKLİFLER & PİYASA FİYAT ARAŞTIRMASI MATRİSİ
   // =========================================================================
-  const wsTeklif = workbook.addWorksheet('🏷️ Teklifler & Piyasa', {
-    properties: { tabColor: { argb: 'FF059669' } },
+  const wsTeklif = workbook.addWorksheet('Teklifler & Piyasa', {
     views: [{ state: 'frozen', ySplit: 4, showGridLines: true }]
   })
 
@@ -657,16 +638,16 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   wsTeklif.mergeCells(`A1:${lastColLetter}1`)
   const tTitle = wsTeklif.getCell('A1')
   tTitle.value = `${dosyaNoStr} - PİYASA FİYAT ARAŞTIRMASI VE TEKLİF KARŞILAŞTIRMA CETVELİ`
-  tTitle.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
-  tTitle.fill = emeraldHeaderFill
+  tTitle.font = { name: FONT_FAMILY, size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
+  tTitle.fill = headerFillOfficial
   tTitle.alignment = { vertical: 'middle', horizontal: 'center' }
   wsTeklif.getRow(1).height = 26
 
   wsTeklif.mergeCells(`A2:${lastColLetter}2`)
   const tSub = wsTeklif.getCell('A2')
   tSub.value = `4734 Sayılı Kanun Madde 22/d Uyarınca Alınan Birim Fiyat Teklifleri ve En Avantajlı Fiyat Tespiti (${effectiveFirms.length} İstekli)`
-  tSub.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFA7F3D0' } }
-  tSub.fill = emeraldHeaderFill
+  tSub.font = { name: FONT_FAMILY, size: 10, color: { argb: 'FFE5E7EB' } }
+  tSub.fill = subHeaderFillOfficial
   tSub.alignment = { vertical: 'middle', horizontal: 'center' }
   wsTeklif.getRow(2).height = 20
 
@@ -687,8 +668,8 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   tHeaders.forEach((th, idx) => {
     const c = tHeaderRow.getCell(idx + 1)
     c.value = th
-    c.font = whiteHeaderFont
-    c.fill = emeraldHeaderFill
+    c.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+    c.fill = subHeaderFillOfficial
     c.border = thinBorder
     c.alignment = {
       vertical: 'middle',
@@ -707,7 +688,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
 
     // Reference to Kalemler sheet for Kalem Adı, Birim, Miktar
     row.getCell(2).value = { formula: `'${kalemlerSheetName}'!E${idx + 5}` }
-    row.getCell(2).font = { name: 'Segoe UI', size: 10, bold: true }
+    row.getCell(2).font = { name: FONT_FAMILY, size: 10, bold: true }
 
     row.getCell(3).value = { formula: `'${kalemlerSheetName}'!F${idx + 5}` }
     row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' }
@@ -749,16 +730,17 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     const minFormulaCells = firmUnitColLetters.map((l) => `${l}${tRowIdx}`).join(',')
     row.getCell(minUnitCol).value = { formula: `MIN(${minFormulaCells})` }
     row.getCell(minUnitCol).numFmt = '#,##0.00 "₺"'
-    row.getCell(minUnitCol).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
+    row.getCell(minUnitCol).font = { name: FONT_FAMILY, size: 10, bold: true }
 
     row.getCell(minTotCol).value = {
       formula: `D${tRowIdx}*${minUnitColLetter}${tRowIdx}`
     }
     row.getCell(minTotCol).numFmt = '#,##0.00 "₺"'
-    row.getCell(minTotCol).font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } }
+    row.getCell(minTotCol).font = { name: FONT_FAMILY, size: 10, bold: true }
 
     for (let c = 1; c <= totalColsCount; c++) {
       const cell = row.getCell(c)
+      cell.font = cell.font || { name: FONT_FAMILY, size: 10 }
       cell.border = thinBorder
       if (isZebra) cell.fill = zebraFill
     }
@@ -771,9 +753,9 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   tTotRow.height = 26
   wsTeklif.mergeCells(`A${tRowIdx}:D${tRowIdx}`)
   wsTeklif.getCell(`A${tRowIdx}`).value = 'FİRMA TEKLİF TOPLAMLARI (KDV HARİÇ):'
-  wsTeklif.getCell(`A${tRowIdx}`).font = { name: 'Segoe UI', size: 10, bold: true }
+  wsTeklif.getCell(`A${tRowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsTeklif.getCell(`A${tRowIdx}`).alignment = { vertical: 'middle', horizontal: 'right' }
-  wsTeklif.getCell(`A${tRowIdx}`).fill = softGreenFill
+  wsTeklif.getCell(`A${tRowIdx}`).fill = softHighlightFill
 
   let summaryCursor = 5
   effectiveFirms.forEach(() => {
@@ -783,8 +765,8 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
       formula: `SUM(${totColLetter}5:${totColLetter}${tRowIdx - 1})`
     }
     wsTeklif.getCell(`${totColLetter}${tRowIdx}`).numFmt = '#,##0.00 "₺"'
-    wsTeklif.getCell(`${totColLetter}${tRowIdx}`).font = { name: 'Segoe UI', size: 10, bold: true }
-    wsTeklif.getCell(`${totColLetter}${tRowIdx}`).fill = softGreenFill
+    wsTeklif.getCell(`${totColLetter}${tRowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+    wsTeklif.getCell(`${totColLetter}${tRowIdx}`).fill = softHighlightFill
     summaryCursor += 2
   })
 
@@ -794,22 +776,20 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   }
   wsTeklif.getCell(`${minTotColLetter}${tRowIdx}`).numFmt = '#,##0.00 "₺"'
   wsTeklif.getCell(`${minTotColLetter}${tRowIdx}`).font = {
-    name: 'Segoe UI',
+    name: FONT_FAMILY,
     size: 11,
-    bold: true,
-    color: { argb: 'FF065F46' }
+    bold: true
   }
-  wsTeklif.getCell(`${minTotColLetter}${tRowIdx}`).fill = softGreenFill
+  wsTeklif.getCell(`${minTotColLetter}${tRowIdx}`).fill = softHighlightFill
 
   for (let c = 1; c <= totalColsCount; c++) {
     wsTeklif.getCell(tRowIdx, c).border = doubleBottomBorder
   }
 
   // =========================================================================
-  // SAYFA 4: 📑 A4 - İHTİYAÇ LİSTESİ & TALEP FORMU (PRINTABLE A4 SHEET)
+  // SAYFA 4: 📑 A4 - İHTİYAÇ LİSTESİ & TALEP FORMU (RESMİ BASKIYA HAZIR)
   // =========================================================================
-  const wsA4Ihtiyac = workbook.addWorksheet('📑 A4 - İhtiyaç Listesi Formu', {
-    properties: { tabColor: { argb: 'FF0284C7' } },
+  const wsA4Ihtiyac = workbook.addWorksheet('A4 - İhtiyaç Listesi Formu', {
     pageSetup: {
       paperSize: 9, // A4
       orientation: 'portrait',
@@ -830,44 +810,44 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     { width: 22 } // F: Açıklama
   ]
 
-  // A4 Document Header
+  // A4 Document Header (Official Republic of Turkey Bureaucratic Style)
   wsA4Ihtiyac.mergeCells('A1:F1')
   wsA4Ihtiyac.getCell('A1').value = `T.C.`
-  wsA4Ihtiyac.getCell('A1').font = { name: 'Times New Roman', size: 12, bold: true }
+  wsA4Ihtiyac.getCell('A1').font = { name: FONT_FAMILY, size: 12, bold: true }
   wsA4Ihtiyac.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
   wsA4Ihtiyac.mergeCells('A2:F2')
-  wsA4Ihtiyac.getCell('A2').value = kurumAdi.toUpperCase()
-  wsA4Ihtiyac.getCell('A2').font = { name: 'Times New Roman', size: 12, bold: true }
+  wsA4Ihtiyac.getCell('A2').value = kurumAdi
+  wsA4Ihtiyac.getCell('A2').font = { name: FONT_FAMILY, size: 12, bold: true }
   wsA4Ihtiyac.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center' }
 
   wsA4Ihtiyac.mergeCells('A3:F3')
-  wsA4Ihtiyac.getCell('A3').value = birimAdi.toUpperCase()
-  wsA4Ihtiyac.getCell('A3').font = { name: 'Times New Roman', size: 11, bold: true }
+  wsA4Ihtiyac.getCell('A3').value = birimAdi
+  wsA4Ihtiyac.getCell('A3').font = { name: FONT_FAMILY, size: 11, bold: true }
   wsA4Ihtiyac.getCell('A3').alignment = { vertical: 'middle', horizontal: 'center' }
 
   wsA4Ihtiyac.mergeCells('A5:F5')
   wsA4Ihtiyac.getCell('A5').value = `İHTİYAÇ LİSTESİ VE TALEP FORMU`
-  wsA4Ihtiyac.getCell('A5').font = { name: 'Times New Roman', size: 13, bold: true, underline: true }
+  wsA4Ihtiyac.getCell('A5').font = { name: FONT_FAMILY, size: 13, bold: true, underline: true }
   wsA4Ihtiyac.getCell('A5').alignment = { vertical: 'middle', horizontal: 'center' }
   wsA4Ihtiyac.getRow(5).height = 24
 
   // Info Block
   wsA4Ihtiyac.getCell('A7').value = 'Dosya No:'
-  wsA4Ihtiyac.getCell('A7').font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Ihtiyac.getCell('A7').font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Ihtiyac.getCell('B7').value = dosyaNoStr
-  wsA4Ihtiyac.getCell('B7').font = { name: 'Times New Roman', size: 10 }
+  wsA4Ihtiyac.getCell('B7').font = { name: FONT_FAMILY, size: 10 }
 
   wsA4Ihtiyac.getCell('E7').value = 'Tarih:'
-  wsA4Ihtiyac.getCell('E7').font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Ihtiyac.getCell('E7').font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Ihtiyac.getCell('F7').value = dosya?.tarih || new Date().toLocaleDateString('tr-TR')
-  wsA4Ihtiyac.getCell('F7').font = { name: 'Times New Roman', size: 10 }
+  wsA4Ihtiyac.getCell('F7').font = { name: FONT_FAMILY, size: 10 }
 
   wsA4Ihtiyac.getCell('A8').value = 'İşin Konusu:'
-  wsA4Ihtiyac.getCell('A8').font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Ihtiyac.getCell('A8').font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Ihtiyac.mergeCells('B8:F8')
   wsA4Ihtiyac.getCell('B8').value = dosyaKonusu
-  wsA4Ihtiyac.getCell('B8').font = { name: 'Times New Roman', size: 10 }
+  wsA4Ihtiyac.getCell('B8').font = { name: FONT_FAMILY, size: 10 }
 
   // A4 Table Header
   const a4Headers = ['Sıra No', 'Taşınır / Poz No', 'Malzeme / Hizmet / İmalat Tanımı', 'Miktar', 'Birim', 'Açıklama']
@@ -876,7 +856,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   a4Headers.forEach((ah, idx) => {
     const c = a4HeaderRow.getCell(idx + 1)
     c.value = ah
-    c.font = { name: 'Times New Roman', size: 10, bold: true }
+    c.font = { name: FONT_FAMILY, size: 10, bold: true }
     c.fill = softGrayFill
     c.border = thinBorder
     c.alignment = { vertical: 'middle', horizontal: idx === 0 || idx === 3 || idx === 4 ? 'center' : 'left' }
@@ -904,7 +884,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
 
     for (let c = 1; c <= 6; c++) {
       row.getCell(c).border = thinBorder
-      row.getCell(c).font = { name: 'Times New Roman', size: 10 }
+      row.getCell(c).font = { name: FONT_FAMILY, size: 10 }
     }
     a4RowIdx++
   })
@@ -912,37 +892,37 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   // Signatures on A4
   a4RowIdx += 2
   wsA4Ihtiyac.mergeCells(`A${a4RowIdx}:C${a4RowIdx}`)
-  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).value = 'Talep Eden / Hazırlayan Personel'
-  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).value = 'Talep Eden / Hazırlayan Görevli'
+  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Ihtiyac.getCell(`A${a4RowIdx}`).alignment = { horizontal: 'center' }
 
   wsA4Ihtiyac.mergeCells(`D${a4RowIdx}:F${a4RowIdx}`)
-  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).value = 'Birim Amiri / Harcama Yetkilisi'
-  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).value = 'Birim Yetkilisi / Harcama Yetkilisi'
+  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Ihtiyac.getCell(`D${a4RowIdx}`).alignment = { horizontal: 'center' }
 
   a4RowIdx++
   wsA4Ihtiyac.mergeCells(`A${a4RowIdx}:C${a4RowIdx}`)
-  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).value = 'İmza / Kaşe'
-  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).font = { name: 'Times New Roman', size: 9, italic: true }
+  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).value = 'İmza'
+  wsA4Ihtiyac.getCell(`A${a4RowIdx}`).font = { name: FONT_FAMILY, size: 9, italic: true }
   wsA4Ihtiyac.getCell(`A${a4RowIdx}`).alignment = { horizontal: 'center' }
 
   wsA4Ihtiyac.mergeCells(`D${a4RowIdx}:F${a4RowIdx}`)
   wsA4Ihtiyac.getCell(`D${a4RowIdx}`).value = 'İmza / Mühür'
-  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).font = { name: 'Times New Roman', size: 9, italic: true }
+  wsA4Ihtiyac.getCell(`D${a4RowIdx}`).font = { name: FONT_FAMILY, size: 9, italic: true }
   wsA4Ihtiyac.getCell(`D${a4RowIdx}`).alignment = { horizontal: 'center' }
 
   // =========================================================================
-  // SAYFA 5: 📑 A4 - ONAY BELGESİ & HARCAMA TALİMATI (PRINTABLE A4 SHEET)
+  // SAYFA 5: 📑 A4 - DOĞRUDAN TEMİN ONAY BELGESİ (HARCAMA TALİMATI)
   // =========================================================================
-  const wsA4Onay = workbook.addWorksheet('📑 A4 - Doğrudan Temin Onayı', {
-    properties: { tabColor: { argb: 'FF7C3AED' } },
+  const wsA4Onay = workbook.addWorksheet('A4 - Doğrudan Temin Onayı', {
     pageSetup: {
       paperSize: 9,
       orientation: 'portrait',
       fitToPage: true,
       fitToWidth: 1,
-      fitToHeight: 0
+      fitToHeight: 0,
+      margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
     },
     views: [{ showGridLines: true }]
   })
@@ -954,13 +934,13 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   ]
 
   wsA4Onay.mergeCells('A1:C1')
-  wsA4Onay.getCell('A1').value = `${kurumAdi.toUpperCase()}`
-  wsA4Onay.getCell('A1').font = { name: 'Times New Roman', size: 12, bold: true }
+  wsA4Onay.getCell('A1').value = kurumAdi
+  wsA4Onay.getCell('A1').font = { name: FONT_FAMILY, size: 12, bold: true }
   wsA4Onay.getCell('A1').alignment = { horizontal: 'center' }
 
   wsA4Onay.mergeCells('A2:C2')
   wsA4Onay.getCell('A2').value = `DOĞRUDAN TEMİN ONAY BELGESİ (HARCAMA TALİMATI)`
-  wsA4Onay.getCell('A2').font = { name: 'Times New Roman', size: 12, bold: true, underline: true }
+  wsA4Onay.getCell('A2').font = { name: FONT_FAMILY, size: 12, bold: true, underline: true }
   wsA4Onay.getCell('A2').alignment = { horizontal: 'center' }
   wsA4Onay.getRow(2).height = 24
 
@@ -972,7 +952,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     ['5', 'Bütçe Tertibi & Yılı:', `${dosya?.butce_yili || '2026'} / ${dosya?.butce_kodu || '03.2'}`],
     ['6', 'Yaklaşık Maliyet Tutarı (KDV Hariç):', { formula: `'${kalemlerSheetName}'!J${kalemTotalRow}` }],
     ['7', 'Kullanılabilir Ödenek Tutarı:', { formula: `'${kalemlerSheetName}'!J${kalemTotalRow}` }],
-    ['8', 'Piyasa Fiyat Araştırması Görevlileri:', komisyon.map(k => k.ad_soyad || k.personel_adi).filter(Boolean).join(', ') || 'Satınalma Komisyonu'],
+    ['8', 'Piyasa Fiyat Araştırması Görevlileri:', komisyon.map(k => k.ad_soyad || k.personel_adi).filter(Boolean).join(', ') || 'Satınalma Görevlileri'],
     ['9', 'Açıklamalar / Gerekçe:', '4734 Sayılı Kanun Madde 22/d uyarınca doğrudan temin usulüyle yapılması uygundur.']
   ]
 
@@ -982,21 +962,21 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     wsA4Onay.getCell(`A${oRow}`).value = f[0]
     wsA4Onay.getCell(`A${oRow}`).alignment = { horizontal: 'center', vertical: 'middle' }
     wsA4Onay.getCell(`A${oRow}`).border = thinBorder
-    wsA4Onay.getCell(`A${oRow}`).font = { name: 'Times New Roman', size: 10, bold: true }
+    wsA4Onay.getCell(`A${oRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
 
     wsA4Onay.getCell(`B${oRow}`).value = f[1]
-    wsA4Onay.getCell(`B${oRow}`).font = { name: 'Times New Roman', size: 10, bold: true }
+    wsA4Onay.getCell(`B${oRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
     wsA4Onay.getCell(`B${oRow}`).fill = softGrayFill
     wsA4Onay.getCell(`B${oRow}`).border = thinBorder
     wsA4Onay.getCell(`B${oRow}`).alignment = { vertical: 'middle' }
 
     wsA4Onay.getCell(`C${oRow}`).value = f[2] as any
-    wsA4Onay.getCell(`C${oRow}`).font = { name: 'Times New Roman', size: 10 }
+    wsA4Onay.getCell(`C${oRow}`).font = { name: FONT_FAMILY, size: 10 }
     wsA4Onay.getCell(`C${oRow}`).border = thinBorder
     wsA4Onay.getCell(`C${oRow}`).alignment = { vertical: 'middle' }
     if (f[0] === '6' || f[0] === '7') {
       wsA4Onay.getCell(`C${oRow}`).numFmt = '#,##0.00 "₺"'
-      wsA4Onay.getCell(`C${oRow}`).font = { name: 'Times New Roman', size: 11, bold: true }
+      wsA4Onay.getCell(`C${oRow}`).font = { name: FONT_FAMILY, size: 11, bold: true }
     }
     oRow++
   }
@@ -1005,7 +985,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   oRow += 2
   wsA4Onay.mergeCells(`A${oRow}:C${oRow}`)
   wsA4Onay.getCell(`A${oRow}`).value = 'HARCAMA YETKİLİSİ ONAYI'
-  wsA4Onay.getCell(`A${oRow}`).font = { name: 'Times New Roman', size: 11, bold: true }
+  wsA4Onay.getCell(`A${oRow}`).font = { name: FONT_FAMILY, size: 11, bold: true }
   wsA4Onay.getCell(`A${oRow}`).fill = softGrayFill
   wsA4Onay.getCell(`A${oRow}`).alignment = { horizontal: 'center' }
   wsA4Onay.getCell(`A${oRow}`).border = thinBorder
@@ -1013,23 +993,145 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   oRow++
   wsA4Onay.mergeCells(`A${oRow}:C${oRow}`)
   wsA4Onay.getCell(`A${oRow}`).value = 'Yukarıda belirtilen harcamanın 4734 Sayılı Kanun Md. 22/d uyarınca doğrudan temin usulüyle yapılması UYGUNDUR.'
-  wsA4Onay.getCell(`A${oRow}`).font = { name: 'Times New Roman', size: 10, italic: true }
+  wsA4Onay.getCell(`A${oRow}`).font = { name: FONT_FAMILY, size: 10, italic: true }
   wsA4Onay.getCell(`A${oRow}`).alignment = { horizontal: 'center' }
   wsA4Onay.getCell(`A${oRow}`).border = thinBorder
 
   oRow++
   wsA4Onay.mergeCells(`A${oRow}:C${oRow}`)
   wsA4Onay.getCell(`A${oRow}`).value = 'Harcama Yetkilisi\nAdı Soyadı / Ünvanı\nİmza ve Mühür'
-  wsA4Onay.getCell(`A${oRow}`).font = { name: 'Times New Roman', size: 10, bold: true }
+  wsA4Onay.getCell(`A${oRow}`).font = { name: FONT_FAMILY, size: 10, bold: true }
   wsA4Onay.getCell(`A${oRow}`).alignment = { horizontal: 'center', wrapText: true }
   wsA4Onay.getRow(oRow).height = 40
-  wsA4Onay.getCell(`A${oRow}`).border = thinBorder
+  wsA4Onay.getCell(`A${oRow}`).border = boxBorder
 
   // =========================================================================
-  // SAYFA 6: 👥 GÖREVLENDİRME & KOMİSYON LİSTESİ
+  // SAYFA 6: 📑 A4 - PİYASA FİYAT ARAŞTIRMA TUTANAĞI (RESMİ BASKIYA HAZIR)
   // =========================================================================
-  const wsKom = workbook.addWorksheet('👥 Komisyon ve Görevliler', {
-    properties: { tabColor: { argb: 'FF6D28D9' } },
+  const wsA4Piyasa = workbook.addWorksheet('A4 - Piyasa Fiyat Tutanağı', {
+    pageSetup: {
+      paperSize: 9,
+      orientation: 'landscape',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      margins: { left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 }
+    },
+    views: [{ showGridLines: true }]
+  })
+
+  wsA4Piyasa.columns = [
+    { width: 6 }, // A: Sıra
+    { width: 34 }, // B: Kalem
+    { width: 10 }, // C: Birim
+    { width: 12 }, // D: Miktar
+    { width: 18 }, // E: Firma 1
+    { width: 18 }, // F: Firma 2
+    { width: 18 }, // G: Firma 3
+    { width: 22 } // H: En Uygun Teklif
+  ]
+
+  wsA4Piyasa.mergeCells('A1:H1')
+  wsA4Piyasa.getCell('A1').value = `${kurumAdi} - ${birimAdi}`
+  wsA4Piyasa.getCell('A1').font = { name: FONT_FAMILY, size: 12, bold: true }
+  wsA4Piyasa.getCell('A1').alignment = { horizontal: 'center' }
+
+  wsA4Piyasa.mergeCells('A2:H2')
+  wsA4Piyasa.getCell('A2').value = `PİYASA FİYAT ARAŞTIRMASI TUTANAĞI`
+  wsA4Piyasa.getCell('A2').font = { name: FONT_FAMILY, size: 12, bold: true, underline: true }
+  wsA4Piyasa.getCell('A2').alignment = { horizontal: 'center' }
+
+  wsA4Piyasa.getCell('A4').value = `İşin Konusu: ${dosyaKonusu} | Dosya No: ${dosyaNoStr}`
+  wsA4Piyasa.mergeCells('A4:H4')
+  wsA4Piyasa.getCell('A4').font = { name: FONT_FAMILY, size: 10, italic: true }
+
+  const pHeaders = [
+    'Sıra',
+    'İhtiyaç Kalemi Tanımı',
+    'Birim',
+    'Miktar',
+    effectiveFirms[0]?.unvan || '1. Firma',
+    effectiveFirms[1]?.unvan || '2. Firma',
+    effectiveFirms[2]?.unvan || '3. Firma',
+    'En Uygun Teklif (₺)'
+  ]
+
+  const pHeaderRow = wsA4Piyasa.getRow(6)
+  pHeaderRow.height = 22
+  pHeaders.forEach((ph, idx) => {
+    const c = pHeaderRow.getCell(idx + 1)
+    c.value = ph
+    c.font = { name: FONT_FAMILY, size: 10, bold: true }
+    c.fill = softGrayFill
+    c.border = thinBorder
+    c.alignment = { vertical: 'middle', horizontal: idx === 0 || idx === 2 ? 'center' : idx >= 3 ? 'right' : 'left' }
+  })
+
+  let pRowIdx = 7
+  kalemler.forEach((_, idx) => {
+    const r = wsA4Piyasa.getRow(pRowIdx)
+    r.height = 20
+
+    r.getCell(1).value = idx + 1
+    r.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' }
+
+    r.getCell(2).value = { formula: `'${kalemlerSheetName}'!E${idx + 5}` }
+    r.getCell(3).value = { formula: `'${kalemlerSheetName}'!F${idx + 5}` }
+    r.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' }
+
+    r.getCell(4).value = { formula: `'${kalemlerSheetName}'!G${idx + 5}` }
+    r.getCell(4).numFmt = '#,##0.00'
+    r.getCell(4).alignment = { vertical: 'middle', horizontal: 'right' }
+
+    // Teklifler sheet formulas
+    r.getCell(5).value = { formula: `'Teklifler & Piyasa'!E${idx + 5}` }
+    r.getCell(5).numFmt = '#,##0.00 "₺"'
+
+    r.getCell(6).value = { formula: `'Teklifler & Piyasa'!G${idx + 5}` }
+    r.getCell(6).numFmt = '#,##0.00 "₺"'
+
+    r.getCell(7).value = { formula: `'Teklifler & Piyasa'!I${idx + 5}` }
+    r.getCell(7).numFmt = '#,##0.00 "₺"'
+
+    const lastColLetterOfTeklif = getColumnLetter(totalColsCount - 1)
+    r.getCell(8).value = { formula: `'Teklifler & Piyasa'!${lastColLetterOfTeklif}${idx + 5}` }
+    r.getCell(8).numFmt = '#,##0.00 "₺"'
+    r.getCell(8).font = { name: FONT_FAMILY, size: 10, bold: true }
+
+    for (let c = 1; c <= 8; c++) {
+      r.getCell(c).border = thinBorder
+      r.getCell(c).font = r.getCell(c).font || { name: FONT_FAMILY, size: 10 }
+    }
+    pRowIdx++
+  })
+
+  // Piyasa Araştırması İmzaları
+  pRowIdx += 2
+  wsA4Piyasa.mergeCells(`A${pRowIdx}:D${pRowIdx}`)
+  wsA4Piyasa.getCell(`A${pRowIdx}`).value = 'Piyasa Fiyat Araştırma Görevlisi'
+  wsA4Piyasa.getCell(`A${pRowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsA4Piyasa.getCell(`A${pRowIdx}`).alignment = { horizontal: 'center' }
+
+  wsA4Piyasa.mergeCells(`E${pRowIdx}:H${pRowIdx}`)
+  wsA4Piyasa.getCell(`E${pRowIdx}`).value = 'Piyasa Fiyat Araştırma Görevlisi'
+  wsA4Piyasa.getCell(`E${pRowIdx}`).font = { name: FONT_FAMILY, size: 10, bold: true }
+  wsA4Piyasa.getCell(`E${pRowIdx}`).alignment = { horizontal: 'center' }
+
+  pRowIdx++
+  wsA4Piyasa.mergeCells(`A${pRowIdx}:D${pRowIdx}`)
+  wsA4Piyasa.getCell(`A${pRowIdx}`).value = 'Adı Soyadı / İmza'
+  wsA4Piyasa.getCell(`A${pRowIdx}`).font = { name: FONT_FAMILY, size: 9, italic: true }
+  wsA4Piyasa.getCell(`A${pRowIdx}`).alignment = { horizontal: 'center' }
+
+  wsA4Piyasa.mergeCells(`E${pRowIdx}:H${pRowIdx}`)
+  wsA4Piyasa.getCell(`E${pRowIdx}`).value = 'Adı Soyadı / İmza'
+  wsA4Piyasa.getCell(`E${pRowIdx}`).font = { name: FONT_FAMILY, size: 9, italic: true }
+  wsA4Piyasa.getCell(`E${pRowIdx}`).alignment = { horizontal: 'center' }
+
+  // =========================================================================
+  // SAYFA 7: GÖREVLENDİRME & KOMİSYON LİSTESİ
+  // =========================================================================
+  const wsKom = workbook.addWorksheet('Komisyon ve Görevliler', {
     views: [{ showGridLines: true }]
   })
 
@@ -1045,19 +1147,19 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   wsKom.mergeCells('A1:F1')
   const komTitle = wsKom.getCell('A1')
   komTitle.value = `${dosyaNoStr} - DOĞRUDAN TEMİN GÖREVLENDİRME VE KOMİSYON LİSTESİ`
-  komTitle.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
-  komTitle.fill = primaryHeaderFill
+  komTitle.font = { name: FONT_FAMILY, size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
+  komTitle.fill = headerFillOfficial
   komTitle.alignment = { vertical: 'middle', horizontal: 'center' }
   wsKom.getRow(1).height = 26
 
-  const komHeaders = ['Sıra', 'Adı Soyadı', 'Ünvanı / Mesleği', 'Komisyon Türü', 'Görevi / Rolü', 'İmza ve Onay Durumu']
+  const komHeaders = ['Sıra', 'Adı Soyadı', 'Ünvanı / Mesleği', 'Komisyon Türü', 'Görevi / Rolü', 'İmza ve Görev Durumu']
   const komHeaderRow = wsKom.getRow(3)
   komHeaderRow.height = 24
   komHeaders.forEach((kh, idx) => {
     const c = komHeaderRow.getCell(idx + 1)
     c.value = kh
-    c.font = whiteHeaderFont
-    c.fill = purpleHeaderFill
+    c.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+    c.fill = subHeaderFillOfficial
     c.border = thinBorder
     c.alignment = { vertical: 'middle', horizontal: idx === 0 ? 'center' : 'left' }
   })
@@ -1099,24 +1201,25 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     row.getCell(1).value = idx + 1
     row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' }
     row.getCell(2).value = m.ad_soyad || m.personel_adi || ''
-    row.getCell(2).font = { name: 'Segoe UI', size: 10, bold: true }
+    row.getCell(2).font = { name: FONT_FAMILY, size: 10, bold: true }
     row.getCell(3).value = m.unvan || '-'
     row.getCell(4).value = m.komisyon_turu || 'Doğrudan Temin Görevlendirmesi'
     row.getCell(5).value = m.rol || m.gorev || 'Üye'
-    row.getCell(6).value = '✅ Görevlendirme Onaylandı'
+    row.getCell(6).value = 'Görevlendirme Onaylandı'
 
     for (let c = 1; c <= 6; c++) {
-      row.getCell(c).border = thinBorder
-      if (idx % 2 === 1) row.getCell(c).fill = zebraFill
+      const cell = row.getCell(c)
+      cell.font = cell.font || { name: FONT_FAMILY, size: 10 }
+      cell.border = thinBorder
+      if (idx % 2 === 1) cell.fill = zebraFill
     }
     komRowIdx++
   })
 
   // =========================================================================
-  // SAYFA 7: 📜 KİK ŞABLON & BELGE ENVANTERİ
+  // SAYFA 8: KİK ŞABLON & BELGE ENVANTERİ
   // =========================================================================
-  const wsSablon = workbook.addWorksheet('📜 Belge ve Şablon Envanteri', {
-    properties: { tabColor: { argb: 'FFD97706' } },
+  const wsSablon = workbook.addWorksheet('Belge ve Şablon Envanteri', {
     views: [{ showGridLines: true }]
   })
 
@@ -1132,8 +1235,8 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   wsSablon.mergeCells('A1:F1')
   const sabTitle = wsSablon.getCell('A1')
   sabTitle.value = `${dosyaNoStr} - 4734 SAYILI KİK DOĞRUDAN TEMİN STANDART ŞABLON VE EVRAK ENVANTERİ`
-  sabTitle.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
-  sabTitle.fill = primaryHeaderFill
+  sabTitle.font = { name: FONT_FAMILY, size: 12, bold: true, color: { argb: 'FFFFFFFF' } }
+  sabTitle.fill = headerFillOfficial
   sabTitle.alignment = { vertical: 'middle', horizontal: 'center' }
   wsSablon.getRow(1).height = 26
 
@@ -1141,7 +1244,7 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     'Sıra',
     'Standart Şablon / Belge Adı',
     'Süreç Aşaması',
-    'Şablon Dosyası (.html / .tsx)',
+    'Şablon Dosyası (.html / .docx)',
     'Mevzuat Maddesi',
     'Belgenin Amacı ve Hukuki Niteliği'
   ]
@@ -1150,8 +1253,8 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
   sabHeaders.forEach((sh, idx) => {
     const c = sabHeaderRow.getCell(idx + 1)
     c.value = sh
-    c.font = whiteHeaderFont
-    c.fill = amberHeaderFill
+    c.font = { name: FONT_FAMILY, size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+    c.fill = subHeaderFillOfficial
     c.border = thinBorder
     c.alignment = { vertical: 'middle', horizontal: idx === 0 ? 'center' : 'left' }
   })
@@ -1187,16 +1290,17 @@ export async function exportDogrudanTeminMasterExcel(data: MasterExcelExportData
     row.getCell(1).value = idx + 1
     row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' }
     row.getCell(2).value = sd[1]
-    row.getCell(2).font = { name: 'Segoe UI', size: 10, bold: true }
+    row.getCell(2).font = { name: FONT_FAMILY, size: 10, bold: true }
     row.getCell(3).value = sd[2]
     row.getCell(4).value = sd[3]
-    row.getCell(4).font = { name: 'Consolas', size: 9 }
     row.getCell(5).value = sd[4]
     row.getCell(6).value = sd[5]
 
     for (let c = 1; c <= 6; c++) {
-      row.getCell(c).border = thinBorder
-      if (idx % 2 === 1) row.getCell(c).fill = zebraFill
+      const cell = row.getCell(c)
+      cell.font = cell.font || { name: FONT_FAMILY, size: 10 }
+      cell.border = thinBorder
+      if (idx % 2 === 1) cell.fill = zebraFill
     }
     sabRowIdx++
   })
