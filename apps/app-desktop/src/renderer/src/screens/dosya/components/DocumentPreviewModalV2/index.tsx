@@ -15,6 +15,20 @@ export function DocumentPreviewModalV2({
   isModal = false,
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const [isBalloon, setIsBalloon] = useState(false);
+  const [prevDocKey, setPrevDocKey] = useState<string | null>(documentId);
+
+  // Belge değiştiğinde yüzen balon durumunu sıfırla
+  if (documentId !== prevDocKey) {
+    setPrevDocKey(documentId);
+    if (isBalloon) {
+      setIsBalloon(false);
+    }
+  }
+
+  const handleClose = React.useCallback(() => {
+    setIsBalloon(false);
+    onClose();
+  }, [onClose]);
 
   const {
     isLoading,
@@ -73,10 +87,7 @@ export function DocumentPreviewModalV2({
       <FloatingDocumentBubble
         documentTitle={docTitle}
         onExpand={() => setIsBalloon(false)}
-        onClose={() => {
-          setIsBalloon(false);
-          onClose();
-        }}
+        onClose={handleClose}
         onPrint={handlePrint}
         onPdf={handlePdf}
         isPrinting={isPrinting}
@@ -95,7 +106,7 @@ export function DocumentPreviewModalV2({
     >
       {/* Header Bar */}
       <DocumentPreviewHeader
-        onClose={onClose}
+        onClose={handleClose}
         documentTitle={docTitle}
         zoomMode={zoomMode}
         manualZoom={manualZoom}

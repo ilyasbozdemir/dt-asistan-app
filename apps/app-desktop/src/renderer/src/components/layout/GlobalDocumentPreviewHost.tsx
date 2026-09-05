@@ -10,6 +10,7 @@ export const GlobalDocumentPreviewHost: React.FC = () => {
 
   return (
     <DocumentPreviewModalV2
+      key={`${documentId}-${dosyaId || "default"}`}
       isOpen={isOpen}
       documentId={documentId}
       dosyaId={dosyaId}

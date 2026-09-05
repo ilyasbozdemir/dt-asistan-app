@@ -40,7 +40,7 @@ export function SubScreen({
 }: SubScreenProps): React.JSX.Element {
   const { activeTabPath } = useTabStore()
   const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
-  const { openDocument, closeDocument } = useGlobalDocumentPreviewStore()
+  const { openDocument, closeDocument, isOpen: isGlobalOpen } = useGlobalDocumentPreviewStore()
 
   useEffect(() => {
     if (!previewDocumentId && onClosePreview) {
@@ -48,7 +48,12 @@ export function SubScreen({
     }
   }, [previewDocumentId, onClosePreview, closeDocument])
 
-
+  // Global modal kapandığında alt ekranın lokal preview state'ini sıfırla
+  useEffect(() => {
+    if (!isGlobalOpen && previewDocumentId && onClosePreview) {
+      onClosePreview()
+    }
+  }, [isGlobalOpen, previewDocumentId, onClosePreview])
 
   useEffect(() => {
     document.title = `${title} - Doğrudan Temin`
@@ -59,10 +64,15 @@ export function SubScreen({
       openDocument({
         documentId: previewDocumentId.replace('.html', ''),
         dosyaId: activeDosyaId || undefined,
-        invitedFirms
+        invitedFirms,
+        onClose: () => {
+          if (onClosePreview) {
+            onClosePreview()
+          }
+        }
       })
     }
-  }, [previewDocumentId, activeDosyaId, invitedFirms, openDocument])
+  }, [previewDocumentId, activeDosyaId, invitedFirms, openDocument, onClosePreview])
 
   useEffect(() => {
     if (!activeDosyaId) return
