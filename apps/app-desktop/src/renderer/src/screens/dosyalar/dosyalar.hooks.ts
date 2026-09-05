@@ -70,13 +70,31 @@ export interface TeminDosyasi {
   created_at: string
   updated_at: string
   birim_adi?: string | null
+  irtibat_ad?: string | null
+  onaylayan_ad?: string | null
+  sunan_ad?: string | null
+  hazirlayan_ad?: string | null
+  talep_eden_ad?: string | null
 }
 
 const fetchDosyalar = async (): Promise<TeminDosyasi[]> => {
   if (!window.electron) return []
   const res = await window.electron.ipcRenderer.invoke(
     'db:query',
-    'SELECT d.*, b.birim_adi FROM DATA_TeminDosyasi d LEFT JOIN TANIM_Birim b ON d.birim_id = b.id ORDER BY COALESCE(d.dosya_acilis_tarihi, d.created_at) DESC, d.id DESC'
+    `SELECT d.*, b.birim_adi,
+      p_irtibat.ad_soyad AS irtibat_ad,
+      p_onay.ad_soyad AS onaylayan_ad,
+      p_sunan.ad_soyad AS sunan_ad,
+      p_hazir.ad_soyad AS hazirlayan_ad,
+      p_talep.ad_soyad AS talep_eden_ad
+    FROM DATA_TeminDosyasi d 
+    LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
+    LEFT JOIN TANIM_Personel p_irtibat ON d.irtibat_yetkilisi_id = p_irtibat.id
+    LEFT JOIN TANIM_Personel p_onay ON d.onay_personel_id = p_onay.id
+    LEFT JOIN TANIM_Personel p_sunan ON d.sunan_personel_id = p_sunan.id
+    LEFT JOIN TANIM_Personel p_hazir ON d.hazirlayan_personel_id = p_hazir.id
+    LEFT JOIN TANIM_Personel p_talep ON d.talep_eden_personel_id = p_talep.id
+    ORDER BY COALESCE(d.dosya_acilis_tarihi, d.created_at) DESC, d.id DESC`
   )
   if (!res.success) throw new Error(res.error)
   return res.data

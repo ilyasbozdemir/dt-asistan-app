@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
+  ChevronRight,
   ClipboardList,
   DownloadCloud,
   FileText,
   Gavel,
   Moon,
+  MoreHorizontal,
   Printer,
+  Sparkles,
   Sun
 } from 'lucide-react'
 import { useTheme } from '../providers/ThemeProvider'
@@ -20,7 +23,19 @@ export function Header(): React.JSX.Element {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
+  const [hoveredSubMenu, setHoveredSubMenu] = useState<string | null>(null)
   const { activeDosyaId } = useWorkspaceStore()
+
+  // Ekran genişliği takibi (Dinamik taşma menüsü hesaplaması için)
+  const [windowWidth, setWindowWidth] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280
+  )
+
+  useEffect(() => {
+    const handleResize = (): void => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Mod Seçici Durumu: 'dogrudan_temin' (KİK 22) veya 'ihale' (KİK 19 / 21)
   const [procurementMode, setProcurementMode] = useState<'dogrudan_temin' | 'ihale'>(() => {
@@ -30,7 +45,11 @@ export function Header(): React.JSX.Element {
     )
   })
 
+  // Mod geçiş animasyonu ve bildirim durumu
+  const [switchFeedback, setSwitchFeedback] = useState<string | null>(null)
+
   const handleModeChange = (mode: 'dogrudan_temin' | 'ihale'): void => {
+    if (mode === procurementMode) return
     setProcurementMode(mode)
     localStorage.setItem('temin_procurement_mode', mode)
     window.dispatchEvent(
@@ -38,6 +57,15 @@ export function Header(): React.JSX.Element {
         detail: { mode }
       })
     )
+
+    const message =
+      mode === 'dogrudan_temin'
+        ? 'Doğrudan Temin Modu (KİK Md. 22) Aktif'
+        : 'İhale Süreçleri Modu (KİK Md. 19 / 21) Aktif'
+    setSwitchFeedback(message)
+    setTimeout(() => {
+      setSwitchFeedback(null)
+    }, 2400)
   }
 
   const handleCloseWorkspace = async (): Promise<void> => {
@@ -67,6 +95,7 @@ export function Header(): React.JSX.Element {
     function handleClickOutside(e: MouseEvent): void {
       if (menuBar && !menuBar.contains(e.target as Node)) {
         setActiveMenu(null)
+        setHoveredSubMenu(null)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -385,6 +414,10 @@ export function Header(): React.JSX.Element {
           label: 'Geliştirici Araçları (DevTools)',
           onClick: () => window.electron?.ipcRenderer.send('window-toggle-devtools')
         },
+        {
+          label: 'Test Verisi Tohumla (Dev Seed)',
+          onClick: () => navigate({ to: '/ayarlar', search: { tab: 'developer' } as any })
+        },
         { divider: true },
         {
           label: 'Kullanım Kılavuzu & Yardım',
@@ -403,28 +436,62 @@ export function Header(): React.JSX.Element {
     }
   ]
 
+  const isDt = procurementMode === 'dogrudan_temin'
+
+  // Ekran daraldıkça menülerin taşmasını önleyen dinamik hesaplama
+  const maxVisibleMenus = (() => {
+    if (windowWidth >= 1520) return 7
+    if (windowWidth >= 1340) return 5
+    if (windowWidth >= 1180) return 4
+    if (windowWidth >= 1020) return 3
+    return 2
+  })()
+
+  const visibleMenus = menus.slice(0, maxVisibleMenus)
+  const overflowMenus = menus.slice(maxVisibleMenus)
+
   return (
     <header
-      className="flex flex-col bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shrink-0 z-50 shadow-xs transition-all duration-300 relative select-none"
+      className="flex flex-col bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shrink-0 z-50 shadow-xs transition-all duration-300 relative select-none"
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
+      {/* Üst Vurgu Çizgisi: Seçilen moda göre şık renk tonu */}
+      <div
+        className={`h-[2px] w-full transition-all duration-500 bg-gradient-to-r ${
+          isDt
+            ? 'from-blue-500 via-sky-400 to-indigo-500'
+            : 'from-indigo-600 via-purple-500 to-pink-500'
+        }`}
+      />
+
+      {/* Geçiş Bildirimi Toast (Mikro Bildirim) */}
+      {switchFeedback && (
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/95 dark:bg-slate-100/95 text-white dark:text-slate-900 text-xs font-semibold shadow-xl border border-slate-700/50 dark:border-slate-300/50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>{switchFeedback}</span>
+        </div>
+      )}
+
       {/* ÜST SATIR: Menü Çubuğu, Mod Switcher ve Sistem/Pencere Kontrolleri */}
       <div className="h-9 flex items-center justify-between px-3 border-b border-slate-200/40 dark:border-slate-800/40 relative">
-        {/* SOL: VS Code-Style Menu Bar */}
+        {/* SOL: VS Code-Style Responsive Menu Bar */}
         <div
           id="native-menu-bar"
-          className="flex items-center gap-1 z-50 text-[11px] font-medium"
+          className="flex items-center gap-0.5 z-50 text-[11px] font-medium"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          {menus.map((m) => (
+          {/* Görünür Ana Menüler */}
+          {visibleMenus.map((m) => (
             <div key={m.name} className="relative">
               <button
                 onClick={() => {
                   if (m.onClick) {
                     m.onClick()
                     setActiveMenu(null)
+                    setHoveredSubMenu(null)
                   } else {
                     setActiveMenu(activeMenu === m.name ? null : m.name)
+                    setHoveredSubMenu(null)
                   }
                 }}
                 onMouseEnter={() => {
@@ -434,9 +501,11 @@ export function Header(): React.JSX.Element {
                     handleMenuHover(m.name)
                   }
                 }}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                className={`px-2 py-1 rounded-md transition-colors cursor-pointer whitespace-nowrap ${
                   activeMenu === m.name
-                    ? 'bg-slate-200/80 dark:bg-slate-800 text-slate-900 dark:text-white'
+                    ? isDt
+                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold'
+                      : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold'
                     : 'text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -455,7 +524,11 @@ export function Header(): React.JSX.Element {
                           item.onClick?.()
                           setActiveMenu(null)
                         }}
-                        className="w-full text-left px-3 py-1.5 hover:bg-blue-600 hover:text-white text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs"
+                        className={`w-full text-left px-3 py-1.5 ${
+                          isDt
+                            ? 'hover:bg-blue-600 hover:text-white'
+                            : 'hover:bg-indigo-600 hover:text-white'
+                        } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
                       >
                         <span>{item.label}</span>
                       </button>
@@ -465,6 +538,102 @@ export function Header(): React.JSX.Element {
               )}
             </div>
           ))}
+
+          {/* TAŞAN MENÜLER (...) BUTONU VE KASKAD (CASCADE) AÇILIR LİSTE */}
+          {overflowMenus.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setActiveMenu(activeMenu === '__overflow__' ? null : '__overflow__')
+                  setHoveredSubMenu(null)
+                }}
+                onMouseEnter={() => {
+                  if (activeMenu && activeMenu !== '__overflow__') {
+                    setActiveMenu('__overflow__')
+                  }
+                }}
+                title="Diğer Menüler"
+                className={`p-1 px-1.5 rounded-md transition-colors cursor-pointer flex items-center justify-center ${
+                  activeMenu === '__overflow__' || overflowMenus.some((m) => m.name === activeMenu)
+                    ? isDt
+                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold'
+                      : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold'
+                    : 'text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+
+              {activeMenu === '__overflow__' && (
+                <div className="absolute top-full left-0 mt-1 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1 z-[110] animate-in fade-in slide-in-from-top-1">
+                  <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 mb-1">
+                    Diğer Menüler
+                  </div>
+                  {overflowMenus.map((om) => (
+                    <div
+                      key={om.name}
+                      className="relative"
+                      onMouseEnter={() => setHoveredSubMenu(om.name)}
+                    >
+                      <button
+                        onClick={() => {
+                          if (om.onClick) {
+                            om.onClick()
+                            setActiveMenu(null)
+                            setHoveredSubMenu(null)
+                          } else {
+                            setHoveredSubMenu(hoveredSubMenu === om.name ? null : om.name)
+                          }
+                        }}
+                        className={`w-full text-left px-3 py-1.5 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 ${
+                          hoveredSubMenu === om.name
+                            ? isDt
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-indigo-600 text-white'
+                            : isDt
+                              ? 'hover:bg-blue-50 dark:hover:bg-blue-950/60'
+                              : 'hover:bg-indigo-50 dark:hover:bg-indigo-950/60'
+                        } transition-colors cursor-pointer`}
+                      >
+                        <span>{om.name}</span>
+                        {om.items && <ChevronRight className="w-3.5 h-3.5 opacity-70" />}
+                      </button>
+
+                      {/* Kaskad Alt Menü (Nested Flyout) */}
+                      {hoveredSubMenu === om.name && om.items && (
+                        <div className="absolute top-0 left-full ml-1 w-56 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1 z-[120] animate-in fade-in slide-in-from-left-1">
+                          {om.items.map((item, idx) =>
+                            item.divider ? (
+                              <div
+                                key={idx}
+                                className="h-[1px] bg-slate-150 dark:bg-slate-800 my-1"
+                              />
+                            ) : (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  item.onClick?.()
+                                  setActiveMenu(null)
+                                  setHoveredSubMenu(null)
+                                }}
+                                className={`w-full text-left px-3 py-1.5 ${
+                                  isDt
+                                    ? 'hover:bg-blue-600 hover:text-white'
+                                    : 'hover:bg-indigo-600 hover:text-white'
+                                } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
+                              >
+                                <span>{item.label}</span>
+                              </button>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* SAĞ: Mod Geçiş Switch'i + Sistem Kontrolleri (Tema, Eşitleme, Bildirim, vb.) */}
@@ -472,31 +641,33 @@ export function Header(): React.JSX.Element {
           className="flex items-center space-x-2 pr-36"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          {/* Kompakt ve Şık Mod Seçici (Doğrudan Temin vs İhale Süreçleri) */}
-          <div className="flex items-center bg-slate-200/70 dark:bg-slate-800/70 p-0.5 rounded-md border border-slate-300/50 dark:border-slate-700/50 text-[11px] font-medium mr-1.5 shadow-2xs">
+          {/* Kompakt, Premium Segmented Mod Seçici */}
+          <div className="flex items-center bg-slate-200/80 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-300/60 dark:border-slate-700/60 text-[11px] font-medium mr-1.5 shadow-2xs transition-all">
             <button
               onClick={() => handleModeChange('dogrudan_temin')}
               title="Doğrudan Temin (KİK Md. 22)"
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded transition-all cursor-pointer ${
-                procurementMode === 'dogrudan_temin'
-                  ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-semibold shadow-xs'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                isDt
+                  ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-semibold shadow-xs ring-1 ring-blue-500/20'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              <FileText className="w-3 h-3" />
+              <FileText className={`w-3.5 h-3.5 ${isDt ? 'text-blue-600 dark:text-blue-400' : ''}`} />
               <span>Doğrudan Temin</span>
+              {isDt && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
             </button>
             <button
               onClick={() => handleModeChange('ihale')}
               title="Açık İhale (Md. 19) & Pazarlık Usulü (Md. 21)"
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded transition-all cursor-pointer ${
-                procurementMode === 'ihale'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                !isDt
+                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs ring-1 ring-indigo-500/20'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              <Gavel className="w-3 h-3" />
+              <Gavel className={`w-3.5 h-3.5 ${!isDt ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
               <span>İhale Süreçleri</span>
+              {!isDt && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />}
             </button>
           </div>
 
@@ -552,13 +723,28 @@ export function Header(): React.JSX.Element {
         <WindowControls />
       </div>
 
-      {/* ALT SATIR: Çalışma Dosyası Seçimi & Süreç Butonları */}
+      {/* ALT SATIR: Çalışma Dosyası Seçimi, Mod Rozeti & Süreç Butonları */}
       <div
         className="min-h-9 py-1.5 flex items-center justify-between bg-slate-100/50 dark:bg-slate-950/20 border-t border-slate-200/30 dark:border-slate-800/30 select-none px-4 relative"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
-        {/* Sol tarafta dengeleyici boşluk */}
-        <div className="w-[280px] shrink-0 hidden lg:block"></div>
+        {/* Sol: İnce ve Şık Aktif Çalışma Modu Rozeti */}
+        <div className="w-[280px] shrink-0 hidden lg:flex items-center">
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-300 border ${
+              isDt
+                ? 'bg-blue-50/90 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/40'
+                : 'bg-indigo-50/90 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/40'
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isDt ? 'bg-blue-500' : 'bg-indigo-500'
+              } animate-pulse`}
+            />
+            <span>{isDt ? 'Doğrudan Temin (Md. 22)' : 'İhale İşlemleri (Md. 19 / 21)'}</span>
+          </div>
+        </div>
 
         {/* Orta: Temin Seçici */}
         <div className="flex-1 flex justify-center">
@@ -570,10 +756,14 @@ export function Header(): React.JSX.Element {
           <div className="flex items-center gap-2 shrink-0 min-w-[280px] justify-end">
             <Link
               to="/takip"
-              className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50 border border-indigo-100/50 dark:border-indigo-900/30 rounded-md transition-colors shadow-2xs hover:shadow-xs"
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all shadow-2xs hover:shadow-xs border ${
+                isDt
+                  ? 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 border-blue-200/50 dark:border-blue-900/30'
+                  : 'text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50 border-indigo-200/50 dark:border-indigo-900/30'
+              }`}
             >
               <ClipboardList className="w-3.5 h-3.5" />
-              {procurementMode === 'dogrudan_temin' ? 'Süreç & Durum' : 'İhale Takip & Durum'}
+              {isDt ? 'Süreç & Durum' : 'İhale Takip & Durum'}
             </Link>
             <Link
               to="/cikti-merkezi"
