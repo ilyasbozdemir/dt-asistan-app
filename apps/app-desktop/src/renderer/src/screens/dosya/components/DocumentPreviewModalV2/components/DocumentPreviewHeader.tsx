@@ -44,6 +44,7 @@ interface DocumentPreviewHeaderProps {
   dropdownRef: React.RefObject<HTMLDivElement | null>;
   handleRefreshFromDb: () => Promise<void>;
   handlePdf: () => Promise<void>;
+  handleDocx?: () => Promise<void>;
   handleOpenPdfInNewTab: () => Promise<void>;
   onToggleBalloon?: () => void;
   dosyaId?: number | null;
@@ -73,6 +74,7 @@ export function DocumentPreviewHeader({
   dropdownRef,
   handleRefreshFromDb,
   handlePdf,
+  handleDocx,
   handleOpenPdfInNewTab,
   onToggleBalloon,
   dosyaId: propDosyaId,
@@ -338,6 +340,19 @@ export function DocumentPreviewHeader({
                 <Download className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                 <span>PDF Olarak Kaydet</span>
               </button>
+
+              {handleDocx && (
+                <button
+                  onClick={async () => {
+                    setDownloadOpen(false);
+                    await handleDocx();
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/60 font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2.5 cursor-pointer transition-colors border-t border-slate-100 dark:border-slate-800/50"
+                >
+                  <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span>Word (DOCX) Olarak Kaydet</span>
+                </button>
+              )}
             </div>
           )}
         </div>

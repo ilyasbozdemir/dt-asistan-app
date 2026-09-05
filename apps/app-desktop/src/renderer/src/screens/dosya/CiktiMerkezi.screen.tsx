@@ -24,6 +24,7 @@ import { BelgeAksiyonlari } from "../../components/ui/BelgeAksiyonlari";
 import { CiktiPresetManager } from "./components/CiktiPresetManager";
 import { CiktiSidebar } from "./components/CiktiSidebar";
 import { CiktiPreviewModal } from "./components/CiktiPreviewModal";
+import { buildExportFileName, buildBatchZipFileName } from "../../utils/exportFileName";
 
 const normalizeForMatch = (str: string) => {
   return str
@@ -390,7 +391,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
   };
 
   const handleAction = async (
-    action: "pdf" | "udf" | "docx" | "print",
+    action: "pdf" | "udf" | "docx" | "print" | "zip",
     specificIds?: number[],
   ) => {
     const targetIds = specificIds ? new Set(specificIds) : selectedIds;
@@ -404,11 +405,69 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
     try {
       const selectedSablons = sablons.filter((s) => targetIds.has(s.id));
 
+      if (action === "zip") {
+        const zipFiles: Array<{
+          name: string;
+          html: string;
+          format: "pdf" | "docx" | "udf";
+        }> = [];
+
+        for (const sablon of selectedSablons) {
+          const html = renderHtml(sablon);
+          const pdfFileName = buildExportFileName({
+            dosya: activeDosya,
+            belgeAdi: sablon.ad,
+            extension: "pdf",
+          });
+          const docxFileName = buildExportFileName({
+            dosya: activeDosya,
+            belgeAdi: sablon.ad,
+            extension: "docx",
+          });
+
+          zipFiles.push({
+            name: pdfFileName,
+            html: String(html || ""),
+            format: "pdf",
+          });
+          zipFiles.push({
+            name: docxFileName,
+            html: String(html || ""),
+            format: "docx",
+          });
+        }
+
+        const defaultZipName = buildBatchZipFileName({
+          dosya: activeDosya,
+          customSuffix: "Tum_Belgeler",
+        });
+
+        const res = await window.electron.ipcRenderer.invoke(
+          "belge:export-zip",
+          {
+            fileName: defaultZipName,
+            files: zipFiles,
+          },
+        );
+
+        if (res && res.success && !res.canceled) {
+          await logDocument("Toplu Belge Paketi", defaultZipName);
+          showToast(
+            `ZIP arşivi başarıyla kaydedildi (${selectedSablons.length} belge).`,
+            "success",
+          );
+        }
+        return;
+      }
+
       for (const sablon of selectedSablons) {
         const html = renderHtml(sablon);
-        // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
-        const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, "_").trim();
-        const fileBase = `${safeName}_${activeDosyaId}`;
+        const fileNameWithExt = buildExportFileName({
+          dosya: activeDosya,
+          belgeAdi: sablon.ad,
+          extension: action === "print" ? "pdf" : action,
+        });
+        const fileBase = fileNameWithExt.replace(/\.[^.]+$/, "");
         const docKey = (sablon.dosya_adi || "").replace(/\.html$/, "");
 
         if (action === "pdf") {

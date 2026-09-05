@@ -2,6 +2,7 @@ import { ipcMain, dialog, BrowserWindow, shell, app } from 'electron'
 import { join } from 'path'
 import fs from 'fs'
 import Mustache from 'mustache'
+import AdmZip from 'adm-zip'
 import { renderDocxBuffer } from '../docxService'
 import { renderPdfBuffer } from '../pdfService'
 
@@ -100,12 +101,22 @@ export function registerDocumentIpcHandlers(): void {
     }
   }
 
-  // 1. DOCX Export
-  handleDoc('belge:export-docx', 'export-docx', async (_, htmlContent: string, fileName?: string) => {
+  // 1. DOCX Export (supports direct params and object payload)
+  handleDoc('belge:export-docx', 'export-docx', async (_, payload: any, legacyFileName?: string) => {
     try {
+      const htmlContent =
+        typeof payload === 'string'
+          ? payload
+          : payload?.html || payload?.htmlContent || ''
+      const rawFileName =
+        (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName || payload?.filename)) ||
+        legacyFileName ||
+        'Belge.docx'
+      const fileName = rawFileName.endsWith('.docx') ? rawFileName : `${rawFileName}.docx`
+
       const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'Word (DOCX) Olarak Kaydet',
-        defaultPath: fileName ? `${fileName}.docx` : 'Cikti.docx',
+        defaultPath: fileName,
         filters: [{ name: 'Word Dosyası', extensions: ['docx'] }]
       })
       if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
@@ -118,13 +129,38 @@ export function registerDocumentIpcHandlers(): void {
       return { success: false, error: err.message }
     }
   })
+  ipcMain.handle('app:export-docx', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-docx']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
+  ipcMain.handle('app:save-docx-as', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-docx']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
+  ipcMain.handle('save-docx-as', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-docx']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
 
   // 2. UDF Export
-  handleDoc('belge:export-udf', 'export-udf', async (_, htmlContent: string, fileName?: string) => {
+  handleDoc('belge:export-udf', 'export-udf', async (_, payload: any, legacyFileName?: string) => {
     try {
+      const htmlContent =
+        typeof payload === 'string'
+          ? payload
+          : payload?.html || payload?.htmlContent || ''
+      const rawFileName =
+        (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName || payload?.filename)) ||
+        legacyFileName ||
+        'Belge.udf'
+      const fileName = rawFileName.endsWith('.udf') ? rawFileName : `${rawFileName}.udf`
+
       const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'UDF Olarak Kaydet',
-        defaultPath: fileName ? `${fileName}.udf` : 'Cikti.udf',
+        defaultPath: fileName,
         filters: [{ name: 'UYAP Dokümanı', extensions: ['udf'] }]
       })
       if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
@@ -138,10 +174,24 @@ export function registerDocumentIpcHandlers(): void {
       return { success: false, error: err.message }
     }
   })
+  ipcMain.handle('app:export-udf', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-udf']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
 
   // 3. Print HTML
-  handleDoc('belge:print-html', 'print-html', async (_, htmlContent: string, printOptions?: any) => {
+  handleDoc('belge:print-html', 'print-html', async (_, payload: any, legacyOptions?: any) => {
     try {
+      const htmlContent =
+        typeof payload === 'string'
+          ? payload
+          : payload?.html || payload?.htmlContent || ''
+      const printOptions =
+        (typeof payload === 'object' && (payload?.options || payload?.printOptions)) ||
+        legacyOptions ||
+        (typeof payload === 'object' ? payload : {})
+
       const win = new BrowserWindow({ show: false })
       await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
 
@@ -169,6 +219,11 @@ export function registerDocumentIpcHandlers(): void {
       return { success: false, error: err.message }
     }
   })
+  ipcMain.handle('app:print-html', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:print-html']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
 
   // 4. Preview PDF
   handleDoc('belge:preview-pdf', 'preview-pdf', async (_, htmlContent: string) => {
@@ -181,23 +236,27 @@ export function registerDocumentIpcHandlers(): void {
   })
 
   // 5. Open PDF External
-  handleDoc('belge:open-pdf-external', 'open-pdf-external', async (_, htmlContent: string) => {
+  handleDoc('belge:open-pdf-external', 'open-pdf-external', async (_, payload: any) => {
     try {
-      const pdfBuffer = await renderPdfBuffer(htmlContent)
+      const html = typeof payload === 'string' ? payload : (payload?.html || payload?.htmlContent || '')
+      const pdfBuffer = await renderPdfBuffer(html)
       const tempPath = join(app.getPath('temp'), `hakim-pro_preview_${Date.now()}.pdf`)
       fs.writeFileSync(tempPath, pdfBuffer)
       await shell.openPath(tempPath)
-      return { success: true }
+      return { success: true, tempPath }
     } catch (err: any) {
       return { success: false, error: err.message }
     }
   })
 
-  // 5.1 Save PDF As
-  handleDoc('app:save-pdf-as', 'save-pdf-as', async (_, payload: any) => {
+  // 5.1 Save PDF As (and export-pdf)
+  handleDoc('belge:export-pdf', 'export-pdf', async (_, payload: any, legacyOptions?: any, legacyFileName?: string) => {
     try {
       const html = typeof payload === 'string' ? payload : (payload?.html || payload?.htmlContent || '')
-      const defaultFilename = (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName)) || 'Belge.pdf'
+      const defaultFilename =
+        (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName || payload?.filename)) ||
+        legacyFileName ||
+        'Belge.pdf'
 
       const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'PDF Olarak Kaydet',
@@ -213,6 +272,33 @@ export function registerDocumentIpcHandlers(): void {
       return { success: false, error: err.message }
     }
   })
+  handleDoc('app:save-pdf-as', 'save-pdf-as', async (_, payload: any, legacyOptions?: any, legacyFileName?: string) => {
+    try {
+      const html = typeof payload === 'string' ? payload : (payload?.html || payload?.htmlContent || '')
+      const defaultFilename =
+        (typeof payload === 'object' && (payload?.defaultFilename || payload?.fileName || payload?.filename)) ||
+        legacyFileName ||
+        'Belge.pdf'
+
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'PDF Olarak Kaydet',
+        defaultPath: defaultFilename.endsWith('.pdf') ? defaultFilename : `${defaultFilename}.pdf`,
+        filters: [{ name: 'PDF Dosyası', extensions: ['pdf'] }]
+      })
+      if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+      const pdfBuffer = await renderPdfBuffer(html)
+      fs.writeFileSync(filePath, pdfBuffer)
+      return { success: true, filePath }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  })
+  ipcMain.handle('app:export-pdf', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-pdf']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
+  })
 
   // 5.2 Open PDF Preview in New Tab / Window
   handleDoc('app:open-pdf-preview', 'open-pdf-preview', async (_, payload: any) => {
@@ -226,6 +312,77 @@ export function registerDocumentIpcHandlers(): void {
     } catch (err: any) {
       return { success: false, error: err.message }
     }
+  })
+
+  // 5.3 Batch Export as ZIP (Toplu İndirme Desteği)
+  handleDoc('belge:export-zip', 'export-zip', async (_, payload: any, legacyZipName?: string) => {
+    try {
+      let items: Array<{ name: string; html?: string; content?: string | Buffer; format?: 'pdf' | 'docx' | 'udf' | 'html' }> = []
+      let defaultZipName = legacyZipName || 'Toplu_Belgeler.zip'
+
+      if (Array.isArray(payload)) {
+        items = payload
+      } else if (payload && typeof payload === 'object') {
+        items = payload.items || payload.files || []
+        defaultZipName = payload.zipName || payload.defaultFilename || defaultZipName
+      }
+
+      if (!defaultZipName.endsWith('.zip')) {
+        defaultZipName = `${defaultZipName}.zip`
+      }
+
+      if (items.length === 0) {
+        return { success: false, error: 'Arşivlenecek belge bulunamadı' }
+      }
+
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'Toplu Belgeleri ZIP Olarak Kaydet',
+        defaultPath: defaultZipName,
+        filters: [{ name: 'ZIP Arşivi', extensions: ['zip'] }]
+      })
+      if (canceled || !filePath) return { success: false, error: 'İptal edildi' }
+
+      const zip = new AdmZip()
+
+      for (const item of items) {
+        const format = (item.format || 'pdf').toLowerCase()
+        const rawName = item.name || 'Belge'
+        const cleanName = rawName.replace(/[/\\:*?"<>|]/g, '_').replace(/\.(pdf|docx|udf|html)$/i, '')
+
+        if (Buffer.isBuffer(item.content)) {
+          zip.addFile(`${cleanName}.${format}`, item.content)
+        } else {
+          const html = item.html || (typeof item.content === 'string' ? item.content : '')
+          if (format === 'docx') {
+            const docxBuf = await renderDocxBuffer(html)
+            zip.addFile(`${cleanName}.docx`, docxBuf)
+          } else if (format === 'udf') {
+            const stripHtml = html.replace(/<[^>]+>/g, ' ')
+            const udfContent = `<?xml version="1.0" encoding="utf-8"?>\n<Document>\n<content>\n<![CDATA[\n${stripHtml}\n]]>\n</content>\n</Document>`
+            zip.addFile(`${cleanName}.udf`, Buffer.from(udfContent, 'utf-8'))
+          } else if (format === 'html') {
+            zip.addFile(`${cleanName}.html`, Buffer.from(html, 'utf-8'))
+          } else {
+            // Default PDF
+            const pdfBuf = await renderPdfBuffer(html)
+            zip.addFile(`${cleanName}.pdf`, pdfBuf)
+          }
+        }
+      }
+
+      const zipBuffer = zip.toBuffer()
+      fs.writeFileSync(filePath, zipBuffer)
+
+      return { success: true, filePath, count: items.length }
+    } catch (err: any) {
+      console.error('ZIP export hatası:', err)
+      return { success: false, error: err.message }
+    }
+  })
+  ipcMain.handle('app:export-zip', async (e, ...args) => {
+    const handler = (ipcMain as any)._events?.['belge:export-zip']
+    if (typeof handler === 'function') return handler(e, ...args)
+    return { success: false, error: 'Handler not found' }
   })
 
   // 6. Export HTML

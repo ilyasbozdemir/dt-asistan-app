@@ -16,6 +16,7 @@ import {
   resolveTemplateConfig,
   TEMPLATE_OPTIONS,
 } from "../templateResolver";
+import { buildExportFileName } from "../../../../../utils/exportFileName";
 
 interface UseDocumentPreviewDataParams {
   isOpen: boolean;
@@ -91,6 +92,7 @@ export function useDocumentPreviewData({
 
   const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
   const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
+  const [dosyaRecord, setDosyaRecord] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">(
     "portrait",
@@ -157,6 +159,13 @@ export function useDocumentPreviewData({
         if (!isMounted) return;
 
         const payloadData = payloadRes?.success ? payloadRes.data : {};
+        if (payloadData.dosya) {
+          setDosyaRecord(payloadData.dosya);
+        } else if (activeDosyaId) {
+          queryExecutor("SELECT * FROM DATA_TeminDosyasi WHERE id = ?", [activeDosyaId]).then((res) => {
+            if (res && res[0]) setDosyaRecord(res[0]);
+          });
+        }
         const personelList = payloadData.personelListesi || [];
         const fileFirms = payloadData.fileFirms || [];
         const combinedFirms = payloadData.firmaListesi || [];
@@ -617,14 +626,18 @@ export function useDocumentPreviewData({
     }
   };
 
-  // 7. PDF Export
+  // 7. PDF Export (Standardized {butceYili}-{dtNo}-{belgeAdi}.pdf)
   const handlePdf = async (): Promise<void> => {
     setIsPrinting(true);
     try {
       const htmlContent = getCompiledHtml();
-      const defaultFilename = `${activeTemplateConf?.name || "Belge"}_${
-        new Date().toISOString().slice(0, 10)
-      }.pdf`;
+      const defaultFilename = buildExportFileName({
+        dosya: dosyaRecord,
+        butceYili: (formData as any)?.butceYili || (formData as any)?.butce_yili || dosyaRecord?.butce_yili,
+        teminNo: (formData as any)?.teminNo || (formData as any)?.temin_no || dosyaRecord?.temin_no,
+        belgeAdi: activeTemplateConf?.name || "Belge",
+        extension: "pdf",
+      });
 
       try {
         const res = await window.electron.ipcRenderer.invoke("app:save-pdf-as", {
@@ -642,6 +655,34 @@ export function useDocumentPreviewData({
       }
     } catch (e) {
       console.error("PDF kaydetme hatası:", e);
+    } finally {
+      setIsPrinting(false);
+      setDownloadOpen(false);
+    }
+  };
+
+  // 7.1 Word (DOCX) Export (Standardized {butceYili}-{dtNo}-{belgeAdi}.docx)
+  const handleDocx = async (): Promise<void> => {
+    setIsPrinting(true);
+    try {
+      const htmlContent = getCompiledHtml();
+      const defaultFilename = buildExportFileName({
+        dosya: dosyaRecord,
+        butceYili: (formData as any)?.butceYili || (formData as any)?.butce_yili || dosyaRecord?.butce_yili,
+        teminNo: (formData as any)?.teminNo || (formData as any)?.temin_no || dosyaRecord?.temin_no,
+        belgeAdi: activeTemplateConf?.name || "Belge",
+        extension: "docx",
+      });
+
+      const res = await window.electron.ipcRenderer.invoke("belge:export-docx", {
+        html: htmlContent,
+        defaultFilename,
+      });
+      if (res && res.success) {
+        alert("Word (DOCX) belgesi başarıyla kaydedildi.");
+      }
+    } catch (e) {
+      console.error("Word (DOCX) kaydetme hatası:", e);
     } finally {
       setIsPrinting(false);
       setDownloadOpen(false);
@@ -718,6 +759,7 @@ export function useDocumentPreviewData({
   return {
     isLoading,
     activeDosyaId,
+    dosyaRecord,
     selectedDocId,
     setSelectedDocId,
     resolvedId,
@@ -755,6 +797,7 @@ export function useDocumentPreviewData({
     handleSaveToDb,
     handlePrint,
     handlePdf,
+    handleDocx,
     handleOpenPdfInNewTab,
     handleRefreshFromDb,
   };

@@ -68,6 +68,7 @@ export function DocumentPreviewModalV2({
     handleSaveToDb,
     handlePrint,
     handlePdf,
+    handleDocx,
     handleOpenPdfInNewTab,
     handleRefreshFromDb,
   } = useDocumentPreviewData({
@@ -127,6 +128,7 @@ export function DocumentPreviewModalV2({
         dropdownRef={dropdownRef}
         handleRefreshFromDb={handleRefreshFromDb}
         handlePdf={handlePdf}
+        handleDocx={handleDocx}
         handleOpenPdfInNewTab={handleOpenPdfInNewTab}
         onToggleBalloon={() => setIsBalloon(true)}
         dosyaId={propDosyaId}

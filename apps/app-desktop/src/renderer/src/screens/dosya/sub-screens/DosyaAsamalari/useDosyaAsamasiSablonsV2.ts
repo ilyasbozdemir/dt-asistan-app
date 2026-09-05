@@ -5,6 +5,7 @@ import { useCiktiMerkeziData } from '../../CiktiMerkezi.hooks'
 import { useDocumentLogger } from '../../../../hooks/useDocumentLogger'
 import { parseStatusAndName } from '../../../system/utils/statusUtils'
 import Mustache from 'mustache'
+import { buildExportFileName } from '../../../../utils/exportFileName'
 
 // -----------------------------------------------------------------------
 // Sabitler – tüm dosya aşaması ekranları tarafından paylaşılır
@@ -325,29 +326,44 @@ export function useDosyaAsamasiSablonsV2() {
   }
 
   const executeExportPdf = async (html: string, filenameTitle?: string) => {
-    const titleForFile = filenameTitle || previewData?.title || 'Belge'
-    const filename = `${titleForFile}.pdf`
-    await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, titleForFile)
+    const rawTitle = filenameTitle || previewData?.title || 'Belge'
+    const fileNameWithExt = buildExportFileName({
+      dosya: activeDosya,
+      belgeAdi: rawTitle,
+      extension: 'pdf'
+    })
+    const fileBase = fileNameWithExt.replace(/\.[^.]+$/, '')
+    await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, fileBase)
     if (previewData?.title) {
-      await logDocument(previewData.title, filename)
+      await logDocument(previewData.title, fileNameWithExt)
     }
   }
 
   const executeExportDocx = async (html: string, filenameTitle?: string) => {
-    const titleForFile = filenameTitle || previewData?.title || 'Belge'
-    const filename = `${titleForFile}.docx`
-    await (window as any).electron.ipcRenderer.invoke('export-docx', html, titleForFile)
+    const rawTitle = filenameTitle || previewData?.title || 'Belge'
+    const fileNameWithExt = buildExportFileName({
+      dosya: activeDosya,
+      belgeAdi: rawTitle,
+      extension: 'docx'
+    })
+    const fileBase = fileNameWithExt.replace(/\.[^.]+$/, '')
+    await (window as any).electron.ipcRenderer.invoke('export-docx', html, fileBase)
     if (previewData?.title) {
-      await logDocument(previewData.title, filename)
+      await logDocument(previewData.title, fileNameWithExt)
     }
   }
 
   const executeExportUdf = async (html: string, filenameTitle?: string) => {
-    const titleForFile = filenameTitle || previewData?.title || 'Belge'
-    const filename = `${titleForFile}.udf`
-    await (window as any).electron.ipcRenderer.invoke('export-udf', html, titleForFile)
+    const rawTitle = filenameTitle || previewData?.title || 'Belge'
+    const fileNameWithExt = buildExportFileName({
+      dosya: activeDosya,
+      belgeAdi: rawTitle,
+      extension: 'udf'
+    })
+    const fileBase = fileNameWithExt.replace(/\.[^.]+$/, '')
+    await (window as any).electron.ipcRenderer.invoke('export-udf', html, fileBase)
     if (previewData?.title) {
-      await logDocument(previewData.title, filename)
+      await logDocument(previewData.title, fileNameWithExt)
     }
   }
 
@@ -374,10 +390,12 @@ export function useDosyaAsamasiSablonsV2() {
   const quickExport = async (sablon: any, format: 'pdf' | 'docx' | 'udf') => {
     const html = await renderHtmlForSablon(sablon)
     if (!html) return
-    // TR karakterleri dosya adında korunuyor; yalnızca OS için yasak karakterler temizleniyor
-    const safeName = sablon.ad.replace(/[/\\:*?"<>|]/g, '_').trim()
-    const fileBase = `${safeName}_${activeDosyaId}`
-    const filename = `${fileBase}.${format}`
+    const fileNameWithExt = buildExportFileName({
+      dosya: activeDosya,
+      belgeAdi: sablon.ad,
+      extension: format
+    })
+    const fileBase = fileNameWithExt.replace(/\.[^.]+$/, '')
 
     if (format === 'pdf') {
       await (window as any).electron.ipcRenderer.invoke('export-pdf', html, null, fileBase)
@@ -387,7 +405,7 @@ export function useDosyaAsamasiSablonsV2() {
       await (window as any).electron.ipcRenderer.invoke('export-udf', html, fileBase)
     }
 
-    await logDocument(sablon.ad, filename)
+    await logDocument(sablon.ad, fileNameWithExt)
   }
 
   const quickOpenExternal = async (sablon: any) => {
