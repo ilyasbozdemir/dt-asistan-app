@@ -6,6 +6,7 @@ import { useDocumentLogger } from '../../../../hooks/useDocumentLogger'
 import { parseStatusAndName } from '../../../system/utils/statusUtils'
 import Mustache from 'mustache'
 import { buildExportFileName } from '../../../../utils/exportFileName'
+import { useGlobalDocumentPreviewStore } from '../../../../store/globalDocumentPreviewStore'
 
 // -----------------------------------------------------------------------
 // Sabitler – tüm dosya aşaması ekranları tarafından paylaşılır
@@ -252,11 +253,6 @@ export function useDosyaAsamasiSablons() {
   }, [sablonAd, sablons, masterHtml, activeDosyaId, dosyaContext])
 
   const handleOpenPreviewForSablon = async (sablon: any, title: string, overrideCtx?: any) => {
-    if (!masterHtml) {
-      alert('Master şablon yüklenemedi, veriler bekleniyor.')
-      return
-    }
-
     const processPath = sablon.route_path || sablon.dosya_adi || ''
     const currentCtx = contextsByPath[processPath] || dosyaContext
     const snapshotCtx = overrideCtx
@@ -273,6 +269,16 @@ export function useDosyaAsamasiSablons() {
       dosyaAdi: sablon.dosya_adi
     })
     setPreviewModalOpen(true)
+
+    const docId = (sablon.dosya_adi || sablon.route_path || '').replace(/\.html$/, '')
+    useGlobalDocumentPreviewStore.getState().openDocument({
+      documentId: docId,
+      dosyaId: activeDosyaId || undefined,
+      documentTitle: title,
+      onClose: () => {
+        setPreviewModalOpen(false)
+      }
+    })
   }
 
   const refreshSnapshot = async () => {

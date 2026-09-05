@@ -17,6 +17,7 @@ import { useSettingsStore } from "../../../../../store/settingsStore";
 import { PrintDropdownButtonV2 } from "@renderer/screens/dosya/components/PrintDropdownButtonV2";
 import { normalizeForMatch } from "../../DosyaAsamalari/useDosyaAsamasiSablonsV2";
 import { exportDogrudanTeminMasterExcel } from "../../../../../services/excelExportService";
+import { useGlobalDocumentPreviewStore } from "../../../../../store/globalDocumentPreviewStore";
 
 export function MalzemeTablosu({
   state,
@@ -473,8 +474,6 @@ export function MalzemeTablosu({
   }, [stageSablons, komisyonSablons]);
 
   const handleOpenSablonByDosyaAdi = (targetKey: string) => {
-    if (!onSablonClick || !sablons || sablons.length === 0) return;
-
     const ALIAS_MAP: Record<string, string[]> = {
       "teklif-isteme-mektubu": [
         "fiyat-arastirma-mektubu",
@@ -525,42 +524,51 @@ export function MalzemeTablosu({
 
     let foundSablon: any = null;
 
-    // 1. Exact match on dosya_adi (with or without .html)
-    for (const key of candidateKeys) {
-      foundSablon = sablons.find((s: any) => {
-        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "").toLowerCase().trim();
-        return fileBase === key;
-      });
-      if (foundSablon) break;
-    }
-
-    // 2. Exact match on route_path or id
-    if (!foundSablon) {
+    if (sablons && sablons.length > 0) {
+      // 1. Exact match on dosya_adi (with or without .html)
       for (const key of candidateKeys) {
         foundSablon = sablons.find((s: any) => {
-          const route = (s.route_path || s.id || "").toLowerCase().trim();
-          return route === key;
+          const fileBase = (s.dosya_adi || "").replace(/\.html$/, "").toLowerCase().trim();
+          return fileBase === key;
         });
         if (foundSablon) break;
       }
-    }
 
-    // 3. Fallback: Normalized title exact match to prevent cross-contamination
-    if (!foundSablon) {
-      for (const key of candidateKeys) {
-        const normKey = normalizeForMatch(key);
-        foundSablon = sablons.find((s: any) => {
-          const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
-          return normSablonName === normKey;
-        });
-        if (foundSablon) break;
+      // 2. Exact match on route_path or id
+      if (!foundSablon) {
+        for (const key of candidateKeys) {
+          foundSablon = sablons.find((s: any) => {
+            const route = (s.route_path || s.id || "").toLowerCase().trim();
+            return route === key;
+          });
+          if (foundSablon) break;
+        }
+      }
+
+      // 3. Fallback: Normalized title exact match to prevent cross-contamination
+      if (!foundSablon) {
+        for (const key of candidateKeys) {
+          const normKey = normalizeForMatch(key);
+          foundSablon = sablons.find((s: any) => {
+            const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
+            return normSablonName === normKey;
+          });
+          if (foundSablon) break;
+        }
       }
     }
 
-    if (foundSablon) {
+    if (foundSablon && onSablonClick) {
       onSablonClick(foundSablon, foundSablon.ad);
     } else {
-      console.warn("Şablon bulunamadı:", targetKey);
+      useGlobalDocumentPreviewStore.getState().openDocument({
+        documentId: cleanTarget,
+        dosyaId: activeDosyaId || undefined,
+        documentTitle: targetKey
+          .replace(/-/g, " ")
+          .replace(/\.html$/, "")
+          .toLocaleUpperCase("tr-TR"),
+      });
     }
   };
 

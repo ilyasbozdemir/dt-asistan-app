@@ -7,6 +7,8 @@ import { PoolFirm } from "../hooks/usePiyasaFiyatArastirmasi";
 import { SABLON_ALIAS_MAP } from "../constants/sablonAliases";
 import { BelgeItem, BelgeListesi } from "./BelgeListesi";
 import { formatDateString } from "../../../CiktiMerkezi.contextBuilder";
+import { useGlobalDocumentPreviewStore } from "../../../../../store/globalDocumentPreviewStore";
+import { useWorkspaceStore } from "../../../../../store/workspaceStore";
 
 interface PiyasaFiyatArastirmasiDashboardProps {
   setIsFormOpen: (val: boolean) => void;
@@ -70,48 +72,57 @@ export function PiyasaFiyatArastirmasiDashboard({
   handleSaveToDosya,
   getEstimatedCostTotal,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
-  const handleOpenSablonByDosyaAdi = (targetKey: string) => {
-    if (!handleOpenPreviewForSablon || !sablons || sablons.length === 0) return;
+  const { activeDosyaId } = useWorkspaceStore();
 
+  const handleOpenSablonByDosyaAdi = (targetKey: string) => {
     const cleanTarget = targetKey.replace(/\.html$/, "").toLowerCase().trim();
     const candidateKeys = SABLON_ALIAS_MAP[cleanTarget] || [cleanTarget];
 
     let foundSablon: any = null;
 
-    for (const key of candidateKeys) {
-      foundSablon = sablons.find((s: any) => {
-        const fileBase = (s.dosya_adi || "").replace(/\.html$/, "")
-          .toLowerCase().trim();
-        return fileBase === key;
-      });
-      if (foundSablon) break;
-    }
-
-    if (!foundSablon) {
+    if (sablons && sablons.length > 0) {
       for (const key of candidateKeys) {
         foundSablon = sablons.find((s: any) => {
-          const route = (s.route_path || s.id || "").toLowerCase().trim();
-          return route === key;
+          const fileBase = (s.dosya_adi || "").replace(/\.html$/, "")
+            .toLowerCase().trim();
+          return fileBase === key;
         });
         if (foundSablon) break;
       }
-    }
 
-    if (!foundSablon) {
-      for (const key of candidateKeys) {
-        const normKey = normalizeForMatch(key);
-        foundSablon = sablons.find((s: any) => {
-          const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
-          return normSablonName === normKey;
-        });
-        if (foundSablon) break;
+      if (!foundSablon) {
+        for (const key of candidateKeys) {
+          foundSablon = sablons.find((s: any) => {
+            const route = (s.route_path || s.id || "").toLowerCase().trim();
+            return route === key;
+          });
+          if (foundSablon) break;
+        }
+      }
+
+      if (!foundSablon) {
+        for (const key of candidateKeys) {
+          const normKey = normalizeForMatch(key);
+          foundSablon = sablons.find((s: any) => {
+            const normSablonName = normalizeForMatch(s.ad || s.dosya_adi || "");
+            return normSablonName === normKey;
+          });
+          if (foundSablon) break;
+        }
       }
     }
 
-    if (foundSablon) {
+    if (foundSablon && handleOpenPreviewForSablon) {
       handleOpenPreviewForSablon(foundSablon, foundSablon.ad);
     } else {
-      console.warn("Şablon bulunamadı:", targetKey);
+      useGlobalDocumentPreviewStore.getState().openDocument({
+        documentId: cleanTarget,
+        dosyaId: activeDosyaId || undefined,
+        documentTitle: targetKey
+          .replace(/-/g, " ")
+          .replace(/\.html$/, "")
+          .toLocaleUpperCase("tr-TR"),
+      });
     }
   };
 

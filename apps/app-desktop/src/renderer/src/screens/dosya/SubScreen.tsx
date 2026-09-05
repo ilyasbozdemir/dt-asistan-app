@@ -40,20 +40,7 @@ export function SubScreen({
 }: SubScreenProps): React.JSX.Element {
   const { activeTabPath } = useTabStore()
   const { activeDosyaId, setActiveStarredDocs } = useWorkspaceStore()
-  const { openDocument, closeDocument, isOpen: isGlobalOpen } = useGlobalDocumentPreviewStore()
-
-  useEffect(() => {
-    if (!previewDocumentId && onClosePreview) {
-      closeDocument()
-    }
-  }, [previewDocumentId, onClosePreview, closeDocument])
-
-  // Global modal kapandığında alt ekranın lokal preview state'ini sıfırla
-  useEffect(() => {
-    if (!isGlobalOpen && previewDocumentId && onClosePreview) {
-      onClosePreview()
-    }
-  }, [isGlobalOpen, previewDocumentId, onClosePreview])
+  const { openDocument } = useGlobalDocumentPreviewStore()
 
   useEffect(() => {
     document.title = `${title} - Doğrudan Temin`

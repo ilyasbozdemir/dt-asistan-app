@@ -16,13 +16,17 @@ export function DocumentPreviewModalV2({
 }: DocumentPreviewModalV2Props): React.JSX.Element | null {
   const [isBalloon, setIsBalloon] = useState(false);
   const [prevDocKey, setPrevDocKey] = useState<string | null>(documentId);
+  const [prevIsOpen, setPrevIsOpen] = useState<boolean>(isOpen);
 
-  // Belge değiştiğinde yüzen balon durumunu sıfırla
-  if (documentId !== prevDocKey) {
+  // Belge değiştiğinde veya modal yeniden açıldığında yüzen balon durumunu sıfırla
+  if (documentId !== prevDocKey || (!prevIsOpen && isOpen)) {
     setPrevDocKey(documentId);
+    setPrevIsOpen(isOpen);
     if (isBalloon) {
       setIsBalloon(false);
     }
+  } else if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
   }
 
   const handleClose = React.useCallback(() => {
