@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ilyasbozdemir/hakim-pro-app/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyasbozdemir/hakim-pro-app/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
-  <a href="https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest"><img src="https://img.shields.io/github/v/release/ilyasbozdemir/hakim-pro-app?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
-  <a href="https://github.com/ilyasbozdemir/hakim-pro-app/releases"><img src="https://img.shields.io/github/downloads/ilyasbozdemir/hakim-pro-app/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
+  <a href="https://github.com/ilyasbozdemir/temin-360-app/actions"><img src="https://img.shields.io/github/actions/workflow/status/ilyasbozdemir/temin-360-app/release.yml?style=flat-square&logo=github&label=Build%20Status" alt="Build Status"></a>
+  <a href="https://github.com/ilyasbozdemir/temin-360-app/releases/latest"><img src="https://img.shields.io/github/v/release/ilyasbozdemir/temin-360-app?style=flat-square&logo=github&label=Latest%20Release" alt="Latest Release"></a>
+  <a href="https://github.com/ilyasbozdemir/temin-360-app/releases"><img src="https://img.shields.io/github/downloads/ilyasbozdemir/temin-360-app/total?style=flat-square&logo=github&color=blue" alt="Downloads"></a>
 </p>
 
 **4734 Sayılı Kamu İhale Kanunu Madde 22 kapsamında doğrudan temin yoluyla
@@ -19,9 +19,9 @@ Uygulamanın en güncel sürümünü (Windows `.exe` yükleyicisi, güncelleme
 yansımaları vb.) aşağıdaki resmi kaynaklardan indirebilirsiniz:
 
 👉
-**[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest)**
+**[En Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/temin-360-app/releases/latest)**
 👉
-**[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/hakim-pro-app/releases)**
+**[Tüm Sürümler ve Paketler (Releases Archive)](https://github.com/ilyasbozdemir/temin-360-app/releases)**
 
 _Not: Windows için indirilen `.exe` dosyasını çalıştırarak kurulumu
 tamamlayabilirsiniz. Otomatik güncelleme desteği sayesinde uygulama açıkken yeni

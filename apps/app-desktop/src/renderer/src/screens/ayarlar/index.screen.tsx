@@ -151,7 +151,7 @@ export default function AyarlarScreen(): React.ReactNode {
 
   useEffect(() => {
     if (activeTab === 'developer') {
-      fetch('https://api.github.com/repos/ilyasbozdemir/hakim-pro-app/releases')
+      fetch('https://api.github.com/repos/ilyasbozdemir/temin-360-app/releases')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {

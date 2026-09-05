@@ -79,7 +79,7 @@ HAKİM Pro masaüstü uygulamasının en güncel sürümlerini doğrudan GitHub 
 sayfası üzerinden indirebilirsiniz:
 
 👉
-**[HAKİM Pro Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/hakim-pro-app/releases)**
+**[HAKİM Pro Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/temin-360-app/releases)**
 
 ---
 

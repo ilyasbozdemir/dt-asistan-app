@@ -34,13 +34,13 @@ export default function Home() {
     tag: "v1.0.0-beta.38",
     size: "68.4 MB",
     date: "10.07.2026",
-    url: "https://github.com/ilyasbozdemir/hakim-pro-app/releases",
+    url: "https://github.com/ilyasbozdemir/temin-360-app/releases",
   });
 
   // Fetch GitHub Release info on mount
   useEffect(() => {
     fetch(
-      "https://api.github.com/repos/ilyasbozdemir/hakim-pro-app/releases/latest",
+      "https://api.github.com/repos/ilyasbozdemir/temin-360-app/releases/latest",
     )
       .then((res) => res.json())
       .then((data) => {
@@ -57,7 +57,7 @@ export default function Home() {
             size: sizeMb,
             date: dateStr,
             url: data.html_url ||
-              "https://github.com/ilyasbozdemir/hakim-pro-app/releases",
+              "https://github.com/ilyasbozdemir/temin-360-app/releases",
           });
         }
       })
@@ -222,25 +222,25 @@ export default function Home() {
           <span className="hidden sm:inline w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
             <a
-              href="https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest"
+              href="https://github.com/ilyasbozdemir/temin-360-app/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
               <img
-                src="https://img.shields.io/github/v/release/ilyasbozdemir/hakim-pro-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm"
+                src="https://img.shields.io/github/v/release/ilyasbozdemir/temin-360-app?style=flat-square&logo=github&label=Son%20S%C3%BCr%C3%BCm"
                 alt="Latest Release"
                 className="h-5 rounded"
               />
             </a>
             <a
-              href="https://github.com/ilyasbozdemir/hakim-pro-app/releases"
+              href="https://github.com/ilyasbozdemir/temin-360-app/releases"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block hover:opacity-90 transition-opacity"
             >
               <img
-                src="https://img.shields.io/github/downloads/ilyasbozdemir/hakim-pro-app/total?style=flat-square&logo=github&color=blue"
+                src="https://img.shields.io/github/downloads/ilyasbozdemir/temin-360-app/total?style=flat-square&logo=github&color=blue"
                 alt="Downloads"
                 className="h-5 rounded"
               />
@@ -634,7 +634,7 @@ export default function Home() {
 
           <div className="flex gap-6">
             <a
-              href="https://github.com/ilyasbozdemir/hakim-pro-app"
+              href="https://github.com/ilyasbozdemir/temin-360-app"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-slate-900 dark:hover:text-white transition-colors"

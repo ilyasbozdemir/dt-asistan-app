@@ -192,7 +192,7 @@ export function Footer(): React.JSX.Element {
               <button
                 onClick={() =>
                   openExternal(
-                    "https://github.com/ilyasbozdemir/hakim-pro-app",
+                    "https://github.com/ilyasbozdemir/temin-360-app",
                   )}
                 className="flex items-center gap-2 w-full p-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all font-semibold cursor-pointer group"
               >
@@ -217,7 +217,7 @@ export function Footer(): React.JSX.Element {
               <button
                 onClick={() =>
                   openExternal(
-                    "https://github.com/ilyasbozdemir/hakim-pro-app/issues",
+                    "https://github.com/ilyasbozdemir/temin-360-app/issues",
                   )}
                 className="flex items-center gap-2 w-full p-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
               >

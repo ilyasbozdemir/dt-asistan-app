@@ -83,11 +83,11 @@ export default function Home(): React.JSX.Element {
     tag: "v1.0.4-stable",
     size: "68.4 MB",
     date: "10.07.2026",
-    url: "https://github.com/ilyasbozdemir/hakim-pro-app/releases",
+    url: "https://github.com/ilyasbozdemir/temin-360-app/releases",
     downloadUrlExe:
-      "https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest",
+      "https://github.com/ilyasbozdemir/temin-360-app/releases/latest",
     downloadUrlDmg:
-      "https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest",
+      "https://github.com/ilyasbozdemir/temin-360-app/releases/latest",
   });
 
   // Live Logs state
@@ -151,7 +151,7 @@ export default function Home(): React.JSX.Element {
   // Fetch GitHub Latest Release dynamically
   useEffect(() => {
     fetch(
-      "https://api.github.com/repos/ilyasbozdemir/hakim-pro-app/releases/latest",
+      "https://api.github.com/repos/ilyasbozdemir/temin-360-app/releases/latest",
     )
       .then((res) => res.json())
       .then((data) => {
@@ -174,13 +174,13 @@ export default function Home(): React.JSX.Element {
             size: sizeMb,
             date: dateStr,
             url: data.html_url ||
-              "https://github.com/ilyasbozdemir/hakim-pro-app/releases",
+              "https://github.com/ilyasbozdemir/temin-360-app/releases",
             downloadUrlExe: exeAsset?.browser_download_url ||
               data.html_url ||
-              "https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest",
+              "https://github.com/ilyasbozdemir/temin-360-app/releases/latest",
             downloadUrlDmg: dmgAsset?.browser_download_url ||
               data.html_url ||
-              "https://github.com/ilyasbozdemir/hakim-pro-app/releases/latest",
+              "https://github.com/ilyasbozdemir/temin-360-app/releases/latest",
           });
         }
       })
