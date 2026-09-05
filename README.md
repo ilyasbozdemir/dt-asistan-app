@@ -75,22 +75,21 @@ Sistemdeki tüm resmi evrak ve tutanak şablonları açık kaynaklı ve modüler
 
 ## 📥 Masaüstü Uygulaması İndir (Desktop App Download)
 
-HAKİM Pro masaüstü uygulamasının en güncel sürümlerini doğrudan GitHub Releases
+Temin 360 masaüstü uygulamasının en güncel sürümlerini doğrudan GitHub Releases
 sayfası üzerinden indirebilirsiniz:
 
-👉
-**[HAKİM Pro Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/temin-360-app/releases)**
+👉 **[Temin 360 Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/temin-360-app/releases)**
 
 ---
 
 ## 📂 Monorepo Dizin Yapısı
 
-- **[`apps/app-desktop`](./apps/app-desktop):** Electron + React 19 +
-  TypeScript + TanStack Router + Tailwind CSS + SQLite masaüstü uygulaması.
-- **[`apps/app-web`](./apps/app-web):** Sunucu tarafı veri senkronizasyonu ve
-  Next.js API katmanı.
-- **[`apps/app-landing`](./apps/app-landing):** Tanıtım ve dokümantasyon web
-  sayfası.
+- **[`apps/app-desktop`](./apps/app-desktop):** Electron + React 19 + TypeScript + TanStack Router + Tailwind CSS + SQLite masaüstü uygulaması.
+- **[`apps/app-web`](./apps/app-web):** Sunucu tarafı veri senkronizasyonu ve Next.js API katmanı.
+- **[`apps/app-landing`](./apps/app-landing):** Tanıtım ve dokümantasyon web sayfası.
+- **[`packages/document-templates`](./packages/document-templates):** Mevzuata uyarlanabilir, dinamik resmi evrak ve tutanak şablonları motoru (`@temin360/document-templates`).
+- **[`packages/pdf-generator`](./packages/pdf-generator):** Yüksek performanslı sunucu ve masaüstü PDF derleyicisi (`@temin360/pdf-generator`).
+- **[`packages/database`](./packages/database):** Veritabanı şemaları, SQLite ve Supabase migrasyonları (`@dt/database`).
 
 ---
 

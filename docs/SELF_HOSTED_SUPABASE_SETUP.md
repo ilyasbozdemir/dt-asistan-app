@@ -53,7 +53,7 @@ Bu işlem şunları otomatik olarak kuracaktır:
 
 ---
 
-## ⚙️ 3. Adım: HAKİM Pro Masaüstü Uygulamasını Bağlama
+## ⚙️ 3. Adım: Temin 360 Masaüstü Uygulamasını Bağlama
 
 1. **HAKİM Pro** uygulamasını açın.
 2. Sol menüden **Ayarlar** (`/ayarlar`) ekranına gidin.

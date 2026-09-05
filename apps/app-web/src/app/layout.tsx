@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HAKİM Pro - API Gateway & Entegrasyon Paneli",
+  title: "Temin 360 - Kamu İhale ve Harcama Yönetim Portalı",
   description:
-    "HAKİM Pro masaüstü uygulaması için veri senkronizasyonu ve API entegrasyon yönetim arayüzü.",
+    "Temin 360 masaüstü uygulaması için veri senkronizasyonu ve API entegrasyon yönetim arayüzü.",
 };
 
 export default function RootLayout({
