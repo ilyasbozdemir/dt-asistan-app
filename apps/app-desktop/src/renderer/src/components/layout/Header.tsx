@@ -131,7 +131,7 @@ export function Header(): React.JSX.Element {
         },
         {
           label: "Süreç Akış Haritası (Beta)",
-          onClick: () => navigate({ to: "/surec-akisi" as any }),
+          onClick: () => navigate({ to: "/dt-surec-akisi" as any }),
         },
       ],
     },
@@ -147,10 +147,6 @@ export function Header(): React.JSX.Element {
             {
               label: "Belge Çıktı Merkezi",
               onClick: () => navigate({ to: "/cikti-merkezi" as any }),
-            },
-            {
-              label: "Süreç Akış Haritası (Beta)",
-              onClick: () => navigate({ to: "/surec-akisi" as any }),
             },
             {
               label: "Hızlı Dosya Ekle / Güncelle",

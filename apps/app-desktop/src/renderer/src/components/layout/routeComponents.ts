@@ -42,9 +42,9 @@ import {
 } from '../../screens/dosya/SubScreens.screen'
 
 import TaslakYoneticisi from '../../screens/system/TaslakYoneticisi'
-import SurecAkisiScreen from '../../screens/system/SurecAkisiScreen'
+import DTSurecAkisiScreen from '../../screens/system/DTSurecAkisiScreen'
 
-export const routeComponents: Record<string, React.ComponentType<any>> = {
+export const routeComponents: Record<string, React.ComponentType> = {
   '/': DashboardScreen,
   '/dosyalar': DosyalarScreen,
   '/dosyalar/yeni': YeniDosyaScreen,
@@ -85,6 +85,6 @@ export const routeComponents: Record<string, React.ComponentType<any>> = {
   '/malzemeler/yeni': YeniMalzemeScreen,
   '/hakedis': HarcamaMerkeziScreen,
   '/harcama-merkezi': HarcamaMerkeziScreen,
-  '/surec-akisi': SurecAkisiScreen,
+  '/dt-surec-akisi': DTSurecAkisiScreen,
   '/yardim': YardimScreen
 }
