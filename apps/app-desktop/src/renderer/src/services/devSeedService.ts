@@ -357,7 +357,7 @@ export const devSeedService = {
       {
         ad_soyad: 'Uzm. Dr. Ali Kemal Yılmaz',
         unvan: 'İl Sağlık Müdürü (Harcama Yetkilisi)',
-        birim: 'İl Müdürlüğü',
+        birim: 'Destek Hizmetleri Başkanlığı',
         sicil: '10482',
         tel: '0532 100 0001',
         ep: 'ali.yilmaz@saglik.gov.tr'
@@ -379,28 +379,12 @@ export const devSeedService = {
         ep: 'ayse.kaya@saglik.gov.tr'
       },
       {
-        ad_soyad: 'Mustafa Çelik',
-        unvan: 'Bilgisayar Mühendisi (Piyasa Araştırma Başkanı)',
-        birim: 'Bilgi İşlem Şube Müdürlüğü',
-        sicil: '18902',
-        tel: '0542 400 0004',
-        ep: 'mustafa.celik@saglik.gov.tr'
-      },
-      {
-        ad_soyad: 'Fatma Şahin Korkmaz',
-        unvan: 'Mali Hizmetler Uzmanı (Piyasa Araştırma Üyesi)',
-        birim: 'İdari ve Mali İşler Şube Müdürlüğü',
-        sicil: '16734',
-        tel: '0544 500 0005',
-        ep: 'fatma.sahin@saglik.gov.tr'
-      },
-      {
-        ad_soyad: 'Emre Karaca',
-        unvan: 'Biyomedikal Mühendisi (Muayene Kabul Başkanı)',
-        birim: 'Tıbbi Cihaz ve Biyomedikal Birimi',
-        sicil: '20194',
-        tel: '0555 600 0006',
-        ep: 'emre.karaca@saglik.gov.tr'
+        ad_soyad: 'Selin Gürbüz',
+        unvan: 'Satınalma Memuru (Dosya Hazırlayan)',
+        birim: 'Destek Hizmetleri Başkanlığı',
+        sicil: '22340',
+        tel: '0536 900 0009',
+        ep: 'selin.gurbuz@saglik.gov.tr'
       },
       {
         ad_soyad: 'Zeynep Aktaş',
@@ -411,28 +395,84 @@ export const devSeedService = {
         ep: 'zeynep.aktas@saglik.gov.tr'
       },
       {
+        ad_soyad: 'Fatma Şahin Korkmaz',
+        unvan: 'Mali Hizmetler Uzmanı (Piyasa Araştırma Üyesi)',
+        birim: 'İdari ve Mali İşler Şube Müdürlüğü',
+        sicil: '16734',
+        tel: '0544 500 0005',
+        ep: 'fatma.sahin@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Hakan Öztürk',
+        unvan: 'Mali Hizmetler Memuru',
+        birim: 'İdari ve Mali İşler Şube Müdürlüğü',
+        sicil: '17890',
+        tel: '0538 400 0011',
+        ep: 'hakan.ozturk@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Mustafa Çelik',
+        unvan: 'Bilgisayar Mühendisi (Piyasa Araştırma Başkanı)',
+        birim: 'Bilgi İşlem ve İletişim Şube Müdürlüğü',
+        sicil: '18902',
+        tel: '0542 400 0004',
+        ep: 'mustafa.celik@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Caner Yılmaz',
+        unvan: 'Yazılım ve Ağ Uzmanı',
+        birim: 'Bilgi İşlem ve İletişim Şube Müdürlüğü',
+        sicil: '19034',
+        tel: '0543 500 0012',
+        ep: 'caner.yilmaz@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Emre Karaca',
+        unvan: 'Biyomedikal Mühendisi (Muayene Kabul Başkanı)',
+        birim: 'Tıbbi Cihaz ve Biyomedikal Hizmetler Birimi',
+        sicil: '20194',
+        tel: '0555 600 0006',
+        ep: 'emre.karaca@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Gizem Arslan',
+        unvan: 'Biyomedikal Teknikeri',
+        birim: 'Tıbbi Cihaz ve Biyomedikal Hizmetler Birimi',
+        sicil: '20850',
+        tel: '0554 700 0013',
+        ep: 'gizem.arslan@saglik.gov.tr'
+      },
+      {
         ad_soyad: 'Murat Can Yurt',
         unvan: 'İnşaat Mühendisi (Muayene Kabul Üyesi)',
-        birim: 'İnşaat ve Teknik Hizmetler Birimi',
+        birim: 'İnşaat, Emlak ve Teknik Hizmetler Birimi',
         sicil: '19450',
         tel: '0530 800 0008',
         ep: 'murat.yurt@saglik.gov.tr'
       },
       {
-        ad_soyad: 'Selin Gürbüz',
-        unvan: 'Satınalma Memuru (Dosya Hazırlayan)',
-        birim: 'Destek Hizmetleri Başkanlığı',
-        sicil: '22340',
-        tel: '0536 900 0009',
-        ep: 'selin.gurbuz@saglik.gov.tr'
-      },
-      {
         ad_soyad: 'Burak Erdem',
         unvan: 'Elektrik Teknikeri (İrtibat Görevlisi)',
-        birim: 'Teknik ve Bakım Onarım Birimi',
+        birim: 'İnşaat, Emlak ve Teknik Hizmetler Birimi',
         sicil: '23110',
         tel: '0541 110 0010',
         ep: 'burak.erdem@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Dr. Serdar Tekin',
+        unvan: 'Acil Sağlık Şube Müdürü',
+        birim: 'Acil Sağlık Hizmetleri ve Lojistik Şube Müdürlüğü',
+        sicil: '15400',
+        tel: '0533 900 0014',
+        ep: 'serdar.tekin@saglik.gov.tr'
+      },
+      {
+        ad_soyad: 'Onur Karataş',
+        unvan: 'Lojistik ve Ambulans Filo Sorumlusu',
+        birim: 'Acil Sağlık Hizmetleri ve Lojistik Şube Müdürlüğü',
+        sicil: '24500',
+        tel: '0545 100 0015',
+        ep: 'onur.karatas@saglik.gov.tr'
       }
     ]
 
@@ -467,10 +507,10 @@ export const devSeedService = {
       const roleMap = [
         { rol_kodu: 'harcama_yetkilisi', pId: ids[1] || ids[0] },
         { rol_kodu: 'gerceklestirme_gorevlisi', pId: ids[2] },
-        { rol_kodu: 'hazirlayan', pId: ids[8] || ids[2] },
+        { rol_kodu: 'hazirlayan', pId: ids[3] || ids[2] },
         { rol_kodu: 'talep_eden', pId: ids[2] },
         { rol_kodu: 'sunan_personel', pId: ids[2] },
-        { rol_kodu: 'ilgili_personel', pId: ids[9] || ids[3] }
+        { rol_kodu: 'ilgili_personel', pId: ids[12] || ids[7] }
       ]
 
       for (const rm of roleMap) {
@@ -489,9 +529,16 @@ export const devSeedService = {
    * Birimleri (Tüm alanları, antet ve harcama yetkilisi eşleşmeleriyle) ekler
    */
   async seedBirimler(personelIds: number[] = []): Promise<number[]> {
-    const hyId1 = personelIds[1] || 1 // Destek Hizmetleri Başkanı
-    const ggId1 = personelIds[2] || 2 // Şube Müdürü
-    const memurId = personelIds[8] || personelIds[2] || 1
+    const p1 = personelIds[1] || 1 // Mehmet Ali Özkan (Destek Hizmetleri Başkanı)
+    const p2 = personelIds[2] || 2 // Ayşe Kaya Demir (Şube Müdürü)
+    const p3 = personelIds[3] || 3 // Selin Gürbüz (Satınalma Memuru)
+    const p5 = personelIds[5] || 5 // Fatma Şahin Korkmaz (Mali Hizmetler)
+    const p7 = personelIds[7] || 7 // Mustafa Çelik (Bilgisayar Müh)
+    const p9 = personelIds[9] || 9 // Emre Karaca (Biyomedikal Müh)
+    const p11 = personelIds[11] || 11 // Murat Can Yurt (İnşaat Müh)
+    const p12 = personelIds[12] || 12 // Burak Erdem (Tekniker)
+    const p13 = personelIds[13] || 13 // Dr. Serdar Tekin (Acil Sağlık Müdürü)
+    const p14 = personelIds[14] || 14 // Onur Karataş (Lojistik)
 
     const birimList = [
       {
@@ -509,12 +556,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-DHB',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p2,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
         ayrintili_bilgi_personel: 'Selin Gürbüz - Satınalma Memuru',
-        ilgili_personel_id: memurId
+        ilgili_personel_id: p3
       },
       {
         ad: 'İdari ve Mali İşler Şube Müdürlüğü',
@@ -531,12 +578,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-IMIS',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p2,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
         ayrintili_bilgi_personel: 'Fatma Şahin Korkmaz - Mali Hizmetler Uzmanı',
-        ilgili_personel_id: personelIds[4] || memurId
+        ilgili_personel_id: p5
       },
       {
         ad: 'Bilgi İşlem ve İletişim Şube Müdürlüğü',
@@ -553,12 +600,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-BISM',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p2,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
         ayrintili_bilgi_personel: 'Mustafa Çelik - Bilgisayar Mühendisi',
-        ilgili_personel_id: personelIds[3] || memurId
+        ilgili_personel_id: p7
       },
       {
         ad: 'Tıbbi Cihaz ve Biyomedikal Hizmetler Birimi',
@@ -575,12 +622,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-TCB',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p2,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
         ayrintili_bilgi_personel: 'Emre Karaca - Biyomedikal Mühendisi',
-        ilgili_personel_id: personelIds[5] || memurId
+        ilgili_personel_id: p9
       },
       {
         ad: 'İnşaat, Emlak ve Teknik Hizmetler Birimi',
@@ -597,12 +644,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-IETH',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p2,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
         ayrintili_bilgi_personel: 'Murat Can Yurt - İnşaat Mühendisi',
-        ilgili_personel_id: personelIds[7] || memurId
+        ilgili_personel_id: p11
       },
       {
         ad: 'Acil Sağlık Hizmetleri ve Lojistik Şube Müdürlüğü',
@@ -619,12 +666,12 @@ export const devSeedService = {
         say2000i: '06.01.00.04',
         dtvt_kodu: 'DT-ASHM',
         e_butce: '06.24.01.00',
-        harcama_yetkilisi_id: hyId1,
+        harcama_yetkilisi_id: p1,
         harcama_yetkilisi_unvan: 'Destek Hizmetleri Başkanı',
-        gerceklestirme_gorevlisi_id: ggId1,
+        gerceklestirme_gorevlisi_id: p13,
         gerceklestirme_gorevlisi_unvan: 'Şube Müdürü',
-        ayrintili_bilgi_personel: 'Burak Erdem - Tekniker',
-        ilgili_personel_id: personelIds[9] || memurId
+        ayrintili_bilgi_personel: 'Onur Karataş - Lojistik Sorumlusu',
+        ilgili_personel_id: p14
       }
     ]
 
