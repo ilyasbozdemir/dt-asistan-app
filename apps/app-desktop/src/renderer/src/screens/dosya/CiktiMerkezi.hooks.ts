@@ -101,7 +101,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
           `SELECT d.*, 
                   b.antet_ek_satir as birim_antet_ek_satir,
                   b.birim_adi as birim_tablo_adi,
-                  b.harcama_birim_kodu,
+                  b.harcama_kodu as harcama_birim_kodu,
                   b.muhasebe_kodu,
                   p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan, p.telefon as onaylayan_telefon,
                   h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
