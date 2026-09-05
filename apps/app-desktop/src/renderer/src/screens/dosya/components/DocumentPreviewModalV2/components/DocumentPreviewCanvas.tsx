@@ -4,7 +4,7 @@ import {
   IhtiyacListesiType,
   TemplateComponentType,
   TemplateEditProvider,
-} from "@hakim-pro-app/document-templates";
+} from "@temin360/document-templates";
 import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { Personel } from "../types";
 import { TemplateOptionItem } from "../templateResolver";

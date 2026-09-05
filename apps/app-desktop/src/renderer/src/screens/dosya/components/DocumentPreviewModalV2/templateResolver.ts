@@ -2,8 +2,8 @@ import {
   TEMPLATE_REGISTRY,
   TemplateComponentType,
   TemplateType,
-} from "@hakim-pro-app/document-templates";
-import * as Templates from "@hakim-pro-app/document-templates";
+} from "@temin360/document-templates";
+import * as Templates from "@temin360/document-templates";
 import { V2_TEMPLATES_MAP } from "./constants";
 
 export interface TemplateOptionItem {

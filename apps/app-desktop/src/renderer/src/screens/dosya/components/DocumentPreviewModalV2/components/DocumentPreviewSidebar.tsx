@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft, Edit3, FileText, Layers, Sliders } from "lucide-react";
-import { IhtiyacListesiType } from "@hakim-pro-app/document-templates";
+import { IhtiyacListesiType } from "@temin360/document-templates";
 import { TemplateOptionItem } from "../templateResolver";
 
 interface DocumentPreviewSidebarProps {

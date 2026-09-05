@@ -1,5 +1,5 @@
-import { TemplateComponentType } from "@hakim-pro-app/document-templates";
-import * as Templates from "@hakim-pro-app/document-templates";
+import { TemplateComponentType } from "@temin360/document-templates";
+import * as Templates from "@temin360/document-templates";
 
 export const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   IhtiyacListesi: Templates.IhtiyacListesi as TemplateComponentType,

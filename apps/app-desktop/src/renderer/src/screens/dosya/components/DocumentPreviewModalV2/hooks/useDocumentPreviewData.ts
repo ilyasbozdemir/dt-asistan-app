@@ -5,7 +5,7 @@ import {
   IhtiyacListesiType,
   TemplateEditProvider,
   TemplateResolver,
-} from "@hakim-pro-app/document-templates";
+} from "@temin360/document-templates";
 import { useWorkspaceStore } from "../../../../../store/workspaceStore";
 import { useSettingsStore } from "../../../../../store/settingsStore";
 import { usePrintQueueStore } from "../../../../../store/printQueueStore";

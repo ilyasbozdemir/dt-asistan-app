@@ -1,6 +1,6 @@
 {
-  "name": "@hakim-pro-app/document-templates",
-  "version": "0.1.0",
+  "name": "@temin360/document-templates",
+  "version": "1.0.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "private": true,
