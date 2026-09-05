@@ -3,6 +3,8 @@ import { ChevronDown, FileText, Printer } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 import { BelgeAksiyonlari } from '../../../components/ui/BelgeAksiyonlari'
 import { normalizeForMatch } from '../sub-screens/DosyaAsamalari/useDosyaAsamasiSablons'
+import { useWorkspaceStore } from '../../../store/workspaceStore'
+import { documentPreloadService } from '../../../services/documentPreloadService'
 
 export interface PrintDropdownButtonV2Props {
   kategori: string // e.g. '4-kabul-ve-odeme-islemleri'
@@ -35,6 +37,7 @@ export function PrintDropdownButtonV2({
   buttonHeightClass = '',
   label
 }: PrintDropdownButtonV2Props): React.JSX.Element | null {
+  const { activeDosyaId } = useWorkspaceStore()
   const [belgeMenuOpen, setBelgeMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -168,6 +171,15 @@ export function PrintDropdownButtonV2({
     <div className={cn('relative', className)} ref={dropdownRef}>
       <button
         onClick={() => setBelgeMenuOpen((v) => !v)}
+        onMouseEnter={() => {
+          if (activeDosyaId && stageSablons.length > 0) {
+            documentPreloadService.warmStageDocuments(
+              kategori,
+              activeDosyaId,
+              stageSablons.map((s) => s.dosya_adi || s.route_path || s.ad)
+            )
+          }
+        }}
         disabled={ciktiLoading}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 bg-slate-55 hover:bg-slate-100 text-slate-705 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -260,6 +272,7 @@ export function PrintDropdownButtonV2({
             </div>
           ) : (
             displaySablons.map((sablon: any) => {
+              const docKey = sablon.dosya_adi || sablon.route_path || sablon.ad
               let cleanName = sablon.ad
               const matchStatus = cleanName.match(/^\[(.*?)\]\s*(.*)$/)
               if (matchStatus) cleanName = matchStatus[2].trim()
@@ -270,6 +283,11 @@ export function PrintDropdownButtonV2({
               return (
                 <div
                   key={sablon.id || sablon.ad}
+                  onMouseEnter={() => {
+                    if (activeDosyaId && docKey) {
+                      documentPreloadService.warmOnHover(docKey, activeDosyaId)
+                    }
+                  }}
                   className="w-full flex items-center justify-between px-3 py-1 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors gap-2"
                 >
                   <button
@@ -277,6 +295,11 @@ export function PrintDropdownButtonV2({
                     onClick={() => {
                       handleOpenPreviewForSablon(sablon, sablon.ad)
                       setBelgeMenuOpen(false)
+                    }}
+                    onMouseEnter={() => {
+                      if (activeDosyaId && docKey) {
+                        documentPreloadService.warmOnHover(docKey, activeDosyaId)
+                      }
                     }}
                     className="flex-1 text-left text-xs text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer flex items-center gap-2 truncate disabled:opacity-50 disabled:cursor-not-allowed hover:text-blue-650 dark:hover:text-blue-400"
                   >

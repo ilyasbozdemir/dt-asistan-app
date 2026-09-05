@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const MuayeneKabulKomisyonuMapping: ProcessMapping = {
   antetSatirlari: {
@@ -18,7 +18,7 @@ export const MuayeneKabulKomisyonuMapping: ProcessMapping = {
   },
   sayisi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'temin_no_clean',
+    sutun: 'temin_no',
     aciklama: 'Temin Numarası'
   },
   dosyaKonusu: { deger: 'Muayene ve Kabul Komisyonu Görevlendirmesi', aciklama: 'Belgenin konusu' },

@@ -589,13 +589,13 @@ export function MalzemeTablosu({
         `SELECT f.*, tf.id as temin_firma_id, tf.kazandi_mi, tf.teklif_toplami 
          FROM DATA_TeminFirma tf 
          JOIN TANIM_Firma f ON tf.firma_id = f.id 
-         WHERE tf.temin_id = ?`,
+         WHERE tf.temin_dosya_id = ?`,
         [activeDosyaId],
       );
 
       const tekliflerRes = await (window as any).electron.ipcRenderer.invoke(
         "db:query",
-        "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_id = ?",
+        "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
         [activeDosyaId],
       );
 

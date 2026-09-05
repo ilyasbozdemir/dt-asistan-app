@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
   ClipboardList,
@@ -10,457 +10,475 @@ import {
   MoreHorizontal,
   Printer,
   Sparkles,
-  Sun
-} from 'lucide-react'
-import { useTheme } from '../providers/ThemeProvider'
-import { TeminSelector } from './TeminSelector'
-import { useWorkspaceStore } from '../../store/workspaceStore'
-import { WindowControls } from './header/WindowControls'
-import { NotificationPopover } from './header/NotificationPopover'
-import { SyncPopover } from './header/SyncPopover'
+  Sun,
+} from "lucide-react";
+import { useTheme } from "../providers/ThemeProvider";
+import { TeminSelector } from "./TeminSelector";
+import { useWorkspaceStore } from "../../store/workspaceStore";
+import { WindowControls } from "./header/WindowControls";
+import { NotificationPopover } from "./header/NotificationPopover";
+import { SyncPopover } from "./header/SyncPopover";
 
 export function Header(): React.JSX.Element {
-  const navigate = useNavigate()
-  const { theme, setTheme } = useTheme()
-  const [activeMenu, setActiveMenu] = useState<string | null>(null)
-  const [hoveredSubMenu, setHoveredSubMenu] = useState<string | null>(null)
-  const { activeDosyaId } = useWorkspaceStore()
+  const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [hoveredSubMenu, setHoveredSubMenu] = useState<string | null>(null);
+  const { activeDosyaId } = useWorkspaceStore();
 
   // Ekran genişliği takibi (Dinamik taşma menüsü hesaplaması için)
   const [windowWidth, setWindowWidth] = useState<number>(() =>
-    typeof window !== 'undefined' ? window.innerWidth : 1280
-  )
+    typeof window !== "undefined" ? window.innerWidth : 1280
+  );
 
   useEffect(() => {
-    const handleResize = (): void => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    const handleResize = (): void => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Mod Seçici Durumu: 'dogrudan_temin' (KİK 22) veya 'ihale' (KİK 19 / 21)
-  const [procurementMode, setProcurementMode] = useState<'dogrudan_temin' | 'ihale'>(() => {
+  const [procurementMode, setProcurementMode] = useState<
+    "dogrudan_temin" | "ihale"
+  >(() => {
     return (
-      (localStorage.getItem('temin_procurement_mode') as 'dogrudan_temin' | 'ihale') ||
-      'dogrudan_temin'
-    )
-  })
+      (localStorage.getItem("temin_procurement_mode") as
+        | "dogrudan_temin"
+        | "ihale") ||
+      "dogrudan_temin"
+    );
+  });
 
   // Mod geçiş animasyonu ve bildirim durumu
-  const [switchFeedback, setSwitchFeedback] = useState<string | null>(null)
+  const [switchFeedback, setSwitchFeedback] = useState<string | null>(null);
 
-  const handleModeChange = (mode: 'dogrudan_temin' | 'ihale'): void => {
-    if (mode === procurementMode) return
-    setProcurementMode(mode)
-    localStorage.setItem('temin_procurement_mode', mode)
+  const handleModeChange = (mode: "dogrudan_temin" | "ihale"): void => {
+    if (mode === procurementMode) return;
+    setProcurementMode(mode);
+    localStorage.setItem("temin_procurement_mode", mode);
     window.dispatchEvent(
-      new CustomEvent('procurement-mode-change', {
-        detail: { mode }
-      })
-    )
+      new CustomEvent("procurement-mode-change", {
+        detail: { mode },
+      }),
+    );
 
-    const message =
-      mode === 'dogrudan_temin'
-        ? 'Doğrudan Temin Modu (KİK Md. 22) Aktif'
-        : 'İhale Süreçleri Modu (KİK Md. 19 / 21) Aktif'
-    setSwitchFeedback(message)
+    const message = mode === "dogrudan_temin"
+      ? "Doğrudan Temin Modu (KİK Md. 22) Aktif"
+      : "İhale Süreçleri Modu (KİK Md. 19 / 21) Aktif";
+    setSwitchFeedback(message);
     setTimeout(() => {
-      setSwitchFeedback(null)
-    }, 2400)
-  }
+      setSwitchFeedback(null);
+    }, 2400);
+  };
 
   const handleCloseWorkspace = async (): Promise<void> => {
-    window.dispatchEvent(new CustomEvent('workspace-close-request'))
-  }
+    window.dispatchEvent(new CustomEvent("workspace-close-request"));
+  };
 
-  const [updateStatus, setUpdateStatus] = useState<{
-    status: string
-    version?: string
-  } | null>(null)
-  const [showNotifications, setShowNotifications] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<
+    {
+      status: string;
+      version?: string;
+    } | null
+  >(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const removeListener = window.electron?.ipcRenderer.on(
-      'updater:status',
+      "updater:status",
       (_event, data: { status: string; version?: string }) => {
-        setUpdateStatus(data)
-      }
-    )
+        setUpdateStatus(data);
+      },
+    );
     return () => {
-      if (removeListener) removeListener()
-    }
-  }, [])
+      if (removeListener) removeListener();
+    };
+  }, []);
 
   useEffect(() => {
-    const menuBar = document.getElementById('native-menu-bar')
+    const menuBar = document.getElementById("native-menu-bar");
     function handleClickOutside(e: MouseEvent): void {
       if (menuBar && !menuBar.contains(e.target as Node)) {
-        setActiveMenu(null)
-        setHoveredSubMenu(null)
+        setActiveMenu(null);
+        setHoveredSubMenu(null);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleMenuHover = (menuName: string): void => {
     if (activeMenu) {
-      setActiveMenu(menuName)
+      setActiveMenu(menuName);
     }
-  }
+  };
 
-  const handleClose = (): void => window.electron?.ipcRenderer.send('window-close')
+  const handleClose = (): void =>
+    window.electron?.ipcRenderer.send("window-close");
 
   const menus = [
     {
-      name: 'Dosya',
+      name: "Dosya",
       items: [
         {
-          label: 'Gösterge Paneli',
-          onClick: () => navigate({ to: '/' })
+          label: "Gösterge Paneli",
+          onClick: () => navigate({ to: "/" }),
         },
         {
-          label: 'Yeni Doğrudan Temin Dosyası',
-          onClick: () => navigate({ to: '/dosyalar/yeni' })
+          label: "Yeni Doğrudan Temin Dosyası",
+          onClick: () => navigate({ to: "/dosyalar/yeni" }),
         },
         {
-          label: 'Veri Dosyası Detayları (.dtal)',
-          onClick: () => navigate({ to: '/dosya' })
+          label: "Veri Dosyası Detayları (.dtal)",
+          onClick: () => navigate({ to: "/dosya" }),
         },
         {
-          label: 'Kullanıcı Profili',
-          onClick: () => navigate({ to: '/profil' })
+          label: "Kullanıcı Profili",
+          onClick: () => navigate({ to: "/profil" }),
         },
         { divider: true },
         {
-          label: 'Farklı Kurum Veri Dosyası Aç (.dtal)...',
+          label: "Farklı Kurum Veri Dosyası Aç (.dtal)...",
           onClick: async () => {
             try {
-              const res = await window.electron?.ipcRenderer.invoke('dialog:showOpenDialog')
+              const res = await window.electron?.ipcRenderer.invoke(
+                "dialog:showOpenDialog",
+              );
               if (!res?.canceled && res?.filePath) {
                 const result = await useWorkspaceStore
                   .getState()
-                  .openWorkspace(res.filePath as string, false)
+                  .openWorkspace(res.filePath as string, false);
                 if (result.success) {
-                  window.location.reload()
+                  window.location.reload();
                 } else {
-                  alert(`Kurum dosyası açılamadı!\nHata: ${result.error || 'Bilinmeyen hata'}`)
+                  alert(
+                    `Kurum dosyası açılamadı!\nHata: ${
+                      result.error || "Bilinmeyen hata"
+                    }`,
+                  );
                 }
               }
             } catch (e) {
-              console.error(e)
+              console.error(e);
             }
-          }
+          },
         },
         {
-          label: 'Kurum Dosyasını Kapat (.dtal)',
-          onClick: handleCloseWorkspace
+          label: "Kurum Dosyasını Kapat (.dtal)",
+          onClick: handleCloseWorkspace,
         },
         { divider: true },
-        { label: 'Uygulamadan Çık (Alt+F4)', onClick: handleClose }
-      ]
+        { label: "Uygulamadan Çık (Alt+F4)", onClick: handleClose },
+      ],
     },
     // Mod Bazlı Menüler: Doğrudan Temin vs İhale Süreçleri
-    ...(procurementMode === 'dogrudan_temin'
+    ...(procurementMode === "dogrudan_temin"
       ? [
-          {
-            name: 'Doğrudan Temin',
-            onClick: () => navigate({ to: '/dosyalar' }),
-            items: [
-              {
-                label: 'Tüm Doğrudan Temin Dosyaları',
-                onClick: () => navigate({ to: '/dosyalar' })
-              },
-              {
-                label: 'Yeni Dosya Oluştur',
-                onClick: () => navigate({ to: '/dosyalar/yeni' })
-              },
-              {
-                label: 'Hızlı Dosya Ekle / Güncelle',
-                onClick: () => navigate({ to: '/hizli-dosya-ekle' })
-              },
-              {
-                label: 'Süreç Akış Haritası (Beta)',
-                onClick: () => navigate({ to: '/surec-akisi' })
-              }
-            ]
-          },
-          ...(activeDosyaId
-            ? [
+        {
+          name: "Doğrudan Temin",
+          onClick: () => navigate({ to: "/dosyalar" }),
+          items: [
+            {
+              label: "Tüm Doğrudan Temin Dosyaları",
+              onClick: () => navigate({ to: "/dosyalar" }),
+            },
+            {
+              label: "Yeni Dosya Oluştur",
+              onClick: () => navigate({ to: "/dosyalar/yeni" }),
+            },
+            {
+              label: "Hızlı Dosya Ekle / Güncelle",
+              onClick: () => navigate({ to: "/hizli-dosya-ekle" }),
+            },
+            {
+              label: "Süreç Akış Haritası (Beta)",
+              onClick: () => navigate({ to: "/surec-akisi" }),
+            },
+          ],
+        },
+        ...(activeDosyaId
+          ? [
+            {
+              name: "Süreç Yönetimi",
+              items: [
                 {
-                  name: 'Süreç Yönetimi',
-                  items: [
-                    {
-                      label: 'Süreç Takip & Durum Paneli',
-                      onClick: () => navigate({ to: '/takip' })
-                    },
-                    {
-                      label: 'Belge Çıktı Merkezi',
-                      onClick: () => navigate({ to: '/cikti-merkezi' })
-                    },
-                    {
-                      label: 'Hızlı Dosya Ekle / Güncelle',
-                      onClick: () => navigate({ to: '/hizli-dosya-ekle' })
-                    },
-                    {
-                      label: 'Şablon & Taslak Yöneticisi',
-                      onClick: () => navigate({ to: '/taslakyonetim' })
-                    }
-                  ]
+                  label: "Süreç Takip & Durum Paneli",
+                  onClick: () => navigate({ to: "/takip" }),
                 },
                 {
-                  name: 'Adım Adım Süreç',
-                  items: [
-                    {
-                      label: '1. İhtiyaç Listesi & Maliyet & Onay',
-                      onClick: () => navigate({ to: '/dosya/hazirlik-ve-ihtiyac' })
-                    },
-                    {
-                      label: '2. Piyasa Fiyat Araştırması',
-                      onClick: () => navigate({ to: '/dosya/piyasa-fiyat-arastirmasi' })
-                    },
-                    {
-                      label: '3. Sipariş & Sözleşme',
-                      onClick: () => navigate({ to: '/dosya/siparis-ve-sozlesme' })
-                    },
-                    {
-                      label: '4. Muayene & Kabul & Ödeme İşlemleri',
-                      onClick: () => navigate({ to: '/dosya/kabul-ve-odeme' })
-                    },
-                    {
-                      label: '5. Klasör & Kapaklar',
-                      onClick: () => navigate({ to: '/dosya/klasor-ve-kapaklar' })
-                    }
-                  ]
-                }
-              ]
-            : [])
-        ]
+                  label: "Belge Çıktı Merkezi",
+                  onClick: () => navigate({ to: "/cikti-merkezi" }),
+                },
+                {
+                  label: "Hızlı Dosya Ekle / Güncelle",
+                  onClick: () => navigate({ to: "/hizli-dosya-ekle" }),
+                },
+                {
+                  label: "Şablon & Taslak Yöneticisi",
+                  onClick: () => navigate({ to: "/taslakyonetim" }),
+                },
+              ],
+            },
+            {
+              name: "Adım Adım Süreç",
+              items: [
+                {
+                  label: "1. İhtiyaç Listesi & Maliyet & Onay",
+                  onClick: () => navigate({ to: "/dosya/hazirlik-ve-ihtiyac" }),
+                },
+                {
+                  label: "2. Piyasa Fiyat Araştırması",
+                  onClick: () =>
+                    navigate({ to: "/dosya/piyasa-fiyat-arastirmasi" }),
+                },
+                {
+                  label: "3. Sipariş & Sözleşme",
+                  onClick: () => navigate({ to: "/dosya/siparis-ve-sozlesme" }),
+                },
+                {
+                  label: "4. Muayene & Kabul & Ödeme İşlemleri",
+                  onClick: () => navigate({ to: "/dosya/kabul-ve-odeme" }),
+                },
+                {
+                  label: "5. Klasör & Kapaklar",
+                  onClick: () => navigate({ to: "/dosya/klasor-ve-kapaklar" }),
+                },
+              ],
+            },
+          ]
+          : []),
+      ]
       : [
-          {
-            name: 'İhale Yönetimi',
-            onClick: () => navigate({ to: '/harcama-merkezi' }),
-            items: [
-              {
-                label: 'Açık İhale Süreçleri (KİK Md. 19)',
-                onClick: () => navigate({ to: '/harcama-merkezi' })
-              },
-              {
-                label: 'Pazarlık Usulü İhale (KİK Md. 21)',
-                onClick: () => navigate({ to: '/harcama-merkezi' })
-              },
-              {
-                label: 'İhale Hakediş & Harcama Raporları',
-                onClick: () => navigate({ to: '/hakedis' })
-              },
-              { divider: true },
-              {
-                label: 'Şablon & Kategori Yönetimi',
-                onClick: () => navigate({ to: '/degiskenler' })
-              },
-              {
-                label: 'Taslak & Belge Havuzu',
-                onClick: () => navigate({ to: '/taslakyonetim' })
-              }
-            ]
-          },
-          ...(activeDosyaId
-            ? [
+        {
+          name: "İhale Yönetimi",
+          onClick: () => navigate({ to: "/harcama-merkezi" }),
+          items: [
+            {
+              label: "Açık İhale Süreçleri (KİK Md. 19)",
+              onClick: () => navigate({ to: "/harcama-merkezi" }),
+            },
+            {
+              label: "Pazarlık Usulü İhale (KİK Md. 21)",
+              onClick: () => navigate({ to: "/harcama-merkezi" }),
+            },
+            {
+              label: "İhale Hakediş & Harcama Raporları",
+              onClick: () => navigate({ to: "/hakedis" }),
+            },
+            { divider: true },
+            {
+              label: "Şablon & Kategori Yönetimi",
+              onClick: () => navigate({ to: "/degiskenler" }),
+            },
+            {
+              label: "Taslak & Belge Havuzu",
+              onClick: () => navigate({ to: "/taslakyonetim" }),
+            },
+          ],
+        },
+        ...(activeDosyaId
+          ? [
+            {
+              name: "İhale Süreç Adımları",
+              items: [
                 {
-                  name: 'İhale Süreç Adımları',
-                  items: [
-                    {
-                      label: '1. İhale Onay Belgesi & Şartnameler',
-                      onClick: () => navigate({ to: '/dosya/hazirlik-ve-ihtiyac' })
-                    },
-                    {
-                      label: '2. İhale İlanı & Davet Mektupları',
-                      onClick: () => navigate({ to: '/dosya/piyasa-fiyat-arastirmasi' })
-                    },
-                    {
-                      label: '3. Teklif Değerlendirme & Komisyon Kararı',
-                      onClick: () => navigate({ to: '/dosya/siparis-ve-sozlesme' })
-                    },
-                    {
-                      label: '4. Sözleşme & Teminat İşlemleri',
-                      onClick: () => navigate({ to: '/dosya/kabul-ve-odeme' })
-                    },
-                    {
-                      label: '5. İhale Klasörü & Arşivleme',
-                      onClick: () => navigate({ to: '/dosya/klasor-ve-kapaklar' })
-                    }
-                  ]
+                  label: "1. İhale Onay Belgesi & Şartnameler",
+                  onClick: () => navigate({ to: "/dosya/hazirlik-ve-ihtiyac" }),
                 },
                 {
-                  name: 'İhale İşlemleri',
-                  items: [
-                    {
-                      label: 'İhale Dosya Durumu & Takip',
-                      onClick: () => navigate({ to: '/takip' })
-                    },
-                    {
-                      label: 'İhale Belge Çıktı Merkezi',
-                      onClick: () => navigate({ to: '/cikti-merkezi' })
-                    },
-                    {
-                      label: 'Hakediş & Ödeme Takibi',
-                      onClick: () => navigate({ to: '/hakedis' })
-                    }
-                  ]
-                }
-              ]
-            : []),
-          {
-            name: 'İhale Mevzuatı',
-            items: [
-              {
-                label: 'İhale Eşik Değerleri & Limitler',
-                onClick: () => navigate({ to: '/mevzuat' })
-              },
-              {
-                label: 'KİK Standart Şablon & Formlar',
-                onClick: () => navigate({ to: '/taslakyonetim' })
-              },
-              {
-                label: 'Mevzuat & Genelgeler',
-                onClick: () => navigate({ to: '/mevzuat' })
-              }
-            ]
-          }
-        ]),
+                  label: "2. İhale İlanı & Davet Mektupları",
+                  onClick: () =>
+                    navigate({ to: "/dosya/piyasa-fiyat-arastirmasi" }),
+                },
+                {
+                  label: "3. Teklif Değerlendirme & Komisyon Kararı",
+                  onClick: () => navigate({ to: "/dosya/siparis-ve-sozlesme" }),
+                },
+                {
+                  label: "4. Sözleşme & Teminat İşlemleri",
+                  onClick: () => navigate({ to: "/dosya/kabul-ve-odeme" }),
+                },
+                {
+                  label: "5. İhale Klasörü & Arşivleme",
+                  onClick: () => navigate({ to: "/dosya/klasor-ve-kapaklar" }),
+                },
+              ],
+            },
+            {
+              name: "İhale İşlemleri",
+              items: [
+                {
+                  label: "İhale Dosya Durumu & Takip",
+                  onClick: () => navigate({ to: "/takip" }),
+                },
+                {
+                  label: "İhale Belge Çıktı Merkezi",
+                  onClick: () => navigate({ to: "/cikti-merkezi" }),
+                },
+                {
+                  label: "Hakediş & Ödeme Takibi",
+                  onClick: () => navigate({ to: "/hakedis" }),
+                },
+              ],
+            },
+          ]
+          : []),
+        {
+          name: "İhale Mevzuatı",
+          items: [
+            {
+              label: "İhale Eşik Değerleri & Limitler",
+              onClick: () => navigate({ to: "/mevzuat" }),
+            },
+            {
+              label: "KİK Standart Şablon & Formlar",
+              onClick: () => navigate({ to: "/taslakyonetim" }),
+            },
+            {
+              label: "Mevzuat & Genelgeler",
+              onClick: () => navigate({ to: "/mevzuat" }),
+            },
+          ],
+        },
+      ]),
     {
-      name: 'Sistem Tanımları',
+      name: "Sistem Tanımları",
       items: [
         {
-          label: 'Kurum Bilgileri',
-          onClick: () => navigate({ to: '/kurum' })
+          label: "Kurum Bilgileri",
+          onClick: () => navigate({ to: "/kurum" }),
         },
         {
-          label: 'Birim Yönetimi',
-          onClick: () => navigate({ to: '/birimler' })
+          label: "Birim Yönetimi",
+          onClick: () => navigate({ to: "/birimler" }),
         },
         {
-          label: 'Personel Yönetimi',
-          onClick: () => navigate({ to: '/personel' })
+          label: "Personel Yönetimi",
+          onClick: () => navigate({ to: "/personel" }),
         },
         {
-          label: 'Komisyon Yönetimi',
-          onClick: () => navigate({ to: '/komisyonlar' })
+          label: "Komisyon Yönetimi",
+          onClick: () => navigate({ to: "/komisyonlar" }),
         },
         {
-          label: 'Görev Tanımları',
-          onClick: () => navigate({ to: '/komisyon-gorevleri' })
+          label: "Görev Tanımları",
+          onClick: () => navigate({ to: "/komisyon-gorevleri" }),
         },
         {
-          label: 'Ambar Yönetimi',
-          onClick: () => navigate({ to: '/ambar' })
-        },
-        { divider: true },
-        {
-          label: 'İstekli Firma Yönetimi',
-          onClick: () => navigate({ to: '/firmalar' })
+          label: "Ambar Yönetimi",
+          onClick: () => navigate({ to: "/ambar" }),
         },
         { divider: true },
         {
-          label: 'Mal/Hizmet/Yapım İşleri Listesi',
-          onClick: () => navigate({ to: '/malzemeler' })
+          label: "İstekli Firma Yönetimi",
+          onClick: () => navigate({ to: "/firmalar" }),
+        },
+        { divider: true },
+        {
+          label: "Mal/Hizmet/Yapım İşleri Listesi",
+          onClick: () => navigate({ to: "/malzemeler" }),
         },
         {
-          label: 'Taşınır Kodları',
-          onClick: () => navigate({ to: '/tasinirkod' })
+          label: "Taşınır Kodları",
+          onClick: () => navigate({ to: "/tasinirkod" }),
         },
         {
-          label: 'OKAS Kodları',
-          onClick: () => navigate({ to: '/okaskod' })
+          label: "OKAS Kodları",
+          onClick: () => navigate({ to: "/okaskod" }),
         },
         {
-          label: 'Ölçü Birimleri',
-          onClick: () => navigate({ to: '/olcubirimleri' })
-        }
-      ]
+          label: "Ölçü Birimleri",
+          onClick: () => navigate({ to: "/olcubirimleri" }),
+        },
+      ],
     },
     {
-      name: 'Yönetim & Yardım',
+      name: "Yönetim & Yardım",
       items: [
         {
-          label: 'Genel Ayarlar',
-          onClick: () => navigate({ to: '/ayarlar' })
+          label: "Genel Ayarlar",
+          onClick: () => navigate({ to: "/ayarlar" }),
         },
         {
-          label: 'Mevzuat ve Parametreler',
-          onClick: () => navigate({ to: '/mevzuat' })
+          label: "Mevzuat ve Parametreler",
+          onClick: () => navigate({ to: "/mevzuat" }),
         },
         {
-          label: 'Şablon & Kategori Yönetimi',
-          onClick: () => navigate({ to: '/degiskenler' })
+          label: "Şablon & Kategori Yönetimi",
+          onClick: () => navigate({ to: "/degiskenler" }),
         },
         {
-          label: 'Şablon Listesi ve Süreçler',
-          onClick: () => navigate({ to: '/taslakyonetim' })
+          label: "Şablon Listesi ve Süreçler",
+          onClick: () => navigate({ to: "/taslakyonetim" }),
         },
         {
-          label: 'Toplu İçe Aktarma',
-          onClick: () => navigate({ to: '/import' })
+          label: "Toplu İçe Aktarma",
+          onClick: () => navigate({ to: "/import" }),
         },
         {
-          label: 'Raporlar',
-          onClick: () => navigate({ to: '/raporlar' })
-        },
-        { divider: true },
-        {
-          label: 'Arayüzü Yenile (Ctrl+R)',
-          onClick: () => window.location.reload()
-        },
-        {
-          label: 'Geliştirici Araçları (DevTools)',
-          onClick: () => window.electron?.ipcRenderer.send('window-toggle-devtools')
-        },
-        {
-          label: 'Test Verisi Tohumla (Dev Seed)',
-          onClick: () => navigate({ to: '/ayarlar', search: { tab: 'developer' } as any })
+          label: "Raporlar",
+          onClick: () => navigate({ to: "/raporlar" }),
         },
         { divider: true },
         {
-          label: 'Kullanım Kılavuzu & Yardım',
-          onClick: () => navigate({ to: '/yardim' })
+          label: "Arayüzü Yenile (Ctrl+R)",
+          onClick: () => window.location.reload(),
         },
         {
-          label: 'Sürüm Notları (Changelog)',
-          onClick: () => navigate({ to: '/changelog' })
-        },
-        {
-          label: 'Hakkında...',
+          label: "Geliştirici Araçları (DevTools)",
           onClick: () =>
-            alert('TEMİN 360\nKamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi')
-        }
-      ]
-    }
-  ]
+            window.electron?.ipcRenderer.send("window-toggle-devtools"),
+        },
+        {
+          label: "Test Verisi Tohumla (Dev Seed)",
+          onClick: () =>
+            navigate({ to: "/ayarlar", search: { tab: "developer" } as any }),
+        },
+        { divider: true },
+        {
+          label: "Kullanım Kılavuzu & Yardım",
+          onClick: () => navigate({ to: "/yardim" }),
+        },
+        {
+          label: "Sürüm Notları (Changelog)",
+          onClick: () => navigate({ to: "/changelog" }),
+        },
+        {
+          label: "Hakkında...",
+          onClick: () =>
+            alert(
+              "TEMİN 360\nKamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi",
+            ),
+        },
+      ],
+    },
+  ];
 
-  const isDt = procurementMode === 'dogrudan_temin'
+  const isDt = procurementMode === "dogrudan_temin";
 
   // Ekran daraldıkça menülerin taşmasını önleyen dinamik hesaplama
   const maxVisibleMenus = (() => {
-    if (windowWidth >= 1520) return 7
-    if (windowWidth >= 1340) return 5
-    if (windowWidth >= 1180) return 4
-    if (windowWidth >= 1020) return 3
-    return 2
-  })()
+    if (windowWidth >= 1520) return 7;
+    if (windowWidth >= 1340) return 5;
+    if (windowWidth >= 1180) return 4;
+    if (windowWidth >= 1020) return 3;
+    return 2;
+  })();
 
-  const visibleMenus = menus.slice(0, maxVisibleMenus)
-  const overflowMenus = menus.slice(maxVisibleMenus)
+  const visibleMenus = menus.slice(0, maxVisibleMenus);
+  const overflowMenus = menus.slice(maxVisibleMenus);
 
   return (
     <header
       className="flex flex-col bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shrink-0 z-50 shadow-xs transition-all duration-300 relative select-none"
-      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       {/* Üst Vurgu Çizgisi: Seçilen moda göre şık renk tonu */}
       <div
         className={`h-[2px] w-full transition-all duration-500 bg-gradient-to-r ${
           isDt
-            ? 'from-blue-500 via-sky-400 to-indigo-500'
-            : 'from-indigo-600 via-purple-500 to-pink-500'
+            ? "from-blue-500 via-sky-400 to-indigo-500"
+            : "from-indigo-600 via-purple-500 to-pink-500"
         }`}
       />
 
@@ -478,7 +496,7 @@ export function Header(): React.JSX.Element {
         <div
           id="native-menu-bar"
           className="flex items-center gap-0.5 z-50 text-[11px] font-medium"
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
           {/* Görünür Ana Menüler */}
           {visibleMenus.map((m) => (
@@ -486,27 +504,27 @@ export function Header(): React.JSX.Element {
               <button
                 onClick={() => {
                   if (m.onClick) {
-                    m.onClick()
-                    setActiveMenu(null)
-                    setHoveredSubMenu(null)
+                    m.onClick();
+                    setActiveMenu(null);
+                    setHoveredSubMenu(null);
                   } else {
-                    setActiveMenu(activeMenu === m.name ? null : m.name)
-                    setHoveredSubMenu(null)
+                    setActiveMenu(activeMenu === m.name ? null : m.name);
+                    setHoveredSubMenu(null);
                   }
                 }}
                 onMouseEnter={() => {
                   if (m.onClick) {
-                    setActiveMenu(null)
+                    setActiveMenu(null);
                   } else {
-                    handleMenuHover(m.name)
+                    handleMenuHover(m.name);
                   }
                 }}
                 className={`px-2 py-1 rounded-md transition-colors cursor-pointer whitespace-nowrap ${
                   activeMenu === m.name
                     ? isDt
-                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold'
-                      : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold'
-                    : 'text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? "bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold"
+                      : "bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold"
+                    : "text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {m.name}
@@ -515,24 +533,29 @@ export function Header(): React.JSX.Element {
               {activeMenu === m.name && m.items && (
                 <div className="absolute top-full left-0 mt-1 w-56 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1 z-[100] animate-in fade-in slide-in-from-top-1">
                   {m.items.map((item, idx) =>
-                    item.divider ? (
-                      <div key={idx} className="h-[1px] bg-slate-150 dark:bg-slate-800 my-1" />
-                    ) : (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          item.onClick?.()
-                          setActiveMenu(null)
-                        }}
-                        className={`w-full text-left px-3 py-1.5 ${
-                          isDt
-                            ? 'hover:bg-blue-600 hover:text-white'
-                            : 'hover:bg-indigo-600 hover:text-white'
-                        } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
-                      >
-                        <span>{item.label}</span>
-                      </button>
-                    )
+                    item.divider
+                      ? (
+                        <div
+                          key={idx}
+                          className="h-[1px] bg-slate-150 dark:bg-slate-800 my-1"
+                        />
+                      )
+                      : (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            item.onClick?.();
+                            setActiveMenu(null);
+                          }}
+                          className={`w-full text-left px-3 py-1.5 ${
+                            isDt
+                              ? "hover:bg-blue-600 hover:text-white"
+                              : "hover:bg-indigo-600 hover:text-white"
+                          } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
+                        >
+                          <span>{item.label}</span>
+                        </button>
+                      )
                   )}
                 </div>
               )}
@@ -544,27 +567,31 @@ export function Header(): React.JSX.Element {
             <div className="relative">
               <button
                 onClick={() => {
-                  setActiveMenu(activeMenu === '__overflow__' ? null : '__overflow__')
-                  setHoveredSubMenu(null)
+                  setActiveMenu(
+                    activeMenu === "__overflow__" ? null : "__overflow__",
+                  );
+                  setHoveredSubMenu(null);
                 }}
                 onMouseEnter={() => {
-                  if (activeMenu && activeMenu !== '__overflow__') {
-                    setActiveMenu('__overflow__')
+                  if (activeMenu && activeMenu !== "__overflow__") {
+                    setActiveMenu("__overflow__");
                   }
                 }}
                 title="Diğer Menüler"
                 className={`p-1 px-1.5 rounded-md transition-colors cursor-pointer flex items-center justify-center ${
-                  activeMenu === '__overflow__' || overflowMenus.some((m) => m.name === activeMenu)
+                  activeMenu === "__overflow__" || overflowMenus.some((m) =>
+                      m.name === activeMenu
+                    )
                     ? isDt
-                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold'
-                      : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold'
-                    : 'text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? "bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-200 font-semibold"
+                      : "bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-semibold"
+                    : "text-slate-600 dark:text-slate-350 hover:bg-slate-200/40 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <MoreHorizontal className="w-4 h-4" />
               </button>
 
-              {activeMenu === '__overflow__' && (
+              {activeMenu === "__overflow__" && (
                 <div className="absolute top-full left-0 mt-1 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1 z-[110] animate-in fade-in slide-in-from-top-1">
                   <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 mb-1">
                     Diğer Menüler
@@ -578,53 +605,59 @@ export function Header(): React.JSX.Element {
                       <button
                         onClick={() => {
                           if (om.onClick) {
-                            om.onClick()
-                            setActiveMenu(null)
-                            setHoveredSubMenu(null)
+                            om.onClick();
+                            setActiveMenu(null);
+                            setHoveredSubMenu(null);
                           } else {
-                            setHoveredSubMenu(hoveredSubMenu === om.name ? null : om.name)
+                            setHoveredSubMenu(
+                              hoveredSubMenu === om.name ? null : om.name,
+                            );
                           }
                         }}
                         className={`w-full text-left px-3 py-1.5 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 ${
                           hoveredSubMenu === om.name
                             ? isDt
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-indigo-600 text-white'
+                              ? "bg-blue-600 text-white"
+                              : "bg-indigo-600 text-white"
                             : isDt
-                              ? 'hover:bg-blue-50 dark:hover:bg-blue-950/60'
-                              : 'hover:bg-indigo-50 dark:hover:bg-indigo-950/60'
+                            ? "hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                            : "hover:bg-indigo-50 dark:hover:bg-indigo-950/60"
                         } transition-colors cursor-pointer`}
                       >
                         <span>{om.name}</span>
-                        {om.items && <ChevronRight className="w-3.5 h-3.5 opacity-70" />}
+                        {om.items && (
+                          <ChevronRight className="w-3.5 h-3.5 opacity-70" />
+                        )}
                       </button>
 
                       {/* Kaskad Alt Menü (Nested Flyout) */}
                       {hoveredSubMenu === om.name && om.items && (
                         <div className="absolute top-0 left-full ml-1 w-56 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-2xl py-1 z-[120] animate-in fade-in slide-in-from-left-1">
                           {om.items.map((item, idx) =>
-                            item.divider ? (
-                              <div
-                                key={idx}
-                                className="h-[1px] bg-slate-150 dark:bg-slate-800 my-1"
-                              />
-                            ) : (
-                              <button
-                                key={idx}
-                                onClick={() => {
-                                  item.onClick?.()
-                                  setActiveMenu(null)
-                                  setHoveredSubMenu(null)
-                                }}
-                                className={`w-full text-left px-3 py-1.5 ${
-                                  isDt
-                                    ? 'hover:bg-blue-600 hover:text-white'
-                                    : 'hover:bg-indigo-600 hover:text-white'
-                                } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
-                              >
-                                <span>{item.label}</span>
-                              </button>
-                            )
+                            item.divider
+                              ? (
+                                <div
+                                  key={idx}
+                                  className="h-[1px] bg-slate-150 dark:bg-slate-800 my-1"
+                                />
+                              )
+                              : (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    item.onClick?.();
+                                    setActiveMenu(null);
+                                    setHoveredSubMenu(null);
+                                  }}
+                                  className={`w-full text-left px-3 py-1.5 ${
+                                    isDt
+                                      ? "hover:bg-blue-600 hover:text-white"
+                                      : "hover:bg-indigo-600 hover:text-white"
+                                  } text-slate-700 dark:text-slate-300 transition-colors flex items-center justify-between cursor-pointer text-xs`}
+                                >
+                                  <span>{item.label}</span>
+                                </button>
+                              )
                           )}
                         </div>
                       )}
@@ -639,35 +672,47 @@ export function Header(): React.JSX.Element {
         {/* SAĞ: Mod Geçiş Switch'i + Sistem Kontrolleri (Tema, Eşitleme, Bildirim, vb.) */}
         <div
           className="flex items-center space-x-2 pr-36"
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
           {/* Kompakt, Premium Segmented Mod Seçici */}
           <div className="flex items-center bg-slate-200/80 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-300/60 dark:border-slate-700/60 text-[11px] font-medium mr-1.5 shadow-2xs transition-all">
             <button
-              onClick={() => handleModeChange('dogrudan_temin')}
+              onClick={() => handleModeChange("dogrudan_temin")}
               title="Doğrudan Temin (KİK Md. 22)"
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                 isDt
-                  ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-semibold shadow-xs ring-1 ring-blue-500/20'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-semibold shadow-xs ring-1 ring-blue-500/20"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <FileText className={`w-3.5 h-3.5 ${isDt ? 'text-blue-600 dark:text-blue-400' : ''}`} />
+              <FileText
+                className={`w-3.5 h-3.5 ${
+                  isDt ? "text-blue-600 dark:text-blue-400" : ""
+                }`}
+              />
               <span>Doğrudan Temin</span>
-              {isDt && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
+              {isDt && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+              )}
             </button>
             <button
-              onClick={() => handleModeChange('ihale')}
+              onClick={() => handleModeChange("ihale")}
               title="Açık İhale (Md. 19) & Pazarlık Usulü (Md. 21)"
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                 !isDt
-                  ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs ring-1 ring-indigo-500/20'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? "bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs ring-1 ring-indigo-500/20"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <Gavel className={`w-3.5 h-3.5 ${!isDt ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
+              <Gavel
+                className={`w-3.5 h-3.5 ${
+                  !isDt ? "text-indigo-600 dark:text-indigo-400" : ""
+                }`}
+              />
               <span>İhale Süreçleri</span>
-              {!isDt && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />}
+              {!isDt && (
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              )}
             </button>
           </div>
 
@@ -678,37 +723,40 @@ export function Header(): React.JSX.Element {
 
           {/* Tema Değiştir */}
           <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-1 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-all rounded hover:bg-slate-200/50 dark:hover:bg-slate-800/50 cursor-pointer"
             title="Tema Değiştir"
           >
-            {theme === 'dark' ? (
-              <Sun className="w-3.5 h-3.5" />
-            ) : (
-              <Moon className="w-3.5 h-3.5" />
-            )}
+            {theme === "dark"
+              ? <Sun className="w-3.5 h-3.5" />
+              : <Moon className="w-3.5 h-3.5" />}
           </button>
 
           {/* Güncelleme Durumu */}
           {updateStatus &&
-            (updateStatus.status === 'available' || updateStatus.status === 'downloaded') && (
+            (updateStatus.status === "available" ||
+              updateStatus.status === "downloaded") &&
+            (
               <button
                 onClick={() => {
-                  if (updateStatus.status === 'downloaded') {
-                    window.electron?.ipcRenderer.invoke('updater:quit-and-install')
+                  if (updateStatus.status === "downloaded") {
+                    window.electron?.ipcRenderer.invoke(
+                      "updater:quit-and-install",
+                    );
                   } else {
-                    alert('Güncelleme arka planda indiriliyor, lütfen bekleyin...')
+                    alert(
+                      "Güncelleme arka planda indiriliyor, lütfen bekleyin...",
+                    );
                   }
                 }}
                 className="relative p-1 text-blue-500 hover:text-blue-600 transition-all rounded hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                title={
-                  updateStatus.status === 'downloaded'
-                    ? `Yeni sürüm hazır: ${updateStatus.version} (Kurmak için tıkla)`
-                    : `Yeni sürüm iniyor: ${updateStatus.version}...`
-                }
+                title={updateStatus.status === "downloaded"
+                  ? `Yeni sürüm hazır: ${updateStatus.version} (Kurmak için tıkla)`
+                  : `Yeni sürüm iniyor: ${updateStatus.version}...`}
               >
                 <DownloadCloud className="w-3.5 h-3.5" />
-                <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full border border-white dark:border-slate-900 shadow-sm animate-pulse"></span>
+                <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full border border-white dark:border-slate-900 shadow-sm animate-pulse">
+                </span>
               </button>
             )}
 
@@ -726,23 +774,27 @@ export function Header(): React.JSX.Element {
       {/* ALT SATIR: Çalışma Dosyası Seçimi, Mod Rozeti & Süreç Butonları */}
       <div
         className="min-h-9 py-1.5 flex items-center justify-between bg-slate-100/50 dark:bg-slate-950/20 border-t border-slate-200/30 dark:border-slate-800/30 select-none px-4 relative"
-        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         {/* Sol: İnce ve Şık Aktif Çalışma Modu Rozeti */}
         <div className="w-[280px] shrink-0 hidden lg:flex items-center">
           <div
             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-300 border ${
               isDt
-                ? 'bg-blue-50/90 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/40'
-                : 'bg-indigo-50/90 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/40'
+                ? "bg-blue-50/90 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/40"
+                : "bg-indigo-50/90 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/40"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isDt ? 'bg-blue-500' : 'bg-indigo-500'
+                isDt ? "bg-blue-500" : "bg-indigo-500"
               } animate-pulse`}
             />
-            <span>{isDt ? 'Doğrudan Temin (Md. 22)' : 'İhale İşlemleri (Md. 19 / 21)'}</span>
+            <span>
+              {isDt
+                ? "Doğrudan Temin (Md. 22)"
+                : "İhale İşlemleri (Md. 19 / 21)"}
+            </span>
           </div>
         </div>
 
@@ -752,31 +804,31 @@ export function Header(): React.JSX.Element {
         </div>
 
         {/* Sağ: Süreç & Çıktı Butonları */}
-        {activeDosyaId ? (
-          <div className="flex items-center gap-2 shrink-0 min-w-[280px] justify-end">
-            <Link
-              to="/takip"
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all shadow-2xs hover:shadow-xs border ${
-                isDt
-                  ? 'text-blue-700 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 border-blue-200/50 dark:border-blue-900/30'
-                  : 'text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50 border-indigo-200/50 dark:border-indigo-900/30'
-              }`}
-            >
-              <ClipboardList className="w-3.5 h-3.5" />
-              {isDt ? 'Süreç & Durum' : 'İhale Takip & Durum'}
-            </Link>
-            <Link
-              to="/cikti-merkezi"
-              className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 border border-emerald-100/50 dark:border-emerald-900/30 rounded-md transition-colors shadow-2xs hover:shadow-xs"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Çıktı Merkezi
-            </Link>
-          </div>
-        ) : (
-          <div className="min-w-[280px] shrink-0 hidden lg:block"></div>
-        )}
+        {activeDosyaId
+          ? (
+            <div className="flex items-center gap-2 shrink-0 min-w-[280px] justify-end">
+              <Link
+                to="/takip"
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all shadow-2xs hover:shadow-xs border ${
+                  isDt
+                    ? "text-blue-700 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/50 border-blue-200/50 dark:border-blue-900/30"
+                    : "text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50 border-indigo-200/50 dark:border-indigo-900/30"
+                }`}
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                {isDt ? "Doğrudan Temin & Durum" : "İhale Takip & Durum"}
+              </Link>
+              <Link
+                to="/cikti-merkezi"
+                className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 border border-emerald-100/50 dark:border-emerald-900/30 rounded-md transition-colors shadow-2xs hover:shadow-xs"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Çıktı Merkezi
+              </Link>
+            </div>
+          )
+          : <div className="min-w-[280px] shrink-0 hidden lg:block"></div>}
       </div>
     </header>
-  )
+  );
 }

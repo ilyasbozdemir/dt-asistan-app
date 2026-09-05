@@ -1,4 +1,4 @@
-﻿import { ProcessMapping } from './types'
+import { ProcessMapping } from './types'
 
 export const SonAlimFiyatCetveliMapping: ProcessMapping = {
   antetSatirlari: {
@@ -12,12 +12,12 @@ export const SonAlimFiyatCetveliMapping: ProcessMapping = {
   },
   evrakSayisi: {
     formul:
-      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no_clean}}',
+      '{{TANIM_Kurum.detsis_kodu}}-{{DATA_TeminDosyasi.butce_yili}}/{{DATA_TeminDosyasi.temin_no}}',
     aciklama: 'DETSİS No - Yıl - Dosya No birleşimi'
   },
   tarih: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'olusturma_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Dosya tarihi'
   },
   kurumIci: {

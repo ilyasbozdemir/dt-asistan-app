@@ -1233,6 +1233,7 @@ export const devSeedService = {
       [
         {
           ad: 'A4 80 gr/m² Beyaz Fotokopi Kağıdı (500 Yaprak / Paket)',
+          ozelligi: '1. hamur yüksek beyazlık derecesine sahip fotokopi kağıdı',
           tip: 'Mal',
           birim: 'Paket',
           miktar: 100,
@@ -1244,6 +1245,7 @@ export const devSeedService = {
         },
         {
           ad: 'Siyah Lazer Toner Kartuşu (Yüksek Kapasiteli)',
+          ozelligi: 'Orijinal veya ISO standartlarına uygun muadil toner kartuşu',
           tip: 'Mal',
           birim: 'Adet',
           miktar: 12,
@@ -1255,6 +1257,7 @@ export const devSeedService = {
         },
         {
           ad: 'Masaüstü Zımba Makinesi ve Tel Seti',
+          ozelligi: '24/6 ve 26/6 tel uyumlu metal gövde zımba makinesi ve 1000 adet tel seti',
           tip: 'Mal',
           birim: 'Kutu',
           miktar: 25,
@@ -1269,6 +1272,7 @@ export const devSeedService = {
       [
         {
           ad: 'Split ve Salon Tipi Klimalar Periyodik Bakım ve Filtre Temizliği',
+          ozelligi: 'Bina içi klimaların antibakteriyel temizliği ve mevsimlik periyodik bakımı',
           tip: 'Hizmet',
           birim: 'Adet',
           miktar: 24,
@@ -1280,6 +1284,7 @@ export const devSeedService = {
         },
         {
           ad: 'R410A / R32 Soğutucu Gaz Dolumu ve Kaçak Kontrolü',
+          ozelligi: 'Orijinal saf soğutucu gaz dolumu ve azot sızdırmazlık kaçak testi',
           tip: 'Hizmet',
           birim: 'Adet',
           miktar: 18,
@@ -1291,6 +1296,7 @@ export const devSeedService = {
         },
         {
           ad: 'Sistem Odası Hassas Kontrollü Klima Yıllık Bakım Hizmeti',
+          ozelligi: '7/24 kesintisiz çalışan hassas kontrollü klima ünitesi periyodik bakımı',
           tip: 'Hizmet',
           birim: 'Adet',
           miktar: 2,
@@ -1305,6 +1311,7 @@ export const devSeedService = {
       [
         {
           ad: 'İç Cephe Alçı Sıva Tamiratı ve Silikonlu Mat Boya Yapım İşi',
+          ozelligi: 'Duvar ve tavan yüzey tamiratları, astar ve çift kat silikonlu iç cephe boyası uygulaması',
           tip: 'Yapım',
           birim: 'm²',
           miktar: 450,
@@ -1316,6 +1323,7 @@ export const devSeedService = {
         },
         {
           ad: 'Zemin ve Duvar Seramik Kaplama Söküm ve Yeniden Yapım İşi',
+          ozelligi: '1. sınıf kaymaz porselen seramik kaplama ve antibakteriyel derz dolgu işi',
           tip: 'Yapım',
           birim: 'm²',
           miktar: 110,
@@ -1327,6 +1335,7 @@ export const devSeedService = {
         },
         {
           ad: 'Akustik Taşyünü Asma Tavan ve T-24 Taşıyıcı Karkas İmalatı',
+          ozelligi: '60x60 cm akustik taşyünü paneller ve galvaniz taşıyıcı profil montajı',
           tip: 'Yapım',
           birim: 'm²',
           miktar: 150,
@@ -1341,6 +1350,7 @@ export const devSeedService = {
       [
         {
           ad: 'Masaüstü İş İstasyonu Bilgisayar Seti (i7 14700, 32GB RAM, 1TB SSD)',
+          ozelligi: 'Kurumsal kullanım için yüksek performanslı masaüstü bilgisayar kasası ve donanım aksesuarları',
           tip: 'Mal',
           birim: 'Set',
           miktar: 6,
@@ -1352,6 +1362,7 @@ export const devSeedService = {
         },
         {
           ad: '27 inç IPS QHD Profesyonel Pivot Monitör',
+          ozelligi: 'Pivot özellikli, HDMI ve DisplayPort girişli IPS panel monitör',
           tip: 'Mal',
           birim: 'Adet',
           miktar: 6,
@@ -1366,6 +1377,7 @@ export const devSeedService = {
       [
         {
           ad: 'Defibrilatör ve EKG Cihazları Güvenlik ve Enerji Kalibrasyonu',
+          ozelligi: 'TÜRKAK akreditasyonlu kuruluş tarafından sertifikalı kalibrasyon ölçüm hizmeti',
           tip: 'Hizmet',
           birim: 'Adet',
           miktar: 15,
@@ -1377,6 +1389,7 @@ export const devSeedService = {
         },
         {
           ad: 'Hasta Başı Monitörleri NIBP, SpO2 ve Sıcaklık Kalibrasyonu',
+          ozelligi: 'Hayati parametre ölçüm sensörleri doğrulama ve periyodik kalibrasyon hizmeti',
           tip: 'Hizmet',
           birim: 'Adet',
           miktar: 20,
@@ -1454,7 +1467,7 @@ export const devSeedService = {
       // Kalemleri kontrol et ve ekle
       const existingKalemler = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT id FROM DATA_TeminKalem WHERE temin_dosya_id = ?',
+        'SELECT id, kalem_adi FROM DATA_TeminKalem WHERE temin_dosya_id = ?',
         [dosyaId]
       )
 
@@ -1467,7 +1480,7 @@ export const devSeedService = {
             `INSERT INTO DATA_TeminKalem (
               temin_dosya_id, kalem_adi, tipi, birim, miktar, kdv_orani, tasinir_kodu, aciklama
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod, item.ad]
+            [dosyaId, item.ad, item.tip, item.birim, item.miktar, item.kdv, item.tkod, item.ozelligi || item.ad]
           )
           if (kRes.success && kRes.lastInsertRowid) {
             dosyaKalemIds.push(Number(kRes.lastInsertRowid))
@@ -1475,6 +1488,18 @@ export const devSeedService = {
         }
       } else {
         dosyaKalemIds = existingKalemler.data.map((r: { id: number }) => r.id)
+        // Mevcut kalemlerin açıklama (özelliği) alanlarını zenginleştir
+        for (let ki = 0; ki < existingKalemler.data.length; ki++) {
+          const ek = existingKalemler.data[ki]
+          const matchingPkgItem = pkg[ki] || pkg.find((p) => p.ad === ek.kalem_adi)
+          if (matchingPkgItem?.ozelligi) {
+            await window.electron.ipcRenderer.invoke(
+              'db:run',
+              'UPDATE DATA_TeminKalem SET aciklama = ? WHERE id = ? AND (aciklama IS NULL OR aciklama = "" OR aciklama = kalem_adi)',
+              [matchingPkgItem.ozelligi, ek.id]
+            )
+          }
+        }
       }
 
       // İstekli Firmaları Bağla

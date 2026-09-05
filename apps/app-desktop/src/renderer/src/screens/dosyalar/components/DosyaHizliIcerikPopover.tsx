@@ -79,9 +79,9 @@ export function DosyaHizliIcerikPopover({
         'db:query',
         `SELECT tk.*, COALESCE(NULLIF(tk.kalem_adi, ''), tk.malzeme_adi) as kalem_adi 
          FROM DATA_TeminKalem tk 
-         WHERE tk.temin_dosya_id = ? OR tk.temin_id = ? 
+         WHERE tk.temin_dosya_id = ? 
          ORDER BY COALESCE(tk.sira_no, tk.id) ASC`,
-        [dosya.id, dosya.id]
+        [dosya.id]
       )
       return res?.success && Array.isArray(res.data) ? res.data : []
     },
@@ -114,9 +114,9 @@ export function DosyaHizliIcerikPopover({
            ) as toplam_teklif
          FROM DATA_TeminFirma df 
          LEFT JOIN TANIM_Firma f ON df.firma_id = f.id 
-         WHERE (df.temin_dosya_id = ? OR df.temin_id = ?) AND (df.aktif_mi IS NULL OR df.aktif_mi = 1)
+         WHERE df.temin_dosya_id = ? AND (df.aktif_mi IS NULL OR df.aktif_mi = 1)
          ORDER BY df.id ASC`,
-        [dosya.id, dosya.id]
+        [dosya.id]
       )
       return res?.success && Array.isArray(res.data) ? res.data : []
     },

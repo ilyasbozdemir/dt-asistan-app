@@ -47,7 +47,7 @@ export const LuzumOnayEkiMapping: ProcessMapping = {
   },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'olusturma_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Dosya tarihi'
   },
   kurumIci: {

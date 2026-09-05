@@ -18,7 +18,7 @@ export const PiyasaFiyatArastirmaGorevlendirmesiMapping: ProcessMapping = {
   },
   sayisi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'temin_no_clean',
+    sutun: 'temin_no',
     aciklama: 'Temin Numarası'
   },
   evrakSayisi: {

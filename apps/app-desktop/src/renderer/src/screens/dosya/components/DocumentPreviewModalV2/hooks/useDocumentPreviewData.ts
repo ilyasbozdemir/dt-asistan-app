@@ -17,6 +17,7 @@ import {
   TEMPLATE_OPTIONS,
 } from "../templateResolver";
 import { buildExportFileName } from "../../../../../utils/exportFileName";
+import { documentPreloadService } from "../../../../../services/documentPreloadService";
 
 interface UseDocumentPreviewDataParams {
   isOpen: boolean;
@@ -63,7 +64,21 @@ export function useDocumentPreviewData({
     customSubInstitutionKurumlari,
   } = useSettingsStore();
 
+  const {
+    config: activeTemplateConf,
+    component: ActiveComponent,
+    resolvedId,
+  } = resolveTemplateConfig(selectedDocId);
+
+  const initialPreloaded = documentPreloadService.getCachedDocument(
+    resolvedId,
+    activeDosyaId,
+  );
+
   const [formData, setFormData] = useState<Partial<IhtiyacListesiType>>(() => {
+    if (initialPreloaded?.resolvedData) {
+      return initialPreloaded.resolvedData;
+    }
     if (propInvitedFirms && propInvitedFirms.length > 0) {
       return {
         firmalar: propInvitedFirms.map((f: any) => ({
@@ -75,8 +90,13 @@ export function useDocumentPreviewData({
     return {};
   });
 
-  const [personelListesi, setPersonelListesi] = useState<Personel[]>([]);
+  const [personelListesi, setPersonelListesi] = useState<Personel[]>(() => {
+    return initialPreloaded?.payloadData?.personelListesi || [];
+  });
   const [firmaListesi, setFirmaListesi] = useState<any[]>(() => {
+    if (initialPreloaded?.payloadData?.firmaListesi) {
+      return initialPreloaded.payloadData.firmaListesi;
+    }
     if (propInvitedFirms && propInvitedFirms.length > 0) {
       return propInvitedFirms.map((f: any) => ({
         temin_firma_id: f.temin_firma_id || f.id,
@@ -92,8 +112,10 @@ export function useDocumentPreviewData({
 
   const [localShowLogoLeft, setLocalShowLogoLeft] = useState(showLogoLeft);
   const [localShowLogoRight, setLocalShowLogoRight] = useState(showLogoRight);
-  const [dosyaRecord, setDosyaRecord] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dosyaRecord, setDosyaRecord] = useState<any>(
+    () => initialPreloaded?.payloadData?.dosya || null,
+  );
+  const [isLoading, setIsLoading] = useState(!initialPreloaded);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">(
     "portrait",
   );
@@ -111,18 +133,18 @@ export function useDocumentPreviewData({
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const {
-    config: activeTemplateConf,
-    component: ActiveComponent,
-    resolvedId,
-  } = resolveTemplateConfig(selectedDocId);
-
   // 1. Load Data from DB in Parallel
   useEffect(() => {
     if (!isOpen) return;
 
     let isMounted = true;
-    setIsLoading(true);
+    const preloaded = documentPreloadService.getCachedDocument(
+      resolvedId,
+      activeDosyaId,
+    );
+    if (!preloaded) {
+      setIsLoading(true);
+    }
 
     const loadInitialData = async (): Promise<void> => {
       try {

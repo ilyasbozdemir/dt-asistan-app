@@ -93,28 +93,28 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
         ),
         window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? OR temin_id = ? ORDER BY id ASC",
-          [dosyaId, dosyaId],
+          "SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC",
+          [dosyaId],
         ),
         window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT tf.*, f.unvan, f.vergi_no, f.telefon, f.yetkili FROM DATA_TeminFirma tf LEFT JOIN TANIM_Firma f ON tf.firma_id = f.id WHERE tf.temin_dosya_id = ? OR tf.temin_id = ?",
-          [dosyaId, dosyaId],
+          "SELECT tf.*, f.unvan, f.vergi_no, f.telefon, f.yetkili FROM DATA_TeminFirma tf LEFT JOIN TANIM_Firma f ON tf.firma_id = f.id WHERE tf.temin_dosya_id = ?",
+          [dosyaId],
         ),
         window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ? OR temin_id = ?",
-          [dosyaId, dosyaId],
+          "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
+          [dosyaId],
         ),
         window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT tk.*, p.ad_soyad, p.unvan as personel_unvan, kg.ad as gorev_adi FROM DATA_TeminKomisyon tk LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id LEFT JOIN TANIM_KomisyonGorevi kg ON tk.gorev_kod = kg.kod WHERE tk.temin_dosya_id = ? OR tk.temin_id = ? ORDER BY tk.id ASC",
-          [dosyaId, dosyaId],
+          "SELECT tk.*, p.ad_soyad, p.unvan as personel_unvan, kg.ad as gorev_adi FROM DATA_TeminKomisyon tk LEFT JOIN TANIM_Personel p ON tk.personel_id = p.id LEFT JOIN TANIM_KomisyonGorevi kg ON tk.gorev_kod = kg.kod WHERE tk.temin_dosya_id = ? ORDER BY tk.id ASC",
+          [dosyaId],
         ),
         window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT * FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ? OR temin_id = ?",
-          [dosyaId, dosyaId],
+          "SELECT * FROM DATA_DosyaSablonVeri WHERE temin_dosya_id = ?",
+          [dosyaId],
         ),
       ]);
 

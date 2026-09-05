@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 
 interface SettingsState {
+  activeKurumId: number
+  setActiveKurumId: (id: number) => void
   institutionName: string
   institutionLogo: string | null
   logoLeft: string | null
@@ -65,6 +67,8 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
+  activeKurumId: 1,
+  setActiveKurumId: (id) => set({ activeKurumId: id }),
   institutionName: 'Kurum Bilgisi Bekleniyor...',
   institutionLogo: null,
   logoLeft: null,
@@ -129,6 +133,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     try {
       const settings = await window.electron.ipcRenderer.invoke('db:get-settings')
       set({
+        activeKurumId: parseInt(settings.activeKurumId || '1', 10) || 1,
         institutionName: settings.institutionName || 'Kurum Adı Bulunamadı',
         institutionLogo: settings.institutionLogo || null,
         logoLeft: settings.logoLeft || null,

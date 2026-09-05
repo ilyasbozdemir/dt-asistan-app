@@ -8,7 +8,7 @@ export const YaklasikMaliyetCetveliMapping: ProcessMapping = {
   },
   kurumUst: {
     tablo: 'TANIM_Kurum',
-    sutun: 'ust_idari_birim',
+    sutun: 'ust_kurum_adi',
     aciklama: 'Üst İdari Birim'
   },
   kurumAdi: {

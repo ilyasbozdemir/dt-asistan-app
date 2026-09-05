@@ -12,6 +12,7 @@ import {
 import { cn } from '../../utils/cn'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { normalizeForMatch, parseStatusAndName } from '../../screens/system/utils/statusUtils'
+import { documentPreloadService } from '../../services/documentPreloadService'
 
 export interface Sablon {
   id: number
@@ -194,13 +195,24 @@ export function BelgeAksiyonlari({
     window.dispatchEvent(new Event('dta_presets_changed'))
   }
 
+  const handleWarmup = () => {
+    if (activeDosyaId && (targetName || cleanTarget)) {
+      documentPreloadService.warmOnHover(targetName || cleanTarget, activeDosyaId)
+    }
+  }
+
   const triggerElement = trigger ? (
-    <div onClick={() => !disabled && setMenuOpen((v) => !v)} className="cursor-pointer">
+    <div
+      onClick={() => !disabled && setMenuOpen((v) => !v)}
+      onMouseEnter={handleWarmup}
+      className="cursor-pointer"
+    >
       {trigger}
     </div>
   ) : (
     <button
       onClick={() => setMenuOpen((v) => !v)}
+      onMouseEnter={handleWarmup}
       disabled={disabled}
       title="İşlemler"
       className={cn(
@@ -217,12 +229,16 @@ export function BelgeAksiyonlari({
     <div
       className="relative inline-block text-left"
       ref={dropdownRef}
+      onMouseEnter={handleWarmup}
       onClick={(e) => e.stopPropagation()}
     >
       {triggerElement}
 
       {menuOpen && (
-        <div className="absolute right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 w-64 py-2 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
+        <div
+          onMouseEnter={handleWarmup}
+          className="absolute right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 w-64 py-2 text-xs animate-in fade-in slide-in-from-top-1 duration-150"
+        >
           {/* Main Actions */}
           <div className="px-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800/80 space-y-0.5">
             <button

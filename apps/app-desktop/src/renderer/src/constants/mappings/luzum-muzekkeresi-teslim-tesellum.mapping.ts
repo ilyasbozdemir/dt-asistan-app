@@ -26,7 +26,7 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
   },
   yukleniciFirma: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'kazanan_firma_id',
+    sutun: 'firma_id',
     iliskiliTablo: 'TANIM_Firma',
     iliskiliSutun: 'unvan',
     varsayilan: '',
@@ -38,12 +38,12 @@ export const LuzumTeslimTesellumMapping: ProcessMapping = {
     aciklama: 'Kurumun adı (tabiri ile birlikte)'
   },
   dosyaNumarasi: {
-    formul: '{{DATA_TeminDosyasi.butce_yili}}-{{DATA_TeminDosyasi.temin_no_clean}}',
+    formul: '{{DATA_TeminDosyasi.butce_yili}}-{{DATA_TeminDosyasi.temin_no}}',
     aciklama: 'Yıl-Dosya no birleşimi'
   },
   dosyaTarihi: {
     tablo: 'DATA_TeminDosyasi',
-    sutun: 'olusturma_tarihi',
+    sutun: 'dosya_acilis_tarihi',
     aciklama: 'Dosya tarihi'
   },
 

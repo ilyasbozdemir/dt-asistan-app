@@ -113,6 +113,7 @@ export function registerDbIpcHandlers(): void {
       }
 
       return {
+        activeKurumId: settingsObj.activeKurumId || '1',
         institutionName: settingsObj.institutionName || 'Bilinmeyen Kurum',
         institutionLogo: settingsObj.institutionLogo || null,
         logoLeft: settingsObj.logoLeft || null,
@@ -128,6 +129,7 @@ export function registerDbIpcHandlers(): void {
       }
     } catch {
       return {
+        activeKurumId: '1',
         institutionName: null,
         institutionLogo: null,
         logoLeft: null,

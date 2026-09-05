@@ -9,6 +9,8 @@ import {
   Search
 } from 'lucide-react'
 import { cn } from '../../../utils/cn'
+import { useWorkspaceStore } from '../../../store/workspaceStore'
+import { documentPreloadService } from '../../../services/documentPreloadService'
 
 interface StepConfig {
   id: number
@@ -16,6 +18,7 @@ interface StepConfig {
   shortLabel: string
   route: string
   icon: React.ElementType
+  docTemplates: string[]
 }
 
 const STEPS: StepConfig[] = [
@@ -24,28 +27,51 @@ const STEPS: StepConfig[] = [
     label: 'İhtiyaç Listesi & Maliyet & Onay',
     shortLabel: 'Hazırlık',
     route: '/dosya/hazirlik-ve-ihtiyac',
-    icon: Package
+    icon: Package,
+    docTemplates: [
+      'ihtiyac-listesi',
+      'dogrudan-temin-onay-belgesi',
+      'komisyon-gorevlendirme-onayi',
+      'luzum-muzekkeresi'
+    ]
   },
   {
     id: 2,
     label: 'Piyasa Fiyat Araştırması',
     shortLabel: 'Araştırma',
     route: '/dosya/piyasa-fiyat-arastirmasi',
-    icon: Search
+    icon: Search,
+    docTemplates: [
+      'piyasa-fiyat-arastirma-tutanagi',
+      'yaklasik-maliyet-hesap-cetveli',
+      'teklif-mektubu-dagitim-cizelgesi',
+      'fiyat-arastirma-mektubu'
+    ]
   },
   {
     id: 3,
     label: 'Sipariş & Sözleşme',
     shortLabel: 'Sözleşme',
     route: '/dosya/siparis-ve-sozlesme',
-    icon: FileSignature
+    icon: FileSignature,
+    docTemplates: [
+      'siparis-mektubu',
+      'kabul-edilen-teklif',
+      'dogrudan-temin-sozlesmesi',
+      'harcama-talimati'
+    ]
   },
   {
     id: 4,
     label: 'Muayene & Kabul & Ödeme',
     shortLabel: 'Muayene & Kabul & Ödeme',
     route: '/dosya/kabul-ve-odeme',
-    icon: CheckCircle2
+    icon: CheckCircle2,
+    docTemplates: [
+      'muayene-kabul-tutanagi',
+      'muayene-kabul-komisyonu',
+      'fatura-ve-odeme-belgesi'
+    ]
   }
 ]
 
@@ -60,6 +86,7 @@ interface ProcessStepperProps {
 
 export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX.Element {
   const navigate = useNavigate()
+  const { activeDosyaId } = useWorkspaceStore()
   const currentIndex = findCurrentStepIndex(currentRoute)
   const prevStep = currentIndex > 0 ? STEPS[currentIndex - 1] : null
   const nextStep = currentIndex < STEPS.length - 1 ? STEPS[currentIndex + 1] : null
@@ -68,12 +95,23 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
     navigate({ to: route as any })
   }
 
+  const handleWarmStep = (step: StepConfig | null) => {
+    if (activeDosyaId && step && step.docTemplates) {
+      documentPreloadService.warmStageDocuments(
+        step.shortLabel,
+        activeDosyaId,
+        step.docTemplates
+      )
+    }
+  }
+
   return (
     <div className="flex items-center justify-between gap-2 print:hidden">
       {/* Önceki Adım Butonu */}
       <button
         type="button"
         onClick={() => prevStep && goTo(prevStep.route)}
+        onMouseEnter={() => handleWarmStep(prevStep)}
         disabled={!prevStep}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all border',
@@ -99,6 +137,7 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
               <button
                 type="button"
                 onClick={() => goTo(step.route)}
+                onMouseEnter={() => handleWarmStep(step)}
                 className={cn(
                   'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-[11px] font-bold cursor-pointer group relative border-0 bg-transparent',
                   isCurrent
@@ -144,6 +183,7 @@ export function ProcessStepper({ currentRoute }: ProcessStepperProps): React.JSX
       <button
         type="button"
         onClick={() => nextStep && goTo(nextStep.route)}
+        onMouseEnter={() => handleWarmStep(nextStep)}
         disabled={!nextStep}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all border',

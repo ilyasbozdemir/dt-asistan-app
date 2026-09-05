@@ -399,7 +399,7 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
       try {
         const kalemlerRes = await window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT * FROM DATA_TeminKalem WHERE temin_id = ?",
+          "SELECT * FROM DATA_TeminKalem WHERE temin_dosya_id = ?",
           [activeDosyaId],
         );
         const firmalarRes = await window.electron.ipcRenderer.invoke(
@@ -407,12 +407,12 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
           `SELECT f.*, tf.durum as teklif_durumu, tf.toplam_teklif 
            FROM DATA_TeminFirma tf 
            JOIN TANIM_Firma f ON tf.firma_id = f.id 
-           WHERE tf.temin_id = ?`,
+           WHERE tf.temin_dosya_id = ?`,
           [activeDosyaId],
         );
         const tekliflerRes = await window.electron.ipcRenderer.invoke(
           "db:query",
-          "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_id = ?",
+          "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_dosya_id = ?",
           [activeDosyaId],
         );
         const komisyonRes = await window.electron.ipcRenderer.invoke(

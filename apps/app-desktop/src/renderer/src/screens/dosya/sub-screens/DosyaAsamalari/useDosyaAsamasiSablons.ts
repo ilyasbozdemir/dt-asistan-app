@@ -7,6 +7,7 @@ import { parseStatusAndName } from '../../../system/utils/statusUtils'
 import Mustache from 'mustache'
 import { buildExportFileName } from '../../../../utils/exportFileName'
 import { useGlobalDocumentPreviewStore } from '../../../../store/globalDocumentPreviewStore'
+import { documentPreloadService } from '../../../../services/documentPreloadService'
 
 // -----------------------------------------------------------------------
 // Sabitler – tüm dosya aşaması ekranları tarafından paylaşılır
@@ -251,6 +252,24 @@ export function useDosyaAsamasiSablons() {
     }
     loadFromUrl()
   }, [sablonAd, sablons, masterHtml, activeDosyaId, dosyaContext])
+
+  // Adımlar arası gezinirken o aşamaya ait tüm belgeleri arkaplanda ön-işle (pre-warm)
+  useEffect(() => {
+    if (!activeDosyaId || sablons.length === 0) return
+    const docKeys = sablons.map((s) => s.dosya_adi || s.route_path || s.ad).filter(Boolean)
+    documentPreloadService.warmStageDocuments('current_stage', activeDosyaId, docKeys)
+  }, [activeDosyaId, sablons])
+
+  const warmSablon = (sablonOrKey: any) => {
+    if (!activeDosyaId || !sablonOrKey) return
+    const key =
+      typeof sablonOrKey === 'string'
+        ? sablonOrKey
+        : sablonOrKey.dosya_adi || sablonOrKey.route_path || sablonOrKey.ad
+    if (key) {
+      documentPreloadService.warmOnHover(key, activeDosyaId)
+    }
+  }
 
   const handleOpenPreviewForSablon = async (sablon: any, title: string, overrideCtx?: any) => {
     const processPath = sablon.route_path || sablon.dosya_adi || ''
@@ -551,6 +570,7 @@ export function useDosyaAsamasiSablons() {
     toggleStar,
     refreshSnapshot,
     saveSnapshot,
-    isSablonDisabled
+    isSablonDisabled,
+    warmSablon
   }
 }
