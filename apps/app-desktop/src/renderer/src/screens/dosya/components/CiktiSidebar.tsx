@@ -1,5 +1,5 @@
 import React from 'react'
-import { Printer, Download, FileText, CheckCircle2, Archive } from 'lucide-react'
+import { Printer, Download, FileText, CheckCircle2, Archive, FileSpreadsheet } from 'lucide-react'
 import { usePrintQueueStore } from '../../../store/printQueueStore'
 import { useWorkspaceStore } from '../../../store/workspaceStore'
 
@@ -8,7 +8,7 @@ interface CiktiSidebarProps {
   processing: boolean
   hasStarredDocs: boolean
   onPrintClick: () => void
-  onDownloadClick: (action: 'pdf' | 'docx' | 'udf' | 'zip') => void
+  onDownloadClick: (action: 'pdf' | 'docx' | 'udf' | 'zip' | 'excel') => void
 }
 
 export function CiktiSidebar({
@@ -57,7 +57,7 @@ export function CiktiSidebar({
       <button
         onClick={() => onDownloadClick('zip')}
         disabled={processing || selectedCount === 0}
-        className="w-full flex items-center gap-3 p-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-600/15 cursor-pointer"
+        className="w-full flex items-center gap-3 p-3.5 bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-600/15 cursor-pointer"
       >
         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
           <Archive className="w-4 h-4" />
@@ -65,6 +65,21 @@ export function CiktiSidebar({
         <div className="text-left flex-1">
           <div className="text-xs font-bold text-white">Toplu İndir (ZIP Arşivi)</div>
           <div className="text-[9px] text-white/80">Seçili tüm belgeleri tek ZIP&apos;te topla</div>
+        </div>
+      </button>
+
+      {/* MASTER EXCEL İNDİR */}
+      <button
+        onClick={() => onDownloadClick('excel')}
+        disabled={processing}
+        className="w-full flex items-center gap-3 p-3.5 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-emerald-600/15 cursor-pointer"
+      >
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
+          <FileSpreadsheet className="w-4 h-4" />
+        </div>
+        <div className="text-left flex-1">
+          <div className="text-xs font-bold text-white">Master Excel İndir (.xlsx)</div>
+          <div className="text-[9px] text-white/80">Tüm süreç, kalemler ve şablonlar</div>
         </div>
       </button>
 

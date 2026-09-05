@@ -27,6 +27,7 @@ import { CiktiPreviewModal } from "./components/CiktiPreviewModal";
 import { buildExportFileName, buildBatchZipFileName } from "../../utils/exportFileName";
 import { usePrintQueueStore } from "../../store/printQueueStore";
 import { useGlobalDocumentPreviewStore } from "../../store/globalDocumentPreviewStore";
+import { exportDogrudanTeminMasterExcel } from "../../services/excelExportService";
 
 const normalizeForMatch = (str: string) => {
   return str
@@ -390,9 +391,59 @@ export function CiktiMerkeziScreen(): React.JSX.Element {
   };
 
   const handleAction = async (
-    action: "pdf" | "udf" | "docx" | "print" | "zip",
+    action: "pdf" | "udf" | "docx" | "print" | "zip" | "excel",
     specificIds?: number[],
   ) => {
+    if (action === "excel") {
+      setProcessing(true);
+      try {
+        const kalemlerRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT * FROM DATA_TeminKalem WHERE temin_id = ?",
+          [activeDosyaId],
+        );
+        const firmalarRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          `SELECT f.*, tf.durum as teklif_durumu, tf.toplam_teklif 
+           FROM DATA_TeminFirma tf 
+           JOIN TANIM_Firma f ON tf.firma_id = f.id 
+           WHERE tf.temin_id = ?`,
+          [activeDosyaId],
+        );
+        const tekliflerRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT * FROM DATA_TeminKalemTeklif WHERE temin_id = ?",
+          [activeDosyaId],
+        );
+        const komisyonRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT * FROM DATA_TeminKomisyon WHERE temin_dosya_id = ?",
+          [activeDosyaId],
+        );
+        const kurumRes = await window.electron.ipcRenderer.invoke(
+          "db:query",
+          "SELECT * FROM TANIM_Kurum LIMIT 1",
+        );
+
+        await exportDogrudanTeminMasterExcel({
+          dosya: activeDosya,
+          kalemler: kalemlerRes.success ? kalemlerRes.data : [],
+          firmalar: firmalarRes.success ? firmalarRes.data : [],
+          teklifler: tekliflerRes.success ? tekliflerRes.data : [],
+          komisyon: komisyonRes.success ? komisyonRes.data : [],
+          kurum: kurumRes.success ? kurumRes.data?.[0] : null,
+          sablons: sablons,
+        });
+
+        showToast("Master Excel raporu başarıyla indirildi.", "success");
+      } catch (err: any) {
+        showToast("Master Excel hazırlanırken hata: " + err.message, "error");
+      } finally {
+        setProcessing(false);
+      }
+      return;
+    }
+
     const targetIds = specificIds ? new Set(specificIds) : selectedIds;
 
     if (targetIds.size === 0) {
