@@ -188,20 +188,24 @@ export function Header(): React.JSX.Element {
           ],
         },
         {
-          name: "Hakediş İşlemleri",
+          name: "İhale İşlemleri",
           items: [
             {
-              label: "Hakediş Raporları",
-              onClick: () => navigate({ to: "/hakedis" as any }),
+              label: "Açık İhale Süreçleri (KİK Md. 19)",
+              onClick: () => navigate({ to: "/harcama-merkezi" as any }),
             },
             {
-              label: "Yeni Hakediş Dosyası",
+              label: "Pazarlık Usulü İhale (KİK Md. 21)",
+              onClick: () => navigate({ to: "/harcama-merkezi" as any }),
+            },
+            {
+              label: "İhale Hakediş & Harcama Raporları",
               onClick: () => navigate({ to: "/hakedis" as any }),
             },
             { divider: true },
             {
-              label: "Hakediş Mevzuat Tanımları",
-              onClick: () => navigate({ to: "/hakedis" as any }),
+              label: "İhale Mevzuat & Eşik Değerleri",
+              onClick: () => navigate({ to: "/mevzuat" as any }),
             },
           ],
         },
