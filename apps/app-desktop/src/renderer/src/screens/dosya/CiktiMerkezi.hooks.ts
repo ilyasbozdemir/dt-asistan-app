@@ -99,6 +99,10 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
         const dosyaRes = await window.electron.ipcRenderer.invoke(
           'db:query',
           `SELECT d.*, 
+                  b.antet_ek_satir as birim_antet_ek_satir,
+                  b.birim_adi as birim_tablo_adi,
+                  b.harcama_birim_kodu,
+                  b.muhasebe_kodu,
                   p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan, p.telefon as onaylayan_telefon,
                   h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
                   h.telefon as hazirlayan_telefon, h.eposta as hazirlayan_eposta,
@@ -115,6 +119,7 @@ export function useCiktiMerkeziData(activeDosyaId: number | null): UseCiktiMerke
                   f.vergi_dairesi as yuklenici_firma_vergi_dairesi,
                   f.vergi_no as yuklenici_firma_vergi_no
            FROM DATA_TeminDosyasi d 
+           LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
            LEFT JOIN TANIM_Personel p ON d.onay_personel_id = p.id 
            LEFT JOIN TANIM_Personel h ON d.hazirlayan_personel_id = h.id
            LEFT JOIN TANIM_Personel te ON d.talep_eden_personel_id = te.id

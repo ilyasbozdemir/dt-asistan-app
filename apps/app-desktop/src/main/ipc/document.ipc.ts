@@ -541,8 +541,22 @@ export function registerDocumentIpcHandlers(): void {
       const solLogo = (kurum as any)?.logo_sol || (kurum as any)?.logo_url || settingsMap.logoLeft || settingsMap.institutionLogo || null
       const sagLogo = (kurum as any)?.logo_sag || settingsMap.logoRight || null
 
-      // 3. Fetch file details
-      const dosya = dosyaId ? db.prepare('SELECT * FROM DATA_TeminDosyasi WHERE id = ?').get(dosyaId) || {} : {}
+      // 3. Fetch file details with Purchasing Unit (TANIM_Birim) antet data
+      const dosya = dosyaId
+        ? db
+            .prepare(
+              `SELECT d.*, 
+                      b.antet_ek_satir as birim_antet_ek_satir, 
+                      b.birim_adi as birim_tablo_adi,
+                      b.harcama_birim_kodu,
+                      b.muhasebe_kodu,
+                      b.detsis_kodu
+               FROM DATA_TeminDosyasi d 
+               LEFT JOIN TANIM_Birim b ON d.birim_id = b.id 
+               WHERE d.id = ?`
+            )
+            .get(dosyaId) || {}
+        : {}
 
       // 4. Fetch items
       const items = dosyaId ? db.prepare('SELECT id, kalem_adi, aciklama, birim, miktar, tasinir_kodu, kdv_orani FROM DATA_TeminKalem WHERE temin_dosya_id = ? ORDER BY id ASC').all(dosyaId) : []
@@ -734,15 +748,56 @@ export function registerDocumentIpcHandlers(): void {
           ? grandTotalNum.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           : '0,00'
 
-      const kurumAdi = (kurum as any)?.ad || settingsMap.institutionName || 'T.C. KAMU KURUMU'
+      let antetSatirlari: string[] = []
+      if ((kurum as any)?.kurum_anteti) {
+        try {
+          const parsed = JSON.parse((kurum as any).kurum_anteti)
+          if (Array.isArray(parsed)) {
+            antetSatirlari = parsed.filter((s: string) => s && s.trim() !== '')
+          }
+        } catch {
+          if (typeof (kurum as any).kurum_anteti === 'string' && (kurum as any).kurum_anteti.trim()) {
+            antetSatirlari = (kurum as any).kurum_anteti.split('\n').map((s: string) => s.trim()).filter(Boolean)
+          }
+        }
+      }
+      if (antetSatirlari.length === 0) {
+        const kurumAdiText = (kurum as any)?.ust_kurum_adi || (kurum as any)?.kurum_adi || (kurum as any)?.ad || settingsMap.institutionName || 'KAMU KURUMU'
+        antetSatirlari = ['T.C.', String(kurumAdiText).toUpperCase()]
+      }
+
+      const birimAntet = (
+        (dosya as any)?.antet_ek_satir ||
+        (dosya as any)?.birim_antet_ek_satir ||
+        (dosya as any)?.birim_tablo_adi ||
+        (dosya as any)?.birim_adi ||
+        (dosya as any)?.harcama_birimi ||
+        settingsMap.spendingUnit ||
+        ''
+      ).trim()
+
+      if (
+        birimAntet &&
+        !antetSatirlari.some((s: string) => s.trim().toUpperCase() === birimAntet.toUpperCase())
+      ) {
+        antetSatirlari.push(birimAntet)
+      }
+
+      const kurumAdi = (kurum as any)?.kurum_adi || (kurum as any)?.ad || settingsMap.institutionName || 'T.C. KAMU KURUMU'
       const harcamaBirimi =
-        (dosya as any)?.harcama_birimi || settingsMap.spendingUnit || (dosya as any)?.konu || 'HARCAMA BİRİMİ'
-      const antetSatirlari = ['T.C.', String(kurumAdi).toUpperCase(), String(harcamaBirimi).toUpperCase()]
+        birimAntet || (dosya as any)?.harcama_birimi || settingsMap.spendingUnit || (dosya as any)?.konu || 'HARCAMA BİRİMİ'
 
       const resolvedContext = {
         kurumAdi,
         harcamaBirimi,
+        birimAdi: birimAntet,
+        birimAnteti: birimAntet,
+        antetEkSatir: birimAntet,
         antetSatirlari,
+        antetSatir1: antetSatirlari[0] || '',
+        antetSatir2: antetSatirlari[1] || '',
+        antetSatir3: antetSatirlari[2] || '',
+        antetSatir4: antetSatirlari[3] || '',
         solLogo,
         sagLogo,
         dosyaNo: (dosya as any)?.temin_no || '',
@@ -862,6 +917,10 @@ export function registerDocumentIpcHandlers(): void {
             .prepare(
               `
           SELECT d.*, 
+                 b.antet_ek_satir as birim_antet_ek_satir,
+                 b.birim_adi as birim_tablo_adi,
+                 b.harcama_birim_kodu,
+                 b.muhasebe_kodu,
                  p.ad_soyad as onaylayan_ad_soyad, p.unvan as onaylayan_unvan, p.telefon as onaylayan_telefon,
                  h.ad_soyad as hazirlayan_ad_soyad, h.unvan as hazirlayan_unvan,
                  h.telefon as hazirlayan_telefon, h.eposta as hazirlayan_eposta,
@@ -878,6 +937,7 @@ export function registerDocumentIpcHandlers(): void {
                  f.vergi_dairesi as yuklenici_firma_vergi_dairesi,
                  f.vergi_no as yuklenici_firma_vergi_no
           FROM DATA_TeminDosyasi d 
+          LEFT JOIN TANIM_Birim b ON d.birim_id = b.id
           LEFT JOIN TANIM_Personel p ON d.onay_personel_id = p.id 
           LEFT JOIN TANIM_Personel h ON d.hazirlayan_personel_id = h.id
           LEFT JOIN TANIM_Personel te ON d.talep_eden_personel_id = te.id
@@ -1108,23 +1168,57 @@ export function registerDocumentIpcHandlers(): void {
             })
           : '0,00'
 
-      const kurumAdi = (kurum as any)?.ad || settingsMap.institutionName || 'T.C. KAMU KURUMU'
-      const harcamaBirimi =
+      let antetSatirlari: string[] = []
+      if ((kurum as any)?.kurum_anteti) {
+        try {
+          const parsed = JSON.parse((kurum as any).kurum_anteti)
+          if (Array.isArray(parsed)) {
+            antetSatirlari = parsed.filter((s: string) => s && s.trim() !== '')
+          }
+        } catch {
+          if (typeof (kurum as any).kurum_anteti === 'string' && (kurum as any).kurum_anteti.trim()) {
+            antetSatirlari = (kurum as any).kurum_anteti.split('\n').map((s: string) => s.trim()).filter(Boolean)
+          }
+        }
+      }
+      if (antetSatirlari.length === 0) {
+        const kurumAdiText = (kurum as any)?.ust_kurum_adi || (kurum as any)?.kurum_adi || (kurum as any)?.ad || settingsMap.institutionName || 'KAMU KURUMU'
+        antetSatirlari = ['T.C.', String(kurumAdiText).toUpperCase()]
+      }
+
+      const birimAntet = (
+        activeDosya?.antet_ek_satir ||
+        activeDosya?.birim_antet_ek_satir ||
+        activeDosya?.birim_tablo_adi ||
+        activeDosya?.birim_adi ||
         activeDosya?.harcama_birimi ||
         settingsMap.spendingUnit ||
-        activeDosya?.konu ||
-        'HARCAMA BİRİMİ'
-      const antetSatirlari = [
-        'T.C.',
-        String(kurumAdi).toUpperCase(),
-        String(harcamaBirimi).toUpperCase()
-      ]
+        ''
+      ).trim()
+
+      if (
+        birimAntet &&
+        !antetSatirlari.some((s: string) => s.trim().toUpperCase() === birimAntet.toUpperCase())
+      ) {
+        antetSatirlari.push(birimAntet)
+      }
+
+      const kurumAdi = (kurum as any)?.kurum_adi || (kurum as any)?.ad || settingsMap.institutionName || 'T.C. KAMU KURUMU'
+      const harcamaBirimi =
+        birimAntet || activeDosya?.harcama_birimi || settingsMap.spendingUnit || activeDosya?.konu || 'HARCAMA BİRİMİ'
 
       const dosyaContext: any = {
         ...masterJson,
         kurumAdi,
         harcamaBirimi,
+        birimAdi: birimAntet,
+        birimAnteti: birimAntet,
+        antetEkSatir: birimAntet,
         antetSatirlari,
+        antetSatir1: antetSatirlari[0] || '',
+        antetSatir2: antetSatirlari[1] || '',
+        antetSatir3: antetSatirlari[2] || '',
+        antetSatir4: antetSatirlari[3] || '',
         solLogo,
         sagLogo,
         id: activeDosya?.id || 0,

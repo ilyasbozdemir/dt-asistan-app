@@ -164,17 +164,39 @@ export async function resolveAntetSatirlari(
       result = ['T.C.'];
     }
 
-    // 4. Fetch antet_ek_satir from DATA_TeminDosyasi for active file if set
+    // 4. Fetch antet_ek_satir or birim antet from DATA_TeminDosyasi & TANIM_Birim
     if (activeDosyaId) {
-      const dosyaRes = await queryExecutor(
-        'SELECT antet_ek_satir FROM DATA_TeminDosyasi WHERE id = ? LIMIT 1',
-        [activeDosyaId]
-      );
-      if (dosyaRes && dosyaRes.length > 0 && dosyaRes[0].antet_ek_satir) {
-        const ekSatir = String(dosyaRes[0].antet_ek_satir).trim();
-        if (ekSatir) {
-          result.push(ekSatir);
+      try {
+        const birimRes = await queryExecutor(
+          `SELECT d.antet_ek_satir as dosya_antet, 
+                  b.antet_ek_satir as birim_antet, 
+                  b.birim_adi, 
+                  d.harcama_birimi,
+                  d.birim_adi as dosya_birim_adi
+           FROM DATA_TeminDosyasi d 
+           LEFT JOIN TANIM_Birim b ON d.birim_id = b.id 
+           WHERE d.id = ? LIMIT 1`,
+          [activeDosyaId]
+        );
+        if (birimRes && birimRes.length > 0) {
+          const row = birimRes[0];
+          const ekSatir = (
+            row.dosya_antet ||
+            row.birim_antet ||
+            row.birim_adi ||
+            row.dosya_birim_adi ||
+            row.harcama_birimi ||
+            ''
+          ).trim();
+          if (
+            ekSatir &&
+            !result.some((s: string) => s.trim().toUpperCase() === ekSatir.toUpperCase())
+          ) {
+            result.push(ekSatir);
+          }
         }
+      } catch (e) {
+        console.error('Birim antet ek satırı çözümlenirken hata:', e);
       }
     }
 

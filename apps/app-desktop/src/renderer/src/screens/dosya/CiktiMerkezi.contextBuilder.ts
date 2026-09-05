@@ -38,7 +38,7 @@ export function buildDocumentContext(
 ): any {
   const subInstType = settings?.subInstitutionType || ''
 
-  // Antet satırlarını parse et
+  // Antet satırlarını parse et (Kurum Anteti + Birim Yönetimi Anteti)
   let antetSatirlari: string[] = []
   if (kurum?.kurum_anteti) {
     try {
@@ -49,6 +49,23 @@ export function buildDocumentContext(
     } catch {
       antetSatirlari = kurum.kurum_anteti ? [kurum.kurum_anteti] : []
     }
+  }
+
+  // Doğrudan temini / ihaleyi yapan birimin antet ek satırını ekle
+  const birimAntet = (
+    dosyaResData?.antet_ek_satir ||
+    dosyaResData?.birim_antet_ek_satir ||
+    dosyaResData?.birim_adi ||
+    dosyaResData?.harcama_birimi ||
+    settings?.harcamaBirimAdi ||
+    ''
+  ).trim()
+
+  if (
+    birimAntet &&
+    !antetSatirlari.some((s: string) => s.trim().toUpperCase() === birimAntet.toUpperCase())
+  ) {
+    antetSatirlari.push(birimAntet)
   }
 
   const suffixes = getInstitutionSuffixes(subInstType, {
