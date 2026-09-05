@@ -45,14 +45,28 @@ export function DocumentPreviewCanvas({
   return (
     <div
       ref={previewContainerRef}
-      className="flex-1 bg-slate-200/50 dark:bg-slate-955 flex justify-center items-start overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar min-h-0 min-w-0"
+      className="flex-1 bg-slate-200/50 dark:bg-slate-955 flex justify-center items-start overflow-x-hidden overflow-y-auto shadow-inner border-l border-slate-200 dark:border-slate-800 h-full py-8 custom-scrollbar min-h-0 min-w-0"
     >
+      {/* Scaled-document wrapper: boyutu scale'e göre güncellenir */}
       <div
-        className="bg-white shadow-2xl origin-top transition-transform duration-200 ease-out shrink-0"
+        style={{
+          width: `${(orientation === 'landscape' ? 1131 : 800) * previewScale}px`,
+          minHeight: `${(orientation === 'landscape' ? 800 : 1131) * previewScale}px`,
+          position: 'relative',
+          flexShrink: 0
+        }}
+      >
+      <div
+        className="bg-white shadow-2xl transition-transform duration-200 ease-out"
         style={{
           transform: `scale(${previewScale})`,
-          width: orientation === "landscape" ? "1131px" : "800px",
-          minHeight: orientation === "landscape" ? "800px" : "1131px",
+          transformOrigin: 'top center',
+          width: orientation === 'landscape' ? '1131px' : '800px',
+          minHeight: orientation === 'landscape' ? '800px' : '1131px',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          translate: '-50% 0',
         }}
       >
         {isLoading ? (
@@ -137,6 +151,7 @@ export function DocumentPreviewCanvas({
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

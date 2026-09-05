@@ -426,10 +426,32 @@ export function SiparisVeSozlesme(): React.JSX.Element {
               <div className="flex items-center gap-2 relative">
                 <WinnerDocumentsMenu
                   onPrintResultApproval={() => {
-                    // Sonuç Onay Belgesi
+                    const s = stageSablons.find((sb) =>
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('sonuconay') ||
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('onaybelgesi')
+                    )
+                    if (s) handleOpenPreviewForSablon(s, s.ad)
                   }}
                   onPrintAcceptanceLetter={() => {
-                    // Kabul Yazısı
+                    const s = stageSablons.find((sb) =>
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('kabulyazisi') ||
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('kabuledilenteklif') ||
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('kabul')
+                    )
+                    if (s) handleOpenPreviewForSablon(s, s.ad)
+                  }}
+                  onPrintOrderForm={() => {
+                    const s = stageSablons.find((sb) =>
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('siparisformu') ||
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('siparis')
+                    )
+                    if (s) handleOpenPreviewForSablon(s, s.ad)
+                  }}
+                  onPrintContract={() => {
+                    const s = stageSablons.find((sb) =>
+                      normalizeForMatch(sb.dosya_adi + sb.ad).includes('sozlesme')
+                    )
+                    if (s) handleOpenPreviewForSablon(s, s.ad)
                   }}
                   onEkapBlacklistQuery={() => {
                     window.electron?.ipcRenderer.send('window:open-external', {

@@ -133,7 +133,32 @@ export function useDocumentPreviewData({
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 1. Load Data from DB in Parallel
+  // Auto-scale: belge genişliği A4 = 800px (portrait) / 1131px (landscape)
+  // Container'ın içine sığacak şekilde scale hesapla
+  useEffect(() => {
+    const container = previewContainerRef.current
+    if (!container) return
+
+    const DOC_W = orientation === 'landscape' ? 1131 : 800
+    const PADDING = 64 // py-8 = 32px * 2
+
+    const recalculate = () => {
+      if (zoomMode === 'manual') {
+        setPreviewScale(manualZoom)
+        return
+      }
+      const availableW = container.clientWidth - PADDING
+      if (availableW <= 0) return
+      const scale = Math.min(availableW / DOC_W, 1) // max 1x, sığmıyorsa küçült
+      setPreviewScale(Math.round(scale * 1000) / 1000)
+    }
+
+    recalculate()
+
+    const observer = new ResizeObserver(recalculate)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [orientation, zoomMode, manualZoom])
   useEffect(() => {
     if (!isOpen) return;
 
