@@ -399,12 +399,12 @@ export default function Home(): React.JSX.Element {
             <div className="inline-flex p-1 mb-2 bg-blue-500/5 dark:bg-blue-500/10 rounded-2xl border border-blue-500/20">
               <img
                 src="/logo.png"
-                alt="HAKİM Pro Logo"
+                alt="TEMİN 360 Logo"
                 className="w-14 h-14 object-contain"
               />
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-2">
-              HAKİM PRO{" "}
+              TEMİN 360{" "}
               <span className="text-xs bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 dark:border-blue-500/30 px-2 py-0.5 rounded-full font-bold">
                 API GATEWAY
               </span>
@@ -525,13 +525,13 @@ export default function Home(): React.JSX.Element {
           <div className="p-0.5 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border border-blue-500/10 dark:border-blue-500/20">
             <img
               src="/logo.png"
-              alt="HAKİM Pro Logo"
+              alt="TEMİN 360 Logo"
               className="w-8 h-8 md:w-9 md:h-9 object-contain"
             />
           </div>
           <div>
             <h1 className="text-xs md:text-sm font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-              HAKİM PRO{" "}
+              TEMİN 360{" "}
               <span className="text-[8px] md:text-[9px] bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 dark:border-blue-500/30 px-1.5 py-0.5 rounded-full font-bold">
                 API GATEWAY
               </span>
@@ -1178,7 +1178,7 @@ export default function Home(): React.JSX.Element {
                   Masaüstü & Mobil Entegrasyonu
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  HAKİM Pro uygulamalarını indirin, kurun ve gateway sunucunuza
+                  TEMİN 360 uygulamalarını indirin, kurun ve gateway sunucunuza
                   kolayca bağlayın.
                 </p>
               </div>

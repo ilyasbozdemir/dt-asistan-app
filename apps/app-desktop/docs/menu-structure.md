@@ -1,4 +1,4 @@
-# HAKİM Pro (hakim-pro-app) - Menü Yapısı (Taslak)
+# TEMİN 360 - Menü Yapısı (Taslak)
 
 Bu dosya uygulamanın sol menü/navigasyon yapısının taslağını içerir. Yeni arayüz
 geliştirilirken bu hiyerarşi temel alınacaktır.

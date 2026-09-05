@@ -40,7 +40,7 @@ import { runMigrations, CURRENT_SCHEMA_VERSION } from './migrate'
 
 export const schema = {
   database: 'DOGRUDAN_TEMIN_DB',
-  app_title: 'HAKİM Pro',
+  app_title: 'TEMİN 360',
   tables: [
     TANIM_Kurum,
     TANIM_Mevzuat,

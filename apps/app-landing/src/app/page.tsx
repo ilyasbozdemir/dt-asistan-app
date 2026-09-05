@@ -116,7 +116,7 @@ export default function Home() {
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
               <Image
                 src="/icon.png"
-                alt="HAKİM Pro Logo"
+                alt="TEMİN 360 Logo"
                 width={36}
                 height={36}
                 className="w-full h-full object-contain"
@@ -124,7 +124,7 @@ export default function Home() {
             </div>
             <div>
               <span className="font-extrabold text-base tracking-wider bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                HAKİM PRO
+                TEMİN 360
               </span>
             </div>
           </div>
@@ -194,7 +194,7 @@ export default function Home() {
         </h1>
 
         <p className="max-w-2xl mx-auto text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed font-medium">
-          HAKİM Pro, kamu ve özel sektör projelerinizde lokal bilgisayarınızın
+          TEMİN 360, kamu ve özel sektör projelerinizde lokal bilgisayarınızın
           performansından ödün vermeden, merkezi sunucuyla çift yönlü
           eşleşebilen gelişmiş bir iş asistanıdır. Çevrimdışı çalışın, tek tıkla
           buluta aktarın.
@@ -313,7 +313,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 space-y-12">
           <div className="text-center max-w-xl mx-auto space-y-3">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Neden HAKİM Pro?
+              Neden TEMİN 360?
             </h2>
             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
               Geleneksel bulut tabanlı yavaş sistemleri ve hantal yerel
@@ -528,7 +528,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-left space-y-4">
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-850 dark:text-white leading-tight">
-              HAKİM Pro Uygulamalarını <br />
+              TEMİN 360 Uygulamalarını <br />
               <span className="bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-500 dark:to-indigo-400 bg-clip-text text-transparent">
                 Hemen İndirin
               </span>
@@ -623,13 +623,13 @@ export default function Home() {
             <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden">
               <Image
                 src="/icon.png"
-                alt="HAKİM Pro Footer Logo"
+                alt="TEMİN 360 Footer Logo"
                 width={24}
                 height={24}
                 className="w-full h-full object-contain"
               />
             </div>
-            <span>© 2026 HAKİM Pro. Tüm hakları saklıdır.</span>
+            <span>© 2026 TEMİN 360. Tüm hakları saklıdır.</span>
           </div>
 
           <div className="flex gap-6">

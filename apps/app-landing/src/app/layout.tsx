@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HAKİM Pro - Yeni Nesil Süreç & Hakediş Yönetim Sistemi",
+  title: "TEMİN 360 - Yeni Nesil Süreç, İhale & Hakediş Yönetim Sistemi",
   description:
     "Masaüstünün yüksek performansı ile bulutun senkronizasyon gücünü birleştiren, kamu ve özel sektör için tasarlanmış yeni nesil iş asistanı.",
 };

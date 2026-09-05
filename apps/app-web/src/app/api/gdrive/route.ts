@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     const boundary = '--------------------------' + Date.now().toString(16)
     const metadata = JSON.stringify({
       name: fileName,
-      description: 'HAKİM Pro Web Çalışma Dosyası Yedeği'
+      description: 'TEMİN 360 Web Çalışma Dosyası Yedeği'
     })
 
     const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`

@@ -1,4 +1,4 @@
-# HAKİM Pro (hakim-pro-app) Geliştirme Kuralları
+# TEMİN 360 Geliştirme Kuralları
 
 Bu dosya, uygulamanın baştan yazılma sürecinde uyulması gereken mimari ve teknik
 kuralları içerir. Antigravity (AI) olarak, verilen her yeni görevde bu kuralları

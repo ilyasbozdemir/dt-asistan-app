@@ -1,6 +1,6 @@
-# 🏛️ HAKİM Pro - Self-Hosted Supabase Kurulum ve Entegrasyon Kılavuzu
+# 🏛️ TEMİN 360 - Self-Hosted Supabase Kurulum ve Entegrasyon Kılavuzu
 
-Bu kılavuz, **HAKİM Pro (Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi)** verilerini kurumunuzun kendi yerel sunucusunda (On-Premise / Intranet) barındırabilmeniz için adım adım **Self-Hosted Supabase** kurulumunu açıklar.
+Bu kılavuz, **TEMİN 360 (Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi)** verilerini kurumunuzun kendi yerel sunucusunda (On-Premise / Intranet) barındırabilmeniz için adım adım **Self-Hosted Supabase** kurulumunu açıklar.
 
 ---
 
@@ -34,11 +34,11 @@ docker compose up -d
 
 Konteynerler çalıştığında şu portlar aktif olacaktır:
 * **Supabase Studio (Yönetim Paneli):** `http://SUNUCU_IP:3000`
-* **Kong API Gateway (HAKİM Pro Bağlantı Kapısı):** `http://SUNUCU_IP:8000`
+* **Kong API Gateway (TEMİN 360 Bağlantı Kapısı):** `http://SUNUCU_IP:8000`
 
 ---
 
-## 🗄️ 2. Adım: HAKİM Pro SQL Şemasını ve Tablolarını İçe Aktarma
+## 🗄️ 2. Adım: TEMİN 360 SQL Şemasını ve Tablolarını İçe Aktarma
 
 1. Tarayıcınızdan **Supabase Studio** arayüzüne girin: `http://SUNUCU_IP:3000`
 2. Sol menüden **SQL Editor** bölümüne tıklayın.
@@ -49,13 +49,13 @@ Bu işlem şunları otomatik olarak kuracaktır:
 * ✅ 37+ kamu ihale tablosu (`DATA_TeminDosyasi`, `DATA_TeminKalem`, `TANIM_Kurum`, vb.)
 * ✅ Sayıştay uyumlu otomatik `LOG_AuditTrail` tetikleyicileri (INSERT/UPDATE/DELETE logları)
 * ✅ Row Level Security (RLS) veri güvenliği kuralları
-* ✅ Evrak ve Veritabanı Yedekleri için `hakim-pro-documents` ve `hakim-pro-backups` Storage bucket'ları
+* ✅ Evrak ve Veritabanı Yedekleri için `temin-360-documents` ve `temin-360-backups` Storage bucket'ları
 
 ---
 
 ## ⚙️ 3. Adım: Temin 360 Masaüstü Uygulamasını Bağlama
 
-1. **HAKİM Pro** uygulamasını açın.
+1. **TEMİN 360** uygulamasını açın.
 2. Sol menüden **Ayarlar** (`/ayarlar`) ekranına gidin.
 3. **"Supabase & Bulut"** sekmesini seçin.
 4. Bilgilerinizi girin:

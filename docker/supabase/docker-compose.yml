@@ -1,5 +1,5 @@
 # ==============================================================================
-# HAKİM Pro - Kurum İçi / Self-Hosted Supabase Docker Compose Stack
+# TEMİN 360 - Kurum İçi / Self-Hosted Supabase Docker Compose Stack
 # ==============================================================================
 # Kurulum için:
 #   1. cp .env.example .env
@@ -12,15 +12,15 @@ services:
   # 1. Supabase Studio (Yönetim Paneli)
   studio:
     image: supabase/studio:20240101-8e0e640
-    container_name: hakim-supabase-studio
+    container_name: temin360-supabase-studio
     restart: unless-stopped
     ports:
       - "${STUDIO_PORT:-3000}:3000"
     environment:
       STUDIO_PG_META_URL: http://meta:8080
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DEFAULT_ORGANIZATION_NAME: "HAKİM Pro Kamu Kurumu"
-      DEFAULT_PROJECT_NAME: "HAKIM Pro DB"
+      DEFAULT_ORGANIZATION_NAME: "TEMİN 360 Kamu Kurumu"
+      DEFAULT_PROJECT_NAME: "TEMIN 360 DB"
       SUPABASE_URL: http://kong:8000
       SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:8000}
       SUPABASE_ANON_KEY: ${ANON_KEY}

@@ -1,5 +1,5 @@
 -- ============================================================================
--- HAKİM Pro - Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi
+-- TEMİN 360 - Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi
 -- Supabase / PostgreSQL Veritabanı Şeması & Güvenlik (RLS) Yapılandırması
 -- ============================================================================
 

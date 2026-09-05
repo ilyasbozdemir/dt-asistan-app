@@ -1,9 +1,9 @@
-# ⚖️ HAKİM Pro (Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi)
+# ⚖️ TEMİN 360 (Kamu Harcama, İhale, Doğrudan Temin ve Hakediş Yönetim Sistemi)
 
 > **"Kamu Harcamalarına, İhale, Doğrudan Temin ve Hakediş Süreçlerine Tam
 > Hâkimiyet."**
 
-**Temin 360 (HAKİM Pro)**, kamu kurumları (Belediyeler, Bakanlıklar, Üniversiteler, İller Bankası ve Özel Bütçeli İdareler) için **4734 Sayılı Kamu İhale Kanunu**, **4735 Sayılı Kamu İhale Sözleşmeleri Kanunu** ve **5018 Sayılı Kamu Malî Yönetimi ve Kontrol Kanunu** standartlarına tam uyumlu, **tamamen açık kaynak kodlu** bir kurumsal otomasyon süitidir.
+**TEMİN 360**, kamu kurumları (Belediyeler, Bakanlıklar, Üniversiteler, İller Bankası ve Özel Bütçeli İdareler) için **4734 Sayılı Kamu İhale Kanunu**, **4735 Sayılı Kamu İhale Sözleşmeleri Kanunu** ve **5018 Sayılı Kamu Malî Yönetimi ve Kontrol Kanunu** standartlarına tam uyumlu, **tamamen açık kaynak kodlu** bir kurumsal otomasyon süitidir.
 
 💡 **Mevzuata Uygun Esnek & Özelleştirilebilir Şablonlar:**
 Sistemdeki tüm resmi evrak ve tutanak şablonları açık kaynaklı ve modülerdir. Değişen kamu ihale mevzuatına ve kurumunuzun özel yönergelerine göre şablon metinlerini kolayca özelleştirebilir, dosya verilerini şablonlara bağlayarak tek tıkla baskıya hazır, barkodlu ve resmi formatta **PDF / Belge** çıktıları üretebilirsiniz.
