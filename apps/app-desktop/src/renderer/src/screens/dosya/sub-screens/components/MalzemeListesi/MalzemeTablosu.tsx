@@ -562,12 +562,22 @@ export function MalzemeTablosu({
     }
   };
 
+  const isYapim =
+    activeDosya?.tur === "yapim_isi" ||
+    activeDosya?.tur === "yapim" ||
+    activeDosya?.ihale_tipi === "Hakediş";
+  const isHizmet = activeDosya?.tur === "hizmet";
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm flex flex-col min-h-[400px]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <Package className="w-4 h-4 text-blue-600" />
-          Dosyadaki İhtiyaç Kalemleri
+          {isYapim
+            ? "Dosyadaki İmalat / İş Kalemleri (Pozlar)"
+            : isHizmet
+            ? "Dosyadaki Hizmet Kalemleri"
+            : "Dosyadaki İhtiyaç Kalemleri"}
           <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full font-bold">
             {items.length}
           </span>
@@ -586,7 +596,11 @@ export function MalzemeTablosu({
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            İhtiyaç Kalemi Ekle
+            {isYapim
+              ? "Poz / İmalat Ekle"
+              : isHizmet
+              ? "Hizmet Kalemi Ekle"
+              : "İhtiyaç Kalemi Ekle"}
           </button>
 
           {!disableDocumentGuidance && combinedSablons.length > 0 &&
@@ -755,11 +769,18 @@ export function MalzemeTablosu({
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
             <Package className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
             <p className="text-xs">
-              Bu dosyada henüz herhangi bir ihtiyaç kalemi eklenmemiş.
+              {isYapim
+                ? "Bu dosyada henüz herhangi bir imalat veya poz kalemi eklenmemiş."
+                : isHizmet
+                ? "Bu dosyada henüz herhangi bir hizmet kalemi eklenmemiş."
+                : "Bu dosyada henüz herhangi bir ihtiyaç kalemi eklenmemiş."}
             </p>
             <p className="text-[10px] text-slate-500 mt-1">
-              Sol taraftaki paneli kullanarak ilk ihtiyaç kalemi
-              ekleyebilirsiniz.
+              {isYapim
+                ? "Yukarıdaki butonu kullanarak ilk imalat/poz kalemini ekleyebilirsiniz."
+                : isHizmet
+                ? "Yukarıdaki butonu kullanarak ilk hizmet kalemini ekleyebilirsiniz."
+                : "Yukarıdaki butonu kullanarak ilk ihtiyaç kalemini ekleyebilirsiniz."}
             </p>
           </div>
         )
@@ -778,8 +799,16 @@ export function MalzemeTablosu({
                     />
                   </th>
                   <th className="p-3 pl-4">Sıra No</th>
-                  <th className="p-3 pl-4">Kodu</th>
-                  <th className="p-3 pl-4">İhtiyaç Kalemi Adı</th>
+                  <th className="p-3 pl-4">
+                    {isYapim ? "Poz No" : isHizmet ? "Hizmet Kodu" : "Kodu"}
+                  </th>
+                  <th className="p-3 pl-4">
+                    {isYapim
+                      ? "İmalat / Poz Adı (İş Kalemi)"
+                      : isHizmet
+                      ? "Hizmet Kalemi Adı"
+                      : "İhtiyaç Kalemi Adı"}
+                  </th>
                   <th className="p-3">Tür</th>
                   <th className="p-3 text-center">Miktar</th>
                   <th className="p-3">Birim</th>
@@ -811,7 +840,7 @@ export function MalzemeTablosu({
                         {index + 1}
                       </td>
 
-                      <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                      <td className="p-3 pl-4 font-mono text-[10px] text-slate-500 dark:text-slate-400 font-bold">
                         {item.tasinir_kodu || "-"}
                       </td>
 

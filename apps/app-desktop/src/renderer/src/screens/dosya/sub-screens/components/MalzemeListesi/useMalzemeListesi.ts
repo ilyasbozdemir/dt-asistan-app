@@ -56,7 +56,17 @@ export interface UseMalzemeListesiReturn {
   loadData: () => Promise<void>
 }
 
-export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListesiReturn {
+export function useMalzemeListesi(
+  activeDosyaId: number | null,
+  activeDosya?: any
+): UseMalzemeListesiReturn {
+  const isYapim =
+    activeDosya?.tur === 'yapim_isi' ||
+    activeDosya?.tur === 'yapim' ||
+    activeDosya?.ihale_tipi === 'Hakediş'
+  const isHizmet = activeDosya?.tur === 'hizmet'
+  const defaultTipi = isYapim ? 'Yapım' : isHizmet ? 'Hizmet' : 'Mal'
+
   const [items, setItems] = useState<any[]>([])
   const [units, setUnits] = useState<any[]>([])
   const [libraryItems, setLibraryItems] = useState<any[]>([])
@@ -66,8 +76,8 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
   const [kalemAdi, setKalemAdi] = useState('')
   const [tasinirKodu, setTasinirKodu] = useState('')
   const [okasKodu, setOkasKodu] = useState('')
-  const [tipi, setTipi] = useState('Mal')
-  const [birim, setBirim] = useState('Adet')
+  const [tipi, setTipi] = useState(defaultTipi)
+  const [birim, setBirim] = useState(isYapim ? 'm²' : 'Adet')
   const [miktar, setMiktar] = useState(1)
   const [kdvOrani, setKdvOrani] = useState(20)
   const [aciklama, setAciklama] = useState('')
@@ -86,6 +96,16 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
   const [editBirim, setEditBirim] = useState('')
   const [editKdv, setEditKdv] = useState(20)
 
+  // Dosya türü değiştiğinde tipi ve birim varsayılanlarını güncelle
+  useEffect(() => {
+    setTipi(defaultTipi)
+    if (isYapim) {
+      setBirim('m²')
+    } else {
+      setBirim('Adet')
+    }
+  }, [activeDosyaId, activeDosya?.tur])
+
   const loadData = async (): Promise<void> => {
     if (!activeDosyaId) return
     setLoading(true)
@@ -103,9 +123,9 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
         'db:query',
         'SELECT * FROM TANIM_Kalem WHERE aktif_mi = 1 ORDER BY kalem_adi ASC'
       )
-      if (resItems.success) setItems(resItems.data)
-      if (resUnits.success) setUnits(resUnits.data)
-      if (resLib.success) setLibraryItems(resLib.data)
+      if (resItems.success) setItems(resItems.data || [])
+      if (resUnits.success) setUnits(resUnits.data || [])
+      if (resLib.success) setLibraryItems(resLib.data || [])
     } catch (err) {
       console.error(err)
     } finally {
@@ -128,8 +148,17 @@ export function useMalzemeListesi(activeDosyaId: number | null): UseMalzemeListe
     if (!name) return
     setAiLoading(true)
     try {
+      let prompt = ''
+      if (isYapim) {
+        prompt = `Kamu İhale Kanunu ve Çevre, Şehircilik ve İklim Değişikliği Bakanlığı standartlarına uygun bir Yapım / Küçük Onarım İşi için "${name}" imalat/poz kalemi tanımlanmaktadır. Bu imalat için resmi poz tarifi, kullanılacak malzeme standartları (TSE/CE), uygulama ve montaj esaslarını içeren kısa, net ve profesyonel bir teknik şartname/imalat tarifi metni yazar mısın? Sadece metni döndür.`
+      } else if (isHizmet) {
+        prompt = `Kamu İhale Kanunu ve Hizmet İşleri Genel Şartnamesi uyarınca bir kamu kurumunda "${name}" hizmeti alımı yapılacaktır. Bu hizmetin kapsamını, periyodik çalışma şartlarını, personel/araç yeterliliklerini ve teslimat esaslarını belirten kısa ve öz profesyonel bir teknik şartname metni yazar mısın? Sadece metni ver.`
+      } else {
+        prompt = `Bir kamu ihalesinde "${name}" malzemesi/ürünü alınacaktır. Bu alım için teknik şartnameye yazılabilecek, genel teknik standartları belirten, ürünün özelliklerini açıklayan kısa ve öz profesyonel bir metin yazar mısın? Sadece metni ver, başına sonuna bir şey ekleme.`
+      }
+
       const res = await (window as any).electron.ipcRenderer.invoke('ai:generate', {
-        prompt: `Bir kamu ihalesinde "${name}" malzemesi veya hizmeti alınacaktır. Bu alım için teknik şartnameye yazılabilecek, genel teknik standartları belirten, ürünün/hizmetin özelliklerini açıklayan kısa ve öz profesyonel bir metin yazar mısın? Sadece metni ver, başına sonuna bir şey ekleme.`
+        prompt
       })
       if (res.success && res.data) {
         setAciklama(res.data)

@@ -12,7 +12,19 @@ import {
 import { cn } from "../../../../../utils/cn";
 import { Modal } from "../../../../../components/ui/Modal";
 
-export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
+export function MalzemeEkleModal({
+  state,
+  activeDosya,
+}: {
+  state: any;
+  activeDosya?: any;
+}): React.JSX.Element {
+  const isYapim =
+    activeDosya?.tur === "yapim_isi" ||
+    activeDosya?.tur === "yapim" ||
+    activeDosya?.ihale_tipi === "Hakediş";
+  const isHizmet = activeDosya?.tur === "hizmet";
+
   const {
     libraryItems,
     units,
@@ -59,7 +71,8 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
   const categoryOptions = ["Tümü", "Mal", "Hizmet", "Yapım", "Danışmanlık"];
 
   const filteredLibraryItems = libraryItems.filter((item: any) => {
-    const matchesSearch = !libSearchQuery.trim() ||
+    const matchesSearch =
+      !libSearchQuery.trim() ||
       item.kalem_adi?.toLowerCase().includes(libSearchQuery.toLowerCase()) ||
       (item.tasinir_kodu || "").toLowerCase().includes(
         libSearchQuery.toLowerCase(),
@@ -68,8 +81,8 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
         libSearchQuery.toLowerCase(),
       );
 
-    const matchesCategory = selectedCategory === "Tümü" ||
-      item.tipi === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "Tümü" || item.tipi === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -93,8 +106,20 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
         setItemMiktarlar({});
         setLibSearchQuery("");
       }}
-      title="Dosyaya İhtiyaç Kalemi Ekle"
-      description="Taşınır kütüphanesinden toplu seçim yapın veya özel yeni kalem oluşturun."
+      title={
+        isYapim
+          ? "Dosyaya İmalat / Poz Kalemi Ekle"
+          : isHizmet
+          ? "Dosyaya Hizmet Kalemi Ekle"
+          : "Dosyaya İhtiyaç Kalemi Ekle"
+      }
+      description={
+        isYapim
+          ? "Poz ve imalat kütüphanesinden seçim yapın veya özel yeni imalat/poz oluşturun."
+          : isHizmet
+          ? "Hizmet kütüphanesinden seçim yapın veya yeni hizmet kalemi tanımlayın."
+          : "Taşınır kütüphanesinden toplu seçim yapın veya özel yeni malzeme kalemi oluşturun."
+      }
     >
       {/* SEKMELER */}
       <div className="flex gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl mb-5 border border-slate-200/60 dark:border-slate-700/60">
@@ -109,7 +134,11 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
           )}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          Kütüphaneden Seç ({libraryItems.length})
+          {isYapim
+            ? `Poz Kütüphanesinden Seç (${libraryItems.length})`
+            : isHizmet
+            ? `Hizmet Havuzundan Seç (${libraryItems.length})`
+            : `Kütüphaneden Seç (${libraryItems.length})`}
         </button>
         <button
           type="button"
@@ -122,7 +151,11 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
           )}
         >
           <PlusCircle className="w-3.5 h-3.5" />
-          Yeni Kalem Oluştur
+          {isYapim
+            ? "Yeni Poz / İmalat Tanımla"
+            : isHizmet
+            ? "Yeni Hizmet Kalemi Tanımla"
+            : "Yeni Kalem Oluştur"}
         </button>
       </div>
 
@@ -137,7 +170,13 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                 type="text"
                 value={libSearchQuery}
                 onChange={(e) => setLibSearchQuery(e.target.value)}
-                placeholder="Kalem adı, taşınır kodu veya OKAS ile canlı arayın..."
+                placeholder={
+                  isYapim
+                    ? "Poz no (örn: 15.120.1001), imalat adı veya OKAS ile canlı arayın..."
+                    : isHizmet
+                    ? "Hizmet adı, kodu veya açıklama ile canlı arayın..."
+                    : "Kalem adı, taşınır kodu veya OKAS ile canlı arayın..."
+                }
                 className="w-full pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-200 font-medium transition-all"
               />
               {libSearchQuery && (
@@ -151,124 +190,114 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
               )}
             </div>
 
-            {/* Tür Filtre Butonları */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-              {categoryOptions.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={cn(
-                    "px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap",
-                    selectedCategory === cat
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700",
-                  )}
-                >
-                  {cat}
-                </button>
-              ))}
+            {/* Kategori Filtre Butonları */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex gap-1 overflow-x-auto">
+                {categoryOptions.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer",
+                      selectedCategory === cat
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200",
+                    )}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
               {filteredLibraryItems.length > 0 && (
                 <button
                   type="button"
                   onClick={handleSelectAllFiltered}
-                  className="ml-auto text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 cursor-pointer flex items-center gap-1"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
                   {selectedItemIds.size === filteredLibraryItems.length
-                    ? "Tümünü Kaldır"
+                    ? "Seçimi Kaldır"
                     : "Tümünü Seç"}
                 </button>
               )}
             </div>
           </div>
 
-          {/* Seçim Sayacı Çubuğu */}
-          {selectedItemIds.size > 0 && (
-            <div className="flex items-center justify-between px-3.5 py-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl animate-in fade-in">
-              <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-blue-600" />
-                {selectedItemIds.size} kalem seçildi
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedItemIds(new Set());
-                  setItemMiktarlar({});
-                }}
-                className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-bold cursor-pointer"
-              >
-                Temizle
-              </button>
-            </div>
-          )}
-
-          {/* Liste */}
-          <div className="max-h-72 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+          {/* Kalem Listesi */}
+          <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
             {filteredLibraryItems.map((item: any) => {
               const isSelected = selectedItemIds.has(item.id);
               const mkt = itemMiktarlar[item.id] ?? 1;
               return (
                 <div
                   key={item.id}
-                  className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
-                    isSelected
-                      ? "border-blue-500 bg-blue-50/70 dark:bg-blue-950/30 dark:border-blue-700 shadow-xs"
-                      : "border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700",
-                  )}
                   onClick={() => {
-                    setSelectedItemIds((prev: any) => {
-                      const next = new Set(prev);
-                      if (next.has(item.id)) next.delete(item.id);
-                      else next.add(item.id);
-                      return next;
-                    });
+                    const next = new Set(selectedItemIds);
+                    if (isSelected) {
+                      next.delete(item.id);
+                    } else {
+                      next.add(item.id);
+                      if (!itemMiktarlar[item.id]) {
+                        setItemMiktarlar((prev: any) => ({
+                          ...prev,
+                          [item.id]: 1,
+                        }));
+                      }
+                    }
+                    setSelectedItemIds(next);
                   }}
+                  className={cn(
+                    "p-3 rounded-xl border text-left cursor-pointer transition-all flex items-center justify-between gap-3",
+                    isSelected
+                      ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100/70 dark:hover:bg-slate-800/50",
+                  )}
                 >
-                  {/* Custom Checkbox */}
-                  <div
-                    className={cn(
-                      "w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
-                      isSelected
-                        ? "bg-blue-600 border-blue-600 text-white"
-                        : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900",
-                    )}
-                  >
-                    {isSelected && (
-                      <Check className="w-3 h-3" strokeWidth={3} />
-                    )}
-                  </div>
-
-                  {/* İçerik Detayları */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-                      {item.kalem_adi}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span
-                        className={cn(
-                          "text-[9px] font-black uppercase px-2 py-0.5 rounded-md border",
-                          item.tipi === "Mal" &&
-                            "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
-                          item.tipi === "Hizmet" &&
-                            "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",
-                          item.tipi === "Yapım" &&
-                            "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
-                          item.tipi === "Danışmanlık" &&
-                            "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800",
-                        )}
-                      >
-                        {item.tipi || "Mal"}
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
-                        {item.birim} · %{item.kdv_orani ?? 20} KDV
-                      </span>
-                      {item.tasinir_kodu && (
-                        <span className="text-[10px] text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                          {item.tasinir_kodu}
-                        </span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div
+                      className={cn(
+                        "w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors",
+                        isSelected
+                          ? "bg-blue-600 border-blue-600 text-white"
+                          : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800",
                       )}
+                    >
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {item.kalem_adi}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span
+                          className={cn(
+                            "text-[9px] font-black uppercase px-2 py-0.5 rounded-md border",
+                            item.tipi === "Mal" &&
+                              "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+                            item.tipi === "Hizmet" &&
+                              "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800",
+                            item.tipi === "Yapım" &&
+                              "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+                            item.tipi === "Danışmanlık" &&
+                              "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800",
+                          )}
+                        >
+                          {item.tipi || "Mal"}
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                          {item.birim} · %{item.kdv_orani ?? 20} KDV
+                        </span>
+                        {item.tasinir_kodu && (
+                          <span className="text-[10px] text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                            {isYapim
+                              ? `Poz: ${item.tasinir_kodu}`
+                              : item.tasinir_kodu}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -276,8 +305,7 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                   {isSelected && (
                     <div
                       className="flex items-center gap-1 shrink-0 bg-white dark:bg-slate-950 p-1 border border-blue-200 dark:border-blue-800 rounded-xl"
-                      onClick={(e) =>
-                        e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         type="button"
@@ -285,7 +313,8 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                           setItemMiktarlar((prev: any) => ({
                             ...prev,
                             [item.id]: Math.max(1, (prev[item.id] ?? 1) - 1),
-                          }))}
+                          }))
+                        }
                         className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors"
                       >
                         −
@@ -301,7 +330,8 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                               1,
                               parseInt(e.target.value, 10) || 1,
                             ),
-                          }))}
+                          }))
+                        }
                         className="w-10 text-center text-xs font-bold text-blue-600 dark:text-blue-400 focus:outline-none bg-transparent"
                       />
                       <button
@@ -310,7 +340,8 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                           setItemMiktarlar((prev: any) => ({
                             ...prev,
                             [item.id]: (prev[item.id] ?? 1) + 1,
-                          }))}
+                          }))
+                        }
                         className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center cursor-pointer transition-colors"
                       >
                         +
@@ -351,7 +382,13 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
             >
               <Plus className="w-4 h-4" />
               {selectedItemIds.size > 0
-                ? `${selectedItemIds.size} Kalem Ekle`
+                ? isYapim
+                  ? `${selectedItemIds.size} Pozu Ekle`
+                  : isHizmet
+                  ? `${selectedItemIds.size} Hizmeti Ekle`
+                  : `${selectedItemIds.size} Kalem Ekle`
+                : isYapim
+                ? "Poz Seçin"
                 : "Kalem Seçin"}
             </button>
           </div>
@@ -364,7 +401,12 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
           {/* Kalem Arama / Autocomplete */}
           <div className="relative">
             <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-              Malzeme / Hizmet Adı <span className="text-red-500">*</span>
+              {isYapim
+                ? "İmalat / İş Kalemi (Poz Tanımı)"
+                : isHizmet
+                ? "Hizmet Tanımı / Alım Konusu"
+                : "Malzeme / Ürün Adı"}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -375,11 +417,15 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                 setKalemAdi(e.target.value);
                 setShowSuggestions(true);
               }}
-              onFocus={() =>
-                setShowSuggestions(true)}
-              onBlur={() =>
-                setTimeout(() => setShowSuggestions(false), 200)}
-              placeholder="Örn: A4 Fotokopi Kağıdı 80gr"
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              placeholder={
+                isYapim
+                  ? "Örn: İç Cephe Alçı Sıva Tamiratı ve Silikonlu Boya Yapılması"
+                  : isHizmet
+                  ? "Örn: Split Klimalar Periyodik Bakım ve Soğutucu Gaz Dolumu"
+                  : "Örn: A4 80 gr/m² Fotokopi Kağıdı"
+              }
               className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-slate-100 font-bold transition-all"
             />
             {showSuggestions && filteredSuggestions.length > 0 && (
@@ -393,10 +439,12 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                   >
                     <span>{item.kalem_adi}</span>
                     <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-                      Tip: {item.tipi} | Birim: {item.birim}{" "}
-                      | KDV: %{item.kdv_orani}{" "}
+                      Tip: {item.tipi} | Birim: {item.birim} | KDV: %
+                      {item.kdv_orani}{" "}
                       {item.tasinir_kodu
-                        ? `| Taşınır: ${item.tasinir_kodu}`
+                        ? isYapim
+                          ? `| Poz No: ${item.tasinir_kodu}`
+                          : `| Taşınır: ${item.tasinir_kodu}`
                         : ""}
                     </span>
                   </button>
@@ -416,9 +464,9 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                 onChange={(e) => setTipi(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100 font-semibold cursor-pointer"
               >
+                <option value="Yapım">Yapım İşi</option>
                 <option value="Mal">Mal Alımı</option>
                 <option value="Hizmet">Hizmet Alımı</option>
-                <option value="Yapım">Yapım İşi</option>
                 <option value="Danışmanlık">Danışmanlık Alımı</option>
               </select>
             </div>
@@ -477,13 +525,23 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                Taşınır Kodu
+                {isYapim
+                  ? "Bakanlık / ÇŞB Poz No"
+                  : isHizmet
+                  ? "Hizmet / Faaliyet Kodu"
+                  : "Taşınır Kodu"}
               </label>
               <input
                 type="text"
                 value={tasinirKodu}
                 onChange={(e) => setTasinirKodu(e.target.value)}
-                placeholder="Örn: 150.01.01"
+                placeholder={
+                  isYapim
+                    ? "Örn: 15.120.1001 veya Y.25.001/01"
+                    : isHizmet
+                    ? "Örn: HZM-01 veya 50730000-1"
+                    : "Örn: 150.01.01.01"
+                }
                 className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none text-slate-800 dark:text-slate-100 font-mono"
               />
             </div>
@@ -495,7 +553,7 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                 type="text"
                 value={okasKodu}
                 onChange={(e) => setOkasKodu(e.target.value)}
-                placeholder="Örn: 30192700"
+                placeholder="Örn: 45442110-1"
                 className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none text-slate-800 dark:text-slate-100 font-mono"
               />
             </div>
@@ -505,7 +563,11 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-                Teknik Şartname / Açıklama
+                {isYapim
+                  ? "İmalat & Poz Tarifi / Şartname"
+                  : isHizmet
+                  ? "Hizmet Şartnamesi & Kapsamı"
+                  : "Teknik Şartname / Açıklama"}
               </label>
               <button
                 type="button"
@@ -514,13 +576,25 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
                 className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-full hover:bg-blue-100 transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs"
               >
                 <Sparkles className="w-3 h-3 text-blue-500 animate-pulse" />
-                {aiLoading ? "AI Üretiyor..." : "AI Şartname Önerisi"}
+                {aiLoading
+                  ? "AI Üretiyor..."
+                  : isYapim
+                  ? "AI Poz & İmalat Tarifi"
+                  : isHizmet
+                  ? "AI Hizmet Şartnamesi"
+                  : "AI Şartname Önerisi"}
               </button>
             </div>
             <textarea
               value={aciklama}
               onChange={(e) => setAciklama(e.target.value)}
-              placeholder="Malzemenin teknik özellikleri, marka/model, standartlar veya ambalaj bilgileri..."
+              placeholder={
+                isYapim
+                  ? "İmalatın uygulama şartları, kullanılacak malzeme standartları (TSE/CE), montaj ve işçilik detayları..."
+                  : isHizmet
+                  ? "Hizmetin kapsamı, çalışma periyotları, personel/araç yeterlilikleri ve kabul kriterleri..."
+                  : "Malzemenin teknik özellikleri, marka/model, standartlar veya ambalaj bilgileri..."
+              }
               rows={3}
               className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 dark:text-slate-100"
             />
@@ -540,7 +614,11 @@ export function MalzemeEkleModal({ state }: { state: any }): React.JSX.Element {
               className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Kaydet ve Dosyaya Ekle
+              {isYapim
+                ? "Pozu Kaydet ve Dosyaya Ekle"
+                : isHizmet
+                ? "Hizmeti Kaydet ve Dosyaya Ekle"
+                : "Kaydet ve Dosyaya Ekle"}
             </button>
           </div>
         </form>
