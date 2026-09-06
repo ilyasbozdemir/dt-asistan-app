@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import {
   Activity,
   ArrowRight,
@@ -28,7 +29,6 @@ import {
   X,
 } from "lucide-react";
 
-// Define interfaces for state
 interface LogEntry {
   id: string;
   time: string;
@@ -36,6 +36,32 @@ interface LogEntry {
   path: string;
   status: number;
   duration: number;
+}
+
+interface DbTable {
+  name: string;
+  records: number;
+  desc: string;
+}
+
+interface LiveStats {
+  database: {
+    status: string;
+    fileSize: string;
+    schemaVersion: string;
+    tableCount: number;
+    tables: DbTable[];
+  };
+  metrics: {
+    totalRequests: number;
+    avgResponseTime: number;
+    recentLogs: LogEntry[];
+  };
+  server: {
+    uptime: number;
+    memoryUsage: string;
+    timestamp: string;
+  };
 }
 
 interface Endpoint {
@@ -62,11 +88,10 @@ export default function Home(): React.JSX.Element {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Mock stats
-  const [requestCount, setRequestCount] = useState(14890);
-  const [avgResponseTime, setAvgResponseTime] = useState(38);
-  const [syncProgress, setSyncProgress] = useState(100);
+  // Live real data states
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccessMsg, setSyncSuccessMsg] = useState("");
   const [selectedEndpoint, setSelectedEndpoint] = useState<number>(0);
   const [apiResponseText, setApiResponseText] = useState("");
   const [testingEndpoint, setTestingEndpoint] = useState(false);
@@ -90,50 +115,30 @@ export default function Home(): React.JSX.Element {
       "https://github.com/ilyasbozdemir/temin-360-app/releases/latest",
   });
 
-  // Live Logs state
-  const [logs, setLogs] = useState<LogEntry[]>([
-    {
-      id: "1",
-      time: "17:45:02",
-      method: "GET",
-      path: "/api/sync",
-      status: 200,
-      duration: 42,
-    },
-    {
-      id: "2",
-      time: "17:45:15",
-      method: "POST",
-      path: "/api/presets",
-      status: 201,
-      duration: 15,
-    },
-    {
-      id: "3",
-      time: "17:45:32",
-      method: "GET",
-      path: "/api/documents",
-      status: 200,
-      duration: 28,
-    },
-    {
-      id: "4",
-      time: "17:46:01",
-      method: "GET",
-      path: "/api/sync/status",
-      status: 200,
-      duration: 10,
-    },
-  ]);
-
   const terminalEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch live stats from SQLite backend
+  const fetchLiveStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/stats");
+      if (res.ok) {
+        const data: LiveStats = await res.json();
+        setLiveStats(data);
+      }
+    } catch (err) {
+      console.error("Live stats fetch error:", err);
+    }
+  }, []);
 
   // Initialize theme & load remember me credentials
   useEffect(() => {
-    const savedTheme = (localStorage.getItem("theme") as "dark" | "light") ||
-      "dark";
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
 
     const savedRememberMe = localStorage.getItem("remember_me") === "true";
     setRememberMe(savedRememberMe);
@@ -148,6 +153,18 @@ export default function Home(): React.JSX.Element {
     }
   }, []);
 
+  // Fetch live stats on initial load & poll every 3 seconds when logged in
+  useEffect(() => {
+    fetchLiveStats();
+    if (!isLoggedIn) return;
+
+    const interval = setInterval(() => {
+      fetchLiveStats();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn, fetchLiveStats]);
+
   // Fetch GitHub Latest Release dynamically
   useEffect(() => {
     fetch(
@@ -156,10 +173,15 @@ export default function Home(): React.JSX.Element {
       .then((res) => res.json())
       .then((data) => {
         if (data && data.tag_name) {
-          const exeAsset = data.assets?.find((a: any) =>
+          interface GitHubAsset {
+            name: string;
+            size: number;
+            browser_download_url: string;
+          }
+          const exeAsset = data.assets?.find((a: GitHubAsset) =>
             a.name.endsWith(".exe")
           );
-          const dmgAsset = data.assets?.find((a: any) =>
+          const dmgAsset = data.assets?.find((a: GitHubAsset) =>
             a.name.endsWith(".dmg")
           );
           const mainAsset = exeAsset || dmgAsset || data.assets?.[0];
@@ -196,52 +218,12 @@ export default function Home(): React.JSX.Element {
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
   };
 
-  // Auto-increment request count and add random logs in dashboard
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const interval = setInterval(() => {
-      setRequestCount((prev) => prev + Math.floor(Math.random() * 3) + 1);
-      setAvgResponseTime((prev) => {
-        const delta = Math.floor(Math.random() * 5) - 2;
-        const next = prev + delta;
-        return next > 20 && next < 60 ? next : prev;
-      });
-
-      // Generate random log
-      const paths = [
-        "/api/sync",
-        "/api/documents",
-        "/api/presets",
-        "/api/sync/status",
-        "/api/auth/verify",
-      ];
-      const randomPath = paths[Math.floor(Math.random() * paths.length)];
-      const randomMethod =
-        randomPath.includes("preset") || randomPath.includes("verify")
-          ? "POST"
-          : "GET";
-      const now = new Date();
-      const timeStr = now.toTimeString().split(" ")[0];
-      const newLog: LogEntry = {
-        id: Date.now().toString(),
-        time: timeStr,
-        method: randomMethod,
-        path: randomPath,
-        status: Math.random() > 0.05 ? 200 : 500,
-        duration: Math.floor(Math.random() * 50) + 12,
-      };
-      setLogs((prev) => [...prev.slice(-30), newLog]);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
-
   // Scroll terminal logs to bottom
   useEffect(() => {
     if (activeTab === "logs" && terminalEndRef.current) {
       terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [logs, activeTab]);
+  }, [liveStats?.metrics.recentLogs, activeTab]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,54 +252,72 @@ export default function Home(): React.JSX.Element {
     }
   };
 
-  const startSyncSimulation = () => {
+  // Real Sync Execution against backend /api/sync
+  const handleTriggerSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
-    setSyncProgress(0);
+    setSyncSuccessMsg("");
 
-    const interval = setInterval(() => {
-      setSyncProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsSyncing(false);
-          // Add custom log about sync finished
-          const now = new Date();
-          const timeStr = now.toTimeString().split(" ")[0];
-          setLogs((prevLogs) => [
-            ...prevLogs,
-            {
-              id: Date.now().toString(),
-              time: timeStr,
-              method: "GET",
-              path: "/api/sync/complete",
-              status: 200,
-              duration: 420,
-            },
-          ]);
-          return 100;
-        }
-        return prev + 5;
+    try {
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer dta_live_sync_token",
+        },
+        body: JSON.stringify({
+          dosyalar: [{ id: "DOSYA-2026-001", title: "Canlı Veri Senkronizasyonu", total: 48500 }],
+          sablonlar: [{ id: "SAB-101", title: "Harcama Talimatı Onay Formu" }],
+          syncedAt: new Date().toISOString(),
+        }),
       });
-    }, 150);
+
+      const data = await res.json();
+      if (data.success) {
+        setSyncSuccessMsg(`Başarılı: ${data.message}`);
+      } else {
+        setSyncSuccessMsg(`Hata: ${data.error || "Senkronizasyon başarısız"}`);
+      }
+      await fetchLiveStats();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Bilinmeyen hata";
+      setSyncSuccessMsg(`Bağlantı hatası: ${msg}`);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const endpoints: Endpoint[] = [
     {
       method: "GET",
+      path: "/api/stats",
+      description:
+        "Canlı veritabanı bağlantı durumu, tablo boyutları ve gateway telemetri verilerini döner.",
+      responseBody: "",
+    },
+    {
+      method: "GET",
+      path: "/api/health",
+      description:
+        "API Gateway sunucusunun anlık çalışma durumunu ve versiyon bilgisini doğrular.",
+      responseBody: "",
+    },
+    {
+      method: "GET",
       path: "/api/documents",
       description:
-        "Aktif dosya süreçlerine bağlı tüm şablon ve belgelerin listesini döner.",
+        "Aktif ihale ve doğrudan temin süreçlerine bağlı tüm şablon ve belgelerin listesini döner.",
       responseBody: "",
     },
     {
       method: "POST",
       path: "/api/presets",
       description:
-        "Yeni bir belge paketi taslağı oluşturur veya mevcutları listeler.",
+        "Yeni bir belge paketi taslağı oluşturur veya mevcut paketleri kaydeder.",
       requestBody: JSON.stringify(
         {
-          name: "Yeni Belge Paketi",
-          docs: ["İhtiyaç Listesi", "Harcama Talimatı"],
+          name: "Genel İhale Belge Paketi",
+          docs: ["İhtiyaç Listesi", "Harcama Talimatı", "Piyasa Fiyat Araştırması"],
         },
         null,
         2,
@@ -325,10 +325,19 @@ export default function Home(): React.JSX.Element {
       responseBody: "",
     },
     {
-      method: "GET",
+      method: "POST",
       path: "/api/sync",
       description:
-        "Masaüstü uygulaması ile sunucu veritabanı arasında çift yönlü senkronizasyonu tetikler.",
+        "Masaüstü uygulaması ile sunucu veritabanı arasında çift yönlü veri senkronizasyonunu gerçekleştirir.",
+      requestBody: JSON.stringify(
+        {
+          dosyalar: [{ id: "SYNC-01", ad: "Tıbbi Cihaz Alımı" }],
+          sablonlar: [{ id: "SAB-01", ad: "Teklif İstem Yazısı" }],
+          syncedAt: new Date().toISOString(),
+        },
+        null,
+        2
+      ),
       responseBody: "",
     },
   ];
@@ -342,7 +351,7 @@ export default function Home(): React.JSX.Element {
         method: ep.method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer dta_token_9f83a2bcde7582506e",
+          Authorization: "Bearer dta_live_token_9f83a2bcde7582506e",
         },
       };
       if (ep.method === "POST" && ep.requestBody) {
@@ -352,37 +361,30 @@ export default function Home(): React.JSX.Element {
       const res = await fetch(ep.path, options);
       const data = await res.json();
       setApiResponseText(JSON.stringify(data, null, 2));
-
-      // Log the real request in terminal logs
-      const now = new Date();
-      const timeStr = now.toTimeString().split(" ")[0];
-      setLogs((prevLogs) => [
-        ...prevLogs,
-        {
-          id: Date.now().toString(),
-          time: timeStr,
-          method: ep.method as any,
-          path: ep.path,
-          status: res.status,
-          duration: Math.floor(Math.random() * 20) + 10,
-        },
-      ]);
-    } catch (err: any) {
-      setApiResponseText(JSON.stringify({ error: err.message }, null, 2));
+      await fetchLiveStats();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Bilinmeyen hata";
+      setApiResponseText(JSON.stringify({ error: msg }, null, 2));
     } finally {
       setTestingEndpoint(false);
     }
   };
 
+  const logs = liveStats?.metrics.recentLogs || [];
+  const requestCount = liveStats?.metrics.totalRequests ?? 0;
+  const avgResponseTime = liveStats?.metrics.avgResponseTime ?? 0;
+  const dbFileSize = liveStats?.database.fileSize || "0 KB";
+  const dbTables = liveStats?.database.tables || [];
+
   // --- LOGIN SCREEN ---
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-955 text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center relative overflow-hidden font-sans transition-colors duration-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center relative overflow-hidden font-sans transition-colors duration-300">
         {/* Theme Toggle in Login */}
         <div className="absolute top-6 right-6 z-25">
           <button
             onClick={toggleTheme}
-            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-855 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all cursor-pointer shadow-xs"
           >
             {theme === "dark"
               ? <Sun className="w-4 h-4" />
@@ -394,13 +396,16 @@ export default function Home(): React.JSX.Element {
         <div className="hidden dark:block absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
         <div className="hidden dark:block absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
 
-        <div className="w-full max-w-md p-8 bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl relative z-10 space-y-6">
+        <div className="w-full max-w-md p-8 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 backdrop-blur-xl rounded-3xl shadow-2xl relative z-10 space-y-6">
           <div className="text-center space-y-2">
-            <div className="inline-flex p-1 mb-2 bg-blue-500/5 dark:bg-blue-500/10 rounded-2xl border border-blue-500/20">
-              <img
-                src="/logo.png"
+            <div className="inline-flex p-2 mb-2 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl border border-blue-500/20">
+              <Image
+                src="/icon.png"
                 alt="TEMİN 360 Logo"
-                className="w-14 h-14 object-contain"
+                width={48}
+                height={48}
+                priority
+                className="w-12 h-12 object-contain"
               />
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-2">
@@ -409,9 +414,8 @@ export default function Home(): React.JSX.Element {
                 API GATEWAY
               </span>
             </h1>
-            <p className="text-xs text-slate-505 dark:text-slate-400">
-              Veri tabanı senkronizasyon ve şablon API entegrasyonu yönetim
-              paneli.
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Veri tabanı senkronizasyon ve şablon API entegrasyonu yönetim paneli.
             </p>
           </div>
 
@@ -421,7 +425,7 @@ export default function Home(): React.JSX.Element {
                 Kullanıcı Adı
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-555">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
                   <User className="w-4 h-4" />
                 </span>
                 <input
@@ -429,7 +433,7 @@ export default function Home(): React.JSX.Element {
                   placeholder="admin"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white rounded-xl py-2.5 pl-10 pr-4 text-xs text-slate-800 dark:text-white focus:outline-none transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white rounded-xl py-2.5 pl-10 pr-4 text-xs text-slate-800 dark:text-white focus:outline-none transition-all"
                   required
                 />
               </div>
@@ -440,7 +444,7 @@ export default function Home(): React.JSX.Element {
                 Şifre
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-555">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
                   <Key className="w-4 h-4" />
                 </span>
                 <input
@@ -448,13 +452,13 @@ export default function Home(): React.JSX.Element {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white rounded-xl py-2.5 pl-10 pr-10 text-xs text-slate-800 dark:text-white focus:outline-none transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white rounded-xl py-2.5 pl-10 pr-10 text-xs text-slate-800 dark:text-white focus:outline-none transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
                 >
                   {showPassword
                     ? <EyeOff className="w-4 h-4" />
@@ -464,7 +468,7 @@ export default function Home(): React.JSX.Element {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer text-slate-650 dark:text-slate-400 select-none">
+              <label className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400 select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -491,12 +495,12 @@ export default function Home(): React.JSX.Element {
           </form>
 
           <div className="text-center pt-2">
-            <span className="text-[10px] text-slate-455 dark:text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
               Varsayılan Test Girişi:{" "}
-              <code className="text-slate-600 dark:text-slate-400">admin</code>
+              <code className="text-slate-600 dark:text-slate-300 font-bold">admin</code>
               {" "}
               /{" "}
-              <code className="text-slate-600 dark:text-slate-400">
+              <code className="text-slate-600 dark:text-slate-300 font-bold">
                 admin123
               </code>
             </span>
@@ -508,11 +512,11 @@ export default function Home(): React.JSX.Element {
 
   // --- API DASHBOARD SCREEN ---
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-855 dark:text-slate-100 flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans antialiased relative overflow-hidden transition-colors duration-300">
       {/* Top Navbar */}
-      <header className="bg-white/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-855 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between shrink-0 relative z-25">
+      <header className="bg-white/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between shrink-0 relative z-25">
         <div className="flex items-center gap-3">
-          {/* Mobile Hamburg menu trigger */}
+          {/* Mobile Hamburger menu trigger */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all cursor-pointer"
@@ -522,11 +526,14 @@ export default function Home(): React.JSX.Element {
               : <Menu className="w-4 h-4" />}
           </button>
 
-          <div className="p-0.5 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border border-blue-500/10 dark:border-blue-500/20">
-            <img
-              src="/logo.png"
+          <div className="p-1 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl border border-blue-500/20">
+            <Image
+              src="/icon.png"
               alt="TEMİN 360 Logo"
-              className="w-8 h-8 md:w-9 md:h-9 object-contain"
+              width={32}
+              height={32}
+              priority
+              className="w-7 h-7 md:w-8 md:h-8 object-contain"
             />
           </div>
           <div>
@@ -537,14 +544,23 @@ export default function Home(): React.JSX.Element {
               </span>
             </h1>
             <p className="text-[9px] md:text-[10px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-              <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-500 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse">
               </span>
-              Servis Aktif: mock_database_v1
+              Canlı SQLite Servis: <span className="text-slate-700 dark:text-slate-300 font-mono font-bold">temin360_web.db</span>
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
+          {/* Refresh Data Button */}
+          <button
+            onClick={fetchLiveStats}
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all cursor-pointer"
+            title="Verileri Yenile"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+
           {/* Theme Toggle inside App */}
           <button
             onClick={toggleTheme}
@@ -558,7 +574,7 @@ export default function Home(): React.JSX.Element {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-650 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer border border-slate-250 dark:border-slate-700/50"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer border border-slate-200 dark:border-slate-700/50"
             title="Oturumu Kapat"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -569,9 +585,9 @@ export default function Home(): React.JSX.Element {
 
       {/* Main Layout Container */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative z-10">
-        {/* Left Sidebar Menu (Desktop + Mobile drawer behavior) */}
+        {/* Left Sidebar Menu */}
         <aside
-          className={`bg-slate-100/90 dark:bg-slate-900/95 md:bg-slate-100/50 md:dark:bg-slate-900/30 border-r border-slate-200 dark:border-slate-855 p-4 space-y-2 shrink-0 transition-all duration-350 ease-in-out md:translate-x-0 ${
+          className={`bg-slate-100/90 dark:bg-slate-900/95 md:bg-slate-100/50 md:dark:bg-slate-900/30 border-r border-slate-200 dark:border-slate-800 p-4 space-y-2 shrink-0 transition-all duration-350 ease-in-out md:translate-x-0 ${
             isSidebarCollapsed ? "md:w-20" : "md:w-64"
           } ${
             isMobileMenuOpen
@@ -602,7 +618,7 @@ export default function Home(): React.JSX.Element {
             } ${
               activeTab === "stats"
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/10"
-                : "text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-900/50"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-900/50"
             }`}
           >
             <Activity className="w-4 h-4 shrink-0" />
@@ -691,103 +707,118 @@ export default function Home(): React.JSX.Element {
           {/* TAB 1: SYSTEM HEALTH STATS */}
           {activeTab === "stats" && (
             <div className="space-y-6">
-              <div className="text-left">
-                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                  Sistem Durumu
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  API gateway sunucunuzun canlı performans göstergeleri.
-                </p>
+              <div className="text-left flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+                    Sistem Durumu (Canlı)
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    API Gateway ve yerleşik SQLite veritabanı performans göstergeleri.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  Canlı Telemetri Aktif
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-855 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
+                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
                   <div className="absolute right-4 top-4 text-blue-500/10 dark:text-blue-500/20">
                     <Activity className="w-12 h-12" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider block">
-                    Toplam İstek
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Toplam Gateway İsteği
                   </span>
                   <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
                     {requestCount.toLocaleString()}
                   </span>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
-                    ▲ Canlı Akış Aktif
+                    ● Canlı İstek Sayacı
                   </span>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-855 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
+                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
                   <div className="absolute right-4 top-4 text-blue-500/10 dark:text-blue-500/20">
                     <Clock className="w-12 h-12" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                     Ort. Yanıt Süresi
                   </span>
                   <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
                     {avgResponseTime}ms
                   </span>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
-                    ● Mükemmel (200 OK)
+                    ● Hızlı SQLite Yanıtı
                   </span>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-855 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
+                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
                   <div className="absolute right-4 top-4 text-blue-500/10 dark:text-blue-500/20">
                     <Database className="w-12 h-12" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider block">
-                    Veritabanı Durumu
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Veritabanı Dosya Boyutu
                   </span>
                   <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
-                    {syncProgress === 100 ? "Hazır" : `%${syncProgress}`}
+                    {dbFileSize}
                   </span>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">
-                    Bulut Veritabanı
+                    {dbTables.length} Canlı Veri Tablosu
                   </span>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-855 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
+                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl space-y-2 relative overflow-hidden shadow-xs">
                   <div className="absolute right-4 top-4 text-blue-500/10 dark:text-blue-500/20">
                     <Shield className="w-12 h-12" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-455 dark:text-slate-500 uppercase tracking-wider block">
-                    Gateway Güvenliği
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Gateway & RAM Durumu
                   </span>
                   <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
-                    SSL / Active
+                    {liveStats?.server.memoryUsage || "Normal"}
                   </span>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
-                    JWT Yetkilendirme
+                    v{liveStats?.database.schemaVersion || "1.0.0"} Aktif
                   </span>
                 </div>
               </div>
 
-              {/* Request Performance Table */}
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-4 md:p-5 space-y-4 text-left shadow-xs">
-                <h3 className="text-xs font-bold text-slate-505 dark:text-slate-400 uppercase tracking-wider">
-                  Son 10 API İsteği
-                </h3>
+              {/* Live Request Performance Table */}
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 space-y-4 text-left shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Gerçek API İstek Kayıtları ({logs.length})
+                  </h3>
+                  <span className="text-[10px] text-slate-500">
+                    Otomatik yenileniyor
+                  </span>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left min-w-[500px]">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-855 pb-2 text-slate-400 dark:text-slate-550 font-bold">
-                        <th className="py-2">Tarih</th>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-400 dark:text-slate-500 font-bold">
+                        <th className="py-2">Tarih / Saat</th>
                         <th className="py-2">Metot</th>
                         <th className="py-2">İstek Yolu</th>
                         <th className="py-2">Durum</th>
                         <th className="py-2 text-right">Yanıt Süresi</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-850/50">
-                      {logs
-                        .slice(-10)
-                        .reverse()
-                        .map((l) => (
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                      {logs.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-6 text-center text-slate-400">
+                            Henüz istek kaydı bulunmuyor. API Dokümantasyonundan canlı istek test edebilirsiniz.
+                          </td>
+                        </tr>
+                      ) : (
+                        logs.slice(0, 10).map((l) => (
                           <tr
                             key={l.id}
                             className="text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-900/20"
                           >
-                            <td className="py-2.5 font-medium text-slate-450 dark:text-slate-550">
+                            <td className="py-2.5 font-medium text-slate-500 dark:text-slate-400">
                               {l.time}
                             </td>
                             <td className="py-2.5">
@@ -801,7 +832,7 @@ export default function Home(): React.JSX.Element {
                                 {l.method}
                               </span>
                             </td>
-                            <td className="py-2.5 font-mono text-slate-800 dark:text-slate-355">
+                            <td className="py-2.5 font-mono text-slate-800 dark:text-slate-200">
                               {l.path}
                             </td>
                             <td className="py-2.5">
@@ -815,11 +846,12 @@ export default function Home(): React.JSX.Element {
                                 {l.status}
                               </span>
                             </td>
-                            <td className="py-2.5 text-right font-mono text-slate-650 dark:text-slate-455">
+                            <td className="py-2.5 text-right font-mono text-slate-600 dark:text-slate-400">
                               {l.duration}ms
                             </td>
                           </tr>
-                        ))}
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -832,10 +864,10 @@ export default function Home(): React.JSX.Element {
             <div className="space-y-6">
               <div className="text-left">
                 <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                  API Entegrasyon Dokümantasyonu
+                  API Entegrasyon Dokümantasyonu (Canlı)
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Uygulamanız için geçerli olan API uçları ve canlı test modülü.
+                  Uygulamanız için geçerli olan API uç noktaları ve canlı test modülü.
                 </p>
               </div>
 
@@ -851,8 +883,8 @@ export default function Home(): React.JSX.Element {
                       }}
                       className={`p-4 rounded-2xl border transition-all cursor-pointer text-left ${
                         selectedEndpoint === idx
-                          ? "bg-blue-600/5 dark:bg-blue-600/10 border-blue-400 dark:border-blue-505 text-slate-900 dark:text-white font-semibold"
-                          : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-855 text-slate-550 dark:text-slate-400 hover:border-slate-350 dark:hover:border-slate-700 shadow-xs"
+                          ? "bg-blue-600/5 dark:bg-blue-600/10 border-blue-400 dark:border-blue-500 text-slate-900 dark:text-white font-semibold"
+                          : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
@@ -865,11 +897,11 @@ export default function Home(): React.JSX.Element {
                         >
                           {ep.method}
                         </span>
-                        <code className="text-xs font-mono font-bold text-slate-700 dark:text-slate-355">
+                        <code className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
                           {ep.path}
                         </code>
                       </div>
-                      <p className="text-[10px] text-slate-550 dark:text-slate-500 line-clamp-2 leading-relaxed">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                         {ep.description}
                       </p>
                     </div>
@@ -877,15 +909,14 @@ export default function Home(): React.JSX.Element {
                 </div>
 
                 {/* Tester panel */}
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-4 md:p-5 space-y-4 flex flex-col text-left shadow-xs">
-                  <div className="flex items-center justify-between border-b border-slate-150 dark:border-slate-850 pb-3">
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 space-y-4 flex flex-col text-left shadow-xs">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-600 dark:text-slate-355 uppercase tracking-wider">
+                      <h3 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                         İstek Test Laboratuvarı
                       </h3>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        Uç noktayı canlı olarak tetikleyin ve JSON cevabını
-                        görün.
+                        Uç noktayı canlı olarak tetikleyin ve JSON cevabını görün.
                       </p>
                     </div>
                     <button
@@ -904,8 +935,8 @@ export default function Home(): React.JSX.Element {
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                       İstek Adresi
                     </span>
-                    <div className="bg-slate-100 dark:bg-slate-955 border border-slate-200 dark:border-slate-855 rounded-lg p-2.5 font-mono text-xs text-slate-700 dark:text-slate-300">
-                      <span className="text-slate-450 dark:text-slate-500 font-bold">
+                    <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 font-mono text-xs text-slate-700 dark:text-slate-300">
+                      <span className="text-slate-400 dark:text-slate-500 font-bold">
                         http://localhost:3000
                       </span>
                       {endpoints[selectedEndpoint].path}
@@ -917,7 +948,7 @@ export default function Home(): React.JSX.Element {
                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                         Request Payload (JSON)
                       </span>
-                      <pre className="bg-slate-100 dark:bg-slate-955 border border-slate-200 dark:border-slate-855 rounded-lg p-3 font-mono text-[10px] text-indigo-600 dark:text-indigo-300 overflow-x-auto max-h-32">
+                      <pre className="bg-slate-100 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-lg p-3 font-mono text-[10px] text-indigo-600 dark:text-indigo-300 overflow-x-auto max-h-32">
                         {endpoints[selectedEndpoint].requestBody}
                       </pre>
                     </div>
@@ -929,7 +960,7 @@ export default function Home(): React.JSX.Element {
                     </span>
                     <pre className="flex-1 bg-slate-900 border border-slate-800 rounded-lg p-3 font-mono text-[10px] text-emerald-400 overflow-auto max-h-60">
                       {testingEndpoint ? (
-                        <span className="text-slate-550 italic">
+                        <span className="text-slate-400 italic">
                           İstek işleniyor...
                         </span>
                       ) : apiResponseText ? (
@@ -954,58 +985,63 @@ export default function Home(): React.JSX.Element {
                   Canlı İstek Logları
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  API gateway üzerinden geçen tüm HTTP trafik verisi gerçek
-                  zamanlı listelenir.
+                  API gateway üzerinden geçen tüm HTTP trafik verisi gerçek zamanlı kaydedilir ve listelenir.
                 </p>
               </div>
 
-              <div className="flex-1 bg-slate-900 dark:bg-slate-955 border border-slate-800 dark:border-slate-855 rounded-2xl p-4 font-mono text-xs text-slate-350 flex flex-col overflow-hidden min-h-[400px]">
-                <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 text-slate-500">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping">
+              <div className="flex-1 bg-slate-900 dark:bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-slate-300 flex flex-col overflow-hidden min-h-[400px]">
+                <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 text-slate-400">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse">
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider">
-                    gateway_terminal_stream.log
+                    live_gateway_activity_stream.log
                   </span>
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-2 text-left">
-                  {logs.map((l) => (
-                    <div
-                      key={l.id}
-                      className="hover:bg-slate-800/40 py-0.5 px-1 rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1"
-                    >
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-slate-505 font-bold text-[10px] shrink-0">
-                          [{l.time}]
-                        </span>
-                        <span
-                          className={`px-1 rounded text-[8px] font-black shrink-0 ${
-                            l.method === "POST"
-                              ? "bg-indigo-500/20 text-indigo-400"
-                              : "bg-blue-500/20 text-blue-400"
-                          }`}
-                        >
-                          {l.method}
-                        </span>
-                        <span className="text-slate-300 break-all">
-                          {l.path}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 ml-4 sm:ml-0 self-start sm:self-center">
-                        <span
-                          className={`px-1 py-0.2 rounded text-[8px] font-black ${
-                            l.status === 200 || l.status === 201
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-rose-500/20 text-rose-400"
-                          }`}
-                        >
-                          {l.status}
-                        </span>
-                        <span className="text-slate-550 text-[10px] font-mono shrink-0">
-                          {l.duration}ms
-                        </span>
-                      </div>
+                  {logs.length === 0 ? (
+                    <div className="text-slate-500 text-center py-10">
+                      Henüz log akışı bulunmuyor. Bir istek göndererek test edin.
                     </div>
-                  ))}
+                  ) : (
+                    logs.map((l) => (
+                      <div
+                        key={l.id}
+                        className="hover:bg-slate-800/40 py-0.5 px-1 rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1"
+                      >
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-slate-500 font-bold text-[10px] shrink-0">
+                            [{l.time}]
+                          </span>
+                          <span
+                            className={`px-1 rounded text-[8px] font-black shrink-0 ${
+                              l.method === "POST"
+                                ? "bg-indigo-500/20 text-indigo-400"
+                                : "bg-blue-500/20 text-blue-400"
+                            }`}
+                          >
+                            {l.method}
+                          </span>
+                          <span className="text-slate-300 break-all">
+                            {l.path}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4 sm:ml-0 self-start sm:self-center">
+                          <span
+                            className={`px-1 py-0.2 rounded text-[8px] font-black ${
+                              l.status === 200 || l.status === 201
+                                ? "bg-emerald-500/20 text-emerald-400"
+                                : "bg-rose-500/20 text-rose-400"
+                            }`}
+                          >
+                            {l.status}
+                          </span>
+                          <span className="text-slate-400 text-[10px] font-mono shrink-0">
+                            {l.duration}ms
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                   <div ref={terminalEndRef} />
                 </div>
               </div>
@@ -1020,13 +1056,13 @@ export default function Home(): React.JSX.Element {
                   Veritabanı Eşitleme (Sync)
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Bulut veritabanı şemasını sunucu arşivi ile eşitleyin.
+                  Bulut SQLite veritabanı şemasını ve kayıtlarını canlı yönetin.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Sync status card */}
-                <div className="lg:col-span-1 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-5 space-y-4 text-left shadow-xs">
+                <div className="lg:col-span-1 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 text-left shadow-xs">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                     Senkronizasyon Kontrolü
                   </span>
@@ -1037,10 +1073,10 @@ export default function Home(): React.JSX.Element {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                        Veri Durumu Güncel
+                        Veri Durumu Aktif
                       </h4>
-                      <p className="text-[10px] text-slate-505 mt-0.5">
-                        En son senkronizasyon: 2 dk önce
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        SQLite Veritabanı Bağlı
                       </p>
                     </div>
                   </div>
@@ -1050,30 +1086,30 @@ export default function Home(): React.JSX.Element {
                       <span className="text-slate-500 dark:text-slate-400">
                         Veritabanı Dosya Boyutu:
                       </span>
-                      <span className="font-mono font-semibold text-slate-850 dark:text-slate-200">
-                        12.4 MB
+                      <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+                        {dbFileSize}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-550 dark:text-slate-400">
+                      <span className="text-slate-500 dark:text-slate-400">
                         Toplam Tablo Sayısı:
                       </span>
-                      <span className="font-mono font-semibold text-slate-850 dark:text-slate-200">
-                        8
+                      <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+                        {dbTables.length}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-550 dark:text-slate-400">
-                        Son Değişen Tablo:
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Şema Versiyonu:
                       </span>
-                      <span className="font-mono font-semibold text-slate-850 dark:text-slate-200">
-                        DATA_DosyaSablonVeri
+                      <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+                        v{liveStats?.database.schemaVersion || "1.0.0"}
                       </span>
                     </div>
                   </div>
 
                   <button
-                    onClick={startSyncSimulation}
+                    onClick={handleTriggerSync}
                     disabled={isSyncing}
                     className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 cursor-pointer mt-4"
                   >
@@ -1084,86 +1120,58 @@ export default function Home(): React.JSX.Element {
                     />
                     {isSyncing
                       ? "Senkronize Ediliyor..."
-                      : "Şimdi Senkronize Et"}
+                      : "Canlı Eşitlemeyi Tetikle"}
                   </button>
 
-                  {isSyncing && (
-                    <div className="space-y-1.5 pt-2 animate-in fade-in">
-                      <div className="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-300 dark:border-slate-855">
-                        <div
-                          className="bg-blue-500 h-1.5 rounded-full transition-all duration-100"
-                          style={{ width: `${syncProgress}%` }}
-                        >
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-mono text-slate-500 block text-right">
-                        Progress: {syncProgress}%
-                      </span>
+                  {syncSuccessMsg && (
+                    <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+                      {syncSuccessMsg}
                     </div>
                   )}
                 </div>
 
                 {/* Table schemes visualization */}
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-5 space-y-4 text-left shadow-xs">
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 text-left shadow-xs">
                   <div>
-                    <h3 className="text-xs font-bold text-slate-650 dark:text-slate-355 uppercase tracking-wider">
-                      Veritabanı Tablo Yapısı
+                    <h3 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                      Canlı Veritabanı Tablo Yapısı ({dbTables.length})
                     </h3>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      Uygulamanın aktif olarak kullandığı ana veri tabloları.
+                      SQLite dosyasında yer alan gerçek tablolar ve anlık satır sayıları.
                     </p>
                   </div>
 
-                  <div className="space-y-2">
-                    {[
-                      {
-                        name: "DATA_TeminDosyasi",
-                        records: 48,
-                        desc:
-                          "İhale/Doğrudan Temin dosyaları genel ayarları ve meta verileri.",
-                      },
-                      {
-                        name: "DATA_DosyaSablonVeri",
-                        records: 120,
-                        desc:
-                          "Dosyalara özel oluşturulmuş dondurulmuş (snapshot) şablon girdi verileri.",
-                      },
-                      {
-                        name: "DATA_Malzeme",
-                        records: 342,
-                        desc:
-                          "Yaklaşık maliyet hesaplamaları için girilen malzeme kalem bilgileri.",
-                      },
-                      {
-                        name: "DATA_Firma",
-                        records: 86,
-                        desc:
-                          "Piyasa fiyat teklifi alınan davetli veya yüklenici firmaların listesi.",
-                      },
-                    ].map((tbl, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-855 rounded-xl flex items-center justify-between gap-3 text-left"
-                      >
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0">
-                            </span>
-                            <span className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                              {tbl.name}
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                    {dbTables.length === 0 ? (
+                      <div className="p-4 text-center text-slate-400 text-xs">
+                        Tablolar yükleniyor...
+                      </div>
+                    ) : (
+                      dbTables.map((tbl, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3 text-left"
+                        >
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0">
+                              </span>
+                              <span className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                                {tbl.name}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                              {tbl.desc}
+                            </p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <span className="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-mono font-bold shadow-2xs">
+                              {tbl.records} Kayıt
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                            {tbl.desc}
-                          </p>
                         </div>
-                        <div className="shrink-0 text-right">
-                          <span className="text-[10px] bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded font-mono font-bold shadow-2xs">
-                            {tbl.records} Kayıt
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -1178,15 +1186,14 @@ export default function Home(): React.JSX.Element {
                   Masaüstü & Mobil Entegrasyonu
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  TEMİN 360 uygulamalarını indirin, kurun ve gateway sunucunuza
-                  kolayca bağlayın.
+                  TEMİN 360 uygulamalarını indirin, kurun ve gateway sunucunuza kolayca bağlayın.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Installation steps */}
                 <div className="lg:col-span-2 space-y-4 text-left">
-                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-5 md:p-6 space-y-6 shadow-xs">
+                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 space-y-6 shadow-xs">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                       Adım Adım Kurulum Rehberi
                     </h3>
@@ -1223,7 +1230,7 @@ export default function Home(): React.JSX.Element {
                             {s.step}
                           </span>
                           <div className="space-y-1">
-                            <h4 className="text-xs font-black text-slate-850 dark:text-slate-200">
+                            <h4 className="text-xs font-black text-slate-800 dark:text-slate-200">
                               {s.title}
                             </h4>
                             <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -1236,16 +1243,16 @@ export default function Home(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Downloads & quick settings mock */}
+                {/* Downloads & quick settings */}
                 <div className="lg:col-span-1 space-y-4 text-left">
                   {/* Downloads Card */}
-                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-5 space-y-4 shadow-xs">
+                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-xs">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                         İndirme Kanalları
                       </span>
                       <a
-                        href="https://github.com/ilyas-bozdemir/dt-desktop-app/releases"
+                        href="https://github.com/ilyasbozdemir/temin-360-app/releases"
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 font-bold"
@@ -1280,18 +1287,18 @@ export default function Home(): React.JSX.Element {
                         href={latestRelease.downloadUrlDmg}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold border border-slate-250 dark:border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer text-center"
+                        className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer text-center"
                       >
                         <Download className="w-4 h-4" />
                         macOS Installer (.dmg) İndir
                       </a>
 
                       {/* Mobile APK Coming Soon */}
-                      <div className="relative group border border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-955/20">
+                      <div className="relative group border border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-950/20">
                         <div className="flex items-center gap-2">
                           <Smartphone className="w-5 h-5 text-slate-400" />
                           <div className="text-left">
-                            <h5 className="text-[10px] font-bold text-slate-700 dark:text-slate-350">
+                            <h5 className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
                               Android & iOS Mobil
                             </h5>
                             <p className="text-[9px] text-slate-500">
@@ -1305,7 +1312,7 @@ export default function Home(): React.JSX.Element {
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-150 dark:border-slate-850 pt-3 text-[10px] text-slate-550 space-y-1">
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-3 text-[10px] text-slate-500 space-y-1">
                       <div className="flex justify-between">
                         <span>Latest Release (GitHub):</span>
                         <a
@@ -1317,26 +1324,26 @@ export default function Home(): React.JSX.Element {
                           {latestRelease.tag}
                         </a>
                       </div>
-                      <div>{"**Dosya Boyutu:** ~" + latestRelease.size}</div>
-                      <div>{"**Yayınlanma:** " + latestRelease.date}</div>
+                      <div>{"Dosya Boyutu: ~" + latestRelease.size}</div>
+                      <div>{"Yayınlanma: " + latestRelease.date}</div>
                     </div>
                   </div>
 
                   {/* Settings JSON Card */}
-                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 rounded-2xl p-5 space-y-3 shadow-xs">
+                  <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 shadow-xs">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                      Masaüstü Görsel Ayarları (Önizleme)
+                      Masaüstü Ayar Yapılandırması (JSON)
                     </span>
 
-                    <div className="space-y-2 border border-slate-200 dark:border-slate-800 p-3 rounded-xl bg-slate-50 dark:bg-slate-955 font-mono text-[9px] text-slate-550 dark:text-slate-400">
+                    <div className="space-y-2 border border-slate-200 dark:border-slate-800 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 font-mono text-[9px] text-slate-500 dark:text-slate-400">
                       <div className="text-blue-500 dark:text-blue-400">
-                        {"// desktop/settings.json"}
+                        {"// settings.json"}
                       </div>
                       <div>{"{"}</div>
                       <div className="pl-4">{'"cloudSyncEnabled": true,'}</div>
                       <div className="pl-4">{'"syncIntervalMinutes": 10,'}</div>
                       <div className="pl-4">
-                        {'"gatewayUrl": "http://localhost:3000",'}
+                        {'"gatewayUrl": "https://app.temin360.ilyasbozdemir.dev",'}
                       </div>
                       <div className="pl-4">
                         {'"apiKey": "dta_key_8e4a90f..."'}

@@ -45,7 +45,11 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/icon.png",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/icon.png",
     apple: "/icon.png",
   },
 };
@@ -61,6 +65,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+      </head>
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950">{children}</body>
     </html>
   );

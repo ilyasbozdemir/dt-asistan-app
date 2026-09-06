@@ -65,9 +65,10 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Dynamic Web App Link (Dev vs Prod)
-  const webAppUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+  const webAppUrl = process.env.NEXT_PUBLIC_APP_URL ||
+    (typeof window !== "undefined" &&
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
       ? "https://app.temin360.ilyasbozdemir.dev"
       : "http://localhost:3000");
 
@@ -87,7 +88,7 @@ export default function Home() {
   // Fetch GitHub Release info on mount
   useEffect(() => {
     fetch(
-      "https://api.github.com/repos/ilyasbozdemir/temin-360-app/releases/latest"
+      "https://api.github.com/repos/ilyasbozdemir/temin-360-app/releases/latest",
     )
       .then((res) => res.json())
       .then((data) => {
@@ -103,8 +104,7 @@ export default function Home() {
             tag: data.tag_name,
             size: sizeMb,
             date: dateStr,
-            url:
-              data.html_url ||
+            url: data.html_url ||
               "https://github.com/ilyasbozdemir/temin-360-app/releases",
           });
         }
@@ -116,10 +116,14 @@ export default function Home() {
 
   // Initialize theme from localStorage & set up scroll listener
   useEffect(() => {
-    const savedTheme =
-      (localStorage.getItem("theme") as "dark" | "light") || "dark";
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    const savedTheme = localStorage.getItem("theme");
+    const initialTheme = savedTheme === "light" ? "light" : "dark";
+    setTheme(initialTheme);
+    if (initialTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -133,7 +137,11 @@ export default function Home() {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
     localStorage.setItem("theme", nextTheme);
-    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    if (nextTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   return (
@@ -154,16 +162,15 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Logo & Brand */}
           <a href="#" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center overflow-hidden p-1">
-                <Image
-                  src="/icon.png"
-                  alt="TEMİN 360 Logo"
-                  width={36}
-                  height={36}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 p-1 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+              <Image
+                src="/icon.png"
+                alt="TEMİN 360 Logo"
+                width={36}
+                height={36}
+                priority
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
@@ -244,11 +251,9 @@ export default function Home() {
               className="p-2 rounded-xl text-slate-600 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-900 dark:hover:bg-slate-800 transition-all border border-slate-200/80 dark:border-slate-800 cursor-pointer"
               title="Tema Değiştir (Koyu / Açık)"
             >
-              {theme === "dark" ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
-              )}
+              {theme === "dark"
+                ? <Sun className="w-4 h-4 text-amber-400" />
+                : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
             {/* Web App / Server Link */}
@@ -276,11 +281,9 @@ export default function Home() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 ml-1 cursor-pointer"
             >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {mobileMenuOpen
+                ? <X className="w-5 h-5" />
+                : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -324,7 +327,9 @@ export default function Home() {
               İndir & Sürümler
             </a>
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <span className="text-xs text-slate-500 font-medium">Sosyal & Kod:</span>
+              <span className="text-xs text-slate-500 font-medium">
+                Sosyal & Kod:
+              </span>
               <div className="flex gap-2">
                 <a
                   href="https://github.com/ilyasbozdemir/temin-360-app"
@@ -454,7 +459,9 @@ export default function Home() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                   <span className="font-semibold">TEMİN 360</span>
                   <span className="text-slate-400">|</span>
-                  <span className="text-slate-500 dark:text-slate-400">Komuta & Karar Destek Merkezi (KİK 4734 / 22-d)</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Komuta & Karar Destek Merkezi (KİK 4734 / 22-d)
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
@@ -542,9 +549,9 @@ export default function Home() {
                   Sıfır Gecikme, Yerel Güç
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Tüm işlemler doğrudan bilgisayarınızdaki SQLite motoru üzerinde
-                  çalışır. İnternet bağlantınız kopsa bile kesintisiz evrak
-                  hazırlamaya ve hakediş hesaplamaya devam edin.
+                  Tüm işlemler doğrudan bilgisayarınızdaki SQLite motoru
+                  üzerinde çalışır. İnternet bağlantınız kopsa bile kesintisiz
+                  evrak hazırlamaya ve hakediş hesaplamaya devam edin.
                 </p>
               </div>
 
@@ -556,9 +563,9 @@ export default function Home() {
                   4734 ve 5018 Mevzuat Uyumu
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Piyasa fiyat araştırma tutanakları, onay belgeleri, sözleşme ve
-                  muayene-kabul tutanakları gibi tüm resmi şablonlar kamu ihale
-                  mevzuatına 100% uyumludur.
+                  Piyasa fiyat araştırma tutanakları, onay belgeleri, sözleşme
+                  ve muayene-kabul tutanakları gibi tüm resmi şablonlar kamu
+                  ihale mevzuatına 100% uyumludur.
                 </p>
               </div>
 
@@ -571,8 +578,8 @@ export default function Home() {
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Çevrimdışı yapılan değişiklikler ağa bağlanıldığı anda merkezi
-                  Docker/Web sunucusuna otomatik aktarılır. Ekip arkadaşlarınızla
-                  çakışmasız ortak çalışın.
+                  Docker/Web sunucusuna otomatik aktarılır. Ekip
+                  arkadaşlarınızla çakışmasız ortak çalışın.
                 </p>
               </div>
             </div>
@@ -586,8 +593,8 @@ export default function Home() {
                   Lokal ve Bulutun Mükemmel Uyumu
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Verileriniz öncelikle sizin kontrolünüzde. İhtiyaç anında merkezi
-                  kurum ağına veya bulut sunucuya senkronize olur.
+                  Verileriniz öncelikle sizin kontrolünüzde. İhtiyaç anında
+                  merkezi kurum ağına veya bulut sunucuya senkronize olur.
                 </p>
               </div>
 
@@ -598,9 +605,13 @@ export default function Home() {
                     <span>Lokal Masaüstü (Client Engine)</span>
                   </div>
                   <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-2">
-                    <li>• SQLite ile mikro-saniye seviyesinde okuma/yazma hızı</li>
+                    <li>
+                      • SQLite ile mikro-saniye seviyesinde okuma/yazma hızı
+                    </li>
                     <li>• Tam çevrimdışı (offline-first) çalışma garantisi</li>
-                    <li>• Yerel yazıcı ve şablon motoruyla PDF/UDF/Docx çıktısı</li>
+                    <li>
+                      • Yerel yazıcı ve şablon motoruyla PDF/UDF/Docx çıktısı
+                    </li>
                     <li>• Hassas veriler lokalde şifrelenerek saklanır</li>
                   </ul>
                 </div>
@@ -612,7 +623,9 @@ export default function Home() {
                   </div>
                   <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-2">
                     <li>• Docker Container ile kolay ve bağımsız kurulum</li>
-                    <li>• RESTful API ve WebSocket üzerinden canlı senkronizasyon</li>
+                    <li>
+                      • RESTful API ve WebSocket üzerinden canlı senkronizasyon
+                    </li>
                     <li>• Çok kullanıcılı yetkilendirme ve rol yönetimi</li>
                     <li>• Günlük otomatik yedekleme ve merkezi arşivleme</li>
                   </ul>
@@ -651,7 +664,12 @@ services:
               </pre>
 
               <div className="text-xs text-slate-400 leading-relaxed">
-                Sunucunuzda <code className="text-blue-300 bg-slate-900 px-1.5 py-0.5 rounded">docker compose up -d</code> komutunu çalıştırarak kurum içi senkronizasyon merkezini 10 saniyede hazır hale getirebilirsiniz.
+                Sunucunuzda{" "}
+                <code className="text-blue-300 bg-slate-900 px-1.5 py-0.5 rounded">
+                  docker compose up -d
+                </code>{" "}
+                komutunu çalıştırarak kurum içi senkronizasyon merkezini 10
+                saniyede hazır hale getirebilirsiniz.
               </div>
             </div>
           )}
@@ -669,7 +687,8 @@ services:
               TEMİN 360&apos;ı Hemen İndirin
             </h2>
             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">
-              İşletim sisteminize uygun kurulum dosyasını indirin ve doğrudan temin süreçlerinizi hızlandırın.
+              İşletim sisteminize uygun kurulum dosyasını indirin ve doğrudan
+              temin süreçlerinizi hızlandırın.
             </p>
           </div>
 
@@ -739,7 +758,7 @@ services:
       <footer className="mt-auto py-12 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 text-xs text-slate-500 font-medium transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center overflow-hidden p-0.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 flex items-center justify-center p-1">
               <Image
                 src="/icon.png"
                 alt="TEMİN 360 Footer Logo"
@@ -753,7 +772,8 @@ services:
                 TEMİN 360
               </p>
               <p className="text-[11px] text-slate-400">
-                © {new Date().getFullYear()} İlyas Bozdemir. Tüm hakları saklıdır.
+                © {new Date().getFullYear()}{" "}
+                İlyas Bozdemir. Tüm hakları saklıdır.
               </p>
             </div>
           </div>

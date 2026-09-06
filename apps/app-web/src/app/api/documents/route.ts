@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { recordRequest } from "@/lib/metrics";
 
 export async function GET() {
+  const startTime = Date.now();
   const documents = [
     {
       id: 1,
@@ -29,6 +31,9 @@ export async function GET() {
     },
   ];
 
+  const duration = Date.now() - startTime;
+  recordRequest("GET", "/api/documents", 200, Math.max(duration, 8));
+
   return NextResponse.json({
     success: true,
     count: documents.length,
@@ -36,3 +41,4 @@ export async function GET() {
     serverTime: new Date().toISOString(),
   });
 }
+
