@@ -94,6 +94,16 @@ export function initializeDatabase(db: Database.Database, institutionName: strin
       version INTEGER PRIMARY KEY,
       applied_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS LOG_YedekGecmisi (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hedef TEXT NOT NULL,
+      dosya_adi TEXT NOT NULL,
+      gdrive_file_id TEXT,
+      boyut_bytes INTEGER,
+      surum_no TEXT,
+      tarih TEXT NOT NULL,
+      aciklama TEXT
+    );
     INSERT OR REPLACE INTO settings (key, value) VALUES ('institutionName', '${institutionName.replace(/'/g, "''")}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '${currentAppVersion}');
     INSERT OR REPLACE INTO settings (key, value) VALUES ('dbSchemaVersion', '${CURRENT_SCHEMA_VERSION}');
