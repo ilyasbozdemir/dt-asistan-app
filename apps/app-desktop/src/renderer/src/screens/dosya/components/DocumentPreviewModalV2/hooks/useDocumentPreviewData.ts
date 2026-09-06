@@ -388,16 +388,20 @@ export function useDocumentPreviewData({
 
         // Teslim süresi / günü hesaplama
         const dosyaObj = payloadData.dosya || dosyaRecord || {};
-        if (dosyaObj.teslim_tarihi) {
+        if (dosyaObj.teslim_gun !== undefined && dosyaObj.teslim_gun !== null && String(dosyaObj.teslim_gun).trim() !== "") {
+          finalData.teslimGun = String(dosyaObj.teslim_gun);
+        } else if (dosyaObj.teslim_suresi) {
+          finalData.teslimGun = String(dosyaObj.teslim_suresi);
+        } else if (dosyaObj.teslim_tarihi) {
           const tDate = new Date(dosyaObj.teslim_tarihi);
-          const today = new Date();
-          const diffDays = Math.ceil((tDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          const baseDate = dosyaObj.tarih ? new Date(dosyaObj.tarih) : (dosyaObj.dosya_acilis_tarihi ? new Date(dosyaObj.dosya_acilis_tarihi) : new Date());
+          const diffDays = Math.ceil((tDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
           if (diffDays > 0 && diffDays < 365) {
             finalData.teslimGun = String(diffDays);
           }
         }
-        if (!finalData.teslimGun && (dosyaObj.teslim_gun || dosyaObj.teslim_suresi)) {
-          finalData.teslimGun = String(dosyaObj.teslim_gun || dosyaObj.teslim_suresi);
+        if (!finalData.teslimGun) {
+          finalData.teslimGun = "7";
         }
 
         const baseKalemler =

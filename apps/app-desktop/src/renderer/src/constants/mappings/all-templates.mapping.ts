@@ -626,6 +626,12 @@ export const KabulEdilenTeklifMapping: ProcessMapping = {
     sutun: 'onaylayan_personel_unvan',
     aciklama: 'Onaylayan Yetkili Ünvanı'
   },
+  teslimGun: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'teslim_gun',
+    varsayilan: '7',
+    aciklama: 'Teslim Süresi (Gün)'
+  },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',
     sutun: '*',
@@ -793,6 +799,12 @@ export const KabulEdilenTeklifOdemeMapping: ProcessMapping = {
     tablo: 'DATA_TeminDosyasi',
     sutun: 'onaylayan_personel_unvan',
     aciklama: 'Onaylayan Yetkili Ünvanı'
+  },
+  teslimGun: {
+    tablo: 'DATA_TeminDosyasi',
+    sutun: 'teslim_gun',
+    varsayilan: '7',
+    aciklama: 'Teslim Süresi (Gün)'
   },
   ihtiyacKalemleri: {
     tablo: 'DATA_TeminKalem',

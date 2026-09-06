@@ -97,6 +97,7 @@ export const DATA_TeminDosyasi = {
     { name: 'irtibat_yetkilisi_id', type: 'INTEGER', description: 'Irtibat Yetkilisi ID' }, // Personel referans
     { name: 'son_teklif_verme_tarihi', type: 'DATETIME', description: 'Son Teklif Verme Tarihi' },
     { name: 'teslim_tarihi', type: 'DATE', description: 'Teslim Tarihi' }, // Tahmini bitiş tarihi
+    { name: 'teslim_gun', type: 'INTEGER', default: 7, description: 'Teslim Süresi (Gün)' },
 
     { name: 'yaklasik_maliyet', type: 'REAL', default: 0, description: 'Yaklasik Maliyet' },
     { name: 'kesinti_damga', type: 'REAL', default: 0, description: 'Damga Vergisi Kesintisi' },

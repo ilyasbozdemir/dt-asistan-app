@@ -480,7 +480,31 @@ export function buildDocumentContext(
       adSoyad: c.ad_soyad,
       unvan: c.unvan,
       gorevi: c.gorevi
-    }))
+    })),
+    teslimGun: dosyaResData?.teslim_gun
+      ? String(dosyaResData.teslim_gun)
+      : (dosyaResData?.teslim_suresi
+        ? String(dosyaResData.teslim_suresi)
+        : (dosyaResData?.teslim_tarihi
+          ? (() => {
+              const tDate = new Date(dosyaResData.teslim_tarihi)
+              const bDate = dosyaResData.tarih ? new Date(dosyaResData.tarih) : new Date()
+              const diff = Math.ceil((tDate.getTime() - bDate.getTime()) / (1000 * 60 * 60 * 24))
+              return diff > 0 ? String(diff) : '7'
+            })()
+          : '7')),
+    teslimGunu: dosyaResData?.teslim_gun
+      ? String(dosyaResData.teslim_gun)
+      : (dosyaResData?.teslim_suresi
+        ? String(dosyaResData.teslim_suresi)
+        : (dosyaResData?.teslim_tarihi
+          ? (() => {
+              const tDate = new Date(dosyaResData.teslim_tarihi)
+              const bDate = dosyaResData.tarih ? new Date(dosyaResData.tarih) : new Date()
+              const diff = Math.ceil((tDate.getTime() - bDate.getTime()) / (1000 * 60 * 60 * 24))
+              return diff > 0 ? String(diff) : '7'
+            })()
+          : '7'))
   }
 
   // Güvenli birleştirme (Safe Merge): resolvedMappings içindeki placeholder (örn. [Belirtilmedi:...])
