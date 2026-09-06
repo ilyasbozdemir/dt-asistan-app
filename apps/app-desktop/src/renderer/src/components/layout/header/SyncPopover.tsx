@@ -1,64 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Cloud, Shield, Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import packageJson from '../../../../../../package.json'
 import { GoogleDriveModal } from '../../ui/GoogleDriveModal'
+import { useSyncStore } from '../../../store/syncStore'
 
 export function SyncPopover(): React.JSX.Element {
-  const [showSyncPopover, setShowSyncPopover] = useState(false)
-  const [showGDriveModal, setShowGDriveModal] = useState(false)
-  const [activeProvider, setActiveProvider] = useState<'server' | 'gdrive'>('server')
-  const [syncUrl, setSyncUrl] = useState('')
-  const [syncToken, setSyncToken] = useState('')
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
-  const [syncMessage, setSyncMessage] = useState('')
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [isOnline, setIsOnline] = useState(true)
-  const [appVersion, setAppVersion] = useState(packageJson.version)
-  const [dbVersionLocal, setDbVersionLocal] = useState(104)
-  const [dbVersionCloud, setDbVersionCloud] = useState(104)
-  const [isOnlineMode, setIsOnlineMode] = useState(true)
+  const [showSyncPopover, setShowSyncPopover] = React.useState(false)
+  const [showGDriveModal, setShowGDriveModal] = React.useState(false)
+  const [isOnline, setIsOnline] = React.useState(true)
   const syncRef = useRef<HTMLDivElement>(null)
 
-  const reloadSettings = () => {
-    window.electron?.ipcRenderer
-      .invoke('db:get-settings')
-      .then((settings) => {
-        if (settings) {
-          setSyncUrl(settings.sync_server_url || '')
-          setSyncToken(settings.sync_server_token || '')
-          if (settings.db_version_local) {
-            setDbVersionLocal(Number(settings.db_version_local))
-            setDbVersionCloud(Number(settings.db_version_cloud || settings.db_version_local))
-          }
-          setIsOnlineMode(settings.is_offline_mode !== 'true')
-        }
-      })
-      .catch(console.error)
-  }
+  const {
+    syncUrl,
+    setSyncUrl,
+    syncToken,
+    setSyncToken,
+    isOnlineMode,
+    setIsOnlineMode,
+    syncStatus,
+    syncMessage,
+    isSyncing,
+    dbVersionLocal,
+    dbVersionCloud,
+    activeProvider,
+    setActiveProvider,
+    loadSettings,
+    testConnection,
+    triggerSync
+  } = useSyncStore()
 
   useEffect(() => {
-    if ((window as any).api?.getAppVersion) {
-      ;(window as any).api
-        .getAppVersion()
-        .then((v: string) => {
-          if (v) setAppVersion(v)
-        })
-        .catch(console.error)
-    }
-
-    reloadSettings()
+    loadSettings()
 
     setIsOnline(navigator.onLine)
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    window.addEventListener('db-synced', reloadSettings)
 
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
-      window.removeEventListener('db-synced', reloadSettings)
     }
   }, [])
 
@@ -73,85 +55,6 @@ export function SyncPopover(): React.JSX.Element {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showSyncPopover])
-
-  const handleSaveAndTest = async () => {
-    setSyncStatus('loading')
-    setSyncMessage('Bağlantı test ediliyor...')
-    try {
-      await window.electron.ipcRenderer.invoke('db:save-settings', {
-        sync_server_url: syncUrl,
-        sync_server_token: syncToken
-      })
-
-      const testRes = await window.electron.ipcRenderer.invoke('sync:test-connection', {
-        url: syncUrl,
-        port: '',
-        token: syncToken
-      })
-
-      if (testRes.success) {
-        setSyncStatus('ok')
-        setSyncMessage('Bağlantı Başarılı!')
-        setIsOnline(true)
-        setIsOnlineMode(true)
-        await window.electron.ipcRenderer.invoke('db:save-settings', {
-          is_offline_mode: 'false'
-        })
-        window.dispatchEvent(new Event('db-synced'))
-      } else {
-        setSyncStatus('error')
-        setSyncMessage(testRes.message || 'Bağlantı başarısız.')
-        setIsOnline(false)
-      }
-    } catch (err: any) {
-      setSyncStatus('error')
-      setSyncMessage(err.message || 'Bir hata oluştu.')
-      setIsOnline(false)
-    }
-  }
-
-  const handleTriggerSync = async () => {
-    if (isSyncing) return
-    setIsSyncing(true)
-    setSyncMessage('Veriler eşitleniyor...')
-    try {
-      const syncRes = await window.electron.ipcRenderer.invoke('sync:run-sync')
-      if (syncRes.success) {
-        setSyncStatus('ok')
-        setSyncMessage('Senkronizasyon Tamamlandı!')
-        const newVer = dbVersionLocal + 1
-        setDbVersionLocal(newVer)
-        setDbVersionCloud(newVer)
-
-        await window.electron.ipcRenderer.invoke('db:save-settings', {
-          db_version_local: String(newVer),
-          db_version_cloud: String(newVer)
-        })
-
-        window.dispatchEvent(new Event('db-synced'))
-      } else {
-        setSyncStatus('error')
-        setSyncMessage(syncRes.message || 'Senkronizasyon başarısız.')
-      }
-    } catch (err: any) {
-      setSyncStatus('error')
-      setSyncMessage(err.message || 'Bir hata oluştu.')
-    } finally {
-      setIsSyncing(false)
-    }
-  }
-
-  const handleToggleOnlineMode = async (checked: boolean) => {
-    setIsOnlineMode(checked)
-    try {
-      await window.electron.ipcRenderer.invoke('db:save-settings', {
-        is_offline_mode: String(!checked)
-      })
-      window.dispatchEvent(new Event('db-synced'))
-    } catch (err) {
-      console.error('Save online mode setting error:', err)
-    }
-  }
 
   return (
     <div className="relative" ref={syncRef}>
@@ -232,13 +135,13 @@ export function SyncPopover(): React.JSX.Element {
                 <div className="flex justify-between items-center text-slate-500">
                   <span>Yerel Veri Sürümü:</span>
                   <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                    v{appVersion}
+                    v{packageJson.version}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-slate-500">
                   <span>Bulut Sunucu Sürümü:</span>
                   <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                    v{appVersion}
+                    v{packageJson.version}
                   </span>
                 </div>
                 {dbVersionLocal < dbVersionCloud && (
@@ -287,7 +190,7 @@ export function SyncPopover(): React.JSX.Element {
                   <input
                     type="checkbox"
                     checked={isOnlineMode}
-                    onChange={(e) => handleToggleOnlineMode(e.target.checked)}
+                    onChange={(e) => setIsOnlineMode(e.target.checked)}
                     className="sr-only peer cursor-pointer"
                   />
                   <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
@@ -296,7 +199,7 @@ export function SyncPopover(): React.JSX.Element {
 
               <div className="flex gap-2 pt-1">
                 <button
-                  onClick={handleSaveAndTest}
+                  onClick={() => testConnection()}
                   disabled={syncStatus === 'loading'}
                   className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-slate-250 dark:border-slate-700"
                 >
@@ -308,7 +211,7 @@ export function SyncPopover(): React.JSX.Element {
                 </button>
 
                 <button
-                  onClick={handleTriggerSync}
+                  onClick={() => triggerSync()}
                   disabled={isSyncing || !syncUrl || !isOnline}
                   className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-sm shadow-blue-500/10"
                 >

@@ -93,20 +93,6 @@ export default function AyarlarScreen(): React.ReactNode {
   const [archiveYear, setArchiveYear] = useState<number>(new Date().getFullYear() - 1)
   const [isArchiving, setIsArchiving] = useState(false)
 
-  // Tab: Web Sync Ayarları
-  const [syncServerUrl, setSyncServerUrl] = useState('')
-  const [syncServerPort, setSyncServerPort] = useState('')
-  const [syncServerToken, setSyncServerToken] = useState('')
-  const [syncTestStatus, setSyncTestStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
-  const [syncTestMsg, setSyncTestMsg] = useState('')
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [isPushing, setIsPushing] = useState(false)
-  const [isPulling, setIsPulling] = useState(false)
-  const [syncLastResult, setSyncLastResult] = useState<{
-    type: 'ok' | 'error'
-    msg: string
-  } | null>(null)
-
   useEffect(() => {
     window.electron.ipcRenderer
       .invoke('app:isPackaged')
@@ -140,9 +126,6 @@ export default function AyarlarScreen(): React.ReactNode {
         setAiOpenaiApiKey(settings.ai_openai_api_key || '')
         setAiAnthropicApiKey(settings.ai_anthropic_api_key || '')
 
-        setSyncServerUrl(settings.sync_server_url || '')
-        setSyncServerPort(settings.sync_server_port || '')
-        setSyncServerToken(settings.sync_server_token || '')
         setDisableDocumentGuidance(settings.disableDocumentGuidance === 'true')
         setUnifiedStepperMode(settings.unifiedStepperMode !== 'false')
       }, 0)
@@ -192,95 +175,6 @@ export default function AyarlarScreen(): React.ReactNode {
     } catch {
       setAiTestStatus('error')
       setAiTestMsg('Beklenmeyen bir hata oluştu.')
-    }
-  }
-
-  const handleSyncTestConnection = async (): Promise<void> => {
-    if (!syncServerUrl) {
-      setSyncTestStatus('error')
-      setSyncTestMsg('Lütfen sunucu adresini girin.')
-      return
-    }
-    setSyncTestStatus('loading')
-    setSyncTestMsg('')
-    try {
-      const res = await window.electron.ipcRenderer.invoke('sync:test-connection', {
-        url: syncServerUrl,
-        port: syncServerPort,
-        token: syncServerToken
-      })
-      if (res.success) {
-        setSyncTestStatus('ok')
-        setSyncTestMsg('Bağlantı başarılı! ✓')
-        await window.electron.ipcRenderer.invoke('db:save-settings', {
-          is_offline_mode: 'false'
-        })
-        window.dispatchEvent(new Event('db-synced'))
-      } else {
-        setSyncTestStatus('error')
-        setSyncTestMsg(res.message || 'Bağlantı başarısız.')
-      }
-    } catch (err: any) {
-      setSyncTestStatus('error')
-      setSyncTestMsg('Hata: ' + err.message)
-    }
-  }
-
-  const handleManualSync = async (): Promise<void> => {
-    setIsSyncing(true)
-    setSyncLastResult(null)
-    try {
-      const res = await window.electron.ipcRenderer.invoke('sync:run-sync')
-      setSyncLastResult({
-        type: res.success ? 'ok' : 'error',
-        msg: res.success ? 'Senkronizasyon tamamlandı.' : res.message || 'Hata'
-      })
-    } catch (err: any) {
-      setSyncLastResult({ type: 'error', msg: err.message })
-    } finally {
-      setIsSyncing(false)
-    }
-  }
-
-  const handlePushToServer = async (): Promise<void> => {
-    setIsPushing(true)
-    setSyncLastResult(null)
-    try {
-      const res = await window.electron.ipcRenderer.invoke('sync:push', {
-        url: syncServerUrl,
-        port: syncServerPort,
-        token: syncServerToken
-      })
-      setSyncLastResult({
-        type: res.success ? 'ok' : 'error',
-        msg: res.success
-          ? '✅ Veriler başarıyla sunucuya gönderildi.'
-          : res.message || 'Push hatası'
-      })
-    } catch (err: any) {
-      setSyncLastResult({ type: 'error', msg: '❌ ' + err.message })
-    } finally {
-      setIsPushing(false)
-    }
-  }
-
-  const handlePullFromServer = async (): Promise<void> => {
-    setIsPulling(true)
-    setSyncLastResult(null)
-    try {
-      const res = await window.electron.ipcRenderer.invoke('sync:pull', {
-        url: syncServerUrl,
-        port: syncServerPort,
-        token: syncServerToken
-      })
-      setSyncLastResult({
-        type: res.success ? 'ok' : 'error',
-        msg: res.success ? '✅ Veriler başarıyla sunucudan alındı.' : res.message || 'Pull hatası'
-      })
-    } catch (err: any) {
-      setSyncLastResult({ type: 'error', msg: '❌ ' + err.message })
-    } finally {
-      setIsPulling(false)
     }
   }
 
@@ -344,10 +238,6 @@ export default function AyarlarScreen(): React.ReactNode {
         dataToSave.ai_gemini_api_key = aiGeminiApiKey
         dataToSave.ai_openai_api_key = aiOpenaiApiKey
         dataToSave.ai_anthropic_api_key = aiAnthropicApiKey
-      } else if (tab === 'sync') {
-        dataToSave.sync_server_url = syncServerUrl
-        dataToSave.sync_server_port = syncServerPort
-        dataToSave.sync_server_token = syncServerToken
       }
 
       await saveSettings(dataToSave)
@@ -460,28 +350,7 @@ export default function AyarlarScreen(): React.ReactNode {
                   />
                 )}
 
-                {activeTab === 'sync' && (
-                  <SyncTab
-                    syncServerUrl={syncServerUrl}
-                    setSyncServerUrl={setSyncServerUrl}
-                    syncServerPort={syncServerPort}
-                    setSyncServerPort={setSyncServerPort}
-                    syncServerToken={syncServerToken}
-                    setSyncServerToken={setSyncServerToken}
-                    syncTestStatus={syncTestStatus}
-                    syncTestMsg={syncTestMsg}
-                    isSyncing={isSyncing}
-                    isPushing={isPushing}
-                    isPulling={isPulling}
-                    saving={saving}
-                    syncLastResult={syncLastResult}
-                    handleSyncTestConnection={handleSyncTestConnection}
-                    handleManualSync={handleManualSync}
-                    handlePushToServer={handlePushToServer}
-                    handlePullFromServer={handlePullFromServer}
-                    handleSaveTab={handleSaveTab}
-                  />
-                )}
+                {activeTab === 'sync' && <SyncTab />}
 
                 {activeTab === 'supabase' && <SupabaseTab />}
               </div>
