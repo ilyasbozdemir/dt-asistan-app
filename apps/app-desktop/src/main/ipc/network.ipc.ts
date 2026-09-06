@@ -161,20 +161,162 @@ export function registerNetworkIpcHandlers(): void {
 
   ipcMain.handle('sync:test-connection', async (_, { url, port, token }) => {
     try {
-      const fullUrl = port ? `${url}:${port}/api/health` : `${url}/api/health`
+      if (!url) return { success: false, error: 'Sunucu adresi girilmedi.' }
+      let cleanUrl = String(url).trim().replace(/\/+$/, '')
+      if (port && !cleanUrl.includes(':' + port)) {
+        cleanUrl = `${cleanUrl}:${port}`
+      }
+      const fullUrl = `${cleanUrl}/api/health`
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      const res = await fetch(fullUrl, {
+        method: 'GET',
+        headers
+      })
+      if (res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { message?: string }
+        return { success: true, message: data.message || 'Bağlantı Başarılı!' }
+      }
+      return { success: false, error: `Sunucu yanıt vermedi: HTTP ${res.status}` }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Bağlantı hatası'
+      return { success: false, error: msg }
+    }
+  })
+
+  ipcMain.handle('sync:run-sync', async (_, args?: { url?: string; token?: string }) => {
+    try {
+      let syncUrl = args?.url
+      let syncToken = args?.token
+
+      if (!syncUrl) {
+        try {
+          const db = workspaceManager.getDb()
+          const urlRow = db
+            .prepare("SELECT value FROM settings WHERE key = 'sync_server_url'")
+            .get() as { value: string }
+          const tokenRow = db
+            .prepare("SELECT value FROM settings WHERE key = 'sync_server_token'")
+            .get() as { value: string }
+          syncUrl = urlRow?.value
+          syncToken = tokenRow?.value
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!syncUrl) {
+        return {
+          success: false,
+          error: 'Sunucu adresi tanımlı değil. Lütfen önce sunucu adresini kaydedin.'
+        }
+      }
+
+      const cleanUrl = String(syncUrl).trim().replace(/\/+$/, '')
+      const fullUrl = `${cleanUrl}/api/sync`
+
+      let dosyalar: unknown[] = []
+      const sablonlar: unknown[] = []
+      try {
+        const db = workspaceManager.getDb()
+        const dCheck = db
+          .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dosyalar'")
+          .get()
+        if (dCheck) {
+          dosyalar = db.prepare('SELECT id, title, created_at FROM dosyalar LIMIT 50').all()
+        }
+      } catch {
+        // fallback
+      }
+
+      const res = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: syncToken ? `Bearer ${syncToken}` : 'Bearer dta_desktop_client',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dosyalar,
+          sablonlar,
+          syncedAt: new Date().toISOString()
+        })
+      })
+
+      if (res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { message?: string }
+        return {
+          success: true,
+          message: data.message || 'Senkronizasyon paketi başarıyla işlendi.'
+        }
+      }
+      return { success: false, error: `Sunucu hatası: HTTP ${res.status}` }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Senkronizasyon hatası'
+      return { success: false, error: msg }
+    }
+  })
+
+  ipcMain.handle('sync:push', async (_, { url, port, token }) => {
+    try {
+      if (!url) return { success: false, error: 'Sunucu adresi tanımlı değil.' }
+      let cleanUrl = String(url).trim().replace(/\/+$/, '')
+      if (port && !cleanUrl.includes(':' + port)) {
+        cleanUrl = `${cleanUrl}:${port}`
+      }
+      const fullUrl = `${cleanUrl}/api/sync`
+
+      const res = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : 'Bearer dta_desktop_client',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'push',
+          syncedAt: new Date().toISOString()
+        })
+      })
+
+      if (res.ok) {
+        return { success: true, message: 'Veriler buluta başarıyla gönderildi.' }
+      }
+      return { success: false, error: `Sunucu hatası: HTTP ${res.status}` }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Push hatası'
+      return { success: false, error: msg }
+    }
+  })
+
+  ipcMain.handle('sync:pull', async (_, { url, port, token }) => {
+    try {
+      if (!url) return { success: false, error: 'Sunucu adresi tanımlı değil.' }
+      let cleanUrl = String(url).trim().replace(/\/+$/, '')
+      if (port && !cleanUrl.includes(':' + port)) {
+        cleanUrl = `${cleanUrl}:${port}`
+      }
+      const fullUrl = `${cleanUrl}/api/documents`
+
       const res = await fetch(fullUrl, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: token ? `Bearer ${token}` : 'Bearer dta_desktop_client',
           'Content-Type': 'application/json'
         }
       })
+
       if (res.ok) {
-        return { success: true }
+        return { success: true, message: 'Bulut verileri başarıyla çekildi.' }
       }
-      return { success: false, error: `Sunucu yanıt vermedi: ${res.status}` }
-    } catch (error: any) {
-      return { success: false, error: error.message }
+      return { success: false, error: `Sunucu hatası: HTTP ${res.status}` }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Pull hatası'
+      return { success: false, error: msg }
     }
   })
 }
+

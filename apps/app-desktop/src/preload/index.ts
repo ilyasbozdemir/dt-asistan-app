@@ -79,6 +79,9 @@ const allowedChannels = new Set([
   'network:can-undo-sync',
   'network:undo-sync',
   'sync:test-connection',
+  'sync:run-sync',
+  'sync:push',
+  'sync:pull',
   // Template
   'template:export',
   'template:import',
