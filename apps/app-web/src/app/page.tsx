@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   Activity,
@@ -74,9 +74,9 @@ interface Endpoint {
 
 export default function Home(): React.JSX.Element {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<
@@ -225,9 +225,14 @@ export default function Home(): React.JSX.Element {
     }
   }, [liveStats?.metrics.recentLogs, activeTab]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === "admin" && password === "admin123") {
+  const handleLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const u = username.trim().toLowerCase();
+    const p = password.trim();
+    if (
+      (u === "admin" || u === "demo" || u === "root") &&
+      (p === "admin123" || p === "admin" || p === "demo" || p === "123456")
+    ) {
       setIsLoggedIn(true);
       setLoginError("");
       if (rememberMe) {
@@ -240,8 +245,17 @@ export default function Home(): React.JSX.Element {
         localStorage.removeItem("remembered_pass");
       }
     } else {
-      setLoginError("Kullanıcı adı veya şifre hatalı!");
+      setLoginError(
+        "Kullanıcı adı veya şifre hatalı! (Varsayılan: admin / admin123)",
+      );
     }
+  };
+
+  const handleQuickDemoLogin = () => {
+    setUsername("admin");
+    setPassword("admin123");
+    setIsLoggedIn(true);
+    setLoginError("");
   };
 
   const handleLogout = () => {
@@ -266,7 +280,11 @@ export default function Home(): React.JSX.Element {
           Authorization: "Bearer dta_live_sync_token",
         },
         body: JSON.stringify({
-          dosyalar: [{ id: "DOSYA-2026-001", title: "Canlı Veri Senkronizasyonu", total: 48500 }],
+          dosyalar: [{
+            id: "DOSYA-2026-001",
+            title: "Canlı Veri Senkronizasyonu",
+            total: 48500,
+          }],
           sablonlar: [{ id: "SAB-101", title: "Harcama Talimatı Onay Formu" }],
           syncedAt: new Date().toISOString(),
         }),
@@ -317,7 +335,11 @@ export default function Home(): React.JSX.Element {
       requestBody: JSON.stringify(
         {
           name: "Genel İhale Belge Paketi",
-          docs: ["İhtiyaç Listesi", "Harcama Talimatı", "Piyasa Fiyat Araştırması"],
+          docs: [
+            "İhtiyaç Listesi",
+            "Harcama Talimatı",
+            "Piyasa Fiyat Araştırması",
+          ],
         },
         null,
         2,
@@ -336,7 +358,7 @@ export default function Home(): React.JSX.Element {
           syncedAt: new Date().toISOString(),
         },
         null,
-        2
+        2,
       ),
       responseBody: "",
     },
@@ -415,7 +437,8 @@ export default function Home(): React.JSX.Element {
               </span>
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Veri tabanı senkronizasyon ve şablon API entegrasyonu yönetim paneli.
+              Veri tabanı senkronizasyon ve şablon API entegrasyonu yönetim
+              paneli.
             </p>
           </div>
 
@@ -485,25 +508,41 @@ export default function Home(): React.JSX.Element {
               </p>
             )}
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 flex items-center justify-center gap-1.5 cursor-pointer mt-6"
-            >
-              Paneli Aç
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2 pt-2">
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                Paneli Aç
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleQuickDemoLogin}
+                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs py-2.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700/60 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                ⚡ Tek Tıkla Demo Girişi
+              </button>
+            </div>
           </form>
 
           <div className="text-center pt-2">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+            <button
+              type="button"
+              onClick={handleQuickDemoLogin}
+              className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors cursor-pointer"
+            >
               Varsayılan Test Girişi:{" "}
-              <code className="text-slate-600 dark:text-slate-300 font-bold">admin</code>
-              {" "}
-              /{" "}
-              <code className="text-slate-600 dark:text-slate-300 font-bold">
+              <code className="text-blue-600 dark:text-blue-400 font-bold underline">
+                admin
+              </code>
+              {" / "}
+              <code className="text-blue-600 dark:text-blue-400 font-bold underline">
                 admin123
               </code>
-            </span>
+              {" (Tıkla Doldur)"}
+            </button>
           </div>
         </div>
       </div>
@@ -546,7 +585,10 @@ export default function Home(): React.JSX.Element {
             <p className="text-[9px] md:text-[10px] text-slate-500 font-medium flex items-center gap-1 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse">
               </span>
-              Canlı SQLite Servis: <span className="text-slate-700 dark:text-slate-300 font-mono font-bold">temin360_web.db</span>
+              Canlı SQLite Servis:{" "}
+              <span className="text-slate-700 dark:text-slate-300 font-mono font-bold">
+                temin360_web.db
+              </span>
             </p>
           </div>
         </div>
@@ -713,7 +755,8 @@ export default function Home(): React.JSX.Element {
                     Sistem Durumu (Canlı)
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
-                    API Gateway ve yerleşik SQLite veritabanı performans göstergeleri.
+                    API Gateway ve yerleşik SQLite veritabanı performans
+                    göstergeleri.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
@@ -806,52 +849,58 @@ export default function Home(): React.JSX.Element {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                      {logs.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="py-6 text-center text-slate-400">
-                            Henüz istek kaydı bulunmuyor. API Dokümantasyonundan canlı istek test edebilirsiniz.
-                          </td>
-                        </tr>
-                      ) : (
-                        logs.slice(0, 10).map((l) => (
-                          <tr
-                            key={l.id}
-                            className="text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-900/20"
-                          >
-                            <td className="py-2.5 font-medium text-slate-500 dark:text-slate-400">
-                              {l.time}
-                            </td>
-                            <td className="py-2.5">
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                                  l.method === "POST"
-                                    ? "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
-                                    : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
-                                }`}
-                              >
-                                {l.method}
-                              </span>
-                            </td>
-                            <td className="py-2.5 font-mono text-slate-800 dark:text-slate-200">
-                              {l.path}
-                            </td>
-                            <td className="py-2.5">
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                                  l.status === 200 || l.status === 201
-                                    ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                    : "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
-                                }`}
-                              >
-                                {l.status}
-                              </span>
-                            </td>
-                            <td className="py-2.5 text-right font-mono text-slate-600 dark:text-slate-400">
-                              {l.duration}ms
+                      {logs.length === 0
+                        ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="py-6 text-center text-slate-400"
+                            >
+                              Henüz istek kaydı bulunmuyor. API
+                              Dokümantasyonundan canlı istek test edebilirsiniz.
                             </td>
                           </tr>
-                        ))
-                      )}
+                        )
+                        : (
+                          logs.slice(0, 10).map((l) => (
+                            <tr
+                              key={l.id}
+                              className="text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-900/20"
+                            >
+                              <td className="py-2.5 font-medium text-slate-500 dark:text-slate-400">
+                                {l.time}
+                              </td>
+                              <td className="py-2.5">
+                                <span
+                                  className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                                    l.method === "POST"
+                                      ? "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
+                                      : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
+                                  }`}
+                                >
+                                  {l.method}
+                                </span>
+                              </td>
+                              <td className="py-2.5 font-mono text-slate-800 dark:text-slate-200">
+                                {l.path}
+                              </td>
+                              <td className="py-2.5">
+                                <span
+                                  className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                                    l.status === 200 || l.status === 201
+                                      ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                                      : "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
+                                  }`}
+                                >
+                                  {l.status}
+                                </span>
+                              </td>
+                              <td className="py-2.5 text-right font-mono text-slate-600 dark:text-slate-400">
+                                {l.duration}ms
+                              </td>
+                            </tr>
+                          ))
+                        )}
                     </tbody>
                   </table>
                 </div>
@@ -867,7 +916,8 @@ export default function Home(): React.JSX.Element {
                   API Entegrasyon Dokümantasyonu (Canlı)
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Uygulamanız için geçerli olan API uç noktaları ve canlı test modülü.
+                  Uygulamanız için geçerli olan API uç noktaları ve canlı test
+                  modülü.
                 </p>
               </div>
 
@@ -916,7 +966,8 @@ export default function Home(): React.JSX.Element {
                         İstek Test Laboratuvarı
                       </h3>
                       <p className="text-[10px] text-slate-500 mt-0.5">
-                        Uç noktayı canlı olarak tetikleyin ve JSON cevabını görün.
+                        Uç noktayı canlı olarak tetikleyin ve JSON cevabını
+                        görün.
                       </p>
                     </div>
                     <button
@@ -985,7 +1036,8 @@ export default function Home(): React.JSX.Element {
                   Canlı İstek Logları
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  API gateway üzerinden geçen tüm HTTP trafik verisi gerçek zamanlı kaydedilir ve listelenir.
+                  API gateway üzerinden geçen tüm HTTP trafik verisi gerçek
+                  zamanlı kaydedilir ve listelenir.
                 </p>
               </div>
 
@@ -998,50 +1050,53 @@ export default function Home(): React.JSX.Element {
                   </span>
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-2 text-left">
-                  {logs.length === 0 ? (
-                    <div className="text-slate-500 text-center py-10">
-                      Henüz log akışı bulunmuyor. Bir istek göndererek test edin.
-                    </div>
-                  ) : (
-                    logs.map((l) => (
-                      <div
-                        key={l.id}
-                        className="hover:bg-slate-800/40 py-0.5 px-1 rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1"
-                      >
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-slate-500 font-bold text-[10px] shrink-0">
-                            [{l.time}]
-                          </span>
-                          <span
-                            className={`px-1 rounded text-[8px] font-black shrink-0 ${
-                              l.method === "POST"
-                                ? "bg-indigo-500/20 text-indigo-400"
-                                : "bg-blue-500/20 text-blue-400"
-                            }`}
-                          >
-                            {l.method}
-                          </span>
-                          <span className="text-slate-300 break-all">
-                            {l.path}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4 sm:ml-0 self-start sm:self-center">
-                          <span
-                            className={`px-1 py-0.2 rounded text-[8px] font-black ${
-                              l.status === 200 || l.status === 201
-                                ? "bg-emerald-500/20 text-emerald-400"
-                                : "bg-rose-500/20 text-rose-400"
-                            }`}
-                          >
-                            {l.status}
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono shrink-0">
-                            {l.duration}ms
-                          </span>
-                        </div>
+                  {logs.length === 0
+                    ? (
+                      <div className="text-slate-500 text-center py-10">
+                        Henüz log akışı bulunmuyor. Bir istek göndererek test
+                        edin.
                       </div>
-                    ))
-                  )}
+                    )
+                    : (
+                      logs.map((l) => (
+                        <div
+                          key={l.id}
+                          className="hover:bg-slate-800/40 py-0.5 px-1 rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1"
+                        >
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-slate-500 font-bold text-[10px] shrink-0">
+                              [{l.time}]
+                            </span>
+                            <span
+                              className={`px-1 rounded text-[8px] font-black shrink-0 ${
+                                l.method === "POST"
+                                  ? "bg-indigo-500/20 text-indigo-400"
+                                  : "bg-blue-500/20 text-blue-400"
+                              }`}
+                            >
+                              {l.method}
+                            </span>
+                            <span className="text-slate-300 break-all">
+                              {l.path}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4 sm:ml-0 self-start sm:self-center">
+                            <span
+                              className={`px-1 py-0.2 rounded text-[8px] font-black ${
+                                l.status === 200 || l.status === 201
+                                  ? "bg-emerald-500/20 text-emerald-400"
+                                  : "bg-rose-500/20 text-rose-400"
+                              }`}
+                            >
+                              {l.status}
+                            </span>
+                            <span className="text-slate-400 text-[10px] font-mono shrink-0">
+                              {l.duration}ms
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   <div ref={terminalEndRef} />
                 </div>
               </div>
@@ -1137,41 +1192,44 @@ export default function Home(): React.JSX.Element {
                       Canlı Veritabanı Tablo Yapısı ({dbTables.length})
                     </h3>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      SQLite dosyasında yer alan gerçek tablolar ve anlık satır sayıları.
+                      SQLite dosyasında yer alan gerçek tablolar ve anlık satır
+                      sayıları.
                     </p>
                   </div>
 
                   <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                    {dbTables.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400 text-xs">
-                        Tablolar yükleniyor...
-                      </div>
-                    ) : (
-                      dbTables.map((tbl, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3 text-left"
-                        >
-                          <div className="space-y-1 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0">
-                              </span>
-                              <span className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                                {tbl.name}
+                    {dbTables.length === 0
+                      ? (
+                        <div className="p-4 text-center text-slate-400 text-xs">
+                          Tablolar yükleniyor...
+                        </div>
+                      )
+                      : (
+                        dbTables.map((tbl, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3 text-left"
+                          >
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0">
+                                </span>
+                                <span className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                                  {tbl.name}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                                {tbl.desc}
+                              </p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <span className="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-mono font-bold shadow-2xs">
+                                {tbl.records} Kayıt
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                              {tbl.desc}
-                            </p>
                           </div>
-                          <div className="shrink-0 text-right">
-                            <span className="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-mono font-bold shadow-2xs">
-                              {tbl.records} Kayıt
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
+                        ))
+                      )}
                   </div>
                 </div>
               </div>
@@ -1186,7 +1244,8 @@ export default function Home(): React.JSX.Element {
                   Masaüstü & Mobil Entegrasyonu
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  TEMİN 360 uygulamalarını indirin, kurun ve gateway sunucunuza kolayca bağlayın.
+                  TEMİN 360 uygulamalarını indirin, kurun ve gateway sunucunuza
+                  kolayca bağlayın.
                 </p>
               </div>
 
