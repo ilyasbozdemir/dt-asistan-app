@@ -73,6 +73,35 @@ export function ensureSchemaIntegrity(db: Database.Database): void {
     }
   }
 
+  // Explicit migration for DATA_TeminDosyasi columns
+  const teminDosyasiColumns = [
+    { name: 'teslim_gun', def: 'INTEGER DEFAULT 7' },
+    { name: 'teslim_tarihi', def: 'DATE' },
+    { name: 'sozlesme_yapilacak_mi', def: 'INTEGER DEFAULT 0' },
+    { name: 'sablon_tercihleri', def: "TEXT DEFAULT '{}'" },
+    { name: 'ordered_docs', def: 'TEXT' },
+    { name: 'starred_docs', def: 'TEXT' },
+    { name: 'skipped_docs', def: 'TEXT' },
+    { name: 'isin_aciklama_maddeleri', def: 'TEXT' },
+    { name: 'yaklasik_maliyet_kdv_dahil_mi', def: 'INTEGER DEFAULT 0' }
+  ]
+  for (const c of teminDosyasiColumns) {
+    try {
+      db.exec(`ALTER TABLE DATA_TeminDosyasi ADD COLUMN "${c.name}" ${c.def};`)
+      console.log(`[Schema Self-Healing] Explicitly added DATA_TeminDosyasi.${c.name}`)
+    } catch (e: any) {
+      // Ignored if column already exists
+    }
+  }
+
+  // Explicit migration for DATA_DosyaSablonVeri columns
+  try {
+    db.exec(`ALTER TABLE DATA_DosyaSablonVeri ADD COLUMN "sablon_kodu" TEXT;`)
+    console.log(`[Schema Self-Healing] Explicitly added DATA_DosyaSablonVeri.sablon_kodu`)
+  } catch (e: any) {
+    // Ignored if column already exists
+  }
+
   for (const table of schema.tables as any[]) {
     try {
       const tableInfo = db.prepare(`PRAGMA table_info(${table.name})`).all() as any[]

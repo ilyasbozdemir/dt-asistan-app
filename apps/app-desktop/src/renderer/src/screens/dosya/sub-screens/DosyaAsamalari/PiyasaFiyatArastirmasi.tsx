@@ -81,6 +81,7 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
     setBelgeleriKaydet,
     handleUpdateDocumentDate,
     handleDeleteDocument,
+    handleSetWinnerFirma,
   } = logic;
 
   const [activeFormTab, setActiveFormTab] = useState<"firms" | "matrix">(() => {
@@ -169,6 +170,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
             setIsFirmModalOpen={setIsFirmModalOpen}
             handleSaveToDosya={handleSaveToDosya}
             getEstimatedCostTotal={getEstimatedCostTotal}
+            manualWinnerFirmaId={manualWinnerFirmaId}
+            handleSetWinnerFirma={handleSetWinnerFirma}
+            lowestTotalFirmaId={lowestTotalFirmaId}
           />
         )
         : (

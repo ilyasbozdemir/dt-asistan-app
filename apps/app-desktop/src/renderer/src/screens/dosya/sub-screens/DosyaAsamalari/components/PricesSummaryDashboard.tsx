@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Plus,
   Settings,
+  Trophy,
 } from "lucide-react";
 import { cn } from "../../../../../utils/cn";
 
@@ -14,6 +15,8 @@ interface PricesSummaryDashboardProps {
   items: any[];
   bids: Record<string, number>;
   onManageFirmsClick?: () => void;
+  manualWinnerFirmaId?: number | null;
+  handleSetWinnerFirma?: (firmaMasterId: number | null) => Promise<void>;
 }
 
 export function PricesSummaryDashboard({
@@ -21,6 +24,8 @@ export function PricesSummaryDashboard({
   items,
   bids,
   onManageFirmsClick,
+  manualWinnerFirmaId,
+  handleSetWinnerFirma,
 }: PricesSummaryDashboardProps): React.JSX.Element {
   if (invitedFirms.length === 0) {
     return (
@@ -71,20 +76,26 @@ export function PricesSummaryDashboard({
       {/* Firm totals summary card grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {firmTotals.map(({ firm, total }) => {
-          const isWinner = total > 0 && total === lowestTotal;
+          const isLowest = total > 0 && total === lowestTotal;
+          const isSelectedWinner = manualWinnerFirmaId
+            ? (manualWinnerFirmaId === firm.firma_id || manualWinnerFirmaId === firm.id)
+            : isLowest;
+
           return (
             <div
               key={firm.id}
               className={cn(
                 "p-5 rounded-2xl border transition-all flex flex-col justify-between relative overflow-hidden",
-                isWinner
-                  ? "bg-emerald-50/40 dark:bg-emerald-955/10 border-emerald-300 dark:border-emerald-800 shadow-sm"
+                isSelectedWinner
+                  ? "bg-amber-50/40 dark:bg-amber-955/10 border-amber-300 dark:border-amber-700 shadow-sm ring-1 ring-amber-400/40"
+                  : isLowest
+                  ? "bg-emerald-50/30 dark:bg-emerald-955/10 border-emerald-300 dark:border-emerald-800"
                   : "bg-slate-50/50 dark:bg-slate-900/10 border-slate-200/60 dark:border-slate-800/80",
               )}
             >
-              {isWinner && (
-                <div className="absolute -right-6 -top-6 w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center rotate-45">
-                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-455 mt-8" />
+              {isSelectedWinner && (
+                <div className="absolute -right-6 -top-6 w-16 h-16 bg-amber-500/15 rounded-full flex items-center justify-center rotate-45">
+                  <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-450 mt-8" />
                 </div>
               )}
               <div>
@@ -92,7 +103,11 @@ export function PricesSummaryDashboard({
                   <Building2
                     className={cn(
                       "w-4 h-4 shrink-0",
-                      isWinner ? "text-emerald-500" : "text-slate-400",
+                      isSelectedWinner
+                        ? "text-amber-500"
+                        : isLowest
+                        ? "text-emerald-500"
+                        : "text-slate-400",
                     )}
                   />
                   <span
@@ -103,36 +118,72 @@ export function PricesSummaryDashboard({
                   </span>
                 </div>
 
-                {isWinner && (
-                  <span className="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-450 px-2 py-0.5 rounded-md mb-3 border border-emerald-500/15">
-                    En Düşük Teklif
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {isSelectedWinner && (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/25">
+                      <Trophy className="w-2.5 h-2.5 text-amber-600" />
+                      Kazanan Firma
+                    </span>
+                  )}
+                  {isLowest && (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-450 px-2 py-0.5 rounded-md border border-emerald-500/15">
+                      <Check className="w-2.5 h-2.5 text-emerald-600" />
+                      En Düşük Teklif
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="mt-4">
-                <span className="text-[10px] text-slate-400 block font-bold">
-                  Toplam Teklif
-                </span>
-                <span
-                  className={cn(
-                    "text-base font-extrabold font-mono",
-                    total > 0
-                      ? isWinner
-                        ? "text-emerald-650 dark:text-emerald-455"
-                        : "text-slate-800 dark:text-slate-200"
-                      : "text-slate-400 italic text-xs font-semibold",
-                  )}
-                >
-                  {total > 0
-                    ? `${
-                      total.toLocaleString("tr-TR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
-                    } TL`
-                    : "Fiyat girilmedi"}
-                </span>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold">
+                    Toplam Teklif
+                  </span>
+                  <span
+                    className={cn(
+                      "text-base font-extrabold font-mono",
+                      total > 0
+                        ? isSelectedWinner
+                          ? "text-amber-600 dark:text-amber-400"
+                          : isLowest
+                          ? "text-emerald-650 dark:text-emerald-455"
+                          : "text-slate-800 dark:text-slate-200"
+                        : "text-slate-400 italic text-xs font-semibold",
+                    )}
+                  >
+                    {total > 0
+                      ? `${
+                        total.toLocaleString("tr-TR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      } TL`
+                      : "Fiyat girilmedi"}
+                  </span>
+                </div>
+
+                {handleSetWinnerFirma && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isSelectedWinner) {
+                        handleSetWinnerFirma(null);
+                      } else {
+                        handleSetWinnerFirma(firm.firma_id || firm.id);
+                      }
+                    }}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer border-0 shrink-0 inline-flex items-center gap-1",
+                      isSelectedWinner
+                        ? "bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs"
+                        : "bg-slate-100 hover:bg-amber-100 dark:bg-slate-800 dark:hover:bg-amber-950/40 text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-300",
+                    )}
+                    title={isSelectedWinner ? "Kazanan seçimini kaldır" : "Bu firmayı kazanan yap"}
+                  >
+                    <Trophy className="w-3 h-3" />
+                    {isSelectedWinner ? "Seçili" : "Kazanan Yap"}
+                  </button>
+                )}
               </div>
             </div>
           );

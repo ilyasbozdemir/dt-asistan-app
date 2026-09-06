@@ -1,4 +1,11 @@
 import React, { useMemo } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  RotateCcw,
+  Sparkles,
+  Trophy,
+} from "lucide-react";
 import { PricesSummaryDashboard } from "./PricesSummaryDashboard";
 import { MalzemeTabloPopover } from "../../components/MalzemeListesi/components/MalzemeTabloPopover";
 import { normalizeForMatch } from "../useDosyaAsamasiSablons";
@@ -46,6 +53,9 @@ interface PiyasaFiyatArastirmasiDashboardProps {
   handleDeleteDocument?: (id: number) => void;
   handleSaveToDosya?: (docType?: "maliyet" | "tutanak" | "save_only") => void;
   getEstimatedCostTotal?: () => number;
+  manualWinnerFirmaId?: number | null;
+  handleSetWinnerFirma?: (firmaMasterId: number | null) => Promise<void>;
+  lowestTotalFirmaId?: number | null;
 }
 
 export function PiyasaFiyatArastirmasiDashboard({
@@ -71,6 +81,9 @@ export function PiyasaFiyatArastirmasiDashboard({
   handleDeleteDocument,
   handleSaveToDosya,
   getEstimatedCostTotal,
+  manualWinnerFirmaId,
+  handleSetWinnerFirma,
+  lowestTotalFirmaId,
 }: PiyasaFiyatArastirmasiDashboardProps): React.JSX.Element {
   const { activeDosyaId } = useWorkspaceStore();
 
@@ -264,6 +277,26 @@ export function PiyasaFiyatArastirmasiDashboard({
     });
   }, [allPoolFirms, invitedFirms]);
 
+  const activeWinnerFirma = useMemo(() => {
+    if (!manualWinnerFirmaId || !invitedFirms) return null;
+    return invitedFirms.find(
+      (f: any) => f.firma_id === manualWinnerFirmaId || f.id === manualWinnerFirmaId,
+    );
+  }, [manualWinnerFirmaId, invitedFirms]);
+
+  const lowestBidFirm = useMemo(() => {
+    if (!invitedFirms || invitedFirms.length === 0) return null;
+    let minTotal = Infinity;
+    let minFirm: any = null;
+    invitedFirms.forEach((f: any) => {
+      if (f.teklif_toplami && f.teklif_toplami > 0 && f.teklif_toplami < minTotal) {
+        minTotal = f.teklif_toplami;
+        minFirm = f;
+      }
+    });
+    return minFirm;
+  }, [invitedFirms]);
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Header Controls Bar */}
@@ -272,6 +305,13 @@ export function PiyasaFiyatArastirmasiDashboard({
         title="Fiyat İstenen Firmaların Seçilmesi"
         firms={formattedFirms}
         columns={firmaColumns}
+        winnerFirmaId={manualWinnerFirmaId}
+        onSetWinnerFirma={(f) => {
+          if (handleSetWinnerFirma) {
+            const targetId = ((f.firma_id as number) || f.id);
+            handleSetWinnerFirma(manualWinnerFirmaId === targetId ? null : targetId);
+          }
+        }}
         onFiyatGir={() => {
           setIsFormOpen(true);
           setActiveFormTab("matrix");
@@ -340,12 +380,116 @@ export function PiyasaFiyatArastirmasiDashboard({
           />
         }
       />
+
+      {/* ─── Kazanan Firma Belirleme & Hızlı Seçim Paneli ─── */}
+      {invitedFirms && invitedFirms.length > 0 && (
+        <div className="rounded-2xl border border-amber-200/80 dark:border-amber-800/60 bg-linear-to-r from-amber-50/70 via-orange-50/40 to-amber-50/70 dark:from-amber-950/20 dark:via-slate-900/40 dark:to-amber-950/20 backdrop-blur-md p-4 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Sol Kısım: Başlık & Durum */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-xs border border-amber-500/20">
+                <Trophy className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                    Kazanan Firma (Yüklenici) Belirleme
+                  </span>
+                  {activeWinnerFirma ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Belirlendi
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100/80 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md border border-amber-500/20">
+                      <AlertCircle className="w-3 h-3" />
+                      Henüz Seçilmedi
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-extrabold text-slate-800 dark:text-slate-100 mt-0.5">
+                  {activeWinnerFirma ? (
+                    <span className="text-emerald-700 dark:text-emerald-300 font-black">
+                      {activeWinnerFirma.unvan}
+                    </span>
+                  ) : (
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">
+                      Teklif girişi haricinde buradan dilediğiniz firmayı doğrudan kazanan yüklenici olarak atayabilirsiniz.
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Sağ Kısım: Hızlı Seçim ve Otomatik Belirleme Butonları */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Dropdown ile elle firma seçimi */}
+              <div className="relative min-w-[200px]">
+                <select
+                  value={manualWinnerFirmaId || ""}
+                  onChange={(e) => {
+                    const val = e.target.value ? Number(e.target.value) : null;
+                    if (handleSetWinnerFirma) {
+                      handleSetWinnerFirma(val);
+                    }
+                  }}
+                  className="w-full text-xs font-bold px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer shadow-xs"
+                >
+                  <option value="">— Firma Seçerek Belirle —</option>
+                  {invitedFirms.map((f: any) => (
+                    <option key={f.id} value={f.firma_id || f.id}>
+                      {f.unvan} {f.teklif_toplami ? `(${f.teklif_toplami.toLocaleString("tr-TR")} ₺)` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* En Düşük Teklifi Otomatik Seç Butonu */}
+              {lowestBidFirm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (handleSetWinnerFirma) {
+                      handleSetWinnerFirma(lowestBidFirm.firma_id || lowestBidFirm.id);
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-all shadow-xs hover:shadow-md cursor-pointer border-0 active:scale-95"
+                  title={`En düşük teklif sahibi (${lowestBidFirm.unvan}) kazanan olarak atanır.`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                  En Düşük Teklifi Kazanan Yap
+                </button>
+              )}
+
+              {/* Temizle / Sıfırla Butonu */}
+              {activeWinnerFirma && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (handleSetWinnerFirma) {
+                      handleSetWinnerFirma(null);
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer border-0"
+                  title="Seçimi Kaldır"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Sıfırla
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {dashboardViewMode === "prices"
         ? (
           <PricesSummaryDashboard
             invitedFirms={invitedFirms}
             items={items}
             bids={bids}
+            manualWinnerFirmaId={manualWinnerFirmaId}
+            handleSetWinnerFirma={handleSetWinnerFirma}
             onManageFirmsClick={() => {
               setIsFormOpen(true);
               setActiveFormTab("firms");

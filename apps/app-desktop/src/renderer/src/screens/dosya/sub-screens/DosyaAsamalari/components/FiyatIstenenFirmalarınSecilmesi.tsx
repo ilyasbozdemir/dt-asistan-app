@@ -18,6 +18,7 @@ import {
   Square,
   Tag,
   Trash2,
+  Trophy,
   X,
 } from "lucide-react";
 
@@ -66,6 +67,10 @@ export interface FiyatIstenenFirmalarınSecilmesiProps {
   onOpenFirmaSecmeModali?: () => void;
   /** Ekstra Üst Bar Butonları / Popover (Örn. Tablo İşlemleri) */
   extraHeaderAction?: React.ReactNode;
+  /** Kazanan Firma Kimliği */
+  winnerFirmaId?: number | null;
+  /** Kazanan Firma Seçme Callback'i */
+  onSetWinnerFirma?: (firma: Firma) => void;
 }
 
 /* ─── Firma Seçim Modali ─────────────────────────────────────────── */
@@ -276,6 +281,8 @@ interface RowMenuProps {
   onFiyatPiyasaFormu?: (firma: Firma) => void;
   onBirimFiyatArastirmasi?: (firma: Firma) => void;
   onUnvanKullanToggle?: (firma: Firma, value: boolean) => void;
+  onSetWinnerFirma?: (firma: Firma) => void;
+  isWinner?: boolean;
 }
 
 function RowMenu({
@@ -285,6 +292,8 @@ function RowMenu({
   onFiyatPiyasaFormu,
   onBirimFiyatArastirmasi,
   onUnvanKullanToggle,
+  onSetWinnerFirma,
+  isWinner,
 }: RowMenuProps): React.JSX.Element {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -363,6 +372,18 @@ function RowMenu({
             style={{ top: `${coords.top}px`, left: `${coords.left}px` }}
             className="fixed z-[9999] w-60 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl py-1.5 animate-in fade-in zoom-in-95 duration-100"
           >
+            {/* Kazanan Firma Olarak Seç */}
+            {onSetWinnerFirma && (
+              <button
+                type="button"
+                onClick={() => handleItem(() => onSetWinnerFirma(firma))}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
+              >
+                <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+                {isWinner ? "Kazanan Seçimini Kaldır" : "Kazanan Firma Olarak Seç"}
+              </button>
+            )}
+
             {/* Fiyat Girişi */}
             {onFiyatGir && (
               <button
@@ -431,6 +452,8 @@ export function FiyatIstenenFirmalarınSecilmesi({
   onUnvanKullanToggle,
   onOpenFirmaSecmeModali,
   extraHeaderAction,
+  winnerFirmaId,
+  onSetWinnerFirma,
 }: FiyatIstenenFirmalarınSecilmesiProps): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -573,39 +596,61 @@ export function FiyatIstenenFirmalarınSecilmesi({
                   </tr>
                 )
                 : (
-                  addedFirms.map((firma, idx) => (
-                    <tr
-                      key={firma.temin_firma_id
-                        ? `temin-${firma.temin_firma_id}`
-                        : `firm-${firma.id}-${idx}`}
-                      className="group hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
-                    >
-                      {columns.map((column) => (
-                        <td
-                          key={column.key}
-                          className={`px-4 py-3 text-xs text-slate-700 dark:text-slate-300 ${
-                            column.className ?? ""
-                          }`}
-                        >
-                          {column.render
-                            ? column.render(firma)
-                            : String(firma[column.key] ?? "-")}
-                        </td>
-                      ))}
+                  addedFirms.map((firma, idx) => {
+                    const isWinner = winnerFirmaId
+                      ? winnerFirmaId === firma.id || winnerFirmaId === (firma as any).firma_id
+                      : false;
 
-                      {/* ⋮ Kebap Menüsü */}
-                      <td className="px-3 py-2 text-right">
-                        <RowMenu
-                          firma={firma}
-                          onFirmaCikar={onFirmaCikar}
-                          onFiyatGir={onFiyatGir}
-                          onFiyatPiyasaFormu={onFiyatPiyasaFormu}
-                          onBirimFiyatArastirmasi={onBirimFiyatArastirmasi}
-                          onUnvanKullanToggle={onUnvanKullanToggle}
-                        />
-                      </td>
-                    </tr>
-                  ))
+                    return (
+                      <tr
+                        key={firma.temin_firma_id
+                          ? `temin-${firma.temin_firma_id}`
+                          : `firm-${firma.id}-${idx}`}
+                        className={`group transition-colors ${
+                          isWinner
+                            ? "bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50/70 dark:hover:bg-amber-950/30 font-medium"
+                            : "hover:bg-slate-50/70 dark:hover:bg-slate-900/50"
+                        }`}
+                      >
+                        {columns.map((column) => (
+                          <td
+                            key={column.key}
+                            className={`px-4 py-3 text-xs text-slate-700 dark:text-slate-300 ${
+                              column.className ?? ""
+                            }`}
+                          >
+                            {column.render ? (
+                              column.render(firma)
+                            ) : column.key === "unvan" && isWinner ? (
+                              <div className="flex items-center gap-2">
+                                <span>{String(firma[column.key] ?? "-")}</span>
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/25 shrink-0">
+                                  <Trophy className="w-2.5 h-2.5 text-amber-600" />
+                                  Kazanan
+                                </span>
+                              </div>
+                            ) : (
+                              String(firma[column.key] ?? "-")
+                            )}
+                          </td>
+                        ))}
+
+                        {/* ⋮ Kebap Menüsü */}
+                        <td className="px-3 py-2 text-right">
+                          <RowMenu
+                            firma={firma}
+                            onFirmaCikar={onFirmaCikar}
+                            onFiyatGir={onFiyatGir}
+                            onFiyatPiyasaFormu={onFiyatPiyasaFormu}
+                            onBirimFiyatArastirmasi={onBirimFiyatArastirmasi}
+                            onUnvanKullanToggle={onUnvanKullanToggle}
+                            onSetWinnerFirma={onSetWinnerFirma}
+                            isWinner={isWinner}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
             </tbody>
           </table>

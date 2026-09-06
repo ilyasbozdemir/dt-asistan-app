@@ -41,6 +41,7 @@ import { useTabStore } from '../../../../../store/tabStore'
 import { formatDateString } from '../../../CiktiMerkezi.contextBuilder'
 import { paraYaziyaCevir } from '../../../../../constants/sayiEslesmeleri'
 import { emitAppEvent, useAppEventListener } from '../../../../../utils/appEvents'
+import { documentPreloadService } from '../../../../../services/documentPreloadService'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function usePiyasaFiyatArastirmasiLogic() {
@@ -218,7 +219,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
 
       const resDosya = await window.electron.ipcRenderer.invoke(
         'db:query',
-        'SELECT hesaplama_esasi, komisyon_takdiri, temin_tarihi FROM DATA_TeminDosyasi WHERE id = ?',
+        'SELECT hesaplama_esasi, komisyon_takdiri, temin_tarihi, firma_id FROM DATA_TeminDosyasi WHERE id = ?',
         [activeDosyaId]
       )
 
@@ -256,6 +257,8 @@ export function usePiyasaFiyatArastirmasiLogic() {
         // Mevcut kazanan firma varsa state'e yükle
         if (resDosya.data[0].firma_id) {
           setManualWinnerFirmaId(resDosya.data[0].firma_id)
+        } else {
+          setManualWinnerFirmaId(null)
         }
       }
 
@@ -1000,6 +1003,50 @@ export function usePiyasaFiyatArastirmasiLogic() {
     return minId
   }, [invitedFirms])
 
+  const handleSetWinnerFirma = useCallback(
+    async (firmaMasterId: number | null): Promise<void> => {
+      if (!activeDosyaId) return
+      try {
+        // 1. DATA_TeminDosyasi tablosunu güncelle
+        await window.electron.ipcRenderer.invoke(
+          'db:run',
+          'UPDATE DATA_TeminDosyasi SET firma_id = ? WHERE id = ?',
+          [firmaMasterId, activeDosyaId]
+        )
+
+        // 2. DATA_TeminFirma tablosundaki kazanan_mi durumunu senkronize et
+        if (firmaMasterId) {
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            `UPDATE DATA_TeminFirma 
+             SET kazanan_mi = CASE WHEN firma_id = ? OR id = ? THEN 1 ELSE 0 END 
+             WHERE temin_dosya_id = ?`,
+            [firmaMasterId, firmaMasterId, activeDosyaId]
+          )
+        } else {
+          await window.electron.ipcRenderer.invoke(
+            'db:run',
+            `UPDATE DATA_TeminFirma SET kazanan_mi = 0 WHERE temin_dosya_id = ?`,
+            [activeDosyaId]
+          )
+        }
+
+        setManualWinnerFirmaId(firmaMasterId)
+        if (firmaMasterId) {
+          setSetLowestFirmAsWinner(false)
+        }
+
+        // 3. Cache'i temizle ve olayları fırlat
+        documentPreloadService.invalidateCache(activeDosyaId)
+        emitAppEvent('dossier:updated', { dosyaId: activeDosyaId })
+        emitAppEvent('bids:changed', { dosyaId: activeDosyaId })
+      } catch (err) {
+        console.error('Error setting winner firma:', err)
+      }
+    },
+    [activeDosyaId]
+  )
+
   return {
     sablonsContext,
     invitedFirms,
@@ -1038,6 +1085,7 @@ export function usePiyasaFiyatArastirmasiLogic() {
     handleNewDocument,
     handleSaveToDosya,
     lowestTotalFirmaId,
+    handleSetWinnerFirma,
     isEditingFirms,
     setIsEditingFirms,
     maliyetCetveliTarihi,
