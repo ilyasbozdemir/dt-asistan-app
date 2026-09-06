@@ -304,8 +304,11 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <HardDrive size={15} /> Google Drive Bulut Yedekleri ({files.length})
+              <HardDrive size={15} /> Klasör: TEMIN_360_YEDEKLER ({files.length})
             </h4>
+            <span className="text-[10px] text-slate-400 font-mono">
+              Google Drive / TEMIN_360_YEDEKLER
+            </span>
           </div>
 
           <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-950 max-h-56 overflow-y-auto">
@@ -315,7 +318,9 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
               </div>
             ) : files.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500">
-                {!token ? 'Devam etmek için lütfen Google Giriş / Access Token girin.' : 'Drive hesabınızda listelenecek `.dtal` uzantılı yedek bulunamadı.'}
+                {!token
+                  ? 'Devam etmek için lütfen Google Giriş / Access Token girin.'
+                  : 'TEMIN_360_YEDEKLER klasöründe henüz .dtal yedek dosyası yok. Yukarıdaki "Aktif Dosyayı Buluta Yükle" butonuyla ilk yedeğinizi yükleyebilirsiniz.'}
               </div>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-850">

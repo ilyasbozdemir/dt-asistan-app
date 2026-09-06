@@ -114,11 +114,16 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
       if (token) {
         const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+        
+        // Ensure dedicated app folder exists
+        const folderId = await getOrCreateAppFolder(cleanToken)
+
         // Construct multipart boundary for metadata + binary payload
         const boundary = '--------------------------' + Date.now().toString(16)
         const metadata = JSON.stringify({
           name: fileName,
-          description: 'TEMİN 360 Çalışma Dosyası Yedeği'
+          description: 'TEMİN 360 Çalışma Dosyası Yedeği',
+          parents: [folderId]
         })
 
         const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`
@@ -157,7 +162,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
         return {
           success: true,
-          message: `${fileName} başarıyla Google Drive hesabınıza yedeklendi.`,
+          message: `${fileName} başarıyla Google Drive 'TEMIN_360_YEDEKLER' klasörüne yedeklendi.`,
           fileId: uploadedFile.id
         }
       }
@@ -173,6 +178,46 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       return { success: false, error: error.message }
     }
   })
+
+  async function getOrCreateAppFolder(token: string): Promise<string> {
+    const folderName = 'TEMIN_360_YEDEKLER'
+    const query = encodeURIComponent(
+      `mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`
+    )
+    const searchRes = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
+    if (searchRes.ok) {
+      const data = (await searchRes.json()) as { files?: Array<{ id: string; name: string }> }
+      if (data.files && data.files.length > 0) {
+        return data.files[0].id
+      }
+    }
+
+    // Create folder if not found
+    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder',
+        description: 'TEMİN 360 Doğrudan Temin Çalışma Alanı Bulut Yedekleri'
+      })
+    })
+
+    if (createRes.ok) {
+      const folderData = (await createRes.json()) as { id: string }
+      return folderData.id
+    }
+
+    throw new Error('Google Drive üzerinde TEMIN_360_YEDEKLER klasörü oluşturulamadı.')
+  }
 
   ipcMain.handle('workspace:list-gdrive-files', async (_, args?: { token?: string }) => {
     try {
@@ -197,7 +242,8 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       }
 
       const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
-      const query = encodeURIComponent("trashed = false and (name contains '.dtal' or name contains '.db')")
+      const folderId = await getOrCreateAppFolder(cleanToken)
+      const query = encodeURIComponent(`'${folderId}' in parents and trashed = false and (name contains '.dtal' or name contains '.hkmp')`)
       const res = await fetch(
         `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=modifiedTime%20desc`,
         {
