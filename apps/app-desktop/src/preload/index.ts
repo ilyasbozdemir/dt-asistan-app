@@ -25,6 +25,7 @@ const allowedChannels = new Set([
   'workspace:backup-gdrive',
   'workspace:list-gdrive-files',
   'workspace:download-gdrive-file',
+  'workspace:delete-gdrive-file',
   'workspace:upload-file',
   'workspace:open-file',
   // Document
