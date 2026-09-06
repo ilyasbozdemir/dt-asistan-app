@@ -268,7 +268,18 @@ export function registerNetworkIpcHandlers(): void {
       if (port && !cleanUrl.includes(':' + port)) {
         cleanUrl = `${cleanUrl}:${port}`
       }
-      const fullUrl = `${cleanUrl}/api/sync`
+      let dosyalar: unknown[] = []
+      try {
+        const db = workspaceManager.getDb()
+        const dCheck = db
+          .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dosyalar'")
+          .get()
+        if (dCheck) {
+          dosyalar = db.prepare('SELECT * FROM dosyalar LIMIT 100').all()
+        }
+      } catch {
+        // fallback
+      }
 
       const res = await fetch(fullUrl, {
         method: 'POST',
@@ -278,6 +289,7 @@ export function registerNetworkIpcHandlers(): void {
         },
         body: JSON.stringify({
           action: 'push',
+          dosyalar,
           syncedAt: new Date().toISOString()
         })
       })
