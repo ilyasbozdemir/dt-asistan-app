@@ -118,11 +118,18 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         // Ensure dedicated app folder exists
         const folderId = await getOrCreateAppFolder(cleanToken)
 
+        // Versioned timestamped filename: e.g. Acme_2026-09-06_17-45.dtal
+        const now = new Date()
+        const dateStr = now.toISOString().slice(0, 10)
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`
+        const rawBase = fileName.replace(/\.dtal$/i, '').replace(/_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$/, '')
+        const backupFileName = `${rawBase}_${dateStr}_${timeStr}.dtal`
+
         // Construct multipart boundary for metadata + binary payload
         const boundary = '--------------------------' + Date.now().toString(16)
         const metadata = JSON.stringify({
-          name: fileName,
-          description: 'TEMİN 360 Çalışma Dosyası Yedeği',
+          name: backupFileName,
+          description: `TEMİN 360 Otomatik Çalışma Dosyası Yedeği (${new Date().toLocaleString('tr-TR')})`,
           parents: [folderId]
         })
 
@@ -160,9 +167,12 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
         const uploadedFile = (await res.json()) as any
 
+        // Prune older backups: keep only last 7 versions
+        await pruneOldBackups(cleanToken, folderId, 7)
+
         return {
           success: true,
-          message: `${fileName} başarıyla Google Drive 'TEMIN_360_YEDEKLER' klasörüne yedeklendi.`,
+          message: `${backupFileName} başarıyla Google Drive 'TEMIN_360_YEDEKLER' klasörüne yüklendi (Son 7 sürüm muhafaza ediliyor).`,
           fileId: uploadedFile.id
         }
       }
@@ -178,6 +188,35 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       return { success: false, error: error.message }
     }
   })
+
+  async function pruneOldBackups(token: string, folderId: string, maxVersions = 7): Promise<void> {
+    try {
+      const query = encodeURIComponent(
+        `'${folderId}' in parents and trashed = false and (name contains '.dtal' or name contains '.hkmp')`
+      )
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,createdTime)&orderBy=createdTime%20desc`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+      if (res.ok) {
+        const data = (await res.json()) as { files?: Array<{ id: string; name: string }> }
+        const files = data.files || []
+        if (files.length > maxVersions) {
+          const toDelete = files.slice(maxVersions)
+          for (const file of toDelete) {
+            await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` }
+            }).catch(console.error)
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Google Drive backup pruning error:', err)
+    }
+  }
 
   async function getOrCreateAppFolder(token: string): Promise<string> {
     const folderName = 'TEMIN_360_YEDEKLER'
@@ -245,7 +284,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       const folderId = await getOrCreateAppFolder(cleanToken)
       const query = encodeURIComponent(`'${folderId}' in parents and trashed = false and (name contains '.dtal' or name contains '.hkmp')`)
       const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=modifiedTime%20desc`,
+        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=createdTime%20desc`,
         {
           headers: {
             Authorization: `Bearer ${cleanToken}`

@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal } from '../ui/Modal'
-import { FileText, Save, Mail, AlertTriangle, Loader2, CloudUpload } from 'lucide-react'
+import { FileText, Save, Mail, AlertTriangle, Loader2, CloudUpload, CheckCircle2 } from 'lucide-react'
 import { cn } from '../../utils/cn'
-import { useAyarlarHooks } from '../../screens/ayarlar/ayarlar.hooks'
 
 interface WorkspaceCloseModalProps {
   isOpen: boolean
@@ -17,7 +16,7 @@ export function WorkspaceCloseModal({
   fileName,
   onConfirm
 }: WorkspaceCloseModalProps): React.JSX.Element {
-  const { settings } = useAyarlarHooks()
+  const [settings, setSettings] = useState<Record<string, string>>({})
   const isMailConfigured = !!settings.smtp_host
   const isGDriveConfigured = !!settings.gdriveAccessToken
   const isServerConfigured = !!settings.sync_server_url
@@ -36,10 +35,24 @@ export function WorkspaceCloseModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Sync selectedOption with available configs when settings change
-  React.useEffect(() => {
-    setSelectedOption(defaultOption)
-  }, [isGDriveConfigured, isServerConfigured, isMailConfigured])
+  useEffect(() => {
+    if (isOpen && window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.invoke('db:get-settings').then((s) => {
+        if (s) {
+          setSettings(s)
+          if (s.gdriveAccessToken) {
+            setSelectedOption('gdrive')
+          } else if (s.sync_server_url) {
+            setSelectedOption('server')
+          } else if (s.smtp_host) {
+            setSelectedOption('email')
+          } else {
+            setSelectedOption('backup')
+          }
+        }
+      }).catch(console.error)
+    }
+  }, [isOpen])
 
   const handleConfirm = async () => {
     setLoading(true)
@@ -72,18 +85,28 @@ export function WorkspaceCloseModal({
           </div>
         )}
 
-        {/* Warning if no cloud or server is configured */}
-        {!hasAnyCloudConfigured && (
+        {/* Cloud active notice */}
+        {isGDriveConfigured ? (
+          <div className="p-3 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-300 text-xs flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-bold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Google Drive Bulut Koruması Devrede</span>
+            </div>
+            <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold">
+              Son 7 Sürüm Tutulur
+            </span>
+          </div>
+        ) : !hasAnyCloudConfigured ? (
           <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-900 dark:text-amber-300 text-xs space-y-1">
             <div className="font-bold flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>Veri Güvenliği Tavsiyesi</span>
             </div>
             <p className="text-[11px] leading-relaxed opacity-90">
-              Bulut veya sunucu entegrasyonunuz henüz yoksa veri kaybı yaşamamak için <strong>hiç olmadı "Bilgisayara Yerel Yedek Kaydet ve Kapat"</strong> seçeneğini seçebilir veya <strong>Google Drive / API Sunucu</strong> entegrasyonlarından birini aktifleştirebilirsiniz. 😊
+              Bulut veya sunucu entegrasyonunuz henüz yoksa veri kaybı yaşamamak için <strong>"Bilgisayara Yerel Yedek Kaydet ve Kapat"</strong> seçeneğini seçebilir veya <strong>Google Drive / API Sunucu</strong> entegrasyonlarından birini aktifleştirebilirsiniz. 😊
             </p>
           </div>
-        )}
+        ) : null}
 
         <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
           Kapatmadan önce veri kaybı veya dosya bozulması riskine karşı veri dosyanızın güncel bir
@@ -98,9 +121,9 @@ export function WorkspaceCloseModal({
               disabled={loading}
               onClick={() => setSelectedOption('gdrive')}
               className={cn(
-                'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer',
+                'flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ring-2 ring-emerald-500/20',
                 selectedOption === 'gdrive'
-                  ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/10'
+                  ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20'
                   : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/20 dark:bg-slate-900/20'
               )}
             >
@@ -125,11 +148,11 @@ export function WorkspaceCloseModal({
                 >
                   <span>Google Drive Bulut Yedeği Al ve Kapat</span>
                   <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold px-1.5 py-0.5 rounded">
-                    GDRIVE
+                    ÖNERİLEN
                   </span>
                 </h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                  Çalışma dosyanızın (.dtal) son halini kişisel Google Drive bulut klasörünüze yükler.
+                  Çalışma dosyanızın (.dtal) son halini <strong>TEMIN_360_YEDEKLER</strong> klasörünüze yükler ve son 7 sürümü korur.
                 </p>
               </div>
             </button>
@@ -308,9 +331,11 @@ export function WorkspaceCloseModal({
             onClick={handleConfirm}
             className={cn(
               'px-5 py-2 text-xs font-bold text-white rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 min-w-[110px] justify-center',
-              selectedOption === 'none'
-                ? 'bg-amber-600 hover:bg-amber-700'
-                : 'bg-blue-600 hover:bg-blue-700'
+              selectedOption === 'gdrive'
+                ? 'bg-emerald-600 hover:bg-emerald-700'
+                : selectedOption === 'none'
+                  ? 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
             )}
           >
             {loading ? (
