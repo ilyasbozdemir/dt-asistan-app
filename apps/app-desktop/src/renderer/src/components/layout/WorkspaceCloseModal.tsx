@@ -32,25 +32,34 @@ export function WorkspaceCloseModal({
   const [selectedOption, setSelectedOption] = useState<
     'none' | 'backup' | 'email' | 'server' | 'gdrive'
   >(defaultOption)
+  const [rememberPreference, setRememberPreference] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (isOpen && window.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.invoke('db:get-settings').then((s) => {
-        if (s) {
-          setSettings(s)
-          if (s.gdriveAccessToken) {
-            setSelectedOption('gdrive')
-          } else if (s.sync_server_url) {
-            setSelectedOption('server')
-          } else if (s.smtp_host) {
-            setSelectedOption('email')
-          } else {
-            setSelectedOption('backup')
+      window.electron.ipcRenderer
+        .invoke('db:get-settings')
+        .then((s) => {
+          if (s) {
+            setSettings(s)
+            if (s.closeActionPreference) {
+              setSelectedOption(s.closeActionPreference as any)
+            } else if (s.gdriveAccessToken) {
+              setSelectedOption('gdrive')
+            } else if (s.sync_server_url) {
+              setSelectedOption('server')
+            } else if (s.smtp_host) {
+              setSelectedOption('email')
+            } else {
+              setSelectedOption('backup')
+            }
+            if (s.closeActionRemember === 'true') {
+              setRememberPreference(true)
+            }
           }
-        }
-      }).catch(console.error)
+        })
+        .catch(console.error)
     }
   }, [isOpen])
 
@@ -58,6 +67,12 @@ export function WorkspaceCloseModal({
     setLoading(true)
     setError(null)
     try {
+      if (window.electron?.ipcRenderer) {
+        await window.electron.ipcRenderer.invoke('db:save-settings', {
+          closeActionPreference: selectedOption,
+          closeActionRemember: rememberPreference ? 'true' : 'false'
+        })
+      }
       await onConfirm(selectedOption)
       onClose()
     } catch (err: any) {
@@ -313,6 +328,28 @@ export function WorkspaceCloseModal({
               </p>
             </div>
           </button>
+        </div>
+
+        {/* Remember Preference Checkbox */}
+        <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex items-start gap-3 mt-1">
+          <input
+            id="remember-close-pref"
+            type="checkbox"
+            checked={rememberPreference}
+            onChange={(e) => setRememberPreference(e.target.checked)}
+            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          <label
+            htmlFor="remember-close-pref"
+            className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none leading-normal"
+          >
+            <span className="font-bold block text-slate-900 dark:text-slate-100">
+              Bu tercihimi hatırla ve dosyayı her kapattığımda otomatik uygula
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
+              İşaretlenirse sonraki kapatmalarda bu pencere tekrar sorulmaz, doğrudan seçtiğiniz işlem yapılır. (Ayarlar &gt; Senkronizasyon alanından dilediğiniz zaman değiştirebilirsiniz).
+            </span>
+          </label>
         </div>
 
         {/* Footer Actions */}

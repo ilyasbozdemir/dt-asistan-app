@@ -184,37 +184,9 @@ export function PageWrapper(): React.ReactNode {
   const [isQuittingApp, setIsQuittingApp] = useState(false)
   const [isGDriveModalOpen, setIsGDriveModalOpen] = useState(false)
 
-  useEffect(() => {
-    const handleQuitRequest = () => {
-      setIsQuittingApp(true)
-      setIsCloseModalOpen(true)
-    }
-
-    const handleCloseRequest = () => {
-      setIsQuittingApp(false)
-      setIsCloseModalOpen(true)
-    }
-
-    const handleOpenGDrive = () => {
-      setIsGDriveModalOpen(true)
-    }
-
-    const removeQuitListener = window.electron?.ipcRenderer.on(
-      'app:quit-request',
-      handleQuitRequest
-    )
-    window.addEventListener('workspace-close-request', handleCloseRequest)
-    window.addEventListener('open-gdrive-modal', handleOpenGDrive)
-
-    return () => {
-      if (removeQuitListener) removeQuitListener()
-      window.removeEventListener('workspace-close-request', handleCloseRequest)
-      window.removeEventListener('open-gdrive-modal', handleOpenGDrive)
-    }
-  }, [])
-
   const handleConfirmClose = async (
-    type: 'none' | 'backup' | 'email' | 'server' | 'gdrive'
+    type: 'none' | 'backup' | 'email' | 'server' | 'gdrive',
+    forceQuit?: boolean
   ): Promise<void> => {
     if (type === 'backup') {
       const res = await window.electron.ipcRenderer.invoke('workspace:backup')
@@ -242,10 +214,58 @@ export function PageWrapper(): React.ReactNode {
     await closeWorkspace()
     queryClient.clear()
 
-    if (isQuittingApp) {
+    const shouldQuit = forceQuit !== undefined ? forceQuit : isQuittingApp
+    if (shouldQuit) {
       await window.electron.ipcRenderer.invoke('app:force-quit')
     }
   }
+
+  useEffect(() => {
+    const handleQuitRequest = async () => {
+      setIsQuittingApp(true)
+      try {
+        const s = await window.electron?.ipcRenderer?.invoke('db:get-settings')
+        if (s?.closeActionRemember === 'true' && s?.closeActionPreference && s.closeActionPreference !== 'ask') {
+          await handleConfirmClose(s.closeActionPreference as any, true)
+          return
+        }
+      } catch (err) {
+        console.error('Error handling remembered close preference:', err)
+      }
+      setIsCloseModalOpen(true)
+    }
+
+    const handleCloseRequest = async () => {
+      setIsQuittingApp(false)
+      try {
+        const s = await window.electron?.ipcRenderer?.invoke('db:get-settings')
+        if (s?.closeActionRemember === 'true' && s?.closeActionPreference && s.closeActionPreference !== 'ask') {
+          await handleConfirmClose(s.closeActionPreference as any, false)
+          return
+        }
+      } catch (err) {
+        console.error('Error handling remembered close preference:', err)
+      }
+      setIsCloseModalOpen(true)
+    }
+
+    const handleOpenGDrive = () => {
+      setIsGDriveModalOpen(true)
+    }
+
+    const removeQuitListener = window.electron?.ipcRenderer.on(
+      'app:quit-request',
+      handleQuitRequest
+    )
+    window.addEventListener('workspace-close-request', handleCloseRequest)
+    window.addEventListener('open-gdrive-modal', handleOpenGDrive)
+
+    return () => {
+      if (removeQuitListener) removeQuitListener()
+      window.removeEventListener('workspace-close-request', handleCloseRequest)
+      window.removeEventListener('open-gdrive-modal', handleOpenGDrive)
+    }
+  }, [closeWorkspace, isQuittingApp, queryClient])
 
   // useRef ile lastActive — state değil, dolayısıyla her değişimde re-render tetiklemez
   const lastActiveRef = useRef<Record<string, number>>({})

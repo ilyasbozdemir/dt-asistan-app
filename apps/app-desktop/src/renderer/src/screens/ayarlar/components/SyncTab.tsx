@@ -6,6 +6,9 @@ import { useSyncStore } from '../../../store/syncStore'
 import packageJson from '../../../../../../package.json'
 
 export const SyncTab: React.FC = () => {
+  const [closePreference, setClosePreference] = React.useState<string>('ask')
+  const [isSavedNotice, setIsSavedNotice] = React.useState<boolean>(false)
+
   const {
     syncUrl,
     setSyncUrl,
@@ -35,7 +38,35 @@ export const SyncTab: React.FC = () => {
 
   useEffect(() => {
     loadSettings()
+    if (window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.invoke('db:get-settings').then((s) => {
+        if (s) {
+          if (s.closeActionRemember === 'true' && s.closeActionPreference) {
+            setClosePreference(s.closeActionPreference)
+          } else {
+            setClosePreference('ask')
+          }
+        }
+      }).catch(console.error)
+    }
   }, [])
+
+  const handleSaveClosePreference = async (pref: string) => {
+    setClosePreference(pref)
+    const isRemember = pref !== 'ask'
+    try {
+      if (window.electron?.ipcRenderer) {
+        await window.electron.ipcRenderer.invoke('db:save-settings', {
+          closeActionPreference: pref,
+          closeActionRemember: isRemember ? 'true' : 'false'
+        })
+        setIsSavedNotice(true)
+        setTimeout(() => setIsSavedNotice(false), 2000)
+      }
+    } catch (err) {
+      console.error('Save close preference error:', err)
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -506,6 +537,103 @@ export const SyncTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Dosya Kapatma & Otomatik Yedekleme Tercihleri (Global) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+              <span>💾 Dosya Kapatma & Otomatik Yedekleme Davranışı</span>
+              {isSavedNotice && (
+                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 animate-pulse">
+                  Tercih Kaydedildi ✓
+                </span>
+              )}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Çalışma dosyanızı (.dtal) her kapattığınızda veya uygulamadan çıktığınızda uygulanacak varsayılan eylemi belirleyin.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          {[
+            {
+              id: 'ask',
+              title: 'Her Kapatışta Sor (Varsayılan)',
+              desc: 'Kapatmadan önce onay penceresi açılarak seçim yapmanızı ister.',
+              icon: '❓',
+              badge: 'Önerilen'
+            },
+            {
+              id: 'gdrive',
+              title: 'Otomatik Google Drive\'a Yedekle',
+              desc: 'Doğrudan buluta tarih damgalı yedek atar ve son 7 sürümü korur.',
+              icon: '☁️',
+              badge: 'En Güvenli'
+            },
+            {
+              id: 'backup',
+              title: 'Otomatik Bilgisayara Yedekle',
+              desc: 'Bilgisayarınızda seçtiğiniz klasöre anında yedek kopyası oluşturur.',
+              icon: '💾'
+            },
+            {
+              id: 'server',
+              title: 'Otomatik Web Sunucusuna Yedekle',
+              desc: 'API sunucunuza güvenli HTTPS üzerinden yeni sürüm gönderir.',
+              icon: '🌐'
+            },
+            {
+              id: 'email',
+              title: 'Otomatik E-Posta ile Gönder',
+              desc: 'Kayıtlı yedek e-posta adresinize dosya eki olarak postalar.',
+              icon: '✉️'
+            },
+            {
+              id: 'none',
+              title: 'Yedeklemeden Doğrudan Kapat',
+              desc: 'Ek bir yedek kopyası oluşturmadan dosyayı hızla kapatır.',
+              icon: '⚡'
+            }
+          ].map((item) => {
+            const isSelected = closePreference === item.id
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleSaveClosePreference(item.id)}
+                className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between gap-2 cursor-pointer ${
+                  isSelected
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 ring-2 ring-blue-500/20'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{item.icon}</span>
+                    <span
+                      className={`text-xs font-bold ${
+                        isSelected ? 'text-blue-900 dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'
+                      }`}
+                    >
+                      {item.title}
+                    </span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 shrink-0">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                  {item.desc}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
