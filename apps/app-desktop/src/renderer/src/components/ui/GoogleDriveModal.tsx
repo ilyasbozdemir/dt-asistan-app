@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Modal } from './Modal'
-import { Upload, Download, RefreshCw, Key, CheckCircle, AlertCircle, HardDrive, FileSpreadsheet, ExternalLink, LogIn, Eye, EyeOff } from 'lucide-react'
+import { Upload, Download, RefreshCw, Key, CheckCircle, AlertCircle, HardDrive, FileSpreadsheet, ExternalLink, LogIn, Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { Button } from './Button'
 import { Input } from './Input'
 
@@ -38,9 +38,13 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
         token: useToken
       })
       if (res.success) {
-        setFiles(res.files || [])
-        if (res.files?.length === 0) {
-          setStatusMsg({ text: 'Google Drive hesabınızda henüz `.dtal` uzantılı yedek dosyası bulunamadı.', type: 'info' })
+        const validList = (res.files || []).filter(
+          (f: GDriveFile) =>
+            (f.name.endsWith('.dtal') || f.name.endsWith('.hkmp'))
+        )
+        setFiles(validList)
+        if (validList.length === 0) {
+          setStatusMsg({ text: 'TEMIN_360_YEDEKLER klasöründe henüz `.dtal` uzantılı yedek dosyası bulunamadı.', type: 'info' })
         }
       } else {
         setStatusMsg({ text: res.error || 'Google Drive dosyaları çekilemedi.', type: 'error' })
@@ -302,7 +306,15 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
 
         {/* Files List Table */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          {/* Security & Privacy Guarantee */}
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
+            <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+            <span>
+              <strong>Güvenlik ve İzolasyon Garantisi:</strong> Drive&apos;ınızdaki diğer şahsi dosyalarınıza kesinlikle erişilmez. Yalnızca <strong>TEMIN_360_YEDEKLER</strong> klasöründeki <strong>.dtal</strong> çalışma dosyalarınız listelenir ve korunur.
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
             <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
               <HardDrive size={15} /> Klasör: TEMIN_360_YEDEKLER ({files.length})
             </h4>

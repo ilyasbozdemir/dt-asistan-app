@@ -282,9 +282,9 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
       const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
       const folderId = await getOrCreateAppFolder(cleanToken)
-      const query = encodeURIComponent(`'${folderId}' in parents and trashed = false and (name contains '.dtal' or name contains '.hkmp')`)
+      const query = encodeURIComponent(`'${folderId}' in parents and trashed = false`)
       const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=createdTime%20desc`,
+        `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,mimeType,modifiedTime,createdTime)&orderBy=createdTime%20desc`,
         {
           headers: {
             Authorization: `Bearer ${cleanToken}`
@@ -298,9 +298,16 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       }
 
       const data = (await res.json()) as any
+      // Strict security filter: only allow .dtal / .hkmp files inside TEMIN_360_YEDEKLER folder
+      const validFiles = (data.files || []).filter(
+        (f: any) =>
+          (f.name.endsWith('.dtal') || f.name.endsWith('.hkmp')) &&
+          f.mimeType !== 'application/vnd.google-apps.folder'
+      )
+
       return {
         success: true,
-        files: data.files || []
+        files: validFiles
       }
     } catch (error: any) {
       console.error('Google Drive list error:', error)
@@ -333,6 +340,33 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         }
 
         const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+        
+        // Security check: Only permit .dtal and .hkmp files
+        if (!args.fileName.endsWith('.dtal') && !args.fileName.endsWith('.hkmp')) {
+          throw new Error('Güvenlik Koruması: Sadece geçerli .dtal çalışma alanı yedekleri indirilebilir.')
+        }
+
+        // Verify file belongs strictly to TEMIN_360_YEDEKLER folder
+        const folderId = await getOrCreateAppFolder(cleanToken)
+        const metaRes = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${args.fileId}?fields=id,name,parents,mimeType`,
+          {
+            headers: {
+              Authorization: `Bearer ${cleanToken}`
+            }
+          }
+        )
+
+        if (metaRes.ok) {
+          const metaData = (await metaRes.json()) as { parents?: string[]; mimeType?: string }
+          if (metaData.mimeType === 'application/vnd.google-apps.folder') {
+            throw new Error('Güvenlik Koruması: Klasörler doğrudan indirilemez.')
+          }
+          if (metaData.parents && !metaData.parents.includes(folderId)) {
+            throw new Error('Güvenlik Koruması: Bu dosya TEMIN_360_YEDEKLER klasörüne ait değil.')
+          }
+        }
+
         const res = await fetch(
           `https://www.googleapis.com/drive/v3/files/${args.fileId}?alt=media`,
           {
