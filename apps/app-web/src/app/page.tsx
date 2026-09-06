@@ -1343,7 +1343,7 @@ export default function Home(): React.JSX.Element {
                       <div className="pl-4">{'"cloudSyncEnabled": true,'}</div>
                       <div className="pl-4">{'"syncIntervalMinutes": 10,'}</div>
                       <div className="pl-4">
-                        {'"gatewayUrl": "https://app.temin360.ilyasbozdemir.dev",'}
+                        {'"gatewayUrl": "https://temin360app.demo.ilyasbozdemir.dev",'}
                       </div>
                       <div className="pl-4">
                         {'"apiKey": "dta_key_8e4a90f..."'}

@@ -64,12 +64,12 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Dynamic Web App Link (Dev vs Prod)
+  // Dynamic Web App Link (Dev vs Prod Demo)
   const webAppUrl = process.env.NEXT_PUBLIC_APP_URL ||
     (typeof window !== "undefined" &&
         window.location.hostname !== "localhost" &&
         window.location.hostname !== "127.0.0.1"
-      ? "https://app.temin360.ilyasbozdemir.dev"
+      ? "https://temin360app.demo.ilyasbozdemir.dev"
       : "http://localhost:3000");
 
   // GitHub Latest Release states

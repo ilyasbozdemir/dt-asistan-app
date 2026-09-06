@@ -78,7 +78,7 @@ Sistemdeki tüm resmi evrak ve tutanak şablonları açık kaynaklı ve modüler
 | Servis | Adres / Bağlantı | Açıklama |
 | :--- | :--- | :--- |
 | 🚀 **Resmi Web & Tanıtım Portalı** | **[temin360.ilyasbozdemir.dev](https://temin360.ilyasbozdemir.dev)** | Canlı ürün tanıtımı, mimari rehber ve otomatik GitHub sürüm indirmeleri |
-| ☁️ **Bulut API Gateway & Yönetim** | **[app.temin360.ilyasbozdemir.dev](https://app.temin360.ilyasbozdemir.dev)** | Canlı SQLite senkronizasyon sunucusu, API dokümantasyonu ve terminal logları |
+| ☁️ **Bulut API Gateway (Demo)** | **[temin360app.demo.ilyasbozdemir.dev](https://temin360app.demo.ilyasbozdemir.dev)** | Canlı SQLite senkronizasyon sunucusu, API dokümantasyonu ve terminal logları |
 | 📦 **Masaüstü Sürümleri (Releases)** | **[GitHub Releases](https://github.com/ilyasbozdemir/temin-360-app/releases)** | Windows (`.exe`) ve macOS (`.dmg`) resmi kurulum paketleri |
 
 ---
@@ -95,7 +95,7 @@ Temin 360 masaüstü uygulamasının en güncel sürümlerini doğrudan web port
 ## 📂 Monorepo Dizin Yapısı
 
 - **[`apps/app-landing`](./apps/app-landing):** Next.js 16 + Tailwind CSS v4 + TypeScript modern tanıtım ve sürüm dağıtım portali (`temin360.ilyasbozdemir.dev`).
-- **[`apps/app-web`](./apps/app-web):** Next.js 16 + SQLite + Telemetri canlı senkronizasyon ve API gateway yönetim paneli (`app.temin360.ilyasbozdemir.dev`).
+- **[`apps/app-web`](./apps/app-web):** Next.js 16 + SQLite + Telemetri canlı senkronizasyon ve API gateway yönetim paneli (`temin360app.demo.ilyasbozdemir.dev`).
 - **[`apps/app-desktop`](./apps/app-desktop):** Electron + React 19 + TypeScript + TanStack Router + Tailwind CSS + SQLite yerel masaüstü uygulaması.
 - **[`packages/document-templates`](./packages/document-templates):** Mevzuata uyarlanabilir, dinamik resmi evrak ve tutanak şablonları motoru (`@temin360/document-templates`).
 - **[`packages/pdf-generator`](./packages/pdf-generator):** Yüksek performanslı sunucu ve masaüstü PDF derleyicisi (`@temin360/pdf-generator`).
@@ -124,7 +124,7 @@ pnpm dev:desktop  # Masaüstü uygulamasını Electron ile açar
 | Uygulama | Alan Adı | Dockerfile | Docker Context | Port |
 | :--- | :--- | :--- | :--- | :--- |
 | **Landing Portal** | `temin360.ilyasbozdemir.dev` | `Dockerfile.landing` | `/` (veya boş) | `3000` |
-| **Web Gateway** | `app.temin360.ilyasbozdemir.dev` | `Dockerfile.web` | `/` (veya boş) | `3000` |
+| **Web Gateway (Demo)** | `temin360app.demo.ilyasbozdemir.dev` | `Dockerfile.web` | `/` (veya boş) | `3000` |
 
 ---
 
