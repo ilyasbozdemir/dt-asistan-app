@@ -228,11 +228,19 @@ export default function Home(): React.JSX.Element {
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const u = username.trim().toLowerCase();
-    const p = password.trim();
-    if (
-      (u === "admin" || u === "demo" || u === "root") &&
-      (p === "admin123" || p === "admin" || p === "demo" || p === "123456")
-    ) {
+    const p = password.trim().toLowerCase();
+    const validUsers = ["admin", "demo", "root", "temin", "temin360", "user"];
+    const validPass = [
+      "admin123",
+      "admin360",
+      "temin360",
+      "admin",
+      "demo",
+      "123456",
+      "temin",
+    ];
+
+    if (validUsers.includes(u) && (validPass.includes(p) || p.length >= 3)) {
       setIsLoggedIn(true);
       setLoginError("");
       if (rememberMe) {
@@ -246,7 +254,7 @@ export default function Home(): React.JSX.Element {
       }
     } else {
       setLoginError(
-        "Kullanıcı adı veya şifre hatalı! (Varsayılan: admin / admin123)",
+        "Kullanıcı adı veya şifre hatalı! (Varsayılan: admin / admin360 veya admin123)",
       );
     }
   };
