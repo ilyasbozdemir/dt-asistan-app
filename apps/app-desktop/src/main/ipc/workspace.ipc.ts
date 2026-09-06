@@ -197,13 +197,13 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
             backupFileName,
             uploadedFile.id,
             fileData.length,
-            '1.0.0-beta.91',
+            '1.0.0-beta.92',
             'Google Drive Bulut Yedeği (TEMIN_360_YEDEKLER)'
           )
           db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('lastGdriveSync', ?)`).run(new Date().toISOString())
           db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('lastBackupFileName', ?)`).run(backupFileName)
           db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('lastBackupFileId', ?)`).run(uploadedFile.id)
-          db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '1.0.0-beta.91')`).run()
+          db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES ('dbVersion', '1.0.0-beta.92')`).run()
         } catch (dbErr) {
           console.error('Failed to log backup history in DB:', dbErr)
         }

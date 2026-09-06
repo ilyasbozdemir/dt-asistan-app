@@ -88,9 +88,9 @@ export default function Home() {
     date: string;
     url: string;
   }>({
-    tag: "v1.0.0-beta.91",
+    tag: "v1.0.0-beta.92",
     size: "68.5 MB",
-    date: "06.09.2026",
+    date: "07.09.2026",
     url: "https://github.com/ilyasbozdemir/temin-360-app/releases",
   });
 
