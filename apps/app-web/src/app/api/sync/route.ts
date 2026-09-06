@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/database";
+import { recordRequest } from "@/lib/metrics";
 
 export async function GET() {
+  const startTime = Date.now();
   try {
     const db = getDatabase();
     
@@ -42,6 +44,9 @@ export async function GET() {
       }
     });
 
+    const duration = Math.max(Date.now() - startTime, 5);
+    recordRequest("GET", "/api/sync", 200, duration);
+
     return NextResponse.json({
       success: true,
       count: dosyalar.length,
@@ -50,11 +55,14 @@ export async function GET() {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Veri çekme hatası";
+    const duration = Math.max(Date.now() - startTime, 5);
+    recordRequest("GET", "/api/sync", 500, duration);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
   try {
     const authHeader = req.headers.get("authorization");
     let clientToken = "anonymous";
@@ -128,6 +136,9 @@ export async function POST(req: NextRequest) {
       console.error("[Sync DB Error]", dbErr);
     }
 
+    const duration = Math.max(Date.now() - startTime, 12);
+    recordRequest("POST", "/api/sync", 200, duration);
+
     return NextResponse.json({
       success: true,
       message: `${savedCount > 0 ? savedCount : (dosyalar.length + sablonlar.length)} kayıt bulut veritabanına başarıyla aktarıldı.`,
@@ -136,6 +147,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Senkronizasyon hatası";
+    const duration = Math.max(Date.now() - startTime, 12);
+    recordRequest("POST", "/api/sync", 500, duration);
     console.error("[Sync Error]", err);
     return NextResponse.json(
       { success: false, error: msg },

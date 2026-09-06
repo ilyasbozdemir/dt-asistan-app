@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { recordRequest } from "@/lib/metrics";
 
 // In-memory / initial registered API keys with expiration and scopes
 interface ApiKeyInfo {
@@ -29,6 +30,10 @@ const activeKeys: ApiKeyInfo[] = [
 ];
 
 export async function GET() {
+  const startTime = Date.now();
+  const duration = Math.max(Date.now() - startTime, 2);
+  recordRequest("GET", "/api/keys", 200, duration);
+
   return NextResponse.json({
     success: true,
     keys: activeKeys.map((k) => ({
@@ -44,6 +49,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
   try {
     const body = await req.json().catch(() => ({}));
     const keyName = body.name || `Masaüstü İstemci (${new Date().toLocaleDateString("tr-TR")})`;
@@ -62,6 +68,9 @@ export async function POST(req: NextRequest) {
 
     activeKeys.unshift(newKeyInfo);
 
+    const duration = Math.max(Date.now() - startTime, 4);
+    recordRequest("POST", "/api/keys", 200, duration);
+
     return NextResponse.json({
       success: true,
       message: "Yeni API Anahtarı başarıyla oluşturuldu.",
@@ -69,6 +78,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Anahtar üretilemedi";
+    const duration = Math.max(Date.now() - startTime, 4);
+    recordRequest("POST", "/api/keys", 500, duration);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
