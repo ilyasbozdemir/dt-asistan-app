@@ -241,7 +241,7 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
                 <LogIn size={16} className="text-blue-500" /> Google Drive Hesabı ile Bağlan
               </h4>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Google hesabınızı bağlayın ve Drive erişim jetonunu kaydedin.
+                En güvenli yetkilendirme için <code className="px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-mono text-[10px]">drive.file</code> izni kullanın.
               </p>
             </div>
             <Button
