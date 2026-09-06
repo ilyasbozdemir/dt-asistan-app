@@ -212,6 +212,10 @@ export default function AyarlarScreen(): React.ReactNode {
       if (res.success) {
         setSyncTestStatus('ok')
         setSyncTestMsg('Bağlantı başarılı! ✓')
+        await window.electron.ipcRenderer.invoke('db:save-settings', {
+          is_offline_mode: 'false'
+        })
+        window.dispatchEvent(new Event('db-synced'))
       } else {
         setSyncTestStatus('error')
         setSyncTestMsg(res.message || 'Bağlantı başarısız.')

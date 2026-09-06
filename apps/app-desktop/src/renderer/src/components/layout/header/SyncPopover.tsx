@@ -16,8 +16,25 @@ export function SyncPopover(): React.JSX.Element {
   const [appVersion, setAppVersion] = useState(packageJson.version)
   const [dbVersionLocal, setDbVersionLocal] = useState(104)
   const [dbVersionCloud, setDbVersionCloud] = useState(104)
-  const [isOfflineMode, setIsOfflineMode] = useState(false)
+  const [isOnlineMode, setIsOnlineMode] = useState(true)
   const syncRef = useRef<HTMLDivElement>(null)
+
+  const reloadSettings = () => {
+    window.electron?.ipcRenderer
+      .invoke('db:get-settings')
+      .then((settings) => {
+        if (settings) {
+          setSyncUrl(settings.sync_server_url || '')
+          setSyncToken(settings.sync_server_token || '')
+          if (settings.db_version_local) {
+            setDbVersionLocal(Number(settings.db_version_local))
+            setDbVersionCloud(Number(settings.db_version_cloud || settings.db_version_local))
+          }
+          setIsOnlineMode(settings.is_offline_mode !== 'true')
+        }
+      })
+      .catch(console.error)
+  }
 
   useEffect(() => {
     if ((window as any).api?.getAppVersion) {
@@ -29,32 +46,19 @@ export function SyncPopover(): React.JSX.Element {
         .catch(console.error)
     }
 
-    window.electron?.ipcRenderer
-      .invoke('db:get-settings')
-      .then((settings) => {
-        if (settings) {
-          setSyncUrl(settings.sync_server_url || '')
-          setSyncToken(settings.sync_server_token || '')
-          if (settings.db_version_local) {
-            setDbVersionLocal(Number(settings.db_version_local))
-            setDbVersionCloud(Number(settings.db_version_cloud || settings.db_version_local))
-          }
-          if (settings.is_offline_mode) {
-            setIsOfflineMode(settings.is_offline_mode === 'true')
-          }
-        }
-      })
-      .catch(console.error)
+    reloadSettings()
 
     setIsOnline(navigator.onLine)
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+    window.addEventListener('db-synced', reloadSettings)
 
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('db-synced', reloadSettings)
     }
   }, [])
 
@@ -89,6 +93,11 @@ export function SyncPopover(): React.JSX.Element {
         setSyncStatus('ok')
         setSyncMessage('Bağlantı Başarılı!')
         setIsOnline(true)
+        setIsOnlineMode(true)
+        await window.electron.ipcRenderer.invoke('db:save-settings', {
+          is_offline_mode: 'false'
+        })
+        window.dispatchEvent(new Event('db-synced'))
       } else {
         setSyncStatus('error')
         setSyncMessage(testRes.message || 'Bağlantı başarısız.')
@@ -132,14 +141,15 @@ export function SyncPopover(): React.JSX.Element {
     }
   }
 
-  const handleToggleOfflineMode = async (checked: boolean) => {
-    setIsOfflineMode(checked)
+  const handleToggleOnlineMode = async (checked: boolean) => {
+    setIsOnlineMode(checked)
     try {
       await window.electron.ipcRenderer.invoke('db:save-settings', {
-        is_offline_mode: String(checked)
+        is_offline_mode: String(!checked)
       })
+      window.dispatchEvent(new Event('db-synced'))
     } catch (err) {
-      console.error('Save offline mode setting error:', err)
+      console.error('Save online mode setting error:', err)
     }
   }
 
@@ -148,7 +158,7 @@ export function SyncPopover(): React.JSX.Element {
       <button
         onClick={() => setShowSyncPopover(!showSyncPopover)}
         className={`px-2 py-0.5 rounded text-[9px] font-bold border transition-all flex items-center gap-1 cursor-pointer ${
-          isOfflineMode
+          !isOnlineMode
             ? 'bg-amber-500/10 text-amber-650 border-amber-500/20 dark:text-amber-400 hover:bg-amber-500/20'
             : isOnline
               ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400 hover:bg-emerald-500/20'
@@ -159,7 +169,7 @@ export function SyncPopover(): React.JSX.Element {
         <Cloud className="w-3 h-3" />
         <span
           className={`w-1 h-1 rounded-full ${
-            isOfflineMode
+            !isOnlineMode
               ? 'bg-amber-500 animate-pulse'
               : isOnline
                 ? 'bg-emerald-500 animate-pulse'
@@ -183,13 +193,13 @@ export function SyncPopover(): React.JSX.Element {
 
             <div
               className={`px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1 border ${
-                isOnline
+                isOnline && isOnlineMode
                   ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                   : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
               }`}
             >
-              {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-              {isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}
+              {isOnline && isOnlineMode ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              {isOnline && isOnlineMode ? 'Çevrimiçi' : 'Çevrimdışı'}
             </div>
           </div>
 
@@ -244,7 +254,7 @@ export function SyncPopover(): React.JSX.Element {
                 </label>
                 <input
                   type="text"
-                  placeholder="http://localhost:3000"
+                  placeholder="https://temin360app.demo.ilyasbozdemir.dev/"
                   value={syncUrl}
                   onChange={(e) => setSyncUrl(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-955 border border-slate-250 dark:border-slate-800/80 rounded-lg p-2 font-mono text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500"
@@ -266,21 +276,21 @@ export function SyncPopover(): React.JSX.Element {
 
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-slate-550 dark:text-slate-450 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     Çalışma Modu
                   </span>
-                  <span className="text-[8px] text-slate-400 font-medium">
-                    Ofis (Online) / Ev (Offline)
+                  <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">
+                    {isOnlineMode ? 'Ofis (Online - Canlı Senkronizasyon)' : 'Ev (Offline - Yerel Çalışma)'}
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={isOfflineMode}
-                    onChange={(e) => handleToggleOfflineMode(e.target.checked)}
+                    checked={isOnlineMode}
+                    onChange={(e) => handleToggleOnlineMode(e.target.checked)}
                     className="sr-only peer cursor-pointer"
                   />
-                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
+                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
                 </label>
               </div>
 

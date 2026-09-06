@@ -102,7 +102,9 @@ export default function Home(): React.JSX.Element {
   const [serverOrigin, setServerOrigin] = useState<string>(
     "https://temin360app.demo.ilyasbozdemir.dev",
   );
-  const [apiKey, setApiKey] = useState<string>("dta_live_8e4a90f1b2c3d4e59071f");
+  const [apiKey, setApiKey] = useState<string>(
+    "dta_live_8e4a90f1b2c3d4e59071f",
+  );
   const [copiedField, setCopiedField] = useState<string>("");
   const [isGeneratingKey, setIsGeneratingKey] = useState<boolean>(false);
 
@@ -993,7 +995,8 @@ export default function Home(): React.JSX.Element {
                     API Entegrasyon Dokümantasyonu (Canlı)
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
-                    TEMİN 360 Masaüstü uygulaması ve harici istemciler için canlı API uç noktaları ve kimlik doğrulama anahtarları.
+                    TEMİN 360 Masaüstü uygulaması ve harici istemciler için
+                    canlı API uç noktaları ve kimlik doğrulama anahtarları.
                   </p>
                 </div>
               </div>
@@ -1013,7 +1016,9 @@ export default function Home(): React.JSX.Element {
                         </span>
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Masaüstündeki <strong>Bulut Senkronizasyon (☁️)</strong> penceresine aşağıdaki bilgileri yapıştırın:
+                        Masaüstündeki <strong>Bulut Senkronizasyon (☁️)</strong>
+                        {" "}
+                        penceresine aşağıdaki bilgileri yapıştırın:
                       </p>
                     </div>
                   </div>
@@ -1023,7 +1028,11 @@ export default function Home(): React.JSX.Element {
                     disabled={isGeneratingKey}
                     className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs shrink-0 self-start sm:self-center cursor-pointer"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingKey ? "animate-spin text-blue-500" : ""}`} />
+                    <RefreshCw
+                      className={`w-3.5 h-3.5 ${
+                        isGeneratingKey ? "animate-spin text-blue-500" : ""
+                      }`}
+                    />
                     {isGeneratingKey ? "Üretiliyor..." : "Yeni Anahtar Üret"}
                   </button>
                 </div>
@@ -1036,20 +1045,25 @@ export default function Home(): React.JSX.Element {
                         1. SUNUCU ADRESİ (HOST URL)
                       </span>
                       <button
-                        onClick={() => copyToClipboard(`${serverOrigin}/`, "url")}
+                        onClick={() =>
+                          copyToClipboard(`${serverOrigin}/`, "url")}
                         className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedField === "url" ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            <span className="text-emerald-500">Kopyalandı!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Kopyala</span>
-                          </>
-                        )}
+                        {copiedField === "url"
+                          ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className="text-emerald-500">
+                                Kopyalandı!
+                              </span>
+                            </>
+                          )
+                          : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Kopyala</span>
+                            </>
+                          )}
                       </button>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-lg p-2.5 font-mono text-xs text-blue-600 dark:text-blue-400 font-bold break-all select-all flex items-center justify-between">
@@ -1067,17 +1081,21 @@ export default function Home(): React.JSX.Element {
                         onClick={() => copyToClipboard(apiKey, "key")}
                         className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                       >
-                        {copiedField === "key" ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            <span className="text-emerald-500">Kopyalandı!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Kopyala</span>
-                          </>
-                        )}
+                        {copiedField === "key"
+                          ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className="text-emerald-500">
+                                Kopyalandı!
+                              </span>
+                            </>
+                          )
+                          : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Kopyala</span>
+                            </>
+                          )}
                       </button>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-lg p-2.5 font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold break-all select-all flex items-center justify-between">
@@ -1089,7 +1107,11 @@ export default function Home(): React.JSX.Element {
                 <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
                   <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>
-                    Masaüstünde bu bilgileri girdikten sonra <strong>&quot;Sına & Kaydet&quot;</strong> butonuna tıkladığınızda yeşil <strong>&quot;Bağlantı Başarılı!&quot;</strong> onayı verilir.
+                    Masaüstünde bu bilgileri girdikten sonra{" "}
+                    <strong>&quot;Sına & Kaydet&quot;</strong>{" "}
+                    butonuna tıkladığınızda yeşil{" "}
+                    <strong>&quot;Bağlantı Başarılı!&quot;</strong>{" "}
+                    onayı verilir.
                   </span>
                 </div>
               </div>
