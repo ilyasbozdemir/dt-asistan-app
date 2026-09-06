@@ -76,7 +76,11 @@ export function WinnerDocumentsMenu({
           <span>Kabul Edilen Teklif / Kabul Yazısı</span>
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={onPrintOrderForm} disabled={!onPrintOrderForm} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={onPrintOrderForm}
+          disabled={!onPrintOrderForm}
+          className="cursor-pointer"
+        >
           <ShoppingCart className="mr-2 h-4 w-4 text-amber-500" />
           <span>Sipariş Formu</span>
         </DropdownMenuItem>

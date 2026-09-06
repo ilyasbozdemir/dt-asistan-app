@@ -647,6 +647,19 @@ export function registerDocumentIpcHandlers(): void {
         }
       })
 
+      const winnerFirmaId = (dosya as any)?.firma_id
+      if (winnerFirmaId) {
+        fileFirms.forEach((f) => {
+          if (f.id === winnerFirmaId || f.temin_firma_id === winnerFirmaId || f.firma_id === winnerFirmaId) {
+            f.isWinner = true
+            const formattedTotal = f.total > 0 ? f.total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''
+            f.label = formattedTotal ? `🏆 ${f.unvan} (${formattedTotal} TL - Kazanan Firma)` : `🏆 ${f.unvan} (Kazanan Firma)`
+          } else {
+            f.isWinner = false
+          }
+        })
+      }
+
       fileFirms.sort((a, b) => (b.isWinner ? 1 : 0) - (a.isWinner ? 1 : 0))
 
       const combinedFirms = [...fileFirms]
@@ -813,6 +826,14 @@ export function registerDocumentIpcHandlers(): void {
         genelToplam: formattedGrandTotal,
         yukleniciFirma: winnerFirm.unvan || '',
         yukleniciYetkili: winnerFirm.yetkili_ad_soyad || '',
+        yukleniciAdresi: winnerFirm.adres || '',
+        yukleniciIlce: winnerFirm.ilce || '',
+        yukleniciIl: winnerFirm.il || '',
+        teslimGun: (dosya as any)?.teslim_gun !== undefined && (dosya as any)?.teslim_gun !== null && String((dosya as any).teslim_gun).trim() !== '' ? String((dosya as any).teslim_gun) : '7',
+        teslimGunu: (dosya as any)?.teslim_gun !== undefined && (dosya as any)?.teslim_gun !== null && String((dosya as any).teslim_gun).trim() !== '' ? String((dosya as any).teslim_gun) : '7',
+        teslimTarihi: (dosya as any)?.teslim_tarihi || '',
+        dosyaTarihi: (dosya as any)?.tarih || (dosya as any)?.temin_tarihi || new Date().toLocaleDateString('tr-TR'),
+        evrakSayisi: (dosya as any)?.evrak_sayisi || (dosya as any)?.temin_no || '',
         ihtiyacKalemleri,
         firmaListesi: combinedFirms,
         firmalar: fileFirms,

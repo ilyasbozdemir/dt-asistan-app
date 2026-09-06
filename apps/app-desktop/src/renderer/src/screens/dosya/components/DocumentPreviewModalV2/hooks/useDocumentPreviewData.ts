@@ -360,16 +360,23 @@ export function useDocumentPreviewData({
         const winnerFirm =
           fileFirms.find(
             (f: any) =>
-              f.id === winnerFirmaId ||
-              f.temin_firma_id === winnerFirmaId ||
+              (winnerFirmaId && (f.id === winnerFirmaId || f.temin_firma_id === winnerFirmaId || f.firma_id === winnerFirmaId)) ||
               f.kazanan_mi === 1 ||
               f.isWinner,
           ) ||
           fileFirms[0] ||
           combinedFirms[0];
 
-        if (winnerFirm) {
-          finalData.yukleniciFirma = winnerFirm.unvan || winnerFirm.firma_adi || finalData.yukleniciFirma;
+        if (winnerFirm && (winnerFirm.unvan || winnerFirm.firma_adi)) {
+          const resolvedUnvan = winnerFirm.unvan || winnerFirm.firma_adi;
+          if (
+            !finalData.yukleniciFirma ||
+            finalData.yukleniciFirma === "YÜKLENİCİ FİRMA" ||
+            finalData.yukleniciFirma === "İstekli Firma" ||
+            finalData.yukleniciFirma.includes("[Belirtilmedi")
+          ) {
+            finalData.yukleniciFirma = resolvedUnvan;
+          }
           if (winnerFirm.adres && !finalData.yukleniciAdresi) {
             finalData.yukleniciAdresi = winnerFirm.adres;
             finalData.yukleniciIlce = winnerFirm.ilce;
@@ -377,31 +384,36 @@ export function useDocumentPreviewData({
           }
           if (
             !finalData.teslimEden_0_adSoyad ||
-            finalData.teslimEden_0_adSoyad === ""
+            finalData.teslimEden_0_adSoyad === "" ||
+            finalData.teslimEden_0_adSoyad.includes("[Belirtilmedi")
           ) {
-            finalData.teslimEden_0_adSoyad = winnerFirm.unvan;
+            finalData.teslimEden_0_adSoyad = resolvedUnvan;
             finalData.teslimEden_0_unvan = winnerFirm.yetkili_ad_soyad
               ? `Yetkili: ${winnerFirm.yetkili_ad_soyad}`
               : "Yüklenici Firma / Yetkilisi";
           }
         }
 
-        // Teslim süresi / günü hesaplama
+        // Teslim süresi / günü hesaplama - Dosyadan gelen gün sayısı her zaman önceliklidir
         const dosyaObj = payloadData.dosya || dosyaRecord || {};
         if (dosyaObj.teslim_gun !== undefined && dosyaObj.teslim_gun !== null && String(dosyaObj.teslim_gun).trim() !== "") {
           finalData.teslimGun = String(dosyaObj.teslim_gun);
+          finalData.teslimGunu = String(dosyaObj.teslim_gun);
         } else if (dosyaObj.teslim_suresi) {
           finalData.teslimGun = String(dosyaObj.teslim_suresi);
+          finalData.teslimGunu = String(dosyaObj.teslim_suresi);
         } else if (dosyaObj.teslim_tarihi) {
           const tDate = new Date(dosyaObj.teslim_tarihi);
           const baseDate = dosyaObj.tarih ? new Date(dosyaObj.tarih) : (dosyaObj.dosya_acilis_tarihi ? new Date(dosyaObj.dosya_acilis_tarihi) : new Date());
           const diffDays = Math.ceil((tDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
           if (diffDays > 0 && diffDays < 365) {
             finalData.teslimGun = String(diffDays);
+            finalData.teslimGunu = String(diffDays);
           }
         }
         if (!finalData.teslimGun) {
           finalData.teslimGun = "7";
+          finalData.teslimGunu = "7";
         }
 
         const baseKalemler =

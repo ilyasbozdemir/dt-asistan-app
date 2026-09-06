@@ -122,6 +122,7 @@ export const DATA_TeminDosyasi = {
     { name: 'ordered_docs', type: 'TEXT', description: 'Ordered Docs' }, // Dosyaya özel belge sıralaması (JSON array)
     { name: 'starred_docs', type: 'TEXT', description: 'Starred Docs' }, // Dosyaya özel yıldızlı belgeler (JSON array)
     { name: 'skipped_docs', type: 'TEXT', description: 'Skipped Docs' }, // Dosyaya özel atlanmış belgeler (JSON array)
+    { name: 'sablon_tercihleri', type: 'TEXT', default: "'{}'", description: 'Dosyada seçilen şablon tercihleri ve parametreleri (JSON)' },
     { name: 'notlar', type: 'TEXT', description: 'Notlar' },
     { name: 'tekrar_no', type: 'INTEGER', default: 1, description: 'Tekrar Numarası' },
     { name: 'status', type: 'TEXT', default: "'devam_ediyor'", description: 'Status' }, // devam_ediyor, tamamlandi, iptal
