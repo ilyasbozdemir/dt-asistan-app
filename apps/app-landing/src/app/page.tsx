@@ -256,17 +256,6 @@ export default function Home() {
                 : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
-            {/* Web App / Server Link */}
-            <a
-              href={webAppUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs font-bold transition-all"
-            >
-              <Server className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Bulut / Web</span>
-            </a>
-
             {/* Main Download CTA */}
             <a
               href="#downloads"
