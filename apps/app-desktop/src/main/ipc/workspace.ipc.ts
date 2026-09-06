@@ -113,6 +113,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       const fileData = fs.readFileSync(filePath)
 
       if (token) {
+        const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
         // Construct multipart boundary for metadata + binary payload
         const boundary = '--------------------------' + Date.now().toString(16)
         const metadata = JSON.stringify({
@@ -140,7 +141,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
           {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${cleanToken}`,
               'Content-Type': `multipart/related; boundary=${boundary}`
             },
             body: multipartBody
@@ -195,12 +196,13 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         }
       }
 
+      const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
       const query = encodeURIComponent("trashed = false and (name contains '.dtal' or name contains '.db')")
       const res = await fetch(
         `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,modifiedTime,createdTime)&orderBy=modifiedTime%20desc`,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${cleanToken}`
           }
         }
       )
@@ -245,11 +247,12 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
           }
         }
 
+        const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
         const res = await fetch(
           `https://www.googleapis.com/drive/v3/files/${args.fileId}?alt=media`,
           {
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${cleanToken}`
             }
           }
         )

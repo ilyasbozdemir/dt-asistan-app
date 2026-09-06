@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Modal } from './Modal'
-import { Cloud, Upload, Download, RefreshCw, Key, CheckCircle, AlertCircle, HardDrive, FileSpreadsheet, ExternalLink, LogIn } from 'lucide-react'
+import { Upload, Download, RefreshCw, Key, CheckCircle, AlertCircle, HardDrive, FileSpreadsheet, ExternalLink, LogIn, Eye, EyeOff } from 'lucide-react'
 import { Button } from './Button'
 import { Input } from './Input'
 
@@ -18,6 +18,7 @@ interface GDriveFile {
 
 export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): React.JSX.Element {
   const [token, setToken] = useState('')
+  const [showToken, setShowToken] = useState(false)
   const [isSavedToken, setIsSavedToken] = useState(false)
   const [files, setFiles] = useState<GDriveFile[]>([])
   const [isLoadingList, setIsLoadingList] = useState(false)
@@ -25,56 +26,10 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null)
 
-  useEffect(() => {
-    if (!isOpen) return
-
-    // Load saved settings
-    window.electron?.ipcRenderer
-      .invoke('db:get-settings')
-      .then((settings) => {
-        if (settings?.gdriveAccessToken) {
-          setToken(settings.gdriveAccessToken)
-          setIsSavedToken(true)
-          fetchDriveFiles(settings.gdriveAccessToken)
-        }
-      })
-      .catch(console.error)
-  }, [isOpen])
-
-  const handleOpenGoogleAuth = () => {
-    const authUrl = 'https://developers.google.com/oauthplayground'
-    if (window.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.send('open-external-url', authUrl)
-    } else {
-      window.open(authUrl, '_blank')
-    }
-    setStatusMsg({
-      text: 'Google Yetkilendirme sayfası tarayıcıda açıldı. Oturum açıp Access Token aldıktan sonra aşağıdaki alana yapıştırın.',
-      type: 'info'
-    })
-  }
-
-  const handleSaveToken = async () => {
-    if (!token.trim()) {
-      setStatusMsg({ text: 'Lütfen geçerli bir Access Token girin.', type: 'error' })
-      return
-    }
-
-    try {
-      await window.electron.ipcRenderer.invoke('db:save-settings', {
-        gdriveAccessToken: token.trim()
-      })
-      setIsSavedToken(true)
-      setStatusMsg({ text: 'Google Drive erişim jetonu kaydedildi. Bulut verileriniz senkronize ediliyor...', type: 'success' })
-      fetchDriveFiles(token.trim())
-    } catch (err: any) {
-      setStatusMsg({ text: `Token kaydetme hatası: ${err.message}`, type: 'error' })
-    }
-  }
-
   const fetchDriveFiles = async (currentToken?: string) => {
-    const useToken = currentToken || token
-    if (!useToken.trim()) return
+    const rawToken = currentToken || token
+    const useToken = rawToken.trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+    if (!useToken) return
 
     setIsLoadingList(true)
     setStatusMsg(null)
@@ -97,8 +52,59 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Load saved settings
+    window.electron?.ipcRenderer
+      .invoke('db:get-settings')
+      .then((settings) => {
+        if (settings?.gdriveAccessToken) {
+          const clean = settings.gdriveAccessToken.trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+          setToken(clean)
+          setIsSavedToken(true)
+          fetchDriveFiles(clean)
+        }
+      })
+      .catch(console.error)
+  }, [isOpen])
+
+  const handleOpenGoogleAuth = () => {
+    const authUrl = 'https://developers.google.com/oauthplayground'
+    if (window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.send('open-external-url', authUrl)
+    } else {
+      window.open(authUrl, '_blank')
+    }
+    setStatusMsg({
+      text: 'Google Yetkilendirme sayfası tarayıcıda açıldı. Oturum açıp Access Token aldıktan sonra aşağıdaki alana yapıştırın.',
+      type: 'info'
+    })
+  }
+
+  const handleSaveToken = async () => {
+    const cleanToken = token.trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+    if (!cleanToken) {
+      setStatusMsg({ text: 'Lütfen geçerli bir Access Token girin.', type: 'error' })
+      return
+    }
+
+    try {
+      await window.electron.ipcRenderer.invoke('db:save-settings', {
+        gdriveAccessToken: cleanToken
+      })
+      setToken(cleanToken)
+      setIsSavedToken(true)
+      setStatusMsg({ text: 'Google Drive erişim jetonu kaydedildi. Bulut verileriniz senkronize ediliyor...', type: 'success' })
+      fetchDriveFiles(cleanToken)
+    } catch (err: any) {
+      setStatusMsg({ text: `Token kaydetme hatası: ${err.message}`, type: 'error' })
+    }
+  }
+
   const handleUploadCurrentFile = async () => {
-    if (!token.trim()) {
+    const cleanToken = token.trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+    if (!cleanToken) {
       setStatusMsg({ text: 'Lütfen önce Google Giriş / Access Token tanımlayın.', type: 'error' })
       return
     }
@@ -107,12 +113,12 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
     setStatusMsg({ text: 'Aktif dosya Google Drive bulutuna yükleniyor...', type: 'info' })
     try {
       const res = await window.electron.ipcRenderer.invoke('workspace:backup-gdrive', {
-        token
+        token: cleanToken
       })
 
       if (res.success) {
         setStatusMsg({ text: res.message || 'Dosya Google Drive hesabınıza başarıyla yüklendi.', type: 'success' })
-        fetchDriveFiles(token)
+        fetchDriveFiles(cleanToken)
       } else {
         setStatusMsg({ text: res.error || 'Yükleme başarısız.', type: 'error' })
       }
@@ -124,13 +130,14 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
   }
 
   const handleDownloadFile = async (file: GDriveFile) => {
+    const cleanToken = token.trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
     setDownloadingId(file.id)
     setStatusMsg({ text: `${file.name} indiriliyor ve çalışma alanı olarak açılıyor...`, type: 'info' })
     try {
       const res = await window.electron.ipcRenderer.invoke('workspace:download-gdrive-file', {
         fileId: file.id,
         fileName: file.name,
-        token
+        token: cleanToken
       })
 
       if (res.success) {
@@ -198,14 +205,24 @@ export function GoogleDriveModal({ isOpen, onClose }: GoogleDriveModalProps): Re
             </Button>
           </div>
 
-          <div className="flex gap-2 pt-1">
-            <Input
-              type="password"
-              placeholder="ya29.a0Ax... (Google OAuth Access Token)"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-xs font-mono"
-            />
+          <div className="flex gap-2 pt-1 items-center">
+            <div className="relative flex-1">
+              <Input
+                type={showToken ? 'text' : 'password'}
+                placeholder="ya29.a0Ax... (Google OAuth Access Token)"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-xs font-mono pr-9"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                title={showToken ? 'Gizle' : 'Göster'}
+              >
+                {showToken ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
             <Button
               onClick={handleSaveToken}
               className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shrink-0 flex items-center gap-1.5"
