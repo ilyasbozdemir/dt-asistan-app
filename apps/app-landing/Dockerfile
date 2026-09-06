@@ -20,16 +20,18 @@ RUN pnpm --filter app-landing build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+COPY --from=builder /app/apps/app-landing/public ./public
 COPY --from=builder /app/apps/app-landing/public ./apps/app-landing/public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/app-landing/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/app-landing/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/app-landing/.next/static ./apps/app-landing/.next/static
 
 USER nextjs
-EXPOSE 3001
+EXPOSE 3000
 CMD ["node", "apps/app-landing/server.js"]
