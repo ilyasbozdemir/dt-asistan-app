@@ -70,7 +70,7 @@ export default function Home() {
         window.location.hostname !== "localhost" &&
         window.location.hostname !== "127.0.0.1"
       ? "https://temin360app.demo.ilyasbozdemir.dev"
-      : "http://localhost:3000");
+      : "https://temin360app.demo.ilyasbozdemir.dev");
 
   // GitHub Latest Release states
   const [latestRelease, setLatestRelease] = useState<{
