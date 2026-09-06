@@ -184,30 +184,52 @@ export function PageWrapper(): React.ReactNode {
   const [isQuittingApp, setIsQuittingApp] = useState(false)
   const [isGDriveModalOpen, setIsGDriveModalOpen] = useState(false)
 
+  const parseSavedClosePreferences = (pref: any): ('none' | 'backup' | 'email' | 'server' | 'gdrive')[] => {
+    if (!pref || pref === 'ask') return []
+    if (Array.isArray(pref)) return pref
+    try {
+      const parsed = JSON.parse(pref)
+      if (Array.isArray(parsed)) return parsed
+      if (typeof parsed === 'string') return [parsed as any]
+    } catch {
+      // Not valid JSON, fallback to comma-separated or single string
+    }
+    if (typeof pref === 'string') {
+      if (pref.includes(',')) {
+        return pref.split(',').map((x: string) => x.trim()) as any
+      }
+      return [pref as any]
+    }
+    return []
+  }
+
   const handleConfirmClose = async (
-    type: 'none' | 'backup' | 'email' | 'server' | 'gdrive',
+    types: ('none' | 'backup' | 'email' | 'server' | 'gdrive')[] | ('none' | 'backup' | 'email' | 'server' | 'gdrive'),
     forceQuit?: boolean
   ): Promise<void> => {
-    if (type === 'backup') {
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup')
-      if (!res.success && res.error !== 'Yedekleme iptal edildi') {
-        throw new Error(res.error)
-      }
-    } else if (type === 'email') {
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup-email')
-      if (!res.success) {
-        throw new Error(res.error)
-      }
-    } else if (type === 'server') {
-      // IPC call to handle server backup
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup-server')
-      if (!res?.success) {
-        throw new Error(res?.error || 'Sunucuya yedekleme işlemi başarısız oldu.')
-      }
-    } else if (type === 'gdrive') {
-      const res = await window.electron.ipcRenderer.invoke('workspace:backup-gdrive')
-      if (!res?.success) {
-        throw new Error(res?.error || 'Google Drive bulut yedekleme işlemi başarısız oldu.')
+    const actionList = Array.isArray(types) ? types : [types]
+    
+    for (const type of actionList) {
+      if (type === 'backup') {
+        const res = await window.electron.ipcRenderer.invoke('workspace:backup')
+        if (!res.success && res.error !== 'Yedekleme iptal edildi') {
+          throw new Error(`Yerel yedekleme hatası: ${res.error}`)
+        }
+      } else if (type === 'email') {
+        const res = await window.electron.ipcRenderer.invoke('workspace:backup-email')
+        if (!res.success) {
+          throw new Error(`E-posta yedekleme hatası: ${res.error}`)
+        }
+      } else if (type === 'server') {
+        const res = await window.electron.ipcRenderer.invoke('workspace:backup-server')
+        if (!res?.success) {
+          throw new Error(res?.error || 'Sunucuya yedekleme işlemi başarısız oldu.')
+        }
+      } else if (type === 'gdrive') {
+        const res = await window.electron.ipcRenderer.invoke('workspace:backup-gdrive')
+        if (!res?.success) {
+          throw new Error(res?.error || 'Google Drive bulut yedekleme işlemi başarısız oldu.')
+        }
       }
     }
 
@@ -226,8 +248,11 @@ export function PageWrapper(): React.ReactNode {
       try {
         const s = await window.electron?.ipcRenderer?.invoke('db:get-settings')
         if (s?.closeActionRemember === 'true' && s?.closeActionPreference && s.closeActionPreference !== 'ask') {
-          await handleConfirmClose(s.closeActionPreference as any, true)
-          return
+          const actions = parseSavedClosePreferences(s.closeActionPreference)
+          if (actions.length > 0) {
+            await handleConfirmClose(actions, true)
+            return
+          }
         }
       } catch (err) {
         console.error('Error handling remembered close preference:', err)
@@ -240,8 +265,11 @@ export function PageWrapper(): React.ReactNode {
       try {
         const s = await window.electron?.ipcRenderer?.invoke('db:get-settings')
         if (s?.closeActionRemember === 'true' && s?.closeActionPreference && s.closeActionPreference !== 'ask') {
-          await handleConfirmClose(s.closeActionPreference as any, false)
-          return
+          const actions = parseSavedClosePreferences(s.closeActionPreference)
+          if (actions.length > 0) {
+            await handleConfirmClose(actions, false)
+            return
+          }
         }
       } catch (err) {
         console.error('Error handling remembered close preference:', err)
