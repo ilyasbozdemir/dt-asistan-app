@@ -355,7 +355,7 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
 
   ipcMain.handle(
     'workspace:download-gdrive-file',
-    async (_, args: { fileId: string; fileName: string; token?: string }) => {
+    async (_, args: { fileId: string; fileName: string; token?: string; overwriteActive?: boolean }) => {
       try {
         let token = args.token
         if (!token) {
@@ -422,24 +422,41 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         const arrayBuffer = await res.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        // Select destination path or save to desktop/temp
-        const defaultPath = require('path').join(
-          require('os').homedir(),
-          'Desktop',
-          args.fileName.endsWith('.dtal') ? args.fileName : `${args.fileName}.dtal`
-        )
+        // Determine destination path: overwrite active workspace or save as new file
+        const currentPath = workspaceManager.getCurrentFilePath()
+        let targetPath: string
 
-        fs.writeFileSync(defaultPath, buffer)
+        if (args.overwriteActive && currentPath && fs.existsSync(currentPath)) {
+          // Create a safety backup before overwriting active workspace
+          try {
+            fs.copyFileSync(currentPath, currentPath + '.bak')
+          } catch (e) {
+            console.warn('Safety backup could not be created:', e)
+          }
+          workspaceManager.close()
+          fs.writeFileSync(currentPath, buffer)
+          targetPath = currentPath
+        } else {
+          const defaultPath = require('path').join(
+            require('os').homedir(),
+            'Desktop',
+            args.fileName.endsWith('.dtal') ? args.fileName : `${args.fileName}.dtal`
+          )
+          fs.writeFileSync(defaultPath, buffer)
+          targetPath = defaultPath
+        }
 
         // Open downloaded file as active workspace
         closeAllSecondaryWindows()
-        const meta = workspaceManager.open(defaultPath, true)
+        const meta = workspaceManager.open(targetPath, true)
 
         return {
           success: true,
-          message: `${args.fileName} Google Drive'dan başarıyla indirildi ve çalışma alanı olarak açıldı.`,
+          message: args.overwriteActive
+            ? `${args.fileName} buluttan indirildi ve mevcut aktif çalışma dosyanız güncellendi.`
+            : `${args.fileName} Google Drive'dan başarıyla indirildi ve çalışma alanı olarak açıldı.`,
           meta,
-          filePath: defaultPath
+          filePath: targetPath
         }
       } catch (error: any) {
         console.error('Google Drive download error:', error)

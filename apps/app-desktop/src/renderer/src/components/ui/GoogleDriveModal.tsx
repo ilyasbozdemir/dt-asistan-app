@@ -209,14 +209,26 @@ export function GoogleDriveModal(
     }
   };
 
-  const handleDownloadFile = async (file: GDriveFile) => {
+  const handleDownloadFile = async (
+    file: GDriveFile,
+    overwriteActive: boolean = true,
+  ) => {
+    if (overwriteActive) {
+      const confirmed = window.confirm(
+        `"${file.name}" bulut yedeği doğrudan mevcut aktif çalışma dosyanıza yazılacak ve geri yüklenecektir.\n\n(Güvenlik için mevcut dosyanızın otomatik .bak yedeği alınır).\n\nDevam etmek istiyor musunuz?`,
+      );
+      if (!confirmed) return;
+    }
+
     const cleanToken = token.trim().replace(/^["']|["']$/g, "").replace(
       /^Bearer\s+/i,
       "",
     ).replace(/[\r\n\s]+/g, "");
     setDownloadingId(file.id);
     setStatusMsg({
-      text: `${file.name} indiriliyor ve çalışma alanı olarak açılıyor...`,
+      text: overwriteActive
+        ? `${file.name} indiriliyor ve aktif çalışma dosyanıza geri yükleniyor...`
+        : `${file.name} Masaüstüne indiriliyor ve açılıyor...`,
       type: "info",
     });
     try {
@@ -226,12 +238,13 @@ export function GoogleDriveModal(
           fileId: file.id,
           fileName: file.name,
           token: cleanToken,
+          overwriteActive,
         },
       );
 
       if (res.success) {
         setStatusMsg({
-          text: res.message || "Dosya indirildi ve başarıyla açıldı.",
+          text: res.message || "Dosya başarıyla yüklendi ve açıldı.",
           type: "success",
         });
         setTimeout(() => {
@@ -537,24 +550,35 @@ export function GoogleDriveModal(
 
                       <div className="flex items-center gap-1.5 shrink-0">
                         <Button
-                          onClick={() => handleDownloadFile(file)}
+                          onClick={() => handleDownloadFile(file, true)}
                           disabled={downloadingId === file.id ||
                             deletingId === file.id}
-                          className="bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors flex items-center gap-1"
+                          title="Bu bulut yedeğini doğrudan mevcut aktif çalışma dosyanızın üzerine yazar ve anında geri yükler."
+                          className="bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0 transition-colors flex items-center gap-1"
                         >
                           {downloadingId === file.id
                             ? (
                               <>
                                 <RefreshCw size={12} className="animate-spin" />
                                 {" "}
-                                İndiriliyor...
+                                Yükleniyor...
                               </>
                             )
                             : (
                               <>
-                                <Download size={12} /> İndir & Aç
+                                <Download size={12} /> Aktif Dosyaya Geri Yükle
                               </>
                             )}
+                        </Button>
+
+                        <Button
+                          onClick={() => handleDownloadFile(file, false)}
+                          disabled={downloadingId === file.id ||
+                            deletingId === file.id}
+                          title="Masaüstüne yeni bir dosya olarak indir ve aç"
+                          className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium px-2 py-1.5 rounded-lg shrink-0 transition-colors flex items-center gap-1"
+                        >
+                          <FolderSync size={12} /> Masaüstüne İndir
                         </Button>
 
                         <Button
