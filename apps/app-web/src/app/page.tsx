@@ -95,6 +95,7 @@ export default function Home(): React.JSX.Element {
   const [selectedEndpoint, setSelectedEndpoint] = useState<number>(0);
   const [apiResponseText, setApiResponseText] = useState("");
   const [testingEndpoint, setTestingEndpoint] = useState(false);
+  const [serverOrigin, setServerOrigin] = useState<string>("https://temin360app.demo.ilyasbozdemir.dev");
 
   // GitHub Latest Release state
   const [latestRelease, setLatestRelease] = useState<{
@@ -138,6 +139,10 @@ export default function Home(): React.JSX.Element {
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
       document.documentElement.classList.add("dark");
+    }
+
+    if (typeof window !== "undefined") {
+      setServerOrigin(window.location.origin);
     }
 
     const savedRememberMe = localStorage.getItem("remember_me") === "true";
@@ -994,11 +999,11 @@ export default function Home(): React.JSX.Element {
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                       İstek Adresi
                     </span>
-                    <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 font-mono text-xs text-slate-700 dark:text-slate-300">
-                      <span className="text-slate-400 dark:text-slate-500 font-bold">
-                        http://localhost:3000
+                    <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 font-mono text-xs text-slate-700 dark:text-slate-300 break-all select-all flex items-center gap-1 overflow-x-auto">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">
+                        {serverOrigin}
                       </span>
-                      {endpoints[selectedEndpoint].path}
+                      <span>{endpoints[selectedEndpoint].path}</span>
                     </div>
                   </div>
 
@@ -1410,7 +1415,7 @@ export default function Home(): React.JSX.Element {
                       <div className="pl-4">{'"cloudSyncEnabled": true,'}</div>
                       <div className="pl-4">{'"syncIntervalMinutes": 10,'}</div>
                       <div className="pl-4">
-                        {'"gatewayUrl": "https://temin360app.demo.ilyasbozdemir.dev",'}
+                        {`"gatewayUrl": "${serverOrigin}",`}
                       </div>
                       <div className="pl-4">
                         {'"apiKey": "dta_key_8e4a90f..."'}
