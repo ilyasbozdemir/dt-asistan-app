@@ -1,6 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/database";
 
+export async function GET() {
+  try {
+    const db = getDatabase();
+    
+    // Ensure table exists
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS dosyalar (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        data TEXT,
+        created_at TEXT,
+        updated_at TEXT
+      );
+    `);
+
+    const rows = db.prepare("SELECT * FROM dosyalar ORDER BY created_at DESC LIMIT 100").all() as Array<{
+      id: string;
+      title: string;
+      data: string;
+      created_at: string;
+      updated_at: string;
+    }>;
+
+    const dosyalar = rows.map((r) => {
+      try {
+        const parsed = JSON.parse(r.data);
+        return {
+          id: r.id,
+          title: r.title,
+          created_at: r.created_at,
+          ...parsed,
+        };
+      } catch {
+        return {
+          id: r.id,
+          title: r.title,
+          created_at: r.created_at,
+        };
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      count: dosyalar.length,
+      dosyalar,
+      serverTime: new Date().toISOString(),
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Veri çekme hatası";
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");

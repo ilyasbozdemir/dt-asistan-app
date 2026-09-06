@@ -1,5 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
 import fs from 'fs'
+import { basename } from 'path'
+import nodemailer from 'nodemailer'
 import { startServer, stopServer, getSocketServer } from '../server'
 import { connectToServer, disconnectFromServer, emitEvent } from '../client'
 import { startExpressServer, stopExpressServer } from '../network/expressServer'
@@ -281,6 +283,8 @@ export function registerNetworkIpcHandlers(): void {
         // fallback
       }
 
+      const fullUrl = `${cleanUrl}/api/sync`
+
       const res = await fetch(fullUrl, {
         method: 'POST',
         headers: {
@@ -311,7 +315,7 @@ export function registerNetworkIpcHandlers(): void {
       if (port && !cleanUrl.includes(':' + port)) {
         cleanUrl = `${cleanUrl}:${port}`
       }
-      const fullUrl = `${cleanUrl}/api/documents`
+      const fullUrl = `${cleanUrl}/api/sync`
 
       const res = await fetch(fullUrl, {
         method: 'GET',
@@ -322,7 +326,42 @@ export function registerNetworkIpcHandlers(): void {
       })
 
       if (res.ok) {
-        return { success: true, message: 'Bulut verileri başarıyla çekildi.' }
+        const data = (await res.json().catch(() => ({}))) as {
+          dosyalar?: Array<{ id: string; title?: string; ad?: string; created_at?: string }>
+        }
+        const files = data.dosyalar || []
+        let imported = 0
+        try {
+          const db = workspaceManager.getDb()
+          const dCheck = db
+            .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dosyalar'")
+            .get()
+          if (dCheck && files.length > 0) {
+            const insertStmt = db.prepare(`
+              INSERT OR REPLACE INTO dosyalar (id, title, created_at, updated_at)
+              VALUES (@id, @title, @created_at, @updated_at)
+            `)
+            const tx = db.transaction((arr) => {
+              for (const f of arr) {
+                insertStmt.run({
+                  id: f.id,
+                  title: f.title || f.ad || 'İhale/Temin Dosyası',
+                  created_at: f.created_at || new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                imported++
+              }
+            })
+            tx(files)
+          }
+        } catch (dbErr) {
+          console.error('Pull DB insert error:', dbErr)
+        }
+
+        return {
+          success: true,
+          message: `${imported > 0 ? imported : files.length} kayıt buluttan başarıyla çekildi ve yerel veritabanına işlendi.`
+        }
       }
       return { success: false, error: `Sunucu hatası: HTTP ${res.status}` }
     } catch (error: unknown) {
@@ -346,11 +385,6 @@ export async function performAutoCloudSync(): Promise<void> {
     const syncUrl = urlRow?.value
     const syncToken = tokenRow?.value
 
-    if (!syncUrl) return
-
-    const cleanUrl = String(syncUrl).trim().replace(/\/+$/, '')
-    const fullUrl = `${cleanUrl}/api/sync`
-
     let dosyalar: unknown[] = []
     const dCheck = db
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dosyalar'")
@@ -359,18 +393,80 @@ export async function performAutoCloudSync(): Promise<void> {
       dosyalar = db.prepare('SELECT * FROM dosyalar LIMIT 100').all()
     }
 
-    await fetch(fullUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: syncToken ? `Bearer ${syncToken}` : 'Bearer dta_desktop_client',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        action: 'auto-sync-on-close',
-        dosyalar,
-        syncedAt: new Date().toISOString()
-      })
-    })
+    // 1. Bulut API Eşitlemesi
+    if (syncUrl) {
+      const cleanUrl = String(syncUrl).trim().replace(/\/+$/, '')
+      const fullUrl = `${cleanUrl}/api/sync`
+
+      await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: syncToken ? `Bearer ${syncToken}` : 'Bearer dta_desktop_client',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'auto-sync-on-close',
+          dosyalar,
+          syncedAt: new Date().toISOString()
+        })
+      }).catch(() => {})
+    }
+
+    // 2. Otomatik E-Posta Yedeklemesi (SMTP tanımlıysa sormadan arka planda yollar)
+    try {
+      const hostRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpHost'")
+        .get() as { value: string } | undefined
+      const userRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpUser'")
+        .get() as { value: string } | undefined
+      const passRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpPass'")
+        .get() as { value: string } | undefined
+      const portRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpPort'")
+        .get() as { value: string } | undefined
+      const emailRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpReceiver'")
+        .get() as { value: string } | undefined
+      const secureRow = db
+        .prepare("SELECT value FROM settings WHERE key = 'smtpSecure'")
+        .get() as { value: string } | undefined
+
+      if (hostRow?.value && userRow?.value && passRow?.value) {
+        const receiver = emailRow?.value || userRow.value
+        const port = parseInt(portRow?.value || '587') || 587
+        const actualSecure =
+          port === 465 ? true : port === 587 ? false : secureRow?.value === 'true'
+
+        const transporter = nodemailer.createTransport({
+          host: hostRow.value,
+          port,
+          secure: actualSecure,
+          auth: {
+            user: userRow.value,
+            pass: passRow.value
+          },
+          tls: { rejectUnauthorized: false }
+        })
+
+        const curFile = workspaceManager.getCurrentFilePath()
+        const attachments =
+          curFile && fs.existsSync(curFile)
+            ? [{ filename: basename(curFile), path: curFile }]
+            : []
+
+        await transporter.sendMail({
+          from: `"TEMİN 360 Otomatik Kapanış Yedeği" <${userRow.value}>`,
+          to: receiver,
+          subject: `TEMİN 360 Otomatik Veritabanı Yedeği - ${new Date().toLocaleDateString('tr-TR')}`,
+          text: `Uygulama kapatılırken otomatik veritabanı yedeğiniz alınmıştır.\nAktarılan dosya sayısı: ${dosyalar.length}\nTarih: ${new Date().toLocaleString('tr-TR')}`,
+          attachments
+        })
+      }
+    } catch {
+      // Non-blocking mail fail-safe
+    }
   } catch {
     // Non-blocking fail-safe
   }

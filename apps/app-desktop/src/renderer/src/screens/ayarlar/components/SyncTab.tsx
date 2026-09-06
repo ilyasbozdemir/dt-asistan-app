@@ -276,6 +276,19 @@ export const SyncTab: React.FC<SyncTabProps> = ({
             </div>
           </div>
 
+          {/* Senkronizasyon Sonuç Bildirim Alanı */}
+          {syncLastResult && (
+            <div
+              className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 ${
+                syncLastResult.type === 'ok'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
+              }`}
+            >
+              <span>{syncLastResult.msg}</span>
+            </div>
+          )}
+
           {/* Genel Eşitle */}
           <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3">
             <RefreshCw className="w-4 h-4 text-slate-400 shrink-0" />
@@ -301,40 +314,46 @@ export const SyncTab: React.FC<SyncTabProps> = ({
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
               Masaüstündeki yerel verileri merkezi bir bulut veri tabanında toplamak ve eşitlemek için,
-              projenin{' '}
-              <code className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-450 font-mono text-[10px] rounded">
-                web/
+              projenin root dizinindeki{' '}
+              <code className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-mono text-[10px] rounded">
+                docker-compose.yml
               </code>{' '}
-              klasöründeki API sunucusunu Docker ile saniyeler içinde ayağa kaldırabilirsiniz. Eşitleme
-              sonrası yerel dosya (.dtal) workspace'leriniz bulut sunucunuza aktarılır.
+              ile PostgreSQL ve API sunucusunu saniyeler içinde ayağa kaldırabilirsiniz.
             </p>
 
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3.5 space-y-2.5 font-mono text-[10px] text-slate-700 dark:text-slate-400">
               <div className="text-slate-400">
-                {'// 1. Terminalde projenin ana klasörüne gidin ve derleyin'}
+                {'# 1. PostgreSQL & TEMİN 360 Web Sunucusunu Docker ile başlatın:'}
               </div>
-              <div className="text-blue-600 dark:text-blue-450">
-                docker build -t hakim-pro-server ./web
+              <div className="text-blue-600 dark:text-blue-400 font-bold">
+                docker compose up -d
               </div>
               <div className="text-slate-400 dark:text-slate-500 mt-2">
-                # 2. İmajı 3000 portu üzerinden arka planda çalıştırın
+                # Veya sadece Web Gateway imajını derleyin:
               </div>
               <div className="text-blue-600 dark:text-blue-400">
-                docker run -p 3000:3000 --name hakim-server -d hakim-pro-server
+                docker build -f Dockerfile.web -t temin360-web .
+              </div>
+              <div className="text-blue-600 dark:text-blue-400">
+                docker run -p 3000:3000 --name temin360-server -d temin360-web
               </div>
 
               <div className="text-slate-400 mt-2">
-                {'// 3. Masaüstü bağlantısında Sunucu Adresi alanına girilecek değer'}
+                {'// 2. Masaüstü bağlantısında Sunucu Adresi alanına girilecek değerler:'}
               </div>
-              <div>
-                Varsayılan Adres:{' '}
-                <span className="text-emerald-600 dark:text-emerald-450 font-bold">
-                  http://localhost:3000
-                </span>{' '}
-                veya{' '}
-                <span className="text-emerald-600 dark:text-emerald-450 font-bold">
-                  http://[LAN_SUNUCU_IP]:3000
-                </span>
+              <div className="space-y-1">
+                <div>
+                  Canlı Demo:{' '}
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">
+                    https://temin360app.demo.ilyasbozdemir.dev/
+                  </span>
+                </div>
+                <div>
+                  Yerel / LAN Sunucu:{' '}
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                    http://localhost:3000
+                  </span>
+                </div>
               </div>
             </div>
           </div>
