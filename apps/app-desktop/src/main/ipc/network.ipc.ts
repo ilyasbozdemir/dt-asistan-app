@@ -332,3 +332,48 @@ export function registerNetworkIpcHandlers(): void {
   })
 }
 
+export async function performAutoCloudSync(): Promise<void> {
+  try {
+    const db = workspaceManager.getDb()
+    if (!db) return
+    const urlRow = db
+      .prepare("SELECT value FROM settings WHERE key = 'sync_server_url'")
+      .get() as { value: string } | undefined
+    const tokenRow = db
+      .prepare("SELECT value FROM settings WHERE key = 'sync_server_token'")
+      .get() as { value: string } | undefined
+
+    const syncUrl = urlRow?.value
+    const syncToken = tokenRow?.value
+
+    if (!syncUrl) return
+
+    const cleanUrl = String(syncUrl).trim().replace(/\/+$/, '')
+    const fullUrl = `${cleanUrl}/api/sync`
+
+    let dosyalar: unknown[] = []
+    const dCheck = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dosyalar'")
+      .get()
+    if (dCheck) {
+      dosyalar = db.prepare('SELECT * FROM dosyalar LIMIT 100').all()
+    }
+
+    await fetch(fullUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: syncToken ? `Bearer ${syncToken}` : 'Bearer dta_desktop_client',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'auto-sync-on-close',
+        dosyalar,
+        syncedAt: new Date().toISOString()
+      })
+    })
+  } catch {
+    // Non-blocking fail-safe
+  }
+}
+
+

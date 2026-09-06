@@ -39,6 +39,7 @@ import { renderDocxBuffer } from './docxService'
 import { startExpressServer, stopExpressServer } from './network/expressServer'
 import { registerArchiveHandlers } from './archive'
 import { registerAllIpcHandlers } from './ipc'
+import { performAutoCloudSync } from './ipc/network.ipc'
 import { TANIM_Placeholder } from '@dt/database'
 
 let isForceQuitting = false
@@ -125,8 +126,13 @@ function closeAllSecondaryWindows(): void {
   dosyaWindows.clear()
 }
 
-// Uygulama tamamen kapanırken (Quit) aktif dosyayı/lock'u temizle
+// Uygulama tamamen kapanırken (Quit) aktif dosyayı/lock'u temizle ve buluta son verileri aktar
 app.on('will-quit', () => {
+  try {
+    performAutoCloudSync()
+  } catch {
+    // ignore
+  }
   try {
     closeAllSecondaryWindows()
     workspaceManager.close()
