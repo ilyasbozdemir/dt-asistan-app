@@ -75,6 +75,22 @@ export const V2_TEMPLATES_NAMES = [
   'birimfiyatteklifmektubu',
   'arastirma-mektubu',
   'arastirmamektubu',
+  'kabul-edilen-teklif',
+  'kabuledilenteklif',
+  'kabul-yazisi',
+  'kabulyazisi',
+  'siparis-formu',
+  'siparisformu',
+  'siparis-mektubu',
+  'siparismektubu',
+  'dogrudan-temin-sonuc-onay-belgesi',
+  'sonuc-onay-belgesi',
+  'sonuconaybelgesi',
+  'sonuconay',
+  'dogrudan-temin-sozlesmesi',
+  'sozlesme',
+  'sozlesmeye-davet',
+  'sozlesmedavet',
 ]
 
 export function isV2Template(dosyaAdiOrTitle?: string | null): boolean {

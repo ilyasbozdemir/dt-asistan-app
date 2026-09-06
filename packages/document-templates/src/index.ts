@@ -27,6 +27,10 @@ export * from "./templates/arastirma-mektubu";
 export * from "./templates/piyasa-fiyat-arastirma-tutanagi";
 export * from "./templates/piyasa-fiyat-arastirma-gorevlendirmesi";
 export * from "./templates/yaklasik-maliyet-cetveli";
+export * from "./templates/kabul-edilen-teklif";
+export * from "./templates/dogrudan-temin-sonuc-onay-belgesi";
+export * from "./templates/dogrudan-temin-sozlesmesi";
+export * from "./templates/sozlesmeye-davet";
 
 // Mapping Resolver
 export * from "./resolver/types";

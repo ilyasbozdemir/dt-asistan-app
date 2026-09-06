@@ -102,3 +102,5 @@ export const BaseTemplateSchema = z.object({
 });
 
 export type BaseTemplate = z.infer<typeof BaseTemplateSchema>;
+export const BaseDocumentSchema = BaseTemplateSchema;
+export type BaseDocument = BaseTemplate;

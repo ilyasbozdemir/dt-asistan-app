@@ -21,4 +21,8 @@ export const V2_TEMPLATES_MAP: Record<string, TemplateComponentType> = {
   PiyasaFiyatArastirmaTutanagi: Templates.PiyasaFiyatArastirmaTutanagi as TemplateComponentType,
   PiyasaFiyatArastirmaGorevlendirmesi: Templates.PiyasaFiyatArastirmaGorevlendirmesi as TemplateComponentType,
   YaklasikMaliyetCetveli: Templates.YaklasikMaliyetCetveli as TemplateComponentType,
+  KabulEdilenTeklif: Templates.KabulEdilenTeklif as TemplateComponentType,
+  DogrudanTeminSonucOnayBelgesi: Templates.DogrudanTeminSonucOnayBelgesi as TemplateComponentType,
+  DogrudanTeminSozlesmesi: Templates.DogrudanTeminSozlesmesi as TemplateComponentType,
+  SozlesmeyeDavet: Templates.SozlesmeyeDavet as TemplateComponentType,
 };

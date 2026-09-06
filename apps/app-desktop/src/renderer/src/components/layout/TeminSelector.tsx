@@ -444,7 +444,7 @@ export function TeminSelector(): React.JSX.Element {
 
         {/* AÇILIR DOSYA SEÇİM POPUP MODALI */}
         {isOpen && (
-          <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[860px] max-w-[92vw] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 z-60 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[860px] max-w-[92vw] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
             {/* 1. ÜST SEGMENT MOD SEÇİCİ & YENİ DOSYA EKLE BUTONU */}
             <div className="flex items-center justify-between gap-3 p-1.5 bg-slate-100/70 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800 mb-2.5">
               <div className="flex items-center gap-1.5">

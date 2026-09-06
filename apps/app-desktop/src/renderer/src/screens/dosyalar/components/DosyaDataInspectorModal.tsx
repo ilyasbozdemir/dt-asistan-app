@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Briefcase,
   Building2,
@@ -203,7 +204,9 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
     0,
   ) || Number(d.yaklasik_maliyet || 0);
 
-  return (
+  if (!isOpen || !dosya) return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
@@ -1028,6 +1031,7 @@ export const DosyaDataInspectorModal: React.FC<DosyaDataInspectorModalProps> = (
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

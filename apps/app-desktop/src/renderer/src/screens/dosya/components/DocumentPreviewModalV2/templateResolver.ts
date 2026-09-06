@@ -132,6 +132,40 @@ export const TEMPLATE_OPTIONS: TemplateOptionItem[] = [
     description: "Alımın tahmini yaklaşık maliyet hesap tablosu",
   },
 
+  // 3. Sipariş ve Sözleşme
+  {
+    id: "kabul-edilen-teklif",
+    name: "KabulEdilenTeklif",
+    title: "Kabul Edilen Teklif Mektubu / Sipariş Formu",
+    category: "3-siparis-ve-sozlesme",
+    categoryLabel: "Sipariş & Sözleşme",
+    description: "Kazanan firmaya sipariş ve kabul tebliğ yazısı",
+  },
+  {
+    id: "dogrudan-temin-sonuc-onay-belgesi",
+    name: "DogrudanTeminSonucOnayBelgesi",
+    title: "Piyasa Fiyat Araştırması Sonuç Onay Belgesi",
+    category: "3-siparis-ve-sozlesme",
+    categoryLabel: "Sipariş & Sözleşme",
+    description: "Piyasa araştırması sonucunda alımın onaylandığı belge",
+  },
+  {
+    id: "dogrudan-temin-sozlesmesi",
+    name: "DogrudanTeminSozlesmesi",
+    title: "Doğrudan Temin Alım Sözleşmesi",
+    category: "3-siparis-ve-sozlesme",
+    categoryLabel: "Sipariş & Sözleşme",
+    description: "İdare ile yüklenici arasında imzalanan alım sözleşmesi",
+  },
+  {
+    id: "sozlesmeye-davet",
+    name: "SozlesmeyeDavet",
+    title: "Sözleşmeye Davet Yazısı",
+    category: "3-siparis-ve-sozlesme",
+    categoryLabel: "Sipariş & Sözleşme",
+    description: "Kazanan firmanın sözleşme imzalamaya davet edildiği resmi yazı",
+  },
+
   // 4. Kabul ve Ödeme İşlemleri
   {
     id: "harcama-pusulasi",
@@ -144,7 +178,7 @@ export const TEMPLATE_OPTIONS: TemplateOptionItem[] = [
 ];
 
 export const TEMPLATE_ALIASES: Record<string, string> = {
-  // Onay Belgeleri
+  // Onay Belgeleri (Aşama 1)
   "dogrudan-temin-onay-belgesi": "harcama-talimati",
   "dogrudan-temin-onay": "harcama-talimati",
   "idare-onay-belgesi": "harcama-talimati",
@@ -159,7 +193,13 @@ export const TEMPLATE_ALIASES: Record<string, string> = {
   "harcama": "harcama-talimati",
   "talimat": "harcama-talimati",
   "harcama-onay-belgesi": "harcama-talimati",
-  "dogrudan-temin-sonuc-onay-belgesi": "harcama-talimati",
+
+  // Sonuç Onay Belgeleri (Aşama 3)
+  "dogrudan-temin-sonuc-onay-belgesi": "dogrudan-temin-sonuc-onay-belgesi",
+  "sonuc-onay-belgesi": "dogrudan-temin-sonuc-onay-belgesi",
+  "sonuconaybelgesi": "dogrudan-temin-sonuc-onay-belgesi",
+  "sonuc-onay": "dogrudan-temin-sonuc-onay-belgesi",
+  "sonuconay": "dogrudan-temin-sonuc-onay-belgesi",
 
   // İhtiyaç & Talep
   "ihtiyac": "ihtiyac-listesi",
@@ -240,7 +280,28 @@ export const TEMPLATE_ALIASES: Record<string, string> = {
   "fiyat-cetveli": "yaklasik-maliyet-cetveli",
   "maliyet-cetveli": "yaklasik-maliyet-cetveli",
 
-  // Muayene, Kabul, Ödeme, Sözleşme
+  // Kabul Edilen Teklif, Sipariş Formu, Sözleşme (Aşama 3)
+  "kabul-edilen-teklif": "kabul-edilen-teklif",
+  "kabuledilenteklif": "kabul-edilen-teklif",
+  "kabul-edilen-teklif-alternatif": "kabul-edilen-teklif",
+  "kabul-yazisi": "kabul-edilen-teklif",
+  "kabulyazisi": "kabul-edilen-teklif",
+  "siparis-formu": "kabul-edilen-teklif",
+  "siparisformu": "kabul-edilen-teklif",
+  "siparis-mektubu": "kabul-edilen-teklif",
+  "siparismektubu": "kabul-edilen-teklif",
+  "siparis": "kabul-edilen-teklif",
+
+  "dogrudan-temin-sozlesmesi": "dogrudan-temin-sozlesmesi",
+  "dogrudan-temin-sozlesmesi-alternatif": "dogrudan-temin-sozlesmesi",
+  "dogrudan-temin-sozlesmesi-uzun": "dogrudan-temin-sozlesmesi",
+  "sozlesme": "dogrudan-temin-sozlesmesi",
+
+  "sozlesmeye-davet": "sozlesmeye-davet",
+  "sozlesmedavet": "sozlesmeye-davet",
+  "davet-mektubu": "sozlesmeye-davet",
+
+  // Muayene, Kabul, Ödeme (Aşama 4)
   "harcama-pusulasi": "harcama-pusulasi",
   "harcamapusulasi": "harcama-pusulasi",
   "pusula": "harcama-pusulasi",
@@ -254,13 +315,6 @@ export const TEMPLATE_ALIASES: Record<string, string> = {
   "odeme-yazisi": "harcama-pusulasi",
   "tasinir-islem-fisi": "harcama-pusulasi",
   "hakedis-raporu": "harcama-pusulasi",
-  "dogrudan-temin-sozlesmesi": "harcama-talimati",
-  "dogrudan-temin-sozlesmesi-alternatif": "harcama-talimati",
-  "dogrudan-temin-sozlesmesi-uzun": "harcama-talimati",
-  "sozlesme": "harcama-talimati",
-  "sozlesmeye-davet": "harcama-talimati",
-  "kabul-edilen-teklif": "harcama-talimati",
-  "kabul-edilen-teklif-alternatif": "harcama-talimati",
 
   // Klasör & Kapak
   "klasor-sirtligi-3cm": "ihtiyac-listesi",
@@ -398,6 +452,24 @@ export function resolveTemplateConfig(
   ) {
     resolvedId = "birim-fiyat-teklif-mektubu";
   } else if (
+    cleanKey.includes("sonuc")
+  ) {
+    resolvedId = "dogrudan-temin-sonuc-onay-belgesi";
+  } else if (
+    cleanKey.includes("siparis") ||
+    cleanKey.includes("kabul-edilen") ||
+    cleanKey.includes("kabul-yazi")
+  ) {
+    resolvedId = "kabul-edilen-teklif";
+  } else if (
+    cleanKey.includes("davet")
+  ) {
+    resolvedId = "sozlesmeye-davet";
+  } else if (
+    cleanKey.includes("sozlesme")
+  ) {
+    resolvedId = "dogrudan-temin-sozlesmesi";
+  } else if (
     cleanKey.includes("arastirma") ||
     cleanKey.includes("mektup") ||
     cleanKey.includes("fiyat")
@@ -406,15 +478,13 @@ export function resolveTemplateConfig(
   } else if (
     cleanKey.includes("pusula") ||
     cleanKey.includes("muayene") ||
-    cleanKey.includes("kabul") ||
     cleanKey.includes("odeme")
   ) {
     resolvedId = "harcama-pusulasi";
   } else if (
     cleanKey.includes("onay") ||
     cleanKey.includes("talimat") ||
-    cleanKey.includes("harcama") ||
-    cleanKey.includes("sozlesme")
+    cleanKey.includes("harcama")
   ) {
     resolvedId = "harcama-talimati";
   }

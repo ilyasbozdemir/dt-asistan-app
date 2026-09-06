@@ -266,8 +266,8 @@ export async function resolveTemplateData(
   const resolvedPayload: Record<string, any> = {};
 
   for (const [sablonDegiskeni, rule] of Object.entries(mapping)) {
-    // 0. Automatic official evrakSayisi formatting
-    if (sablonDegiskeni === 'evrakSayisi' && !rule.formul && rule.deger === undefined) {
+    // 0. Automatic official evrakSayisi formatting (E-DETSIS-SDP-0001)
+    if (sablonDegiskeni === 'evrakSayisi' && rule.deger === undefined) {
       resolvedPayload['evrakSayisi'] = await resolveEvrakSayisi(activeDosyaId, queryExecutor);
       continue;
     }

@@ -91,4 +91,29 @@ export const TEMPLATE_REGISTRY: TemplateType[] = [
     category: "2-piyasa-fiyat-arastirmasi",
     supportsOlur: false,
   },
+  // 3. Sipariş ve Sözleşme
+  {
+    id: "kabul-edilen-teklif",
+    name: "KabulEdilenTeklif",
+    category: "3-siparis-ve-sozlesme",
+    supportsOlur: false,
+  },
+  {
+    id: "dogrudan-temin-sonuc-onay-belgesi",
+    name: "DogrudanTeminSonucOnayBelgesi",
+    category: "3-siparis-ve-sozlesme",
+    supportsOlur: true,
+  },
+  {
+    id: "dogrudan-temin-sozlesmesi",
+    name: "DogrudanTeminSozlesmesi",
+    category: "3-siparis-ve-sozlesme",
+    supportsOlur: false,
+  },
+  {
+    id: "sozlesmeye-davet",
+    name: "SozlesmeyeDavet",
+    category: "3-siparis-ve-sozlesme",
+    supportsOlur: false,
+  },
 ];

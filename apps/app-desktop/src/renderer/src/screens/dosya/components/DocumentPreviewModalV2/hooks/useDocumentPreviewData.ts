@@ -351,6 +351,55 @@ export function useDocumentPreviewData({
         finalData.firmalar = activeFirms;
         finalData.firmaListesi = combinedFirms;
 
+        // 1. Kazanan firmayı tespit et (dosya.firma_id, kazanan_mi, isWinner)
+        const winnerFirmaId =
+          payloadData.dosya?.firma_id ||
+          dosyaRecord?.firma_id ||
+          fileFirms.find((f: any) => f.kazanan_mi === 1 || f.isWinner)?.id;
+
+        const winnerFirm =
+          fileFirms.find(
+            (f: any) =>
+              f.id === winnerFirmaId ||
+              f.temin_firma_id === winnerFirmaId ||
+              f.kazanan_mi === 1 ||
+              f.isWinner,
+          ) ||
+          fileFirms[0] ||
+          combinedFirms[0];
+
+        if (winnerFirm) {
+          finalData.yukleniciFirma = winnerFirm.unvan || winnerFirm.firma_adi || finalData.yukleniciFirma;
+          if (winnerFirm.adres && !finalData.yukleniciAdresi) {
+            finalData.yukleniciAdresi = winnerFirm.adres;
+            finalData.yukleniciIlce = winnerFirm.ilce;
+            finalData.yukleniciIl = winnerFirm.il;
+          }
+          if (
+            !finalData.teslimEden_0_adSoyad ||
+            finalData.teslimEden_0_adSoyad === ""
+          ) {
+            finalData.teslimEden_0_adSoyad = winnerFirm.unvan;
+            finalData.teslimEden_0_unvan = winnerFirm.yetkili_ad_soyad
+              ? `Yetkili: ${winnerFirm.yetkili_ad_soyad}`
+              : "Yüklenici Firma / Yetkilisi";
+          }
+        }
+
+        // Teslim süresi / günü hesaplama
+        const dosyaObj = payloadData.dosya || dosyaRecord || {};
+        if (dosyaObj.teslim_tarihi) {
+          const tDate = new Date(dosyaObj.teslim_tarihi);
+          const today = new Date();
+          const diffDays = Math.ceil((tDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays > 0 && diffDays < 365) {
+            finalData.teslimGun = String(diffDays);
+          }
+        }
+        if (!finalData.teslimGun && (dosyaObj.teslim_gun || dosyaObj.teslim_suresi)) {
+          finalData.teslimGun = String(dosyaObj.teslim_gun || dosyaObj.teslim_suresi);
+        }
+
         const baseKalemler =
           finalData.ihtiyacKalemleri &&
           Array.isArray(finalData.ihtiyacKalemleri) &&
@@ -362,14 +411,16 @@ export function useDocumentPreviewData({
           let grandTotalNum = 0;
 
           finalData.ihtiyacKalemleri = baseKalemler.map((kalem: any, idx: number) => {
-            const miktarNum = Number(kalem.miktar || 0);
+            const miktarNum = Number(kalem.miktar || 1);
+            const kalemId = kalem.id || items[idx]?.id || idx + 1;
             let minPrice = Infinity;
             let bestFirmName = "";
+            let winnerPrice = 0;
 
             const teklifler = activeFirms.map((firm: any) => {
               const bid = bids.find(
                 (b: any) =>
-                  (b.temin_kalem_id === kalem.id || b.temin_kalem_id === kalem.siraNo) &&
+                  (b.temin_kalem_id === kalemId || b.temin_kalem_id === kalem.siraNo || b.temin_kalem_id === idx + 1) &&
                   (b.temin_firma_id === firm.temin_firma_id || b.temin_firma_id === firm.id)
               );
 
@@ -377,6 +428,10 @@ export function useDocumentPreviewData({
               if (priceNum > 0 && priceNum < minPrice) {
                 minPrice = priceNum;
                 bestFirmName = firm.unvan || "";
+              }
+
+              if (winnerFirm && (firm.id === winnerFirm.id || firm.temin_firma_id === winnerFirm.temin_firma_id) && priceNum > 0) {
+                winnerPrice = priceNum;
               }
 
               const formattedPrice = priceNum > 0
@@ -397,20 +452,22 @@ export function useDocumentPreviewData({
               };
             });
 
-            const validMinPrice = minPrice !== Infinity ? minPrice : 0;
-            const itemCostNum = validMinPrice * miktarNum;
+            const effectivePrice = winnerPrice > 0 ? winnerPrice : (minPrice !== Infinity ? minPrice : 0);
+            const itemCostNum = effectivePrice * miktarNum;
             grandTotalNum += itemCostNum;
 
             return {
               ...kalem,
+              id: kalemId,
               siraNo: kalem.siraNo || idx + 1,
-              malzemeAdi: kalem.malzemeAdi || kalem.kalem_adi || "",
-              ozelligi: kalem.ozelligi || kalem.aciklama || "",
-              birimi: kalem.birimi || kalem.birim || "",
+              kodu: kalem.kodu || kalem.tasinir_kodu || items[idx]?.tasinir_kodu || "-",
+              malzemeAdi: kalem.malzemeAdi || kalem.kalem_adi || items[idx]?.kalem_adi || "",
+              ozelligi: kalem.ozelligi || kalem.aciklama || items[idx]?.aciklama || "",
+              birimi: kalem.birimi || kalem.birim || items[idx]?.birim || "",
               miktar: miktarNum,
               enUygunFirmaAdi: bestFirmName,
-              enDusukFiyat: validMinPrice > 0
-                ? validMinPrice.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              enDusukFiyat: effectivePrice > 0
+                ? effectivePrice.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 : "-",
               toplamBedel: itemCostNum > 0
                 ? itemCostNum.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -445,34 +502,16 @@ export function useDocumentPreviewData({
           finalData.firmaToplamlari = firmTotals;
           finalData.firmaToplamlariDetay = firmTotals;
 
-          if (!finalData.genelToplam || finalData.genelToplam === "0" || finalData.genelToplam === "0,00") {
-            const winnerFirm = activeFirms.find((f: any) => f.isWinner);
-            const calcTotal = winnerFirm && winnerFirm.total > 0 ? winnerFirm.total : grandTotalNum;
-            if (calcTotal > 0) {
-              finalData.genelToplam = calcTotal.toLocaleString("tr-TR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              });
-            }
-          }
-        }
-
-        const defaultFirm =
-          fileFirms.find((f: any) => f.isWinner) ||
-          fileFirms[0] ||
-          combinedFirms[0];
-        if (defaultFirm) {
-          if (!finalData.yukleniciFirma) {
-            finalData.yukleniciFirma = defaultFirm.unvan;
-          }
-          if (
-            !finalData.teslimEden_0_adSoyad ||
-            finalData.teslimEden_0_adSoyad === ""
-          ) {
-            finalData.teslimEden_0_adSoyad = defaultFirm.unvan;
-            finalData.teslimEden_0_unvan = defaultFirm.yetkili_ad_soyad
-              ? `Yetkili: ${defaultFirm.yetkili_ad_soyad}`
-              : "Yüklenici Firma / Yetkilisi";
+          if (winnerFirm?.teklif_toplami && Number(winnerFirm.teklif_toplami) > 0) {
+            finalData.genelToplam = Number(winnerFirm.teklif_toplami).toLocaleString("tr-TR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+          } else if (grandTotalNum > 0) {
+            finalData.genelToplam = grandTotalNum.toLocaleString("tr-TR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
           }
         }
 

@@ -129,7 +129,9 @@ export function PiyasaFiyatArastirmasi(): React.JSX.Element {
       title="Teklifler & Piyasa Fiyat Araştırması"
       icon={PackageSearch}
       description="Tedarikçi teklif mektupları hazırlayabilir, toplanan teklifleri fiyat araştırma tablosuna girerek en uygun teklifleri ve yaklaşık maliyeti belirleyebilirsiniz."
-      previewDocumentId={previewModalOpen && previewData?.dosyaAdi ? previewData.dosyaAdi : null}
+      previewDocumentId={previewModalOpen && previewData?.dosyaAdi
+        ? previewData.dosyaAdi
+        : null}
       invitedFirms={logic.invitedFirms}
       onClosePreview={() => setPreviewModalOpen(false)}
     >
