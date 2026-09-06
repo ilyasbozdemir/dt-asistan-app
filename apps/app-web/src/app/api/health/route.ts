@@ -8,7 +8,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: "ok",
-    version: "1.0.0-beta.90",
+    version: "1.0.0-beta.91",
     message: "TEMİN 360 API Gateway & Senkronizasyon Sunucusu Aktif.",
     serverTime: new Date().toISOString(),
   });
