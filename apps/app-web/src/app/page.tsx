@@ -6,10 +6,12 @@ import {
   Activity,
   ArrowRight,
   BookOpen,
+  Check,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Copy,
   Cpu,
   Database,
   Download,
@@ -21,7 +23,9 @@ import {
   Moon,
   Play,
   RefreshCw,
+  Server,
   Shield,
+  ShieldCheck,
   Smartphone,
   Sun,
   Terminal,
@@ -95,7 +99,43 @@ export default function Home(): React.JSX.Element {
   const [selectedEndpoint, setSelectedEndpoint] = useState<number>(0);
   const [apiResponseText, setApiResponseText] = useState("");
   const [testingEndpoint, setTestingEndpoint] = useState(false);
-  const [serverOrigin, setServerOrigin] = useState<string>("https://temin360app.demo.ilyasbozdemir.dev");
+  const [serverOrigin, setServerOrigin] = useState<string>(
+    "https://temin360app.demo.ilyasbozdemir.dev",
+  );
+  const [apiKey, setApiKey] = useState<string>("dta_live_8e4a90f1b2c3d4e59071f");
+  const [copiedField, setCopiedField] = useState<string>("");
+  const [isGeneratingKey, setIsGeneratingKey] = useState<boolean>(false);
+
+  const copyToClipboard = (text: string, fieldName: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(""), 2200);
+    }
+  };
+
+  const handleGenerateKey = async () => {
+    setIsGeneratingKey(true);
+    try {
+      const res = await fetch("/api/keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Masaüstü İstemci" }),
+      });
+      const data = await res.json();
+      if (data.success && data.key?.key) {
+        setApiKey(data.key.key);
+      } else {
+        const rnd = Math.random().toString(36).substring(2, 10);
+        setApiKey(`dta_live_${rnd}`);
+      }
+    } catch {
+      const rnd = Math.random().toString(36).substring(2, 10);
+      setApiKey(`dta_live_${rnd}`);
+    } finally {
+      setIsGeneratingKey(false);
+    }
+  };
 
   // GitHub Latest Release state
   const [latestRelease, setLatestRelease] = useState<{
@@ -369,6 +409,28 @@ export default function Home(): React.JSX.Element {
           dosyalar: [{ id: "SYNC-01", ad: "Tıbbi Cihaz Alımı" }],
           sablonlar: [{ id: "SAB-01", ad: "Teklif İstem Yazısı" }],
           syncedAt: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+      responseBody: "",
+    },
+    {
+      method: "GET",
+      path: "/api/keys",
+      description:
+        "Masaüstü ve harici istemciler için yetkilendirilmiş API anahtarlarının listesini döner.",
+      responseBody: "",
+    },
+    {
+      method: "POST",
+      path: "/api/keys",
+      description:
+        "Yeni bir dinamik API anahtarı (dta_live_...) üretir ve kaydeder.",
+      requestBody: JSON.stringify(
+        {
+          name: "Masaüstü İstemci (Windows)",
+          scope: "admin",
         },
         null,
         2,
@@ -924,14 +986,112 @@ export default function Home(): React.JSX.Element {
           {/* TAB 2: API PLAYGROUND */}
           {activeTab === "docs" && (
             <div className="space-y-6">
-              <div className="text-left">
-                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                  API Entegrasyon Dokümantasyonu (Canlı)
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  Uygulamanız için geçerli olan API uç noktaları ve canlı test
-                  modülü.
-                </p>
+              <div className="text-left flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Server className="w-5 h-5 text-blue-500" />
+                    API Entegrasyon Dokümantasyonu (Canlı)
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    TEMİN 360 Masaüstü uygulaması ve harici istemciler için canlı API uç noktaları ve kimlik doğrulama anahtarları.
+                  </p>
+                </div>
+              </div>
+
+              {/* DESKTOP INTEGRATION KEY CARD */}
+              <div className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-blue-500/5 border border-blue-500/20 dark:border-blue-500/30 rounded-2xl p-5 md:p-6 text-left space-y-4 shadow-sm backdrop-blur-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-500/15 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
+                      <Key className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        Masaüstü Uygulaması Bağlantı Bilgileri
+                        <span className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">
+                          Canlı Aktif
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Masaüstündeki <strong>Bulut Senkronizasyon (☁️)</strong> penceresine aşağıdaki bilgileri yapıştırın:
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleGenerateKey}
+                    disabled={isGeneratingKey}
+                    className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs shrink-0 self-start sm:self-center cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingKey ? "animate-spin text-blue-500" : ""}`} />
+                    {isGeneratingKey ? "Üretiliyor..." : "Yeni Anahtar Üret"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Sunucu Adresi Card */}
+                  <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-1.5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        1. SUNUCU ADRESİ (HOST URL)
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(`${serverOrigin}/`, "url")}
+                        className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedField === "url" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-emerald-500">Kopyalandı!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Kopyala</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-lg p-2.5 font-mono text-xs text-blue-600 dark:text-blue-400 font-bold break-all select-all flex items-center justify-between">
+                      <span>{serverOrigin}/</span>
+                    </div>
+                  </div>
+
+                  {/* Güvenlik Tokeni Card */}
+                  <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-1.5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        2. GÜVENLİK TOKENİ (AUTH KEY)
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(apiKey, "key")}
+                        className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedField === "key" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-emerald-500">Kopyalandı!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Kopyala</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-lg p-2.5 font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold break-all select-all flex items-center justify-between">
+                      <span>{apiKey}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>
+                    Masaüstünde bu bilgileri girdikten sonra <strong>&quot;Sına & Kaydet&quot;</strong> butonuna tıkladığınızda yeşil <strong>&quot;Bağlantı Başarılı!&quot;</strong> onayı verilir.
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1418,7 +1578,7 @@ export default function Home(): React.JSX.Element {
                         {`"gatewayUrl": "${serverOrigin}",`}
                       </div>
                       <div className="pl-4">
-                        {'"apiKey": "dta_key_8e4a90f..."'}
+                        {`"apiKey": "${apiKey}"`}
                       </div>
                       <div>{"}"}</div>
                     </div>

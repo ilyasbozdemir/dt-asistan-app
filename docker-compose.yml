@@ -1,32 +1,57 @@
 version: "3.8"
 
 services:
+  # 1. PostgreSQL Database Service
   db:
-    image: postgres:15-alpine
-    container_name: hakim-pro-postgres
+    image: postgres:16-alpine
+    container_name: temin360-postgres
     restart: always
     environment:
-      POSTGRES_DB: hakim_pro
+      POSTGRES_DB: temin360_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_PASSWORD: temin360pass
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d temin360_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # 2. TEMİN 360 API Gateway & Web App (Port 3000)
   web:
     build:
-      context: ./apps/app-web
-      dockerfile: Dockerfile
-    container_name: hakim-pro-web
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: temin360-web
     restart: always
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/hakim_pro?schema=public
       - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:temin360pass@db:5432/temin360_db?schema=public
+      - API_SECRET_KEY=dta_live_8e4a90f1b2c3d4e59071f
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  # 3. TEMİN 360 Landing & Promotion Portal (Port 3001)
+  landing:
+    build:
+      context: .
+      dockerfile: Dockerfile.landing
+    container_name: temin360-landing
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
 
 volumes:
   pgdata:
+    driver: local
