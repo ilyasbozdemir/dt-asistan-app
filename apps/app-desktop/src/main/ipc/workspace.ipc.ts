@@ -118,18 +118,22 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
         // Ensure dedicated app folder exists
         const folderId = await getOrCreateAppFolder(cleanToken)
 
-        // Versioned timestamped filename: e.g. Acme_2026-09-06_17-45.dtal
+        // Versioned timestamped filename: e.g. Acme_2026-09-06_17-46.dtal
         const now = new Date()
-        const dateStr = now.toISOString().slice(0, 10)
-        const timeStr = `${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`
-        const rawBase = fileName.replace(/\.dtal$/i, '').replace(/_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$/, '')
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+        const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}`
+        const rawBase = fileName
+          .replace(/\.dtal$/i, '')
+          .replace(/\.hkmp$/i, '')
+          .replace(/_\d{4}[-_.]\d{2}[-_.]\d{2}(?:[-_.]\d{2}[-_.]\d{2})?$/, '')
         const backupFileName = `${rawBase}_${dateStr}_${timeStr}.dtal`
 
         // Construct multipart boundary for metadata + binary payload
         const boundary = '--------------------------' + Date.now().toString(16)
         const metadata = JSON.stringify({
           name: backupFileName,
-          description: `TEMİN 360 Otomatik Çalışma Dosyası Yedeği (${new Date().toLocaleString('tr-TR')})`,
+          description: `TEMİN 360 Çalışma Dosyası Yedeği (${dateStr} ${timeStr.replace('-', ':')})`,
           parents: [folderId]
         })
 
@@ -406,6 +410,59 @@ export function registerWorkspaceIpcHandlers(closeAllSecondaryWindows: () => voi
       } catch (error: any) {
         console.error('Google Drive download error:', error)
         return { success: false, error: error.message }
+      }
+    }
+  )
+
+  ipcMain.handle(
+    'workspace:delete-gdrive-file',
+    async (_, args: { fileId: string; token?: string }) => {
+      try {
+        let token = args.token
+        if (!token) {
+          const db = workspaceManager.getDb()
+          try {
+            const row = db
+              .prepare("SELECT value FROM settings WHERE key = 'gdriveAccessToken'")
+              .get() as { value?: string }
+            token = row?.value
+          } catch {
+            // Fallback
+          }
+        }
+
+        if (!token) {
+          return { success: false, error: 'Google Drive token bulunamadı.' }
+        }
+
+        const cleanToken = String(token).trim().replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/[\r\n\s]+/g, '')
+        const folderId = await getOrCreateAppFolder(cleanToken)
+
+        // Verify file is strictly in TEMIN_360_YEDEKLER folder
+        const metaRes = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${args.fileId}?fields=id,parents`,
+          { headers: { Authorization: `Bearer ${cleanToken}` } }
+        )
+        if (metaRes.ok) {
+          const meta = (await metaRes.json()) as { parents?: string[] }
+          if (meta.parents && !meta.parents.includes(folderId)) {
+            throw new Error('Güvenlik Koruması: Yalnızca TEMIN_360_YEDEKLER klasöründeki yedekler silinebilir.')
+          }
+        }
+
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${args.fileId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${cleanToken}` }
+        })
+
+        if (!res.ok && res.status !== 204) {
+          const errText = await res.text()
+          throw new Error(`Silme hatası (${res.status}): ${errText}`)
+        }
+
+        return { success: true, message: 'Yedek dosyası Google Drive üzerinden başarıyla silindi.' }
+      } catch (err: any) {
+        return { success: false, error: err.message }
       }
     }
   )
