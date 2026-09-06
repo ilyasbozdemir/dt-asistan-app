@@ -10,7 +10,7 @@ COPY apps/app-web/package.json ./apps/app-web/
 COPY packages/database/package.json ./packages/database/
 RUN pnpm --filter app-web... install --frozen-lockfile
 
-# 2. Build the app
+# 2. Build shared packages and app
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/app-web/node_modules ./apps/app-web/node_modules
@@ -18,10 +18,15 @@ COPY --from=deps /app/packages/database/node_modules ./packages/database/node_mo
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/database ./packages/database
 COPY apps/app-web ./apps/app-web
+
+# Build @dt/database first so dist/index.js is available
+RUN pnpm --filter @dt/database build
+# Build app-web
 RUN pnpm --filter app-web build
 
 # 3. Production runner
 FROM node:20-alpine AS runner
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -35,6 +40,9 @@ COPY --from=builder /app/apps/app-web/public ./apps/app-web/public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/app-web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/app-web/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/app-web/.next/static ./apps/app-web/.next/static
+
+# Ensure shared database package schema-manifest is available in standalone
+COPY --from=builder --chown=nextjs:nodejs /app/packages/database/dist ./packages/database/dist
 
 USER nextjs
 EXPOSE 3000
