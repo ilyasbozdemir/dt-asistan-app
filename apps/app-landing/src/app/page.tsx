@@ -380,7 +380,7 @@ export default function Home() {
             className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-xs"
           >
             <Globe className="w-4 h-4 text-blue-500" />
-            Web Sürümünü Aç
+            Web Sürümünü Dene (Demo)
           </a>
           <a
             href="https://github.com/ilyasbozdemir/temin-360-app"
