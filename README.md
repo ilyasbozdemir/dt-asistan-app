@@ -73,20 +73,30 @@ Sistemdeki tüm resmi evrak ve tutanak şablonları açık kaynaklı ve modüler
 
 ---
 
+## 🌐 Canlı Bağlantılar ve Dağıtım (Live Portals)
+
+| Servis | Adres / Bağlantı | Açıklama |
+| :--- | :--- | :--- |
+| 🚀 **Resmi Web & Tanıtım Portalı** | **[temin360.ilyasbozdemir.dev](https://temin360.ilyasbozdemir.dev)** | Canlı ürün tanıtımı, mimari rehber ve otomatik GitHub sürüm indirmeleri |
+| ☁️ **Bulut API Gateway & Yönetim** | **[app.temin360.ilyasbozdemir.dev](https://app.temin360.ilyasbozdemir.dev)** | Canlı SQLite senkronizasyon sunucusu, API dokümantasyonu ve terminal logları |
+| 📦 **Masaüstü Sürümleri (Releases)** | **[GitHub Releases](https://github.com/ilyasbozdemir/temin-360-app/releases)** | Windows (`.exe`) ve macOS (`.dmg`) resmi kurulum paketleri |
+
+---
+
 ## 📥 Masaüstü Uygulaması İndir (Desktop App Download)
 
-Temin 360 masaüstü uygulamasının en güncel sürümlerini doğrudan GitHub Releases
-sayfası üzerinden indirebilirsiniz:
+Temin 360 masaüstü uygulamasının en güncel sürümlerini doğrudan web portalımız veya GitHub Releases sayfası üzerinden indirebilirsiniz:
 
-👉 **[Temin 360 Masaüstü Uygulaması Son Sürümü İndir (GitHub Releases)](https://github.com/ilyasbozdemir/temin-360-app/releases)**
+👉 **[Web Portalı Üzerinden İndir (temin360.ilyasbozdemir.dev)](https://temin360.ilyasbozdemir.dev)**  
+👉 **[GitHub Releases Üzerinden İndir](https://github.com/ilyasbozdemir/temin-360-app/releases)**
 
 ---
 
 ## 📂 Monorepo Dizin Yapısı
 
-- **[`apps/app-desktop`](./apps/app-desktop):** Electron + React 19 + TypeScript + TanStack Router + Tailwind CSS + SQLite masaüstü uygulaması.
-- **[`apps/app-web`](./apps/app-web):** Sunucu tarafı veri senkronizasyonu ve Next.js API katmanı.
-- **[`apps/app-landing`](./apps/app-landing):** Tanıtım ve dokümantasyon web sayfası.
+- **[`apps/app-landing`](./apps/app-landing):** Next.js 16 + Tailwind CSS v4 + TypeScript modern tanıtım ve sürüm dağıtım portali (`temin360.ilyasbozdemir.dev`).
+- **[`apps/app-web`](./apps/app-web):** Next.js 16 + SQLite + Telemetri canlı senkronizasyon ve API gateway yönetim paneli (`app.temin360.ilyasbozdemir.dev`).
+- **[`apps/app-desktop`](./apps/app-desktop):** Electron + React 19 + TypeScript + TanStack Router + Tailwind CSS + SQLite yerel masaüstü uygulaması.
 - **[`packages/document-templates`](./packages/document-templates):** Mevzuata uyarlanabilir, dinamik resmi evrak ve tutanak şablonları motoru (`@temin360/document-templates`).
 - **[`packages/pdf-generator`](./packages/pdf-generator):** Yüksek performanslı sunucu ve masaüstü PDF derleyicisi (`@temin360/pdf-generator`).
 - **[`packages/database`](./packages/database):** Veritabanı şemaları, SQLite ve Supabase migrasyonları (`@dt/database`).
@@ -101,27 +111,40 @@ Projeyi yerel ortamınızda çalıştırmak için:
 # 1. Bağımlılıkları yükleyin
 pnpm install
 
-# 2. Masaüstü uygulamasını geliştirme modunda başlatın
-pnpm dev:desktop
+# 2. İlgili uygulamayı geliştirme modunda başlatın
+pnpm dev:website  # Landing sayfasını açar (http://localhost:3001)
+pnpm dev:web      # Web Gateway sunucusunu açar (http://localhost:3000)
+pnpm dev:desktop  # Masaüstü uygulamasını Electron ile açar
 ```
+
+---
+
+## 🐳 Docker & Dokploy Dağıtımı (Deployment)
+
+| Uygulama | Alan Adı | Dockerfile | Docker Context | Port |
+| :--- | :--- | :--- | :--- | :--- |
+| **Landing Portal** | `temin360.ilyasbozdemir.dev` | `Dockerfile.landing` | `/` (veya boş) | `3000` |
+| **Web Gateway** | `app.temin360.ilyasbozdemir.dev` | `Dockerfile.web` | `/` (veya boş) | `3000` |
 
 ---
 
 ## 🛠️ Monorepo Komutları
 
-| Komut                | Açıklama                                                 |
-| :------------------- | :------------------------------------------------------- |
-| `pnpm dev:desktop`   | Masaüstü uygulamasını (Electron) geliştirme modunda açar |
-| `pnpm dev:web`       | Web sunucusunu geliştirme modunda açar                   |
-| `pnpm build:desktop` | Masaüstü uygulamasının production derlemesini alır       |
-| `pnpm build:web`     | Web sunucusunun production derlemesini alır              |
-| `pnpm typecheck`     | TypeScript tip kontrollerini çalıştırır                  |
-| `pnpm format`        | Prettier kod formatlamasını çalıştırır                   |
-| `pnpm lint`          | ESLint denetimini çalıştırır                             |
+| Komut | Açıklama |
+| :--- | :--- |
+| `pnpm dev:website` | Tanıtım web sayfasını (`app-landing`) geliştirme modunda açar |
+| `pnpm dev:web` | Web Gateway sunucusunu (`app-web`) geliştirme modunda açar |
+| `pnpm dev:desktop` | Masaüstü uygulamasını (Electron) geliştirme modunda açar |
+| `pnpm build:website` | Tanıtım sayfasının standalone production derlemesini alır |
+| `pnpm build:web` | Web Gateway sunucusunun production derlemesini alır |
+| `pnpm build:desktop` | Masaüstü uygulamasının installer (.exe / .dmg) derlemesini alır |
+| `pnpm typecheck` | Tüm projelerdeki TypeScript tip kontrollerini çalıştırır |
+| `pnpm format` | Prettier kod formatlamasını çalıştırır |
+| `pnpm lint` | ESLint denetimini çalıştırır |
 
 ---
 
 ## 📄 Lisans
 
-Bu proje kamu kurumları ve harcama birimlerinin kullanımına yönelik
-geliştirilmiş kurumsal bir yazılımdır.
+Bu proje kamu kurumları ve harcama birimlerinin kullanımına yönelik geliştirilmiş kurumsal bir yazılımdır.
+
